@@ -2,13 +2,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.dakusui</groupId>
-    <artifactId>thincrest</artifactId>
+    <artifactId>pcond</artifactId>
     <packaging>jar</packaging>
-    <version>4.1.1-SNAPSHOT</version>
-    <description>Yet another assertion library</description>
+    <version>1.0-SNAPSHOT</version>
+    <description>Printable Preconditions</description>
 
-    <name>thincrest</name>
-    <url>https://github.com/dakusui/thincrest</url>
+    <name>pcond</name>
+    <url>https://github.com/dakusui/pcond</url>
 
     <licenses>
         <license>
@@ -22,8 +22,8 @@
         <connection>scm:git:git@github.com/dakusui/thincrest.git</connection>
         <developerConnection>scm:git:git@github.com:dakusui/thincrest.git
         </developerConnection>
-        <url>http://dakusui.github.io/thincrest</url>
-        <tag>thincrest-4.1.x</tag>
+        <url>http://dakusui.github.io/pcond</url>
+        <tag>pcond-1.0.x</tag>
     </scm>
 
     <developers>

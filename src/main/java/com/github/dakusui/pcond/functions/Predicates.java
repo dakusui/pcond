@@ -1,14 +1,11 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.crest.utils.InternalUtils;
-
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.crest.utils.InternalUtils.formatObject;
-import static com.github.dakusui.crest.utils.InternalUtils.summarize;
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.util.Objects.requireNonNull;
 
 public enum Predicates {
@@ -194,12 +191,4 @@ public enum Predicates {
         stream -> stream.anyMatch(predicate)
     );
   }
-
-  public static <T> Predicate<? super T> invoke(String methodName, Object... args) {
-    return Printable.predicate(
-        () -> String.format(".%s%s", methodName, String.join(",", summarize(args))),
-        (Object target) -> InternalUtils.invokeMethod(target, methodName, args)
-    );
-  }
-
 }
