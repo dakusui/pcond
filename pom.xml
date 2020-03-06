@@ -19,8 +19,8 @@
     </licenses>
 
     <scm>
-        <connection>scm:git:git@github.com/dakusui/thincrest.git</connection>
-        <developerConnection>scm:git:git@github.com:dakusui/thincrest.git
+        <connection>scm:git:git@github.com/dakusui/pcond.git</connection>
+        <developerConnection>scm:git:git@github.com:dakusui/pcond.git
         </developerConnection>
         <url>http://dakusui.github.io/pcond</url>
         <tag>pcond-1.0.x</tag>

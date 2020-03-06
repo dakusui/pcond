@@ -11,64 +11,57 @@ import static java.util.Objects.requireNonNull;
 
 public enum Functions {
   ;
-
-  public static final Object THIS = new Object() {
-    public String toString() {
-      return "(THIS)";
-    }
-  };
-
   public static <E> Function<E, E> identity() {
     return Printable.function(
-        "->identity",
+        "identity",
         Function.identity()
     );
   }
 
   public static <E> Function<? super E, String> stringify() {
     return Printable.function(
-        "->stringify",
+        "stringify",
         Object::toString
     );
   }
 
   public static Function<? super String, Integer> length() {
     return Printable.function(
-        "->length",
+        "length",
         String::length
     );
   }
 
   public static <E> Function<List<? extends E>, ? extends E> elementAt(int i) {
     return Printable.function(
-        () -> String.format("->at[%s]", i),
+        () -> String.format("at[%s]", i),
         es -> (E) es.get(i)
     );
   }
 
   public static Function<? super Collection<?>, Integer> size() {
     return Printable.function(
-        "->size",
+        "size",
         Collection::size
     );
   }
 
   public static <E> Function<Collection<? extends E>, Stream<? extends E>> stream() {
     return Printable.function(
-        "->stream",
+        "stream",
         Collection::stream
     );
   }
 
   public static <E> Function<? super Object, ? extends E> cast(Class<E> type) {
     return Printable.function(
-        () -> String.format("->castTo[%s]", requireNonNull(type).getSimpleName()),
+        () -> String.format("castTo[%s]", requireNonNull(type).getSimpleName()),
         type::cast
     );
   }
 
   public static <I extends Collection<? extends E>, E> Function<I, List<E>> collectionToList() {
-    return Printable.function("->collectionToList", (I c) -> new LinkedList<E>() {
+    return Printable.function("collectionToList", (I c) -> new LinkedList<E>() {
       {
         addAll(c);
       }
@@ -76,10 +69,10 @@ public enum Functions {
   }
 
   public static <E> Function<E[], List<E>> arrayToList() {
-    return Printable.function("->arrayToList", Arrays::asList);
+    return Printable.function("arrayToList", Arrays::asList);
   }
 
   public static Function<String, Integer> countLines() {
-    return Printable.function("->countLines", (String s) -> s.split("\n").length);
+    return Printable.function("countLines", (String s) -> s.split("\n").length);
   }
 }

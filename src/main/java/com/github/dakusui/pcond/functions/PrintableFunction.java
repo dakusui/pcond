@@ -19,12 +19,12 @@ public class PrintableFunction<T, R> implements Function<T, R> {
 
   public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
     Objects.requireNonNull(before);
-    return new PrintableFunction<>(String.format("%s%s", before, s), this.function.compose(before));
+    return new PrintableFunction<>(String.format("%s->%s", before, s), this.function.compose(before));
   }
 
   public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
     Objects.requireNonNull(after);
-    return new PrintableFunction<>(String.format("%s%s", s, after), this.function.andThen(after));
+    return new PrintableFunction<>(String.format("%s->%s", s, after), this.function.andThen(after));
   }
 
   @Override

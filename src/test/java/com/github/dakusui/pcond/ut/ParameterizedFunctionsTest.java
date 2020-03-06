@@ -46,28 +46,28 @@ public class ParameterizedFunctionsTest {
     return asList(
         new Object[] {
             Functions.identity(),
-            "->identity",
+            "identity",
             singletonList(
                 TestItem.$("X", CoreMatchers.equalTo("X"))
             )
         },
         new Object[] {
             Functions.length(),
-            "->length",
+            "length",
             singletonList(
                 TestItem.$("ABC", CoreMatchers.equalTo(3))
             )
         },
         new Object[] {
             Functions.cast(String.class),
-            "->castTo[String]",
+            "castTo[String]",
             singletonList(
                 TestItem.$("hello", CoreMatchers.equalTo("hello")) // Check only identity.
             )
         },
         new Object[] {
             Functions.collectionToList(),
-            "->collectionToList",
+            "collectionToList",
             singletonList(
                 TestItem.$(
                     new TreeSet<String>() {{
@@ -80,21 +80,21 @@ public class ParameterizedFunctionsTest {
         },
         new Object[] {
             Functions.arrayToList(),
-            "->arrayToList",
+            "arrayToList",
             singletonList(
                 TestItem.$(new Object[] { "A", "B" }, CoreMatchers.equalTo(asList("A", "B")))
             )
         },
         new Object[] {
             Functions.countLines(),
-            "->countLines",
+            "countLines",
             singletonList(
                 TestItem.$("hello\nworld", CoreMatchers.equalTo(2))
             )
         },
         new Object[] {
             Functions.arrayToList().andThen(Functions.size()),
-            "->arrayToList->size",
+            "arrayToList->size",
             singletonList(
                 TestItem.$(
                     new Object[] { "A", "B", "C" },
@@ -104,7 +104,7 @@ public class ParameterizedFunctionsTest {
         },
         new Object[] {
             Functions.size().compose(Functions.arrayToList()),
-            "->arrayToList->size",
+            "arrayToList->size",
             singletonList(
                 TestItem.$(
                     new Object[] { "A", "B", "C" },

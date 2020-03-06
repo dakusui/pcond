@@ -1,36 +1,13 @@
-package com.github.dakusui.pcond;
+package com.github.dakusui.pcond.perf;
 
+import com.github.dakusui.pcond.Preconditions;
 import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
-import static com.github.dakusui.pcond.Preconditions.*;
-import static com.github.dakusui.pcond.functions.Functions.size;
-import static com.github.dakusui.pcond.functions.Predicates.gt;
-
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class Example {
+public class Perf {
   private static final int numLoops = 1_000_000_000;
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testArgument() {
-    checkListSize(Collections.emptyList(), 0);
-  }
-
-  public void checkListSize(List<Object> list, int expectedMinimumSize) {
-    requireArgument(list, when(size()).then(gt(expectedMinimumSize)));
-  }
-
-  @Test(expected = IllegalStateException.class)
-  public void testState() {
-    System.out.println(requireState(Collections.emptyList(), when("size", size()).then(gt(0))));
-  }
-
 
   @BeforeClass
   public static void warmUp() {

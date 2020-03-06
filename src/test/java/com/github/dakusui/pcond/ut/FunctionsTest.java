@@ -27,7 +27,7 @@ public class FunctionsTest {
     @Test
     public void whenToString$thenLooksGood()  {
       assertEquals(
-          "->at[123]",
+          "at[123]",
           Functions.elementAt(123).toString()
       );
     }
@@ -45,7 +45,7 @@ public class FunctionsTest {
     @Test
     public void whenToString$thenLooksGood()  {
       assertEquals(
-          "->size",
+          "size",
           Functions.size().toString()
       );
     }
@@ -63,7 +63,7 @@ public class FunctionsTest {
     @Test
     public void whenToString$thenLooksGood()  {
       assertEquals(
-          "->stream",
+          "stream",
           stream().toString()
       );
     }
@@ -81,7 +81,7 @@ public class FunctionsTest {
     @Test
     public void whenToString$thenLooksGood()  {
       assertEquals(
-          "->stringify",
+          "stringify",
           stringify().toString()
       );
 

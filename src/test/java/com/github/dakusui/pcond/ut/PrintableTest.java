@@ -30,7 +30,7 @@ public class PrintableTest {
     public void givenFunctionReturnedByCompose$whenToString$thenLooksGood() {
       Function<String, String> composed = appendA.compose(appendB);
 
-      assertEquals("->append[B]->append[A]", composed.toString());
+      assertEquals("append[B]->append[A]", composed.toString());
     }
 
     @Test
@@ -44,7 +44,7 @@ public class PrintableTest {
     public void givenFunctionReturnedByAndThen$whenToString$thenLooksGood() {
       Function<String, String> andThen = appendA.andThen(appendB);
 
-      assertEquals("->append[A]->append[B]", andThen.toString());
+      assertEquals("append[A]->append[B]", andThen.toString());
     }
   }
 
