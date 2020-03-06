@@ -2,10 +2,12 @@ package com.github.dakusui.pcond.perf;
 
 import com.github.dakusui.pcond.Preconditions;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Objects;
 
+@Ignore
 public class Perf {
   private static final int numLoops = 1_000_000_000;
 

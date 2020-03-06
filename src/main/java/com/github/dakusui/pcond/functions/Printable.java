@@ -7,35 +7,21 @@ import java.util.function.Supplier;
 
 public enum Printable {
   ;
-  static boolean assertsEnabled = false;
-
-  static {
-    // noinspection AssertWithSideEffects
-    assert assertsEnabled = true; // Intentional side-effect!!!
-  }
 
   public static <T> Predicate<T> predicate(Supplier<String> s, Predicate<T> predicate) {
-    return assertsEnabled ?
-        Printable.printablePredicate(s.get(), predicate) :
-        predicate;
+    return Printable.printablePredicate(s.get(), predicate);
   }
 
   public static <T> Predicate<T> predicate(String s, Predicate<T> predicate) {
-    return assertsEnabled ?
-        Printable.printablePredicate(s, predicate) :
-        predicate;
+    return Printable.printablePredicate(s, predicate);
   }
 
   public static <T, R> Function<T, R> function(Supplier<String> s, Function<T, R> function) {
-    return assertsEnabled ?
-        Printable.printableFunction(s.get(), function) :
-        function;
+    return Printable.printableFunction(s.get(), function);
   }
 
   public static <T, R> Function<T, R> function(String s, Function<T, R> function) {
-    return assertsEnabled ?
-        Printable.printableFunction(s, function) :
-        function;
+    return Printable.printableFunction(s, function) ;
   }
 
   public static <T> Predicate<T> printablePredicate(String s, Predicate<T> predicate) {

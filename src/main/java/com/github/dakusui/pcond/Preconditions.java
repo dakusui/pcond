@@ -8,6 +8,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+
 public enum Preconditions {
   ;
 
@@ -59,6 +61,6 @@ public enum Preconditions {
   }
 
   private static <T> String composeMessage(T value, Predicate<? super T> predicate) {
-    return String.format("value:%s violated precondition:value%s", value, predicate);
+    return String.format("value:%s violated precondition:value %s", formatObject(value), predicate);
   }
 }

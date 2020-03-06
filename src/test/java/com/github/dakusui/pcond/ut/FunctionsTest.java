@@ -84,8 +84,6 @@ public class FunctionsTest {
           "stringify",
           stringify().toString()
       );
-
     }
   }
-
 }

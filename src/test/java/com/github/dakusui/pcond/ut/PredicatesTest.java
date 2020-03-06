@@ -12,7 +12,6 @@ import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
 public class PredicatesTest {
-
   public static class IsNullTest extends TestBase {
     @Test
     public void whenMet$thenTrue() {

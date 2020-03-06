@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.utils.TestUtils;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.functions.Printable;
+import com.github.dakusui.pcond.utils.TestUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -113,6 +113,12 @@ public class ParameterizedPredicatesTest {
             $(Collections.emptySet(), true),
         } },
         new Object[][] { {
+            Predicates.isEmptyArray(),
+            "isEmptyArray",
+            $(new String[] { "Hello" }, false),
+            $(new String[0], true)
+        } },
+        new Object[][] { {
             Predicates.alwaysTrue().and(Predicates.equalTo("X")),
             "(alwaysTrue&&equalTo[\"X\"])",
             $("X", true),
@@ -148,9 +154,9 @@ public class ParameterizedPredicatesTest {
     );
   }
 
-  final private Predicate<Object>      predicate;
-  final private String         expectationForToString;
-  final private List<TestItem> testItems;
+  final private Predicate<Object> predicate;
+  final private String            expectationForToString;
+  final private List<TestItem>    testItems;
 
   @Before
   public void before() {

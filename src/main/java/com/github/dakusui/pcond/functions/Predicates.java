@@ -11,11 +11,11 @@ import static java.util.Objects.requireNonNull;
 public enum Predicates {
   ;
 
-  public static final Predicate<?> ALWAYS_TRUE = Printable.predicate("alwaysTrue", t -> true);
-  public static final Predicate<Boolean> IS_TRUE = Printable.predicate("isTrue", (Boolean v) -> v);
-  public static final Predicate<Boolean> IS_FALSE = Printable.predicate("isFalse", (Boolean v) -> !v);
-  public static final Predicate<?> IS_NULL = Printable.predicate("isNull", Objects::isNull);
-  public static final Predicate<?> IS_NOT_NULL = Printable.predicate("isNotNull", Objects::nonNull);
+  public static final Predicate<?>       ALWAYS_TRUE = Printable.predicate("alwaysTrue", t -> true);
+  public static final Predicate<Boolean> IS_TRUE     = Printable.predicate("isTrue", (Boolean v) -> v);
+  public static final Predicate<Boolean> IS_FALSE    = Printable.predicate("isFalse", (Boolean v) -> !v);
+  public static final Predicate<?>       IS_NULL     = Printable.predicate("isNull", Objects::isNull);
+  public static final Predicate<?>       IS_NOT_NULL = Printable.predicate("isNotNull", Objects::nonNull);
 
   @SuppressWarnings("unchecked")
   public static <T> Predicate<T> alwaysTrue() {
@@ -164,7 +164,7 @@ public enum Predicates {
   }
 
   public static Predicate<Object[]> isEmptyArray() {
-    return Printable.predicate("isEmpty", objects -> objects.length == 0);
+    return Printable.predicate("isEmptyArray", objects -> objects.length == 0);
   }
 
   public static Predicate<? super Collection<?>> isEmpty() {
