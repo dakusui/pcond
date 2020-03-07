@@ -8,10 +8,6 @@ public class PrintableFunction<T, R> implements Function<T, R> {
   private final Supplier<String>                 s;
   private final Function<? super T, ? extends R> function;
 
-  PrintableFunction(String s, Function<? super T, ? extends R> function) {
-    this(() -> Objects.requireNonNull(s), function);
-  }
-
   PrintableFunction(Supplier<String> s, Function<? super T, ? extends R> function) {
     this.s = Objects.requireNonNull(s);
     this.function = Objects.requireNonNull(function);
@@ -24,12 +20,12 @@ public class PrintableFunction<T, R> implements Function<T, R> {
 
   public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
     Objects.requireNonNull(before);
-    return new PrintableFunction<>(String.format("%s->%s", before, s.get()), this.function.compose(before));
+    return new PrintableFunction<>(() -> String.format("%s->%s", before, s.get()), this.function.compose(before));
   }
 
   public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
     Objects.requireNonNull(after);
-    return new PrintableFunction<>(String.format("%s->%s", s.get(), after), this.function.andThen(after));
+    return new PrintableFunction<>(() -> String.format("%s->%s", s.get(), after), this.function.andThen(after));
   }
 
   @Override
@@ -38,7 +34,7 @@ public class PrintableFunction<T, R> implements Function<T, R> {
   }
 
   public static <T, R> PrintableFunction<T, R> create(String s, Function<? super T, ? extends R> function) {
-    return new PrintableFunction<>(Objects.requireNonNull(s), function);
+    return new PrintableFunction<>(() -> Objects.requireNonNull(s), function);
   }
 
 

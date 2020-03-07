@@ -21,11 +21,11 @@ public enum Printable {
   }
 
   public static <T, R> Function<T, R> function(String s, Function<T, R> function) {
-    return Printable.printableFunction(s, function) ;
+    return function(() -> s, function);
   }
 
   public static <T> Predicate<T> printablePredicate(String s, Predicate<T> predicate) {
-    return new PrintablePredicate<>(s, predicate);
+    return new PrintablePredicate<>(() -> s, predicate);
   }
 
   public static <T, R> PrintableFunction<T, R> printableFunction(String s, Function<? super T, ? extends R> function) {
@@ -38,6 +38,17 @@ public enum Printable {
     return new PrintableFunction.Factory<T, R>(nameComposer) {
       @Override
       Function<T, R> createFunction(Object arg) {
+        return ff.apply(arg);
+      }
+    };
+  }
+
+  static <T> PrintablePredicate.Factory<T> predicateFactory(
+      final Function<Object, String> nameComposer,
+      final Function<Object, Predicate<T>> ff) {
+    return new PrintablePredicate.Factory<T>(nameComposer) {
+      @Override
+      Predicate<T> createPredicate(Object arg) {
         return ff.apply(arg);
       }
     };

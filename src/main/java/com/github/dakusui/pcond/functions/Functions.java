@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.functions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -19,7 +19,7 @@ public enum Functions {
   private static final Function<Collection<?>, Stream<?>>    STREAM             = Printable.function("stream", Collection::stream);
   private static final Function<Object[], List<?>>           ARRAY_TO_LIST      = Printable.function("arrayToList", Arrays::asList);
   private static final Function<String, Integer>             COUNT_LINES        = Printable.function("countLines", (String s) -> s.split("\n").length);
-  private static final Function<Collection<?>, List<?>>      COLLECTION_TO_LIST = Printable.function("collectionToList", (Collection<?> c) -> new LinkedList<Object>() {
+  private static final Function<Collection<?>, List<?>>      COLLECTION_TO_LIST = Printable.function("collectionToList", (Collection<?> c) -> new ArrayList<Object>() {
     {
       addAll(c);
     }

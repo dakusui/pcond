@@ -8,6 +8,7 @@ import org.junit.runner.RunWith;
 
 import java.util.stream.Stream;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
@@ -46,6 +47,28 @@ public class PredicatesTest {
     public void whenNotMet$thenFalse() {
       assertFalse(Predicates.eq(100).test(99));
       assertFalse(Predicates.eq(100).test(101));
+    }
+
+    @Test
+    public void whenEqualityIsChecked$thenSameIsSameAndDifferentIsDifferent() {
+      Object target = Predicates.eq(100);
+      assertThat(
+          target,
+          allOf(
+              is(Predicates.eq(100)),
+              is(target),
+              not(is(new Object())),
+              not(is(Predicates.eq(101)))));
+    }
+
+    @Test
+    public void whenHashCode$thenSameIsSameAndDifferentIsDifferent() {
+      int target = Predicates.eq(100).hashCode();
+      assertThat(
+          target,
+          allOf(
+              is(Predicates.eq(100).hashCode()),
+              not(is(Predicates.eq(101).hashCode()))));
     }
 
     @Test
