@@ -11,6 +11,21 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 public class PrintablePredicate<T> implements Predicate<T> {
+  private static final PrintablePredicate.Factory<?, List<Predicate<Object>>> AND_FACTORY = factory(
+      (arg) -> format("(%s&&%s)", arg.get(0), arg.get(1)),
+      arg -> (Object t) -> unwrapIfPrintablePredicate(arg.get(0)).test(t) && (unwrapIfPrintablePredicate(arg.get(1))).test(t)
+  );
+
+  private static final PrintablePredicate.Factory<?, List<Predicate<Object>>> OR_FACTORY = factory(
+      (arg) -> format("(%s||%s)", arg.get(0), arg.get(1)),
+      arg -> (Object t) -> unwrapIfPrintablePredicate(arg.get(0)).test(t) || (unwrapIfPrintablePredicate(arg.get(1))).test(t)
+  );
+
+  private static final PrintablePredicate.Factory<?, Predicate<Object>> NEGATE_FACTORY = factory(
+      (arg) -> format("!%s", arg),
+      arg -> (Object t) -> unwrapIfPrintablePredicate(arg).negate().test(t)
+  );
+
   final Predicate<? super T> predicate;
   final Supplier<String>     s;
 
@@ -33,25 +48,24 @@ public class PrintablePredicate<T> implements Predicate<T> {
     return predicate.test(t);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public Predicate<T> and(Predicate<? super T> other) {
     requireNonNull(other);
-    final PrintablePredicate.Factory<T, List<Predicate<? super T>>> and_factory = factory(
-        (arg) -> format("(%s&&%s)", arg.get(0), arg.get(1)),
-        arg -> t -> arg.get(0).test(t) && (arg.get(1)).test(t)
-    );
-    return and_factory.create(asList(predicate, other));
+    return (Predicate<T>) AND_FACTORY.create(asList((Predicate<Object>) this, (Predicate<Object>) other));
   }
 
-  @Override
-  public Predicate<T> negate() {
-    return new PrintablePredicate<>(() -> String.format("!%s", s.get()), predicate.negate());
-  }
-
+  @SuppressWarnings("unchecked")
   @Override
   public Predicate<T> or(Predicate<? super T> other) {
     requireNonNull(other);
-    return new PrintablePredicate<>(() -> format("(%s||%s)", s.get(), other), t -> predicate.test(t) || other.test(t));
+    return (Predicate<T>) OR_FACTORY.create(asList((Predicate<Object>) this, (Predicate<Object>) other));
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public Predicate<T> negate() {
+    return (Predicate<T>) NEGATE_FACTORY.create((Predicate<Object>) this);
   }
 
   @Override
@@ -72,6 +86,12 @@ public class PrintablePredicate<T> implements Predicate<T> {
   @Override
   public String toString() {
     return s.get();
+  }
+
+  private static Predicate<Object> unwrapIfPrintablePredicate(Predicate<Object> predicate) {
+    if (predicate instanceof PrintablePredicate)
+      return ((PrintablePredicate<Object>) predicate).predicate;
+    return predicate;
   }
 
   static abstract class Factory<T, E> extends PrintableLambdaFactory<E> {

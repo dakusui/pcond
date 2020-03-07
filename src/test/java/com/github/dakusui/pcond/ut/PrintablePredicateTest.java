@@ -14,14 +14,6 @@ import static org.junit.Assert.assertThat;
 @RunWith(Enclosed.class)
 public class PrintablePredicateTest {
   private abstract static class Conj {
-    <T> Predicate<T> create(String name, Predicate<T> p, Predicate<T> q) {
-      return create(new PrintablePredicate<>(() -> name + "1", p), new PrintablePredicate<>(() -> name + "2", q));
-    }
-
-    abstract <T> Predicate<T> create(Predicate<T> predicate, Predicate<T> predicate1);
-  }
-
-  public static class And extends Conj {
     @Test
     public void test() {
       Predicate<?> p1 = create("P", Predicates.isNotNull(), Predicates.isNotNull());
@@ -29,18 +21,6 @@ public class PrintablePredicateTest {
       Predicate<?> q = create("Q", Predicates.isNotNull(), Predicates.isNotNull());
       Predicate<?> r1 = create("R", Predicates.isNull(), Predicates.isNotNull());
       Predicate<?> r2 = create("R", Predicates.isNotNull(), Predicates.isNull());
-      assertThat(
-          p1,
-          is(p2));
-      assertThat(
-          p1,
-          is(q));
-      assertThat(
-          p1,
-          not(is(r1)));
-      assertThat(
-          p1,
-          not(is(r2)));
       assertThat(
           p1,
           allOf(
@@ -52,17 +32,52 @@ public class PrintablePredicateTest {
           ));
     }
 
+    <T> Predicate<T> create(String name, Predicate<T> p, Predicate<T> q) {
+      return create(new PrintablePredicate<>(() -> name + "1", p), new PrintablePredicate<>(() -> name + "2", q));
+    }
+
+    abstract <T> Predicate<T> create(PrintablePredicate<T> predicate, PrintablePredicate<T> predicate1);
+  }
+
+  public static class And extends Conj {
     @Override
-    <T> Predicate<T> create(Predicate<T> predicate1, Predicate<T> predicate2) {
+    <T> Predicate<T> create(PrintablePredicate<T> predicate1, PrintablePredicate<T> predicate2) {
       return predicate1.and(predicate2);
     }
   }
 
-  public static class Or {
-
+  public static class Or extends Conj {
+    @Override
+    <T> Predicate<T> create(PrintablePredicate<T> predicate1, PrintablePredicate<T> predicate2) {
+      return predicate1.or(predicate2);
+    }
   }
 
   public static class Negate {
+    @Test
+    public void test() {
+      Predicate<?> p = Predicates.isNotNull();
+      Predicate<?> q = Predicates.isNotNull();
+      Predicate<?> n = Predicates.isNotNull().negate();
+      assertThat(
+          p,
+          allOf(
+              is(p),
+              is(q),
+              not(is(n))));
+    }
 
+    @Test
+    public void test2() {
+      Predicate<?> p = Predicates.isNotNull().negate();
+      Predicate<?> q = Predicates.isNotNull().negate();
+      Predicate<?> n = Predicates.isNotNull();
+      assertThat(
+          p,
+          allOf(
+              is(p),
+              is(q),
+              not(is(n))));
+    }
   }
 }
