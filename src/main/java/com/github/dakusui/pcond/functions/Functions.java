@@ -25,8 +25,8 @@ public enum Functions {
     }
   });
   private static final PrintableFunction.Factory<List<?>, ?, Integer> ELEMENT_AT_FACTORY =
-      Printable.printableFunctionFactory((v) -> String.format("at[%s]", v), arg -> es -> es.get((Integer) arg));
-  private static final PrintableFunction.Factory<Object, ?, Class<?>>       CAST_FACTORY       = Printable.printableFunctionFactory(
+      Printable.functionFactory((v) -> String.format("at[%s]", v), arg -> es -> es.get((Integer) arg));
+  private static final PrintableFunction.Factory<Object, ?, Class<?>>       CAST_FACTORY       = Printable.functionFactory(
       (v) -> String.format("castTo[%s]", ((Class<?>) requireNonNull(v)).getSimpleName()),
       arg -> ((Class<?>) arg)::cast);
 

@@ -21,6 +21,7 @@ public class PrintablePredicateTest {
       Predicate<?> q = create("Q", Predicates.isNotNull(), Predicates.isNotNull());
       Predicate<?> r1 = create("R", Predicates.isNull(), Predicates.isNotNull());
       Predicate<?> r2 = create("R", Predicates.isNotNull(), Predicates.isNull());
+      Object o = new Object();
       assertThat(
           p1,
           allOf(
@@ -28,7 +29,8 @@ public class PrintablePredicateTest {
               is(p2),
               is(q),
               not(is(r1)),
-              not(is(r2))
+              not(is(r2)),
+              not(is(o))
           ));
     }
 
