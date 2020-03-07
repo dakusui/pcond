@@ -1,8 +1,11 @@
 package com.github.dakusui.pcond.functions;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import static java.util.Arrays.asList;
 
 public class PrintableFunction<T, R> implements Function<T, R> {
   private final Supplier<String>                 s;
@@ -13,19 +16,40 @@ public class PrintableFunction<T, R> implements Function<T, R> {
     this.function = Objects.requireNonNull(function);
   }
 
+  static <T, R, E> Factory<T, R, E> factory(Function<E, String> nameComposer, Function<E, Function<T, R>> ff) {
+    return new Factory<T, R, E>(nameComposer) {
+      @Override
+      Function<T, R> createFunction(E arg) {
+        return ff.apply(arg);
+      }
+    };
+  }
+
   @Override
   public R apply(T t) {
     return this.function.apply(t);
   }
 
+  private static final Factory<Object, Object, List<Function<Object, Object>>> COMPOSE_FACTORY = PrintableFunction.factory(
+      arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
+      arg -> p -> unwrapIfPrintablePredicate(arg.get(1)).compose(unwrapIfPrintablePredicate(arg.get(0))).apply(p)
+  );
+
+  @SuppressWarnings("unchecked")
   public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
     Objects.requireNonNull(before);
-    return new PrintableFunction<>(() -> String.format("%s->%s", before, s.get()), this.function.compose(before));
+    return (Function<V, R>) COMPOSE_FACTORY.create(asList((Function<Object, Object>) before, (Function<Object, Object>) this));
   }
 
+  private static final Factory<Object, Object, List<Function<Object, Object>>> ANDTHEN_FACTORY = PrintableFunction.factory(
+      arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
+      arg -> p -> unwrapIfPrintablePredicate(arg.get(1)).compose(unwrapIfPrintablePredicate(arg.get(0))).apply(p)
+  );
+
+  @SuppressWarnings("unchecked")
   public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
     Objects.requireNonNull(after);
-    return new PrintableFunction<>(() -> String.format("%s->%s", s.get(), after), this.function.andThen(after));
+    return (Function<T, V>) ANDTHEN_FACTORY.create(asList((Function<Object, Object>) this, (Function<Object, Object>) after));
   }
 
   @Override
@@ -37,10 +61,17 @@ public class PrintableFunction<T, R> implements Function<T, R> {
     return new PrintableFunction<>(() -> Objects.requireNonNull(s), function);
   }
 
+  @SuppressWarnings("unchecked")
+  private static Function<Object, Object> unwrapIfPrintablePredicate(Function<Object, Object> function) {
+    if (function instanceof PrintableFunction)
+      return (Function<Object, Object>) ((PrintableFunction<Object, Object>) function).function;
+    return function;
+  }
 
-  static abstract class Factory<T, R> extends PrintableLambdaFactory {
 
-    abstract static class PrintableFunctionFromFactory<T, R> extends PrintableFunction<T, R> implements Lambda<Factory<T, R>> {
+  static abstract class Factory<T, R, E> extends PrintableLambdaFactory<E> {
+
+    abstract static class PrintableFunctionFromFactory<T, R, E> extends PrintableFunction<T, R> implements Lambda<Factory<T, R, E>, E> {
       PrintableFunctionFromFactory(Supplier<String> s, Function<? super T, ? extends R> function) {
         super(s, function);
       }
@@ -57,22 +88,22 @@ public class PrintableFunction<T, R> implements Function<T, R> {
       }
     }
 
-    Factory(Function<Object, String> s) {
+    Factory(Function<E, String> s) {
       super(s);
     }
 
-    PrintableFunction<T, R> create(Object arg) {
-      Lambda.Spec spec = new Lambda.Spec(Factory.this, arg, PrintableFunctionFromFactory.class);
-      return new PrintableFunctionFromFactory<T, R>(
+    PrintableFunction<T, R> create(E arg) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, PrintableFunctionFromFactory.class);
+      return new PrintableFunctionFromFactory<T, R, E>(
           () -> this.nameComposer().apply(arg),
           createFunction(arg)) {
         @Override
-        public Spec spec() {
+        public Spec<E> spec() {
           return spec;
         }
       };
     }
 
-    abstract Function<? super T, ? extends R> createFunction(Object arg);
+    abstract Function<? super T, ? extends R> createFunction(E arg);
   }
 }

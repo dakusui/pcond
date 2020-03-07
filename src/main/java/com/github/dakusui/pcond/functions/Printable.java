@@ -32,25 +32,16 @@ public enum Printable {
     return PrintableFunction.create(s, function);
   }
 
-  static <T, R> PrintableFunction.Factory<T, R> printableFunctionFactory(
-      final Function<Object, String> nameComposer,
-      final Function<Object, Function<T, R>> ff) {
-    return new PrintableFunction.Factory<T, R>(nameComposer) {
-      @Override
-      Function<T, R> createFunction(Object arg) {
-        return ff.apply(arg);
-      }
-    };
+  static <T, R, E> PrintableFunction.Factory<T, R, E> functionFactory(
+      final Function<E, String> nameComposer,
+      final Function<E, Function<T, R>> ff) {
+    return PrintableFunction.factory(nameComposer, ff);
   }
 
-  static <T> PrintablePredicate.Factory<T> predicateFactory(
-      final Function<Object, String> nameComposer,
-      final Function<Object, Predicate<T>> ff) {
-    return new PrintablePredicate.Factory<T>(nameComposer) {
-      @Override
-      Predicate<T> createPredicate(Object arg) {
-        return ff.apply(arg);
-      }
-    };
+  static <T, E> PrintablePredicate.Factory<T, E> predicateFactory(
+      final Function<E, String> nameComposer,
+      final Function<E, Predicate<T>> ff) {
+    return PrintablePredicate.factory(nameComposer, ff);
   }
+
 }
