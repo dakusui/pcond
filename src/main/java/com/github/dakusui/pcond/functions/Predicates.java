@@ -11,11 +11,16 @@ import static java.util.Objects.requireNonNull;
 public enum Predicates {
   ;
 
-  public static final Predicate<?>       ALWAYS_TRUE = Printable.predicate("alwaysTrue", t -> true);
-  public static final Predicate<Boolean> IS_TRUE     = Printable.predicate("isTrue", (Boolean v) -> v);
-  public static final Predicate<Boolean> IS_FALSE    = Printable.predicate("isFalse", (Boolean v) -> !v);
-  public static final Predicate<?>       IS_NULL     = Printable.predicate("isNull", Objects::isNull);
-  public static final Predicate<?>       IS_NOT_NULL = Printable.predicate("isNotNull", Objects::nonNull);
+  public static final Predicate<?>             ALWAYS_TRUE             = Printable.predicate("alwaysTrue", t -> true);
+  public static final Predicate<Boolean>       IS_TRUE                 = Printable.predicate("isTrue", (Boolean v) -> v);
+  public static final Predicate<Boolean>       IS_FALSE                = Printable.predicate("isFalse", (Boolean v) -> !v);
+  public static final Predicate<?>             IS_NULL                 = Printable.predicate("isNull", Objects::isNull);
+  public static final Predicate<?>             IS_NOT_NULL             = Printable.predicate("isNotNull", Objects::nonNull);
+  public static final Predicate<String>        IS_EMPTY_STRING         = Printable.predicate("isEmpty", String::isEmpty);
+  public static final Predicate<String>        IS_EMPTY_OR_NULL_STRING = Printable.predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
+  );
+  public static final Predicate<Object[]>      IS_EMPTY_ARRAY          = Printable.predicate("isEmptyArray", objects -> objects.length == 0);
+  public static final Predicate<Collection<?>> IS_EMPTY_COLLECTION     = Printable.predicate("isEmpty", Collection::isEmpty);
 
   @SuppressWarnings("unchecked")
   public static <T> Predicate<T> alwaysTrue() {
@@ -141,17 +146,11 @@ public enum Predicates {
   }
 
   public static Predicate<String> isEmptyString() {
-    return Printable.predicate(
-        "isEmpty",
-        String::isEmpty
-    );
+    return IS_EMPTY_STRING;
   }
 
   public static Predicate<String> isEmptyOrNullString() {
-    return Printable.predicate(
-        "isEmptyOrNullString",
-        s -> Objects.isNull(s) || isEmptyString().test(s)
-    );
+    return IS_EMPTY_OR_NULL_STRING;
   }
 
   public static <E> Predicate<? super Collection<E>> contains(Object entry) {
@@ -164,11 +163,11 @@ public enum Predicates {
   }
 
   public static Predicate<Object[]> isEmptyArray() {
-    return Printable.predicate("isEmptyArray", objects -> objects.length == 0);
+    return IS_EMPTY_ARRAY;
   }
 
   public static Predicate<? super Collection<?>> isEmpty() {
-    return Printable.predicate("isEmpty", Collection::isEmpty);
+    return IS_EMPTY_COLLECTION;
   }
 
   public static <E> Predicate<? super Stream<? extends E>> allMatch(Predicate<E> predicate) {

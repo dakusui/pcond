@@ -32,4 +32,14 @@ public enum Printable {
     return PrintableFunction.create(s, function);
   }
 
+  static <T, R> PrintableFunction.Factory<T, R> printableFunctionFactory(
+      final Function<Object, String> nameComposer,
+      final Function<Object, Function<T, R>> ff) {
+    return new PrintableFunction.Factory<T, R>(nameComposer) {
+      @Override
+      Function<T, R> createFunction(Object arg) {
+        return ff.apply(arg);
+      }
+    };
+  }
 }
