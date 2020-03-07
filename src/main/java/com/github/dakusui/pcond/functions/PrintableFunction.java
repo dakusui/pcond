@@ -38,48 +38,37 @@ public class PrintableFunction<T, R> implements Function<T, R> {
   }
 
 
-  static abstract class Factory<T, R> {
-    private final Function<Object, String> nameComposer;
+  static abstract class Factory<T, R> extends PrintableLambdaFactory {
 
-    abstract static class PrintableFunctionFromFactory<T, R> extends PrintableFunction<T, R> {
+    abstract static class PrintableFunctionFromFactory<T, R> extends PrintableFunction<T, R> implements Lambda<Factory<T, R>> {
       PrintableFunctionFromFactory(Supplier<String> s, Function<? super T, ? extends R> function) {
         super(s, function);
       }
 
-      abstract Factory<T, R> createdFrom();
+      @Override
+      public int hashCode() {
+        return Objects.hashCode(arg());
+      }
 
-      abstract Object arg();
+      @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+      @Override
+      public boolean equals(Object anotherObject) {
+        return equals(anotherObject, type());
+      }
     }
 
     Factory(Function<Object, String> s) {
-      this.nameComposer = s;
+      super(s);
     }
 
     PrintableFunction<T, R> create(Object arg) {
-      return new PrintableFunctionFromFactory<T, R>(() -> this.nameComposer.apply(arg), createFunction(arg)) {
+      Lambda.Spec spec = new Lambda.Spec(Factory.this, arg, PrintableFunctionFromFactory.class);
+      return new PrintableFunctionFromFactory<T, R>(
+          () -> this.nameComposer().apply(arg),
+          createFunction(arg)) {
         @Override
-        Factory<T, R> createdFrom() {
-          return Factory.this;
-        }
-
-        @Override
-        Object arg() {
-          return arg;
-        }
-
-        @Override
-        public int hashCode() {
-          return Objects.hashCode(arg);
-        }
-
-        @Override
-        public boolean equals(Object anotherObject) {
-          if (this == anotherObject)
-            return true;
-          if (!(anotherObject instanceof PrintableFunctionFromFactory))
-            return false;
-          PrintableFunctionFromFactory<?, ?> another = (PrintableFunctionFromFactory<?, ?>) anotherObject;
-          return this.createdFrom() == another.createdFrom() && Objects.equals(arg, another.arg());
+        public Spec spec() {
+          return spec;
         }
       };
     }

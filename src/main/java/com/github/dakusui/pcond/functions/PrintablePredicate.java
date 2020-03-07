@@ -44,51 +44,38 @@ public class PrintablePredicate<T> implements Predicate<T> {
     return s.get();
   }
 
-  static abstract class Factory<T> {
-    private final Function<Object, String> nameComposer;
-
-    abstract static class PrintablePredicateFromFactory<T> extends PrintablePredicate<T> {
+  static abstract class Factory<T> extends PrintableLambdaFactory {
+    abstract static class PrintablePredicateFromFactory<T> extends PrintablePredicate<T> implements Lambda<Factory<T>> {
       PrintablePredicateFromFactory(Supplier<String> s, Predicate<? super T> function) {
         super(s, function);
       }
 
-      abstract Factory<T> createdFrom();
+      @Override
+      public int hashCode() {
+        return Objects.hashCode(arg());
+      }
 
-      abstract Object arg();
+      @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+      @Override
+      public boolean equals(Object anotherObject) {
+        return equals(anotherObject, type());
+      }
     }
 
     Factory(Function<Object, String> s) {
-      this.nameComposer = s;
+      super(s);
     }
 
     PrintablePredicate<T> create(Object arg) {
-      return new PrintablePredicateFromFactory<T>(() -> this.nameComposer.apply(arg), createPredicate(arg)) {
+      Lambda.Spec spec = new Lambda.Spec(Factory.this, arg, PrintablePredicateFromFactory.class);
+      return new PrintablePredicateFromFactory<T>(() -> this.nameComposer().apply(arg), createPredicate(arg)) {
         @Override
-        Factory<T> createdFrom() {
-          return Factory.this;
-        }
-
-        @Override
-        Object arg() {
-          return arg;
-        }
-
-        @Override
-        public int hashCode() {
-          return Objects.hashCode(arg);
-        }
-
-        @Override
-        public boolean equals(Object anotherObject) {
-          if (this == anotherObject)
-            return true;
-          if (!(anotherObject instanceof PrintablePredicate.Factory.PrintablePredicateFromFactory))
-            return false;
-          PrintablePredicateFromFactory<?> another = (PrintablePredicateFromFactory<?>) anotherObject;
-          return this.createdFrom() == another.createdFrom() && Objects.equals(arg, another.arg());
+        public Spec spec() {
+          return spec;
         }
       };
     }
+
     abstract Predicate<? super T> createPredicate(Object arg);
   }
 }

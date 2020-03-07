@@ -13,7 +13,7 @@ public enum Printable {
   }
 
   public static <T> Predicate<T> predicate(String s, Predicate<T> predicate) {
-    return Printable.printablePredicate(s, predicate);
+    return predicate(() -> s, predicate);
   }
 
   public static <T, R> Function<T, R> function(Supplier<String> s, Function<T, R> function) {

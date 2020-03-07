@@ -11,27 +11,27 @@ import static java.util.Objects.requireNonNull;
 public enum Predicates {
   ;
 
-  public static final  Predicate<?>                              ALWAYS_TRUE                      = Printable.predicate("alwaysTrue", t -> true);
-  public static final  Predicate<Boolean>                        IS_TRUE                          = Printable.predicate("isTrue", (Boolean v) -> v);
-  public static final  Predicate<Boolean>                        IS_FALSE                         = Printable.predicate("isFalse", (Boolean v) -> !v);
-  public static final  Predicate<?>                              IS_NULL                          = Printable.predicate("isNull", Objects::isNull);
-  public static final  Predicate<?>                              IS_NOT_NULL                      = Printable.predicate("isNotNull", Objects::nonNull);
-  public static final  Predicate<String>                         IS_EMPTY_STRING                  = Printable.predicate("isEmpty", String::isEmpty);
-  public static final  Predicate<String>                         IS_EMPTY_OR_NULL_STRING          = Printable.predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
+  private static final  Predicate<?>                              ALWAYS_TRUE                      = Printable.predicate("alwaysTrue", t -> true);
+  private static final  Predicate<Boolean>                        IS_TRUE                          = Printable.predicate("isTrue", (Boolean v) -> v);
+  private static final  Predicate<Boolean>                        IS_FALSE                         = Printable.predicate("isFalse", (Boolean v) -> !v);
+  private static final  Predicate<?>                              IS_NULL                          = Printable.predicate("isNull", Objects::isNull);
+  private static final  Predicate<?>                              IS_NOT_NULL                      = Printable.predicate("isNotNull", Objects::nonNull);
+  private static final  Predicate<String>                         IS_EMPTY_STRING                  = Printable.predicate("isEmpty", String::isEmpty);
+  private static final  Predicate<String>                         IS_EMPTY_OR_NULL_STRING          = Printable.predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
   );
-  public static final  Predicate<Object[]>                       IS_EMPTY_ARRAY                   = Printable.predicate("isEmptyArray", objects -> objects.length == 0);
-  public static final  Predicate<Collection<?>>                  IS_EMPTY_COLLECTION              = Printable.predicate("isEmpty", Collection::isEmpty);
-  public static final  PrintablePredicate.Factory<Object>        EQUAL_TO_FACTORY                 = Printable.predicateFactory(
+  private static final  Predicate<Object[]>                       IS_EMPTY_ARRAY                   = Printable.predicate("isEmptyArray", objects -> objects.length == 0);
+  private static final  Predicate<Collection<?>>                  IS_EMPTY_COLLECTION              = Printable.predicate("isEmpty", Collection::isEmpty);
+  private static final  PrintablePredicate.Factory<Object>        EQUAL_TO_FACTORY                 = Printable.predicateFactory(
       (arg) -> String.format("equalTo[%s]", formatObject(arg)),
       arg -> v -> Objects.equals(v, arg));
-  public static final  PrintablePredicate.Factory<Collection<?>> CONTAINS_FACTORY                 = Printable.predicateFactory(
+  private static final  PrintablePredicate.Factory<Collection<?>> CONTAINS_FACTORY                 = Printable.predicateFactory(
       arg -> String.format("contains[%s]", formatObject(arg)),
       arg -> (Collection<?> c) -> c.contains(arg));
-  public static final  PrintablePredicate.Factory<Object>        OBJECT_IS_SAME_AS_FACTORY        = Printable.predicateFactory(
+  private static final  PrintablePredicate.Factory<Object>        OBJECT_IS_SAME_AS_FACTORY        = Printable.predicateFactory(
       arg -> String.format("==[%s]", formatObject(arg)),
       arg -> v -> v == arg);
   @SuppressWarnings("SimplifiableConditionalExpression")
-  public static final  PrintablePredicate.Factory<Object>        OBJECT_IS_INSTANCE_OF_FACTORY    = Printable.predicateFactory(
+  private static final  PrintablePredicate.Factory<Object>        OBJECT_IS_INSTANCE_OF_FACTORY    = Printable.predicateFactory(
       (arg) -> String.format("isInstanceOf[%s]", ((Class<?>) arg).getCanonicalName()),
       arg -> v -> v == null ?
           false :
@@ -56,33 +56,33 @@ public enum Predicates {
   private static final PrintablePredicate.Factory<Object>        EQ_FACTORY                       = Printable.predicateFactory(
       (arg) -> String.format("~[%s]", formatObject(arg)),
       arg -> v -> ((Comparable) v).compareTo(arg) == 0);
-  public static final  PrintablePredicate.Factory<String>        STRING_MATCHES_REGEX_FACTORY     = Printable.predicateFactory(
+  private static final  PrintablePredicate.Factory<String>        STRING_MATCHES_REGEX_FACTORY     = Printable.predicateFactory(
       (arg) -> String.format("matchesRegex[%s]", formatObject(arg)),
       arg -> s -> s.matches((String) arg));
-  public static final  PrintablePredicate.Factory<String>        STRING_CONTAINS_FACTORY          = Printable.predicateFactory(
+  private static final  PrintablePredicate.Factory<String>        STRING_CONTAINS_FACTORY          = Printable.predicateFactory(
       (arg) -> String.format("containsString[%s]", formatObject(arg)),
       arg -> s -> s.contains((String) arg));
-  public static final  PrintablePredicate.Factory<String>        STRING_STARTS_WITH_FACTORY       = Printable.predicateFactory(
+  private static final  PrintablePredicate.Factory<String>        STRING_STARTS_WITH_FACTORY       = Printable.predicateFactory(
       (arg) -> String.format("startsWith[%s]", formatObject(arg)),
       (arg) -> s -> s.startsWith((String) arg));
-  public static final  PrintablePredicate.Factory<String>        STRING_ENDS_WITH_FACTORY         = Printable.predicateFactory(
+  private static final  PrintablePredicate.Factory<String>        STRING_ENDS_WITH_FACTORY         = Printable.predicateFactory(
       (arg) -> String.format("endsWith[%s]", formatObject(arg)),
       arg -> s -> s.endsWith((String) arg));
-  public static final  PrintablePredicate.Factory<String>        STRING_EQUALS_IGNORECASE_FACTORY = Printable.predicateFactory(
+  private static final  PrintablePredicate.Factory<String>        STRING_EQUALS_IGNORECASE_FACTORY = Printable.predicateFactory(
       (arg) -> String.format("equalsIgnoreCase[%s]", formatObject(arg)),
       arg -> s -> s.equalsIgnoreCase((String) arg));
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static final  PrintablePredicate.Factory<Stream<?>>     STREAM_ALL_MATCH_FACTORY         = Printable.predicateFactory(
+  private static final  PrintablePredicate.Factory<Stream<?>>     STREAM_ALL_MATCH_FACTORY         = Printable.predicateFactory(
       (arg) -> String.format("allMatch[%s]", requireNonNull(arg)),
       arg -> stream -> stream.allMatch((Predicate) arg)
   );
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static final  PrintablePredicate.Factory<Stream<?>>     STREAM_NONE_MATCH_FACTORY        = Printable.predicateFactory(
+  private static final  PrintablePredicate.Factory<Stream<?>>     STREAM_NONE_MATCH_FACTORY        = Printable.predicateFactory(
       (arg) -> String.format("noneMatch[%s]", requireNonNull(arg)),
       arg -> stream -> stream.noneMatch((Predicate) arg)
   );
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public static final  PrintablePredicate.Factory<Stream<?>>     STREAM_ANY_MATCH_FACTORY         = Printable.predicateFactory(
+  private static final  PrintablePredicate.Factory<Stream<?>>     STREAM_ANY_MATCH_FACTORY         = Printable.predicateFactory(
       (arg) -> String.format("anyMatch[%s]", requireNonNull(arg)),
       arg -> stream -> stream.anyMatch((Predicate) arg)
   );
