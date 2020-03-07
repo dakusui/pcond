@@ -3,31 +3,31 @@ package com.github.dakusui.pcond.functions;
 import java.util.Objects;
 import java.util.function.Function;
 
-abstract class PrintableLambdaFactory {
-  private final Function<Object, String> nameComposer;
+abstract class PrintableLambdaFactory<E> {
+  private final Function<E, String> nameComposer;
 
-  protected PrintableLambdaFactory(Function<Object, String> nameComposer) {
+  protected PrintableLambdaFactory(Function<E, String> nameComposer) {
     this.nameComposer = nameComposer;
   }
 
-  public Function<Object, String> nameComposer() {
+  public Function<E, String> nameComposer() {
     return this.nameComposer;
   }
 
-  interface Lambda<F extends PrintableLambdaFactory> {
-    class Spec {
-      final PrintableLambdaFactory factory;
-      final Object                 arg;
-      final Class<?>               type;
+  interface Lambda<F extends PrintableLambdaFactory<E>, E> {
+    class Spec<E> {
+      final PrintableLambdaFactory<E> factory;
+      final E                         arg;
+      final Class<?>                  type;
 
-      public Spec(PrintableLambdaFactory factory, Object arg, Class<?> type) {
+      public Spec(PrintableLambdaFactory<E> factory, E arg, Class<?> type) {
         this.factory = factory;
         this.arg = arg;
         this.type = type;
       }
     }
 
-    Spec spec();
+    Spec<E> spec();
 
     @SuppressWarnings("unchecked")
     default F createdFrom() {
@@ -39,11 +39,11 @@ abstract class PrintableLambdaFactory {
     }
 
     @SuppressWarnings("unchecked")
-    default Class<? extends Lambda<?>> type() {
-      return (Class<? extends Lambda<?>>) spec().type;
+    default Class<? extends Lambda<?, E>> type() {
+      return (Class<? extends Lambda<?, E>>) spec().type;
     }
 
-    default <T extends Lambda<?>> boolean equals(Object anotherObject, Class<T> intendedClass) {
+    default <T extends Lambda<?, E>> boolean equals(Object anotherObject, Class<T> intendedClass) {
       if (this == anotherObject)
         return true;
       if (!(intendedClass.isInstance(anotherObject)))

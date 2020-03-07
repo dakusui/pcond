@@ -38,9 +38,9 @@ public class PrintableFunction<T, R> implements Function<T, R> {
   }
 
 
-  static abstract class Factory<T, R> extends PrintableLambdaFactory {
+  static abstract class Factory<T, R, E> extends PrintableLambdaFactory<E> {
 
-    abstract static class PrintableFunctionFromFactory<T, R> extends PrintableFunction<T, R> implements Lambda<Factory<T, R>> {
+    abstract static class PrintableFunctionFromFactory<T, R, E> extends PrintableFunction<T, R> implements Lambda<Factory<T, R, E>, E> {
       PrintableFunctionFromFactory(Supplier<String> s, Function<? super T, ? extends R> function) {
         super(s, function);
       }
@@ -57,22 +57,22 @@ public class PrintableFunction<T, R> implements Function<T, R> {
       }
     }
 
-    Factory(Function<Object, String> s) {
+    Factory(Function<E, String> s) {
       super(s);
     }
 
-    PrintableFunction<T, R> create(Object arg) {
-      Lambda.Spec spec = new Lambda.Spec(Factory.this, arg, PrintableFunctionFromFactory.class);
-      return new PrintableFunctionFromFactory<T, R>(
+    PrintableFunction<T, R> create(E arg) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, PrintableFunctionFromFactory.class);
+      return new PrintableFunctionFromFactory<T, R, E>(
           () -> this.nameComposer().apply(arg),
           createFunction(arg)) {
         @Override
-        public Spec spec() {
+        public Spec<E> spec() {
           return spec;
         }
       };
     }
 
-    abstract Function<? super T, ? extends R> createFunction(Object arg);
+    abstract Function<? super T, ? extends R> createFunction(E arg);
   }
 }
