@@ -10,11 +10,10 @@ import java.util.List;
 import static com.github.dakusui.pcond.Preconditions.*;
 import static com.github.dakusui.pcond.functions.Functions.size;
 import static com.github.dakusui.pcond.functions.Predicates.gt;
+import static com.github.dakusui.pcond.functions.Predicates.isEmptyOrNullString;
 
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Example {
-  private static final int numLoops = 1_000_000_000;
-
   @Test(expected = IllegalArgumentException.class)
   public void testArgument() {
     try {
@@ -39,4 +38,19 @@ public class Example {
     }
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void checkIfNull() {
+    String in = "";
+    try {
+      greeting(in);
+    } catch (RuntimeException e) {
+      e.printStackTrace();
+      throw e;
+    }
+  }
+
+  private void greeting(String in) {
+    String var = requireArgument(in, isEmptyOrNullString().negate());
+    System.out.println(var);
+  }
 }
