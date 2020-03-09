@@ -1,0 +1,28 @@
+= pcond: A printable precondition checking library
+
+A simple library for precondition checking.
+
+* Readable in code
+* Readable in runtime output (log/message)
+* Consistent style
+* Small overhead
+* Construct a precondition from preset predicates and functions.
+
+[source,java]
+----
+public class Example {
+  public void check2(String var) {
+    String ret = requireArgument(var, and(isNotNull(), not(isEmptyString())));
+    System.out.println(ret);
+  }
+}
+----
+[source,text]
+----
+java.lang.IllegalArgumentException: value:"" violated precondition:value (isNotNull&&!isEmpty)
+
+	at com.github.dakusui.pcond.Preconditions.lambda$illegalArgument$3(Preconditions.java:87)
+	at com.github.dakusui.pcond.Preconditions.require(Preconditions.java:21)
+	at com.github.dakusui.pcond.Preconditions.requireArgument(Preconditions.java:30)
+	at com.github.dakusui.pcond.examples.Example.check2(Example.java:52)
+----

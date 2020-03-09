@@ -22,14 +22,6 @@ public enum Preconditions {
     return value;
   }
 
-  public static <O, P> TransformingPredicate.Factory<P, O> when(String funcName, Function<? super O, ? extends P> func) {
-    return when(Printable.function(funcName, func));
-  }
-
-  public static <O, P> TransformingPredicate.Factory<P, O> when(Function<? super O, ? extends P> function) {
-    return cond -> new TransformingPredicate<>(cond, function);
-  }
-
   public static <T> T requireNonNull(T value) {
     return require(value, Predicates.isNotNull(), nullPointer());
   }
@@ -40,6 +32,42 @@ public enum Preconditions {
 
   public static <T> T requireState(T value, Predicate<? super T> cond) {
     return require(value, cond, illegalState());
+  }
+
+  @SafeVarargs
+  public static <T> Predicate<? super T> and(Predicate<T>... conds) {
+    if (conds.length == 0)
+      return Predicates.alwaysTrue();
+    if (conds.length == 1)
+      return conds[0];
+    Predicate<T> ret = conds[0];
+    for (int i = 1; i < conds.length; i++)
+      ret = ret.and(conds[i]);
+    return ret;
+  }
+
+  @SafeVarargs
+  public static <T> Predicate<? super T> or(Predicate<T>... conds) {
+    if (conds.length == 0)
+      return Predicates.alwaysTrue().negate();
+    if (conds.length == 1)
+      return conds[0];
+    Predicate<T> ret = conds[0];
+    for (int i = 1; i < conds.length; i++)
+      ret = ret.or(conds[i]);
+    return ret;
+  }
+
+  public static <T> Predicate<T> not(Predicate<T> cond) {
+    return cond.negate();
+  }
+
+  public static <O, P> TransformingPredicate.Factory<P, O> when(String funcName, Function<? super O, ? extends P> func) {
+    return when(Printable.function(funcName, func));
+  }
+
+  public static <O, P> TransformingPredicate.Factory<P, O> when(Function<? super O, ? extends P> function) {
+    return cond -> new TransformingPredicate<>(cond, function);
   }
 
   public static <T> BiFunction<T, Predicate<? super T>, IllegalStateException> nullPointer() {
