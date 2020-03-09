@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.Preconditions;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.Predicates;
 import org.junit.Test;
@@ -13,10 +12,10 @@ import static org.junit.Assert.assertThat;
 public class TransformingPredicateTest {
   @Test
   public void testEquals() {
-    Predicate<String> p = Preconditions.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
-    Predicate<String> q = Preconditions.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
-    Predicate<String> r = Preconditions.<String, String>when(Functions.identity()).then(Predicates.isNotNull());
-    Predicate<String> s = Preconditions.<String, String>when(Functions.stringify()).then(Predicates.equalTo("hello"));
+    Predicate<String> p = Predicates.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
+    Predicate<String> q = Predicates.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
+    Predicate<String> r = Predicates.<String, String>when(Functions.identity()).then(Predicates.isNotNull());
+    Predicate<String> s = Predicates.<String, String>when(Functions.stringify()).then(Predicates.equalTo("hello"));
     Object stranger = new Object();
 
     assertThat(
@@ -31,10 +30,10 @@ public class TransformingPredicateTest {
 
   @Test
   public void testHashCode() {
-    Predicate<String> p = Preconditions.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
-    Predicate<String> q = Preconditions.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
-    Predicate<String> r = Preconditions.<String, String>when(Functions.identity()).then(Predicates.isNotNull());
-    Predicate<String> s = Preconditions.<String, String>when(Functions.stringify()).then(Predicates.equalTo("hello"));
+    Predicate<String> p = Predicates.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
+    Predicate<String> q = Predicates.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
+    Predicate<String> r = Predicates.<String, String>when(Functions.identity()).then(Predicates.isNotNull());
+    Predicate<String> s = Predicates.<String, String>when(Functions.stringify()).then(Predicates.equalTo("hello"));
 
     assertThat(
         p.hashCode(),

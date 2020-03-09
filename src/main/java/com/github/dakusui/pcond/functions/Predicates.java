@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.functions;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -200,5 +201,41 @@ public enum Predicates {
 
   public static <E> Predicate<? super Stream<? extends E>> anyMatch(Predicate<E> predicate) {
     return STREAM_ANY_MATCH_FACTORY.create(predicate);
+  }
+
+  @SafeVarargs
+  public static <T> Predicate<? super T> and(Predicate<T>... conds) {
+    if (conds.length == 0)
+      return alwaysTrue();
+    if (conds.length == 1)
+      return conds[0];
+    Predicate<T> ret = conds[0];
+    for (int i = 1; i < conds.length; i++)
+      ret = ret.and(conds[i]);
+    return ret;
+  }
+
+  @SafeVarargs
+  public static <T> Predicate<? super T> or(Predicate<T>... conds) {
+    if (conds.length == 0)
+      return alwaysTrue().negate();
+    if (conds.length == 1)
+      return conds[0];
+    Predicate<T> ret = conds[0];
+    for (int i = 1; i < conds.length; i++)
+      ret = ret.or(conds[i]);
+    return ret;
+  }
+
+  public static <T> Predicate<T> not(Predicate<T> cond) {
+    return cond.negate();
+  }
+
+  public static <O, P> TransformingPredicate.Factory<P, O> when(String funcName, Function<? super O, ? extends P> func) {
+    return when(Printable.function(funcName, func));
+  }
+
+  public static <O, P> TransformingPredicate.Factory<P, O> when(Function<? super O, ? extends P> function) {
+    return cond -> new TransformingPredicate<>(cond, function);
   }
 }

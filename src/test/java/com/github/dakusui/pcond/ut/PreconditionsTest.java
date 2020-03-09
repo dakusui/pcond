@@ -59,7 +59,7 @@ public class PreconditionsTest extends TestBase {
     String value = "hello";
     Preconditions.requireArgument(
         value,
-        Preconditions.when(Functions.length()).then(Predicates.gt(100)));
+        Predicates.when(Functions.length()).then(Predicates.gt(100)));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -68,7 +68,7 @@ public class PreconditionsTest extends TestBase {
     try {
       Preconditions.requireArgument(
           value,
-          Preconditions.when("LENGTH", Functions.length())
+          Predicates.when("LENGTH", Functions.length())
               .then("GT[100]", Predicates.gt(100)));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
@@ -93,7 +93,7 @@ public class PreconditionsTest extends TestBase {
     assertThat(
         Preconditions.requireArgument(
             value,
-            Preconditions.when(Functions.length()).then(Predicates.gt(0))),
+            Predicates.when(Functions.length()).then(Predicates.gt(0))),
         is(value));
   }
 
@@ -103,7 +103,7 @@ public class PreconditionsTest extends TestBase {
     assertThat(
         Preconditions.requireArgument(
             value,
-            Preconditions.when(Functions.length()).then(Predicates.gt(0))),
+            Predicates.when(Functions.length()).then(Predicates.gt(0))),
         is(value));
   }
 

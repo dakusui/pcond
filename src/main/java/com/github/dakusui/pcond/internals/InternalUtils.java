@@ -2,6 +2,8 @@ package com.github.dakusui.pcond.internals;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -39,5 +41,14 @@ public enum InternalUtils {
         ? ret.substring(ret.lastIndexOf("$") + 1)
         : ret;
     return ret;
+  }
+
+  public static <T, E extends Throwable> T check(
+      T value,
+      Predicate<? super T> cond,
+      BiFunction<T, Predicate<? super T>, ? extends E> exceptionFactory) throws E {
+    if (!cond.test(value))
+      throw exceptionFactory.apply(value, cond);
+    return value;
   }
 }
