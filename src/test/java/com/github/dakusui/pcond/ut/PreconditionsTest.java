@@ -107,4 +107,13 @@ public class PreconditionsTest extends TestBase {
         is(value));
   }
 
+  @Test
+  public void testRequire() {
+    String message = Preconditions.require(
+        "hello",
+        Predicates.isNotNull(),
+        (v, e) -> String.format("%s", "Hi!"),
+        s -> new Error()
+    );
+  }
 }

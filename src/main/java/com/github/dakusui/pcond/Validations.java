@@ -10,7 +10,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 public enum Validations {
   ;
 
-  <T, E extends Throwable> T validate(
+  public static <T, E extends Throwable> T validate(
       T value,
       Predicate<? super T> cond,
       MessageComposer<T> messageComposer,
@@ -20,7 +20,7 @@ public enum Validations {
     throw exceptionFactory.apply(messageComposer.apply(value, cond));
   }
 
-  <T, E extends Throwable> T validate(
+  public static <T, E extends Throwable> T validate(
       T value,
       Predicate<? super T> cond,
       Function<String, E> exceptionFactory) throws E {

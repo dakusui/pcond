@@ -233,4 +233,41 @@ public class PredicatesTest {
       assertEquals("containsString[\"hello\"]", Predicates.containsString("hello").toString());
     }
   }
+
+  public static class AndTest extends TestBase {
+    @Test
+    public void performEmptyAnd$thenTrue() {
+      assertTrue(Predicates.and().test("hello"));
+    }
+
+    @Test
+    public void performSingleAnd$thenTrue() {
+      assertTrue(Predicates.and(Predicates.alwaysTrue()).test("hello"));
+    }
+
+    @Test
+    public void performAnd$thenTrue() {
+      assertTrue(Predicates.and(Predicates.not(Predicates.isNull()), Predicates.not(Predicates.isEmptyString())).test("hello"));
+    }
+
+    @Test
+    public void performAnd$thenFalse() {
+      assertFalse(Predicates.and(Predicates.not(Predicates.isNull()), Predicates.not(Predicates.isEmptyString())).test(null));
+    }
+
+    @Test
+    public void performEmptyOr$thenFalse() {
+      assertFalse(Predicates.or().test("hello"));
+    }
+
+    @Test
+    public void performSingleOr$thenTrue() {
+      assertTrue(Predicates.or(Predicates.alwaysTrue()).test("hello"));
+    }
+
+    @Test
+    public void performOr$thenTrue() {
+      assertTrue(Predicates.or(Predicates.isNull(), Predicates.isEmptyString()).test(null));
+    }
+  }
 }
