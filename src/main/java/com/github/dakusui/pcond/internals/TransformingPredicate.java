@@ -57,8 +57,7 @@ public class TransformingPredicate<P, O> implements Predicate<O> {
     if (!(anotherObject instanceof TransformingPredicate))
       return false;
     TransformingPredicate<?, ?> another = (TransformingPredicate<?, ?>) anotherObject;
-    return Objects.equals(this.name, another.name) &&
-        Objects.equals(this.function, another.function) &&
+    return Objects.equals(this.function, another.function) &&
         Objects.equals(this.predicate, another.predicate);
   }
 
