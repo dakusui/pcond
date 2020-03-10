@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.functions.Printable;
+import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.utils.TestUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -143,10 +143,10 @@ public class ParameterizedPredicatesTest {
             $("X", false),
         } },
         new Object[][] { {
-            Printable.predicate("alwaysTrue", s -> true)
+            Printables.predicate("alwaysTrue", s -> true)
                 .negate()
-                .and(Printable.predicate("alwaysFalse", s -> false)
-                .or(Printable.predicate("hello", s -> false).and(Printable.predicate("bye", s -> true)))),
+                .and(Printables.predicate("alwaysFalse", s -> false)
+                .or(Printables.predicate("hello", s -> false).and(Printables.predicate("bye", s -> true)))),
             "(!alwaysTrue&&(alwaysFalse||(hello&&bye)))",
             $("ANYTHING", false),
         } }

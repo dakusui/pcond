@@ -2,23 +2,37 @@ package com.github.dakusui.pcond.perf;
 
 import com.github.dakusui.pcond.Preconditions;
 import org.junit.BeforeClass;
+import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
 import java.util.Objects;
 
 @Ignore
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Perf {
   private static final int numLoops = 1_000_000_000;
 
   @BeforeClass
   public static void warmUp() {
-    int x = 0, y = 0, z = 0;
+    int w = 0, x = 0, y = 0, z = 0;
     for (int i = 0; i < 1_000_000; i++) {
+      w = noCheck(w);
       x = objectsRequireNonNull(x);
       y = preconditionsRequireNonNull(y);
       z = preconditionsRequireNonNullWithSimpleLambda(z);
     }
+  }
+
+  @Test
+  public void a0_testNoCheck() {
+    int i = 0;
+    long before = System.currentTimeMillis();
+    while (i < numLoops)
+      i = noCheck(i);
+    long after = System.currentTimeMillis();
+    System.out.println("objectsRequireNonNull:" + numLoops + ":" + (after - before));
   }
 
   @Test
@@ -52,6 +66,16 @@ public class Perf {
   }
 
   @Test
+  public void b0_testNoCheck() {
+    int i = 0;
+    long before = System.currentTimeMillis();
+    while (i < numLoops)
+      i = noCheck(i);
+    long after = System.currentTimeMillis();
+    System.out.println("objectsRequireNonNull:" + numLoops + ":" + (after - before));
+  }
+
+  @Test
   public void b1_testObjectsRequireNonNull() {
     int i = 0;
     long before = System.currentTimeMillis();
@@ -82,6 +106,16 @@ public class Perf {
   }
 
   @Test
+  public void c0_testNoCheck() {
+    int i = 0;
+    long before = System.currentTimeMillis();
+    while (i < numLoops)
+      i = noCheck(i);
+    long after = System.currentTimeMillis();
+    System.out.println("objectsRequireNonNull:" + numLoops + ":" + (after - before));
+  }
+
+  @Test
   public void c1_testObjectsRequireNonNull() {
     int i = 0;
     long before = System.currentTimeMillis();
@@ -109,6 +143,10 @@ public class Perf {
       i = preconditionsRequireNonNullWithSimpleLambda(i);
     long after = System.currentTimeMillis();
     System.out.println("preconditionsRequireNonNullWithSimpleLambda:" + numLoops + ":" + (after - before));
+  }
+
+  private static int noCheck(int i) {
+    return i + 1;
   }
 
   public static int objectsRequireNonNull(Integer i) {

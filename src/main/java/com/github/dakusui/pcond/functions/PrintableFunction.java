@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -10,12 +12,12 @@ import static java.util.Arrays.asList;
 public class PrintableFunction<T, R> implements Function<T, R> {
   private static final Factory<Object, Object, List<Function<Object, Object>>> COMPOSE_FACTORY = PrintableFunction.factory(
       arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
-      arg -> p -> unwrapIfPrintableFunciton(arg.get(1)).compose(unwrapIfPrintableFunciton(arg.get(0))).apply(p)
+      arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
   );
 
   private static final Factory<Object, Object, List<Function<Object, Object>>> ANDTHEN_FACTORY = PrintableFunction.factory(
       arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
-      arg -> p -> unwrapIfPrintableFunciton(arg.get(1)).compose(unwrapIfPrintableFunciton(arg.get(0))).apply(p)
+      arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
   );
 
   private final Supplier<String>                 s;
@@ -24,15 +26,6 @@ public class PrintableFunction<T, R> implements Function<T, R> {
   PrintableFunction(Supplier<String> s, Function<? super T, ? extends R> function) {
     this.s = Objects.requireNonNull(s);
     this.function = Objects.requireNonNull(function);
-  }
-
-  static <T, R, E> Factory<T, R, E> factory(Function<E, String> nameComposer, Function<E, Function<T, R>> ff) {
-    return new Factory<T, R, E>(nameComposer) {
-      @Override
-      Function<T, R> createFunction(E arg) {
-        return ff.apply(arg);
-      }
-    };
   }
 
   @Override
@@ -61,13 +54,22 @@ public class PrintableFunction<T, R> implements Function<T, R> {
     return new PrintableFunction<>(() -> Objects.requireNonNull(s), function);
   }
 
-  @SuppressWarnings("unchecked")
-  private static Function<Object, Object> unwrapIfPrintableFunciton(Function<Object, Object> function) {
-    if (function instanceof PrintableFunction)
-      return (Function<Object, Object>) ((PrintableFunction<Object, Object>) function).function;
-    return function;
+  static <T, R, E> Factory<T, R, E> factory(Function<E, String> nameComposer, Function<E, Function<T, R>> ff) {
+    return new Factory<T, R, E>(nameComposer) {
+      @Override
+      Function<T, R> createFunction(E arg) {
+        return ff.apply(arg);
+      }
+    };
   }
 
+  @SuppressWarnings("unchecked")
+  private static Function<Object, Object> unwrapIfPrintableFunction(Function<Object, Object> function) {
+    Function<Object, Object> ret = function;
+    if (function instanceof PrintableFunction)
+      ret = (Function<Object, Object>) ((PrintableFunction<Object, Object>) function).function;
+    return ret;
+  }
 
   static abstract class Factory<T, R, E> extends PrintableLambdaFactory<E> {
 

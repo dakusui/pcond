@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.functions.PrintablePredicate;
+import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -12,7 +13,31 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Enclosed.class)
-public class PrintablePredicateTest {
+public class PrintablesPredicateTest extends TestBase {
+  public static class Leaf {
+    @Test
+    public void test() {
+      Predicate<?> p1 = Predicates.isNotNull();
+      Predicate<?> p2 = Predicates.isNotNull();
+      Predicate<?> q = Predicates.equalTo("hello");
+      Predicate<?> qq = Predicate.isEqual("hello");
+      Object o = new Object();
+
+      System.out.println("p1=<" + p1 + ">");
+      System.out.println("p2=<" + p2 + ">");
+      System.out.println("q=<" + q + ">");
+      System.out.println("qq=<" + qq + ">");
+      assertThat(
+          p1,
+          allOf(
+              is(p1),
+              is(p2),
+              not(is(q)),
+              not(is(qq)),
+              not(is(o))));
+    }
+  }
+
   private abstract static class Conj {
     @Test
     public void test() {

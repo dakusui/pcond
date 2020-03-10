@@ -1,4 +1,6 @@
-package com.github.dakusui.pcond.functions;
+package com.github.dakusui.pcond.internals;
+
+import com.github.dakusui.pcond.functions.Printables;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -7,7 +9,7 @@ import java.util.function.Predicate;
 public class TransformingPredicate<P, O> implements Predicate<O> {
   public interface Factory<P, O> {
     default TransformingPredicate<P, O> then(String condName, Predicate<? super P> cond) {
-      return then(Printable.predicate(condName, cond));
+      return then(Printables.predicate(condName, cond));
     }
 
     TransformingPredicate<P, O> then(Predicate<? super P> cond);

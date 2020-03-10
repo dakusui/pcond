@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -48,21 +50,21 @@ public class PrintablePredicate<T> implements Predicate<T> {
     return predicate.test(t);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "NullableProblems" })
   @Override
   public Predicate<T> and(Predicate<? super T> other) {
     requireNonNull(other);
     return (Predicate<T>) AND_FACTORY.create(asList((Predicate<Object>) this, (Predicate<Object>) other));
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "NullableProblems" })
   @Override
   public Predicate<T> or(Predicate<? super T> other) {
     requireNonNull(other);
     return (Predicate<T>) OR_FACTORY.create(asList((Predicate<Object>) this, (Predicate<Object>) other));
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "NullableProblems" })
   @Override
   public Predicate<T> negate() {
     return (Predicate<T>) NEGATE_FACTORY.create((Predicate<Object>) this);
@@ -77,7 +79,7 @@ public class PrintablePredicate<T> implements Predicate<T> {
   public boolean equals(Object anotherObject) {
     if (this == anotherObject)
       return true;
-    if (!(anotherObject instanceof Predicate))
+    if (!(anotherObject instanceof PrintablePredicate))
       return false;
     @SuppressWarnings("unchecked") PrintablePredicate<T> another = (PrintablePredicate<T>) anotherObject;
     return this.predicate.equals(another.predicate);
@@ -89,9 +91,10 @@ public class PrintablePredicate<T> implements Predicate<T> {
   }
 
   private static Predicate<Object> unwrapIfPrintablePredicate(Predicate<Object> predicate) {
+    Predicate<Object> ret = predicate;
     if (predicate instanceof PrintablePredicate)
-      return ((PrintablePredicate<Object>) predicate).predicate;
-    return predicate;
+      ret = ((PrintablePredicate<Object>) predicate).predicate;
+    return ret;
   }
 
   static abstract class Factory<T, E> extends PrintableLambdaFactory<E> {

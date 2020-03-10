@@ -1,4 +1,4 @@
-= pcond: A printable precondition checking library
+= pcond: A (Printable {Pre,Post})condition checking library
 
 A simple library for precondition checking.
 
@@ -11,18 +11,21 @@ A simple library for precondition checking.
 [source,java]
 ----
 public class Example {
-  public void check2(String var) {
-    String ret = requireArgument(var, and(isNotNull(), not(isEmptyString())));
+  public void check4(int var) {
+    Comparable<?> ret = requireArgument(var, and(ge(0), lt(100)));
     System.out.println(ret);
   }
 }
 ----
+
+If we give `100` to this method for the parameter `var`, you will get following output.
+
 [source,text]
 ----
-java.lang.IllegalArgumentException: value:"" violated precondition:value (isNotNull&&!isEmpty)
+java.lang.IllegalArgumentException: value:100 violated precondition:value (>=[0]&&<[100])
 
-	at com.github.dakusui.pcond.Preconditions.lambda$illegalArgument$3(Preconditions.java:87)
-	at com.github.dakusui.pcond.Preconditions.require(Preconditions.java:21)
-	at com.github.dakusui.pcond.Preconditions.requireArgument(Preconditions.java:30)
-	at com.github.dakusui.pcond.examples.Example.check2(Example.java:52)
+	at com.github.dakusui.pcond.internals.Exceptions.lambda$illegalArgument$2(Exceptions.java:25)
+	at com.github.dakusui.pcond.internals.InternalUtils.check(InternalUtils.java:51)
+	at com.github.dakusui.pcond.Preconditions.requireArgument(Preconditions.java:21)
+	at com.github.dakusui.pcond.examples.Example.check4(Example.java:69)
 ----

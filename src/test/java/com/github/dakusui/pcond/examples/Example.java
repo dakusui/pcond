@@ -1,17 +1,15 @@
 package com.github.dakusui.pcond.examples;
 
-import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.runners.MethodSorters;
 
 import java.util.Collections;
 import java.util.List;
 
-import static com.github.dakusui.pcond.Preconditions.*;
+import static com.github.dakusui.pcond.Preconditions.requireArgument;
+import static com.github.dakusui.pcond.Preconditions.requireState;
 import static com.github.dakusui.pcond.functions.Functions.size;
 import static com.github.dakusui.pcond.functions.Predicates.*;
 
-@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Example {
   @Test(expected = IllegalArgumentException.class)
   public void testArgument() {
@@ -43,6 +41,12 @@ public class Example {
     check3("");
   }
 
+  @Test
+  public void testCheck4() {
+    check4(99);
+    check4(100);
+  }
+
   public void check1(String var) {
     String ret = requireArgument(var, and(isNotNull()));
     System.out.println(ret);
@@ -55,6 +59,11 @@ public class Example {
 
   public void check3(String var) {
     String ret = requireArgument(var, not(or(isNull(), isEmptyString())));
+    System.out.println(ret);
+  }
+
+  public void check4(int var) {
+    Comparable<?> ret = requireArgument(var, and(ge(0), lt(100)));
     System.out.println(ret);
   }
 
