@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import static com.github.dakusui.pcond.functions.Predicates.isNotNull;
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 public class PreconditionsTest extends TestBase {
@@ -41,7 +42,7 @@ public class PreconditionsTest extends TestBase {
   }
 
   @Test(expected = IllegalStateException.class)
-  public void testRequireState() {
+  public void givenInvalidState$whenRequireState$thenIllegalStateExceptionThrown() {
     try {
       Preconditions.requireState(null, isNotNull());
     } catch (IllegalStateException e) {
@@ -52,6 +53,12 @@ public class PreconditionsTest extends TestBase {
               is("value:null violated precondition:value isNotNull")));
       throw e;
     }
+  }
+
+  @Test
+  public void givenValidState$whenRequireState$thenPass() {
+    String var = Preconditions.requireState("hello", isNotNull());
+    assertNotNull(var);
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -115,5 +122,18 @@ public class PreconditionsTest extends TestBase {
         (v, e) -> String.format("%s", "Hi!"),
         s -> new Error()
     );
+    assertNotNull(message);
+  }
+
+  @Test(expected = Error.class)
+  public void testRequire$thenError() {
+    String value = null;
+    String message = Preconditions.require(
+        value,
+        Predicates.isNotNull(),
+        (v, e) -> String.format("%s", "Hi!"),
+        s -> new Error()
+    );
+    assertNotNull(message);
   }
 }

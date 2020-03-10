@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.utils.TestBase;
 import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.utils.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -10,8 +10,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
 public class PrintablesTest {
@@ -85,6 +84,24 @@ public class PrintablesTest {
     @Test
     public void givenPredicateReturnedByNegate$whenToString$thenWorksRight() {
       assertEquals("!is[A]", isA.negate().toString());
+    }
+  }
+
+  public static class FactoryTest {
+    @Test
+    public void testFunctionFactory() {
+      assertNotNull(Printables.functionFactory(
+          (e) -> "hello:" + e,
+          (e) -> (t) -> "world"
+      ));
+    }
+
+    @Test
+    public void testPredicateFactory() {
+      assertNotNull(Printables.predicateFactory(
+          (e) -> "hello:" + e,
+          (e) -> (t) -> true
+      ));
     }
   }
 }

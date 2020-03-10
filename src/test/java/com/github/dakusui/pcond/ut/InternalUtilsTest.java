@@ -41,6 +41,13 @@ public class InternalUtilsTest {
   }
 
   @Test
+  public void testFormatObject$boundaryLengthString() {
+    assertEquals(
+        InternalUtils.formatObject("HelloHelloHelloHello"),
+        "\"HelloHelloHelloHello\"");
+  }
+
+  @Test
   public void testFormatObject$InnerClassObject() {
     assertThat(
         InternalUtils.formatObject(new InnerClass()),

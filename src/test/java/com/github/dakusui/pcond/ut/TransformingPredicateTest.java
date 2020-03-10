@@ -4,9 +4,11 @@ import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.Predicates;
 import org.junit.Test;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class TransformingPredicateTest {
@@ -43,5 +45,15 @@ public class TransformingPredicateTest {
             not(is(r.hashCode())),
             not(is(s.hashCode()))));
 
+  }
+
+  @Test
+  public void testHashCodeSimply() {
+    Function<String, String> identity = Functions.identity();
+    Predicate<String> equalToHello = Predicates.equalTo("hello");
+    Predicate<String> p = Predicates.when(identity).then(equalToHello);
+    assertEquals(
+        identity.hashCode() + equalToHello.hashCode(),
+        p.hashCode());
   }
 }

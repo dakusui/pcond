@@ -218,27 +218,20 @@ public enum Predicates {
 
   @SuppressWarnings("unchecked")
   @SafeVarargs
-  public static <T> Predicate<T> and(Predicate<? super T>... conds) {
-    if (conds.length == 0)
-      return alwaysTrue();
-    if (conds.length == 1)
-      return (Predicate<T>) conds[0];
-    Predicate<T> ret = (Predicate<T>) conds[0];
-    for (int i = 1; i < conds.length; i++)
-      ret = ret.and(conds[i]);
+  public static <T> Predicate<T> and(Predicate<? super T> car, Predicate<? super T>... cdr) {
+    Predicate<T> ret = (Predicate<T>) car;
+    for (Predicate<? super T> predicate : cdr)
+      ret = ret.and(predicate);
     return ret;
   }
 
   @SuppressWarnings("unchecked")
   @SafeVarargs
-  public static <T> Predicate<T> or(Predicate<? super T>... conds) {
-    if (conds.length == 0)
-      return (Predicate<T>) alwaysTrue().negate();
-    if (conds.length == 1)
-      return (Predicate<T>) conds[0];
-    Predicate<T> ret = (Predicate<T>) conds[0];
-    for (int i = 1; i < conds.length; i++)
-      ret = ret.or(conds[i]);
+  public static <T> Predicate<T> or(Predicate<? super T> car, Predicate<? super T>... cdr) {
+    requireNonNull(car);
+    Predicate<T> ret = (Predicate<T>) car;
+    for (Predicate<? super T> predicate : cdr)
+      ret = ret.or(predicate);
     return ret;
   }
 

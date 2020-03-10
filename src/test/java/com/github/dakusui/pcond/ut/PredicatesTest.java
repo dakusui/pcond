@@ -236,11 +236,6 @@ public class PredicatesTest {
 
   public static class AndTest extends TestBase {
     @Test
-    public void performEmptyAnd$thenTrue() {
-      assertTrue(Predicates.and().test("hello"));
-    }
-
-    @Test
     public void performSingleAnd$thenTrue() {
       assertTrue(Predicates.and(Predicates.alwaysTrue()).test("hello"));
     }
@@ -256,18 +251,22 @@ public class PredicatesTest {
     }
 
     @Test
-    public void performEmptyOr$thenFalse() {
-      assertFalse(Predicates.or().test("hello"));
+    public void performOr$thenTrue() {
+      assertTrue(Predicates.or(Predicates.isNull(), Predicates.isEmptyString()).test(null));
     }
+  }
 
+  public static class OrTest extends TestBase {
     @Test
     public void performSingleOr$thenTrue() {
       assertTrue(Predicates.or(Predicates.alwaysTrue()).test("hello"));
     }
+  }
 
+  public static class NotTest extends TestBase {
     @Test
-    public void performOr$thenTrue() {
-      assertTrue(Predicates.or(Predicates.isNull(), Predicates.isEmptyString()).test(null));
+    public void test() {
+      assertFalse(Predicates.not(Predicates.alwaysTrue()).test(true));
     }
   }
 }
