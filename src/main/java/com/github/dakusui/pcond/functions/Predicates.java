@@ -187,29 +187,33 @@ public enum Predicates {
     return IS_EMPTY_OR_NULL_STRING;
   }
 
-  public static <E> Predicate<? super Collection<E>> contains(Object entry) {
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public static <E> Predicate<Collection<E>> contains(Object entry) {
     requireNonNull(entry);
-    return CONTAINS_FACTORY.create(entry);
+    return (Predicate) CONTAINS_FACTORY.create(entry);
   }
 
   public static Predicate<Object[]> isEmptyArray() {
     return IS_EMPTY_ARRAY;
   }
 
-  public static Predicate<? super Collection<?>> isEmpty() {
+  public static Predicate<Collection<?>> isEmpty() {
     return IS_EMPTY_COLLECTION;
   }
 
-  public static <E> Predicate<? super Stream<? extends E>> allMatch(Predicate<E> predicate) {
-    return STREAM_ALL_MATCH_FACTORY.create(predicate);
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public static <E> Predicate<Stream<? extends E>> allMatch(Predicate<E> predicate) {
+    return (Predicate) STREAM_ALL_MATCH_FACTORY.create(predicate);
   }
 
-  public static <E> Predicate<? super Stream<? extends E>> noneMatch(Predicate<E> predicate) {
-    return STREAM_NONE_MATCH_FACTORY.create(predicate);
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public static <E> Predicate<Stream<? extends E>> noneMatch(Predicate<E> predicate) {
+    return (Predicate) STREAM_NONE_MATCH_FACTORY.create(predicate);
   }
 
-  public static <E> Predicate<? super Stream<? extends E>> anyMatch(Predicate<E> predicate) {
-    return STREAM_ANY_MATCH_FACTORY.create(predicate);
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public static <E> Predicate<Stream<? extends E>> anyMatch(Predicate<E> predicate) {
+    return (Predicate) STREAM_ANY_MATCH_FACTORY.create(predicate);
   }
 
   @SuppressWarnings("unchecked")
