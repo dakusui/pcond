@@ -17,7 +17,7 @@ public class Perf {
   @BeforeClass
   public static void warmUp() {
     int w = 0, x = 0, y = 0, z = 0;
-    for (int i = 0; i < 1_000_000; i++) {
+    for (int i = 0; i < 10_000_000; i++) {
       w = noCheck(w);
       x = objectsRequireNonNull(x);
       y = preconditionsRequireNonNull(y);
@@ -32,7 +32,7 @@ public class Perf {
     while (i < numLoops)
       i = noCheck(i);
     long after = System.currentTimeMillis();
-    System.out.println("objectsRequireNonNull:" + numLoops + ":" + (after - before));
+    System.out.println("noCheck:" + numLoops + ":" + (after - before));
   }
 
   @Test
@@ -72,7 +72,7 @@ public class Perf {
     while (i < numLoops)
       i = noCheck(i);
     long after = System.currentTimeMillis();
-    System.out.println("objectsRequireNonNull:" + numLoops + ":" + (after - before));
+    System.out.println("noCheck:" + numLoops + ":" + (after - before));
   }
 
   @Test
@@ -112,7 +112,7 @@ public class Perf {
     while (i < numLoops)
       i = noCheck(i);
     long after = System.currentTimeMillis();
-    System.out.println("objectsRequireNonNull:" + numLoops + ":" + (after - before));
+    System.out.println("noCheck:" + numLoops + ":" + (after - before));
   }
 
   @Test

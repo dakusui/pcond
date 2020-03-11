@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
 import java.util.Collection;
@@ -19,7 +20,7 @@ public enum Predicates {
   private static final Predicate<Boolean>                                  IS_TRUE                          = Printables.predicate("isTrue", (Boolean v) -> v);
   private static final Predicate<Boolean>                                  IS_FALSE                         = Printables.predicate("isFalse", (Boolean v) -> !v);
   private static final Predicate<?>                                        IS_NULL                          = Printables.predicate("isNull", Objects::isNull);
-  private static final Predicate<?>                                        IS_NOT_NULL                      = Printables.predicate("isNotNull", Objects::nonNull);
+  private static final Predicate<?>                                        IS_NOT_NULL                      = stubIfAssertionIsDisabled(Printables.predicate("isNotNull", Objects::nonNull));
   private static final Predicate<String>                                   IS_EMPTY_STRING                  = Printables.predicate("isEmpty", String::isEmpty);
   private static final Predicate<String>                                   IS_EMPTY_OR_NULL_STRING          = Printables.predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
   );
@@ -247,4 +248,9 @@ public enum Predicates {
   public static <O, P> TransformingPredicate.Factory<P, O> when(Function<? super O, ? extends P> function) {
     return cond -> new TransformingPredicate<>(cond, function);
   }
+
+  private static Predicate<?> stubIfAssertionIsDisabled(Predicate<Object> alwaysTrue) {
+    return InternalUtils.isAssertionEnabled() ? alwaysTrue : t -> true;
+  }
+
 }
