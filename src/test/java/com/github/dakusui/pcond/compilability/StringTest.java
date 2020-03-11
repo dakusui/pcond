@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.compilability;
 
+import com.github.dakusui.pcond.functions.Predicates;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -43,9 +44,9 @@ public class StringTest {
   @Test(expected = IllegalArgumentException.class)
   public void testEqualTo() {
     String var = "hello";
-    requireArgument(var, equalTo("HELLO"));
-    requireArgument(var, and(isNotNull(), equalTo("HELLO")));
-    requireArgument(var, and(isNotNull(), or(equalTo("hello")), equalTo("h")));
+    requireArgument(var, isEqualTo("HELLO"));
+    requireArgument(var, and(isNotNull(), isEqualTo("HELLO")));
+    requireArgument(var, and(isNotNull(), or(isEqualTo("hello")), isEqualTo("h")));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -77,14 +78,14 @@ public class StringTest {
     String var = "hello";
     requireArgument(var, and(ge("A"), lt("Z")));
     requireArgument(var, or(le("a"), gt("z")));
-    requireArgument(var, eq("HELLO"));
+    requireArgument(var, Predicates.eq("HELLO"));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testSameAs() {
     String var = "hello";
-    requireArgument(var, isSameAs("A"));
-    requireArgument(var, or(isSameAs("A"), isSameAs("B")));
+    requireArgument(var, isSameReferenceAs("A"));
+    requireArgument(var, or(isSameReferenceAs("A"), isSameReferenceAs("B")));
   }
 
   @Test

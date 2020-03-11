@@ -17,17 +17,17 @@ public class ValidationsTest extends TestBase {
   @Test(expected = AppLevelException.class)
   public void test() {
     try {
-      @SuppressWarnings("ConstantConditions") Object ret = Validations.validate(null, Predicates.not(Predicates.equalTo(null)), AppLevelException::new);
+      @SuppressWarnings("ConstantConditions") Object ret = Validations.validate(null, Predicates.not(Predicates.isEqualTo(null)), AppLevelException::new);
       System.out.println(ret);
     } catch (AppLevelException e) {
-      assertEquals("value:null violated runtime check:value !equalTo[null]", e.getMessage());
+      assertEquals("value:null violated runtime check:value !isEqualTo[null]", e.getMessage());
       throw e;
     }
   }
 
   @Test
   public void test2() {
-    @SuppressWarnings("ConstantConditions") Object ret = Validations.validate("Hello", Predicates.not(Predicates.equalTo(null)), AppLevelException::new);
+    @SuppressWarnings("ConstantConditions") Object ret = Validations.validate("Hello", Predicates.not(Predicates.isEqualTo(null)), AppLevelException::new);
     System.out.println(ret);
     assertEquals("Hello", ret);
   }

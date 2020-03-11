@@ -55,13 +55,13 @@ public class ParameterizedPredicatesTest {
             $(true, false),
         } },
         new Object[] { new Object[] {
-            Predicates.equalTo("X"),
-            "equalTo[\"X\"]",
+            Predicates.isEqualTo("X"),
+            "isEqualTo[\"X\"]",
             $("X", true),
             $("Y", false),
         } },
         new Object[] { new Object[] {
-            Predicates.isSameAs(x),
+            Predicates.isSameReferenceAs(x),
             "==[x]",
             $(x, true),
             $("x", false),
@@ -119,20 +119,20 @@ public class ParameterizedPredicatesTest {
             $(new String[0], true)
         } },
         new Object[][] { {
-            Predicates.alwaysTrue().and(Predicates.equalTo("X")),
-            "(alwaysTrue&&equalTo[\"X\"])",
+            Predicates.alwaysTrue().and(Predicates.isEqualTo("X")),
+            "(alwaysTrue&&isEqualTo[\"X\"])",
             $("X", true),
             $("Y", false)
         } },
         new Object[][] { {
-            Predicates.equalTo("Z").or(Predicates.equalTo("X")),
-            "(equalTo[\"Z\"]||equalTo[\"X\"])",
+            Predicates.isEqualTo("Z").or(Predicates.isEqualTo("X")),
+            "(isEqualTo[\"Z\"]||isEqualTo[\"X\"])",
             $("X", true),
             $("Y", false)
         } },
         new Object[][] { {
-            Predicates.equalTo("Y").negate().or(Predicates.equalTo("X").and(Predicates.isInstanceOf(String.class))),
-            "(!equalTo[\"Y\"]||(equalTo[\"X\"]&&isInstanceOf[java.lang.String]))",
+            Predicates.isEqualTo("Y").negate().or(Predicates.isEqualTo("X").and(Predicates.isInstanceOf(String.class))),
+            "(!isEqualTo[\"Y\"]||(isEqualTo[\"X\"]&&isInstanceOf[java.lang.String]))",
             $("Z", true),
             $("X", true),
             $("Y", false)

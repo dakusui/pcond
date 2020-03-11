@@ -14,7 +14,8 @@ import static java.util.Objects.requireNonNull;
 public enum Predicates {
   ;
 
-  private static final Predicate<?>                                        ALWAYS_TRUE                      = Printables.predicate("alwaysTrue", t -> true);
+  private static final Predicate<?> ALWAYS_TRUE = Printables.predicate("alwaysTrue", t -> true);
+
   private static final Predicate<Boolean>                                  IS_TRUE                          = Printables.predicate("isTrue", (Boolean v) -> v);
   private static final Predicate<Boolean>                                  IS_FALSE                         = Printables.predicate("isFalse", (Boolean v) -> !v);
   private static final Predicate<?>                                        IS_NULL                          = Printables.predicate("isNull", Objects::isNull);
@@ -24,8 +25,8 @@ public enum Predicates {
   );
   private static final Predicate<Object[]>                                 IS_EMPTY_ARRAY                   = Printables.predicate("isEmptyArray", objects -> objects.length == 0);
   private static final Predicate<Collection<?>>                            IS_EMPTY_COLLECTION              = Printables.predicate("isEmpty", Collection::isEmpty);
-  private static final PrintablePredicate.Factory<Object, Object>          EQUAL_TO_FACTORY                 = Printables.predicateFactory(
-      (arg) -> String.format("equalTo[%s]", formatObject(arg)),
+  private static final PrintablePredicate.Factory<Object, Object>          IS_EQUAL_TO_FACTORY              = Printables.predicateFactory(
+      (arg) -> String.format("isEqualTo[%s]", formatObject(arg)),
       arg -> v -> Objects.equals(v, arg));
   private static final PrintablePredicate.Factory<Collection<?>, Object>   CONTAINS_FACTORY                 = Printables.predicateFactory(
       arg -> String.format("contains[%s]", formatObject(arg)),
@@ -40,7 +41,7 @@ public enum Predicates {
           false :
           arg.isAssignableFrom(v.getClass()));
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private static final PrintablePredicate.Factory<?, Comparable<?>>        GT_FACTORY                       = Printables.predicateFactory(
+  private static final PrintablePredicate.Factory<?, Comparable<?>>        GT_ACTORY                        = Printables.predicateFactory(
       (arg) -> String.format(">[%s]", formatObject(arg)),
       arg -> v -> ((Comparable) v).compareTo(arg) > 0);
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -57,7 +58,7 @@ public enum Predicates {
       arg -> v -> ((Comparable) v).compareTo(arg) < 0);
   @SuppressWarnings({ "unchecked", "rawtypes" })
   private static final PrintablePredicate.Factory<?, Comparable<?>>        EQ_FACTORY                       = Printables.predicateFactory(
-      (arg) -> String.format("~[%s]", formatObject(arg)),
+      (arg) -> String.format("=[%s]", formatObject(arg)),
       arg -> v -> ((Comparable) v).compareTo(arg) == 0);
   private static final PrintablePredicate.Factory<String, String>          STRING_MATCHES_REGEX_FACTORY     = Printables.predicateFactory(
       (arg) -> String.format("matchesRegex[%s]", formatObject(arg)),
@@ -114,12 +115,12 @@ public enum Predicates {
   }
 
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
-  public static <T> Predicate<T> equalTo(T value) {
-    return Predicate.class.cast(EQUAL_TO_FACTORY.create(value));
+  public static <T> Predicate<T> isEqualTo(T value) {
+    return Predicate.class.cast(IS_EQUAL_TO_FACTORY.create(value));
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> Predicate<T> isSameAs(T value) {
+  public static <T> Predicate<T> isSameReferenceAs(T value) {
     return (Predicate<T>) OBJECT_IS_SAME_AS_FACTORY.create(value);
   }
 
@@ -131,7 +132,7 @@ public enum Predicates {
 
   @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> Predicate<T> gt(T value) {
-    return (Predicate<T>) GT_FACTORY.create(value);
+    return (Predicate<T>) GT_ACTORY.create(value);
   }
 
   @SuppressWarnings("unchecked")

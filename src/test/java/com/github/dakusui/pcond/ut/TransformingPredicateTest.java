@@ -14,10 +14,10 @@ import static org.junit.Assert.assertThat;
 public class TransformingPredicateTest {
   @Test
   public void testEquals() {
-    Predicate<String> p = Predicates.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
-    Predicate<String> q = Predicates.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
+    Predicate<String> p = Predicates.<String, String>when(Functions.identity()).then(Predicates.isEqualTo("hello"));
+    Predicate<String> q = Predicates.<String, String>when(Functions.identity()).then(Predicates.isEqualTo("hello"));
     Predicate<String> r = Predicates.<String, String>when(Functions.identity()).then(Predicates.isNotNull());
-    Predicate<String> s = Predicates.<String, String>when(Functions.stringify()).then(Predicates.equalTo("hello"));
+    Predicate<String> s = Predicates.<String, String>when(Functions.stringify()).then(Predicates.isEqualTo("hello"));
     Object stranger = new Object();
 
     assertThat(
@@ -32,10 +32,10 @@ public class TransformingPredicateTest {
 
   @Test
   public void testHashCode() {
-    Predicate<String> p = Predicates.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
-    Predicate<String> q = Predicates.<String, String>when(Functions.identity()).then(Predicates.equalTo("hello"));
+    Predicate<String> p = Predicates.<String, String>when(Functions.identity()).then(Predicates.isEqualTo("hello"));
+    Predicate<String> q = Predicates.<String, String>when(Functions.identity()).then(Predicates.isEqualTo("hello"));
     Predicate<String> r = Predicates.<String, String>when(Functions.identity()).then(Predicates.isNotNull());
-    Predicate<String> s = Predicates.<String, String>when(Functions.stringify()).then(Predicates.equalTo("hello"));
+    Predicate<String> s = Predicates.<String, String>when(Functions.stringify()).then(Predicates.isEqualTo("hello"));
 
     assertThat(
         p.hashCode(),
@@ -50,7 +50,7 @@ public class TransformingPredicateTest {
   @Test
   public void testHashCodeSimply() {
     Function<String, String> identity = Functions.identity();
-    Predicate<String> equalToHello = Predicates.equalTo("hello");
+    Predicate<String> equalToHello = Predicates.isEqualTo("hello");
     Predicate<String> p = Predicates.when(identity).then(equalToHello);
     assertEquals(
         identity.hashCode() + equalToHello.hashCode(),

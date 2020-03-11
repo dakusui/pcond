@@ -21,7 +21,7 @@ public class PrintablesPredicateTest extends TestBase {
     public void test() {
       Predicate<?> p1 = Predicates.isNotNull();
       Predicate<?> p2 = Predicates.isNotNull();
-      Predicate<?> q = Predicates.equalTo("hello");
+      Predicate<?> q = Predicates.isEqualTo("hello");
       Predicate<?> qq = Predicate.isEqual("hello");
       Object o = new Object();
       assertThat(
