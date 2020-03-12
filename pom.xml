@@ -23,7 +23,7 @@
         <developerConnection>scm:git:git@github.com:dakusui/pcond.git
         </developerConnection>
         <url>http://dakusui.github.io/pcond</url>
-        <tag>pcond-1.0.x</tag>
+        <tag>pcond-1.1.x</tag>
     </scm>
 
     <developers>
@@ -172,8 +172,16 @@
                 <artifactId>pitest-maven</artifactId>
                 <configuration>
                     <jvmArgs>
+                        <jvmArg>-ea</jvmArg>
                         <jvmArg>-Dunderpitest=yes</jvmArg>
                     </jvmArgs>
+                    <avoidCallsTo>
+                        <avoidCallsTo>java.util.logging</avoidCallsTo>
+                        <avoidCallsTo>org.apache.log4j</avoidCallsTo>
+                        <avoidCallsTo>org.slf4j</avoidCallsTo>
+                        <avoidCallsTo>org.apache.commons.logging</avoidCallsTo>
+                        <avoidCallsTo>com.github.dakusui.control</avoidCallsTo>
+                    </avoidCallsTo>
                     <targetClasses>
                         <param>com.github.dakusui.pcond.*</param>
                     </targetClasses>

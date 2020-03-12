@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.perf;
 
 import com.github.dakusui.pcond.Preconditions;
+import com.github.dakusui.pcond.functions.Predicates;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -8,6 +9,7 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.util.Objects;
+import java.util.function.Predicate;
 
 @Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -66,6 +68,16 @@ public class Perf {
   }
 
   @Test
+  public void a4_testAssertNonNull() {
+    int i = 0;
+    long before = System.currentTimeMillis();
+    while (i < numLoops)
+      i = assertNonNull(i);
+    long after = System.currentTimeMillis();
+    System.out.println("preconditionsRequireNonNullWithSimpleLambda:" + numLoops + ":" + (after - before));
+  }
+
+  @Test
   public void b0_testNoCheck() {
     int i = 0;
     long before = System.currentTimeMillis();
@@ -101,6 +113,16 @@ public class Perf {
     long before = System.currentTimeMillis();
     while (i < numLoops)
       i = preconditionsRequireNonNullWithSimpleLambda(i);
+    long after = System.currentTimeMillis();
+    System.out.println("preconditionsRequireNonNullWithSimpleLambda:" + numLoops + ":" + (after - before));
+  }
+
+  @Test
+  public void b4_testAssertNonNull() {
+    int i = 0;
+    long before = System.currentTimeMillis();
+    while (i < numLoops)
+      i = assertNonNull(i);
     long after = System.currentTimeMillis();
     System.out.println("preconditionsRequireNonNullWithSimpleLambda:" + numLoops + ":" + (after - before));
   }
@@ -145,7 +167,17 @@ public class Perf {
     System.out.println("preconditionsRequireNonNullWithSimpleLambda:" + numLoops + ":" + (after - before));
   }
 
-  private static int noCheck(int i) {
+  @Test
+  public void c4_testAssertNonNull() {
+    int i = 0;
+    long before = System.currentTimeMillis();
+    while (i < numLoops)
+      i = assertNonNull(i);
+    long after = System.currentTimeMillis();
+    System.out.println("preconditionsRequireNonNullWithSimpleLambda:" + numLoops + ":" + (after - before));
+  }
+
+  public static int noCheck(int i) {
     return i + 1;
   }
 
@@ -157,8 +189,23 @@ public class Perf {
     return Preconditions.requireNonNull(i) + 1;
   }
 
+  public static int assertNonNull(int i) {
+    assertValue(i, Predicates.isNotNull());
+    return i + 1;
+  }
+
   public static int preconditionsRequireNonNullWithSimpleLambda(Integer i) {
     //noinspection Convert2MethodRef
     return Preconditions.requireArgument(i, v -> v != null) + 1;
+  }
+
+  @Ignore
+  @Test
+  public void test() {
+    assertValue(null, Predicates.isNotNull());
+  }
+
+  private static void assertValue(Object t, Predicate<Object> predicate) {
+    assert predicate.test(t) : "Violated: " + predicate.toString();
   }
 }

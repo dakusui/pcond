@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
 import java.util.Collection;
@@ -10,6 +9,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.internals.InternalUtils.isAssertionEnabled;
 import static java.util.Objects.requireNonNull;
 
 public enum Predicates {
@@ -17,15 +17,15 @@ public enum Predicates {
 
   private static final Predicate<?> ALWAYS_TRUE = Printables.predicate("alwaysTrue", t -> true);
 
-  private static final Predicate<Boolean>                                  IS_TRUE                          = Printables.predicate("isTrue", (Boolean v) -> v);
-  private static final Predicate<Boolean>                                  IS_FALSE                         = Printables.predicate("isFalse", (Boolean v) -> !v);
-  private static final Predicate<?>                                        IS_NULL                          = Printables.predicate("isNull", Objects::isNull);
+  private static final Predicate<Boolean>                                  IS_TRUE                          = stubIfAssertionIsDisabled(Printables.predicate("isTrue", (Boolean v) -> v));
+  private static final Predicate<Boolean>                                  IS_FALSE                         = stubIfAssertionIsDisabled(Printables.predicate("isFalse", (Boolean v) -> !v));
+  private static final Predicate<?>                                        IS_NULL                          = stubIfAssertionIsDisabled(Printables.predicate("isNull", Objects::isNull));
   private static final Predicate<?>                                        IS_NOT_NULL                      = stubIfAssertionIsDisabled(Printables.predicate("isNotNull", Objects::nonNull));
-  private static final Predicate<String>                                   IS_EMPTY_STRING                  = Printables.predicate("isEmpty", String::isEmpty);
-  private static final Predicate<String>                                   IS_EMPTY_OR_NULL_STRING          = Printables.predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
-  );
-  private static final Predicate<Object[]>                                 IS_EMPTY_ARRAY                   = Printables.predicate("isEmptyArray", objects -> objects.length == 0);
-  private static final Predicate<Collection<?>>                            IS_EMPTY_COLLECTION              = Printables.predicate("isEmpty", Collection::isEmpty);
+  private static final Predicate<String>                                   IS_EMPTY_STRING                  = stubIfAssertionIsDisabled(Printables.predicate("isEmpty", String::isEmpty));
+  private static final Predicate<String>                                   IS_EMPTY_OR_NULL_STRING          = stubIfAssertionIsDisabled(Printables.predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
+  ));
+  private static final Predicate<Object[]>                                 IS_EMPTY_ARRAY                   = stubIfAssertionIsDisabled(Printables.predicate("isEmptyArray", objects -> objects.length == 0));
+  private static final Predicate<Collection<?>>                            IS_EMPTY_COLLECTION              = stubIfAssertionIsDisabled(Printables.predicate("isEmpty", Collection::isEmpty));
   private static final PrintablePredicate.Factory<Object, Object>          IS_EQUAL_TO_FACTORY              = Printables.predicateFactory(
       (arg) -> String.format("isEqualTo[%s]", formatObject(arg)),
       arg -> v -> Objects.equals(v, arg));
@@ -36,17 +36,17 @@ public enum Predicates {
       arg -> String.format("==[%s]", formatObject(arg)),
       arg -> v -> v == arg);
   @SuppressWarnings({ "SimplifiableConditionalExpression" })
-  private static final PrintablePredicate.Factory<Object, Class<?>>        OBJECT_IS_INSTANCE_OF_FACTORY    = Printables.predicateFactory(
+  private static final PrintablePredicate.Factory<Object, Class<?>> OBJECT_IS_INSTANCE_OF_FACTORY = Printables.predicateFactory(
       (arg) -> String.format("isInstanceOf[%s]", arg.getCanonicalName()),
       arg -> v -> v == null ?
           false :
           arg.isAssignableFrom(v.getClass()));
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private static final PrintablePredicate.Factory<?, Comparable<?>>        GT_ACTORY                        = Printables.predicateFactory(
+  private static final PrintablePredicate.Factory<?, Comparable<?>> GT_FACTORY                    = Printables.predicateFactory(
       (arg) -> String.format(">[%s]", formatObject(arg)),
       arg -> v -> ((Comparable) v).compareTo(arg) > 0);
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  private static final PrintablePredicate.Factory<?, Comparable<?>>        GE_FACTORY                       = Printables.predicateFactory(
+  private static final PrintablePredicate.Factory<?, Comparable<?>> GE_FACTORY                    = Printables.predicateFactory(
       (arg) -> String.format(">=[%s]", formatObject(arg)),
       arg -> v -> ((Comparable) v).compareTo(arg) >= 0);
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -133,7 +133,7 @@ public enum Predicates {
 
   @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> Predicate<T> gt(T value) {
-    return (Predicate<T>) GT_ACTORY.create(value);
+    return (Predicate<T>) GT_FACTORY.create(value);
   }
 
   @SuppressWarnings("unchecked")
@@ -249,8 +249,8 @@ public enum Predicates {
     return cond -> new TransformingPredicate<>(cond, function);
   }
 
-  private static Predicate<?> stubIfAssertionIsDisabled(Predicate<Object> alwaysTrue) {
-    return InternalUtils.isAssertionEnabled() ? alwaysTrue : t -> true;
+  private static <P extends Predicate<?>> P stubIfAssertionIsDisabled(P predicate) {
+    @SuppressWarnings("unchecked") P ret = (P) (Predicate<Object>) o -> true;
+    return isAssertionEnabled() ? predicate : ret;
   }
-
 }

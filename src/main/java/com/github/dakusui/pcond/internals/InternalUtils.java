@@ -60,10 +60,10 @@ public enum InternalUtils {
     return IS_ASSERTION_ENABLED;
   }
 
-  private static boolean isAssertionEnabledPrivate() {
+  public static boolean isAssertionEnabledPrivate() {
     try {
       assert false;
-      return false;
+      return true;
     } catch (AssertionError e) {
       return true;
     }
