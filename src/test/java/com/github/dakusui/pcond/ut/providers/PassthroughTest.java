@@ -35,8 +35,14 @@ public class PassthroughTest {
   }
 
   @Test
-  public void testEnsureNonNull() {
+  public void testEnsureNonNull$withNullValue() {
     Object var = null;
+    assertEquals(var, provider.ensureNonNull(var));
+  }
+
+  @Test
+  public void testEnsureNonNull$withNonNullValue() {
+    Object var = "HELLO";
     assertEquals(var, provider.ensureNonNull(var));
   }
 

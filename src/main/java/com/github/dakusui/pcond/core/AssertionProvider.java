@@ -7,13 +7,14 @@ import com.github.dakusui.pcond.internals.InternalUtils;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.internals.InternalUtils.isAssertionEnabled;
 
 public interface AssertionProvider {
-  AssertionProvider INSTANCE = createAssertionProvider();
+  AssertionProvider INSTANCE = createAssertionProvider(isAssertionEnabled());
 
-  static AssertionProvider createAssertionProvider() {
+  static AssertionProvider createAssertionProvider(boolean assertionEnabled) {
     AssertionProvider ret = new Default();
-    if (!InternalUtils.isAssertionEnabled())
+    if (!assertionEnabled)
       ret = new Passthrough();
     return ret;
   }
