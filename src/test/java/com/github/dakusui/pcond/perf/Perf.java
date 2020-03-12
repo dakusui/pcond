@@ -1,15 +1,12 @@
 package com.github.dakusui.pcond.perf;
 
+import com.github.dakusui.pcond.Assertions;
 import com.github.dakusui.pcond.Preconditions;
 import com.github.dakusui.pcond.functions.Predicates;
-import org.junit.BeforeClass;
-import org.junit.FixMethodOrder;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runners.MethodSorters;
 
 import java.util.Objects;
-import java.util.function.Predicate;
 
 @Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -74,7 +71,7 @@ public class Perf {
     while (i < numLoops)
       i = assertNonNull(i);
     long after = System.currentTimeMillis();
-    System.out.println("preconditionsRequireNonNullWithSimpleLambda:" + numLoops + ":" + (after - before));
+    System.out.println("assertNonNull:" + numLoops + ":" + (after - before));
   }
 
   @Test
@@ -124,7 +121,7 @@ public class Perf {
     while (i < numLoops)
       i = assertNonNull(i);
     long after = System.currentTimeMillis();
-    System.out.println("preconditionsRequireNonNullWithSimpleLambda:" + numLoops + ":" + (after - before));
+    System.out.println("assertNonNull:" + numLoops + ":" + (after - before));
   }
 
   @Test
@@ -174,7 +171,7 @@ public class Perf {
     while (i < numLoops)
       i = assertNonNull(i);
     long after = System.currentTimeMillis();
-    System.out.println("preconditionsRequireNonNullWithSimpleLambda:" + numLoops + ":" + (after - before));
+    System.out.println("assertNonNull:" + numLoops + ":" + (after - before));
   }
 
   public static int noCheck(int i) {
@@ -190,7 +187,7 @@ public class Perf {
   }
 
   public static int assertNonNull(int i) {
-    assertValue(i, Predicates.isNotNull());
+    Assertions.assertInt(i, Predicates.isNotNull());
     return i + 1;
   }
 
@@ -202,10 +199,7 @@ public class Perf {
   @Ignore
   @Test
   public void test() {
-    assertValue(null, Predicates.isNotNull());
+    Assertions.assertValue(null, Predicates.isNotNull());
   }
 
-  private static void assertValue(Object t, Predicate<Object> predicate) {
-    assert predicate.test(t) : "Violated: " + predicate.toString();
-  }
 }

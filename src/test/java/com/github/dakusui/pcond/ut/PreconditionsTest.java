@@ -118,9 +118,7 @@ public class PreconditionsTest extends TestBase {
   public void testRequire() {
     String message = Preconditions.require(
         "hello",
-        Predicates.isNotNull(),
-        (v, e) -> String.format("%s", "Hi!"),
-        s -> new Error()
+        Predicates.isNotNull()
     );
     assertNotNull(message);
   }
@@ -130,9 +128,7 @@ public class PreconditionsTest extends TestBase {
     String value = null;
     String message = Preconditions.require(
         value,
-        Predicates.isNotNull(),
-        (v, e) -> String.format("%s", "Hi!"),
-        s -> new Error()
+        Predicates.isNotNull()
     );
     assertNotNull(message);
   }

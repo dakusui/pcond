@@ -1,32 +1,21 @@
 package com.github.dakusui.pcond;
 
-import com.github.dakusui.pcond.functions.MessageComposer;
-import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.internals.Exceptions;
-import com.github.dakusui.pcond.internals.InternalUtils;
+import com.github.dakusui.pcond.core.AssertionProvider;
 
-import java.util.function.Function;
 import java.util.function.Predicate;
-
-import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 
 public enum Postconditions {
   ;
 
   public static <T> T ensureNonNull(T value) {
-    return InternalUtils.check(value, Predicates.isNotNull(), Exceptions.nullPointer(Postconditions::composeMessage));
+    return AssertionProvider.INSTANCE.ensureNonNull(value);
   }
 
   public static <T> T ensureState(T value, Predicate<? super T> cond) {
-    return InternalUtils.check(value, cond, Exceptions.illegalState(Postconditions::composeMessage));
+    return AssertionProvider.INSTANCE.ensureState(value, cond);
   }
 
-  public static <T, E extends Throwable> T ensure(T value, Predicate<? super T> cond, MessageComposer<T> messageComposer, Function<String, E> exceptionFactory) throws E {
-    return InternalUtils.check(value, cond,
-        (v, p) -> exceptionFactory.apply(messageComposer.apply(v, p)));
-  }
-
-  private static <T> String composeMessage(T value, Predicate<? super T> predicate) {
-    return String.format("value:%s violated postcondition:value %s", formatObject(value), predicate);
+  public static <T> T ensure(T value, Predicate<? super T> cond) {
+    return AssertionProvider.INSTANCE.ensure(value, cond);
   }
 }

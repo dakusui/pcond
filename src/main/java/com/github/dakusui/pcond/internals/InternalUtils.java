@@ -12,8 +12,6 @@ import static java.util.Arrays.asList;
 public enum InternalUtils {
   ;
 
-  private static final boolean IS_ASSERTION_ENABLED = isAssertionEnabledPrivate();
-
   public static String formatObject(Object value) {
     if (value == null)
       return "null";
@@ -49,21 +47,15 @@ public enum InternalUtils {
       T value,
       Predicate<? super T> cond,
       BiFunction<T, Predicate<? super T>, ? extends E> exceptionFactory) throws E {
-    if (!isAssertionEnabled())
-      return value;
     if (!cond.test(value))
       throw exceptionFactory.apply(value, cond);
     return value;
   }
 
   public static boolean isAssertionEnabled() {
-    return IS_ASSERTION_ENABLED;
-  }
-
-  public static boolean isAssertionEnabledPrivate() {
     try {
       assert false;
-      return true;
+      return false;
     } catch (AssertionError e) {
       return true;
     }

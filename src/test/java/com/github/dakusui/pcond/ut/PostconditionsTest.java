@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Postconditions;
+import com.github.dakusui.pcond.core.AssertionProvider;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
@@ -9,12 +10,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class PostconditionsTest extends TestBase {
-  public static class IntentionalException extends RuntimeException {
-    public IntentionalException(String message) {
-      super(message);
-    }
-  }
-
   @Test(expected = NullPointerException.class)
   public void testEnsureNonNull() {
     try {
@@ -24,6 +19,11 @@ public class PostconditionsTest extends TestBase {
       assertEquals("value:null violated postcondition:value isNotNull", e.getMessage());
       throw e;
     }
+  }
+
+  @Test
+  public void test() {
+    System.out.println(AssertionProvider.INSTANCE);
   }
 
   @Test
@@ -51,15 +51,12 @@ public class PostconditionsTest extends TestBase {
     assertNotNull(ret);
   }
 
-  @Test(expected = IntentionalException.class)
+  @Test(expected = Error.class)
   public void testEnsure() {
     try {
-      Object ret = Postconditions.ensure(
-          null,
-          Predicates.isNotNull(),
-          (v, p) -> "Hello:" + v + ":" + p, IntentionalException::new);
+      Object ret = Postconditions.ensure(null, Predicates.isNotNull());
       System.out.println("<" + ret + ">");
-    } catch (IntentionalException e) {
+    } catch (Error e) {
       assertEquals("Hello:null:isNotNull", e.getMessage());
       throw e;
     }
@@ -69,8 +66,7 @@ public class PostconditionsTest extends TestBase {
   public void givenValidValue$whenEnsure$thenPasses() {
     Object ret = Postconditions.ensure(
         "hello",
-        Predicates.isNotNull(),
-        (v, p) -> "hello:" + v + ":" + p, IllegalArgumentException::new);
+        Predicates.isNotNull());
     System.out.println("<" + ret + ">");
     assertNotNull(ret);
   }
