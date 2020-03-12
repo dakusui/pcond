@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.ut;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.utils.TestUtils;
+import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,7 +23,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class ParameterizedPredicatesTest {
+public class ParameterizedPredicatesTest extends TestBase.ForAssertionEnabledVM {
   @BeforeClass
   public static void suppressStdOutErrIfRunUnderSurefire() {
   }

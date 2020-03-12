@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
 public class PredicatesTest {
-  public static class IsNullTest extends TestBase {
+  public static class IsNullTest extends TestBase.ForAssertionEnabledVM {
     @Test
     public void whenMet$thenTrue() {
       assertTrue(Predicates.isNull().test(null));
@@ -25,7 +25,7 @@ public class PredicatesTest {
     }
   }
 
-  public static class IsNotNullTest extends TestBase {
+  public static class IsNotNullTest extends TestBase.ForAssertionEnabledVM {
     @Test
     public void whenMet$thenTrue() {
       assertTrue(Predicates.isNotNull().test("HELLO"));
@@ -234,7 +234,7 @@ public class PredicatesTest {
     }
   }
 
-  public static class AndTest extends TestBase {
+  public static class AndTest extends TestBase.ForAssertionEnabledVM {
     @Test
     public void performSingleAnd$thenTrue() {
       assertTrue(Predicates.and(Predicates.alwaysTrue()).test("hello"));

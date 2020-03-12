@@ -9,7 +9,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class PostconditionsTest extends TestBase {
+public class PostconditionsTest extends TestBase.ForAssertionEnabledVM {
   @Test(expected = NullPointerException.class)
   public void testEnsureNonNull() {
     try {

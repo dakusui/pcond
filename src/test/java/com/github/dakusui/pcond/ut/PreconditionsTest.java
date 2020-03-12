@@ -12,7 +12,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-public class PreconditionsTest extends TestBase {
+public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
   @Test(expected = NullPointerException.class)
   public void testRequireNonNull() {
     try {

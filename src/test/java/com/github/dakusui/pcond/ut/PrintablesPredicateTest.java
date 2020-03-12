@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Enclosed.class)
-public class PrintablesPredicateTest extends TestBase {
+public class PrintablesPredicateTest {
   public static class Leaf {
     @Test
     public void test() {
@@ -42,7 +42,9 @@ public class PrintablesPredicateTest extends TestBase {
     }
   }
 
-  private abstract static class Conj {
+  private abstract static class Conj extends TestBase
+
+      .ForAssertionEnabledVM {
     @Test
     public void test() {
       Predicate<?> p1 = create("P", Predicates.isNotNull(), Predicates.isNotNull());
@@ -84,7 +86,7 @@ public class PrintablesPredicateTest extends TestBase {
     }
   }
 
-  public static class Negate {
+  public static class Negate extends TestBase.ForAssertionEnabledVM {
     @Test
     public void test() {
       Predicate<?> p = Predicates.isNotNull();
