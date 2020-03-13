@@ -5,8 +5,6 @@ import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.ut.testdata.FailingConstructor;
 import com.github.dakusui.pcond.ut.testdata.IntentionalException;
 import com.github.dakusui.pcond.ut.testdata.NoParameterConstructorAbsent;
-import com.github.dakusui.pcond.utils.TestUtils;
-import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -133,15 +131,20 @@ public class InternalUtilsTest {
     }
 
     @Test
-    public void test () {
-
+    public void givenTrue$whenAssertionFailsWith$thenFalse() {
+      assertFalse(InternalUtils.assertFailsWith(true));
     }
-  }
 
-  public static class IsAssertionEnabled extends TestBase.ForAssertionEnabledVM {
+    /**
+     * This is the only test case that fails when {@code -da} is given to the JVM.
+     * You can give {@code assumeTrue(InternalUtils.assertFailsWith(false))}, before the {@code assertTrue}, but
+     * it will hurt mutation test coverage.
+     * I decided to let it fail, when {@code -da} is set, since this library should usually be built with {@code -ea}
+     * option.
+     */
     @Test
-    public void testIsAssertionEnabled() {
-      assertTrue(InternalUtils.isAssertionEnabled());
+    public void givenFalse$whenAssertionFailsWith$thenTrue() {
+      assertTrue(InternalUtils.assertFailsWith(false));
     }
   }
 }

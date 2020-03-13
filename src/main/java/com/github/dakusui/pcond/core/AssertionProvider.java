@@ -7,11 +7,10 @@ import com.github.dakusui.pcond.internals.InternalUtils;
 import java.util.Properties;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
-import static com.github.dakusui.pcond.internals.InternalUtils.isAssertionEnabled;
+import static com.github.dakusui.pcond.internals.InternalUtils.*;
 
 public interface AssertionProvider {
-  AssertionProvider INSTANCE = createAssertionProvider(System.getProperties(), isAssertionEnabled());
+  AssertionProvider INSTANCE = createAssertionProvider(System.getProperties(), assertFailsWith(false));
 
   static AssertionProvider createAssertionProvider(Properties properties, boolean assertionEnabled) {
     String propertyKeyName = AssertionProvider.class.getCanonicalName();

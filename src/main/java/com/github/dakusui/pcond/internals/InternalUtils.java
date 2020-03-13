@@ -7,6 +7,7 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.github.dakusui.pcond.internals.Exceptions.wrap;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
@@ -53,10 +54,10 @@ public enum InternalUtils {
     return value;
   }
 
-  public static boolean isAssertionEnabled() {
+  public static boolean assertFailsWith(boolean v) {
     boolean ret = false;
     try {
-      assert false;
+      assert v;
     } catch (AssertionError e) {
       ret = true;
     }
@@ -70,20 +71,17 @@ public enum InternalUtils {
       try {
         return (T) expectedClass.cast(loadedClass.getDeclaredConstructor().newInstance());
       } catch (ClassCastException e) {
-        throw Exceptions.wrap("The requested class:'" + requestedClassName +
+        throw wrap("The requested class:'" + requestedClassName +
                 "' was found but not an instance of " + expectedClass.getCanonicalName() + ".: " +
                 "It was '" + loadedClass.getCanonicalName() + "'.",
-            e
-        );
+            e);
       } catch (NoSuchMethodException e) {
-        throw Exceptions.wrap("Public constructor without parameters was not found in " + requestedClassName, e);
+        throw wrap("Public constructor without parameters was not found in " + requestedClassName, e);
       } catch (InvocationTargetException e) {
-        throw Exceptions.wrap(
-            "Public constructor without parameters was found in " + requestedClassName + " but threw an exception",
-            e.getCause());
+        throw wrap("Public constructor without parameters was found in " + requestedClassName + " but threw an exception", e.getCause());
       }
     } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-      throw Exceptions.wrap("The requested class was not found or not accessible.: " + requestedClassName, e);
+      throw wrap("The requested class was not found or not accessible.: " + requestedClassName, e);
     }
   }
 }

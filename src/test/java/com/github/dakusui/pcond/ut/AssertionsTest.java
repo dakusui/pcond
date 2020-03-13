@@ -3,9 +3,12 @@ package com.github.dakusui.pcond.ut;
 import com.github.dakusui.pcond.Assertions;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
+
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(Enclosed.class)
 public class AssertionsTest {
@@ -113,6 +116,12 @@ public class AssertionsTest {
     public void testAssertFloat$thenFail() {
       float var = 20;
       Assertions.assertFloat(var, Predicates.ge(10f).and(Predicates.lt(20f)));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testAssertDouble$thenFail() {
+      double var = 20;
+      Assertions.assertDouble(var, Predicates.ge(10d).and(Predicates.lt(20d)));
     }
   }
 }
