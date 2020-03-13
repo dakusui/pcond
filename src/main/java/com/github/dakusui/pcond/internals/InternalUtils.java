@@ -63,25 +63,26 @@ public enum InternalUtils {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> T createInstanceFromClassName(String className, Class<T> expectedClass) {
+  public static <T> T createInstanceFromClassName(Class<? super T> expectedClass, String requestedClassName) {
     try {
-      Class<?> loadedClass = Class.forName(className);
+      Class<?> loadedClass = Class.forName(requestedClassName);
       try {
-        return (T) loadedClass.getDeclaredConstructor().newInstance();
+        return (T) expectedClass.cast(loadedClass.getDeclaredConstructor().newInstance());
       } catch (ClassCastException e) {
-        throw new Error("The requested class:'" + className +
-            "' was found but not an instance of " + expectedClass.getCanonicalName() + ".: " +
-            "It was '" + loadedClass.getCanonicalName() + "'."
+        throw Exceptions.wrap("The requested class:'" + requestedClassName +
+                "' was found but not an instance of " + expectedClass.getCanonicalName() + ".: " +
+                "It was '" + loadedClass.getCanonicalName() + "'.",
+            e
         );
       } catch (NoSuchMethodException e) {
-        throw new Error("Public constructor without parameters was not found in " + className, e);
+        throw Exceptions.wrap("Public constructor without parameters was not found in " + requestedClassName, e);
       } catch (InvocationTargetException e) {
-        throw new Error(
-            "Public constructor without parameters was found in " + className + " but thrown an exception",
+        throw Exceptions.wrap(
+            "Public constructor without parameters was found in " + requestedClassName + " but threw an exception",
             e.getCause());
       }
     } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-      throw new Error("The requested class was not found or not accessible.", e);
+      throw Exceptions.wrap("The requested class was not found or not accessible.: " + requestedClassName, e);
     }
   }
 }

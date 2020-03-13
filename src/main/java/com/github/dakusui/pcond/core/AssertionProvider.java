@@ -16,7 +16,7 @@ public interface AssertionProvider {
   static AssertionProvider createAssertionProvider(Properties properties, boolean assertionEnabled) {
     String propertyKeyName = AssertionProvider.class.getCanonicalName();
     if (properties.containsKey(propertyKeyName)) {
-      return InternalUtils.createInstanceFromClassName(propertyKeyName, AssertionProvider.class);
+      return InternalUtils.createInstanceFromClassName(AssertionProvider.class, properties.getProperty(propertyKeyName));
     }
     AssertionProvider ret = new Default();
     if (!assertionEnabled)

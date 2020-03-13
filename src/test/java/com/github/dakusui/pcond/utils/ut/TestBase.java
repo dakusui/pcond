@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.utils.ut;
 
+import com.github.dakusui.pcond.utils.TestUtils;
 import org.junit.BeforeClass;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.isAssertionEnabled;
