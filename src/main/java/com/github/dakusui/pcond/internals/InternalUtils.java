@@ -54,12 +54,13 @@ public enum InternalUtils {
   }
 
   public static boolean isAssertionEnabled() {
+    boolean ret = false;
     try {
       assert false;
-      return false;
     } catch (AssertionError e) {
-      return true;
+      ret = true;
     }
+    return ret;
   }
 
   @SuppressWarnings("unchecked")
