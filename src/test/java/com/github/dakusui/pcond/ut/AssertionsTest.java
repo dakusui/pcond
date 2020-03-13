@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
 @RunWith(Enclosed.class)
@@ -122,6 +123,13 @@ public class AssertionsTest {
     public void testAssertDouble$thenFail() {
       double var = 20;
       Assertions.assertDouble(var, Predicates.ge(10d).and(Predicates.lt(20d)));
+    }
+  }
+
+  public static class MessageTest {
+    @Test
+    public void composeMessage$thenComposed() {
+      assertEquals("Value: \"hello\" violated: isNull", Assertions.composeMessage("hello", Predicates.isNull()));
     }
   }
 }
