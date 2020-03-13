@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.internals;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.BiFunction;
@@ -58,6 +59,29 @@ public enum InternalUtils {
       return false;
     } catch (AssertionError e) {
       return true;
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> T createInstanceFromClassName(String className, Class<T> expectedClass) {
+    try {
+      Class<?> loadedClass = Class.forName(className);
+      try {
+        return (T) loadedClass.getDeclaredConstructor().newInstance();
+      } catch (ClassCastException e) {
+        throw new Error("The requested class:'" + className +
+            "' was found but not an instance of " + expectedClass.getCanonicalName() + ".: " +
+            "It was '" + loadedClass.getCanonicalName() + "'."
+        );
+      } catch (NoSuchMethodException e) {
+        throw new Error("Public constructor without parameters was not found in " + className, e);
+      } catch (InvocationTargetException e) {
+        throw new Error(
+            "Public constructor without parameters was found in " + className + " but thrown an exception",
+            e.getCause());
+      }
+    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+      throw new Error("The requested class was not found or not accessible.", e);
     }
   }
 }

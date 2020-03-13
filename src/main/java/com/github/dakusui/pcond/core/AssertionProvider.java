@@ -4,15 +4,20 @@ import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.internals.Exceptions;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
+import java.util.Properties;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.internals.InternalUtils.isAssertionEnabled;
 
 public interface AssertionProvider {
-  AssertionProvider INSTANCE = createAssertionProvider(isAssertionEnabled());
+  AssertionProvider INSTANCE = createAssertionProvider(System.getProperties(), isAssertionEnabled());
 
-  static AssertionProvider createAssertionProvider(boolean assertionEnabled) {
+  static AssertionProvider createAssertionProvider(Properties properties, boolean assertionEnabled) {
+    String propertyKeyName = AssertionProvider.class.getCanonicalName();
+    if (properties.containsKey(propertyKeyName)) {
+      return InternalUtils.createInstanceFromClassName(propertyKeyName, AssertionProvider.class);
+    }
     AssertionProvider ret = new Default();
     if (!assertionEnabled)
       ret = new Passthrough();
@@ -33,14 +38,12 @@ public interface AssertionProvider {
 
   <T, E extends Throwable> T ensure(T value, Predicate<? super T> cond) throws E;
 
-  boolean shouldStub();
-
   class Default implements AssertionProvider {
     private static <T> String composeMessageForPrecondition(T value, Predicate<? super T> predicate) {
       return String.format("value:%s violated precondition:value %s", formatObject(value), predicate);
     }
 
-    public static <T> String composeMessageForPostcondition(T value, Predicate<? super T> predicate) {
+    private static <T> String composeMessageForPostcondition(T value, Predicate<? super T> predicate) {
       return String.format("value:%s violated postcondition:value %s", formatObject(value), predicate);
     }
 
@@ -85,11 +88,6 @@ public interface AssertionProvider {
     public <T, E extends Throwable> T ensure(T value, Predicate<? super T> cond) {
       return InternalUtils.check(value, cond, (v, p) -> new Error(composeMessageForPostcondition(v, p)));
     }
-
-    @Override
-    public boolean shouldStub() {
-      return false;
-    }
   }
 
   @SuppressWarnings("unused")
@@ -127,11 +125,6 @@ public interface AssertionProvider {
     @Override
     public <T, E extends Throwable> T ensure(T value, Predicate<? super T> cond) {
       return value;
-    }
-
-    @Override
-    public boolean shouldStub() {
-      return true;
     }
   }
 }

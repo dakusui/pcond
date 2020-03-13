@@ -5,7 +5,6 @@ import com.github.dakusui.pcond.functions.Predicates;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class PassthroughTest {
   final AssertionProvider provider = new AssertionProvider.Passthrough();
@@ -56,10 +55,5 @@ public class PassthroughTest {
   public void testEnsure() {
     Object var = "hello";
     assertEquals(var, provider.ensure(var, Predicates.alwaysTrue().negate()));
-  }
-
-  @Test
-  public void testShouldStub() {
-    assertTrue(provider.shouldStub());
   }
 }

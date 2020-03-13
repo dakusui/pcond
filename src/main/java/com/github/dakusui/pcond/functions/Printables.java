@@ -43,5 +43,4 @@ public enum Printables {
       final Function<E, Predicate<T>> ff) {
     return PrintablePredicate.factory(nameComposer, ff);
   }
-
 }
