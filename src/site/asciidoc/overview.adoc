@@ -1,0 +1,19 @@
+= Overview
+
+[source,java]
+----
+public class HelloPcond {
+  public void helloAssertThat(double var) {
+    assert that(var, and(ge(0.0), lt(20.0)));
+  }
+}
+----
+
+[source,console]
+----
+java.lang.AssertionError: Value: 20.0 violated: (>=[0.0]&&<[20.0])
+
+	at com.github.dakusui.pcond.Assertions.that(Assertions.java:16)
+	at com.github.dakusui.pcond.examples.Example.exampleAssertThat(Example.java:84)
+    ...
+----

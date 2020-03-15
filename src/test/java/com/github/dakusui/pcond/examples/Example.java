@@ -79,9 +79,12 @@ public class Example {
   }
 
   @Test
-  public void exampleAssertThat() {
-    double var = 20;
-    assert that(var, and(ge(0.0), lt(20.0)));
+  public void helloAssertThat() {
+    helloAssertThat(20);
+  }
+
+  public void helloAssertThat(int var) {
+    assert that((double) var, and(ge(0.0), lt(20.0)));
   }
 
 }
