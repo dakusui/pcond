@@ -20,7 +20,6 @@ java.lang.AssertionError: Value: 20.0 violated: (>=[0.0]&&<[20.0])
     ...
 ----
 
-
 == Installation
 
 [source,xml]
@@ -39,7 +38,7 @@ For `${pcond.version}`, `1.1.0-SNAPSHOT` is the latest one as of Mar/15/2020.
 
 Import entry points of this library statically.
 
-[source, java]
+[source,java]
 ----
 import static com.github.dakusui.pcond.Assertions.*;
 import static com.github.dakusui.pcond.Preconditions.*;
@@ -55,4 +54,5 @@ import static com.github.dakusui.pcond.functions.Predicates.*;
 * Post-condition check
 * Validation
 * Readable in source code and output on error
-* Zero-overhead assertion (with `assert that` style and `-da` option)
+* `{require,ensure}` style
+* Zero-overhead readable assertion message (with `assert {that, precondition, postcondition}` style and `-da` option)
