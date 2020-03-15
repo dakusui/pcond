@@ -11,8 +11,7 @@ import org.junit.runner.RunWith;
 import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
 public class PrintablesPredicateTest {
@@ -42,9 +41,7 @@ public class PrintablesPredicateTest {
     }
   }
 
-  private abstract static class Conj extends TestBase
-
-      .ForAssertionEnabledVM {
+  private abstract static class Conj extends TestBase.ForAssertionEnabledVM {
     @Test
     public void test() {
       Predicate<?> p1 = create("P", Predicates.isNotNull(), Predicates.isNotNull());
@@ -76,6 +73,15 @@ public class PrintablesPredicateTest {
     @Override
     <T> Predicate<T> create(PrintablePredicate<T> predicate1, PrintablePredicate<T> predicate2) {
       return predicate1.and(predicate2);
+    }
+
+    @Test
+    public void testWithNonPrintable() {
+      Predicate<Object> p1 = Predicates.alwaysTrue().and(v -> true);
+      System.out.println(p1);
+      System.out.println(p1.test("hello"));
+      assertThat(p1.toString(), startsWith("(alwaysTrue&&"));
+      assertTrue(p1.test("hello"));
     }
   }
 

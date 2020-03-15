@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.functions.Functions;
+import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -9,6 +10,7 @@ import org.junit.runner.RunWith;
 import java.util.function.Function;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Enclosed.class)
@@ -51,7 +53,7 @@ public class PrintablesFunctionTest {
     }
   }
 
-  public static class Composed {
+  public static class Composed extends TestBase {
     @Test
     public void testCompose() {
       Function<?, ?> f1 = Functions.identity().compose(Functions.identity());
@@ -90,6 +92,32 @@ public class PrintablesFunctionTest {
               not(is(i)),
               not(is(o))
           ));
+    }
+
+    @Test
+    public void testAndThen$toString() {
+      Function<Object, Object> f1 = Functions.identity().andThen(Function.identity());
+
+      System.out.println(f1.toString());
+      System.out.println(f1.apply("hello"));
+      assertThat(
+          f1.toString(),
+          startsWith("identity->java.util.function.Function"));
+      assertEquals(f1.apply("hello"), "hello");
+    }
+
+    @Test
+    public void testCompose$toString() {
+      Function<Object, Object> f1 = Functions.identity().compose(Function.identity());
+
+      System.out.println(f1.toString());
+      System.out.println(f1.apply("hello"));
+      assertThat(
+          f1.toString(),
+          allOf(
+              startsWith("java.util.function.Function"),
+              endsWith("->identity")));
+      assertEquals(f1.apply("hello"), "hello");
     }
 
     @Test

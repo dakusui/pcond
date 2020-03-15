@@ -7,7 +7,6 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.github.dakusui.pcond.internals.Exceptions.wrap;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
@@ -83,5 +82,17 @@ public enum InternalUtils {
     } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
       throw wrap("The requested class was not found or not accessible.: " + requestedClassName, e);
     }
+  }
+
+  public static Exceptions.InternalException wrap(String message, Throwable cause) {
+    throw new Exceptions.InternalException(message, cause);
+  }
+
+  public static Exceptions.InternalException wrapIfNecessary(Throwable cause) {
+    if (cause instanceof Error)
+      throw (Error) cause;
+    if (cause instanceof RuntimeException)
+      throw (RuntimeException) cause;
+    throw wrap(cause.getMessage(), cause);
   }
 }

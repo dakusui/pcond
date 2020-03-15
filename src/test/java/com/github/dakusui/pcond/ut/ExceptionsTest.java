@@ -1,21 +1,22 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.internals.Exceptions;
+import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.ut.testdata.IntentionalException;
 import org.junit.Test;
 
 public class ExceptionsTest {
   @Test(expected = IntentionalError.class)
   public void testWrapIfNecessary() {
-    throw Exceptions.wrapIfNecessary(new IntentionalError());
+    throw InternalUtils.wrapIfNecessary(new IntentionalError());
   }
   @Test(expected = IntentionalException.class)
   public void testWrapIfNecessaryWithRuntimeException() {
-    throw Exceptions.wrapIfNecessary(new IntentionalException("hi"));
+    throw InternalUtils.wrapIfNecessary(new IntentionalException("hi"));
   }
 
   @Test(expected = Exceptions.InternalException.class)
   public void testWrapIfNecessaryWithCheckedException() {
-    throw Exceptions.wrapIfNecessary(new Exception("hi"));
+    throw InternalUtils.wrapIfNecessary(new Exception("hi"));
   }
 }

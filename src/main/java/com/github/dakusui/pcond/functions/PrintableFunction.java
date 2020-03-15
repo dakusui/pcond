@@ -33,13 +33,13 @@ public class PrintableFunction<T, R> implements Function<T, R> {
     return this.function.apply(t);
   }
 
-  @SuppressWarnings({ "unchecked", "NullableProblems" })
+  @SuppressWarnings({ "unchecked"})
   public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
     Objects.requireNonNull(before);
     return (Function<V, R>) COMPOSE_FACTORY.create(asList((Function<Object, Object>) before, (Function<Object, Object>) this));
   }
 
-  @SuppressWarnings({ "unchecked", "NullableProblems" })
+  @SuppressWarnings({ "unchecked"})
   public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
     Objects.requireNonNull(after);
     return (Function<T, V>) ANDTHEN_FACTORY.create(asList((Function<Object, Object>) this, (Function<Object, Object>) after));

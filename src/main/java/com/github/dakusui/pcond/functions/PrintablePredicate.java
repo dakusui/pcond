@@ -50,21 +50,21 @@ public class PrintablePredicate<T> implements Predicate<T> {
     return predicate.test(t);
   }
 
-  @SuppressWarnings({ "unchecked", "NullableProblems" })
+  @SuppressWarnings({ "unchecked"})
   @Override
   public Predicate<T> and(Predicate<? super T> other) {
     requireNonNull(other);
     return (Predicate<T>) AND_FACTORY.create(asList((Predicate<Object>) this, (Predicate<Object>) other));
   }
 
-  @SuppressWarnings({ "unchecked", "NullableProblems" })
+  @SuppressWarnings({ "unchecked"})
   @Override
   public Predicate<T> or(Predicate<? super T> other) {
     requireNonNull(other);
     return (Predicate<T>) OR_FACTORY.create(asList((Predicate<Object>) this, (Predicate<Object>) other));
   }
 
-  @SuppressWarnings({ "unchecked", "NullableProblems" })
+  @SuppressWarnings({ "unchecked"})
   @Override
   public Predicate<T> negate() {
     return (Predicate<T>) NEGATE_FACTORY.create((Predicate<Object>) this);

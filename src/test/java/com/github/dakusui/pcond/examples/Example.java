@@ -5,8 +5,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static com.github.dakusui.pcond.Assertions.assertDouble;
-import static com.github.dakusui.pcond.Assertions.assertValue;
+import static com.github.dakusui.pcond.Assertions.that;
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
 import static com.github.dakusui.pcond.Preconditions.requireState;
 import static com.github.dakusui.pcond.functions.Functions.size;
@@ -80,14 +79,9 @@ public class Example {
   }
 
   @Test
-  public void assertDoubleExample$fail() {
+  public void exampleAssertThat() {
     double var = 20;
-    assertDouble(var, ge(10d).and(lt(20d)));
+    assert that(var, and(ge(0.0), lt(20.0)));
   }
 
-  @Test
-  public void assertStringExample$fail() {
-    String var = "20";
-    assertValue(var, ge("10").and(lt("20")));
-  }
 }

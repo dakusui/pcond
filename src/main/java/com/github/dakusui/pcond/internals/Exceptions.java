@@ -26,18 +26,6 @@ public enum Exceptions {
     };
   }
 
-  public static InternalException wrap(String message, Throwable cause) {
-    throw new InternalException(message, cause);
-  }
-
-  public static InternalException wrapIfNecessary(Throwable cause) {
-    if (cause instanceof Error)
-      throw (Error) cause;
-    if (cause instanceof RuntimeException)
-      throw (RuntimeException) cause;
-    throw wrap(cause.getMessage(), cause);
-  }
-
   public static class InternalException extends RuntimeException {
     InternalException(String message, Throwable cause) {
       super(message, cause);

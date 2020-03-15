@@ -1,8 +1,6 @@
 package com.github.dakusui.pcond.perf;
 
-import com.github.dakusui.pcond.Assertions;
 import com.github.dakusui.pcond.Preconditions;
-import com.github.dakusui.pcond.functions.Predicates;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -10,6 +8,9 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
 import java.util.Objects;
+
+import static com.github.dakusui.pcond.Assertions.that;
+import static com.github.dakusui.pcond.functions.Predicates.*;
 
 @Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -53,6 +54,11 @@ public class Perf {
   }
 
   @Test
+  public void a7_testAssertThatRangeWithSimpleLambda() {
+    testAssertThatRange();
+  }
+
+  @Test
   public void b0_testNoCheck() {
     testNoCheck();
   }
@@ -76,6 +82,7 @@ public class Perf {
   public void b4_testAssertNonNull() {
     testAssertNonNulls();
   }
+
 
   @Test
   public void c0_testNoCheck() {
@@ -323,14 +330,18 @@ public class Perf {
     System.out.println("assertNonNull:" + i + ":" + (after - before));
   }
 
-  @Test
-  public void testDirectAssertNonNulls() {
+  public static void testAssertThatRange() {
     int i = 0;
     long before = System.currentTimeMillis();
     while (i < numLoops)
-      i = directAssertNonNull(i);
+      i = assertThatRange(i);
     long after = System.currentTimeMillis();
     System.out.println("assertNonNull:" + i + ":" + (after - before));
+  }
+
+  private static int assertThatRange(int i) {
+    assert that(i, and(ge(0), lt(Integer.MAX_VALUE)));
+    return i + 1;
   }
 
   public static int noCheck(int i) {
@@ -346,14 +357,10 @@ public class Perf {
   }
 
   public static int assertNonNull(int i) {
-    Assertions.assertInt(i, Predicates.isNotNull());
+    assert that(i, isNotNull());
     return i + 1;
   }
 
-  public static int directAssertNonNull(int i) {
-    assert Predicates.isNotNull().test(null);
-    return i + 1;
-  }
 
   public static int preconditionsRequireNonNullWithSimpleLambda(Integer i) {
     //noinspection Convert2MethodRef
@@ -363,7 +370,6 @@ public class Perf {
   @Ignore
   @Test
   public void test() {
-    Assertions.assertValue(null, Predicates.isNotNull());
+    assert that(null, isNotNull());
   }
-
 }

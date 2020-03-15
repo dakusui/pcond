@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.functions.Predicates;
 import org.junit.Test;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
 import static com.github.dakusui.pcond.functions.Predicates.*;
@@ -95,6 +96,7 @@ public class StringTest {
     requireArgument(var, and(
         isInstanceOf(String.class),
         isInstanceOf(Serializable.class),
-        isInstanceOf(Comparable.class)));
+        isInstanceOf(Comparable.class),
+        not(isInstanceOf(Map.class))));
   }
 }
