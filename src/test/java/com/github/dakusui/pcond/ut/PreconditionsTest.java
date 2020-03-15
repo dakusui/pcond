@@ -22,7 +22,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       assertThat(e.getMessage(),
           allOf(
               notNullValue(),
-              is("value:null violated precondition:value isNotNull")));
+              is("Value:null violated: isNotNull")));
       throw e;
     }
   }
@@ -116,10 +116,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
 
   @Test
   public void testRequire() {
-    String message = Preconditions.require(
-        "hello",
-        Predicates.isNotNull()
-    );
+    String message = Preconditions.require("hello", Predicates.isNotNull());
     assertNotNull(message);
   }
 

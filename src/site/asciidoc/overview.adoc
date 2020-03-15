@@ -1,5 +1,7 @@
 = Overview
 
+`pcond` is a library to build printable functions and predicates.
+
 [source,java]
 ----
 public class HelloPcond {
@@ -17,3 +19,40 @@ java.lang.AssertionError: Value: 20.0 violated: (>=[0.0]&&<[20.0])
 	at com.github.dakusui.pcond.examples.Example.exampleAssertThat(Example.java:84)
     ...
 ----
+
+
+== Installation
+
+[source,xml]
+----
+<dependency>
+    <groupId>com.github.dakusui</groupId>
+    <artifactId>pcond</artifactId>
+    <packaging>jar</packaging>
+    <version>${pcond.version}</version>
+</dependency>
+----
+
+For `${pcond.version}`, `1.1.0-SNAPSHOT` is the latest one as of Mar/15/2020.
+
+== Getting started
+
+Import entry points of this library statically.
+
+[source, java]
+----
+import static com.github.dakusui.pcond.Assertions.*;
+import static com.github.dakusui.pcond.Preconditions.*;
+import static com.github.dakusui.pcond.Preconditions.*;
+import static com.github.dakusui.pcond.functions.Functions.*;
+import static com.github.dakusui.pcond.functions.Predicates.*;
+
+----
+
+=== Features
+
+* Pre-condition check
+* Post-condition check
+* Validation
+* Readable in source code and output on error
+* Zero-overhead assertion (with `assert that` style and `-da` option)

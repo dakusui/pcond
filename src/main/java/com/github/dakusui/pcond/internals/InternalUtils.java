@@ -3,8 +3,6 @@ package com.github.dakusui.pcond.internals;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -44,15 +42,6 @@ public enum InternalUtils {
     return ret;
   }
 
-  public static <T, E extends Throwable> T check(
-      T value,
-      Predicate<? super T> cond,
-      BiFunction<T, Predicate<? super T>, ? extends E> exceptionFactory) throws E {
-    if (!cond.test(value))
-      throw exceptionFactory.apply(value, cond);
-    return value;
-  }
-
   public static boolean assertFailsWith(boolean v) {
     boolean ret = false;
     try {
@@ -84,11 +73,11 @@ public enum InternalUtils {
     }
   }
 
-  public static Exceptions.InternalException wrap(String message, Throwable cause) {
-    throw new Exceptions.InternalException(message, cause);
+  public static InternalException wrap(String message, Throwable cause) {
+    throw new InternalException(message, cause);
   }
 
-  public static Exceptions.InternalException wrapIfNecessary(Throwable cause) {
+  public static InternalException wrapIfNecessary(Throwable cause) {
     if (cause instanceof Error)
       throw (Error) cause;
     if (cause instanceof RuntimeException)

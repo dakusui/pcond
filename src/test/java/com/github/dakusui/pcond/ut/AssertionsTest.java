@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Assertions;
+import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
@@ -17,20 +18,44 @@ public class AssertionsTest {
       String var = "10";
       assert Assertions.that(var, Predicates.ge("10").and(Predicates.lt("20")));
     }
+
+    @Test
+    public void testAssertPrecondition$thenPassing() {
+      String var = "10";
+      assert Assertions.precondition(var, Predicates.ge("10").and(Predicates.lt("20")));
+    }
+
+    @Test
+    public void testAssertPostcondition$thenPassing() {
+      String var = "10";
+      assert Assertions.postcondition(var, Predicates.ge("10").and(Predicates.lt("20")));
+    }
   }
 
   public static class Failing extends TestBase.ForAssertionEnabledVM {
     @Test(expected = AssertionError.class)
-    public void testAssertThatValue$thenPass() {
+    public void testAssertThat$thenFailing() {
       String var = "20";
       assert Assertions.that(var, Predicates.ge("10").and(Predicates.lt("20")));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testAssertPrecondition$thenFailing() {
+      String var = "20";
+      assert Assertions.precondition(var, Predicates.ge("10").and(Predicates.lt("20")));
+    }
+
+    @Test(expected = AssertionError.class)
+    public void testAssertPostcondition$thenFailing() {
+      String var = "20";
+      assert Assertions.postcondition(var, Predicates.ge("10").and(Predicates.lt("20")));
     }
   }
 
   public static class MessageTest {
     @Test
     public void composeMessage$thenComposed() {
-      assertEquals("Value: \"hello\" violated: isNull", Assertions.composeMessage("hello", Predicates.isNull()));
+      assertEquals("Value:\"hello\" violated: isNull", new DefaultAssertionProvider().composeMessageForAssertion("hello", Predicates.isNull()));
     }
   }
 }

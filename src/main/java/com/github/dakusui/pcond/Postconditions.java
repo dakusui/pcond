@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond;
 
-import com.github.dakusui.pcond.core.AssertionProvider;
+import com.github.dakusui.pcond.provider.AssertionProvider;
 
 import java.util.function.Predicate;
 

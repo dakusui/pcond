@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Postconditions;
-import com.github.dakusui.pcond.core.AssertionProvider;
+import com.github.dakusui.pcond.provider.AssertionProvider;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
@@ -16,7 +16,7 @@ public class PostconditionsTest extends TestBase.ForAssertionEnabledVM {
       Object ret = Postconditions.ensureNonNull(null);
       System.out.println("<" + ret + ">");
     } catch (NullPointerException e) {
-      assertEquals("value:null violated postcondition:value isNotNull", e.getMessage());
+      assertEquals("Value:null violated: isNotNull", e.getMessage());
       throw e;
     }
   }

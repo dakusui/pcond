@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.internals.Exceptions;
+import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.ut.testdata.IntentionalException;
 import org.junit.Test;
@@ -15,7 +15,7 @@ public class ExceptionsTest {
     throw InternalUtils.wrapIfNecessary(new IntentionalException("hi"));
   }
 
-  @Test(expected = Exceptions.InternalException.class)
+  @Test(expected = InternalException.class)
   public void testWrapIfNecessaryWithCheckedException() {
     throw InternalUtils.wrapIfNecessary(new Exception("hi"));
   }
