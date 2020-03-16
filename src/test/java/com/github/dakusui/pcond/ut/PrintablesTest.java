@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.utils.TestBase;
-import com.github.dakusui.pcond.functions.Printable;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -10,14 +10,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
-public class PrintableTest {
+public class PrintablesTest {
   public static class FunctionTest extends TestBase {
-    Function<String, String> appendA = Printable.function("append[A]", s -> s + "A");
-    Function<String, String> appendB = Printable.function("append[B]", s -> s + "B");
+    Function<String, String> appendA = Printables.function("append[A]", s -> s + "A");
+    Function<String, String> appendB = Printables.function("append[B]", s -> s + "B");
 
     @Test
     public void givenFunctionReturnedByCompose$whenApply$thenWorksRight() {
@@ -49,8 +48,8 @@ public class PrintableTest {
   }
 
   public static class PredicateTest extends TestBase {
-    Predicate<String> isA = Printable.predicate("is[A]", "A"::equals);
-    Predicate<String> isB = Printable.predicate("is[B]", "B"::equals);
+    Predicate<String> isA = Printables.predicate("is[A]", "A"::equals);
+    Predicate<String> isB = Printables.predicate("is[B]", "B"::equals);
 
     @Test
     public void givenPredicateReturnedByAnd$whenTest$thenWorksRight() {
@@ -85,6 +84,24 @@ public class PrintableTest {
     @Test
     public void givenPredicateReturnedByNegate$whenToString$thenWorksRight() {
       assertEquals("!is[A]", isA.negate().toString());
+    }
+  }
+
+  public static class FactoryTest {
+    @Test
+    public void testFunctionFactory() {
+      assertNotNull(Printables.functionFactory(
+          (e) -> "hello:" + e,
+          (e) -> (t) -> "world"
+      ));
+    }
+
+    @Test
+    public void testPredicateFactory() {
+      assertNotNull(Printables.predicateFactory(
+          (e) -> "hello:" + e,
+          (e) -> (t) -> true
+      ));
     }
   }
 }

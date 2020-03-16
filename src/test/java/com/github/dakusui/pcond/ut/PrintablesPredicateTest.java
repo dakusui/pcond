@@ -2,6 +2,8 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.functions.PrintablePredicate;
+import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -9,11 +11,37 @@ import org.junit.runner.RunWith;
 import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
-public class PrintablePredicateTest {
-  private abstract static class Conj {
+public class PrintablesPredicateTest {
+  public static class Leaf {
+    @Test
+    public void test() {
+      Predicate<?> p1 = Predicates.isNotNull();
+      Predicate<?> p2 = Predicates.isNotNull();
+      Predicate<?> q = Predicates.isEqualTo("hello");
+      Predicate<?> qq = Predicate.isEqual("hello");
+      Object o = new Object();
+      assertThat(
+          p1,
+          allOf(
+              is(p1),
+              is(p2),
+              not(is(q)),
+              not(is(qq)),
+              not(is(o))));
+    }
+
+    @Test
+    public void testHashCode() {
+      Predicate<String> pp = Predicate.isEqual("hello");
+      Predicate<String> p = Printables.predicate("hello", pp);
+      assertEquals(pp.hashCode(), p.hashCode());
+    }
+  }
+
+  private abstract static class Conj extends TestBase.ForAssertionEnabledVM {
     @Test
     public void test() {
       Predicate<?> p1 = create("P", Predicates.isNotNull(), Predicates.isNotNull());
@@ -46,6 +74,15 @@ public class PrintablePredicateTest {
     <T> Predicate<T> create(PrintablePredicate<T> predicate1, PrintablePredicate<T> predicate2) {
       return predicate1.and(predicate2);
     }
+
+    @Test
+    public void testWithNonPrintable() {
+      Predicate<Object> p1 = Predicates.alwaysTrue().and(v -> true);
+      System.out.println(p1);
+      System.out.println(p1.test("hello"));
+      assertThat(p1.toString(), startsWith("(alwaysTrue&&"));
+      assertTrue(p1.test("hello"));
+    }
   }
 
   public static class Or extends Conj {
@@ -55,7 +92,7 @@ public class PrintablePredicateTest {
     }
   }
 
-  public static class Negate {
+  public static class Negate extends TestBase.ForAssertionEnabledVM {
     @Test
     public void test() {
       Predicate<?> p = Predicates.isNotNull();

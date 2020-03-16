@@ -12,23 +12,22 @@ import static java.util.Objects.requireNonNull;
 public enum Functions {
   ;
 
-  private static final Function<?, ?>                                       IDENTITY           = Printable.function("identity", Function.identity());
-  private static final Function<?, String>                                  STRINGIFY          = Printable.function("stringify", Object::toString);
-  private static final Function<String, Integer>                            LENGTH             = Printable.function("length", String::length);
-  private static final Function<Collection<?>, Integer>                     SIZE               = Printable.function("size", Collection::size);
-  private static final Function<Collection<?>, Stream<?>>                   STREAM             = Printable.function("stream", Collection::stream);
-  private static final Function<Object[], List<?>>                          ARRAY_TO_LIST      = Printable.function("arrayToList", Arrays::asList);
-  private static final Function<String, Integer>                            COUNT_LINES        = Printable.function("countLines", (String s) -> s.split("\n").length);
-  private static final Function<Collection<?>, List<?>>                     COLLECTION_TO_LIST = Printable.function("collectionToList", (Collection<?> c) -> new ArrayList<Object>() {
+  private static final Function<?, ?>                                 IDENTITY           = Printables.function("identity", Function.identity());
+  private static final Function<?, String>                            STRINGIFY          = Printables.function("stringify", Object::toString);
+  private static final Function<String, Integer>                      LENGTH             = Printables.function("length", String::length);
+  private static final Function<Collection<?>, Integer>               SIZE               = Printables.function("size", Collection::size);
+  private static final Function<Collection<?>, Stream<?>>             STREAM             = Printables.function("stream", Collection::stream);
+  private static final Function<Object[], List<?>>                    ARRAY_TO_LIST      = Printables.function("arrayToList", Arrays::asList);
+  private static final Function<String, Integer>                      COUNT_LINES        = Printables.function("countLines", (String s) -> s.split("\n").length);
+  private static final Function<Collection<?>, List<?>>               COLLECTION_TO_LIST = Printables.function("collectionToList", (Collection<?> c) -> new ArrayList<Object>() {
     {
       addAll(c);
     }
   });
   private static final PrintableFunction.Factory<List<?>, ?, Integer> ELEMENT_AT_FACTORY =
-      Printable.functionFactory((v) -> String.format("at[%s]", v), arg -> es -> es.get((Integer) arg));
-  private static final PrintableFunction.Factory<Object, ?, Class<?>>       CAST_FACTORY       = Printable.functionFactory(
-      (v) -> String.format("castTo[%s]", ((Class<?>) requireNonNull(v)).getSimpleName()),
-      arg -> ((Class<?>) arg)::cast);
+      Printables.functionFactory((v) -> String.format("at[%s]", v), arg -> es -> es.get((Integer) arg));
+  private static final PrintableFunction.Factory<Object, ?, Class<?>> CAST_FACTORY       = Printables.functionFactory(
+      (v) -> String.format("castTo[%s]", requireNonNull(v).getSimpleName()), arg -> arg::cast);
 
   @SuppressWarnings("unchecked")
   public static <E> Function<E, E> identity() {

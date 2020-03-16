@@ -9,9 +9,10 @@ import org.junit.Test;
 
 import static com.github.dakusui.pcond.functions.Predicates.isNotNull;
 import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-public class PreconditionsTest extends TestBase {
+public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
   @Test(expected = NullPointerException.class)
   public void testRequireNonNull() {
     try {
@@ -21,7 +22,7 @@ public class PreconditionsTest extends TestBase {
       assertThat(e.getMessage(),
           allOf(
               notNullValue(),
-              is("value:null violated precondition:value isNotNull")));
+              is("Value:null violated: isNotNull")));
       throw e;
     }
   }
@@ -41,7 +42,7 @@ public class PreconditionsTest extends TestBase {
   }
 
   @Test(expected = IllegalStateException.class)
-  public void testRequireState() {
+  public void givenInvalidState$whenRequireState$thenIllegalStateExceptionThrown() {
     try {
       Preconditions.requireState(null, isNotNull());
     } catch (IllegalStateException e) {
@@ -54,12 +55,18 @@ public class PreconditionsTest extends TestBase {
     }
   }
 
+  @Test
+  public void givenValidState$whenRequireState$thenPass() {
+    String var = Preconditions.requireState("hello", isNotNull());
+    assertNotNull(var);
+  }
+
   @Test(expected = IllegalArgumentException.class)
   public void testRequireWithTransformingPredicate() {
     String value = "hello";
     Preconditions.requireArgument(
         value,
-        Preconditions.when(Functions.length()).then(Predicates.gt(100)));
+        Predicates.when(Functions.length()).then(Predicates.gt(100)));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -68,7 +75,7 @@ public class PreconditionsTest extends TestBase {
     try {
       Preconditions.requireArgument(
           value,
-          Preconditions.when("LENGTH", Functions.length())
+          Predicates.when("LENGTH", Functions.length())
               .then("GT[100]", Predicates.gt(100)));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
@@ -93,7 +100,7 @@ public class PreconditionsTest extends TestBase {
     assertThat(
         Preconditions.requireArgument(
             value,
-            Preconditions.when(Functions.length()).then(Predicates.gt(0))),
+            Predicates.when(Functions.length()).then(Predicates.gt(0))),
         is(value));
   }
 
@@ -103,8 +110,23 @@ public class PreconditionsTest extends TestBase {
     assertThat(
         Preconditions.requireArgument(
             value,
-            Preconditions.when(Functions.length()).then(Predicates.gt(0))),
+            Predicates.when(Functions.length()).then(Predicates.gt(0))),
         is(value));
   }
 
+  @Test
+  public void testRequire() {
+    String message = Preconditions.require("hello", Predicates.isNotNull());
+    assertNotNull(message);
+  }
+
+  @Test(expected = Error.class)
+  public void testRequire$thenError() {
+    String value = null;
+    String message = Preconditions.require(
+        value,
+        Predicates.isNotNull()
+    );
+    assertNotNull(message);
+  }
 }

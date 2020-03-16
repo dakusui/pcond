@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
 public class PredicatesTest {
-  public static class IsNullTest extends TestBase {
+  public static class IsNullTest extends TestBase.ForAssertionEnabledVM {
     @Test
     public void whenMet$thenTrue() {
       assertTrue(Predicates.isNull().test(null));
@@ -25,7 +25,7 @@ public class PredicatesTest {
     }
   }
 
-  public static class IsNotNullTest extends TestBase {
+  public static class IsNotNullTest extends TestBase.ForAssertionEnabledVM {
     @Test
     public void whenMet$thenTrue() {
       assertTrue(Predicates.isNotNull().test("HELLO"));
@@ -73,7 +73,7 @@ public class PredicatesTest {
 
     @Test
     public void whenToString$thenLooksGood() {
-      assertEquals("~[123]", Predicates.eq(123).toString());
+      assertEquals("=[123]", Predicates.eq(123).toString());
     }
   }
 
@@ -231,6 +231,42 @@ public class PredicatesTest {
     @Test
     public void whenToString$thenLooksGood() {
       assertEquals("containsString[\"hello\"]", Predicates.containsString("hello").toString());
+    }
+  }
+
+  public static class AndTest extends TestBase.ForAssertionEnabledVM {
+    @Test
+    public void performSingleAnd$thenTrue() {
+      assertTrue(Predicates.and(Predicates.alwaysTrue()).test("hello"));
+    }
+
+    @Test
+    public void performAnd$thenTrue() {
+      assertTrue(Predicates.and(Predicates.not(Predicates.isNull()), Predicates.not(Predicates.isEmptyString())).test("hello"));
+    }
+
+    @Test
+    public void performAnd$thenFalse() {
+      assertFalse(Predicates.and(Predicates.not(Predicates.isNull()), Predicates.not(Predicates.isEmptyString())).test(null));
+    }
+
+    @Test
+    public void performOr$thenTrue() {
+      assertTrue(Predicates.or(Predicates.isNull(), Predicates.isEmptyString()).test(null));
+    }
+  }
+
+  public static class OrTest extends TestBase {
+    @Test
+    public void performSingleOr$thenTrue() {
+      assertTrue(Predicates.or(Predicates.alwaysTrue()).test("hello"));
+    }
+  }
+
+  public static class NotTest extends TestBase {
+    @Test
+    public void test() {
+      assertFalse(Predicates.not(Predicates.alwaysTrue()).test(true));
     }
   }
 }

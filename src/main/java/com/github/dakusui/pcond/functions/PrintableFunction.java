@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -8,6 +10,16 @@ import java.util.function.Supplier;
 import static java.util.Arrays.asList;
 
 public class PrintableFunction<T, R> implements Function<T, R> {
+  private static final Factory<Object, Object, List<Function<Object, Object>>> COMPOSE_FACTORY = PrintableFunction.factory(
+      arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
+      arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
+  );
+
+  private static final Factory<Object, Object, List<Function<Object, Object>>> ANDTHEN_FACTORY = PrintableFunction.factory(
+      arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
+      arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
+  );
+
   private final Supplier<String>                 s;
   private final Function<? super T, ? extends R> function;
 
@@ -16,37 +28,18 @@ public class PrintableFunction<T, R> implements Function<T, R> {
     this.function = Objects.requireNonNull(function);
   }
 
-  static <T, R, E> Factory<T, R, E> factory(Function<E, String> nameComposer, Function<E, Function<T, R>> ff) {
-    return new Factory<T, R, E>(nameComposer) {
-      @Override
-      Function<T, R> createFunction(E arg) {
-        return ff.apply(arg);
-      }
-    };
-  }
-
   @Override
   public R apply(T t) {
     return this.function.apply(t);
   }
 
-  private static final Factory<Object, Object, List<Function<Object, Object>>> COMPOSE_FACTORY = PrintableFunction.factory(
-      arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
-      arg -> p -> unwrapIfPrintablePredicate(arg.get(1)).compose(unwrapIfPrintablePredicate(arg.get(0))).apply(p)
-  );
-
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked"})
   public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
     Objects.requireNonNull(before);
     return (Function<V, R>) COMPOSE_FACTORY.create(asList((Function<Object, Object>) before, (Function<Object, Object>) this));
   }
 
-  private static final Factory<Object, Object, List<Function<Object, Object>>> ANDTHEN_FACTORY = PrintableFunction.factory(
-      arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
-      arg -> p -> unwrapIfPrintablePredicate(arg.get(1)).compose(unwrapIfPrintablePredicate(arg.get(0))).apply(p)
-  );
-
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked"})
   public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
     Objects.requireNonNull(after);
     return (Function<T, V>) ANDTHEN_FACTORY.create(asList((Function<Object, Object>) this, (Function<Object, Object>) after));
@@ -61,13 +54,22 @@ public class PrintableFunction<T, R> implements Function<T, R> {
     return new PrintableFunction<>(() -> Objects.requireNonNull(s), function);
   }
 
-  @SuppressWarnings("unchecked")
-  private static Function<Object, Object> unwrapIfPrintablePredicate(Function<Object, Object> function) {
-    if (function instanceof PrintableFunction)
-      return (Function<Object, Object>) ((PrintableFunction<Object, Object>) function).function;
-    return function;
+  static <T, R, E> Factory<T, R, E> factory(Function<E, String> nameComposer, Function<E, Function<T, R>> ff) {
+    return new Factory<T, R, E>(nameComposer) {
+      @Override
+      Function<T, R> createFunction(E arg) {
+        return ff.apply(arg);
+      }
+    };
   }
 
+  @SuppressWarnings("unchecked")
+  private static Function<Object, Object> unwrapIfPrintableFunction(Function<Object, Object> function) {
+    Function<Object, Object> ret = function;
+    if (function instanceof PrintableFunction)
+      ret = (Function<Object, Object>) ((PrintableFunction<Object, Object>) function).function;
+    return ret;
+  }
 
   static abstract class Factory<T, R, E> extends PrintableLambdaFactory<E> {
 

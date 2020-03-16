@@ -5,11 +5,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public enum Printable {
+public enum Printables {
   ;
 
   public static <T> Predicate<T> predicate(Supplier<String> s, Predicate<T> predicate) {
-    return Printable.printablePredicate(s.get(), predicate);
+    return Printables.printablePredicate(s.get(), predicate);
   }
 
   public static <T> Predicate<T> predicate(String s, Predicate<T> predicate) {
@@ -17,7 +17,7 @@ public enum Printable {
   }
 
   public static <T, R> Function<T, R> function(Supplier<String> s, Function<T, R> function) {
-    return Printable.printableFunction(s.get(), function);
+    return Printables.printableFunction(s.get(), function);
   }
 
   public static <T, R> Function<T, R> function(String s, Function<T, R> function) {
@@ -32,16 +32,15 @@ public enum Printable {
     return PrintableFunction.create(s, function);
   }
 
-  static <T, R, E> PrintableFunction.Factory<T, R, E> functionFactory(
+  public static <T, R, E> PrintableFunction.Factory<T, R, E> functionFactory(
       final Function<E, String> nameComposer,
       final Function<E, Function<T, R>> ff) {
     return PrintableFunction.factory(nameComposer, ff);
   }
 
-  static <T, E> PrintablePredicate.Factory<T, E> predicateFactory(
+  public static <T, E> PrintablePredicate.Factory<T, E> predicateFactory(
       final Function<E, String> nameComposer,
       final Function<E, Predicate<T>> ff) {
     return PrintablePredicate.factory(nameComposer, ff);
   }
-
 }

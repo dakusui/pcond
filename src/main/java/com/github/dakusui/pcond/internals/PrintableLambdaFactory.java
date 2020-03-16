@@ -1,9 +1,9 @@
-package com.github.dakusui.pcond.functions;
+package com.github.dakusui.pcond.internals;
 
 import java.util.Objects;
 import java.util.function.Function;
 
-abstract class PrintableLambdaFactory<E> {
+public abstract class PrintableLambdaFactory<E> {
   private final Function<E, String> nameComposer;
 
   protected PrintableLambdaFactory(Function<E, String> nameComposer) {
@@ -14,7 +14,7 @@ abstract class PrintableLambdaFactory<E> {
     return this.nameComposer;
   }
 
-  interface Lambda<F extends PrintableLambdaFactory<E>, E> {
+  public interface Lambda<F extends PrintableLambdaFactory<E>, E> {
     class Spec<E> {
       final PrintableLambdaFactory<E> factory;
       final E                         arg;
