@@ -2,10 +2,9 @@
     <body>
         <menu ref="reports" inherit="top"/>
         <menu ref="modules"/> 
-        <menu name="Asciidoctor Example">
-            <item href="hello.html" name="Hello" />
-            <item href="article.html" name="Article" />
-        </menu>    
+        <menu name="Documents">
+            <item href="overview.html" name="Overview" />
+        </menu>
     </body>
     <skin>
         <groupId>org.apache.maven.skins</groupId>

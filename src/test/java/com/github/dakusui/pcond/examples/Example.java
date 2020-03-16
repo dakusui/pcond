@@ -83,8 +83,9 @@ public class Example {
     helloAssertThat(20);
   }
 
-  public void helloAssertThat(int var) {
-    assert that((double) var, and(ge(0.0), lt(20.0)));
+  public void helloAssertThat(double var) {
+    assert that(var, v -> v >=0.0 && v < 20.0);
+    //assert that(var, and(ge(0.0), lt(20.0)));
   }
 
 }
