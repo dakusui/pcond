@@ -6,6 +6,9 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.Preconditions.requireArgument;
+import static com.github.dakusui.pcond.functions.Predicates.isInstanceOf;
+
 public class TransformingPredicate<P, O> implements Predicate<O> {
   public interface Factory<P, O> {
     default TransformingPredicate<P, O> then(String condName, Predicate<? super P> cond) {
@@ -15,9 +18,9 @@ public class TransformingPredicate<P, O> implements Predicate<O> {
     TransformingPredicate<P, O> then(Predicate<? super P> cond);
   }
 
-  private final Predicate<? super P>             predicate;
+  private final Predicate<? super P> predicate;
   private final Function<? super O, ? extends P> function;
-  private final String                           name;
+  private final String name;
 
   public TransformingPredicate(Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
     this(null, predicate, function);
@@ -66,4 +69,3 @@ public class TransformingPredicate<P, O> implements Predicate<O> {
     return String.format("%s%s %s", this.name == null ? "" : this.name, function(), predicate());
   }
 }
-

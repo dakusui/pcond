@@ -97,7 +97,7 @@ public class PrintablePredicate<T> implements Predicate<T> {
     return ret;
   }
 
-  static abstract class Factory<T, E> extends PrintableLambdaFactory<E> {
+  public static abstract class Factory<T, E> extends PrintableLambdaFactory<E> {
     abstract static class PrintablePredicateFromFactory<T, E> extends PrintablePredicate<T> implements Lambda<Factory<T, E>, E> {
       PrintablePredicateFromFactory(Supplier<String> s, Predicate<? super T> function) {
         super(s, function);
@@ -119,7 +119,7 @@ public class PrintablePredicate<T> implements Predicate<T> {
       super(s);
     }
 
-    PrintablePredicate<T> create(E arg) {
+    public PrintablePredicate<T> create(E arg) {
       Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, PrintablePredicateFromFactory.class);
       return new PrintablePredicateFromFactory<T, E>(() -> this.nameComposer().apply(arg), createPredicate(arg)) {
         @Override
