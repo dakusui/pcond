@@ -2,13 +2,18 @@ package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.Preconditions.requireArgument;
+import static com.github.dakusui.pcond.functions.Printables.function;
+import static com.github.dakusui.pcond.functions.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -16,6 +21,8 @@ import static java.util.Objects.requireNonNull;
 
 public enum Predicates {
   ;
+
+  public static final Function<Class<?>, Predicate<?>> IS_INSTANCE_OF$2 = function(() -> "isInstanceOf", (Class<?> c) -> c::isInstance);
 
   @SuppressWarnings("unchecked")
   public static <T> Predicate<T> alwaysTrue() {
@@ -50,8 +57,48 @@ public enum Predicates {
     return (Predicate<T>) Def.OBJECT_IS_SAME_AS_FACTORY.create(value);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "RedundantClassCall"})
+  public static <T> Function<Class<?>, Predicate<T>> isInstanceOf() {
+    return Function.class.cast(IS_INSTANCE_OF$2);
+  }
+
   public static <T> Predicate<T> isInstanceOf(Class<?> value) {
+    return applyOnceExpectingPredicate(requireNonNull(value), isInstanceOf());
+  }
+
+  public static <T> T applyValues(Function<?, ?> func, List<?> args) {
+    requireArgument(requireNonNull(args), not(isEmpty()));
+    Object ret = func;
+    for (Object arg : args)
+      ret = applyOrTest(ret, arg);
+    return (T) ret;
+  }
+
+  private static Object applyOrTest(Object func, Object arg) {
+    requireArgument(func, or(isInstanceOf(Function.class), isInstanceOf(Predicate.class)));
+    if (func instanceof Predicate)
+      return ((Predicate<Object>) func).test(arg);
+    return ((Function<Object, Object>) func).apply(arg);
+  }
+
+  public static <T, R> Predicate<R> applyOnceExpectingPredicate(T value, Function<T, Predicate<R>> p) {
+    return predicate(() -> format("%s[%s]", p, formatObject(value)), p.apply(value));
+  }
+
+  public static Predicate<List<?>> uncurry(Function<?, Predicate<Object>> curriedFunc) {
+    return Printables.predicate(() -> "uncurried:" + curriedFunc, args -> Predicates.applyValues(curriedFunc, args));
+  }
+
+  public static void main(String... args) {
+    System.out.println(isInstanceOf(Serializable.class));
+    System.out.println(isInstanceOf(Serializable.class).test(null));
+
+    System.out.println(applyValues(isInstanceOf(), asList("hello", String.class)) + "");
+    System.out.println(applyValues(isInstanceOf(), asList("hello", Map.class)) + "");
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Predicate<T> _isInstanceOf(Class<?> value) {
     requireNonNull(value);
     return (Predicate<T>) Def.OBJECT_IS_INSTANCE_OF_FACTORY.create(value);
   }
@@ -182,7 +229,7 @@ public enum Predicates {
   }
 
   public static <O, P> TransformingPredicate.Factory<P, O> when(String funcName, Function<? super O, ? extends P> func) {
-    return when(Printables.function(funcName, func));
+    return when(function(funcName, func));
   }
 
   public static <O, P> TransformingPredicate.Factory<P, O> when(Function<? super O, ? extends P> function) {
@@ -192,16 +239,16 @@ public enum Predicates {
   enum Def {
     ;
 
-    private static final Predicate<?> ALWAYS_TRUE = Printables.predicate("alwaysTrue", t -> true);
-    private static final Predicate<Boolean> IS_TRUE = Printables.predicate("isTrue", (Boolean v) -> v);
-    private static final Predicate<Boolean> IS_FALSE = Printables.predicate("isFalse", (Boolean v) -> !v);
-    private static final Predicate<?> IS_NULL = Printables.predicate("isNull", Objects::isNull);
-    private static final Predicate<?> IS_NOT_NULL = Printables.predicate("isNotNull", Objects::nonNull);
-    private static final Predicate<String> IS_EMPTY_STRING = Printables.predicate("isEmpty", String::isEmpty);
-    private static final Predicate<String> IS_EMPTY_OR_NULL_STRING = Printables.predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
+    private static final Predicate<?> ALWAYS_TRUE = predicate("alwaysTrue", t -> true);
+    private static final Predicate<Boolean> IS_TRUE = predicate("isTrue", (Boolean v) -> v);
+    private static final Predicate<Boolean> IS_FALSE = predicate("isFalse", (Boolean v) -> !v);
+    private static final Predicate<?> IS_NULL = predicate("isNull", Objects::isNull);
+    private static final Predicate<?> IS_NOT_NULL = predicate("isNotNull", Objects::nonNull);
+    private static final Predicate<String> IS_EMPTY_STRING = predicate("isEmpty", String::isEmpty);
+    private static final Predicate<String> IS_EMPTY_OR_NULL_STRING = predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
     );
-    private static final Predicate<Object[]> IS_EMPTY_ARRAY = Printables.predicate("isEmptyArray", objects -> objects.length == 0);
-    private static final Predicate<Collection<?>> IS_EMPTY_COLLECTION = Printables.predicate("isEmpty", Collection::isEmpty);
+    private static final Predicate<Object[]> IS_EMPTY_ARRAY = predicate("isEmptyArray", objects -> objects.length == 0);
+    private static final Predicate<Collection<?>> IS_EMPTY_COLLECTION = predicate("isEmpty", Collection::isEmpty);
     private static final PrintablePredicate.Factory<Object, Object> IS_EQUAL_TO_FACTORY = Printables.predicateFactory(
         (arg) -> format("isEqualTo[%s]", formatObject(arg)),
         arg -> v -> Objects.equals(v, arg));
