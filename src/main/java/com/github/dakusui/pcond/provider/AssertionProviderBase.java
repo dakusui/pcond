@@ -7,49 +7,59 @@ import java.util.function.Predicate;
 public interface AssertionProviderBase<AE extends Throwable> extends AssertionProvider<AE> {
   @Override
   default <T> T requireNonNull(T value) {
-    assert nonNull(value);
+    Predicate<T> cond = Predicates.isNotNull();
+    if (!cond.test(value))
+      throw new NullPointerException(composeMessageForAssertion(value, cond));
     return value;
   }
 
   @Override
   default <T> T requireArgument(T value, Predicate<? super T> cond) {
-    assert argument(value, cond);
+    if (!cond.test(value))
+      throw new IllegalArgumentException(composeMessageForPrecondition(value, cond));
     return value;
   }
 
   @Override
   default <T> T requireState(T value, Predicate<? super T> cond) {
-    assert state(value, cond);
+    if (!cond.test(value))
+      throw new IllegalStateException(composeMessageForPrecondition(value, cond));
     return value;
   }
 
   @Override
   default <T> T require(T value, Predicate<? super T> cond) {
-    assert precondition(value, cond);
+    if (!cond.test(value))
+      throw new AssertionError(composeMessageForPrecondition(value, cond));
     return value;
   }
 
   @Override
   default <T> T validate(T value, Predicate<? super T> cond) throws AE {
-    assert validation(value, cond);
+    if (!cond.test(value))
+      throw applicationException(composeMessageForValidation(value, cond));
     return value;
   }
 
   @Override
   default <T> T ensureNonNull(T value) {
-    assert nonNull(value);
+    Predicate<T> cond = Predicates.isNotNull();
+    if (!cond.test(value))
+      throw new NullPointerException(composeMessageForAssertion(value, cond));
     return value;
   }
 
   @Override
   default <T> T ensureState(T value, Predicate<? super T> cond) {
-    assert state(value, cond);
+    if (!cond.test(value))
+      throw new IllegalStateException(composeMessageForPrecondition(value, cond));
     return value;
   }
 
   @Override
   default <T> T ensure(T value, Predicate<? super T> cond) {
-    assert postcondition(value, cond);
+    if (!cond.test(value))
+      throw new AssertionError(composeMessageForPrecondition(value, cond));
     return value;
   }
 
