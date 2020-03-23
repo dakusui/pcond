@@ -70,25 +70,6 @@ public interface AssertionProviderBase<AE extends Throwable> extends AssertionPr
     return true;
   }
 
-  default <T> boolean nonNull(T value) {
-    Predicate<T> cond = Predicates.isNotNull();
-    if (!cond.test(value))
-      throw new NullPointerException(composeMessageForAssertion(value, cond));
-    return true;
-  }
-
-  default  <T> boolean argument(T value, Predicate<? super T> cond) {
-    if (!cond.test(value))
-      throw new IllegalArgumentException(composeMessageForPrecondition(value, cond));
-    return true;
-  }
-
-  default  <T> boolean state(T value, Predicate<? super T> cond) {
-    if (!cond.test(value))
-      throw new IllegalStateException(composeMessageForPrecondition(value, cond));
-    return true;
-  }
-
   @Override
   default  <T> boolean precondition(T value, Predicate<? super T> cond) {
     if (!cond.test(value))
