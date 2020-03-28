@@ -73,6 +73,22 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R> {
     return this.function.apply(value);
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public Class<?> parameterType() {
+    return function instanceof CurriedFunction ?
+        ((CurriedFunction<? super T, ? extends R>) function).parameterType() :
+        Object.class;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public Class<?> returnType() {
+    return function instanceof CurriedFunction ?
+        ((CurriedFunction<? super T, ? extends R>) function).returnType() :
+        Object.class;
+  }
+
   public static abstract class Factory<T, R, E> extends PrintableLambdaFactory<E> {
 
     abstract static class PrintableFunctionFromFactory<T, R, E> extends PrintableFunction<T, R> implements Lambda<Factory<T, R, E>, E> {

@@ -1,15 +1,15 @@
 package com.github.dakusui.pcond.functions.currying;
 
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.functions.currying.CurryngUtils.*;
+import static com.github.dakusui.pcond.functions.currying.CurryingUtils.*;
 
-@FunctionalInterface
 public interface CurriedFunction<T, R> extends Function<T, R> {
   R applyFunction(T value);
 
   default R apply(T value) {
-    return ensureReturnedValueType(this.applyFunction(validateArgumentType(value, parameterType(), messageInvalidTypeArgument(value, parameterType()))), returnType());
+    return ensureReturnedValueType(this.applyFunction(validateArg(value)), returnType());
   }
 
   @SuppressWarnings("unchecked")
@@ -17,19 +17,31 @@ public interface CurriedFunction<T, R> extends Function<T, R> {
     return (V) requireLast(this).apply(value);
   }
 
-  default Class<?> parameterType() {
-    return Object.class;
+  @SuppressWarnings("unchecked")
+  default <V extends CurriedFunction<T, R>> V applyNext(T value) {
+    return (V) requireHasNext(this).apply(value);
   }
 
-  default Class<?> returnType() {
-    return Object.class;
+  static <V extends CurriedFunction<T, R>, T, R> V requireHasNext(V value) {
+    if (!value.hasNext())
+      throw new NoSuchElementException();
+    return value;
   }
+
+  Class<?> parameterType();
+
+  Class<?> returnType();
 
   default boolean hasNext() {
     return CurriedFunction.class.isAssignableFrom(returnType());
   }
 
-  default boolean isValidArgument(Object arg) {
-    return CurryngUtils.isValidArgument(this.parameterType(), arg);
+  default boolean isValidArg(Object arg) {
+    return CurryingUtils.isValidArgument(this.parameterType(), arg);
   }
+
+  default <V> V validateArg(V arg) {
+    return validateArgumentType(arg, parameterType(), messageInvalidTypeArgument(arg, parameterType()));
+  }
+
 }

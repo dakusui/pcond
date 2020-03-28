@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.currying.CurriedFunction;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.InternalUtils;
@@ -13,6 +14,7 @@ import org.junit.runner.RunWith;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Objects;
 import java.util.function.Function;
 
 import static java.util.Arrays.asList;
@@ -160,7 +162,7 @@ public class InternalUtilsTest {
     @SuppressWarnings("unchecked")
     @Test
     public void test() {
-      CurriedFunction<Object, Object> curried = InternalUtils.curry(CurryingTest.class, "example", int.class, int.class);
+      CurriedFunction<Object, Object> curried = Functions.curry(CurryingTest.class, "example", int.class, int.class);
       System.out.println(curried);
       Function<Object, Object> partiallyApplied = (Function<Object, Object>) curried.apply(1);
       Object actual = partiallyApplied.apply(2);
@@ -175,6 +177,13 @@ public class InternalUtilsTest {
       System.out.println(m);
       Short s = 100;
       System.out.println(int.class.getSimpleName() + "value=" + m.invoke(null, s));
+    }
+
+    @SuppressWarnings("UnnecessaryCallToStringValueOf")
+    @Test
+    public void test3() {
+      CurriedFunction<Object, Object> curried = Functions.curry(CurryingTest.class, "example", int.class, int.class);
+      System.out.println(Objects.toString(curried.applyNext((short)2).applyLast(3)));
     }
 
     public static String example(int i, int j) {

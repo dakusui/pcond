@@ -8,7 +8,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.IntStream;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.util.Arrays.asList;
@@ -17,9 +20,8 @@ import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toSet;
 
-public class CurryngUtils {
-
-  public static final Map<Class<?>, Set<Class<?>>> WIDER_CLASSES = new HashMap<Class<?>, Set<Class<?>>>() {
+public class CurryingUtils {
+  public static final Map<Class<?>, Set<Class<?>>> WIDER_TYPES = new HashMap<Class<?>, Set<Class<?>>>() {
     {
       // https://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.1.2
       put(wrapperClassOf(byte.class), wrapperClassesOf(asSet(short.class, int.class, long.class, float.class, double.class)));
@@ -31,7 +33,7 @@ public class CurryngUtils {
     }
 
     private Set<Class<?>> wrapperClassesOf(Set<Class<?>> collect) {
-      return collect.stream().map(CurryngUtils::wrapperClassOf).collect(toSet());
+      return collect.stream().map(CurryingUtils::wrapperClassOf).collect(toSet());
     }
 
     private Set<Class<?>> asSet(Class<?>... classes) {
@@ -41,12 +43,13 @@ public class CurryngUtils {
     }
   };
 
-  public static CurriedFunction<Object, Object> curry(MultiParameterFunction<Object> function) {
-    return curry(function, emptyList());
+  public static CurriedFunction<Object, Object> curry(String functionName, MultiParameterFunction<Object> function) {
+    return curry(functionName, function, emptyList());
   }
 
-  private static CurriedFunction<Object, Object> curry(MultiParameterFunction<Object> function, List<? super Object> ongoingContext) {
-    return Printables.functionFactory((MultiParameterFunction<Object> arg) -> arg + formatObject(ongoingContext),
+  private static CurriedFunction<Object, Object> curry(String functionName, MultiParameterFunction<Object> function, List<? super Object> ongoingContext) {
+    return Printables.functionFactory(
+        functionNameFormatter(functionName, ongoingContext),
         (MultiParameterFunction<Object> arg) -> new CurriedFunction<Object, Object>() {
           @Override
           public Class<?> parameterType() {
@@ -65,10 +68,19 @@ public class CurryngUtils {
           public Object applyFunction(Object p) {
             if (ongoingContext.size() == function.arity() - 1)
               return function.apply(append(ongoingContext, p));
-            return curry(function, append(ongoingContext, p));
+            return curry(functionName, function, append(ongoingContext, p));
           }
-
         }).create(function);
+  }
+
+  private static Function<MultiParameterFunction<Object>, String> functionNameFormatter(String functionName, List<? super Object> ongoingContext) {
+    return (MultiParameterFunction<Object> function) -> functionName +
+        (!ongoingContext.isEmpty() ? IntStream.range(0, ongoingContext.size())
+            .mapToObj(i -> function.parameterType(i).getSimpleName() + ":" + ongoingContext.get(i))
+            .collect(joining(",", "(", ")")) : "") +
+        IntStream.range(ongoingContext.size(), function.arity())
+            .mapToObj(i -> "(" + function.parameterType(i).getSimpleName() + ")")
+            .collect(joining());
   }
 
   static <T> T validateArgumentType(T arg, Class<?> paramType, Supplier<String> messageFormatter) {
@@ -83,7 +95,7 @@ public class CurryngUtils {
       Class<?> wrapperClass = wrapperClassOf(paramType);
       if (wrapperClass.equals(arg.getClass()))
         return true;
-      return isWiderThan(paramType, wrapperClass);
+      return isWiderThan(wrapperClass, arg.getClass());
     } else {
       if (arg == null)
         return true;
@@ -97,7 +109,9 @@ public class CurryngUtils {
   }
 
   private static boolean isWiderThan(Class<?> aClass, Class<?> bClass) {
-    return WIDER_CLASSES.get(aClass).contains(bClass);
+    assert !bClass.isPrimitive();
+    assert !aClass.isPrimitive();
+    return WIDER_TYPES.get(bClass).contains(aClass);
   }
 
   private static Class<?> wrapperClassOf(Class<?> clazz) {
@@ -132,10 +146,14 @@ public class CurryngUtils {
     }});
   }
 
+  private static final ThreadLocal<Map<Method, MultiParameterFunction<?>>> METHOD_BASED_FUNCTION_POOL = new ThreadLocal<>();
+
   @SuppressWarnings("unchecked")
   public static <R> MultiParameterFunction<R> createFunctionFromStaticMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    try {
-      Method m = validateMethod(aClass.getMethod(methodName, parameterTypes));
+    Map<Method, MultiParameterFunction<?>> methodBasedMultiParameterFunctionPool = methodBasedMultiParameterFunctionPool();
+
+    Method method = validateMethod(getMethod(aClass, methodName, parameterTypes));
+    methodBasedMultiParameterFunctionPool.computeIfAbsent(method, m -> {
       class PrintableMultiParameterFunction<RR> extends PrintableFunction<List<? super Object>, RR> implements MultiParameterFunction<RR> {
         PrintableMultiParameterFunction() {
           super(() -> formatMethodName(m),
@@ -162,10 +180,42 @@ public class CurryngUtils {
         public Class<? extends RR> returnType() {
           return (Class<? extends RR>) m.getReturnType();
         }
+
+        @Override
+        public int hashCode() {
+          return m.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object anotherObject) {
+          if (anotherObject == this)
+            return true;
+          if (anotherObject instanceof PrintableMultiParameterFunction) {
+            PrintableMultiParameterFunction<?> another = (PrintableMultiParameterFunction<?>) anotherObject;
+            return this.method().equals(another.method());
+          }
+          return false;
+        }
+
+        Method method() {
+          return m;
+        }
       }
-      return new PrintableMultiParameterFunction<R>();
-    } catch (
-        NoSuchMethodException e) {
+      return new PrintableMultiParameterFunction<>();
+    });
+    return (MultiParameterFunction<R>) methodBasedMultiParameterFunctionPool.get(method);
+  }
+
+  private static Map<Method, MultiParameterFunction<?>> methodBasedMultiParameterFunctionPool() {
+    if (METHOD_BASED_FUNCTION_POOL.get() == null)
+      METHOD_BASED_FUNCTION_POOL.set(new HashMap<>());
+    return METHOD_BASED_FUNCTION_POOL.get();
+  }
+
+  public static Method getMethod(Class<?> aClass, String methodName, Class<?>[] parameterTypes) {
+    try {
+      return aClass.getMethod(methodName, parameterTypes);
+    } catch (NoSuchMethodException e) {
       throw InternalUtils.wrapIfNecessary(e);
     }
   }
@@ -184,7 +234,11 @@ public class CurryngUtils {
   }
 
   static Supplier<String> messageInvalidTypeArgument(Object value, Class<?> aClass) {
-    return () -> "Given argument:" + formatObject(value) + " cannot be assigned to parameter:" + aClass.getCanonicalName();
+    return () -> "Given argument:" + formatObject(value) +
+        (value == null ?
+            "" :
+            "(" + value.getClass() + ")") +
+        " cannot be assigned to parameter:" + aClass.getCanonicalName();
   }
 
   @SuppressWarnings("unchecked")
@@ -195,8 +249,14 @@ public class CurryngUtils {
   }
 
   public static <T extends CurriedFunction<?, ?>> T requireLast(T value) {
-    if (!value.hasNext())
+    if (value.hasNext())
       throw new IllegalStateException();
     return value;
+  }
+
+  public static <V> V requireArgument(V arg, Predicate<? super V> predicate, Supplier<String> messageFormatter) {
+    if (predicate.test(arg))
+      throw new IllegalArgumentException(messageFormatter.get());
+    return arg;
   }
 }

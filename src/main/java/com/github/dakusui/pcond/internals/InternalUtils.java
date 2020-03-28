@@ -1,8 +1,5 @@
 package com.github.dakusui.pcond.internals;
 
-import com.github.dakusui.pcond.functions.currying.CurriedFunction;
-import com.github.dakusui.pcond.functions.currying.CurryngUtils;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -94,7 +91,4 @@ public enum InternalUtils {
     throw wrap(cause.getMessage(), cause);
   }
 
-  public static CurriedFunction<Object, Object> curry(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    return CurryngUtils.curry(CurryngUtils.createFunctionFromStaticMethod(aClass, methodName, parameterTypes));
-  }
 }
