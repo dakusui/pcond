@@ -74,7 +74,7 @@ public enum Functions {
       }
     });
     private static final PrintableFunction.Factory<List<?>, ?, Integer> ELEMENT_AT_FACTORY =
-        Printables.functionFactory((v) -> String.format("at[%s]", v), arg -> es -> es.get((Integer) arg));
+        Printables.functionFactory((Integer v) -> String.format("at[%s]", v), (Integer arg) -> (List<?> es) -> es.get((Integer) arg));
     private static final PrintableFunction.Factory<Object, ?, Class<?>> CAST_FACTORY       = Printables.functionFactory(
         (v) -> String.format("castTo[%s]", requireNonNull(v).getSimpleName()), arg -> arg::cast);
   }

@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.functions.currying.CurriedFunction;
 import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
 
-public class PrintableFunction<T, R> implements Function<T, R> {
+public class PrintableFunction<T, R> implements CurriedFunction<T, R> {
   private static final Factory<Object, Object, List<Function<Object, Object>>> COMPOSE_FACTORY = PrintableFunction.factory(
       arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
       arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
@@ -23,15 +24,11 @@ public class PrintableFunction<T, R> implements Function<T, R> {
   private final Supplier<String> s;
   private final Function<? super T, ? extends R> function;
 
-  PrintableFunction(Supplier<String> s, Function<? super T, ? extends R> function) {
+  protected PrintableFunction(Supplier<String> s, Function<? super T, ? extends R> function) {
     this.s = Objects.requireNonNull(s);
     this.function = Objects.requireNonNull(function);
   }
 
-  @Override
-  public R apply(T t) {
-    return this.function.apply(t);
-  }
 
   @SuppressWarnings({"unchecked"})
   public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
@@ -69,6 +66,11 @@ public class PrintableFunction<T, R> implements Function<T, R> {
     if (function instanceof PrintableFunction)
       ret = (Function<Object, Object>) ((PrintableFunction<Object, Object>) function).function;
     return ret;
+  }
+
+  @Override
+  public R applyFunction(T value) {
+    return this.function.apply(value);
   }
 
   public static abstract class Factory<T, R, E> extends PrintableLambdaFactory<E> {

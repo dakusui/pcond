@@ -22,8 +22,6 @@ import static java.util.Objects.requireNonNull;
 public enum Predicates {
   ;
 
-  public static final Function<Class<?>, Predicate<?>> IS_INSTANCE_OF$2 = function(() -> "isInstanceOf", (Class<?> c) -> c::isInstance);
-
   @SuppressWarnings("unchecked")
   public static <T> Predicate<T> alwaysTrue() {
     return (Predicate<T>) Def.ALWAYS_TRUE;
@@ -59,7 +57,7 @@ public enum Predicates {
 
   @SuppressWarnings({"unchecked", "RedundantClassCall"})
   public static <T> Function<Class<?>, Predicate<T>> isInstanceOf() {
-    return Function.class.cast(IS_INSTANCE_OF$2);
+    return Function.class.cast(Def.IS_INSTANCE_OF$2);
   }
 
   public static <T> Predicate<T> isInstanceOf(Class<?> value) {
@@ -95,12 +93,6 @@ public enum Predicates {
 
     System.out.println(applyValues(isInstanceOf(), asList("hello", String.class)) + "");
     System.out.println(applyValues(isInstanceOf(), asList("hello", Map.class)) + "");
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> Predicate<T> _isInstanceOf(Class<?> value) {
-    requireNonNull(value);
-    return (Predicate<T>) Def.OBJECT_IS_INSTANCE_OF_FACTORY.create(value);
   }
 
   @SuppressWarnings("unchecked")
@@ -239,6 +231,7 @@ public enum Predicates {
   enum Def {
     ;
 
+    public static final Function<Class<?>, Predicate<?>> IS_INSTANCE_OF$2 = function(() -> "isInstanceOf", (Class<?> c) -> c::isInstance);
     private static final Predicate<?> ALWAYS_TRUE = predicate("alwaysTrue", t -> true);
     private static final Predicate<Boolean> IS_TRUE = predicate("isTrue", (Boolean v) -> v);
     private static final Predicate<Boolean> IS_FALSE = predicate("isFalse", (Boolean v) -> !v);
@@ -258,12 +251,6 @@ public enum Predicates {
     private static final PrintablePredicate.Factory<Object, Object> OBJECT_IS_SAME_AS_FACTORY = Printables.predicateFactory(
         arg -> format("==[%s]", formatObject(arg)),
         arg -> v -> v == arg);
-    @SuppressWarnings({"SimplifiableConditionalExpression"})
-    private static final PrintablePredicate.Factory<Object, Class<?>> OBJECT_IS_INSTANCE_OF_FACTORY = Printables.predicateFactory(
-        (arg) -> format("isInstanceOf[%s]", arg.getCanonicalName()),
-        arg -> v -> v == null ?
-            false :
-            arg.isAssignableFrom(v.getClass()));
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static final PrintablePredicate.Factory<?, Comparable<?>> GT_FACTORY = Printables.predicateFactory(
         (arg) -> format(">[%s]", formatObject(arg)),

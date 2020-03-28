@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.functions.currying.CurriedFunction;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.ut.testdata.FailingConstructor;
@@ -9,6 +10,10 @@ import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
@@ -37,7 +42,7 @@ public class InternalUtilsTest {
     @Test
     public void testFormatObject$array4() {
       assertEquals(
-          InternalUtils.formatObject(new String[] { "a", "b", "c", "d" }),
+          InternalUtils.formatObject(new String[]{"a", "b", "c", "d"}),
           "(\"a\",\"b\",\"c\"...;4)");
     }
 
@@ -148,6 +153,36 @@ public class InternalUtilsTest {
     @Test
     public void givenFalse$whenAssertionFailsWith$thenTrue() {
       assertTrue(InternalUtils.assertFailsWith(false));
+    }
+  }
+
+  public static class CurryingTest {
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test() {
+      CurriedFunction<Object, Object> curried = InternalUtils.curry(CurryingTest.class, "example", int.class, int.class);
+      System.out.println(curried);
+      Function<Object, Object> partiallyApplied = (Function<Object, Object>) curried.apply(1);
+      Object actual = partiallyApplied.apply(2);
+      System.out.println(curried);
+      System.out.println(partiallyApplied);
+      assertEquals("1+2=3", actual.toString());
+    }
+
+    @Test
+    public void test2() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+      Method m = CurryingTest.class.getMethod("example", int.class);
+      System.out.println(m);
+      Short s = 100;
+      System.out.println(int.class.getSimpleName() + "value=" + m.invoke(null, s));
+    }
+
+    public static String example(int i, int j) {
+      return String.format("%s+%s=%s", i, j, i + j);
+    }
+
+    public static String example(int i) {
+      return String.format("value=%s", i);
     }
   }
 }

@@ -1,5 +1,8 @@
 package com.github.dakusui.pcond.internals;
 
+import com.github.dakusui.pcond.functions.currying.CurriedFunction;
+import com.github.dakusui.pcond.functions.currying.CurryngUtils;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -42,6 +45,12 @@ public enum InternalUtils {
     return ret;
   }
 
+  /**
+   * A method to check if assertion is enabled or not.
+   *
+   * @param v A boolean value to test.
+   * @return {@code true} - assertion failed with the given value {@code v} / {@code false} - otherwise.
+   */
   public static boolean assertFailsWith(boolean v) {
     boolean ret = false;
     try {
@@ -83,5 +92,9 @@ public enum InternalUtils {
     if (cause instanceof RuntimeException)
       throw (RuntimeException) cause;
     throw wrap(cause.getMessage(), cause);
+  }
+
+  public static CurriedFunction<Object, Object> curry(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
+    return CurryngUtils.curry(CurryngUtils.createFunctionFromStaticMethod(aClass, methodName, parameterTypes));
   }
 }
