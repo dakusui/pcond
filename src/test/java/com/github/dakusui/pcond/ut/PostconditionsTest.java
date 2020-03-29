@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.ut;
 import com.github.dakusui.pcond.Postconditions;
 import com.github.dakusui.pcond.provider.AssertionProvider;
 import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.provider.PostconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
@@ -16,7 +17,7 @@ public class PostconditionsTest extends TestBase.ForAssertionEnabledVM {
       Object ret = Postconditions.ensureNonNull(null);
       System.out.println("<" + ret + ">");
     } catch (NullPointerException e) {
-      assertEquals("Value:null violated: isNotNull", e.getMessage());
+      assertEquals("value:null violated postcondition:value isNotNull", e.getMessage());
       throw e;
     }
   }
@@ -51,7 +52,7 @@ public class PostconditionsTest extends TestBase.ForAssertionEnabledVM {
     assertNotNull(ret);
   }
 
-  @Test(expected = Error.class)
+  @Test(expected = PostconditionViolationException.class)
   public void testEnsure() {
     try {
       Object ret = Postconditions.ensure(null, Predicates.isNotNull());

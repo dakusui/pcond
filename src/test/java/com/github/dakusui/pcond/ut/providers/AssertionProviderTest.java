@@ -6,6 +6,7 @@ import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -29,12 +30,23 @@ public class AssertionProviderTest extends TestBase {
     }
 
     @Override
-    public <T> T require(T value, Predicate<? super T> cond) {
+    public <T, E extends Exception> T require(T value, Predicate<? super T> cond) throws E {
       return null;
     }
 
     @Override
+    public <T, E extends Exception> T require(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
+      return null;
+    }
+
+
+    @Override
     public <T> T validate(T value, Predicate<? super T> cond) throws RuntimeException {
+      return null;
+    }
+
+    @Override
+    public <T, E extends Exception> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
       return null;
     }
 
@@ -49,7 +61,12 @@ public class AssertionProviderTest extends TestBase {
     }
 
     @Override
-    public <T> T ensure(T value, Predicate<? super T> cond) {
+    public <T, E extends Exception> T ensure(T value, Predicate<? super T> cond) throws E {
+      return null;
+    }
+
+    @Override
+    public <T, E extends Exception> T ensure(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
       return null;
     }
 
