@@ -1,7 +1,5 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.functions.currying.MultiParameterFunction;
-
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;

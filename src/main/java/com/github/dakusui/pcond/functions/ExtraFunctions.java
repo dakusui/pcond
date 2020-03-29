@@ -1,7 +1,6 @@
 package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.functions.currying.CurriedFunction;
-import com.github.dakusui.pcond.functions.currying.MultiParameterFunction;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.Arrays;
@@ -9,7 +8,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 

@@ -64,12 +64,6 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
   }
 
   @Override
-  default <T> void validation(T value, Predicate<? super T> cond) throws AE {
-    if (!cond.test(value))
-      throw applicationException(composeMessageForValidation(value, cond));
-  }
-
-  @Override
   default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
     if (!cond.test(value))
       throw new AssertionError(composeMessageForPrecondition(value, cond));

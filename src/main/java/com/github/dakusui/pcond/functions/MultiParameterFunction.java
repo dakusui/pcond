@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.functions.currying;
+package com.github.dakusui.pcond.functions;
 
 import java.util.List;
 import java.util.function.Function;

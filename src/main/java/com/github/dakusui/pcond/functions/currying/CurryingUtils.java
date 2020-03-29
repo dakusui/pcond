@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.functions.currying;
 
+import com.github.dakusui.pcond.functions.MultiParameterFunction;
 import com.github.dakusui.pcond.functions.PrintableFunction;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.internals.InternalChecks;
@@ -20,6 +21,9 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.*;
 
+/**
+ * Intended for internal use only.
+ */
 public enum CurryingUtils {
   ;
 
@@ -130,7 +134,9 @@ public enum CurryingUtils {
                       try {
                         return (RR) m.invoke(null, paramOrder.stream().map(objects::get).toArray());
                       } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw InternalUtils.wrapIfNecessary(e);
+                        throw InternalUtils.wrap(
+                            String.format("Invoked method:%s threw an exception", Formatters.formatMethodName(m)),
+                            e instanceof InvocationTargetException ? e.getCause() : e);
                       }
                     });
               }
@@ -185,7 +191,7 @@ public enum CurryingUtils {
       try {
         return aClass.getMethod(methodName, parameterTypes);
       } catch (NoSuchMethodException e) {
-        throw InternalUtils.wrapIfNecessary(e);
+        throw InternalUtils.wrap(String.format("Requested method: %s(%s) was not found in %s", methodName, Arrays.stream(parameterTypes).map(Class::getName).collect(joining(",")), aClass.getName()), e);
       }
     }
   }
@@ -204,8 +210,8 @@ public enum CurryingUtils {
     }
 
     private static String formatMethodName(Method method) {
-      return String.format("%s.%s[%s]",
-          method.getDeclaringClass().getSimpleName(),
+      return String.format("%s.%s(%s)",
+          method.getDeclaringClass().getName(),
           method.getName(),
           Arrays.stream(method.getParameterTypes()).map(Class::getSimpleName).collect(joining(",")));
     }
@@ -254,10 +260,11 @@ public enum CurryingUtils {
       }
     }
 
-    private static boolean isWiderThan(Class<?> aClass, Class<?> bClass) {
-      assert !bClass.isPrimitive();
-      assert !aClass.isPrimitive();
-      return Reflections.WIDER_TYPES.get(bClass).contains(aClass);
+    private static boolean isWiderThan(Class<?> classA, Class<?> classB) {
+      assert !classB.isPrimitive();
+      assert !classA.isPrimitive();
+      Set<Class<?>> widerBoxedClassesForClassA = Reflections.WIDER_TYPES.get(classB);
+      return widerBoxedClassesForClassA != null && widerBoxedClassesForClassA.contains(classA);
     }
 
     private static Method validateMethod(Method method) {

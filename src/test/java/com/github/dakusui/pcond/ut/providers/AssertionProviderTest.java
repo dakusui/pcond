@@ -71,10 +71,6 @@ public class AssertionProviderTest extends TestBase {
     }
 
     @Override
-    public <T> void validation(T value, Predicate<? super T> cond) throws RuntimeException {
-    }
-
-    @Override
     public <T> void checkInvariant(T value, Predicate<? super T> cond) {
     }
 
