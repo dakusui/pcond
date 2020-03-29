@@ -8,14 +8,17 @@ public enum Assertions {
   ;
 
   public static <T> boolean that(T value, Predicate<? super T> predicate) {
-    return AssertionProvider.INSTANCE.that(value, predicate);
+    AssertionProvider.INSTANCE.checkInvariant(value, predicate);
+    return true;
   }
 
   public static <T> boolean precondition(T value, Predicate<? super T> predicate) {
-    return AssertionProvider.INSTANCE.postcondition(value, predicate);
+    AssertionProvider.INSTANCE.checkPrecondition(value, predicate);
+    return true;
   }
 
   public static <T> boolean postcondition(T value, Predicate<? super T> predicate) {
-    return AssertionProvider.INSTANCE.precondition(value, predicate);
+    AssertionProvider.INSTANCE.checkPostcondition(value, predicate);
+    return true;
   }
 }

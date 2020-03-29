@@ -33,12 +33,12 @@ public interface AssertionProvider<AE extends Throwable> {
 
   <T> T ensure(T value, Predicate<? super T> cond);
 
-  <T> boolean validation(T value, Predicate<? super T> cond) throws AE;
+  <T> void validation(T value, Predicate<? super T> cond) throws AE;
 
-  <T> boolean that(T value, Predicate<? super T> cond);
+  <T> void checkInvariant(T value, Predicate<? super T> cond);
 
-  <T> boolean precondition(T value, Predicate<? super T> cond);
+  <T> void checkPrecondition(T value, Predicate<? super T> cond);
 
-  <T> boolean postcondition(T value, Predicate<? super T> cond);
+  <T> void checkPostcondition(T value, Predicate<? super T> cond);
 
 }

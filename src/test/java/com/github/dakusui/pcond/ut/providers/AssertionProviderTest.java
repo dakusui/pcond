@@ -54,23 +54,19 @@ public class AssertionProviderTest extends TestBase {
     }
 
     @Override
-    public <T> boolean validation(T value, Predicate<? super T> cond) throws RuntimeException {
-      return false;
+    public <T> void validation(T value, Predicate<? super T> cond) throws RuntimeException {
     }
 
     @Override
-    public <T> boolean that(T value, Predicate<? super T> cond) {
-      return false;
+    public <T> void checkInvariant(T value, Predicate<? super T> cond) {
     }
 
     @Override
-    public <T> boolean precondition(T value, Predicate<? super T> cond) {
-      return false;
+    public <T> void checkPrecondition(T value, Predicate<? super T> cond) {
     }
 
     @Override
-    public <T> boolean postcondition(T value, Predicate<? super T> cond) {
-      return false;
+    public <T> void checkPostcondition(T value, Predicate<? super T> cond) {
     }
   }
 

@@ -2,16 +2,13 @@ package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.Preconditions.requireArgument;
 import static com.github.dakusui.pcond.functions.Printables.function;
 import static com.github.dakusui.pcond.functions.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
@@ -64,35 +61,8 @@ public enum Predicates {
     return applyOnceExpectingPredicate(requireNonNull(value), isInstanceOf());
   }
 
-  public static <T> T applyValues(Function<?, ?> func, List<?> args) {
-    requireArgument(requireNonNull(args), not(isEmpty()));
-    Object ret = func;
-    for (Object arg : args)
-      ret = applyOrTest(ret, arg);
-    return (T) ret;
-  }
-
-  private static Object applyOrTest(Object func, Object arg) {
-    requireArgument(func, or(isInstanceOf(Function.class), isInstanceOf(Predicate.class)));
-    if (func instanceof Predicate)
-      return ((Predicate<Object>) func).test(arg);
-    return ((Function<Object, Object>) func).apply(arg);
-  }
-
-  public static <T, R> Predicate<R> applyOnceExpectingPredicate(T value, Function<T, Predicate<R>> p) {
+  private static <T, R> Predicate<R> applyOnceExpectingPredicate(T value, Function<T, Predicate<R>> p) {
     return predicate(() -> format("%s[%s]", p, formatObject(value)), p.apply(value));
-  }
-
-  public static Predicate<List<?>> uncurry(Function<?, Predicate<Object>> curriedFunc) {
-    return Printables.predicate(() -> "uncurried:" + curriedFunc, args -> Predicates.applyValues(curriedFunc, args));
-  }
-
-  public static void main(String... args) {
-    System.out.println(isInstanceOf(Serializable.class));
-    System.out.println(isInstanceOf(Serializable.class).test(null));
-
-    System.out.println(applyValues(isInstanceOf(), asList("hello", String.class)) + "");
-    System.out.println(applyValues(isInstanceOf(), asList("hello", Map.class)) + "");
   }
 
   @SuppressWarnings("unchecked")
@@ -183,21 +153,6 @@ public enum Predicates {
   }
 
   @SuppressWarnings("unchecked")
-  public static <E> Predicate<E> matchesAllOf(Collection<? extends E> collection, Predicate<E> cond) {
-    return (Predicate<E>) Def.MATCHES_ALL_OF_FACTORY.create(asList(collection, cond));
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <E> Predicate<E> matchesAnyOf(Collection<? extends E> collection, Predicate<E> cond) {
-    return (Predicate<E>) Def.MATCHES_ANY_OF_FACTORY.create(asList(collection, cond));
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <E> Predicate<E> matchesNoneOf(Collection<? extends E> collection, Predicate<E> cond) {
-    return (Predicate<E>) Def.MATCHES_NONE_OF_FACTORY.create(asList(collection, cond));
-  }
-
-  @SuppressWarnings("unchecked")
   @SafeVarargs
   public static <T> Predicate<T> and(Predicate<? super T> car, Predicate<? super T>... cdr) {
     Predicate<T> ret = (Predicate<T>) car;
@@ -246,8 +201,8 @@ public enum Predicates {
         (arg) -> format("isEqualTo[%s]", formatObject(arg)),
         arg -> v -> Objects.equals(v, arg));
     private static final PrintablePredicate.Factory<Collection<?>, Object> CONTAINS_FACTORY = Printables.predicateFactory(
-        arg -> format("contains[%s]", formatObject(arg)),
-        arg -> (Collection<?> c) -> c.contains(arg));
+        (Object arg) -> format("contains[%s]", formatObject(arg)),
+        (Object arg) -> (Collection<?> c) -> c.contains(arg));
     private static final PrintablePredicate.Factory<Object, Object> OBJECT_IS_SAME_AS_FACTORY = Printables.predicateFactory(
         arg -> format("==[%s]", formatObject(arg)),
         arg -> v -> v == arg);
@@ -301,17 +256,5 @@ public enum Predicates {
         (arg) -> format("anyMatch[%s]", requireNonNull(arg)),
         arg -> (Stream<?> stream) -> stream.anyMatch((Predicate) arg)
     );
-    @SuppressWarnings("unchecked")
-    private static final PrintablePredicate.Factory<?, List<Object>> MATCHES_ALL_OF_FACTORY = Printables.predicateFactory(
-        (List<Object> v) -> format("%s matchesAllOf(%s)", v.get(1), v.get(0)),
-        (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().allMatch((Predicate<Object>) v.get(1)));
-    @SuppressWarnings("unchecked")
-    private static final PrintablePredicate.Factory<?, List<Object>> MATCHES_ANY_OF_FACTORY = Printables.predicateFactory(
-        (List<Object> v) -> format("matchesAnyOf(%s,%s)", v.get(0), v.get(1)),
-        (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().anyMatch((Predicate<Object>) v.get(1)));
-    @SuppressWarnings("unchecked")
-    private static final PrintablePredicate.Factory<?, List<Object>> MATCHES_NONE_OF_FACTORY = Printables.predicateFactory(
-        (List<Object> v) -> format("matchesNoneOf(%s,%s)", v.get(0), v.get(1)),
-        (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().noneMatch((Predicate<Object>) v.get(1)));
   }
 }

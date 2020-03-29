@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.functions.currying.CurryingUtils.Reflections.createFunctionFromStaticMethod;
 import static java.util.Objects.requireNonNull;
 
 public enum Functions {
@@ -63,7 +64,7 @@ public enum Functions {
   }
 
   public static CurriedFunction<Object, Object> curry(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    return CurryingUtils.curry("example", CurryingUtils.createFunctionFromStaticMethod(aClass, methodName, parameterTypes));
+    return CurryingUtils.curry(methodName, createFunctionFromStaticMethod(aClass, methodName, parameterTypes));
   }
 
   enum Def {

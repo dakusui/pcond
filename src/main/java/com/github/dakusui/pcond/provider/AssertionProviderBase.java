@@ -7,97 +7,90 @@ import java.util.function.Predicate;
 public interface AssertionProviderBase<AE extends Throwable> extends AssertionProvider<AE> {
   @Override
   default <T> T requireNonNull(T value) {
-    assert nonNull(value);
+    checkNotNull(value);
     return value;
   }
 
   @Override
   default <T> T requireArgument(T value, Predicate<? super T> cond) {
-    assert argument(value, cond);
+    checkArgument(value, cond);
     return value;
   }
 
   @Override
   default <T> T requireState(T value, Predicate<? super T> cond) {
-    assert state(value, cond);
+    checkState(value, cond);
     return value;
   }
 
   @Override
   default <T> T require(T value, Predicate<? super T> cond) {
-    assert precondition(value, cond);
+    checkPrecondition(value, cond);
     return value;
   }
 
   @Override
   default <T> T validate(T value, Predicate<? super T> cond) throws AE {
-    assert validation(value, cond);
+    validation(value, cond);
     return value;
   }
 
   @Override
   default <T> T ensureNonNull(T value) {
-    assert nonNull(value);
+    checkNotNull(value);
     return value;
   }
 
   @Override
   default <T> T ensureState(T value, Predicate<? super T> cond) {
-    assert state(value, cond);
+    checkState(value, cond);
     return value;
   }
 
   @Override
   default <T> T ensure(T value, Predicate<? super T> cond) {
-    assert postcondition(value, cond);
+    checkPostcondition(value, cond);
     return value;
   }
 
   @Override
-  default <T> boolean validation(T value, Predicate<? super T> cond) throws AE {
+  default <T> void validation(T value, Predicate<? super T> cond) throws AE {
     if (!cond.test(value))
       throw applicationException(composeMessageForValidation(value, cond));
-    return true;
   }
 
-  default <T> boolean nonNull(T value) {
+  default <T> void checkNotNull(T value) {
     Predicate<T> cond = Predicates.isNotNull();
     if (!cond.test(value))
       throw new NullPointerException(composeMessageForAssertion(value, cond));
-    return true;
   }
 
-  default  <T> boolean argument(T value, Predicate<? super T> cond) {
+  default <T> void checkArgument(T value, Predicate<? super T> cond) {
     if (!cond.test(value))
       throw new IllegalArgumentException(composeMessageForPrecondition(value, cond));
-    return true;
   }
 
-  default  <T> boolean state(T value, Predicate<? super T> cond) {
+  default <T> void checkState(T value, Predicate<? super T> cond) {
     if (!cond.test(value))
       throw new IllegalStateException(composeMessageForPrecondition(value, cond));
-    return true;
   }
 
   @Override
-  default  <T> boolean precondition(T value, Predicate<? super T> cond) {
+  default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
     if (!cond.test(value))
       throw new AssertionError(composeMessageForPrecondition(value, cond));
-    return true;
   }
 
   @Override
-  default  <T> boolean postcondition(T value, Predicate<? super T> cond) {
+  default <T> void checkPostcondition(T value, Predicate<? super T> cond) {
     if (!cond.test(value))
       throw new AssertionError(composeMessageForPostcondition(value, cond));
-    return true;
   }
 
   @Override
-  default  <T> boolean that(T value, Predicate<? super T> cond) {
+  default <T> void checkInvariant(T value, Predicate<? super T> cond) {
     if (!cond.test(value))
       throw new AssertionError(composeMessageForAssertion(value, cond));
-    return true;
   }
 
   <T> String composeMessageForPrecondition(T value, Predicate<? super T> predicate);

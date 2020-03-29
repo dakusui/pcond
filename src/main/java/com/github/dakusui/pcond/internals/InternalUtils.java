@@ -1,12 +1,15 @@
 package com.github.dakusui.pcond.internals;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
 
 public enum InternalUtils {
   ;
@@ -91,4 +94,9 @@ public enum InternalUtils {
     throw wrap(cause.getMessage(), cause);
   }
 
+  public static List<? super Object> append(List<? super Object> list, Object p) {
+    return unmodifiableList(new ArrayList<Object>(list) {{
+      add(p);
+    }});
+  }
 }

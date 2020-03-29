@@ -3,18 +3,18 @@ package com.github.dakusui.pcond.functions.currying;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.functions.currying.CurryingUtils.*;
+import static com.github.dakusui.pcond.functions.currying.CurryingUtils.Checks.*;
 
 public interface CurriedFunction<T, R> extends Function<T, R> {
   R applyFunction(T value);
 
   default R apply(T value) {
-    return ensureReturnedValueType(this.applyFunction(validateArg(value)), returnType());
+    return CurryingUtils.Checks.ensureReturnedValueType(this.applyFunction(validateArg(value)), returnType());
   }
 
   @SuppressWarnings("unchecked")
   default <V> V applyLast(T value) {
-    return (V) requireLast(this).apply(value);
+    return (V) CurryingUtils.Checks.requireLast(this).apply(value);
   }
 
   @SuppressWarnings("unchecked")
@@ -37,11 +37,11 @@ public interface CurriedFunction<T, R> extends Function<T, R> {
   }
 
   default boolean isValidArg(Object arg) {
-    return CurryingUtils.isValidArgument(this.parameterType(), arg);
+    return isValidArgument(this.parameterType(), arg);
   }
 
   default <V> V validateArg(V arg) {
-    return validateArgumentType(arg, parameterType(), messageInvalidTypeArgument(arg, parameterType()));
+    return validateArgumentType(arg, parameterType(), CurryingUtils.Formatters.messageInvalidTypeArgument(arg, parameterType()));
   }
 
 }

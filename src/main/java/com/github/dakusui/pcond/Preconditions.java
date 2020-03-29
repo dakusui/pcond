@@ -19,6 +19,7 @@ public enum Preconditions {
     return AssertionProvider.INSTANCE.requireState(value, cond);
   }
 
+  @SuppressWarnings("RedundantThrows")
   public static <T, E extends Throwable> T require(
       T value,
       Predicate<? super T> cond) throws E {
