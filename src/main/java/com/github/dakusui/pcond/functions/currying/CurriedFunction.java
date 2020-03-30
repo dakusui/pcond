@@ -37,7 +37,7 @@ public interface CurriedFunction<T, R> extends Function<T, R> {
   }
 
   default boolean isValidArg(Object arg) {
-    return isValidArgument(this.parameterType(), arg);
+    return isValidValueForType(arg, this.parameterType());
   }
 
   default <V> V validateArg(V arg) {

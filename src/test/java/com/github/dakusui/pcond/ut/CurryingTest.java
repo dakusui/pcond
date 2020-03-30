@@ -35,6 +35,14 @@ public class CurryingTest extends TestBase {
     assertEquals("1+2=3", actual);
   }
 
+  @Test
+  public void givenCurriedFunction$whenToStringOnOngoing$thenExpectedResultReturned() {
+    CurriedFunction<Object, Object> curried = Utils.example();
+    curried = curried.applyNext(1);
+    String actual = curried.toString();
+    assertEquals("example(int:1)(int)", actual);
+  }
+
   @Test(expected = NoSuchElementException.class)
   public void givenCurriedFunction$whenApplyNextMoreThanExpected$thenNoSuchElementIsThrown() {
     CurriedFunction<Object, Object> curried = Utils.example();
