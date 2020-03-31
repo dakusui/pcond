@@ -36,7 +36,7 @@ public class PrintablePredicate<T> implements Predicate<T> {
     this.s = requireNonNull(s);
   }
 
-  static <T, E> Factory<T, E> factory(Function<E, String> nameComposer, Function<E, Predicate<T>> ff) {
+  public static <T, E> Factory<T, E> factory(Function<E, String> nameComposer, Function<E, Predicate<T>> ff) {
     return new Factory<T, E>(nameComposer) {
       @Override
       Predicate<? super T> createPredicate(E arg) {

@@ -51,7 +51,7 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R> {
     return new PrintableFunction<>(() -> Objects.requireNonNull(s), function);
   }
 
-  static <T, R, E> Factory<T, R, E> factory(Function<E, String> nameComposer, Function<E, Function<T, R>> ff) {
+  public static <T, R, E> Factory<T, R, E> factory(Function<E, String> nameComposer, Function<E, Function<T, R>> ff) {
     return new Factory<T, R, E>(nameComposer) {
       @Override
       Function<T, R> createFunction(E arg) {
