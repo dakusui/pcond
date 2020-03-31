@@ -69,7 +69,7 @@ public class ParameterizedPredicatesTest extends TestBase.ForAssertionEnabledVM 
         } },
         new Object[] { new Object[] {
             Predicates.isInstanceOf(List.class),
-            "isInstanceOf[java.util.List]",
+            "isInstanceOf[interface java.util.List]",
             $(new LinkedList<>(), true),
             $(new HashSet<>(), false),
         } },
@@ -133,7 +133,7 @@ public class ParameterizedPredicatesTest extends TestBase.ForAssertionEnabledVM 
         } },
         new Object[][] { {
             Predicates.isEqualTo("Y").negate().or(Predicates.isEqualTo("X").and(Predicates.isInstanceOf(String.class))),
-            "(!isEqualTo[\"Y\"]||(isEqualTo[\"X\"]&&isInstanceOf[java.lang.String]))",
+            "(!isEqualTo[\"Y\"]||(isEqualTo[\"X\"]&&isInstanceOf[class java.lang.String]))",
             $("Z", true),
             $("X", true),
             $("Y", false)

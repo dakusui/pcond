@@ -1,0 +1,53 @@
+package com.github.dakusui.pcond.ut;
+
+import com.github.dakusui.pcond.functions.currying.CurriedFunction;
+import com.github.dakusui.pcond.functions.currying.CurryingUtils;
+import org.junit.Test;
+
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+
+public class CurryingUtilsTest {
+  @Test
+  public void testVoid() {
+    assertEquals(Void.class, CurryingUtils.Reflections.wrapperClassOf(void.class));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testNonPrimitive() {
+    CurryingUtils.Reflections.wrapperClassOf(String.class);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void returnedValueIsInvalid() {
+    try {
+      new CurriedFunction<Object, Object>() {
+
+        @Override
+        public Object applyFunction(Object value) {
+          return 123;
+        }
+
+        @Override
+        public Class<?> parameterType() {
+          return Object.class;
+        }
+
+        @Override
+        public Class<?> returnType() {
+          return String.class;
+        }
+      }.apply("hello");
+    } catch (IllegalStateException e) {
+      assertThat(
+          e.getMessage(),
+          allOf(
+              containsString("123"),
+              containsString("java.lang.Integer"),
+              containsString("java.lang.String")));
+      throw e;
+    }
+  }
+}

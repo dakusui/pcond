@@ -29,7 +29,7 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
   }
 
   @Override
-  public ApplicationException applicationException(String message) throws ApplicationException {
-    throw new ApplicationException(message);
+  public ApplicationException applicationException(String message) {
+    return new ApplicationException(message);
   }
 }

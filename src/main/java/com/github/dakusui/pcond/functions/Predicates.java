@@ -9,6 +9,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.functions.Printables.function;
+import static com.github.dakusui.pcond.functions.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -50,10 +52,17 @@ public enum Predicates {
     return (Predicate<T>) Def.OBJECT_IS_SAME_AS_FACTORY.create(value);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "RedundantClassCall"})
+  public static <T> Function<Class<?>, Predicate<T>> isInstanceOf() {
+    return Function.class.cast(Def.IS_INSTANCE_OF$2);
+  }
+
   public static <T> Predicate<T> isInstanceOf(Class<?> value) {
-    requireNonNull(value);
-    return (Predicate<T>) Def.OBJECT_IS_INSTANCE_OF_FACTORY.create(value);
+    return applyOnceExpectingPredicate(requireNonNull(value), isInstanceOf());
+  }
+
+  private static <T, R> Predicate<R> applyOnceExpectingPredicate(T value, Function<T, Predicate<R>> p) {
+    return predicate(() -> format("%s[%s]", p, formatObject(value)), p.apply(value));
   }
 
   @SuppressWarnings("unchecked")
@@ -144,21 +153,6 @@ public enum Predicates {
   }
 
   @SuppressWarnings("unchecked")
-  public static <E> Predicate<E> matchesAllOf(Collection<? extends E> collection, Predicate<E> cond) {
-    return (Predicate<E>) Def.MATCHES_ALL_OF_FACTORY.create(asList(collection, cond));
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <E> Predicate<E> matchesAnyOf(Collection<? extends E> collection, Predicate<E> cond) {
-    return (Predicate<E>) Def.MATCHES_ANY_OF_FACTORY.create(asList(collection, cond));
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <E> Predicate<E> matchesNoneOf(Collection<? extends E> collection, Predicate<E> cond) {
-    return (Predicate<E>) Def.MATCHES_NONE_OF_FACTORY.create(asList(collection, cond));
-  }
-
-  @SuppressWarnings("unchecked")
   @SafeVarargs
   public static <T> Predicate<T> and(Predicate<? super T> car, Predicate<? super T>... cdr) {
     Predicate<T> ret = (Predicate<T>) car;
@@ -182,7 +176,7 @@ public enum Predicates {
   }
 
   public static <O, P> TransformingPredicate.Factory<P, O> when(String funcName, Function<? super O, ? extends P> func) {
-    return when(Printables.function(funcName, func));
+    return when(function(funcName, func));
   }
 
   public static <O, P> TransformingPredicate.Factory<P, O> when(Function<? super O, ? extends P> function) {
@@ -192,31 +186,26 @@ public enum Predicates {
   enum Def {
     ;
 
-    private static final Predicate<?> ALWAYS_TRUE = Printables.predicate("alwaysTrue", t -> true);
-    private static final Predicate<Boolean> IS_TRUE = Printables.predicate("isTrue", (Boolean v) -> v);
-    private static final Predicate<Boolean> IS_FALSE = Printables.predicate("isFalse", (Boolean v) -> !v);
-    private static final Predicate<?> IS_NULL = Printables.predicate("isNull", Objects::isNull);
-    private static final Predicate<?> IS_NOT_NULL = Printables.predicate("isNotNull", Objects::nonNull);
-    private static final Predicate<String> IS_EMPTY_STRING = Printables.predicate("isEmpty", String::isEmpty);
-    private static final Predicate<String> IS_EMPTY_OR_NULL_STRING = Printables.predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
+    public static final Function<Class<?>, Predicate<?>> IS_INSTANCE_OF$2 = function(() -> "isInstanceOf", (Class<?> c) -> c::isInstance);
+    private static final Predicate<?> ALWAYS_TRUE = predicate("alwaysTrue", t -> true);
+    private static final Predicate<Boolean> IS_TRUE = predicate("isTrue", (Boolean v) -> v);
+    private static final Predicate<Boolean> IS_FALSE = predicate("isFalse", (Boolean v) -> !v);
+    private static final Predicate<?> IS_NULL = predicate("isNull", Objects::isNull);
+    private static final Predicate<?> IS_NOT_NULL = predicate("isNotNull", Objects::nonNull);
+    private static final Predicate<String> IS_EMPTY_STRING = predicate("isEmpty", String::isEmpty);
+    private static final Predicate<String> IS_EMPTY_OR_NULL_STRING = predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
     );
-    private static final Predicate<Object[]> IS_EMPTY_ARRAY = Printables.predicate("isEmptyArray", objects -> objects.length == 0);
-    private static final Predicate<Collection<?>> IS_EMPTY_COLLECTION = Printables.predicate("isEmpty", Collection::isEmpty);
+    private static final Predicate<Object[]> IS_EMPTY_ARRAY = predicate("isEmptyArray", objects -> objects.length == 0);
+    private static final Predicate<Collection<?>> IS_EMPTY_COLLECTION = predicate("isEmpty", Collection::isEmpty);
     private static final PrintablePredicate.Factory<Object, Object> IS_EQUAL_TO_FACTORY = Printables.predicateFactory(
         (arg) -> format("isEqualTo[%s]", formatObject(arg)),
         arg -> v -> Objects.equals(v, arg));
     private static final PrintablePredicate.Factory<Collection<?>, Object> CONTAINS_FACTORY = Printables.predicateFactory(
-        arg -> format("contains[%s]", formatObject(arg)),
-        arg -> (Collection<?> c) -> c.contains(arg));
+        (Object arg) -> format("contains[%s]", formatObject(arg)),
+        (Object arg) -> (Collection<?> c) -> c.contains(arg));
     private static final PrintablePredicate.Factory<Object, Object> OBJECT_IS_SAME_AS_FACTORY = Printables.predicateFactory(
         arg -> format("==[%s]", formatObject(arg)),
         arg -> v -> v == arg);
-    @SuppressWarnings({"SimplifiableConditionalExpression"})
-    private static final PrintablePredicate.Factory<Object, Class<?>> OBJECT_IS_INSTANCE_OF_FACTORY = Printables.predicateFactory(
-        (arg) -> format("isInstanceOf[%s]", arg.getCanonicalName()),
-        arg -> v -> v == null ?
-            false :
-            arg.isAssignableFrom(v.getClass()));
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static final PrintablePredicate.Factory<?, Comparable<?>> GT_FACTORY = Printables.predicateFactory(
         (arg) -> format(">[%s]", formatObject(arg)),
@@ -267,17 +256,5 @@ public enum Predicates {
         (arg) -> format("anyMatch[%s]", requireNonNull(arg)),
         arg -> (Stream<?> stream) -> stream.anyMatch((Predicate) arg)
     );
-    @SuppressWarnings("unchecked")
-    private static final PrintablePredicate.Factory<?, List<Object>> MATCHES_ALL_OF_FACTORY = Printables.predicateFactory(
-        (List<Object> v) -> format("%s matchesAllOf(%s)", v.get(1), v.get(0)),
-        (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().allMatch((Predicate<Object>) v.get(1)));
-    @SuppressWarnings("unchecked")
-    private static final PrintablePredicate.Factory<?, List<Object>> MATCHES_ANY_OF_FACTORY = Printables.predicateFactory(
-        (List<Object> v) -> format("matchesAnyOf(%s,%s)", v.get(0), v.get(1)),
-        (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().anyMatch((Predicate<Object>) v.get(1)));
-    @SuppressWarnings("unchecked")
-    private static final PrintablePredicate.Factory<?, List<Object>> MATCHES_NONE_OF_FACTORY = Printables.predicateFactory(
-        (List<Object> v) -> format("matchesNoneOf(%s,%s)", v.get(0), v.get(1)),
-        (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().noneMatch((Predicate<Object>) v.get(1)));
   }
 }

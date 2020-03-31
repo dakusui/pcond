@@ -1,12 +1,15 @@
 package com.github.dakusui.pcond.internals;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
 
 public enum InternalUtils {
   ;
@@ -42,6 +45,12 @@ public enum InternalUtils {
     return ret;
   }
 
+  /**
+   * A method to check if assertion is enabled or not.
+   *
+   * @param v A boolean value to test.
+   * @return {@code true} - assertion failed with the given value {@code v} / {@code false} - otherwise.
+   */
   public static boolean assertFailsWith(boolean v) {
     boolean ret = false;
     try {
@@ -83,5 +92,11 @@ public enum InternalUtils {
     if (cause instanceof RuntimeException)
       throw (RuntimeException) cause;
     throw wrap(cause.getMessage(), cause);
+  }
+
+  public static List<? super Object> append(List<? super Object> list, Object p) {
+    return unmodifiableList(new ArrayList<Object>(list) {{
+      add(p);
+    }});
   }
 }

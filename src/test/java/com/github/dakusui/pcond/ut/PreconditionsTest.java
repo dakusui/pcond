@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.ut;
 import com.github.dakusui.pcond.Preconditions;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -22,7 +23,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       assertThat(e.getMessage(),
           allOf(
               notNullValue(),
-              is("Value:null violated: isNotNull")));
+              is("value:null violated precondition:value isNotNull")));
       throw e;
     }
   }
@@ -120,7 +121,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
     assertNotNull(message);
   }
 
-  @Test(expected = Error.class)
+  @Test(expected = PreconditionViolationException.class)
   public void testRequire$thenError() {
     String value = null;
     String message = Preconditions.require(

@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.functions.ExtraFunctions;
+import com.github.dakusui.pcond.functions.currying.CurriedFunction;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.ut.testdata.FailingConstructor;
@@ -10,7 +12,21 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import static com.github.dakusui.pcond.Preconditions.require;
+import static com.github.dakusui.pcond.functions.ExtraFunctions.nest;
+import static com.github.dakusui.pcond.functions.ExtraFunctions.test;
+import static com.github.dakusui.pcond.functions.Functions.curry;
+import static com.github.dakusui.pcond.functions.Functions.stream;
+import static com.github.dakusui.pcond.functions.Predicates.*;
 import static java.util.Arrays.asList;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -37,7 +53,7 @@ public class InternalUtilsTest {
     @Test
     public void testFormatObject$array4() {
       assertEquals(
-          InternalUtils.formatObject(new String[] { "a", "b", "c", "d" }),
+          InternalUtils.formatObject(new String[]{"a", "b", "c", "d"}),
           "(\"a\",\"b\",\"c\"...;4)");
     }
 
