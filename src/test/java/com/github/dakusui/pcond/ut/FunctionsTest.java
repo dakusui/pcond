@@ -114,7 +114,7 @@ public class FunctionsTest {
     }
   }
 
-  public static class MultiParameterFunctionTest {
+  public static class MultiParameterFunctionTest extends TestBase {
     @Test
     public void runMultiParameterFunction$thenExpectedValueReturned() {
       MultiParameterFunction<String> func = greeting(0, 1);
