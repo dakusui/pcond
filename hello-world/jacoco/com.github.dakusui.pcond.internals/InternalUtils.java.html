@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InternalUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.internals</a> &gt; <span class="el_source">InternalUtils.java</span></div><h1>InternalUtils.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.internals;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
+
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">public enum InternalUtils {</span>
+  ;
+
+  public static String formatObject(Object value) {
+<span class="fc bfc" id="L18" title="All 2 branches covered.">    if (value == null)</span>
+<span class="fc" id="L19">      return &quot;null&quot;;</span>
+<span class="fc bfc" id="L20" title="All 2 branches covered.">    if (value instanceof Collection) {</span>
+<span class="fc" id="L21">      Collection&lt;?&gt; collection = (Collection&lt;?&gt;) value;</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">      if (collection.size() &lt; 4)</span>
+<span class="fc" id="L23">        return format(&quot;(%s)&quot;,</span>
+<span class="fc" id="L24">            collection.stream().map(InternalUtils::formatObject).collect(Collectors.joining(&quot;,&quot;)));</span>
+<span class="fc" id="L25">      Iterator&lt;?&gt; i = collection.iterator();</span>
+<span class="fc" id="L26">      return format(&quot;(%s,%s,%s...;%s)&quot;,</span>
+<span class="fc" id="L27">          formatObject(i.next()),</span>
+<span class="fc" id="L28">          formatObject(i.next()),</span>
+<span class="fc" id="L29">          formatObject(i.next()),</span>
+<span class="fc" id="L30">          collection.size()</span>
+      );
+    }
+<span class="fc bfc" id="L33" title="All 2 branches covered.">    if (value instanceof Object[])</span>
+<span class="fc" id="L34">      return formatObject(asList((Object[]) value));</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">    if (value instanceof String) {</span>
+<span class="fc" id="L36">      String s = (String) value;</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">      if (s.length() &gt; 20)</span>
+<span class="fc" id="L38">        s = s.substring(0, 12) + &quot;...&quot; + s.substring(s.length() - 5);</span>
+<span class="fc" id="L39">      return format(&quot;\&quot;%s\&quot;&quot;, s);</span>
+    }
+<span class="fc" id="L41">    String ret = value.toString();</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">    ret = ret.contains(&quot;$&quot;)</span>
+<span class="fc" id="L43">        ? ret.substring(ret.lastIndexOf(&quot;$&quot;) + 1)</span>
+        : ret;
+<span class="fc" id="L45">    return ret;</span>
+  }
+
+  /**
+   * A method to check if assertion is enabled or not.
+   *
+   * @param v A boolean value to test.
+   * @return {@code true} - assertion failed with the given value {@code v} / {@code false} - otherwise.
+   */
+  public static boolean assertFailsWith(boolean v) {
+<span class="fc" id="L55">    boolean ret = false;</span>
+    try {
+<span class="pc bpc" id="L57" title="1 of 4 branches missed.">      assert v;</span>
+<span class="fc" id="L58">    } catch (AssertionError e) {</span>
+<span class="fc" id="L59">      ret = true;</span>
+<span class="fc" id="L60">    }</span>
+<span class="fc" id="L61">    return ret;</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;T&gt; T createInstanceFromClassName(Class&lt;? super T&gt; expectedClass, String requestedClassName) {
+    try {
+<span class="fc" id="L67">      Class&lt;?&gt; loadedClass = Class.forName(requestedClassName);</span>
+      try {
+<span class="fc" id="L69">        return (T) expectedClass.cast(loadedClass.getDeclaredConstructor().newInstance());</span>
+<span class="fc" id="L70">      } catch (ClassCastException e) {</span>
+<span class="pc" id="L71">        throw wrap(&quot;The requested class:'&quot; + requestedClassName +</span>
+<span class="fc" id="L72">                &quot;' was found but not an instance of &quot; + expectedClass.getCanonicalName() + &quot;.: &quot; +</span>
+<span class="fc" id="L73">                &quot;It was '&quot; + loadedClass.getCanonicalName() + &quot;'.&quot;,</span>
+            e);
+<span class="fc" id="L75">      } catch (NoSuchMethodException e) {</span>
+<span class="nc" id="L76">        throw wrap(&quot;Public constructor without parameters was not found in &quot; + requestedClassName, e);</span>
+<span class="fc" id="L77">      } catch (InvocationTargetException e) {</span>
+<span class="nc" id="L78">        throw wrap(&quot;Public constructor without parameters was found in &quot; + requestedClassName + &quot; but threw an exception&quot;, e.getCause());</span>
+      }
+<span class="fc" id="L80">    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {</span>
+<span class="nc" id="L81">      throw wrap(&quot;The requested class was not found or not accessible.: &quot; + requestedClassName, e);</span>
+    }
+  }
+
+  public static InternalException wrap(String message, Throwable cause) {
+<span class="fc" id="L86">    throw new InternalException(message, cause);</span>
+  }
+
+  public static InternalException wrapIfNecessary(Throwable cause) {
+<span class="fc bfc" id="L90" title="All 2 branches covered.">    if (cause instanceof Error)</span>
+<span class="fc" id="L91">      throw (Error) cause;</span>
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">    if (cause instanceof RuntimeException)</span>
+<span class="fc" id="L93">      throw (RuntimeException) cause;</span>
+<span class="nc" id="L94">    throw wrap(cause.getMessage(), cause);</span>
+  }
+
+  public static List&lt;? super Object&gt; append(List&lt;? super Object&gt; list, Object p) {
+<span class="fc" id="L98">    return unmodifiableList(new ArrayList&lt;Object&gt;(list) {{</span>
+<span class="fc" id="L99">      add(p);</span>
+<span class="fc" id="L100">    }});</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
