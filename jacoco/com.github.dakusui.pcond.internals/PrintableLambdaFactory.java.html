@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrintableLambdaFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.internals</a> &gt; <span class="el_source">PrintableLambdaFactory.java</span></div><h1>PrintableLambdaFactory.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.internals;
+
+import java.util.Objects;
+import java.util.function.Function;
+
+public abstract class PrintableLambdaFactory&lt;E&gt; {
+  private final Function&lt;E, String&gt; nameComposer;
+
+<span class="fc" id="L9">  protected PrintableLambdaFactory(Function&lt;E, String&gt; nameComposer) {</span>
+<span class="fc" id="L10">    this.nameComposer = nameComposer;</span>
+<span class="fc" id="L11">  }</span>
+
+  public Function&lt;E, String&gt; nameComposer() {
+<span class="fc" id="L14">    return this.nameComposer;</span>
+  }
+
+  public interface Lambda&lt;F extends PrintableLambdaFactory&lt;E&gt;, E&gt; {
+    class Spec&lt;E&gt; {
+      final PrintableLambdaFactory&lt;E&gt; factory;
+      final E                         arg;
+      final Class&lt;?&gt;                  type;
+
+<span class="fc" id="L23">      public Spec(PrintableLambdaFactory&lt;E&gt; factory, E arg, Class&lt;?&gt; type) {</span>
+<span class="fc" id="L24">        this.factory = factory;</span>
+<span class="fc" id="L25">        this.arg = arg;</span>
+<span class="fc" id="L26">        this.type = type;</span>
+<span class="fc" id="L27">      }</span>
+    }
+
+    Spec&lt;E&gt; spec();
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    default F createdFrom() {
+<span class="fc" id="L34">      return (F) spec().factory;</span>
+    }
+
+    default Object arg() {
+<span class="fc" id="L38">      return spec().arg;</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    default Class&lt;? extends Lambda&lt;?, E&gt;&gt; type() {
+<span class="fc" id="L43">      return (Class&lt;? extends Lambda&lt;?, E&gt;&gt;) spec().type;</span>
+    }
+
+    default &lt;T extends Lambda&lt;?, E&gt;&gt; boolean equals(Object anotherObject, Class&lt;T&gt; intendedClass) {
+<span class="fc bfc" id="L47" title="All 2 branches covered.">      if (this == anotherObject)</span>
+<span class="fc" id="L48">        return true;</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">      if (!(intendedClass.isInstance(anotherObject)))</span>
+<span class="fc" id="L50">        return false;</span>
+<span class="fc" id="L51">      T another = intendedClass.cast(anotherObject);</span>
+<span class="fc bfc" id="L52" title="All 4 branches covered.">      return this.createdFrom() == another.createdFrom() &amp;&amp; Objects.equals(arg(), another.arg());</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

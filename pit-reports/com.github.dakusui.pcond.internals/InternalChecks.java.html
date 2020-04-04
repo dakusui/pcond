@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>InternalChecks.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.github.dakusui.pcond.internals;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.function.Predicate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.function.Supplier;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='uncovered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='uncovered'><pre><span  class=''>public class InternalChecks {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static void checkArgument(boolean b, Supplier&#60;String&#62; messageFormatter) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_8'/>
+8
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_8'>1</a>
+<span>
+1. checkArgument : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    if (!b)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      throw new IllegalArgumentException(messageFormatter.get());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static &#60;V&#62; V requireArgument(V arg, Predicate&#60;? super V&#62; predicate, Supplier&#60;String&#62; messageFormatter) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_13'/>
+13
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_13'>1</a>
+<span>
+1. requireArgument : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    if (!predicate.test(arg))</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      throw new IllegalArgumentException(messageFormatter.get());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_15'/>
+15
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_15'>1</a>
+<span>
+1. requireArgument : replaced return value with null for com/github/dakusui/pcond/internals/InternalChecks::requireArgument &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    return arg;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@1644cc2d_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@1644cc2d_8'>8</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_8'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>checkArgument<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@1644cc2d_13'>13</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_13'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>requireArgument<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.InternalChecksTest.testRequireArgument$fails(com.github.dakusui.pcond.ut.InternalChecksTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@1644cc2d_15'>15</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@1644cc2d_15'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>requireArgument<br/><b>Killed by : </b>none</span></span> replaced return value with null for com/github/dakusui/pcond/internals/InternalChecks::requireArgument &rarr; SURVIVED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>BOOLEAN_FALSE_RETURN</li>
+<li class='mutator'>BOOLEAN_TRUE_RETURN</li>
+<li class='mutator'>CONDITIONALS_BOUNDARY_MUTATOR</li>
+<li class='mutator'>EMPTY_RETURN_VALUES</li>
+<li class='mutator'>INCREMENTS_MUTATOR</li>
+<li class='mutator'>INVERT_NEGS_MUTATOR</li>
+<li class='mutator'>MATH_MUTATOR</li>
+<li class='mutator'>NEGATE_CONDITIONALS_MUTATOR</li>
+<li class='mutator'>NULL_RETURN_VALUES</li>
+<li class='mutator'>PRIMITIVE_RETURN_VALS_MUTATOR</li>
+<li class='mutator'>VOID_METHOD_CALL_MUTATOR</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.github.dakusui.pcond.ut.CurryingTest.hello_a(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.hello_c(com.github.dakusui.pcond.ut.CurryingTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[0](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[10](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[15](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.compilability.ListTest.testAllMatch(com.github.dakusui.pcond.compilability.ListTest) (10 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[5](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[14](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[11](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyWithInvalidArg$thenThrown(com.github.dakusui.pcond.ut.CurryingTest) (7 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest.testEqualsWithIdenticalObjects(com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[12](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[13](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByCompose$whenApply$thenWorksRight(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest) (0 ms)</li><li>com.github.dakusui.pcond.compilability.BooleanTest.testIsFalse(com.github.dakusui.pcond.compilability.BooleanTest) (14 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.hello(com.github.dakusui.pcond.ut.CurryingTest) (20 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.nonStaticMethod(com.github.dakusui.pcond.ut.CurryingTest) (9 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[17](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.test4_b(com.github.dakusui.pcond.ut.CurryingTest) (8 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_IntegerToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.undefinedMethod(com.github.dakusui.pcond.ut.CurryingTest) (11 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest.toStringMultiParameterFunction$withReversedOrder$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest) (6 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[16](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest.toStringMultiParameterFunction$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.compilability.StringTest.testIsInstanceOf(com.github.dakusui.pcond.compilability.StringTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[3](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testCompose$toString(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[4](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.hello3_a(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.hello3_b(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.compilability.ObjectTest.givenNull(com.github.dakusui.pcond.compilability.ObjectTest) (0 ms)</li><li>com.github.dakusui.pcond.compilability.ListTest.testAnyMatch(com.github.dakusui.pcond.compilability.ListTest) (1 ms)</li><li>com.github.dakusui.pcond.compilability.ListTest.testNoneMatch(com.github.dakusui.pcond.compilability.ListTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[7](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest.runMultiParameterFunction$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyLastBeforeLast$thenIllegalStateIsThrown(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.usageExample(com.github.dakusui.pcond.ut.CurryingTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[14](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[11](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenExceptionThrowingFunction$whenApplythenThrown(com.github.dakusui.pcond.ut.CurryingTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.test3(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[1](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[6](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[5](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.hello4_a(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyExpectedTimes$thenExpectedResultReturned(com.github.dakusui.pcond.ut.CurryingTest) (29 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyNextMoreThanExpected$thenNoSuchElementIsThrown(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$StreamTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$StreamTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[2](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[3](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.CurryingUtilsTest.returnedValueIsInvalid(com.github.dakusui.pcond.ut.CurryingUtilsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[1](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[9](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.hello_b(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenToStringOnOngoing$thenExpectedResultReturned(com.github.dakusui.pcond.ut.CurryingTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[8](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[3](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest.testEqualsWithDifferentTypeObjects(com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PreconditionsTest (6 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[7](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$StringifyTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$StringifyTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[6](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest.testEqualsWithDifferentObjects(com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest.runVoidReturningMultiParameterFunction$thenNullReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[5](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithStringParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[7](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[0](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[4](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[1](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[17](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenApply$thenWorksRight(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[9](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[2](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_intToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[16](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[8](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[10](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (11 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[15](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenStringToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[4](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.hello2(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.hello4(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testAndThen$toString(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.hello6(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.hello3(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.InternalChecksTest.testRequireArgument$fails(com.github.dakusui.pcond.ut.InternalChecksTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[6](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[13](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.hello5(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[12](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[0](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (6 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest.testMultiParameterFunction$withReversedOrder$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[2](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest.testHashCodeWithIdenticalObjects(com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest) (1 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='http://pitest.org'>PIT</a> 1.5.0
+
+</body>
+</html>

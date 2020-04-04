@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ExtraFunctions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.functions</a> &gt; <span class="el_source">ExtraFunctions.java</span></div><h1>ExtraFunctions.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.functions;
+
+import com.github.dakusui.pcond.functions.currying.CurriedFunction;
+import com.github.dakusui.pcond.internals.InternalUtils;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+
+<span class="nc" id="L18">public class ExtraFunctions {</span>
+  public static Function&lt;Stream&lt;?&gt;, Stream&lt;Context&gt;&gt; nest(Collection&lt;?&gt; inner) {
+<span class="fc" id="L20">    return Printables.function(() -&gt; &quot;nest&quot; + formatObject(inner), (Stream&lt;?&gt; stream) -&gt; Def.nest(stream, inner));</span>
+  }
+
+  public static Function&lt;Stream&lt;?&gt;, Stream&lt;Context&gt;&gt; toContextStream() {
+<span class="fc" id="L24">    return Printables.function(() -&gt; &quot;toContextStream&quot;, Def::toContextStream);</span>
+  }
+
+  public static &lt;R&gt; Function&lt;Context, R&gt; apply(CurriedFunction&lt;Object, Object&gt; curriedFunction, int... orderArgs) {
+<span class="fc" id="L28">    return context -&gt; {</span>
+<span class="fc" id="L29">      CurriedFunction&lt;?, ?&gt; cur = curriedFunction;</span>
+<span class="fc" id="L30">      int[] normalizedOrderArgs = normalizeOrderArgs(context, orderArgs);</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">      for (int i = 0; i &lt; normalizedOrderArgs.length - 1; i++)</span>
+<span class="fc" id="L32">        cur = cur.applyNext(context.valueAt(normalizedOrderArgs[i]));</span>
+<span class="fc" id="L33">      return cur.applyLast(context.valueAt(normalizedOrderArgs[context.size() - 1]));</span>
+    };
+  }
+
+  public static Predicate&lt;Context&gt; test(CurriedFunction&lt;Object, Object&gt; curriedFunction, int... orderArgs) {
+<span class="fc" id="L38">    return Def.applyAndTest(curriedFunction, Predicates.isTrue(), Boolean.class, orderArgs);</span>
+  }
+
+  public static int[] normalizeOrderArgs(Context context, int[] orderArgs) {
+    int[] order;
+<span class="fc bfc" id="L43" title="All 2 branches covered.">    if (orderArgs.length == 0)</span>
+<span class="fc" id="L44">      order = IntStream.range(0, context.size()).toArray();</span>
+    else
+<span class="fc" id="L46">      order = orderArgs;</span>
+<span class="fc" id="L47">    return order;</span>
+  }
+
+  public interface Context {
+    default int size() {
+<span class="fc" id="L52">      return values().size();</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    default &lt;T&gt; T valueAt(int i) {
+<span class="fc" id="L57">      return (T) values().get(i);</span>
+    }
+
+    default Context append(Object o) {
+<span class="fc" id="L61">      return () -&gt; InternalUtils.append(values(), o);</span>
+    }
+
+    List&lt;Object&gt; values();
+
+    static Context from(Object o) {
+<span class="fc" id="L67">      return () -&gt; singletonList(o);</span>
+    }
+  }
+
+<span class="fc" id="L71">  enum Def {</span>
+    ;
+
+    public static Stream&lt;Context&gt; nest(Stream&lt;?&gt; stream, Collection&lt;?&gt; inner) {
+<span class="fc" id="L75">      return toContextStream(stream).flatMap(context -&gt; inner.stream().map((Function&lt;Object, Context&gt;) context::append));</span>
+    }
+
+    public static Stream&lt;Context&gt; toContextStream(Stream&lt;?&gt; stream) {
+<span class="fc bfc" id="L79" title="All 2 branches covered.">      return stream.map(o -&gt; (Context) (o instanceof Context ? o : Context.from(o)));</span>
+    }
+
+    static &lt;R&gt; Predicate&lt;Context&gt; applyAndTest(CurriedFunction&lt;Object, Object&gt; curriedFunction, Predicate&lt;? super R&gt; pred, @SuppressWarnings(&quot;SameParameterValue&quot;) Class&lt;? extends R&gt; type, int... orderArgs) {
+<span class="fc" id="L83">      List&lt;Object&gt; spec = asList(curriedFunction, pred, asList(Arrays.stream(orderArgs).boxed().toArray()));</span>
+<span class="fc" id="L84">      return Printables.predicateFactory(</span>
+<span class="fc" id="L85">          (List&lt;Object&gt; e) -&gt; String.format(&quot;%s(%s%s)&quot;, e.get(1), e.get(0), e.get(2)),</span>
+<span class="fc" id="L86">          (List&lt;Object&gt; e) -&gt; (Context context) -&gt; (pred).test(type.cast(apply(curriedFunction, orderArgs).apply(context)))).create(spec);</span>
+    }
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

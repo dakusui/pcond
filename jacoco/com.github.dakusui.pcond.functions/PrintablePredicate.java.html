@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrintablePredicate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.functions</a> &gt; <span class="el_source">PrintablePredicate.java</span></div><h1>PrintablePredicate.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.functions;
+
+import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
+
+public class PrintablePredicate&lt;T&gt; implements Predicate&lt;T&gt; {
+<span class="fc" id="L16">  private static final PrintablePredicate.Factory&lt;?, List&lt;Predicate&lt;Object&gt;&gt;&gt; AND_FACTORY = factory(</span>
+<span class="fc" id="L17">      (arg) -&gt; format(&quot;(%s&amp;&amp;%s)&quot;, arg.get(0), arg.get(1)),</span>
+<span class="fc bfc" id="L18" title="All 4 branches covered.">      arg -&gt; (Object t) -&gt; unwrapIfPrintablePredicate(arg.get(0)).test(t) &amp;&amp; (unwrapIfPrintablePredicate(arg.get(1))).test(t)</span>
+  );
+
+<span class="fc" id="L21">  private static final PrintablePredicate.Factory&lt;?, List&lt;Predicate&lt;Object&gt;&gt;&gt; OR_FACTORY = factory(</span>
+<span class="fc" id="L22">      (arg) -&gt; format(&quot;(%s||%s)&quot;, arg.get(0), arg.get(1)),</span>
+<span class="fc bfc" id="L23" title="All 4 branches covered.">      arg -&gt; (Object t) -&gt; unwrapIfPrintablePredicate(arg.get(0)).test(t) || (unwrapIfPrintablePredicate(arg.get(1))).test(t)</span>
+  );
+
+<span class="fc" id="L26">  private static final PrintablePredicate.Factory&lt;?, Predicate&lt;Object&gt;&gt; NEGATE_FACTORY = factory(</span>
+<span class="fc" id="L27">      (arg) -&gt; format(&quot;!%s&quot;, arg),</span>
+<span class="fc" id="L28">      arg -&gt; (Object t) -&gt; unwrapIfPrintablePredicate(arg).negate().test(t)</span>
+  );
+
+  final Predicate&lt;? super T&gt; predicate;
+  final Supplier&lt;String&gt;     s;
+
+<span class="fc" id="L34">  public PrintablePredicate(Supplier&lt;String&gt; s, Predicate&lt;? super T&gt; predicate) {</span>
+<span class="fc" id="L35">    this.predicate = requireNonNull(predicate);</span>
+<span class="fc" id="L36">    this.s = requireNonNull(s);</span>
+<span class="fc" id="L37">  }</span>
+
+  public static &lt;T, E&gt; Factory&lt;T, E&gt; factory(Function&lt;E, String&gt; nameComposer, Function&lt;E, Predicate&lt;T&gt;&gt; ff) {
+<span class="fc" id="L40">    return new Factory&lt;T, E&gt;(nameComposer) {</span>
+      @Override
+      Predicate&lt;? super T&gt; createPredicate(E arg) {
+<span class="fc" id="L43">        return ff.apply(arg);</span>
+      }
+    };
+  }
+
+  @Override
+  public boolean test(T t) {
+<span class="fc" id="L50">    return predicate.test(t);</span>
+  }
+
+  @SuppressWarnings({ &quot;unchecked&quot;})
+  @Override
+  public Predicate&lt;T&gt; and(Predicate&lt;? super T&gt; other) {
+<span class="fc" id="L56">    requireNonNull(other);</span>
+<span class="fc" id="L57">    return (Predicate&lt;T&gt;) AND_FACTORY.create(asList((Predicate&lt;Object&gt;) this, (Predicate&lt;Object&gt;) other));</span>
+  }
+
+  @SuppressWarnings({ &quot;unchecked&quot;})
+  @Override
+  public Predicate&lt;T&gt; or(Predicate&lt;? super T&gt; other) {
+<span class="fc" id="L63">    requireNonNull(other);</span>
+<span class="fc" id="L64">    return (Predicate&lt;T&gt;) OR_FACTORY.create(asList((Predicate&lt;Object&gt;) this, (Predicate&lt;Object&gt;) other));</span>
+  }
+
+  @SuppressWarnings({ &quot;unchecked&quot;})
+  @Override
+  public Predicate&lt;T&gt; negate() {
+<span class="fc" id="L70">    return (Predicate&lt;T&gt;) NEGATE_FACTORY.create((Predicate&lt;Object&gt;) this);</span>
+  }
+
+  @Override
+  public int hashCode() {
+<span class="fc" id="L75">    return this.predicate.hashCode();</span>
+  }
+
+  @Override
+  public boolean equals(Object anotherObject) {
+<span class="fc bfc" id="L80" title="All 2 branches covered.">    if (this == anotherObject)</span>
+<span class="fc" id="L81">      return true;</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">    if (!(anotherObject instanceof PrintablePredicate))</span>
+<span class="fc" id="L83">      return false;</span>
+<span class="fc" id="L84">    @SuppressWarnings(&quot;unchecked&quot;) PrintablePredicate&lt;T&gt; another = (PrintablePredicate&lt;T&gt;) anotherObject;</span>
+<span class="fc" id="L85">    return this.predicate.equals(another.predicate);</span>
+  }
+
+  @Override
+  public String toString() {
+<span class="fc" id="L90">    return s.get();</span>
+  }
+
+  private static Predicate&lt;Object&gt; unwrapIfPrintablePredicate(Predicate&lt;Object&gt; predicate) {
+<span class="fc" id="L94">    Predicate&lt;Object&gt; ret = predicate;</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">    if (predicate instanceof PrintablePredicate)</span>
+<span class="fc" id="L96">      ret = ((PrintablePredicate&lt;Object&gt;) predicate).predicate;</span>
+<span class="fc" id="L97">    return ret;</span>
+  }
+
+  public static abstract class Factory&lt;T, E&gt; extends PrintableLambdaFactory&lt;E&gt; {
+    abstract static class PrintablePredicateFromFactory&lt;T, E&gt; extends PrintablePredicate&lt;T&gt; implements Lambda&lt;Factory&lt;T, E&gt;, E&gt; {
+      PrintablePredicateFromFactory(Supplier&lt;String&gt; s, Predicate&lt;? super T&gt; function) {
+<span class="fc" id="L103">        super(s, function);</span>
+<span class="fc" id="L104">      }</span>
+
+      @Override
+      public int hashCode() {
+<span class="fc" id="L108">        return Objects.hashCode(arg());</span>
+      }
+
+      @SuppressWarnings(&quot;EqualsWhichDoesntCheckParameterClass&quot;)
+      @Override
+      public boolean equals(Object anotherObject) {
+<span class="fc" id="L114">        return equals(anotherObject, type());</span>
+      }
+    }
+
+    Factory(Function&lt;E, String&gt; s) {
+<span class="fc" id="L119">      super(s);</span>
+<span class="fc" id="L120">    }</span>
+
+    public PrintablePredicate&lt;T&gt; create(E arg) {
+<span class="fc" id="L123">      Lambda.Spec&lt;E&gt; spec = new Lambda.Spec&lt;&gt;(Factory.this, arg, PrintablePredicateFromFactory.class);</span>
+<span class="fc" id="L124">      return new PrintablePredicateFromFactory&lt;T, E&gt;(() -&gt; this.nameComposer().apply(arg), createPredicate(arg)) {</span>
+        @Override
+        public Spec&lt;E&gt; spec() {
+<span class="fc" id="L127">          return spec;</span>
+        }
+      };
+    }
+
+    abstract Predicate&lt;? super T&gt; createPredicate(E arg);
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
