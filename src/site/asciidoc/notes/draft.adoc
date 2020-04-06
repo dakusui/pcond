@@ -1,5 +1,7 @@
 = Overview: `pcond`
 
+The next generation assertive programming library, inspired by valid4j<<v4j>>.
+
 == Background
 
 Didn't you get bored of writing a code like below repeatedly with Guava or any other small utility functions?
@@ -44,7 +46,7 @@ public class Hello {
 
 Unfortunately in Java, `toString` on lambda results in a cryptic string.
 
-[source,console]
+[console]
 ----
 java.lang.IllegalArgumentException: Value:20.0 violated: com.github.dakusui.pcond.examples.Example$$Lambda$1/537548559@5680a178
 
@@ -65,7 +67,7 @@ public class HelloPcond {
 
 This will print as message shown below.
 
-[source,console]
+[console]
 ----
 java.lang.IllegalArgument: Value: 20.0 violated: (>=[0.0]&&<[20.0])
 	at com.github.dakusui.pcond.Preconditions.requireArgument(Assertions.java:16)
@@ -198,6 +200,12 @@ They are defined separately in order to make it possible to customize the behavi
 * Zero-overhead readable assertion message (with `assert {that, precondition, postcondition}` style and `-da` option)
 * Transforming predicate.
 
+[bibliography]
 == References
+
+(t.b.d.)
+
+* https://github.com/google/guava/wiki/PreconditionsExplained[Preconditions Explaind, Google Guava]
+
+- [[[v4j]]] Valid4j, http://www.valid4j.org
 - [[[DbC]]] Wikipedia article on Design by Contract, https://en.wikipedia.org/wiki/Design_by_contract
-- [[[GuavaP]]] Google, https://github.com/google/guava/wiki/PreconditionsExplained

@@ -1,10 +1,13 @@
 <project>
     <body>
-        <menu ref="reports" inherit="top"/>
-        <menu ref="modules"/> 
         <menu name="Documents">
-            <item href="overview.html" name="Overview" />
+            <item href="overview.html" name="Overview"/>
+            <item href="quickstart.htm" name="Quick Start"/>
+            <item href="usage.html" name="Usage"/>
+            <item href="design.html" name="Design"/>
         </menu>
+        <menu ref="reports" inherit="top"/>
+        <menu ref="modules"/>
     </body>
     <skin>
         <groupId>org.apache.maven.skins</groupId>
