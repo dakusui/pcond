@@ -44,7 +44,7 @@ public class Hello {
 
 Unfortunately in Java, `toString` on lambda results in a cryptic string.
 
-[console]
+[source,console]
 ----
 java.lang.IllegalArgumentException: Value:20.0 violated: com.github.dakusui.pcond.examples.Example$$Lambda$1/537548559@5680a178
 
@@ -65,7 +65,7 @@ public class HelloPcond {
 
 This will print as message shown below.
 
-[console]
+[source,console]
 ----
 java.lang.IllegalArgument: Value: 20.0 violated: (>=[0.0]&&<[20.0])
 	at com.github.dakusui.pcond.Preconditions.requireArgument(Assertions.java:16)
