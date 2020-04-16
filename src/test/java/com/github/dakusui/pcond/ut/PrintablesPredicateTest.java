@@ -63,7 +63,7 @@ public class PrintablesPredicateTest {
     }
 
     <T> Predicate<T> create(String name, Predicate<T> p, Predicate<T> q) {
-      return create(new PrintablePredicate<>(() -> name + "1", p), new PrintablePredicate<>(() -> name + "2", q));
+      return create(new PrintablePredicate.Leaf<>(() -> name + "1", p), new PrintablePredicate.Leaf<>(() -> name + "2", q));
     }
 
     abstract <T> Predicate<T> create(PrintablePredicate<T> predicate, PrintablePredicate<T> predicate1);

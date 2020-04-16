@@ -12,7 +12,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
-public class PrintablePredicate<T> implements Predicate<T> {
+public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T> {
   private static final PrintablePredicate.Factory<?, List<Predicate<Object>>> AND_FACTORY = factory(
       (arg) -> format("(%s&&%s)", arg.get(0), arg.get(1)),
       arg -> (Object t) -> unwrapIfPrintablePredicate(arg.get(0)).test(t) && (unwrapIfPrintablePredicate(arg.get(1))).test(t)
@@ -31,11 +31,6 @@ public class PrintablePredicate<T> implements Predicate<T> {
   final Predicate<? super T> predicate;
   final Supplier<String>     s;
 
-  public PrintablePredicate(Supplier<String> s, Predicate<? super T> predicate) {
-    this.predicate = requireNonNull(predicate);
-    this.s = requireNonNull(s);
-  }
-
   public static <T, E> Factory<T, E> factory(Function<E, String> nameComposer, Function<E, Predicate<T>> ff) {
     return new Factory<T, E>(nameComposer) {
       @Override
@@ -45,26 +40,31 @@ public class PrintablePredicate<T> implements Predicate<T> {
     };
   }
 
+  private PrintablePredicate(Supplier<String> s, Predicate<? super T> predicate) {
+    this.predicate = requireNonNull(predicate);
+    this.s = requireNonNull(s);
+  }
+
   @Override
   public boolean test(T t) {
     return predicate.test(t);
   }
 
-  @SuppressWarnings({ "unchecked"})
+  @SuppressWarnings({ "unchecked" })
   @Override
   public Predicate<T> and(Predicate<? super T> other) {
     requireNonNull(other);
     return (Predicate<T>) AND_FACTORY.create(asList((Predicate<Object>) this, (Predicate<Object>) other));
   }
 
-  @SuppressWarnings({ "unchecked"})
+  @SuppressWarnings({ "unchecked" })
   @Override
   public Predicate<T> or(Predicate<? super T> other) {
     requireNonNull(other);
     return (Predicate<T>) OR_FACTORY.create(asList((Predicate<Object>) this, (Predicate<Object>) other));
   }
 
-  @SuppressWarnings({ "unchecked"})
+  @SuppressWarnings({ "unchecked" })
   @Override
   public Predicate<T> negate() {
     return (Predicate<T>) NEGATE_FACTORY.create((Predicate<Object>) this);
@@ -97,8 +97,25 @@ public class PrintablePredicate<T> implements Predicate<T> {
     return ret;
   }
 
+  public static class Leaf<T> extends PrintablePredicate<T> implements Evaluable.Leaf<T> {
+
+    public Leaf(Supplier<String> s, Predicate<? super T> predicate) {
+      super(s, predicate);
+    }
+
+    @Override
+    public boolean accept(T value, Evaluator evaluator) {
+      return evaluator.evaluate(value, this);
+    }
+
+    @Override
+    public Predicate<? super T> predicate() {
+      return predicate;
+    }
+  }
+
   public static abstract class Factory<T, E> extends PrintableLambdaFactory<E> {
-    abstract static class PrintablePredicateFromFactory<T, E> extends PrintablePredicate<T> implements Lambda<Factory<T, E>, E> {
+    abstract static class PrintablePredicateFromFactory<T, E> extends PrintablePredicate.Leaf<T> implements Lambda<Factory<T, E>, E> {
       PrintablePredicateFromFactory(Supplier<String> s, Predicate<? super T> function) {
         super(s, function);
       }

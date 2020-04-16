@@ -1,8 +1,11 @@
 = Overview
-(t.b.d.)
+
+The `pcond` is a simple library for Java SE 8 which makes it possible to define pre- and post-conditions with informative error messages on a failure without repeating what you write as a code as a text string like with other libraries.
+
+== vs Valid4J
 
 
 [bibliography]
 == References
 
-(t.b.d.)
+- [[[valid4j]]] valid4j, http://www.valid4j.org/[valid4j.org]
