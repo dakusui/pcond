@@ -1,7 +1,5 @@
 package com.github.dakusui.pcond.ut.providers;
 
-import com.github.dakusui.pcond.Validations;
-import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.provider.AssertionProvider;
 import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
@@ -102,23 +100,5 @@ public class AssertionProviderTest extends TestBase {
         assertionProvider,
         instanceOf(TestAssertionProvider.class)
     );
-  }
-
-  @Test
-  public void test2() {
-    AssertionProvider<?> assertionProvider = AssertionProvider.createAssertionProvider(new Properties() {{
-      put(AssertionProvider.class.getCanonicalName(), CheckedExceptionAssertionProvider.class.getName());
-    }});
-    assertThat(
-        assertionProvider,
-        instanceOf(TestAssertionProvider.class)
-    );
-  }
-
-  @Test
-  public void test3() {
-    System.setProperty(AssertionProvider.class.getCanonicalName(), CheckedExceptionAssertionProvider.class.getName());
-    Validations.validate("", Predicates.isEqualTo("hello"));
-    System.out.println(AssertionProvider.INSTANCE);
   }
 }
