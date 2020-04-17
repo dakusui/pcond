@@ -54,7 +54,9 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
   @Override
   public Predicate<T> and(Predicate<? super T> other) {
     requireNonNull(other);
-    return (Predicate<T>) AND_FACTORY.createConjunction(asList((Predicate<Object>) this, (Predicate<Object>) other));
+    Predicate<Object> p = (Predicate<Object>) this;
+    Predicate<Object> q = (Predicate<Object>) other;
+    return (Predicate<T>) AND_FACTORY.<Predicate>createConjunction(asList((Predicate<Object>) this, (Predicate<Object>) other), p, q);
   }
 
   @SuppressWarnings({ "unchecked" })
@@ -115,28 +117,28 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
   }
 
   private abstract static class Junction<T> extends PrintablePredicate<T> implements Evaluable.Composite<T> {
-    private final Evaluable<T> a;
-    private final Evaluable<T> b;
+    private final Evaluable<? super T> a;
+    private final Evaluable<? super T> b;
 
-    public Junction(Supplier<String> s, Predicate<? super T> predicate, Evaluable<T> a, Evaluable<T> b) {
+    public Junction(Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
       super(s, predicate);
       this.a = a;
       this.b = b;
     }
 
     @Override
-    public Evaluable<T> a() {
+    public Evaluable<? super T> a() {
       return this.a;
     }
 
     @Override
-    public Evaluable<T> b() {
+    public Evaluable<? super T> b() {
       return this.b;
     }
   }
 
   public static class Conjunction<T> extends Junction<T> implements Evaluable.Conjunction<T> {
-    public Conjunction(Supplier<String> s, Predicate<? super T> predicate, Evaluable<T> a, Evaluable<T> b) {
+    public Conjunction(Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
       super(s, predicate, a, b);
     }
 
@@ -187,16 +189,30 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
       return new LeafPrintablePredicateFromFactory<>(spec, () -> this.nameComposer().apply(arg), createPredicate(arg));
     }
 
-    public ConjunctionPrintablePredicateFromFactory<T, E> createConjunction(E arg) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, LeafPrintablePredicateFromFactory.class);
-      return new ConjunctionPrintablePredicateFromFactory<T, E>(spec, () -> this.nameComposer().apply(arg), (Predicate<? super E>) createPredicate(arg), null, null);
+    public <P extends Predicate<T>> ConjunctionPrintablePredicateFromFactory<T, E> createConjunction(E arg, P p, P q) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, ConjunctionPrintablePredicateFromFactory.class);
+      return new ConjunctionPrintablePredicateFromFactory<>(
+          spec,
+          () -> this.nameComposer().apply(arg),
+          createPredicate(arg),
+          toEvaluableIfNecessary(p),
+          toEvaluableIfNecessary(q));
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> Evaluable<T> toEvaluableIfNecessary(Predicate<? super T> p) {
+      Objects.requireNonNull(p);
+      if (p instanceof Evaluable)
+        return (Evaluable<T>) p;
+      // We know that Printable.predicate returns a PrintablePredicate object, which is an Evaluable.
+      return (Evaluable<T>) Printables.predicate(p::toString, p);
     }
 
     static class LeafPrintablePredicateFromFactory<T, E> extends Leaf<T> implements Lambda<Factory<T, E>, E> {
       private final Spec<E> spec;
 
-      LeafPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> function) {
-        super(s, function);
+      LeafPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate) {
+        super(s, predicate);
         this.spec = spec;
       }
 
@@ -217,11 +233,11 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
       }
     }
 
-    static class ConjunctionPrintablePredicateFromFactory<T, E> extends Conjunction<E> implements Lambda<Factory<T, E>, E> {
+    static class ConjunctionPrintablePredicateFromFactory<T, E> extends Conjunction<T> implements Lambda<Factory<T, E>, E> {
       private final Spec<E> spec;
 
-      ConjunctionPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super E> p, Evaluable<E> a, Evaluable<E> b) {
-        super(s, p, a, b);
+      ConjunctionPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
+        super(s, predicate, a, b);
         this.spec = spec;
       }
 

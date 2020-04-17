@@ -1,9 +1,6 @@
 package com.github.dakusui.pcond.functions;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public interface Evaluator {
   <T> boolean evaluate(T value, Evaluable.Conjunction<T> conjunction);
@@ -36,87 +33,108 @@ public interface Evaluator {
       this.records = records;
     }
 
-    static class Record {
+    public boolean result() {
+      return this.result;
+    }
+
+    public void formatTo(StringBuilder buffer) {
+      records.forEach(r -> buffer.append(r.toString()).append(String.format("%n")));
+    }
+
+    static abstract class Record {
       final int    level;
       final Object value;
-      final String message;
+      final String name;
 
-      Record(int level, Object value, String message) {
+      Record(int level, Object value, String name) {
         this.level = level;
         this.value = value;
-        this.message = message;
+        this.name = name;
+      }
+    }
+
+    static class FinalizedRecord extends Record {
+      final boolean result;
+
+      FinalizedRecord(int level, Object value, boolean result, String name) {
+        super(level, value, name);
+        this.result = result;
+      }
+
+      public String toString() {
+        return String.format("%d:%s:%s:%s", level, name, value, result);
+      }
+    }
+
+    static class OnGoingRecord extends Record {
+      final int positionInRecords;
+
+      OnGoingRecord(int level, int positionInRecords, Object value, String name) {
+        super(level, value, name);
+        this.positionInRecords = positionInRecords;
+      }
+
+      FinalizedRecord result(boolean result) {
+        return new FinalizedRecord(this.level, this.value, result, this.name);
       }
     }
   }
 
   class Impl implements Evaluator {
-    int                 level   = 0;
-    List<Result.Record> records = new LinkedList<>();
+    List<Result.OnGoingRecord> onGoingRecords = new LinkedList<>();
+    List<Result.Record>        records        = new ArrayList<>();
 
-    void newRecord(Object value, String message) {
-      this.records.add(new Result.Record(level, value, message));
+    void record(boolean result, Object value, String message) {
+      this.records.add(new Result.FinalizedRecord(onGoingRecords.size(), value, result, message));
     }
 
-    void enter() {
-      this.level++;
+    Evaluator.Impl enter(String name, Object value) {
+      Result.OnGoingRecord newRecord = new Result.OnGoingRecord(onGoingRecords.size(), records.size(), value, name);
+      onGoingRecords.add(newRecord);
+      records.add(newRecord);
+      return this;
     }
 
-    void leave() {
-      this.level--;
+    boolean leave(boolean result) {
+      int positionInOngoingRecords = onGoingRecords.size() - 1;
+      Result.OnGoingRecord current = onGoingRecords.get(positionInOngoingRecords);
+      records.set(current.positionInRecords, current.result(result));
+      onGoingRecords.remove(positionInOngoingRecords);
+      return result;
     }
 
     @Override
     public <T> boolean evaluate(T value, Evaluable.Conjunction<T> conjunction) {
-      newRecord(value, "and");
-      enter();
-      try {
-        if (!conjunction.a().accept(value, this))
-          return false;
-        return conjunction.b().accept(value, this);
-      } finally {
-        leave();
-      }
+      enter("and", value);
+      if (!conjunction.a().accept(value, this))
+        return leave(false);
+      return leave(conjunction.b().accept(value, this));
     }
 
     @Override
     public <T> boolean evaluate(T value, Evaluable.Disjunction<T> disjunction) {
-      newRecord(value, "or");
-      enter();
-      try {
-        if (disjunction.a().accept(value, this))
-          return true;
-        return disjunction.b().accept(value, this);
-      } finally {
-        leave();
-      }
+      enter("or", value);
+      if (disjunction.a().accept(value, this))
+        return leave(true);
+      return leave(disjunction.b().accept(value, this));
     }
 
     @Override
     public <T> boolean evaluate(T value, Evaluable.Negation<T> negation) {
-      newRecord(value, "or");
-      enter();
-      try {
-        return !negation.body().accept(value, this);
-      } finally {
-        leave();
-      }
+      enter("negate", value);
+      return leave(!negation.body().accept(value, this));
     }
 
     @Override
     public <T> boolean evaluate(T value, Evaluable.Leaf<T> leaf) {
-      newRecord(value, String.format("leaf:%s", leaf.predicate()));
-      return leaf.predicate().test(value);
+      boolean result = leaf.predicate().test(value);
+      record(result, value, String.format("leaf:%s", leaf));
+      return result;
     }
 
     @Override
     public <T, R> boolean evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      newRecord(value, String.format("transform:%s", transformation.mapper()));
-      enter();
-      try {
-        return transformation.checker().accept(transformation.mapper().apply(value), this);
-      } finally {
-        leave();
-      }
+      return enter(String.format("transform:%s", transformation.mapper()), value).leave(transformation.checker().accept(transformation.mapper().apply(value), this));
     }
 
     @Override

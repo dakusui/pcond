@@ -7,9 +7,9 @@ public interface Evaluable<T> {
   boolean accept(T value, Evaluator evaluator);
 
   interface Composite<T> extends Evaluable<T> {
-    Evaluable<T> a();
+    Evaluable<? super T> a();
 
-    Evaluable<T> b();
+    Evaluable<? super T> b();
   }
 
   interface Conjunction<T> extends Composite<T> {
