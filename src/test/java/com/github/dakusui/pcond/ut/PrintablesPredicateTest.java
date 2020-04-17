@@ -111,6 +111,9 @@ public class PrintablesPredicateTest {
       Predicate<?> p = Predicates.isNotNull().negate();
       Predicate<?> q = Predicates.isNotNull().negate();
       Predicate<?> n = Predicates.isNotNull();
+//      assertThat(p, is(p));
+      assertThat(p, is(q));
+      assertThat(p, not(is(n)));
       assertThat(
           p,
           allOf(

@@ -29,7 +29,7 @@ public interface Evaluable<T> {
       return evaluator.evaluate(value, this);
     }
 
-    Evaluable<T> body();
+    Evaluable<? super T> target();
   }
 
   interface Leaf<T> extends Evaluable<T> {
@@ -45,8 +45,8 @@ public interface Evaluable<T> {
       return evaluator.evaluate(value, this);
     }
 
-    Function<T, R> mapper();
+    Function<? super T, ? extends R> mapper();
 
-    Evaluable<R> checker();
+    Evaluable<? super R> checker();
   }
 }

@@ -104,13 +104,15 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
   AE applicationException(String message);
 
   static <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E {
-    if (isInDetailMode() && cond instanceof Evaluable) {
+    if (useEvaluator() && cond instanceof Evaluable) {
       Evaluator.Result result = Evaluator.evaluate(value, (Evaluable<? super T>) cond);
       if (result.result())
         return value;
       StringBuilder b = new StringBuilder(messageComposer.apply(value, cond));
-      b.append(String.format("%n"));
-      result.formatTo(b);
+      if (isInDetailMode()) {
+        b.append(String.format("%n"));
+        result.formatTo(b);
+      }
       throw exceptionComposer.apply(b.toString());
     } else {
       if (!cond.test(value))
@@ -119,7 +121,11 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
     }
   }
 
-  static boolean isInDetailMode() {
+  static boolean useEvaluator() {
     return true;
+  }
+
+  static boolean isInDetailMode() {
+    return false;
   }
 }

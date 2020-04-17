@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
@@ -63,13 +64,16 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
   @Override
   public Predicate<T> or(Predicate<? super T> other) {
     requireNonNull(other);
-    return (Predicate<T>) OR_FACTORY.create(asList((Predicate<Object>) this, (Predicate<Object>) other));
+    Predicate<Object> p = (Predicate<Object>) this;
+    Predicate<Object> q = (Predicate<Object>) other;
+    return (Predicate<T>) OR_FACTORY.<Predicate>createDisjunction(asList((Predicate<Object>) this, (Predicate<Object>) other), p, q);
   }
 
   @SuppressWarnings({ "unchecked" })
   @Override
   public Predicate<T> negate() {
-    return (Predicate<T>) NEGATE_FACTORY.create((Predicate<Object>) this);
+    Predicate<Object> p = (Predicate<Object>) this;
+    return (Predicate<T>) NEGATE_FACTORY.<Predicate>createNegation((Predicate<Object>) this, p);
   }
 
   @Override
@@ -149,7 +153,7 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
   }
 
   public static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
-    public Disjunction(Supplier<String> s, Predicate<? super T> predicate, Evaluable<T> a, Evaluable<T> b) {
+    public Disjunction(Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
       super(s, predicate, a, b);
     }
 
@@ -160,15 +164,15 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
   }
 
   public static class Negation<T> extends PrintablePredicate<T> implements Evaluable.Negation<T> {
-    private final Evaluable<T> body;
+    private final Evaluable<? super T> body;
 
-    public Negation(Supplier<String> s, Predicate<? super T> predicate, Evaluable<T> body) {
+    public Negation(Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> body) {
       super(s, predicate);
       this.body = body;
     }
 
     @Override
-    public Evaluable<T> body() {
+    public Evaluable<? super T> target() {
       return this.body;
     }
   }
@@ -199,13 +203,23 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
           toEvaluableIfNecessary(q));
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> Evaluable<T> toEvaluableIfNecessary(Predicate<? super T> p) {
-      Objects.requireNonNull(p);
-      if (p instanceof Evaluable)
-        return (Evaluable<T>) p;
-      // We know that Printable.predicate returns a PrintablePredicate object, which is an Evaluable.
-      return (Evaluable<T>) Printables.predicate(p::toString, p);
+    public <P extends Predicate<T>> DisjunctionPrintablePredicateFromFactory<T, E> createDisjunction(E arg, P p, P q) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, DisjunctionPrintablePredicateFromFactory.class);
+      return new DisjunctionPrintablePredicateFromFactory<>(
+          spec,
+          () -> this.nameComposer().apply(arg),
+          createPredicate(arg),
+          toEvaluableIfNecessary(p),
+          toEvaluableIfNecessary(q));
+    }
+
+    public <P extends Predicate<T>> NegationPrintablePredicateFromFactory<T, E> createNegation(E arg, P p) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, NegationPrintablePredicateFromFactory.class);
+      return new NegationPrintablePredicateFromFactory<>(
+          spec,
+          () -> this.nameComposer().apply(arg),
+          createPredicate(arg),
+          toEvaluableIfNecessary(p));
     }
 
     static class LeafPrintablePredicateFromFactory<T, E> extends Leaf<T> implements Lambda<Factory<T, E>, E> {
@@ -258,5 +272,54 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
       }
     }
 
+    static class DisjunctionPrintablePredicateFromFactory<T, E> extends Disjunction<T> implements Lambda<Factory<T, E>, E> {
+      private final Spec<E> spec;
+
+      DisjunctionPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
+        super(s, predicate, a, b);
+        this.spec = spec;
+      }
+
+      @Override
+      public Spec<E> spec() {
+        return spec;
+      }
+
+      @Override
+      public int hashCode() {
+        return Objects.hashCode(arg());
+      }
+
+      @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+      @Override
+      public boolean equals(Object anotherObject) {
+        return equals(anotherObject, type());
+      }
+    }
+
+    static class NegationPrintablePredicateFromFactory<T, E> extends Negation<T> implements Lambda<Factory<T, E>, E> {
+      private final Spec<E> spec;
+
+      NegationPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> target) {
+        super(s, predicate, target);
+        this.spec = spec;
+      }
+
+      @Override
+      public Spec<E> spec() {
+        return spec;
+      }
+
+      @Override
+      public int hashCode() {
+        return Objects.hashCode(arg());
+      }
+
+      @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+      @Override
+      public boolean equals(Object anotherObject) {
+        return equals(anotherObject, type());
+      }
+    }
   }
 }

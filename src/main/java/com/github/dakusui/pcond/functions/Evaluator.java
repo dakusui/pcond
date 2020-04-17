@@ -2,6 +2,8 @@ package com.github.dakusui.pcond.functions;
 
 import java.util.*;
 
+import static java.util.Collections.unmodifiableList;
+
 public interface Evaluator {
   <T> boolean evaluate(T value, Evaluable.Conjunction<T> conjunction);
 
@@ -54,9 +56,9 @@ public interface Evaluator {
     }
 
     static class FinalizedRecord extends Record {
-      final boolean result;
+      final Object result;
 
-      FinalizedRecord(int level, Object value, boolean result, String name) {
+      FinalizedRecord(int level, Object value, Object result, String name) {
         super(level, value, name);
         this.result = result;
       }
@@ -84,15 +86,21 @@ public interface Evaluator {
     List<Result.OnGoingRecord> onGoingRecords = new LinkedList<>();
     List<Result.Record>        records        = new ArrayList<>();
 
-    void record(boolean result, Object value, String message) {
-      this.records.add(new Result.FinalizedRecord(onGoingRecords.size(), value, result, message));
+    /**
+     * Records an operation of the name.
+     *
+     * @param name   The name of the operation
+     * @param value  Input to the operation
+     * @param result The output of the operation
+     */
+    void record(String name, Object value, Object result) {
+      this.records.add(new Result.FinalizedRecord(onGoingRecords.size(), value, result, name));
     }
 
-    Evaluator.Impl enter(String name, Object value) {
+    void enter(String name, Object value) {
       Result.OnGoingRecord newRecord = new Result.OnGoingRecord(onGoingRecords.size(), records.size(), value, name);
       onGoingRecords.add(newRecord);
       records.add(newRecord);
-      return this;
     }
 
     boolean leave(boolean result) {
@@ -121,25 +129,27 @@ public interface Evaluator {
 
     @Override
     public <T> boolean evaluate(T value, Evaluable.Negation<T> negation) {
-      enter("negate", value);
-      return leave(!negation.body().accept(value, this));
+      enter("not", value);
+      return leave(!negation.target().accept(value, this));
     }
 
     @Override
     public <T> boolean evaluate(T value, Evaluable.Leaf<T> leaf) {
       boolean result = leaf.predicate().test(value);
-      record(result, value, String.format("leaf:%s", leaf));
+      record(String.format("leaf:%s", leaf), value, result);
       return result;
     }
 
     @Override
     public <T, R> boolean evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      return enter(String.format("transform:%s", transformation.mapper()), value).leave(transformation.checker().accept(transformation.mapper().apply(value), this));
+      R transformedValue = transformation.mapper().apply(value);
+      record(String.format("transform:%s", transformation.mapper()), value, transformedValue);
+      return transformation.checker().accept(transformedValue, this);
     }
 
     @Override
     public List<Result.Record> resultRecords() {
-      return Collections.unmodifiableList(this.records);
+      return unmodifiableList(this.records);
     }
   }
 }

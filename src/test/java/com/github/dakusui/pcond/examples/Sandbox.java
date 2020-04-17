@@ -68,7 +68,7 @@ public class Sandbox {
     System.out.println(ret);
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test//(expected = IllegalStateException.class)
   public void testState() {
     try {
       System.out.println(requireState(Collections.emptyList(), when("size", size()).then(gt(0))));

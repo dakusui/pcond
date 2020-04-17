@@ -1,10 +1,11 @@
 package com.github.dakusui.pcond.internals;
 
+import com.github.dakusui.pcond.functions.Evaluable;
+import com.github.dakusui.pcond.functions.Printables;
+
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -98,5 +99,14 @@ public enum InternalUtils {
     return unmodifiableList(new ArrayList<Object>(list) {{
       add(p);
     }});
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Evaluable<T> toEvaluableIfNecessary(Predicate<? super T> p) {
+    Objects.requireNonNull(p);
+    if (p instanceof Evaluable)
+      return (Evaluable<T>) p;
+    // We know that Printable.predicate returns a PrintablePredicate object, which is an Evaluable.
+    return (Evaluable<T>) Printables.predicate(p::toString, p);
   }
 }
