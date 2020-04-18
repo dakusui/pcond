@@ -18,7 +18,7 @@ public enum TestUtils {
   /**
    * Typically called from a method annotated with {@literal @}{@code Before} method.
    */
-  public static void suppressStdOutErrIfRunUnderSurefire() {
+  public static void suppressStdOutErrIfUnderPitestOrSurefire() {
     if (isRunUnderPitest() || TestUtils.isRunUnderSurefire()) {
       System.setOut(NOP);
       System.setErr(NOP);

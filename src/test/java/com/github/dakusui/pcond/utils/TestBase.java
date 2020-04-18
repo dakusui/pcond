@@ -6,7 +6,7 @@ import org.junit.Before;
 public abstract class TestBase {
   @Before
   public void before() {
-    TestUtils.suppressStdOutErrIfRunUnderSurefire();
+    TestUtils.suppressStdOutErrIfUnderPitestOrSurefire();
   }
 
   @After
