@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.utils;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Objects;
 
 public enum TestUtils {
   ;
@@ -18,7 +19,7 @@ public enum TestUtils {
    * Typically called from a method annotated with {@literal @}{@code Before} method.
    */
   public static void suppressStdOutErrIfRunUnderSurefire() {
-    if (TestUtils.isRunUnderSurefire()) {
+    if (isRunUnderPitest() || TestUtils.isRunUnderSurefire()) {
       System.setOut(NOP);
       System.setErr(NOP);
     }
@@ -36,11 +37,23 @@ public enum TestUtils {
     return System.getProperty("surefire.real.class.path") != null;
   }
 
+  public static boolean isRunUnderPitest() {
+    return Objects.equals(System.getProperty("underpitest"), "yes");
+  }
+
   public static String firstLineOf(String multilineString) {
     return lineAt(multilineString, 0);
   }
 
   public static String lineAt(String multilineString, int position) {
-    return multilineString.split("\\r?\\n")[position];
+    return split(multilineString)[position];
+  }
+
+  public static String[] split(String multilineString) {
+    return multilineString.split("\\r?\\n");
+  }
+
+  public static int numLines(String multilineString) {
+    return split(multilineString).length;
   }
 }

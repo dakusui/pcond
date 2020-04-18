@@ -13,8 +13,10 @@ import java.util.Properties;
 import static com.github.dakusui.pcond.functions.Functions.length;
 import static com.github.dakusui.pcond.functions.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
+import static com.github.dakusui.pcond.utils.TestUtils.numLines;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class DefaultAssertionProviderTest extends TestBase {
@@ -25,6 +27,7 @@ public class DefaultAssertionProviderTest extends TestBase {
           .requireArgument("Hello", and(isNotNull(), isEmptyString().negate(), when(length()).then(gt(10))));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
+      assertEquals(1, numLines(e.getMessage()));
       throw e;
     }
   }

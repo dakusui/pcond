@@ -157,16 +157,20 @@ public interface Evaluator {
     @Override
     public <T> boolean evaluate(T value, Evaluable.Conjunction<T> conjunction) {
       enter("&&");
-      if (!conjunction.a().accept(value, this))
-        return leave(false);
+      if (!conjunction.a().accept(value, this)) {
+        leave(false);
+        return false;
+      }
       return leave(conjunction.b().accept(value, this));
     }
 
     @Override
     public <T> boolean evaluate(T value, Evaluable.Disjunction<T> disjunction) {
       enter("||");
-      if (disjunction.a().accept(value, this))
-        return leave(true);
+      if (disjunction.a().accept(value, this)) {
+        leave(true);
+        return true;
+      }
       return leave(disjunction.b().accept(value, this));
     }
 
