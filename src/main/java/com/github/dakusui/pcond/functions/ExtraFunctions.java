@@ -34,6 +34,13 @@ public class ExtraFunctions {
     };
   }
 
+  /**
+   * Converts a curried function which results in a boolean value in to a predicate.
+   *
+   * @param curriedFunction A curried function to be converted.
+   * @param orderArgs An array to specify the order in which values in the context are applied to the function.
+   * @return A predicate converted from the given curried function.
+   */
   public static Predicate<Context> test(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
     return Def.applyAndTest(curriedFunction, Predicates.isTrue(), Boolean.class, orderArgs);
   }

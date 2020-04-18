@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.functions.Evaluable;
 import com.github.dakusui.pcond.functions.Printables;
 
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.joining;
 
 public enum InternalUtils {
   ;
@@ -63,11 +65,11 @@ public enum InternalUtils {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> T createInstanceFromClassName(Class<? super T> expectedClass, String requestedClassName) {
+  public static <T> T createInstanceFromClassName(Class<? super T> expectedClass, String requestedClassName, Object... args) {
     try {
       Class<?> loadedClass = Class.forName(requestedClassName);
       try {
-        return (T) expectedClass.cast(loadedClass.getDeclaredConstructor().newInstance());
+        return (T) expectedClass.cast(loadedClass.getDeclaredConstructor(Arrays.stream(args).map(Object::getClass).toArray(Class<?>[]::new)).newInstance(args));
       } catch (ClassCastException e) {
         throw wrap("The requested class:'" + requestedClassName +
                 "' was found but not an instance of " + expectedClass.getCanonicalName() + ".: " +
@@ -113,6 +115,37 @@ public enum InternalUtils {
   public static String spaces(int num) {
     char[] buf = new char[num];
     Arrays.fill(buf, ' ');
-    return new StringBuilder(num).append(buf).toString();
+    return String.valueOf(buf);
+  }
+
+  public static Class<?> wrapperClassOf(Class<?> clazz) {
+    assert clazz != null;
+    if (clazz == Integer.TYPE)
+      return Integer.class;
+    if (clazz == Long.TYPE)
+      return Long.class;
+    if (clazz == Boolean.TYPE)
+      return Boolean.class;
+    if (clazz == Byte.TYPE)
+      return Byte.class;
+    if (clazz == Character.TYPE)
+      return Character.class;
+    if (clazz == Float.TYPE)
+      return Float.class;
+    if (clazz == Double.TYPE)
+      return Double.class;
+    if (clazz == Short.TYPE)
+      return Short.class;
+    if (clazz == Void.TYPE)
+      return Void.class;
+    throw new IllegalArgumentException("Unsupported type:" + clazz.getName() + " was given.");
+  }
+
+  public static Method getMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
+    try {
+      return aClass.getMethod(methodName, parameterTypes);
+    } catch (NoSuchMethodException e) {
+      throw wrap(format("Requested method: %s(%s) was not found in %s", methodName, Arrays.stream(parameterTypes).map(Class::getName).collect(joining(",")), aClass.getName()), e);
+    }
   }
 }

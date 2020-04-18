@@ -1,7 +1,5 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.ExtraFunctions;
-import com.github.dakusui.pcond.functions.currying.CurriedFunction;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.ut.testdata.FailingConstructor;
@@ -12,21 +10,7 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Objects;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
-import static com.github.dakusui.pcond.Preconditions.require;
-import static com.github.dakusui.pcond.functions.ExtraFunctions.nest;
-import static com.github.dakusui.pcond.functions.ExtraFunctions.test;
-import static com.github.dakusui.pcond.functions.Functions.curry;
-import static com.github.dakusui.pcond.functions.Functions.stream;
-import static com.github.dakusui.pcond.functions.Predicates.*;
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -164,6 +148,57 @@ public class InternalUtilsTest {
     @Test
     public void givenFalse$whenAssertionFailsWith$thenTrue() {
       assertTrue(InternalUtils.assertFailsWith(false));
+    }
+  }
+
+  public static class WrapperClassOf {
+    @Test
+    public void testInteger() {
+      assertEquals(Integer.class, InternalUtils.wrapperClassOf(int.class));
+    }
+    @Test
+    public void testLong() {
+      assertEquals(Long.class, InternalUtils.wrapperClassOf(long.class));
+    }
+
+    @Test
+    public void testBoolean() {
+      assertEquals(Boolean.class, InternalUtils.wrapperClassOf(boolean.class));
+    }
+
+    @Test
+    public void testByte() {
+      assertEquals(Byte.class, InternalUtils.wrapperClassOf(byte.class));
+    }
+
+    @Test
+    public void testCharacter() {
+      assertEquals(Character.class, InternalUtils.wrapperClassOf(char.class));
+    }
+
+    @Test
+    public void testFloat() {
+      assertEquals(Float.class, InternalUtils.wrapperClassOf(float.class));
+    }
+
+    @Test
+    public void testDouble() {
+      assertEquals(Double.class, InternalUtils.wrapperClassOf(double.class));
+    }
+
+    @Test
+    public void testShort() {
+      assertEquals(Short.class, InternalUtils.wrapperClassOf(short.class));
+    }
+
+    @Test
+    public void testVoid() {
+      assertEquals(Void.class, InternalUtils.wrapperClassOf(void.class));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testOther() {
+      InternalUtils.wrapperClassOf(Object.class);
     }
   }
 }

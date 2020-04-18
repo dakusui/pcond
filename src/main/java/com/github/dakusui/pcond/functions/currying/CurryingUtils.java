@@ -15,8 +15,8 @@ import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.functions.currying.CurryingUtils.Reflections.wrapperClassOf;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
@@ -75,7 +75,7 @@ public enum CurryingUtils {
       }
 
       private Set<Class<?>> wrapperClassesOf(Set<Class<?>> collect) {
-        return collect.stream().map(Reflections::wrapperClassOf).collect(toSet());
+        return collect.stream().map(InternalUtils::wrapperClassOf).collect(toSet());
       }
 
       private Set<Class<?>> asSet(Class<?>... classes) {
@@ -85,95 +85,81 @@ public enum CurryingUtils {
       }
     };
 
-    public static Class<?> wrapperClassOf(Class<?> clazz) {
-      assert clazz != null;
-      if (clazz == Integer.TYPE)
-        return Integer.class;
-      if (clazz == Long.TYPE)
-        return Long.class;
-      if (clazz == Boolean.TYPE)
-        return Boolean.class;
-      if (clazz == Byte.TYPE)
-        return Byte.class;
-      if (clazz == Character.TYPE)
-        return Character.class;
-      if (clazz == Float.TYPE)
-        return Float.class;
-      if (clazz == Double.TYPE)
-        return Double.class;
-      if (clazz == Short.TYPE)
-        return Short.class;
-      if (clazz == Void.TYPE)
-        return Void.class;
-      throw new IllegalArgumentException("Unsupported type:" + clazz.getName() + " was given.");
+    @SuppressWarnings("unchecked")
+    public static <R> MultiParameterFunction<R> lookupFunctionForStaticMethod(int[] order, Class<?> aClass, String methodName, Class<?>... parameterTypes) {
+      final List<Integer> paramOrder = unmodifiableList(Arrays.stream(order).boxed().distinct().collect(toList()));
+      InternalChecks.requireArgument(order, o -> o.length == paramOrder.size(), () -> "Duplicated elements are found in the 'order' argument:" + Arrays.toString(order) + " " + paramOrder);
+      InternalChecks.requireArgument(order, o -> o.length == parameterTypes.length, () -> "Inconsistent number of parameters are supplied by 'order'. Expected:" + parameterTypes.length + ", Actual: " + order.length);
+      Map<List<Object>, MultiParameterFunction<?>> methodBasedMultiParameterFunctionPool = methodBasedMultiParameterFunctionPool();
+      Method method = Checks.validateMethod(InternalUtils.getMethod(aClass, methodName, parameterTypes));
+      methodBasedMultiParameterFunctionPool.computeIfAbsent(
+          asList(method, paramOrder),
+          Reflections::createMultiParameterFunctionForStaticMethod);
+      return (MultiParameterFunction<R>) methodBasedMultiParameterFunctionPool.get(asList(method, paramOrder));
+    }
+
+    public static <R> MultiParameterFunction<R> createMultiParameterFunctionForStaticMethod(List<Object> m) {
+      final Method method = (Method) m.get(0);
+      @SuppressWarnings("unchecked") final List<Integer> paramOrder = (List<Integer>) m.get(1);
+      return createMultiParameterFunctionForStaticMethod(method, paramOrder);
     }
 
     @SuppressWarnings("unchecked")
-    public static <R> MultiParameterFunction<R> createFunctionFromStaticMethod(int[] order, Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-      final List<Integer> paramOrder = unmodifiableList(Arrays.stream(order).boxed().distinct().collect(toList()));
-      InternalChecks.requireArgument(order, o -> o.length == paramOrder.size(), () -> "Duplicated elements are found in the 'order' argument:" + Arrays.toString(order) + " " + paramOrder);
-      InternalChecks.requireArgument(order, o -> o.length == parameterTypes.length, () -> "Inconsistent number of parameter numbers are specified by 'order'. Expected:" + parameterTypes.length + ", Actual: " + order.length);
-      System.out.println("-->" + paramOrder);
-      Map<List<Object>, MultiParameterFunction<?>> methodBasedMultiParameterFunctionPool = methodBasedMultiParameterFunctionPool();
-      Method method = Checks.validateMethod(getMethod(aClass, methodName, parameterTypes));
-      methodBasedMultiParameterFunctionPool.computeIfAbsent(
-          asList(method, paramOrder),
-          m -> {
-            class PrintableMultiParameterFunction<RR> extends PrintableFunction<List<? super Object>, RR> implements MultiParameterFunction<RR> {
-              final List<Object> identity = m;
+    public static <R> MultiParameterFunction<R> createMultiParameterFunctionForStaticMethod(Method method, List<Integer> paramOrder) {
+      class PrintableMultiParameterFunction<RR> extends PrintableFunction<List<? super Object>, RR> implements MultiParameterFunction<RR> {
+        final Object identity = asList(method, paramOrder);
 
-              PrintableMultiParameterFunction() {
-                super(
-                    () -> Formatters.formatMethodName((Method) m.get(0)) + Formatters.formatParameterOrder((List<Integer>) m.get(1)),
-                    objects -> {
-                      try {
-                        return (RR) ((Method) m.get(0)).invoke(null, ((List<Integer>) m.get(1)).stream().map(objects::get).toArray());
-                      } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw InternalUtils.wrap(
-                            String.format("Invoked method:%s threw an exception", Formatters.formatMethodName(((Method) m.get(0)))),
-                            e instanceof InvocationTargetException ? e.getCause() : e);
-                      }
-                    });
-              }
-
-              @Override
-              public int arity() {
-                return ((Method) m.get(0)).getParameterCount();
-              }
-
-              @Override
-              public Class<?> parameterType(int i) {
-                return ((Method) m.get(0)).getParameterTypes()[paramOrder.get(i)];
-              }
-
-              @Override
-              public Class<? extends RR> returnType() {
-                return (Class<? extends RR>) ((Method) m.get(0)).getReturnType();
-              }
-
-              @Override
-              public int hashCode() {
-                return m.hashCode();
-              }
-
-              @Override
-              public boolean equals(Object anotherObject) {
-                if (anotherObject == this)
-                  return true;
-                if (anotherObject instanceof PrintableMultiParameterFunction) {
-                  PrintableMultiParameterFunction<?> another = (PrintableMultiParameterFunction<?>) anotherObject;
-                  return this.identity().equals(another.identity());
+        PrintableMultiParameterFunction() {
+          super(
+              () -> Formatters.formatMethodName(method) + Formatters.formatParameterOrder(paramOrder),
+              objects -> {
+                try {
+                  return (RR) method.invoke(null, (paramOrder).stream().map(objects::get).toArray());
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                  throw InternalUtils.wrap(
+                      String.format("Invoked method:%s threw an exception", Formatters.formatMethodName(method)),
+                      e instanceof InvocationTargetException ? e.getCause() : e);
                 }
-                return false;
-              }
+              });
+        }
 
-              List<Object> identity() {
-                return this.identity;
-              }
-            }
-            return new PrintableMultiParameterFunction<>();
-          });
-      return (MultiParameterFunction<R>) methodBasedMultiParameterFunctionPool.get(asList(method, paramOrder));
+        @Override
+        public int arity() {
+          return method.getParameterCount();
+        }
+
+        @Override
+        public Class<?> parameterType(int i) {
+          return method.getParameterTypes()[(paramOrder).get(i)];
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public Class<? extends RR> returnType() {
+          return (Class<? extends RR>) (method).getReturnType();
+        }
+
+        @Override
+        public int hashCode() {
+          return identity.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object anotherObject) {
+          if (anotherObject == this)
+            return true;
+          if (anotherObject instanceof PrintableMultiParameterFunction) {
+            PrintableMultiParameterFunction<?> another = (PrintableMultiParameterFunction<?>) anotherObject;
+            return this.identity().equals(another.identity());
+          }
+          return false;
+        }
+
+        Object identity() {
+          return this.identity;
+        }
+      }
+      return new PrintableMultiParameterFunction<>();
     }
 
     private static Map<List<Object>, MultiParameterFunction<?>> methodBasedMultiParameterFunctionPool() {
@@ -182,13 +168,6 @@ public enum CurryingUtils {
       return METHOD_BASED_FUNCTION_POOL.get();
     }
 
-    private static Method getMethod(Class<?> aClass, String methodName, Class<?>[] parameterTypes) {
-      try {
-        return aClass.getMethod(methodName, parameterTypes);
-      } catch (NoSuchMethodException e) {
-        throw InternalUtils.wrap(String.format("Requested method: %s(%s) was not found in %s", methodName, Arrays.stream(parameterTypes).map(Class::getName).collect(joining(",")), aClass.getName()), e);
-      }
-    }
   }
 
   enum Formatters {

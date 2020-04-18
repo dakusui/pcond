@@ -128,11 +128,11 @@ public enum Functions {
    * @return A printable and curried function of the target method.
    */
   public static CurriedFunction<Object, Object> curry(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    return CurryingUtils.curry(methodName, createFunctionFromStaticMethod(aClass, methodName, parameterTypes));
+    return CurryingUtils.curry(methodName, functionForStaticMethod(aClass, methodName, parameterTypes));
   }
 
-  public static <R> MultiParameterFunction<R> createFunctionFromStaticMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    return CurryingUtils.Reflections.createFunctionFromStaticMethod(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);
+  public static <R> MultiParameterFunction<R> functionForStaticMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
+    return CurryingUtils.Reflections.lookupFunctionForStaticMethod(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);
   }
 
   enum Def {

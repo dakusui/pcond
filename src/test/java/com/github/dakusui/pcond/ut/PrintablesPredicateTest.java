@@ -60,6 +60,13 @@ public class PrintablesPredicateTest {
               not(is(r2)),
               not(is(o))
           ));
+      assertThat(
+          p1.hashCode(),
+          allOf(
+              is(p1.hashCode()),
+              is(p2.hashCode()),
+              is(q.hashCode())
+          ));
     }
 
     <T> Predicate<T> create(String name, Predicate<T> p, Predicate<T> q) {
@@ -111,15 +118,18 @@ public class PrintablesPredicateTest {
       Predicate<?> p = Predicates.isNotNull().negate();
       Predicate<?> q = Predicates.isNotNull().negate();
       Predicate<?> n = Predicates.isNotNull();
-//      assertThat(p, is(p));
-      assertThat(p, is(q));
-      assertThat(p, not(is(n)));
       assertThat(
           p,
           allOf(
               is(p),
               is(q),
               not(is(n))));
+      assertThat(
+          p.hashCode(),
+          allOf(
+              is(p.hashCode()),
+              is(q.hashCode())
+          ));
     }
   }
 }

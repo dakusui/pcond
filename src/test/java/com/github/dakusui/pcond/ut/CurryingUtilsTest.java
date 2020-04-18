@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.functions.currying.CurriedFunction;
-import com.github.dakusui.pcond.functions.currying.CurryingUtils;
+import com.github.dakusui.pcond.internals.InternalUtils;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.allOf;
@@ -12,12 +12,12 @@ import static org.junit.Assert.assertThat;
 public class CurryingUtilsTest {
   @Test
   public void testVoid() {
-    assertEquals(Void.class, CurryingUtils.Reflections.wrapperClassOf(void.class));
+    assertEquals(Void.class, InternalUtils.wrapperClassOf(void.class));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testNonPrimitive() {
-    CurryingUtils.Reflections.wrapperClassOf(String.class);
+    InternalUtils.wrapperClassOf(String.class);
   }
 
   @Test(expected = IllegalStateException.class)

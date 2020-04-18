@@ -16,4 +16,15 @@ public class InternalChecksTest {
       throw e;
     }
   }
+
+  @Test(expected = IllegalStateException.class)
+  public void testRequireState$fails() {
+    String message = "value is not zero";
+    try {
+      InternalChecks.requireState(1, i -> i == 0, () -> message);
+    } catch (IllegalStateException e) {
+      assertEquals(message, e.getMessage());
+      throw e;
+    }
+  }
 }

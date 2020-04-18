@@ -14,4 +14,10 @@ public class InternalChecks {
       throw new IllegalArgumentException(messageFormatter.get());
     return arg;
   }
+
+  public static <V> V requireState(V arg, Predicate<? super V> predicate, Supplier<String> messageFormatter) {
+    if (!predicate.test(arg))
+      throw new IllegalStateException(messageFormatter.get());
+    return arg;
+  }
 }

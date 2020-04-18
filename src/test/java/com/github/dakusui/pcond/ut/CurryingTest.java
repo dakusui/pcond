@@ -64,10 +64,13 @@ public class CurryingTest extends TestBase {
       curried = curried.applyNext("InvalidArgString").applyLast("Detail:InvalidArgString");
       System.out.println(curried);
     } catch (IllegalArgumentException e) {
+      e.printStackTrace();
       assertThat(
           e.getMessage(),
           allOf(
+              CoreMatchers.containsString("Given argument"),
               CoreMatchers.containsString("InvalidArgString"),
+              CoreMatchers.containsString(String.class.getName()),
               CoreMatchers.containsString("int")
           ));
       throw e;
@@ -108,6 +111,25 @@ public class CurryingTest extends TestBase {
   public void given_intToCurriedFuncWithIntParam$whenIsValidArg$thenTrue() {
     CurriedFunction<Object, Object> curried = Utils.example();
     assertTrue(curried.isValidArg(1));
+  }
+
+  @Test
+  public void given_shortToCurriedFuncWithIntParam$whenIsValidArg$thenTrue() {
+    CurriedFunction<Object, Object> curried = Utils.example();
+    assertTrue(curried.isValidArg((short) 1));
+  }
+
+  @Test
+  public void given_byteToCurriedFuncWithIntParam$whenIsValidArg$thenTrue() {
+    CurriedFunction<Object, Object> curried = Utils.example();
+    assertTrue(curried.isValidArg((byte) 1));
+  }
+
+
+  @Test
+  public void given_longToCurriedFuncWithIntParam$whenIsValidArg$thenFalse() {
+    CurriedFunction<Object, Object> curried = Utils.example();
+    assertFalse(curried.isValidArg(1L));
   }
 
   @SuppressWarnings("UnnecessaryBoxing")
@@ -193,9 +215,14 @@ public class CurryingTest extends TestBase {
 
   @Test(expected = PreconditionViolationException.class)
   public void hello_a() {
-    require(
-        asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2", "o")))).then(allMatch(test(Utils.endsWith()))));
+    try {
+      require(
+          asList("hello", "world"),
+          when(stream().andThen(nest(asList("1", "2", "o")))).then(allMatch(test(Utils.endsWith()))));
+    } catch (PreconditionViolationException e) {
+      e.printStackTrace();
+      throw e;
+    }
   }
 
   @Test

@@ -57,7 +57,7 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     requireNonNull(other);
     Predicate<Object> p = (Predicate<Object>) this;
     Predicate<Object> q = (Predicate<Object>) other;
-    return (Predicate<T>) AND_FACTORY.<Predicate>createConjunction(asList((Predicate<Object>) this, (Predicate<Object>) other), p, q);
+    return (Predicate<T>) AND_FACTORY.createConjunction(asList((Predicate<Object>) this, (Predicate<Object>) other), p, q);
   }
 
   @SuppressWarnings({ "unchecked" })
@@ -66,14 +66,14 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     requireNonNull(other);
     Predicate<Object> p = (Predicate<Object>) this;
     Predicate<Object> q = (Predicate<Object>) other;
-    return (Predicate<T>) OR_FACTORY.<Predicate>createDisjunction(asList((Predicate<Object>) this, (Predicate<Object>) other), p, q);
+    return (Predicate<T>) OR_FACTORY.createDisjunction(asList((Predicate<Object>) this, (Predicate<Object>) other), p, q);
   }
 
   @SuppressWarnings({ "unchecked" })
   @Override
   public Predicate<T> negate() {
     Predicate<Object> p = (Predicate<Object>) this;
-    return (Predicate<T>) NEGATE_FACTORY.<Predicate>createNegation((Predicate<Object>) this, p);
+    return (Predicate<T>) NEGATE_FACTORY.createNegation((Predicate<Object>) this, p);
   }
 
   @Override
@@ -110,11 +110,6 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     }
 
     @Override
-    public boolean accept(T value, Evaluator evaluator) {
-      return evaluator.evaluate(value, this);
-    }
-
-    @Override
     public Predicate<? super T> predicate() {
       return predicate;
     }
@@ -145,21 +140,11 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     public Conjunction(Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
       super(s, predicate, a, b);
     }
-
-    @Override
-    public boolean accept(T value, Evaluator evaluator) {
-      return evaluator.evaluate(value, this);
-    }
   }
 
   public static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
     public Disjunction(Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
       super(s, predicate, a, b);
-    }
-
-    @Override
-    public boolean accept(T value, Evaluator evaluator) {
-      return evaluator.evaluate(value, this);
     }
   }
 
@@ -193,7 +178,7 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
       return new LeafPrintablePredicateFromFactory<>(spec, () -> this.nameComposer().apply(arg), createPredicate(arg));
     }
 
-    public <P extends Predicate<T>> ConjunctionPrintablePredicateFromFactory<T, E> createConjunction(E arg, P p, P q) {
+    public <P extends Predicate<? super T>> ConjunctionPrintablePredicateFromFactory<T, E> createConjunction(E arg, P p, P q) {
       Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, ConjunctionPrintablePredicateFromFactory.class);
       return new ConjunctionPrintablePredicateFromFactory<>(
           spec,
@@ -203,7 +188,7 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
           toEvaluableIfNecessary(q));
     }
 
-    public <P extends Predicate<T>> DisjunctionPrintablePredicateFromFactory<T, E> createDisjunction(E arg, P p, P q) {
+    public <P extends Predicate<? super T>> DisjunctionPrintablePredicateFromFactory<T, E> createDisjunction(E arg, P p, P q) {
       Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, DisjunctionPrintablePredicateFromFactory.class);
       return new DisjunctionPrintablePredicateFromFactory<>(
           spec,
@@ -213,7 +198,7 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
           toEvaluableIfNecessary(q));
     }
 
-    public <P extends Predicate<T>> NegationPrintablePredicateFromFactory<T, E> createNegation(E arg, P p) {
+    public <P extends Predicate<? super T>> NegationPrintablePredicateFromFactory<T, E> createNegation(E arg, P p) {
       Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, NegationPrintablePredicateFromFactory.class);
       return new NegationPrintablePredicateFromFactory<>(
           spec,

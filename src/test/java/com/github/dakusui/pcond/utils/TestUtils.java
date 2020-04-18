@@ -36,7 +36,11 @@ public enum TestUtils {
     return System.getProperty("surefire.real.class.path") != null;
   }
 
-  public static String firstLineOf(String s) {
-    return s.split("\n")[0];
+  public static String firstLineOf(String multilineString) {
+    return lineAt(multilineString, 0);
+  }
+
+  public static String lineAt(String multilineString, int position) {
+    return multilineString.split("\\r?\\n")[position];
   }
 }

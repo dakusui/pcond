@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.functions;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Collections.unmodifiableList;
 
 public interface Evaluator {
@@ -68,9 +69,14 @@ public interface Evaluator {
         return level;
       }
 
+      public boolean hasInput() {
+        return this.hasInput;
+      }
+
       @SuppressWarnings({ "unchecked" })
-      public <T> Optional<T> input() {
-        return this.hasInput ? Optional.ofNullable((T) this.input) : Optional.empty();
+      public <T> T input() {
+        requireState(this.hasInput, v -> v, () -> "This object does not have an input.");
+        return (T) this.input;
       }
 
       public String name() {
@@ -91,10 +97,6 @@ public interface Evaluator {
       FinalizedRecord(int level, Object output, String name) {
         super(level, name);
         this.output = output;
-      }
-
-      public String toString() {
-        return String.format("%d:%s:%s:%s", level, name, input, output);
       }
 
       @SuppressWarnings("unchecked")
