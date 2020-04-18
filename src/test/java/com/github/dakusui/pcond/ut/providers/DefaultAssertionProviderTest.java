@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.ut.providers;
 
+import com.github.dakusui.pcond.functions.Functions;
+import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
@@ -12,6 +14,7 @@ import static com.github.dakusui.pcond.functions.Functions.length;
 import static com.github.dakusui.pcond.functions.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class DefaultAssertionProviderTest extends TestBase {
@@ -43,6 +46,13 @@ public class DefaultAssertionProviderTest extends TestBase {
     }
   }
 
+  @Test
+  public void withEvaluator_nativePredicate() {
+    String value = createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
+        .requireArgument("Hello", v -> v.equals("Hello"));
+    assertThat(value, equalTo("Hello"));
+  }
+
   @Test(expected = IllegalArgumentException.class)
   public void withEvaluator_disj_thenFail() {
     try {
@@ -64,6 +74,31 @@ public class DefaultAssertionProviderTest extends TestBase {
       ));
       assertThat(lineAt(e.getMessage(), 3), allOf(
           CoreMatchers.startsWith("  isEqualTo[\"HELLO\"](\"Hello\")"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("false")
+
+      ));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void withEvaluator_transforming_thenFail() {
+    try {
+      createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
+          .requireArgument("Hello", when(Functions.length()).then(Predicates.gt(10)));
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+      assertThat(lineAt(e.getMessage(), 1), allOf(
+          CoreMatchers.startsWith("length"),
+          CoreMatchers.containsString("Hello"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("5")
+
+      ));
+      assertThat(lineAt(e.getMessage(), 2), allOf(
+          CoreMatchers.startsWith(">[10]"),
+          CoreMatchers.containsString("(5)"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 

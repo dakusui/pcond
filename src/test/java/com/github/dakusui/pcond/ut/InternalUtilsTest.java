@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.functions.Evaluable;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.ut.testdata.FailingConstructor;
@@ -9,6 +10,8 @@ import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
+
+import java.util.function.Predicate;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
@@ -201,4 +204,15 @@ public class InternalUtilsTest {
       InternalUtils.wrapperClassOf(Object.class);
     }
   }
+
+  public static class ToEvaluableIfNecessary {
+
+    @Test
+    public void givenNonEvaluable$whenToEvaluableIfNecessary$thenConverted() {
+      Predicate<Object> predicate = Predicate.isEqual("Hello");
+      Evaluable<Object> ev = InternalUtils.toEvaluableIfNecessary(predicate);
+      assertNotNull(ev);
+    }
+  }
+
 }

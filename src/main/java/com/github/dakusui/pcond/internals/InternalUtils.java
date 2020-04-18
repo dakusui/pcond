@@ -35,6 +35,8 @@ public enum InternalUtils {
     }
     if (value instanceof Object[])
       return formatObject(asList((Object[]) value));
+    if (value instanceof Formattable)
+      return String.format("%s", value);
     if (value instanceof String) {
       String s = (String) value;
       if (s.length() > 20)

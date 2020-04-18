@@ -51,7 +51,7 @@ public enum Functions {
     return Def.LENGTH;
   }
 
-  @SuppressWarnings({"unchecked", "RedundantClassCall"})
+  @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   public static <E> Function<List<? extends E>, ? extends E> elementAt(int i) {
     return Function.class.cast(Def.ELEMENT_AT_FACTORY.create(i));
   }
@@ -71,9 +71,20 @@ public enum Functions {
    * @param <E> Type of elements in the given collection.
    * @return The function.
    */
-  @SuppressWarnings({"unchecked", "RedundantClassCall"})
+  @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   public static <E> Function<Collection<? extends E>, Stream<? extends E>> stream() {
     return Function.class.cast(Def.STREAM);
+  }
+
+  /**
+   * Returns a function that returns a stream for a given given collection.
+   *
+   * @param <E> Type of elements in the given collection.
+   * @return The function.
+   */
+  @SuppressWarnings({ "unchecked", "RedundantClassCall" })
+  public static <E> Function<E, Stream<? extends E>> streamOf() {
+    return Function.class.cast(Def.STREAM_OF);
   }
 
   /**
@@ -83,18 +94,19 @@ public enum Functions {
    * @param <E>  The type to which the object is case.
    * @return The function.
    */
-  @SuppressWarnings({"unchecked", "RedundantClassCall"})
+  @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   public static <E> Function<? super Object, ? extends E> cast(Class<E> type) {
     return Function.class.cast(Def.CAST_FACTORY.create(type));
   }
 
   /**
    * Returns a function that creates and returns a list that contains all the elements in the given list.
+   *
    * @param <I> The type of the input collection.
    * @param <E> Type of the elements in the collection
    * @return The function.
    */
-  @SuppressWarnings({"unchecked", "RedundantClassCall"})
+  @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   public static <I extends Collection<? extends E>, E> Function<I, List<E>> collectionToList() {
     return Function.class.cast(Def.COLLECTION_TO_LIST);
   }
@@ -105,7 +117,7 @@ public enum Functions {
    * @param <E> Type of elements in a given array.
    * @return The function.
    */
-  @SuppressWarnings({"unchecked", "RedundantClassCall"})
+  @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   public static <E> Function<E[], List<E>> arrayToList() {
     return Function.class.cast(Def.ARRAY_TO_LIST);
   }
@@ -137,21 +149,22 @@ public enum Functions {
 
   enum Def {
     ;
-    private static final Function<?, ?> IDENTITY = Printables.function("identity", Function.identity());
-    private static final Function<?, String> STRINGIFY = Printables.function("stringify", Object::toString);
-    private static final Function<String, Integer> LENGTH = Printables.function("length", String::length);
-    private static final Function<Collection<?>, Integer> SIZE = Printables.function("size", Collection::size);
-    private static final Function<Collection<?>, Stream<?>> STREAM = Printables.function("stream", Collection::stream);
-    private static final Function<Object[], List<?>> ARRAY_TO_LIST = Printables.function("arrayToList", Arrays::asList);
-    private static final Function<String, Integer> COUNT_LINES = Printables.function("countLines", (String s) -> s.split(String.format("%n")).length);
-    private static final Function<Collection<?>, List<?>> COLLECTION_TO_LIST = Printables.function("collectionToList", (Collection<?> c) -> new ArrayList<Object>() {
+    private static final Function<?, ?>                                 IDENTITY           = Printables.function("identity", Function.identity());
+    private static final Function<?, String>                            STRINGIFY          = Printables.function("stringify", Object::toString);
+    private static final Function<String, Integer>                      LENGTH             = Printables.function("length", String::length);
+    private static final Function<Collection<?>, Integer>               SIZE               = Printables.function("size", Collection::size);
+    private static final Function<Collection<?>, Stream<?>>             STREAM             = Printables.function("stream", Collection::stream);
+    private static final Function<?, Stream<?>>                         STREAM_OF          = Printables.function("streamOf", Stream::of);
+    private static final Function<Object[], List<?>>                    ARRAY_TO_LIST      = Printables.function("arrayToList", Arrays::asList);
+    private static final Function<String, Integer>                      COUNT_LINES        = Printables.function("countLines", (String s) -> s.split(String.format("%n")).length);
+    private static final Function<Collection<?>, List<?>>               COLLECTION_TO_LIST = Printables.function("collectionToList", (Collection<?> c) -> new ArrayList<Object>() {
       {
         addAll(c);
       }
     });
     private static final PrintableFunction.Factory<List<?>, ?, Integer> ELEMENT_AT_FACTORY =
         Printables.functionFactory((Integer v) -> String.format("at[%s]", v), (Integer arg) -> (List<?> es) -> es.get((Integer) arg));
-    private static final PrintableFunction.Factory<Object, ?, Class<?>> CAST_FACTORY = Printables.functionFactory(
+    private static final PrintableFunction.Factory<Object, ?, Class<?>> CAST_FACTORY       = Printables.functionFactory(
         (v) -> String.format("castTo[%s]", requireNonNull(v).getSimpleName()), arg -> arg::cast);
   }
 }

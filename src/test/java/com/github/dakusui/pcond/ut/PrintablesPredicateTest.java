@@ -65,8 +65,8 @@ public class PrintablesPredicateTest {
           allOf(
               is(p1.hashCode()),
               is(p2.hashCode()),
-              is(q.hashCode())
-          ));
+              is(q.hashCode()),
+              not(is(0))));
     }
 
     <T> Predicate<T> create(String name, Predicate<T> p, Predicate<T> q) {
@@ -128,8 +128,8 @@ public class PrintablesPredicateTest {
           p.hashCode(),
           allOf(
               is(p.hashCode()),
-              is(q.hashCode())
-          ));
+              is(q.hashCode()),
+              not(is(0))));
     }
   }
 }
