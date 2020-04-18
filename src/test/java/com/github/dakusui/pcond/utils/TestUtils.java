@@ -6,9 +6,9 @@ import java.io.PrintStream;
 public enum TestUtils {
   ;
 
-  static final PrintStream STDOUT = System.out;
-  static final PrintStream STDERR = System.err;
-  public static final PrintStream NOP = new PrintStream(new OutputStream() {
+  static final        PrintStream STDOUT = System.out;
+  static final        PrintStream STDERR = System.err;
+  public static final PrintStream NOP    = new PrintStream(new OutputStream() {
     @Override
     public void write(int b) {
     }
@@ -34,5 +34,9 @@ public enum TestUtils {
 
   public static boolean isRunUnderSurefire() {
     return System.getProperty("surefire.real.class.path") != null;
+  }
+
+  public static String firstLineOf(String s) {
+    return s.split("\n")[0];
   }
 }

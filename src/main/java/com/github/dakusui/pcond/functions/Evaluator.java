@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.functions;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableList;
 
@@ -39,45 +40,85 @@ public interface Evaluator {
       return this.result;
     }
 
-    public void formatTo(StringBuilder buffer) {
-      records.forEach(r -> buffer.append(r.toString()).append(String.format("%n")));
+    public Stream<Record> stream() {
+      return this.records.stream();
     }
 
-    static abstract class Record {
-      final int    level;
-      final Object value;
-      final String name;
+    public static abstract class Record {
+      final int     level;
+      final boolean hasInput;
+      final Object  input;
+      final String  name;
 
-      Record(int level, Object value, String name) {
+      Record(int level, Object input, String name) {
+        this.hasInput = true;
         this.level = level;
-        this.value = value;
+        this.input = input;
         this.name = name;
       }
+
+      Record(int level, String name) {
+        this.hasInput = false;
+        this.level = level;
+        this.input = null;
+        this.name = name;
+      }
+
+      public int level() {
+        return level;
+      }
+
+      @SuppressWarnings({ "unchecked" })
+      public <T> Optional<T> input() {
+        return this.hasInput ? Optional.ofNullable((T) this.input) : Optional.empty();
+      }
+
+      public String name() {
+        return name;
+      }
+
+      public abstract <T> Optional<T> output();
     }
 
     static class FinalizedRecord extends Record {
-      final Object result;
+      final Object output;
 
-      FinalizedRecord(int level, Object value, Object result, String name) {
-        super(level, value, name);
-        this.result = result;
+      FinalizedRecord(int level, Object input, Object output, String name) {
+        super(level, input, name);
+        this.output = output;
+      }
+
+      FinalizedRecord(int level, Object output, String name) {
+        super(level, name);
+        this.output = output;
       }
 
       public String toString() {
-        return String.format("%d:%s:%s:%s", level, name, value, result);
+        return String.format("%d:%s:%s:%s", level, name, input, output);
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public <T> Optional<T> output() {
+        return Optional.of((T) output);
       }
     }
 
     static class OnGoingRecord extends Record {
       final int positionInRecords;
 
-      OnGoingRecord(int level, int positionInRecords, Object value, String name) {
-        super(level, value, name);
+      OnGoingRecord(int level, int positionInRecords, String name) {
+        super(level, name);
         this.positionInRecords = positionInRecords;
       }
 
       FinalizedRecord result(boolean result) {
-        return new FinalizedRecord(this.level, this.value, result, this.name);
+        return new FinalizedRecord(this.level, result, this.name);
+      }
+
+      @Override
+      public <T> Optional<T> output() {
+        return Optional.empty();
       }
     }
   }
@@ -97,8 +138,8 @@ public interface Evaluator {
       this.records.add(new Result.FinalizedRecord(onGoingRecords.size(), value, result, name));
     }
 
-    void enter(String name, Object value) {
-      Result.OnGoingRecord newRecord = new Result.OnGoingRecord(onGoingRecords.size(), records.size(), value, name);
+    void enter(String name) {
+      Result.OnGoingRecord newRecord = new Result.OnGoingRecord(onGoingRecords.size(), records.size(), name);
       onGoingRecords.add(newRecord);
       records.add(newRecord);
     }
@@ -113,7 +154,7 @@ public interface Evaluator {
 
     @Override
     public <T> boolean evaluate(T value, Evaluable.Conjunction<T> conjunction) {
-      enter("and", value);
+      enter("&&");
       if (!conjunction.a().accept(value, this))
         return leave(false);
       return leave(conjunction.b().accept(value, this));
@@ -121,7 +162,7 @@ public interface Evaluator {
 
     @Override
     public <T> boolean evaluate(T value, Evaluable.Disjunction<T> disjunction) {
-      enter("or", value);
+      enter("||");
       if (disjunction.a().accept(value, this))
         return leave(true);
       return leave(disjunction.b().accept(value, this));
@@ -129,21 +170,21 @@ public interface Evaluator {
 
     @Override
     public <T> boolean evaluate(T value, Evaluable.Negation<T> negation) {
-      enter("not", value);
+      enter("!");
       return leave(!negation.target().accept(value, this));
     }
 
     @Override
     public <T> boolean evaluate(T value, Evaluable.Leaf<T> leaf) {
       boolean result = leaf.predicate().test(value);
-      record(String.format("leaf:%s", leaf), value, result);
+      record(String.format("%s", leaf), value, result);
       return result;
     }
 
     @Override
     public <T, R> boolean evaluate(T value, Evaluable.Transformation<T, R> transformation) {
       R transformedValue = transformation.mapper().apply(value);
-      record(String.format("transform:%s", transformation.mapper()), value, transformedValue);
+      record(String.format("%s", transformation.mapper()), value, transformedValue);
       return transformation.checker().accept(transformedValue, this);
     }
 

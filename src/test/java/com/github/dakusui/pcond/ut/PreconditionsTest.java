@@ -9,6 +9,7 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.functions.Predicates.isNotNull;
+import static com.github.dakusui.pcond.utils.TestUtils.firstLineOf;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -20,7 +21,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       Preconditions.requireNonNull(null);
     } catch (NullPointerException e) {
       e.printStackTrace();
-      assertThat(e.getMessage(),
+      assertThat(firstLineOf(e.getMessage()),
           allOf(
               notNullValue(),
               is("value:null violated precondition:value isNotNull")));
@@ -34,7 +35,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       Preconditions.requireArgument(null, isNotNull());
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
-      assertThat(e.getMessage(),
+      assertThat(firstLineOf(e.getMessage()),
           allOf(
               notNullValue(),
               is("value:null violated precondition:value isNotNull")));
@@ -48,7 +49,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       Preconditions.requireState(null, isNotNull());
     } catch (IllegalStateException e) {
       e.printStackTrace();
-      assertThat(e.getMessage(),
+      assertThat(firstLineOf(e.getMessage()),
           allOf(
               notNullValue(),
               is("value:null violated precondition:value isNotNull")));
@@ -81,7 +82,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(
-          e.getMessage(),
+          firstLineOf(e.getMessage()),
           CoreMatchers.is("value:\"hello\" violated precondition:value LENGTH GT[100]"));
       throw e;
     }

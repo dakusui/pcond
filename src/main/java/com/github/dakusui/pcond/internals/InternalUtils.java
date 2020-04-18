@@ -109,4 +109,10 @@ public enum InternalUtils {
     // We know that Printable.predicate returns a PrintablePredicate object, which is an Evaluable.
     return (Evaluable<T>) Printables.predicate(p::toString, p);
   }
+
+  public static String spaces(int num) {
+    char[] buf = new char[num];
+    Arrays.fill(buf, ' ');
+    return new StringBuilder(num).append(buf).toString();
+  }
 }
