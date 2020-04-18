@@ -60,10 +60,17 @@ public class PrintablesPredicateTest {
               not(is(r2)),
               not(is(o))
           ));
+      assertThat(
+          p1.hashCode(),
+          allOf(
+              is(p1.hashCode()),
+              is(p2.hashCode()),
+              is(q.hashCode()),
+              not(is(0))));
     }
 
     <T> Predicate<T> create(String name, Predicate<T> p, Predicate<T> q) {
-      return create(new PrintablePredicate<>(() -> name + "1", p), new PrintablePredicate<>(() -> name + "2", q));
+      return create(new PrintablePredicate.Leaf<>(() -> name + "1", p), new PrintablePredicate.Leaf<>(() -> name + "2", q));
     }
 
     abstract <T> Predicate<T> create(PrintablePredicate<T> predicate, PrintablePredicate<T> predicate1);
@@ -117,6 +124,12 @@ public class PrintablesPredicateTest {
               is(p),
               is(q),
               not(is(n))));
+      assertThat(
+          p.hashCode(),
+          allOf(
+              is(p.hashCode()),
+              is(q.hashCode()),
+              not(is(0))));
     }
   }
 }

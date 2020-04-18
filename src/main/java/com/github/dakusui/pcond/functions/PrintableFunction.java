@@ -42,24 +42,6 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R> {
     return (Function<T, V>) ANDTHEN_FACTORY.create(asList((Function<Object, Object>) this, (Function<Object, Object>) after));
   }
 
-  @Override
-  public String toString() {
-    return s.get();
-  }
-
-  public static <T, R> PrintableFunction<T, R> create(String s, Function<? super T, ? extends R> function) {
-    return new PrintableFunction<>(() -> Objects.requireNonNull(s), function);
-  }
-
-  public static <T, R, E> Factory<T, R, E> factory(Function<E, String> nameComposer, Function<E, Function<T, R>> ff) {
-    return new Factory<T, R, E>(nameComposer) {
-      @Override
-      Function<T, R> createFunction(E arg) {
-        return ff.apply(arg);
-      }
-    };
-  }
-
   @SuppressWarnings("unchecked")
   private static Function<Object, Object> unwrapIfPrintableFunction(Function<Object, Object> function) {
     Function<Object, Object> ret = function;
@@ -89,6 +71,23 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R> {
         Object.class;
   }
 
+  @Override
+  public String toString() {
+    return s.get();
+  }
+
+  public static <T, R> PrintableFunction<T, R> create(String s, Function<? super T, ? extends R> function) {
+    return new PrintableFunction<>(() -> Objects.requireNonNull(s), function);
+  }
+
+  public static <T, R, E> Factory<T, R, E> factory(Function<E, String> nameComposer, Function<E, Function<T, R>> ff) {
+    return new Factory<T, R, E>(nameComposer) {
+      @Override
+      Function<T, R> createFunction(E arg) {
+        return ff.apply(arg);
+      }
+    };
+  }
   public static abstract class Factory<T, R, E> extends PrintableLambdaFactory<E> {
 
     abstract static class PrintableFunctionFromFactory<T, R, E> extends PrintableFunction<T, R> implements Lambda<Factory<T, R, E>, E> {

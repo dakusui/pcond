@@ -31,7 +31,7 @@ public interface AssertionProvider<AE extends Throwable> {
     if (properties.containsKey(propertyKeyName)) {
       return InternalUtils.createInstanceFromClassName(AssertionProvider.class, properties.getProperty(propertyKeyName));
     }
-    return new DefaultAssertionProvider();
+    return new DefaultAssertionProvider(properties);
   }
 
   /**

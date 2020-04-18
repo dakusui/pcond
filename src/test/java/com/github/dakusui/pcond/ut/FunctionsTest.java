@@ -8,12 +8,15 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.functions.Functions.stream;
 import static com.github.dakusui.pcond.functions.Functions.stringify;
+import static com.github.dakusui.pcond.internals.InternalUtils.getMethod;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
@@ -115,6 +118,36 @@ public class FunctionsTest {
   }
 
   public static class MultiParameterFunctionTest extends TestBase {
+    @Test(expected = IllegalArgumentException.class)
+    public void lookUpWithInvalidArgument_duplicatedOrder() {
+      try {
+        greeting(0, 0);
+      } catch (IllegalArgumentException e) {
+        e.printStackTrace();
+        assertThat(
+            e.getMessage(),
+            allOf(
+                containsString("Duplicated elements are found"),
+                containsString("[0, 0]")));
+        throw e;
+      }
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void lookUpWithInvalidArgument_insufficientNumberOfParamOrder() {
+      try {
+        greeting(0);
+      } catch (IllegalArgumentException e) {
+        e.printStackTrace();
+        assertThat(
+            e.getMessage(),
+            allOf(
+                containsString("Inconsistent number of parameters are"),
+                containsString("Expected:2, Actual: 1")));
+        throw e;
+      }
+    }
+
     @Test
     public void runMultiParameterFunction$thenExpectedValueReturned() {
       MultiParameterFunction<String> func = greeting(0, 1);
@@ -155,6 +188,15 @@ public class FunctionsTest {
       MultiParameterFunction<String> func1 = greeting(0, 1);
       MultiParameterFunction<String> func2 = greeting(0, 1);
       assertEquals(func1, func2);
+      assertEquals(func1.hashCode(), func2.hashCode());
+    }
+
+    @Test
+    public void testEqualsWithIdenticalObjectsCreatedSeparately() {
+      MultiParameterFunction<String> func1 = greeting(0, 1);
+      MultiParameterFunction<String> func2 = greeting2(0, 1);
+      assertEquals(func1, func2);
+      assertEquals(func1.hashCode(), func2.hashCode());
     }
 
     @Test
@@ -162,6 +204,7 @@ public class FunctionsTest {
       MultiParameterFunction<String> func1 = greeting(0, 1);
       MultiParameterFunction<String> func2 = greeting(1, 0);
       assertNotEquals(func1, func2);
+      assertNotEquals(func1.hashCode(), func2.hashCode());
     }
 
     @Test
@@ -179,11 +222,18 @@ public class FunctionsTest {
     }
 
     private static MultiParameterFunction<String> greeting(int... order) {
-      return CurryingUtils.Reflections.createFunctionFromStaticMethod(order, TargetMethodHolder.class, "greeting", String.class, String.class);
+      return CurryingUtils.Reflections.lookupFunctionForStaticMethod(order, TargetMethodHolder.class, "greeting", String.class, String.class);
+    }
+
+    private static MultiParameterFunction<String> greeting2(int... order) {
+      Method m = getMethod(TargetMethodHolder.class, "greeting", String.class, String.class);
+      List<Integer> paramOrder = Arrays.stream(order).boxed().collect(toList());
+      List<Object> args = asList(m, paramOrder);
+      return CurryingUtils.Reflections.createMultiParameterFunctionForStaticMethod(args);
     }
 
     private static MultiParameterFunction<String> voidMethod() {
-      return Functions.createFunctionFromStaticMethod(TargetMethodHolder.class, "voidMethod", String.class, String.class);
+      return Functions.functionForStaticMethod(TargetMethodHolder.class, "voidMethod", String.class, String.class);
     }
 
     public static class TargetMethodHolder {

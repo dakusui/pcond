@@ -1,1 +1,76 @@
- =
+:pcond-version: 1.2.0
+
+= Quick Start
+
+== Installation
+
+Have a following maven dependency in your `pom.xml`.
+
+[source,xml]
+[subs="verbatim,attributes"]
+----
+<dependency>
+  <groupId>com.github.dakusui</groupId>
+  <artifactId>pcond</artifactId>
+  <version>{pcond-version}</version>
+</dependency>
+----
+
+== Getting started
+
+Following is the first example of the `pcond` library.
+
+[source,java]
+.Example.java
+----
+package com.github.dakusui.pcond.examples;
+
+// <1>
+import static com.github.dakusui.pcond.Assertions.*;
+import static com.github.dakusui.pcond.Postconditions.*;
+import static com.github.dakusui.pcond.Preconditions.*;
+import static com.github.dakusui.pcond.functions.Predicates.*;
+
+public class Example {
+  public static String hello(String yourName) {
+    requireArgument(yourName, and(isNotNull(), not(isEmptyString()))); //<2>
+
+    String format = "Hello, %s";
+    assert that(format, isNotNull()); //<3>
+
+    String ret = String.format(format, yourName);
+    return ensureNonNull(ret); //<4>
+  }
+
+  public static void main(String[] args) {
+    System.out.println(hello("John"));
+    System.out.println(hello("")); // <5>
+  }
+}
+----
+<1> Import entry points statically.
+<2> In order to require *your user* satisfy a certain condition on an input, use `requireXyz` methods in `Preconditions` class.
+<3> In a situation, where if a certain value does not satisfy a certain condition, and it will be your own bug, (neither your user's nor a third party library,) use `assert` with a predicate built with methods in `Predicates` and `Functions`.
+<4> In order to ensure an output of a library whose user is you satisfy a certain condition, user `ensureXyz` methods in `Postconditions` class.
+<5> This intentionally violates a requirement of the `hello(String)` method.
+
+This results in a following output.
+
+[source]
+.Output of Example.java
+----
+Hello, John
+Exception in thread "main" java.lang.IllegalArgumentException: value:"" violated precondition:value (isNotNull&&!isEmpty)
+	at com.github.dakusui.pcond...
+	at com.github.dakusui.pcond...
+	at...
+----
+
+Look at the second line.
+There's a message:
+
+----
+`value:"" violated precondition:value (isNotNull&&!isEmpty)`
+----
+
+, which explains how a given value violated a condition to be satisfied.

@@ -1,69 +1,11 @@
 = Overview
 
-// suppress inspection "AsciiDocLinkResolve"
-The `pcond` is a Java library to help you write a code in "Design by Contract"<<DbC>> style programming.
+The `pcond` is a simple library for Java SE 8 which makes it possible to define pre- and post-conditions with informative error messages on a failure without repeating what you write as a code as a text string like with other libraries.
 
-== What is Design by Contract?
+== vs Valid4J
 
-== What is your concern?
-
-=== `Objects.requireNonNull`
-
-=== Guava's `Preconditions`
-
-- Cumbersomeness
-- Lambda readability
-- Performance
-
-=== Java's assert statement
-
-(t.b.d.)
-
-== What does the `pcond` offer you?
-The `pcond` is a library to provide you with ability to use and build "printable" functions and predicates.
-In Java, a lambda is printed as its cryptic `hashCode` value, which is not so much helpful on debugging.
-For instance,
-
-[source,java]
-----
-public class AClass {
-  public void aMethod() {
-    Predicate<Integer> p = i -> 0 <= i && i < 100;
-    System.out.println(f.toString());
-  }
-}
-----
-
-This prints something like following.
-Not the definition of the operation defined as `f`, directly.
-
-----
-AClass$$Lambda$1/1068824137@16b3fc9e
-----
-
-Instead, you would see something like this.
-
-----
-startsWith["Hello"]
-----
-
-`pcond` allows you to do it by a following code fragment.
-
-[source,java]
-----
-import static com.github.dakusui.pcond.Preconditions.*;
-public class AClass {
-  public void hello2() {
-    Predicate<String> p = and(ge(0), lt(100));
-    System.out.println(p.toString());
-  }
-}
-----
-
-The `pcond` library offers you a handy way to make your own functions and predicates "printable" and build a new printable ones from existing printable ones.
-For more details, please refer to the link:usage.adoc[Usage]
 
 [bibliography]
 == References
-- [[[DbC]]] Wikipedia article on Design by Contract, https://en.wikipedia.org/wiki/Design_by_contract
-- [[[GuavaP]]] Google, https://github.com/google/guava/wiki/PreconditionsExplained
+
+- [[[valid4j]]] valid4j, http://www.valid4j.org/[valid4j.org]

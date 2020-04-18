@@ -3,9 +3,7 @@ package com.github.dakusui.pcond.functions;
 import com.github.dakusui.pcond.functions.currying.CurriedFunction;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -15,13 +13,18 @@ import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
-public class ExtraFunctions {
+public enum Experimentals {
+  ;
   public static Function<Stream<?>, Stream<Context>> nest(Collection<?> inner) {
     return Printables.function(() -> "nest" + formatObject(inner), (Stream<?> stream) -> Def.nest(stream, inner));
   }
 
   public static Function<Stream<?>, Stream<Context>> toContextStream() {
     return Printables.function(() -> "toContextStream", Def::toContextStream);
+  }
+
+  public static <T> Function<T, Context> toContext() {
+    return Printables.function(() -> "toContext", Def::toContext);
   }
 
   public static <R> Function<Context, R> apply(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
@@ -34,8 +37,25 @@ public class ExtraFunctions {
     };
   }
 
+  /**
+   * Converts a curried function which results in a boolean value in to a predicate.
+   *
+   * @param curriedFunction A curried function to be converted.
+   * @param orderArgs       An array to specify the order in which values in the context are applied to the function.
+   * @return A predicate converted from the given curried function.
+   */
   public static Predicate<Context> test(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
     return Def.applyAndTest(curriedFunction, Predicates.isTrue(), Boolean.class, orderArgs);
+  }
+
+  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate, int argIndex) {
+    return Printables.predicate(
+        () -> String.format("toContextPredicate[%s,%s]", predicate, argIndex),
+        context -> predicate.test(context.valueAt(argIndex)));
+  }
+
+  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate) {
+    return toContextPredicate(predicate, 0);
   }
 
   public static int[] normalizeOrderArgs(Context context, int[] orderArgs) {
@@ -47,7 +67,7 @@ public class ExtraFunctions {
     return order;
   }
 
-  public interface Context {
+  public interface Context extends Formattable {
     default int size() {
       return values().size();
     }
@@ -59,6 +79,11 @@ public class ExtraFunctions {
 
     default Context append(Object o) {
       return () -> InternalUtils.append(values(), o);
+    }
+
+    @Override
+    default void formatTo(Formatter formatter, int flags, int width, int precision) {
+      formatter.format("context:%s", this.values());
     }
 
     List<Object> values();
@@ -76,7 +101,11 @@ public class ExtraFunctions {
     }
 
     public static Stream<Context> toContextStream(Stream<?> stream) {
-      return stream.map(o -> (Context) (o instanceof Context ? o : Context.from(o)));
+      return stream.map(Def::toContext);
+    }
+
+    public static <T> Context toContext(T t) {
+      return t instanceof Context ? (Context) t : Context.from(t);
     }
 
     static <R> Predicate<Context> applyAndTest(CurriedFunction<Object, Object> curriedFunction, Predicate<? super R> pred, @SuppressWarnings("SameParameterValue") Class<? extends R> type, int... orderArgs) {

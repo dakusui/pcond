@@ -6,6 +6,7 @@ import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
+import static com.github.dakusui.pcond.utils.TestUtils.firstLineOf;
 import static org.junit.Assert.assertEquals;
 
 public class ValidationsTest extends TestBase {
@@ -15,7 +16,7 @@ public class ValidationsTest extends TestBase {
       @SuppressWarnings("ConstantConditions") Object ret = Validations.<Object, ApplicationException>validate(null, Predicates.not(Predicates.isEqualTo(null)));
       System.out.println(ret);
     } catch (ApplicationException e) {
-      assertEquals("Value:null violated: !isEqualTo[null]", e.getMessage());
+      assertEquals("Value:null violated: !isEqualTo[null]", firstLineOf(e.getMessage()));
       throw e;
     }
   }

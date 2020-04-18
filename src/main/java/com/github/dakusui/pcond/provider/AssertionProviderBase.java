@@ -65,20 +65,17 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
 
   @Override
   default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
-    if (!cond.test(value))
-      throw new AssertionError(composeMessageForPrecondition(value, cond));
+    checkValue(value, cond, this::composeMessageForPrecondition, AssertionError::new);
   }
 
   @Override
   default <T> void checkPostcondition(T value, Predicate<? super T> cond) {
-    if (!cond.test(value))
-      throw new AssertionError(composeMessageForPostcondition(value, cond));
+    checkValue(value, cond, this::composeMessageForPostcondition, AssertionError::new);
   }
 
   @Override
   default <T> void checkInvariant(T value, Predicate<? super T> cond) {
-    if (!cond.test(value))
-      throw new AssertionError(composeMessageForAssertion(value, cond));
+    checkValue(value, cond, this::composeMessageForAssertion, AssertionError::new);
   }
 
   @SuppressWarnings("unchecked")
@@ -101,9 +98,7 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
 
   AE applicationException(String message);
 
-  static <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E {
-    if (!cond.test(value))
-      throw exceptionComposer.apply(messageComposer.apply(value, cond));
-    return value;
-  }
+  <T, E extends Throwable>
+  T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer)
+      throws E;
 }

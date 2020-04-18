@@ -25,10 +25,10 @@ public enum Printables {
   }
 
   public static <T> Predicate<T> printablePredicate(String s, Predicate<T> predicate) {
-    return new PrintablePredicate<>(() -> s, predicate);
+    return new PrintablePredicate.Leaf<>(() -> s, predicate);
   }
 
-  public static <T, R> PrintableFunction<T, R> printableFunction(String s, Function<? super T, ? extends R> function) {
+  public static <T, R> Function<T, R> printableFunction(String s, Function<? super T, ? extends R> function) {
     return PrintableFunction.create(s, function);
   }
 

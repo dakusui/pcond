@@ -161,7 +161,7 @@ public class ParameterizedPredicatesTest extends TestBase.ForAssertionEnabledVM 
 
   @Before
   public void before() {
-    TestUtils.suppressStdOutErrIfRunUnderSurefire();
+    TestUtils.suppressStdOutErrIfUnderPitestOrSurefire();
     System.out.printf("predicate:%s%n", this.predicate);
     System.out.printf("expectationForToString:%s%n", this.expectationForToString);
     System.out.printf("testItems:%s%n", this.testItems);

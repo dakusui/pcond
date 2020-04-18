@@ -8,11 +8,32 @@ import org.junit.runner.RunWith;
 
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.Preconditions.requireArgument;
+import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
 public class PredicatesTest {
+  public static class IsInstanceOfTest extends TestBase {
+    @Test(expected = IllegalArgumentException.class)
+    public void test() {
+      try {
+        requireArgument(100, Predicates.isInstanceOf(String.class));
+      } catch (IllegalArgumentException e) {
+        e.printStackTrace();
+        assertThat(
+            lineAt(e.getMessage(), 1),
+            allOf(
+                startsWith("isInstanceOf"),
+                containsString("java.lang.String"),
+                containsString("100"),
+                containsString("false")));
+        throw e;
+      }
+    }
+  }
+
   public static class IsNullTest extends TestBase.ForAssertionEnabledVM {
     @Test
     public void whenMet$thenTrue() {

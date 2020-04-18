@@ -1,12 +1,14 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Assertions;
-import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
 import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
+
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
@@ -55,7 +57,7 @@ public class AssertionsTest {
   public static class MessageTest {
     @Test
     public void composeMessage$thenComposed() {
-      assertEquals("Value:\"hello\" violated: isNull", new DefaultAssertionProvider().composeMessageForAssertion("hello", Predicates.isNull()));
+      assertEquals("Value:\"hello\" violated: isNull", new DefaultAssertionProvider(new Properties()).composeMessageForAssertion("hello", Predicates.isNull()));
     }
   }
 }

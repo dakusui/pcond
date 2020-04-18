@@ -108,9 +108,9 @@ enum Lab {
     return (Predicate<E>) MATCHES_NONE_OF_FACTORY.create(asList(collection, cond));
   }
 
-  public static <R> Function<ExtraFunctions.Context, R> apply(MultiParameterFunction<R> multiParameterFunction, int... orderArgs) {
+  public static <R> Function<Experimentals.Context, R> apply(MultiParameterFunction<R> multiParameterFunction, int... orderArgs) {
     return context -> {
-      IntStream orderStream = Arrays.stream(ExtraFunctions.normalizeOrderArgs(context, orderArgs));
+      IntStream orderStream = Arrays.stream(Experimentals.normalizeOrderArgs(context, orderArgs));
       return multiParameterFunction.apply(orderStream.distinct().mapToObj(context::valueAt).collect(Collectors.toList()));
     };
   }

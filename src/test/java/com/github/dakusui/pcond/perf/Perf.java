@@ -12,6 +12,40 @@ import java.util.Objects;
 import static com.github.dakusui.pcond.Assertions.that;
 import static com.github.dakusui.pcond.functions.Predicates.*;
 
+/**
+ * -ea; evaluator mode
+ * 1 billion times
+ * 0: testNoCheck                                             5ms
+ * 1: testObjectsRequireNonNull                           2s457ms
+ * 2: testPreconditionsRequireNonNull                  6m 0s247ms
+ * 3: testPreconditionsRequireNonNullWithSimpleLambda    18s 82ms
+ * 4: tetAssertNonNull                                 6m 4s542ms
+ * 7: testAssertThatRange                             31m27s990ms
+ *
+ * -da: evaluator mode
+ * 0: testNoCheck                                             5ms
+ * 1  testObjectsRequireNonNull                           2s446ms
+ * 2: testPreconditionsRequireNonNull                  6m12s317ms
+ * 3: testPreconditionsRequireNonNullWithSimpleLambda    18s131ms
+ * 4: tetAssertNonNull                                        9ms
+ * 5: testAssertThatRange                                     5ms
+ *
+ * -ea; fast mode
+ * 0: testNoCheck                                              7ms
+ * 1  testObjectsRequireNonNull                            2s781ms
+ * 2: testPreconditionsRequireNonNull                      2s626ms
+ * 3: testPreconditionsRequireNonNullWithSimpleLambda      2s508ms
+ * 4: tetAssertNonNull                                     2s519ms
+ * 5: testAssertThatRange                               1m 8s354ms
+ *
+ * -da; fast mode
+ * 0: testNoCheck                                              5ms
+ * 1  testObjectsRequireNonNull                            2s869ms
+ * 2: testPreconditionsRequireNonNull                      2s633ms
+ * 3: testPreconditionsRequireNonNullWithSimpleLambda      2s441ms
+ * 4: tetAssertNonNull                                         4ms
+ * 5: testAssertThatRange                                      6ms
+ */
 @Ignore
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Perf {
@@ -54,7 +88,7 @@ public class Perf {
   }
 
   @Test
-  public void a7_testAssertThatRangeWithSimpleLambda() {
+  public void a7_testAssertThatRange() {
     testAssertThatRange();
   }
 
