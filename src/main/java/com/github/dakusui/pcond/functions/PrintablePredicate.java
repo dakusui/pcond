@@ -41,7 +41,7 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     };
   }
 
-  private PrintablePredicate(Supplier<String> s, Predicate<? super T> predicate) {
+  protected PrintablePredicate(Supplier<String> s, Predicate<? super T> predicate) {
     this.predicate = requireNonNull(predicate);
     this.s = requireNonNull(s);
   }
