@@ -1,13 +1,14 @@
 package com.github.dakusui.pcond.internals;
 
 import com.github.dakusui.pcond.functions.Evaluable;
+import com.github.dakusui.pcond.functions.PrintablePredicate;
 import com.github.dakusui.pcond.functions.Printables;
 
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class TransformingPredicate<P, O> implements Predicate<O>, Evaluable.Transformation<O, P> {
+public class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Predicate<O>, Evaluable.Transformation<O, P> {
   public interface Factory<P, O> {
     default TransformingPredicate<P, O> then(String condName, Predicate<? super P> cond) {
       return then(Printables.predicate(condName, cond));
@@ -25,17 +26,10 @@ public class TransformingPredicate<P, O> implements Predicate<O>, Evaluable.Tran
   }
 
   public TransformingPredicate(String name, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
+    super(() -> "", v -> predicate.test(function.apply(v)));
     this.predicate = predicate;
     this.function = function;
     this.name = name;
-  }
-
-  @Override
-  public boolean test(O v) {
-    ////
-    // This method is usually not called. Because Assertion class invokes function
-    // and predicate of this object by itself and do not use this method.
-    return predicate.test(function.apply(v));
   }
 
   public Predicate<? super P> predicate() {
