@@ -7,15 +7,17 @@ import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Collections.unmodifiableList;
 
 public interface Evaluator {
-  <T> boolean evaluate(T value, Evaluable.Conjunction<T> conjunction);
+  <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction);
 
-  <T> boolean evaluate(T value, Evaluable.Disjunction<T> disjunction);
+  <T> void evaluate(T value, Evaluable.Disjunction<T> disjunction);
 
-  <T> boolean evaluate(T value, Evaluable.Negation<T> negation);
+  <T> void evaluate(T value, Evaluable.Negation<T> negation);
 
-  <T> boolean evaluate(T value, Evaluable.Leaf<T> leaf);
+  <T> void evaluate(T value, Evaluable.Leaf<T> leaf);
 
-  <T, R> boolean evaluate(T value, Evaluable.Transformation<T, R> transformation);
+  <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation);
+
+  boolean resultValue();
 
   static Evaluator create() {
     return new Impl();
@@ -23,8 +25,10 @@ public interface Evaluator {
 
   static <T> Result evaluate(T value, Evaluable<T> evaluable) {
     Evaluator evaluator = create();
-    return new Result(Objects.requireNonNull(evaluable).accept(value, evaluator), evaluator.resultRecords());
+    Objects.requireNonNull(evaluable).accept(value, evaluator);
+    return new Result(evaluator.resultValue(), evaluator.resultRecords());
   }
+
 
   List<Result.Record> resultRecords();
 
@@ -128,6 +132,7 @@ public interface Evaluator {
   class Impl implements Evaluator {
     List<Result.OnGoingRecord> onGoingRecords = new LinkedList<>();
     List<Result.Record>        records        = new ArrayList<>();
+    Object                     currentResult;
 
     /**
      * Records an operation of the name.
@@ -138,6 +143,7 @@ public interface Evaluator {
      */
     void record(String name, Object value, Object result) {
       this.records.add(new Result.FinalizedRecord(onGoingRecords.size(), value, result, name));
+      this.currentResult = result;
     }
 
     void enter(String name) {
@@ -146,52 +152,61 @@ public interface Evaluator {
       records.add(newRecord);
     }
 
-    boolean leave(boolean result) {
+    void leave(boolean result) {
       int positionInOngoingRecords = onGoingRecords.size() - 1;
       Result.OnGoingRecord current = onGoingRecords.get(positionInOngoingRecords);
       records.set(current.positionInRecords, current.result(result));
       onGoingRecords.remove(positionInOngoingRecords);
-      return result;
+      this.currentResult = result;
     }
 
     @Override
-    public <T> boolean evaluate(T value, Evaluable.Conjunction<T> conjunction) {
+    public <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction) {
       enter("&&");
-      if (!conjunction.a().accept(value, this)) {
+      conjunction.a().accept(value, this);
+      if (!this.resultValue()) {
         leave(false);
-        return false;
+        return;
       }
-      return leave(conjunction.b().accept(value, this));
+      conjunction.b().accept(value, this);
+      leave(this.resultValue());
     }
 
     @Override
-    public <T> boolean evaluate(T value, Evaluable.Disjunction<T> disjunction) {
+    public <T> void evaluate(T value, Evaluable.Disjunction<T> disjunction) {
       enter("||");
-      if (disjunction.a().accept(value, this)) {
+      disjunction.a().accept(value, this);
+      if (this.resultValue()) {
         leave(true);
-        return true;
+        return;
       }
-      return leave(disjunction.b().accept(value, this));
+      disjunction.b().accept(value, this);
+      leave(this.resultValue());
     }
 
     @Override
-    public <T> boolean evaluate(T value, Evaluable.Negation<T> negation) {
+    public <T> void evaluate(T value, Evaluable.Negation<T> negation) {
       enter("!");
-      return leave(!negation.target().accept(value, this));
+      negation.target().accept(value, this);
+      leave(!this.resultValue());
     }
 
     @Override
-    public <T> boolean evaluate(T value, Evaluable.Leaf<T> leaf) {
+    public <T> void evaluate(T value, Evaluable.Leaf<T> leaf) {
       boolean result = leaf.predicate().test(value);
       record(String.format("%s", leaf), value, result);
-      return result;
     }
 
     @Override
-    public <T, R> boolean evaluate(T value, Evaluable.Transformation<T, R> transformation) {
+    public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
       R transformedValue = transformation.mapper().apply(value);
       record(String.format("%s", transformation.mapper()), value, transformedValue);
-      return transformation.checker().accept(transformedValue, this);
+      transformation.checker().accept(transformedValue, this);
+    }
+
+    @Override
+    public boolean resultValue() {
+      return (boolean) currentResult;
     }
 
     @Override
