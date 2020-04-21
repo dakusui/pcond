@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.functions;
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -13,7 +12,6 @@ import static com.github.dakusui.pcond.functions.Printables.function;
 import static com.github.dakusui.pcond.functions.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 public enum Predicates {
@@ -175,11 +173,11 @@ public enum Predicates {
     return cond.negate();
   }
 
-  public static <O, P> TransformingPredicate.Factory<P, O> when(String funcName, Function<? super O, ? extends P> func) {
-    return when(function(funcName, func));
+  public static <O, P> TransformingPredicate.Factory<P, O> transform(String funcName, Function<? super O, ? extends P> func) {
+    return transform(function(funcName, func));
   }
 
-  public static <O, P> TransformingPredicate.Factory<P, O> when(Function<? super O, ? extends P> function) {
+  public static <O, P> TransformingPredicate.Factory<P, O> transform(Function<? super O, ? extends P> function) {
     return cond -> new TransformingPredicate<>(cond, function);
   }
 

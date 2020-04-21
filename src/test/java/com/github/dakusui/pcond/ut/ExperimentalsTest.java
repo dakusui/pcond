@@ -40,35 +40,35 @@ public class ExperimentalsTest extends TestBase {
   public void hello() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2", "o")))).then(anyMatch(test(stringEndsWith()))));
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(test(stringEndsWith()))));
   }
 
   @Test
   public void hello_a() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2", "o")))).then(anyMatch(test(stringEndsWith(), 0, 1))));
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(test(stringEndsWith(), 0, 1))));
   }
 
   @Test
   public void hello_b() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2", "o")))).then(noneMatch(test(stringEndsWith(), 1, 0))));
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(test(stringEndsWith(), 1, 0))));
   }
 
   @Test
   public void hello_c() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(toContextStream()).andThen(nest(asList("1", "2", "o")))).then(anyMatch(test(stringEndsWith(), 0, 1))));
+        transform(stream().andThen(toContextStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(test(stringEndsWith(), 0, 1))));
   }
 
   @Test
   public void hello_d_1() {
     require(
         "hello",
-        when(streamOf().andThen(nest(asList("Hello", "HELLO", "hello")))).then(anyMatch(test(areEqual()))));
+        transform(streamOf().andThen(nest(asList("Hello", "HELLO", "hello")))).check(anyMatch(test(areEqual()))));
   }
 
   @Test(expected = PreconditionViolationException.class)
@@ -76,7 +76,7 @@ public class ExperimentalsTest extends TestBase {
     try {
       require(
           "hello",
-          when(streamOf().andThen(toContextStream())).then(anyMatch(toContextPredicate(isNull()))));
+          transform(streamOf().andThen(toContextStream())).check(anyMatch(toContextPredicate(isNull()))));
     } catch (PreconditionViolationException e) {
       e.printStackTrace();
       assertThat(
@@ -101,7 +101,7 @@ public class ExperimentalsTest extends TestBase {
   public void hello_d_2() {
     require(
         "hello",
-        when(toContext()).then(toContextPredicate(isNotNull())));
+        transform(toContext()).check(toContextPredicate(isNotNull())));
   }
 
   @Test(expected = PreconditionViolationException.class)
@@ -109,7 +109,7 @@ public class ExperimentalsTest extends TestBase {
     try {
       require(
           "hello",
-          when(toContext()).then(toContextPredicate(isNull())));
+          transform(toContext()).check(toContextPredicate(isNull())));
     } catch (PreconditionViolationException e) {
       e.printStackTrace();
       assertThat(
@@ -139,7 +139,7 @@ public class ExperimentalsTest extends TestBase {
     try {
       require(
           asList("hello", "world"),
-          when(stream().andThen(nest(asList("1", "2", "o")))).then(allMatch(test(stringEndsWith()))));
+          transform(stream().andThen(nest(asList("1", "2", "o")))).check(allMatch(test(stringEndsWith()))));
     } catch (PreconditionViolationException e) {
       e.printStackTrace();
       assertThat(
@@ -164,35 +164,35 @@ public class ExperimentalsTest extends TestBase {
   public void hello2() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2")))).then(alwaysTrue()));
+        transform(stream().andThen(nest(asList("1", "2")))).check(alwaysTrue()));
   }
 
   @Test
   public void hello3() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2")))).then(anyMatch(alwaysTrue())));
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(alwaysTrue())));
   }
 
   @Test
   public void hello3_a() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).then(alwaysTrue()));
+        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(alwaysTrue()));
   }
 
   @Test
   public void hello3_b() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).then(anyMatch(alwaysTrue())));
+        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(alwaysTrue())));
   }
 
   @Test
   public void hello4() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).then(anyMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(new Predicate<Experimentals.Context>() {
           @Override
           public boolean test(Experimentals.Context context) {
             return context.valueAt(1).equals("1");
@@ -209,7 +209,7 @@ public class ExperimentalsTest extends TestBase {
   public void hello4_a() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2")))).then(anyMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<Experimentals.Context>() {
           @Override
           public boolean test(Experimentals.Context context) {
             return context.valueAt(1).equals("1");
@@ -226,7 +226,7 @@ public class ExperimentalsTest extends TestBase {
   public void hello5() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2")))).then(allMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(allMatch(new Predicate<Experimentals.Context>() {
           @Override
           public boolean test(Experimentals.Context context) {
             return context.valueAt(1).equals("1");
@@ -243,7 +243,7 @@ public class ExperimentalsTest extends TestBase {
   public void hello6() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2")))).then(anyMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<Experimentals.Context>() {
           @Override
           public boolean test(Experimentals.Context context) {
             return context.valueAt(1).equals("1");

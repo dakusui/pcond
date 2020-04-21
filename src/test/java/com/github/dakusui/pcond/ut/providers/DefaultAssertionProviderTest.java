@@ -24,7 +24,7 @@ public class DefaultAssertionProviderTest extends TestBase {
   public void withoutEvaluator_conj_thenFail() {
     try {
       createAssertionProvider(useEvaluator(newProperties(), false))
-          .requireArgument("Hello", and(isNotNull(), isEmptyString().negate(), when(length()).then(gt(10))));
+          .requireArgument("Hello", and(isNotNull(), isEmptyString().negate(), transform(length()).check(gt(10))));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertEquals(1, numLines(e.getMessage()));
@@ -35,14 +35,14 @@ public class DefaultAssertionProviderTest extends TestBase {
   @Test
   public void withoutEvaluator_conj_thenPass() {
     createAssertionProvider(useEvaluator(newProperties(), false))
-        .requireArgument("Hello World, everyone", and(isNotNull(), isEmptyString().negate(), when(length()).then(gt(10))));
+        .requireArgument("Hello World, everyone", and(isNotNull(), isEmptyString().negate(), transform(length()).check(gt(10))));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void withEvaluator_columns100_conj() {
     try {
       createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
-          .requireArgument("Hello", and(isNotNull(), isEmptyString().negate(), when(length()).then(gt(10))));
+          .requireArgument("Hello", and(isNotNull(), isEmptyString().negate(), transform(length()).check(gt(10))));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       throw e;
@@ -89,7 +89,7 @@ public class DefaultAssertionProviderTest extends TestBase {
   public void withEvaluator_transforming_thenFail() {
     try {
       createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
-          .requireArgument("Hello", when(Functions.length()).then(Predicates.gt(10)));
+          .requireArgument("Hello", transform(Functions.length()).check(Predicates.gt(10)));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
@@ -126,7 +126,7 @@ public class DefaultAssertionProviderTest extends TestBase {
   public void withEvaluator_columns100$whenNull() {
     try {
       createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
-          .requireArgument(null, and(isNotNull(), isEmptyString().negate(), when(length()).then(gt(10))));
+          .requireArgument(null, and(isNotNull(), isEmptyString().negate(), transform(length()).check(gt(10))));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(

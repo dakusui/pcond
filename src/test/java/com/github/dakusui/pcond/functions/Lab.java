@@ -71,8 +71,8 @@ enum Lab {
     System.out.println(">>" + applyValues(isInstanceOf(), asList("Hello", Class.class)));
     System.out.println(requireArgument(
         asList("hello", new HashMap<>(), Object.class),
-        when(cartesianWith(asList(Map.class, List.class, String.class)))
-            .then(noneMatch(uncurry(isInstanceOf())))
+        transform(cartesianWith(asList(Map.class, List.class, String.class)))
+            .check(noneMatch(uncurry(isInstanceOf())))
     ));
   }
 

@@ -10,11 +10,11 @@ import java.util.function.Predicate;
 
 public class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Predicate<O>, Evaluable.Transformation<O, P> {
   public interface Factory<P, O> {
-    default TransformingPredicate<P, O> then(String condName, Predicate<? super P> cond) {
-      return then(Printables.predicate(condName, cond));
+    default TransformingPredicate<P, O> check(String condName, Predicate<? super P> cond) {
+      return check(Printables.predicate(condName, cond));
     }
 
-    TransformingPredicate<P, O> then(Predicate<? super P> cond);
+    TransformingPredicate<P, O> check(Predicate<? super P> cond);
   }
 
   private final Predicate<? super P>             predicate;

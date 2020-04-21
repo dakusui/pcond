@@ -23,7 +23,7 @@ public class Sandbox {
   }
 
   public void checkListSize(List<Object> list, int expectedMinimumSize) {
-    requireArgument(list, when(size()).then(gt(expectedMinimumSize)));
+    requireArgument(list, transform(size()).check(gt(expectedMinimumSize)));
   }
 
 
@@ -71,7 +71,7 @@ public class Sandbox {
   @Test//(expected = IllegalStateException.class)
   public void testState() {
     try {
-      System.out.println(requireState(Collections.emptyList(), when("size", size()).then(gt(0))));
+      System.out.println(requireState(Collections.emptyList(), transform("size", size()).check(gt(0))));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       throw e;
