@@ -17,7 +17,9 @@ public interface Evaluator {
 
   <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation);
 
-  boolean resultValue();
+  <T> void evaluate(T value, Evaluable.Func<T> func);
+
+  <T> T resultValue();
 
   static Evaluator create() {
     return new Impl();
@@ -118,7 +120,7 @@ public interface Evaluator {
         this.positionInRecords = positionInRecords;
       }
 
-      FinalizedRecord result(boolean result) {
+      FinalizedRecord result(Object result) {
         return new FinalizedRecord(this.level, result, this.name);
       }
 
@@ -152,7 +154,7 @@ public interface Evaluator {
       records.add(newRecord);
     }
 
-    void leave(boolean result) {
+    void leave(Object result) {
       int positionInOngoingRecords = onGoingRecords.size() - 1;
       Result.OnGoingRecord current = onGoingRecords.get(positionInOngoingRecords);
       records.set(current.positionInRecords, current.result(result));
@@ -164,7 +166,7 @@ public interface Evaluator {
     public <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction) {
       enter("&&");
       conjunction.a().accept(value, this);
-      if (!this.resultValue()) {
+      if (!this.<Boolean>resultValue()) {
         leave(false);
         return;
       }
@@ -188,7 +190,7 @@ public interface Evaluator {
     public <T> void evaluate(T value, Evaluable.Negation<T> negation) {
       enter("!");
       negation.target().accept(value, this);
-      leave(!this.resultValue());
+      leave(!this.<Boolean>resultValue());
     }
 
     @Override
@@ -197,16 +199,30 @@ public interface Evaluator {
       record(String.format("%s", leaf), value, result);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      R transformedValue = transformation.mapper().apply(value);
-      record(String.format("%s", transformation.mapper()), value, transformedValue);
-      transformation.checker().accept(transformedValue, this);
+      transformation.mapper().accept(value, this);
+      //record(String.format("%s", transformation.mapper()), value, transformedValue);
+      enter("check");
+      transformation.checker().accept((R) this.currentResult, this);
+      leave(this.resultValue());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public boolean resultValue() {
-      return (boolean) currentResult;
+    public <T> void evaluate(T value, Evaluable.Func<T> func) {
+      enter("transform");
+      Object resultValue = func.head().apply(value);
+      record(String.format("%s", func.head()), value, resultValue);
+      func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(resultValue, this));
+      leave(this.resultValue());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> T resultValue() {
+      return (T) currentResult;
     }
 
     @Override

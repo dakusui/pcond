@@ -20,8 +20,8 @@ public class Issue11Test extends TestBase {
     Object[] args = new Object[] { 123 };
     try {
       requireArgument(asList(args),
-          and(Predicates.transform(size()).check(isEqualTo(1)),
-              Predicates.transform(elementAt(0)).check(and(isNotNull(), isInstanceOf(String.class)))));
+          and(transform(size()).check(isEqualTo(1)),
+              transform(elementAt(0)).check(and(isNotNull(), isInstanceOf(String.class)))));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), containsString("&&"));

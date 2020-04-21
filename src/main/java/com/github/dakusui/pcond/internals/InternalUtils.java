@@ -6,6 +6,7 @@ import com.github.dakusui.pcond.functions.Printables;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -112,6 +113,15 @@ public enum InternalUtils {
       return (Evaluable<T>) p;
     // We know that Printable.predicate returns a PrintablePredicate object, which is an Evaluable.
     return (Evaluable<T>) Printables.predicate(p::toString, p);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Evaluable<T> toEvaluableIfNecessary(Function<? super T, ?> f) {
+    Objects.requireNonNull(f);
+    if (f instanceof Evaluable)
+      return (Evaluable<T>) f;
+    // We know that Printable.predicate returns a PrintableFunction object, which is an Evaluable.
+    return (Evaluable<T>) Printables.function(f::toString, f);
   }
 
   public static String spaces(int num) {

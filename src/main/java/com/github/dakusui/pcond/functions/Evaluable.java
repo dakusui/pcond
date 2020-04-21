@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.functions;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -13,18 +14,21 @@ public interface Evaluable<T> {
   }
 
   interface Conjunction<T> extends Composite<T> {
+    @Override
     default void accept(T value, Evaluator evaluator) {
       evaluator.evaluate(value, this);
     }
   }
 
   interface Disjunction<T> extends Composite<T> {
+    @Override
     default void accept(T value, Evaluator evaluator) {
       evaluator.evaluate(value, this);
     }
   }
 
   interface Negation<T> extends Evaluable<T> {
+    @Override
     default void accept(T value, Evaluator evaluator) {
       evaluator.evaluate(value, this);
     }
@@ -33,6 +37,7 @@ public interface Evaluable<T> {
   }
 
   interface Leaf<T> extends Evaluable<T> {
+    @Override
     default void accept(T value, Evaluator evaluator) {
       evaluator.evaluate(value, this);
     }
@@ -41,12 +46,24 @@ public interface Evaluable<T> {
   }
 
   interface Transformation<T, R> extends Evaluable<T> {
+    @Override
     default void accept(T value, Evaluator evaluator) {
       evaluator.evaluate(value, this);
     }
 
-    Function<? super T, ? extends R> mapper();
+    Evaluable<? super T> mapper();
 
     Evaluable<? super R> checker();
+  }
+
+  interface Func<T> extends Evaluable<T> {
+    @Override
+    default void accept(T value, Evaluator evaluator) {
+      evaluator.evaluate(value, this);
+    }
+
+    Function<? super T, ?> head();
+
+    Optional<Evaluable<?>> tail();
   }
 }

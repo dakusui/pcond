@@ -5,38 +5,51 @@ import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.util.Arrays.asList;
 
-public class PrintableFunction<T, R> implements CurriedFunction<T, R> {
-  private static final Factory<Object, Object, List<Function<Object, Object>>> COMPOSE_FACTORY = PrintableFunction.factory(
+public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable.Func<T> {
+  private static final Factory<Object, Object, List<Function<Object, Object>>> COMPOSE_FACTORY = PrintableFunction.composedFunctionFactory(
       arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
       arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
   );
 
-  private static final Factory<Object, Object, List<Function<Object, Object>>> ANDTHEN_FACTORY = PrintableFunction.factory(
+  private static final Factory<Object, Object, List<Function<Object, Object>>> ANDTHEN_FACTORY = PrintableFunction.composedFunctionFactory(
       arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
       arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
   );
 
-  private final Supplier<String> s;
+  private final Supplier<String>                 s;
   private final Function<? super T, ? extends R> function;
+  private final Function<? super T, ?>           head;
+  private final Evaluable<?>                     tail;
+
+  protected PrintableFunction(Supplier<String> s, Function<? super T, ? extends R> function, Function<? super T, ?> head, Evaluable<?> tail) {
+    this.s = Objects.requireNonNull(s);
+    this.function = Objects.requireNonNull(function);
+    this.head = head;
+    this.tail = tail;
+  }
 
   protected PrintableFunction(Supplier<String> s, Function<? super T, ? extends R> function) {
     this.s = Objects.requireNonNull(s);
     this.function = Objects.requireNonNull(function);
+    this.head = this;
+    this.tail = null;
   }
 
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({ "unchecked" })
   public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
     Objects.requireNonNull(before);
     return (Function<V, R>) COMPOSE_FACTORY.create(asList((Function<Object, Object>) before, (Function<Object, Object>) this));
   }
 
-  @SuppressWarnings({"unchecked"})
+  @SuppressWarnings({ "unchecked" })
   public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
     Objects.requireNonNull(after);
     return (Function<T, V>) ANDTHEN_FACTORY.create(asList((Function<Object, Object>) this, (Function<Object, Object>) after));
@@ -72,6 +85,16 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R> {
   }
 
   @Override
+  public Function<? super T, ?> head() {
+    return this.head;
+  }
+
+  @Override
+  public Optional<Evaluable<?>> tail() {
+    return Optional.ofNullable(this.tail);
+  }
+
+  @Override
   public String toString() {
     return s.get();
   }
@@ -88,10 +111,46 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R> {
       }
     };
   }
-  public static abstract class Factory<T, R, E> extends PrintableLambdaFactory<E> {
 
+  public static <T, R> Factory<T, R, List<Function<Object, Object>>> composedFunctionFactory(
+      Function<List<Function<Object, Object>>, String> nameComposer, Function<List<Function<Object, Object>>, Function<T, R>> ff) {
+    return new Factory<T, R, List<Function<Object, Object>>>(nameComposer) {
+      public PrintableFunction<T, R> create(List<Function<Object, Object>> arg) {
+        final Lambda.Spec<List<Function<Object, Object>>> spec = new Lambda.Spec<>(this, arg, PrintableFunctionFromFactory.class);
+        final Function<? super T, ? extends R> function = createFunction(arg);
+        return new PrintableFunctionFromFactory<T, R, List<Function<Object, Object>>>(
+            () -> this.nameComposer().apply(arg), function, createHead(arg), createTail(arg)) {
+
+          @Override
+          public Spec<List<Function<Object, Object>>> spec() {
+            return spec;
+          }
+        };
+      }
+
+      @Override
+      Function<T, R> createFunction(List<Function<Object, Object>> arg) {
+        return ff.apply(arg);
+      }
+
+      @SuppressWarnings("unchecked")
+      Function<? super T, ? extends R> createHead(List<Function<Object, Object>> arg) {
+        return (Function<? super T, ? extends R>) arg.get(0);
+      }
+
+      Evaluable<T> createTail(List<Function<Object, Object>> arg) {
+        return toEvaluableIfNecessary(arg.get(1));
+      }
+    };
+  }
+
+  public static abstract class Factory<T, R, E> extends PrintableLambdaFactory<E> {
     abstract static class PrintableFunctionFromFactory<T, R, E> extends PrintableFunction<T, R> implements Lambda<Factory<T, R, E>, E> {
-      PrintableFunctionFromFactory(Supplier<String> s, Function<? super T, ? extends R> function) {
+      PrintableFunctionFromFactory(Supplier<String> s, Function<? super T, ? extends R> function, Function<? super T, ?> head, Evaluable<?> tail) {
+        super(s, function, head, tail);
+      }
+
+      public PrintableFunctionFromFactory(Supplier<String> s, Function<? super T, ? extends R> function) {
         super(s, function);
       }
 
@@ -112,10 +171,10 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R> {
     }
 
     public PrintableFunction<T, R> create(E arg) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, PrintableFunctionFromFactory.class);
-      return new PrintableFunctionFromFactory<T, R, E>(
-          () -> this.nameComposer().apply(arg),
-          createFunction(arg)) {
+      Function<? super T, ? extends R> function = createFunction(arg);
+      return new PrintableFunctionFromFactory<T, R, E>(() -> this.nameComposer().apply(arg), function) {
+        final Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, PrintableFunctionFromFactory.class);
+
         @Override
         public Spec<E> spec() {
           return spec;

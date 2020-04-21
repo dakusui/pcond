@@ -29,7 +29,7 @@ public class ExperimentalsTest extends TestBase {
 
   /**
    * Building a nested loop with the {@code pcond} library.
-   *
+   * <p>
    * You can build a check using a multi-parameter static method which returns a boolean value.
    * In this example, {@link TargetMethodHolder#stringEndsWith(String, String)} is the method.
    * It is turned into a curried function in {@link Utils#stringEndsWith()} and then passed to {@link Experimentals#test(CurriedFunction, int...)}.
@@ -83,10 +83,12 @@ public class ExperimentalsTest extends TestBase {
           lineAt(e.getMessage(), 1),
           allOf(
               CoreMatchers.startsWith("streamOf"),
-              CoreMatchers.containsString("toContextStream"),
               CoreMatchers.containsString("hello")));
       assertThat(
           lineAt(e.getMessage(), 2),
+          CoreMatchers.containsString("toContextStream"));
+      assertThat(
+          lineAt(e.getMessage(), 3),
           allOf(
               CoreMatchers.startsWith("anyMatch"),
               CoreMatchers.containsString("toContextPredicate"),
@@ -146,10 +148,14 @@ public class ExperimentalsTest extends TestBase {
           lineAt(e.getMessage(), 1),
           allOf(
               CoreMatchers.startsWith("stream"),
+              CoreMatchers.containsString("\"hello\",\"world\"")));
+      assertThat(
+          lineAt(e.getMessage(), 2),
+          allOf(
               CoreMatchers.containsString("nest"),
               CoreMatchers.containsString("\"1\",\"2\",\"o\"")));
       assertThat(
-          lineAt(e.getMessage(), 2),
+          lineAt(e.getMessage(), 3),
           allOf(
               CoreMatchers.startsWith("allMatch"),
               CoreMatchers.containsString("isTrue"),

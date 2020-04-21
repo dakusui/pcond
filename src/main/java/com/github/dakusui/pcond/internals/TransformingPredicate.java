@@ -8,6 +8,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
+
 public class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Predicate<O>, Evaluable.Transformation<O, P> {
   public interface Factory<P, O> {
     default TransformingPredicate<P, O> check(String condName, Predicate<? super P> cond) {
@@ -41,13 +43,13 @@ public class TransformingPredicate<P, O> extends PrintablePredicate<O> implement
   }
 
   @Override
-  public Function<? super O, ? extends P> mapper() {
-    return this.function();
+  public Evaluable<? super O> mapper() {
+    return toEvaluableIfNecessary(this.function());
   }
 
   @Override
   public Evaluable<? super P> checker() {
-    return InternalUtils.toEvaluableIfNecessary(this.predicate());
+    return toEvaluableIfNecessary(this.predicate());
   }
 
   @Override
