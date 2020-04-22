@@ -21,7 +21,7 @@ public class EvaluatorTest extends TestBase {
           "hello",
           (Evaluable.Conjunction<String>) and(isNotNull(), errorThrowingPredicate()));
     } catch (EvaluationFailure e) {
-      assertFalse(evaluator.resultRecords().get(0).output().isPresent());
+      assertFalse(evaluator.resultRecords().get(0).hasOutput());
     }
   }
 

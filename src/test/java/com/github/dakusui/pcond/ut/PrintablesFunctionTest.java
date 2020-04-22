@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.functions.Functions;
+import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import org.junit.runner.RunWith;
 
 import java.util.function.Function;
 
+import static com.github.dakusui.pcond.Preconditions.requireArgument;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -32,6 +34,14 @@ public class PrintablesFunctionTest {
               not(is(n)),
               not(is(o))));
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testHandleNull() {
+      Function<String, String> f = Functions.identity();
+      String o = null;
+      requireArgument(o, Predicates.transform(f).check(Predicates.isNotNull()));
+    }
+
   }
 
   public static class Parameterized {

@@ -2,7 +2,9 @@ package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.functions.Experimentals;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -75,7 +77,9 @@ public interface Evaluator {
         return name;
       }
 
-      public abstract <T> Optional<T> output();
+      public abstract boolean hasOutput();
+
+      public abstract <T> T output();
     }
 
     static class FinalizedRecord extends Record {
@@ -86,10 +90,15 @@ public interface Evaluator {
         this.output = output;
       }
 
+      @Override
+      public boolean hasOutput() {
+        return true;
+      }
+
       @SuppressWarnings("unchecked")
       @Override
-      public <T> Optional<T> output() {
-        return Optional.of((T) output);
+      public <T> T output() {
+        return (T) output;
       }
     }
 
@@ -106,8 +115,13 @@ public interface Evaluator {
       }
 
       @Override
-      public <T> Optional<T> output() {
-        return Optional.empty();
+      public boolean hasOutput() {
+        return false;
+      }
+
+      @Override
+      public <T> T output() {
+        throw new UnsupportedOperationException();
       }
     }
   }
@@ -253,7 +267,7 @@ public interface Evaluator {
     }
 
     private Result.FinalizedRecord createRecordForImport(Result.Record each, Object other) {
-      return new Result.FinalizedRecord(this.onGoingRecords.size() + each.level, each.input, each.output().orElse(other), each.name);
+      return new Result.FinalizedRecord(this.onGoingRecords.size() + each.level, each.input, each.hasOutput() ? each.output() : other, each.name);
     }
   }
 }

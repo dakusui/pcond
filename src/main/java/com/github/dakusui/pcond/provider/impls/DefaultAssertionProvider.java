@@ -57,15 +57,15 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
       } catch (Error error) {
         throw error;
       } catch (Throwable t) {
-        String message = String.format("An exception was thrown during evaluation of value: %s: %s%n", value, cond);
-        message = message + composeExplanation(evaluator.resultRecords());
+        String message = String.format("An exception(%s) was thrown during evaluation of value: %s: %s", t, value, cond);
+        message = message + String.format("%n") + composeExplanation(evaluator.resultRecords(), t);
         throw wrap(message, t);
       }
       Evaluator.Result result = new Evaluator.Result(evaluator.resultValue(), evaluator.resultRecords());
       if (result.result())
         return value;
-      String b = messageComposer.apply(value, cond) + String.format("%n") + composeExplanation(evaluator.resultRecords());
-      throw exceptionComposer.apply(b);
+      String message = messageComposer.apply(value, cond) + String.format("%n") + composeExplanation(evaluator.resultRecords(), null);
+      throw exceptionComposer.apply(message);
     } else {
       if (!cond.test(value))
         throw exceptionComposer.apply(messageComposer.apply(value, cond));
@@ -73,27 +73,27 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     }
   }
 
-  private String composeExplanation(List<Evaluator.Result.Record> result) {
+  private String composeExplanation(List<Evaluator.Result.Record> result, Throwable t) {
     int maxLevel = result.stream().map(Evaluator.Result.Record::level).max(Integer::compareTo).orElse(0);
     int maxNameLength = result.stream().map(record -> record.name().length() + record.level() * 2).max(Integer::compareTo).orElse(0);
     int maxInputLength = result.stream().map(record -> formatObject(record.input()).length() + record.level() * 2).max(Integer::compareTo).orElse(0);
-    return
-        result.stream()
-            .map(r -> this.formatRecord(r, maxLevel, maxNameLength, maxInputLength))
-            .collect(joining(String.format("%n")));
+    return result.stream()
+        .map(r -> this.formatRecord(r, maxLevel, maxNameLength, maxInputLength, t))
+        .collect(joining(String.format("%n")));
   }
 
-  protected String formatRecord(Evaluator.Result.Record r, int maxLevel, int maxNameLength, int maxInputLength) {
+  protected String formatRecord(Evaluator.Result.Record r, int maxLevel, int maxNameLength, int maxInputLength, Throwable throwable) {
     String formattedInput = InternalUtils.formatObject(r.input());
     String input;
     input = formattedInput;
     String indent = spaces(r.level() * 2);
-    return String.format("%-" + maxInputLength + "s %s %-" + maxNameLength + "s -> %s%s",
+    return String.format("%-" + maxInputLength + "s %s %-" + maxNameLength + "s %s %s%s",
         indent + input,
         "->",
         indent + r.name(),
+        r.hasOutput() ? "->" : "  ",
         spaces((maxLevel - r.level()) * 2),
-        r.output().map(InternalUtils::formatObject).orElse("<<OUTPUT MISSING>>"));
+        r.hasOutput() ? InternalUtils.formatObject(r.output()) : throwable);
   }
 
   private boolean useEvaluator() {
