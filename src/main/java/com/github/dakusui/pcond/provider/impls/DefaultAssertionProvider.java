@@ -56,10 +56,7 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
       Evaluator.Result result = Evaluator.evaluate(value, (Evaluable<? super T>) cond);
       if (result.result())
         return value;
-      String b = messageComposer.apply(value, cond) + String.format("%n") +
-          result.stream()
-              .map(this::formatRecord)
-              .collect(joining(String.format("%n")));
+      String b = messageComposer.apply(value, cond) + composeExplanation(result);
       throw exceptionComposer.apply(b);
     } else {
       if (!cond.test(value))
@@ -68,10 +65,19 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     }
   }
 
-  protected String formatRecord(Evaluator.Result.Record r) {
-    return String.format("%-30s -> %-" + evaluableNameWidth() + "s -> %s",
+  private String composeExplanation(Evaluator.Result result) {
+    int maxLevel = result.stream().map(Evaluator.Result.Record::level).max(Integer::compareTo).orElse(0);
+    return String.format("%n") +
+        result.stream()
+            .map(r -> this.formatRecord(r, maxLevel))
+            .collect(joining(String.format("%n")));
+  }
+
+  protected String formatRecord(Evaluator.Result.Record r, int maxLevel) {
+    return String.format("%-30s -> %-" + evaluableNameWidth() + "s -> %s%s",
         InternalUtils.formatObject(r.input()),
         spaces(r.level() * 2) + r.name(),
+        spaces((maxLevel - r.level()) * 2),
         r.output().map(InternalUtils::formatObject).orElse("<<OUTPUT MISSING>>"));
   }
 
