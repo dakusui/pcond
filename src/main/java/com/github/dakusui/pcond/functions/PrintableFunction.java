@@ -2,7 +2,8 @@ package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
+import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.functions.preds.ComposedFuncUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -14,12 +15,12 @@ import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNece
 import static java.util.Arrays.asList;
 
 public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable.Func<T> {
-  private static final Factory<Object, Object, List<Function<Object, Object>>> COMPOSE_FACTORY = PrintableFunction.composedFunctionFactory(
+  private static final BaseFuncUtils.Factory<Object, Object, List<Function<Object, Object>>> COMPOSE_FACTORY = ComposedFuncUtils.factory(
       arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
       arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
   );
 
-  private static final Factory<Object, Object, List<Function<Object, Object>>> ANDTHEN_FACTORY = PrintableFunction.composedFunctionFactory(
+  private static final BaseFuncUtils.Factory<Object, Object, List<Function<Object, Object>>> ANDTHEN_FACTORY = ComposedFuncUtils.factory(
       arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
       arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
   );
@@ -104,85 +105,4 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable
     return new PrintableFunction<>(() -> Objects.requireNonNull(s), function);
   }
 
-  public static <T, R, E> Factory<T, R, E> factory(Function<E, String> nameComposer, Function<E, Function<T, R>> ff) {
-    return new Factory<T, R, E>(nameComposer) {
-      @Override
-      Function<T, R> createFunction(E arg) {
-        return ff.apply(arg);
-      }
-    };
-  }
-
-  public static <T, R> Factory<T, R, List<Function<Object, Object>>> composedFunctionFactory(
-      Function<List<Function<Object, Object>>, String> nameComposer, Function<List<Function<Object, Object>>, Function<T, R>> ff) {
-    return new Factory<T, R, List<Function<Object, Object>>>(nameComposer) {
-      public PrintableFunction<T, R> create(List<Function<Object, Object>> arg) {
-        final Lambda.Spec<List<Function<Object, Object>>> spec = new Lambda.Spec<>(this, arg, PrintableFunctionFromFactory.class);
-        final Function<? super T, ? extends R> function = createFunction(arg);
-        return new PrintableFunctionFromFactory<T, R, List<Function<Object, Object>>>(
-            () -> this.nameComposer().apply(arg), function, createHead(arg), createTail(arg)) {
-
-          @Override
-          public Spec<List<Function<Object, Object>>> spec() {
-            return spec;
-          }
-        };
-      }
-
-      @Override
-      Function<T, R> createFunction(List<Function<Object, Object>> arg) {
-        return ff.apply(arg);
-      }
-
-      @SuppressWarnings("unchecked")
-      Function<? super T, ? extends R> createHead(List<Function<Object, Object>> arg) {
-        return (Function<? super T, ? extends R>) arg.get(0);
-      }
-
-      Evaluable<T> createTail(List<Function<Object, Object>> arg) {
-        return toEvaluableIfNecessary(arg.get(1));
-      }
-    };
-  }
-
-  public static abstract class Factory<T, R, E> extends PrintableLambdaFactory<E> {
-    abstract static class PrintableFunctionFromFactory<T, R, E> extends PrintableFunction<T, R> implements Lambda<Factory<T, R, E>, E> {
-      PrintableFunctionFromFactory(Supplier<String> s, Function<? super T, ? extends R> function, Function<? super T, ?> head, Evaluable<?> tail) {
-        super(s, function, head, tail);
-      }
-
-      public PrintableFunctionFromFactory(Supplier<String> s, Function<? super T, ? extends R> function) {
-        super(s, function);
-      }
-
-      @Override
-      public int hashCode() {
-        return Objects.hashCode(arg());
-      }
-
-      @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-      @Override
-      public boolean equals(Object anotherObject) {
-        return equals(anotherObject, type());
-      }
-    }
-
-    Factory(Function<E, String> s) {
-      super(s);
-    }
-
-    public PrintableFunction<T, R> create(E arg) {
-      Function<? super T, ? extends R> function = createFunction(arg);
-      return new PrintableFunctionFromFactory<T, R, E>(() -> this.nameComposer().apply(arg), function) {
-        final Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, PrintableFunctionFromFactory.class);
-
-        @Override
-        public Spec<E> spec() {
-          return spec;
-        }
-      };
-    }
-
-    abstract Function<? super T, ? extends R> createFunction(E arg);
-  }
 }

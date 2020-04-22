@@ -1,9 +1,9 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.functions.Experimentals;
-import com.github.dakusui.pcond.functions.PrintableFunction;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
@@ -289,7 +289,7 @@ public class ExperimentalsTest extends TestBase {
 
   @Test
   public void usageExample() {
-    PrintableFunction.Factory<String, String, List<Object>> functionFactory = pathToUriFunctionFactory();
+    BaseFuncUtils.Factory<String, String, List<Object>> functionFactory = pathToUriFunctionFactory();
     Function<String, String> pathToUriOnLocalHost = functionFactory.create(asList("http", "localhost", 80));
     System.out.println(pathToUriOnLocalHost);
     System.out.println(pathToUriOnLocalHost.apply("path/to/resource"));
@@ -308,7 +308,7 @@ public class ExperimentalsTest extends TestBase {
     System.out.println(pathToUriOnLocalHost.equals(pathToUriOnRemoteHost));
   }
 
-  private static PrintableFunction.Factory<String, String, List<Object>> pathToUriFunctionFactory() {
+  private static BaseFuncUtils.Factory<String, String, List<Object>> pathToUriFunctionFactory() {
     return Printables.functionFactory(
         (List<Object> args) -> "buildUri" + args,
         (List<Object> args) -> (String path) -> String.format("%s://%s:%s/%s", args.get(0), args.get(1), args.get(2), path));

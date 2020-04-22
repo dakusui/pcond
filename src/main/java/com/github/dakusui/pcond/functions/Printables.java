@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.functions;
 
 
+import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
 import com.github.dakusui.pcond.functions.preds.BasePredUtils;
 import com.github.dakusui.pcond.functions.preds.LeafPredUtils;
 
@@ -103,10 +104,10 @@ public enum Printables {
    * @param <E>          Type of the parameter with which the returned factory create a function
    * @return A factory to create a printable function.
    */
-  public static <T, R, E> PrintableFunction.Factory<T, R, E> functionFactory(
+  public static <T, R, E> BaseFuncUtils.Factory<T, R, E> functionFactory(
       final Function<E, String> nameComposer,
       final Function<E, Function<T, R>> ff) {
-    return PrintableFunction.factory(nameComposer, ff);
+    return BaseFuncUtils.factory(nameComposer, ff);
   }
 
   /**
