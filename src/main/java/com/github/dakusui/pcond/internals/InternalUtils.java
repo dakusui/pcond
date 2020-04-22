@@ -24,10 +24,10 @@ public enum InternalUtils {
     if (value instanceof Collection) {
       Collection<?> collection = (Collection<?>) value;
       if (collection.size() < 4)
-        return format("(%s)",
+        return format("[%s]",
             collection.stream().map(InternalUtils::formatObject).collect(Collectors.joining(",")));
       Iterator<?> i = collection.iterator();
-      return format("(%s,%s,%s...;%s)",
+      return format("[%s,%s,%s...;%s]",
           formatObject(i.next()),
           formatObject(i.next()),
           formatObject(i.next()),

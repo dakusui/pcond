@@ -27,21 +27,21 @@ public class InternalUtilsTest {
     public void testFormatObject$collection3() {
       assertEquals(
           InternalUtils.formatObject(asList("a", "b", "c")),
-          "(\"a\",\"b\",\"c\")");
+          "[\"a\",\"b\",\"c\"]");
     }
 
     @Test
     public void testFormatObject$collection4() {
       assertEquals(
           InternalUtils.formatObject(asList("a", "b", "c", "d")),
-          "(\"a\",\"b\",\"c\"...;4)");
+          "[\"a\",\"b\",\"c\"...;4]");
     }
 
     @Test
     public void testFormatObject$array4() {
       assertEquals(
           InternalUtils.formatObject(new String[]{"a", "b", "c", "d"}),
-          "(\"a\",\"b\",\"c\"...;4)");
+          "[\"a\",\"b\",\"c\"...;4]");
     }
 
     @Test
