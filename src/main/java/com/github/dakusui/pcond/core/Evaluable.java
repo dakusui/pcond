@@ -1,5 +1,8 @@
 package com.github.dakusui.pcond.core;
 
+import com.github.dakusui.pcond.functions.Experimentals;
+import com.github.dakusui.pcond.functions.Experimentals.Context;
+
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -47,6 +50,17 @@ public interface Evaluable<T> {
     }
 
     Predicate<? super T> predicate();
+  }
+
+  interface ContextPred extends Pred<Context> {
+    @Override
+    default void accept(Context value, Evaluator evaluator) {
+      evaluator.evaluate(value, this);
+    }
+
+    <T> Evaluable<? super T> enclosed();
+
+    int argIndex();
   }
 
   interface StreamPred<E> extends Pred<Stream<E>> {

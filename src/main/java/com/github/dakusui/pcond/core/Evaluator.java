@@ -1,9 +1,12 @@
 package com.github.dakusui.pcond.core;
 
+import com.github.dakusui.pcond.functions.Experimentals;
+
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static java.util.Collections.unmodifiableList;
 
 public interface Evaluator {
@@ -14,6 +17,8 @@ public interface Evaluator {
   <T> void evaluate(T value, Evaluable.Negation<T> negation);
 
   <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred);
+
+  void evaluate(Experimentals.Context value, Evaluable.ContextPred contextPred);
 
   <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation);
 
@@ -27,12 +32,6 @@ public interface Evaluator {
 
   static Evaluator create() {
     return new Impl();
-  }
-
-  static <T> Result evaluate(T value, Evaluable<T> evaluable) {
-    Evaluator evaluator = create();
-    Objects.requireNonNull(evaluable).accept(value, evaluator);
-    return new Result(evaluator.resultValue(), evaluator.resultRecords());
   }
 
   class Result {
@@ -60,12 +59,6 @@ public interface Evaluator {
       Record(int level, Object input, String name) {
         this.level = level;
         this.input = input;
-        this.name = name;
-      }
-
-      Record(int level, String name) {
-        this.level = level;
-        this.input = null;
         this.name = name;
       }
 
@@ -125,18 +118,6 @@ public interface Evaluator {
     List<Result.Record>        records        = new ArrayList<>();
     Object                     currentResult;
 
-    /**
-     * Records an operation of the name.
-     *
-     * @param name   The name of the operation
-     * @param value  Input to the operation
-     * @param result The output of the operation
-     */
-    void record(String name, Object value, Object result) {
-      this.records.add(new Result.FinalizedRecord(onGoingRecords.size(), value, result, name));
-      this.currentResult = result;
-    }
-
     void enter(String name, Object input) {
       Result.OnGoingRecord newRecord = new Result.OnGoingRecord(onGoingRecords.size(), records.size(), name, input);
       onGoingRecords.add(newRecord);
@@ -184,8 +165,16 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred) {
+      enter(String.format("%s", leafPred), value);
       boolean result = leafPred.predicate().test(value);
-      record(String.format("%s", leafPred), value, result);
+      leave(result);
+    }
+
+    @Override
+    public void evaluate(Experimentals.Context context, Evaluable.ContextPred contextPred) {
+      enter(String.format("%s", contextPred), context);
+      contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
+      leave(this.resultValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -200,11 +189,10 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T> void evaluate(T value, Evaluable.Func<T> func) {
+      enter(String.format("%s", func.head()), value);
       Object resultValue = func.head().apply(value);
-      record(String.format("%s", func.head()), value, resultValue);
-      func.tail().ifPresent(tailSide -> {
-        ((Evaluable<Object>) tailSide).accept(resultValue, this);
-      });
+      leave(resultValue);
+      func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(resultValue, this));
     }
 
     @Override
@@ -225,13 +213,25 @@ public interface Evaluator {
 
     private <E> Predicate<E> valueChecker(Evaluable.StreamPred<E> streamPred) {
       return e -> {
-        Evaluator evaluator = new Impl();
-        streamPred.cut().accept(e, evaluator);
-        if (evaluator.resultValue()) {
-          importResultRecords(evaluator.resultRecords());
-          return true;
+        Evaluator evaluator = Evaluator.create();
+        boolean succeeded = false;
+        boolean ret = false;
+        Object throwable = "<<OUTPUT MISSING>>";
+        try {
+          streamPred.cut().accept(e, evaluator);
+          succeeded = true;
+        } catch (Error error) {
+          throw error;
+        } catch (Throwable t) {
+          throwable = t;
+          throw wrapIfNecessary(t);
+        } finally {
+          if (!succeeded || evaluator.<Boolean>resultValue()) {
+            importResultRecords(evaluator.resultRecords(), throwable);
+            ret = true;
+          }
         }
-        return false;
+        return ret;
       };
     }
 
@@ -246,14 +246,14 @@ public interface Evaluator {
       return unmodifiableList(this.records);
     }
 
-    public void importResultRecords(List<Result.Record> resultRecords) {
+    public void importResultRecords(List<Result.Record> resultRecords, Object other) {
       resultRecords.stream()
-          .map(this::createRecordForImport)
+          .map(each1 -> createRecordForImport(each1, other))
           .forEach(each -> this.records.add(each));
     }
 
-    private Result.FinalizedRecord createRecordForImport(Result.Record each) {
-      return new Result.FinalizedRecord(this.onGoingRecords.size() + each.level, each.input, each.output().orElseThrow(IllegalStateException::new), each.name);
+    private Result.FinalizedRecord createRecordForImport(Result.Record each, Object other) {
+      return new Result.FinalizedRecord(this.onGoingRecords.size() + each.level, each.input, each.output().orElse(other), each.name);
     }
   }
 }

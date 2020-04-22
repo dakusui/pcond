@@ -1,9 +1,11 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.Experimentals;
-import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.functions.Experimentals;
+import com.github.dakusui.pcond.functions.Functions;
+import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
@@ -18,6 +20,7 @@ import static com.github.dakusui.pcond.Preconditions.require;
 import static com.github.dakusui.pcond.functions.Experimentals.*;
 import static com.github.dakusui.pcond.functions.Functions.*;
 import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static com.github.dakusui.pcond.ut.ExperimentalsTest.Utils.areEqual;
 import static com.github.dakusui.pcond.ut.ExperimentalsTest.Utils.stringEndsWith;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
@@ -74,6 +77,71 @@ public class ExperimentalsTest extends TestBase {
               CoreMatchers.containsString("true")
           ));
       throw e;
+    }
+  }
+
+  @Test(expected = PreconditionViolationException.class)
+  public void hello_b_e2() {
+    try {
+      require(
+          asList("Hi", "hello", "world", null),
+          transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
+              toContextPredicate(transform(Functions.length()).check(gt(3))))));
+    } catch (PreconditionViolationException e) {
+      e.printStackTrace();
+      assertThat(
+          lineAt(e.getMessage(), 5),
+          allOf(
+              CoreMatchers.containsString("context:[hello, 1]"),
+              CoreMatchers.containsString("contextPredicate"),
+              CoreMatchers.containsString("length >[3]"),
+              CoreMatchers.containsString(",0"),
+              CoreMatchers.containsString("true")
+          ));
+      assertThat(
+          lineAt(e.getMessage(), 7),
+          allOf(
+              CoreMatchers.containsString("hello"),
+              CoreMatchers.containsString("length"),
+              CoreMatchers.containsString("5")
+          ));
+      assertThat(
+          lineAt(e.getMessage(), 8),
+          allOf(
+              CoreMatchers.containsString("5"),
+              CoreMatchers.containsString(">[3]"),
+              CoreMatchers.containsString("true")
+          ));
+      throw e;
+    }
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void hello_b_e3() {
+    try {
+      require(
+          asList(null,"Hi", "hello", "world", null),
+          transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
+              toContextPredicate(transform(Functions.length()).check(gt(3))))));
+    } catch (InternalException e) {
+      e.printStackTrace();
+      assertThat(
+          lineAt(e.getMessage(), 5),
+          allOf(
+              CoreMatchers.containsString("context:[null, 1]"),
+              CoreMatchers.containsString("contextPredicate"),
+              CoreMatchers.containsString("length >[3]"),
+              CoreMatchers.containsString(",0"),
+              CoreMatchers.containsString("NullPointerException")
+          ));
+      assertThat(
+          lineAt(e.getMessage(), 7),
+          allOf(
+              CoreMatchers.containsString("null"),
+              CoreMatchers.containsString("length"),
+              CoreMatchers.containsString("NullPointerException")
+          ));
+      throw wrapIfNecessary(e.getCause());
     }
   }
 

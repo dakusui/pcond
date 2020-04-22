@@ -6,13 +6,13 @@ import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.provider.ApplicationException;
 import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
-import static com.github.dakusui.pcond.internals.InternalUtils.spaces;
+import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.util.stream.Collectors.joining;
 
 public class DefaultAssertionProvider implements AssertionProviderBase<ApplicationException> {
@@ -47,14 +47,24 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     return new ApplicationException(message);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E {
     if (useEvaluator() && cond instanceof Evaluable) {
-      @SuppressWarnings("unchecked")
-      Evaluator.Result result = Evaluator.evaluate(value, (Evaluable<? super T>) cond);
+      Evaluator evaluator = Evaluator.create();
+      try {
+        ((Evaluable<T>) cond).accept(value, evaluator);
+      } catch (Error error) {
+        throw error;
+      } catch (Throwable t) {
+        String message = String.format("An exception was thrown during evaluation of value: %s: %s%n", value, cond);
+        message = message + composeExplanation(evaluator.resultRecords());
+        throw wrap(message, t);
+      }
+      Evaluator.Result result = new Evaluator.Result(evaluator.resultValue(), evaluator.resultRecords());
       if (result.result())
         return value;
-      String b = messageComposer.apply(value, cond) + composeExplanation(result);
+      String b = messageComposer.apply(value, cond) + String.format("%n") + composeExplanation(evaluator.resultRecords());
       throw exceptionComposer.apply(b);
     } else {
       if (!cond.test(value))
@@ -63,11 +73,11 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     }
   }
 
-  private String composeExplanation(Evaluator.Result result) {
+  private String composeExplanation(List<Evaluator.Result.Record> result) {
     int maxLevel = result.stream().map(Evaluator.Result.Record::level).max(Integer::compareTo).orElse(0);
     int maxNameLength = result.stream().map(record -> record.name().length() + record.level() * 2).max(Integer::compareTo).orElse(0);
     int maxInputLength = result.stream().map(record -> formatObject(record.input()).length() + record.level() * 2).max(Integer::compareTo).orElse(0);
-    return String.format("%n") +
+    return
         result.stream()
             .map(r -> this.formatRecord(r, maxLevel, maxNameLength, maxInputLength))
             .collect(joining(String.format("%n")));
@@ -76,15 +86,13 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
   protected String formatRecord(Evaluator.Result.Record r, int maxLevel, int maxNameLength, int maxInputLength) {
     String formattedInput = InternalUtils.formatObject(r.input());
     String input;
-    String arrowForInput;
     input = formattedInput;
-    arrowForInput = "->";
     String indent = spaces(r.level() * 2);
     return String.format("%-" + maxInputLength + "s %s %-" + maxNameLength + "s -> %s%s",
         indent + input,
-        arrowForInput,
+        "->",
         indent + r.name(),
-        indent,
+        spaces((maxLevel - r.level()) * 2),
         r.output().map(InternalUtils::formatObject).orElse("<<OUTPUT MISSING>>"));
   }
 
