@@ -3,11 +3,9 @@ package com.github.dakusui.pcond.functions;
 import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
@@ -104,44 +102,7 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     return ret;
   }
 
-  public static class LeafPred<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T> {
-    public LeafPred(Supplier<String> s, Predicate<? super T> predicate) {
-      super(s, predicate);
-    }
-
-    @Override
-    public Predicate<? super T> predicate() {
-      return predicate;
-    }
-  }
-
-  public static class StreamPred<E> extends PrintablePredicate<Stream<E>> implements Evaluable.StreamPred<E> {
-    private final Evaluable<? super E> cut;
-    private final boolean              defaultValue;
-
-    protected StreamPred(Supplier<String> s, Predicate<? super Stream<E>> predicate, Evaluable<? super E> cut, boolean defaultValue) {
-      super(s, predicate);
-      this.cut = requireNonNull(cut);
-      this.defaultValue = defaultValue;
-    }
-
-    @Override
-    public boolean defaultValue() {
-      return this.defaultValue;
-    }
-
-    @Override
-    public Evaluable<? super E> cut() {
-      return this.cut;
-    }
-
-    @Override
-    public boolean valueOnCut() {
-      return !defaultValue();
-    }
-  }
-
-  private abstract static class Junction<T> extends PrintablePredicate<T> implements Evaluable.Composite<T> {
+  abstract static class Junction<T> extends PrintablePredicate<T> implements Evaluable.Composite<T> {
     private final Evaluable<? super T> a;
     private final Evaluable<? super T> b;
 
@@ -159,18 +120,6 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     @Override
     public Evaluable<? super T> b() {
       return this.b;
-    }
-  }
-
-  public static class Conjunction<T> extends Junction<T> implements Evaluable.Conjunction<T> {
-    public Conjunction(Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
-      super(s, predicate, a, b);
-    }
-  }
-
-  public static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
-    public Disjunction(Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
-      super(s, predicate, a, b);
     }
   }
 
@@ -199,15 +148,15 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
       return createLeafPred(arg);
     }
 
-    public LeafPredPrintablePredicateFromFactory<T, E> createLeafPred(E arg) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, LeafPredPrintablePredicateFromFactory.class);
-      return new LeafPredPrintablePredicateFromFactory<>(spec, () -> this.nameComposer().apply(arg), createPredicate(arg));
+    public LeafKit.LeafPredPrintablePredicateFromFactory<T, E> createLeafPred(E arg) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, LeafKit.LeafPredPrintablePredicateFromFactory.class);
+      return new LeafKit.LeafPredPrintablePredicateFromFactory<>(spec, () -> this.nameComposer().apply(arg), createPredicate(arg));
     }
 
     @SuppressWarnings({ "RedundantClassCall", "unchecked" })
-    public <EE> StreamPredPrintablePredicateFromFactory<EE, E> createStreamPred(E arg, Predicate<? super EE> cut, boolean defaultValue) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, StreamPredPrintablePredicateFromFactory.class);
-      return new StreamPredPrintablePredicateFromFactory<EE, E>(
+    public <EE> StreamKit.StreamPredPrintablePredicateFromFactory<EE, E> createStreamPred(E arg, Predicate<? super EE> cut, boolean defaultValue) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, StreamKit.StreamPredPrintablePredicateFromFactory.class);
+      return new StreamKit.StreamPredPrintablePredicateFromFactory<EE, E>(
           spec,
           () -> this.nameComposer().apply(arg),
           Predicate.class.cast(createPredicate(arg)),
@@ -216,9 +165,9 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
       );
     }
 
-    public <P extends Predicate<? super T>> ConjunctionPrintablePredicateFromFactory<T, E> createConjunction(E arg, P p, P q) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, ConjunctionPrintablePredicateFromFactory.class);
-      return new ConjunctionPrintablePredicateFromFactory<>(
+    public <P extends Predicate<? super T>> ConjunctionKit.ConjunctionPrintablePredicateFromFactory<T, E> createConjunction(E arg, P p, P q) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, ConjunctionKit.ConjunctionPrintablePredicateFromFactory.class);
+      return new ConjunctionKit.ConjunctionPrintablePredicateFromFactory<>(
           spec,
           () -> this.nameComposer().apply(arg),
           createPredicate(arg),
@@ -226,9 +175,9 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
           toEvaluableIfNecessary(q));
     }
 
-    public <P extends Predicate<? super T>> DisjunctionPrintablePredicateFromFactory<T, E> createDisjunction(E arg, P p, P q) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, DisjunctionPrintablePredicateFromFactory.class);
-      return new DisjunctionPrintablePredicateFromFactory<>(
+    public <P extends Predicate<? super T>> DisjunctionKit.DisjunctionPrintablePredicateFromFactory<T, E> createDisjunction(E arg, P p, P q) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, DisjunctionKit.DisjunctionPrintablePredicateFromFactory.class);
+      return new DisjunctionKit.DisjunctionPrintablePredicateFromFactory<>(
           spec,
           () -> this.nameComposer().apply(arg),
           createPredicate(arg),
@@ -236,138 +185,14 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
           toEvaluableIfNecessary(q));
     }
 
-    public <P extends Predicate<? super T>> NegationPrintablePredicateFromFactory<T, E> createNegation(E arg, P p) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, NegationPrintablePredicateFromFactory.class);
-      return new NegationPrintablePredicateFromFactory<>(
+    public <P extends Predicate<? super T>> NegationKit.NegationPrintablePredicateFromFactory<T, E> createNegation(E arg, P p) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, NegationKit.NegationPrintablePredicateFromFactory.class);
+      return new NegationKit.NegationPrintablePredicateFromFactory<>(
           spec,
           () -> this.nameComposer().apply(arg),
           createPredicate(arg),
           toEvaluableIfNecessary(p));
     }
 
-    static class LeafPredPrintablePredicateFromFactory<T, E> extends LeafPred<T> implements Lambda<Factory<T, E>, E> {
-      private final Spec<E> spec;
-
-      LeafPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate) {
-        super(s, predicate);
-        this.spec = spec;
-      }
-
-      @Override
-      public Spec<E> spec() {
-        return spec;
-      }
-
-      @Override
-      public int hashCode() {
-        return Objects.hashCode(arg());
-      }
-
-      @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-      @Override
-      public boolean equals(Object anotherObject) {
-        return equals(anotherObject, type());
-      }
-    }
-
-    static class StreamPredPrintablePredicateFromFactory<EE, E> extends StreamPred<EE> implements Lambda<Factory<Stream<EE>, E>, E> {
-      private final Spec<E> spec;
-
-      StreamPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super Stream<EE>> predicate, Evaluable<? super EE> cut, boolean defaultValue) {
-        super(s, predicate, cut, defaultValue);
-        this.spec = spec;
-      }
-
-      @Override
-      public Spec<E> spec() {
-        return spec;
-      }
-
-      @Override
-      public int hashCode() {
-        return Objects.hashCode(arg());
-      }
-
-      @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-      @Override
-      public boolean equals(Object anotherObject) {
-        return equals(anotherObject, type());
-      }
-    }
-
-    static class ConjunctionPrintablePredicateFromFactory<T, E> extends Conjunction<T> implements Lambda<Factory<T, E>, E> {
-      private final Spec<E> spec;
-
-      ConjunctionPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
-        super(s, predicate, a, b);
-        this.spec = spec;
-      }
-
-      @Override
-      public Spec<E> spec() {
-        return spec;
-      }
-
-      @Override
-      public int hashCode() {
-        return Objects.hashCode(arg());
-      }
-
-      @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-      @Override
-      public boolean equals(Object anotherObject) {
-        return equals(anotherObject, type());
-      }
-    }
-
-    static class DisjunctionPrintablePredicateFromFactory<T, E> extends Disjunction<T> implements Lambda<Factory<T, E>, E> {
-      private final Spec<E> spec;
-
-      DisjunctionPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
-        super(s, predicate, a, b);
-        this.spec = spec;
-      }
-
-      @Override
-      public Spec<E> spec() {
-        return spec;
-      }
-
-      @Override
-      public int hashCode() {
-        return Objects.hashCode(arg());
-      }
-
-      @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-      @Override
-      public boolean equals(Object anotherObject) {
-        return equals(anotherObject, type());
-      }
-    }
-
-    static class NegationPrintablePredicateFromFactory<T, E> extends Negation<T> implements Lambda<Factory<T, E>, E> {
-      private final Spec<E> spec;
-
-      NegationPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> target) {
-        super(s, predicate, target);
-        this.spec = spec;
-      }
-
-      @Override
-      public Spec<E> spec() {
-        return spec;
-      }
-
-      @Override
-      public int hashCode() {
-        return Objects.hashCode(arg());
-      }
-
-      @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-      @Override
-      public boolean equals(Object anotherObject) {
-        return equals(anotherObject, type());
-      }
-    }
   }
 }

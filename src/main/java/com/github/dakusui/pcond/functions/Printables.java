@@ -25,7 +25,7 @@ public enum Printables {
   }
 
   public static <T> Predicate<T> printablePredicate(String s, Predicate<T> predicate) {
-    return new PrintablePredicate.LeafPred<>(() -> s, predicate);
+    return new LeafKit.LeafPred<>(() -> s, predicate);
   }
 
   public static <T, R> Function<T, R> printableFunction(String s, Function<? super T, ? extends R> function) {
