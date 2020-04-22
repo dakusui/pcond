@@ -69,10 +69,9 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
   }
 
   protected String formatRecord(Evaluator.Result.Record r) {
-    return String.format("%-" + evaluableNameWidth() + "s -> %s",
-        String.format("%s%s",
-            spaces(r.level() * 2),
-            String.format("%s%s", r.name(), r.hasInput() ? "(" + InternalUtils.formatObject(r.input()) + ")" : "")),
+    return String.format("%-30s -> %-" + evaluableNameWidth() + "s -> %s",
+        InternalUtils.formatObject(r.input()),
+        spaces(r.level() * 2) + r.name(),
         r.output().map(InternalUtils::formatObject).orElse("<<OUTPUT MISSING>>"));
   }
 

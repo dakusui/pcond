@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.functions;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Collections.unmodifiableList;
 
 public interface Evaluator {
@@ -52,20 +51,17 @@ public interface Evaluator {
     }
 
     public static abstract class Record {
-      final int     level;
-      final boolean hasInput;
-      final Object  input;
-      final String  name;
+      final int    level;
+      final Object input;
+      final String name;
 
       Record(int level, Object input, String name) {
-        this.hasInput = true;
         this.level = level;
         this.input = input;
         this.name = name;
       }
 
       Record(int level, String name) {
-        this.hasInput = false;
         this.level = level;
         this.input = null;
         this.name = name;
@@ -75,13 +71,8 @@ public interface Evaluator {
         return level;
       }
 
-      public boolean hasInput() {
-        return this.hasInput;
-      }
-
       @SuppressWarnings({ "unchecked" })
       public <T> T input() {
-        requireState(this.hasInput, v -> v, () -> "This object does not have an input.");
         return (T) this.input;
       }
 
@@ -100,11 +91,6 @@ public interface Evaluator {
         this.output = output;
       }
 
-      FinalizedRecord(int level, Object output, String name) {
-        super(level, name);
-        this.output = output;
-      }
-
       @SuppressWarnings("unchecked")
       @Override
       public <T> Optional<T> output() {
@@ -115,13 +101,13 @@ public interface Evaluator {
     static class OnGoingRecord extends Record {
       final int positionInRecords;
 
-      OnGoingRecord(int level, int positionInRecords, String name) {
-        super(level, name);
+      OnGoingRecord(int level, int positionInRecords, String name, Object input) {
+        super(level, input, name);
         this.positionInRecords = positionInRecords;
       }
 
       FinalizedRecord result(Object result) {
-        return new FinalizedRecord(this.level, result, this.name);
+        return new FinalizedRecord(this.level, this.input, result, this.name);
       }
 
       @Override
@@ -148,8 +134,8 @@ public interface Evaluator {
       this.currentResult = result;
     }
 
-    void enter(String name) {
-      Result.OnGoingRecord newRecord = new Result.OnGoingRecord(onGoingRecords.size(), records.size(), name);
+    void enter(String name, Object input) {
+      Result.OnGoingRecord newRecord = new Result.OnGoingRecord(onGoingRecords.size(), records.size(), name, input);
       onGoingRecords.add(newRecord);
       records.add(newRecord);
     }
@@ -164,7 +150,7 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction) {
-      enter("&&");
+      enter("&&", value);
       conjunction.a().accept(value, this);
       if (!this.<Boolean>resultValue()) {
         leave(false);
@@ -176,7 +162,7 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.Disjunction<T> disjunction) {
-      enter("||");
+      enter("||", value);
       disjunction.a().accept(value, this);
       if (this.resultValue()) {
         leave(true);
@@ -188,7 +174,7 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.Negation<T> negation) {
-      enter("!");
+      enter("!", value);
       negation.target().accept(value, this);
       leave(!this.<Boolean>resultValue());
     }
@@ -202,9 +188,9 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
+      enter("check", value);
       transformation.mapper().accept(value, this);
       //record(String.format("%s", transformation.mapper()), value, transformedValue);
-      enter("check");
       transformation.checker().accept((R) this.currentResult, this);
       leave(this.resultValue());
     }
@@ -212,11 +198,11 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T> void evaluate(T value, Evaluable.Func<T> func) {
-      enter("transform");
       Object resultValue = func.head().apply(value);
       record(String.format("%s", func.head()), value, resultValue);
-      func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(resultValue, this));
-      leave(this.resultValue());
+      func.tail().ifPresent(tailSide -> {
+        ((Evaluable<Object>) tailSide).accept(resultValue, this);
+      });
     }
 
     @SuppressWarnings("unchecked")
