@@ -3,11 +3,15 @@ package com.github.dakusui.pcond.functions;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public interface Evaluable<T> {
   void accept(T value, Evaluator evaluator);
 
-  interface Composite<T> extends Evaluable<T> {
+  interface Pred<T> extends Evaluable<T> {
+  }
+
+  interface Composite<T> extends Pred<T> {
     Evaluable<? super T> a();
 
     Evaluable<? super T> b();
@@ -27,7 +31,7 @@ public interface Evaluable<T> {
     }
   }
 
-  interface Negation<T> extends Evaluable<T> {
+  interface Negation<T> extends Pred<T> {
     @Override
     default void accept(T value, Evaluator evaluator) {
       evaluator.evaluate(value, this);
@@ -36,7 +40,7 @@ public interface Evaluable<T> {
     Evaluable<? super T> target();
   }
 
-  interface Leaf<T> extends Evaluable<T> {
+  interface LeafPred<T> extends Pred<T> {
     @Override
     default void accept(T value, Evaluator evaluator) {
       evaluator.evaluate(value, this);
@@ -45,7 +49,20 @@ public interface Evaluable<T> {
     Predicate<? super T> predicate();
   }
 
-  interface Transformation<T, R> extends Evaluable<T> {
+  interface StreamPred<T extends Stream<E>, E> extends Pred<T> {
+    @Override
+    default void accept(T value, Evaluator evaluator) {
+      evaluator.evaluate(value, this);
+    }
+
+    boolean defaultValue();
+
+    Evaluable<? super E> cut();
+
+    boolean valueOnCut();
+  }
+
+  interface Transformation<T, R> extends Pred<T> {
     @Override
     default void accept(T value, Evaluator evaluator) {
       evaluator.evaluate(value, this);

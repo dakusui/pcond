@@ -12,13 +12,17 @@ public interface Evaluator {
 
   <T> void evaluate(T value, Evaluable.Negation<T> negation);
 
-  <T> void evaluate(T value, Evaluable.Leaf<T> leaf);
+  <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred);
 
   <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation);
 
   <T> void evaluate(T value, Evaluable.Func<T> func);
 
+  <T extends Stream<E>, E> void evaluate(T value, Evaluable.StreamPred<T, E> streamPred);
+
   <T> T resultValue();
+
+  List<Result.Record> resultRecords();
 
   static Evaluator create() {
     return new Impl();
@@ -30,8 +34,6 @@ public interface Evaluator {
     return new Result(evaluator.resultValue(), evaluator.resultRecords());
   }
 
-
-  List<Result.Record> resultRecords();
 
   class Result {
     final boolean      result;
@@ -180,17 +182,16 @@ public interface Evaluator {
     }
 
     @Override
-    public <T> void evaluate(T value, Evaluable.Leaf<T> leaf) {
-      boolean result = leaf.predicate().test(value);
-      record(String.format("%s", leaf), value, result);
+    public <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred) {
+      boolean result = leafPred.predicate().test(value);
+      record(String.format("%s", leafPred), value, result);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      enter("check", value);
+      enter("=>", value);
       transformation.mapper().accept(value, this);
-      //record(String.format("%s", transformation.mapper()), value, transformedValue);
       transformation.checker().accept((R) this.currentResult, this);
       leave(this.resultValue());
     }
@@ -203,6 +204,23 @@ public interface Evaluator {
       func.tail().ifPresent(tailSide -> {
         ((Evaluable<Object>) tailSide).accept(resultValue, this);
       });
+    }
+
+    @Override
+    public <T extends Stream<E>, E> void evaluate(T value, Evaluable.StreamPred<T, E> streamPred) {
+      boolean ret = streamPred.defaultValue();
+      enter(String.format("%s", streamPred), value);
+      leave(value.filter(e -> {
+        Evaluator evaluator = new Evaluator.Impl();
+        streamPred.cut().accept(e, evaluator);
+        if (evaluator.resultValue()) {
+          Impl.this.records.addAll(evaluator.resultRecords());
+          return true;
+        }
+        return false;
+      }).findFirst()
+          .map(each -> streamPred.valueOnCut())
+          .orElse(ret));
     }
 
     @SuppressWarnings("unchecked")

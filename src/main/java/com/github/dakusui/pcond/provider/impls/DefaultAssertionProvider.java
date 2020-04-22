@@ -7,6 +7,7 @@ import com.github.dakusui.pcond.provider.ApplicationException;
 import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -16,11 +17,9 @@ import static com.github.dakusui.pcond.internals.InternalUtils.spaces;
 import static java.util.stream.Collectors.joining;
 
 public class DefaultAssertionProvider implements AssertionProviderBase<ApplicationException> {
-  private final int     evaluableNameWidth;
   private final boolean useEvaluator;
 
   public DefaultAssertionProvider(Properties properties) {
-    this.evaluableNameWidth = evaluableNameWidth(this.getClass(), properties);
     this.useEvaluator = useEvaluator(this.getClass(), properties);
   }
 
@@ -67,30 +66,31 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
 
   private String composeExplanation(Evaluator.Result result) {
     int maxLevel = result.stream().map(Evaluator.Result.Record::level).max(Integer::compareTo).orElse(0);
+    int maxNameLength = result.stream().map(record -> record.name().length() + record.level() * 2).max(Integer::compareTo).orElse(0);
+    int maxInputLength = result.stream().map(record -> formatObject(record.input()).length() + record.level() * 2).max(Integer::compareTo).orElse(0);
     return String.format("%n") +
         result.stream()
-            .map(r -> this.formatRecord(r, maxLevel))
+            .map(r -> this.formatRecord(r, maxLevel, maxNameLength, maxInputLength))
             .collect(joining(String.format("%n")));
   }
 
-  protected String formatRecord(Evaluator.Result.Record r, int maxLevel) {
-    return String.format("%-30s -> %-" + evaluableNameWidth() + "s -> %s%s",
-        InternalUtils.formatObject(r.input()),
-        spaces(r.level() * 2) + r.name(),
-        spaces((maxLevel - r.level()) * 2),
+  protected String formatRecord(Evaluator.Result.Record r, int maxLevel, int maxNameLength, int maxInputLength) {
+    String formattedInput = InternalUtils.formatObject(r.input());
+    String input;
+    String arrowForInput;
+    input = formattedInput;
+    arrowForInput = "->";
+    String indent = spaces(r.level() * 2);
+    return String.format("%-" + maxInputLength + "s %s %-" + maxNameLength + "s -> %s%s",
+        indent + input,
+        arrowForInput,
+        indent + r.name(),
+        indent,
         r.output().map(InternalUtils::formatObject).orElse("<<OUTPUT MISSING>>"));
-  }
-
-  private int evaluableNameWidth() {
-    return this.evaluableNameWidth;
   }
 
   private boolean useEvaluator() {
     return this.useEvaluator;
-  }
-
-  private static int evaluableNameWidth(Class<?> myClass, Properties properties) {
-    return Integer.parseInt(properties.getProperty(myClass.getName() + ".evaluableNameWidth", "58"));
   }
 
   private static boolean useEvaluator(Class<?> myClass, Properties properties) {

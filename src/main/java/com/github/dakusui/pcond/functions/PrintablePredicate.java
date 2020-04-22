@@ -103,9 +103,9 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     return ret;
   }
 
-  public static class Leaf<T> extends PrintablePredicate<T> implements Evaluable.Leaf<T> {
+  public static class LeafPred<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T> {
 
-    public Leaf(Supplier<String> s, Predicate<? super T> predicate) {
+    public LeafPred(Supplier<String> s, Predicate<? super T> predicate) {
       super(s, predicate);
     }
 
@@ -173,9 +173,9 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
       return createLeaf(arg);
     }
 
-    public LeafPrintablePredicateFromFactory<T, E> createLeaf(E arg) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, LeafPrintablePredicateFromFactory.class);
-      return new LeafPrintablePredicateFromFactory<>(spec, () -> this.nameComposer().apply(arg), createPredicate(arg));
+    public LeafPredPrintablePredicateFromFactory<T, E> createLeaf(E arg) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, LeafPredPrintablePredicateFromFactory.class);
+      return new LeafPredPrintablePredicateFromFactory<>(spec, () -> this.nameComposer().apply(arg), createPredicate(arg));
     }
 
     public <P extends Predicate<? super T>> ConjunctionPrintablePredicateFromFactory<T, E> createConjunction(E arg, P p, P q) {
@@ -207,10 +207,10 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
           toEvaluableIfNecessary(p));
     }
 
-    static class LeafPrintablePredicateFromFactory<T, E> extends Leaf<T> implements Lambda<Factory<T, E>, E> {
+    static class LeafPredPrintablePredicateFromFactory<T, E> extends LeafPred<T> implements Lambda<Factory<T, E>, E> {
       private final Spec<E> spec;
 
-      LeafPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate) {
+      LeafPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate) {
         super(s, predicate);
         this.spec = spec;
       }
