@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.functions;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableList;
@@ -119,6 +120,7 @@ public interface Evaluator {
   }
 
   class Impl implements Evaluator {
+    private static final Object NULL_VALUE = new Object();
     List<Result.OnGoingRecord> onGoingRecords = new LinkedList<>();
     List<Result.Record>        records        = new ArrayList<>();
     Object                     currentResult;
@@ -209,17 +211,28 @@ public interface Evaluator {
     public <E> void evaluate(Stream<E> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
       enter(String.format("%s", streamPred), value);
-      leave(value.filter(e -> {
-        Evaluator evaluator = new Evaluator.Impl();
+      // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
+      // on 'findFirst()'.
+      // Although NULL_VALUE is an ordinary Object, not a value of E, this works
+      // because either way we will just return a boolean and during the execution,
+      // type information is erased.
+      leave(value.filter(valueChecker(streamPred))
+          .map(v -> v != null ? v : NULL_VALUE)
+          .findFirst()
+          .map(each -> streamPred.valueOnCut())
+          .orElse(ret));
+    }
+
+    private <E> Predicate<E> valueChecker(Evaluable.StreamPred<E> streamPred) {
+      return e -> {
+        Evaluator evaluator = new Impl();
         streamPred.cut().accept(e, evaluator);
         if (evaluator.resultValue()) {
           importResultRecords(evaluator.resultRecords());
           return true;
         }
         return false;
-      }).findFirst()
-          .map(each -> streamPred.valueOnCut())
-          .orElse(ret));
+      };
     }
 
     @SuppressWarnings("unchecked")

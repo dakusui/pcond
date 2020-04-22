@@ -26,20 +26,6 @@ public class EvaluatorTest extends TestBase {
     }
   }
 
-  @Test(expected = IllegalStateException.class)
-  public void testOngoingRecord_givenOngoingRecord$whenOutput$thenIllegalStateThrown() {
-    Evaluator evaluator = new Evaluator.Impl();
-    @SuppressWarnings("unchecked") Evaluable.Disjunction<String> evaluable = (Evaluable.Disjunction<String>) or(isNull(), alwaysTrue());
-    evaluator.evaluate("hello", evaluable);
-    try {
-      evaluator.resultRecords().get(0).input();
-    } catch (IllegalStateException e) {
-      e.printStackTrace();
-      assertThat(e.getMessage(), CoreMatchers.containsString("This object does not have an input"));
-      throw e;
-    }
-  }
-
   @Test
   public void testDisjShortcut_withTrue() {
     Evaluator evaluator = new Evaluator.Impl();

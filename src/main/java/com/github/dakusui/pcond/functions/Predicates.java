@@ -137,17 +137,17 @@ public enum Predicates {
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public static <E> Predicate<Stream<? extends E>> allMatch(Predicate<E> predicate) {
-    return (Predicate) Def.STREAM_ALL_MATCH_FACTORY.createStreamPred(predicate, predicate.negate(), true, false);
+    return (Predicate) Def.STREAM_ALL_MATCH_FACTORY.createStreamPred(predicate, predicate.negate(), true);
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public static <E> Predicate<Stream<? extends E>> noneMatch(Predicate<E> predicate) {
-    return (Predicate) Def.STREAM_NONE_MATCH_FACTORY.createStreamPred(predicate, predicate, true, false);
+    return (Predicate) Def.STREAM_NONE_MATCH_FACTORY.createStreamPred(predicate, predicate, true);
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public static <E> Predicate<Stream<? extends E>> anyMatch(Predicate<E> predicate) {
-    return (Predicate) Def.STREAM_ANY_MATCH_FACTORY.createStreamPred(predicate, predicate, false, true);
+    return (Predicate) Def.STREAM_ANY_MATCH_FACTORY.createStreamPred(predicate, predicate, false);
   }
 
   @SuppressWarnings("unchecked")

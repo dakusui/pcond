@@ -57,11 +57,24 @@ public class ExperimentalsTest extends TestBase {
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(test(stringEndsWith(), 1, 0))));
   }
 
-  @Test
+  @Test(expected = PreconditionViolationException.class)
   public void hello_b_e() {
-    require(
-        asList("Hi", "hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(test(stringEndsWith(), 0, 1))));
+    try {
+      require(
+          asList("Hi", "hello", "world"),
+          transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(test(stringEndsWith(), 0, 1))));
+    } catch (PreconditionViolationException e) {
+      e.printStackTrace();
+      assertThat(
+          lineAt(e.getMessage(), 5),
+          allOf(
+              CoreMatchers.containsString("context:[hello, o]"),
+              CoreMatchers.containsString("isTrue"),
+              CoreMatchers.containsString("stringEndsWith(String)(String)[0, 1]"),
+              CoreMatchers.containsString("true")
+          ));
+      throw e;
+    }
   }
 
   @Test
@@ -87,18 +100,18 @@ public class ExperimentalsTest extends TestBase {
     } catch (PreconditionViolationException e) {
       e.printStackTrace();
       assertThat(
-          lineAt(e.getMessage(), 1),
+          lineAt(e.getMessage(), 2),
           allOf(
-              CoreMatchers.startsWith("streamOf"),
+              CoreMatchers.containsString("streamOf"),
               CoreMatchers.containsString("hello")));
       assertThat(
-          lineAt(e.getMessage(), 2),
+          lineAt(e.getMessage(), 3),
           CoreMatchers.containsString("toContextStream"));
       assertThat(
-          lineAt(e.getMessage(), 3),
+          lineAt(e.getMessage(), 4),
           allOf(
-              CoreMatchers.startsWith("anyMatch"),
-              CoreMatchers.containsString("toContextPredicate"),
+              CoreMatchers.containsString("anyMatch"),
+              CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("isNull"),
               CoreMatchers.containsString("0"),
               CoreMatchers.containsString("false")));
@@ -122,20 +135,20 @@ public class ExperimentalsTest extends TestBase {
     } catch (PreconditionViolationException e) {
       e.printStackTrace();
       assertThat(
-          lineAt(e.getMessage(), 1),
+          lineAt(e.getMessage(), 2),
           allOf(
-              CoreMatchers.startsWith("toContext"),
               CoreMatchers.containsString("hello"),
+              CoreMatchers.containsString("toContext"),
               CoreMatchers.containsString("context:[hello]")
           ));
 
       assertThat(
-          lineAt(e.getMessage(), 2),
+          lineAt(e.getMessage(), 3),
           allOf(
-              CoreMatchers.startsWith("toContextPredicate"),
+              CoreMatchers.containsString("context:[hello]"),
+              CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("isNull"),
               CoreMatchers.containsString("0"),
-              CoreMatchers.containsString("context:[hello]"),
               CoreMatchers.containsString("->"),
               CoreMatchers.containsString("false")
           ));
@@ -154,17 +167,22 @@ public class ExperimentalsTest extends TestBase {
       assertThat(
           lineAt(e.getMessage(), 1),
           allOf(
-              CoreMatchers.startsWith("stream"),
-              CoreMatchers.containsString("\"hello\",\"world\"")));
+              CoreMatchers.containsString("\"hello\",\"world\""),
+              CoreMatchers.containsString("=>")));
       assertThat(
           lineAt(e.getMessage(), 2),
+          allOf(
+              CoreMatchers.containsString("stream"),
+              CoreMatchers.containsString("\"hello\",\"world\"")));
+      assertThat(
+          lineAt(e.getMessage(), 3),
           allOf(
               CoreMatchers.containsString("nest"),
               CoreMatchers.containsString("\"1\",\"2\",\"o\"")));
       assertThat(
-          lineAt(e.getMessage(), 3),
+          lineAt(e.getMessage(), 4),
           allOf(
-              CoreMatchers.startsWith("allMatch"),
+              CoreMatchers.containsString("allMatch"),
               CoreMatchers.containsString("isTrue"),
               CoreMatchers.containsString("stringEndsWith"),
               CoreMatchers.containsString("String"),

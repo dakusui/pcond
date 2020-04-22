@@ -117,14 +117,12 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
 
   public static class StreamPred<E> extends PrintablePredicate<Stream<E>> implements Evaluable.StreamPred<E> {
     private final Evaluable<? super E> cut;
-    private final boolean              valueOnCut;
     private final boolean              defaultValue;
 
-    protected StreamPred(Supplier<String> s, Predicate<? super Stream<E>> predicate, Evaluable<? super E> cut, boolean defaultValue, boolean valueOnCut) {
+    protected StreamPred(Supplier<String> s, Predicate<? super Stream<E>> predicate, Evaluable<? super E> cut, boolean defaultValue) {
       super(s, predicate);
       this.cut = requireNonNull(cut);
       this.defaultValue = defaultValue;
-      this.valueOnCut = valueOnCut;
     }
 
     @Override
@@ -139,7 +137,7 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
 
     @Override
     public boolean valueOnCut() {
-      return this.valueOnCut;
+      return !defaultValue();
     }
   }
 
@@ -206,15 +204,16 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
       return new LeafPredPrintablePredicateFromFactory<>(spec, () -> this.nameComposer().apply(arg), createPredicate(arg));
     }
 
-    public <EE> StreamPredPrintablePredicateFromFactory<EE, E> createStreamPred(E arg, Predicate<? super EE> cut, boolean defaultValue, boolean valueOnCut) {
+    @SuppressWarnings({ "RedundantClassCall", "unchecked" })
+    public <EE> StreamPredPrintablePredicateFromFactory<EE, E> createStreamPred(E arg, Predicate<? super EE> cut, boolean defaultValue) {
       Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, StreamPredPrintablePredicateFromFactory.class);
       return new StreamPredPrintablePredicateFromFactory<EE, E>(
           spec,
           () -> this.nameComposer().apply(arg),
           Predicate.class.cast(createPredicate(arg)),
           toEvaluableIfNecessary(cut),
-          defaultValue,
-          valueOnCut);
+          defaultValue
+      );
     }
 
     public <P extends Predicate<? super T>> ConjunctionPrintablePredicateFromFactory<T, E> createConjunction(E arg, P p, P q) {
@@ -274,8 +273,8 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     static class StreamPredPrintablePredicateFromFactory<EE, E> extends StreamPred<EE> implements Lambda<Factory<Stream<EE>, E>, E> {
       private final Spec<E> spec;
 
-      StreamPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super Stream<EE>> predicate, Evaluable<? super EE> cut, boolean defaultValue, boolean valueOnCut) {
-        super(s, predicate, cut, defaultValue, valueOnCut);
+      StreamPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super Stream<EE>> predicate, Evaluable<? super EE> cut, boolean defaultValue) {
+        super(s, predicate, cut, defaultValue);
         this.spec = spec;
       }
 

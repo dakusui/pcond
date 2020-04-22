@@ -25,12 +25,14 @@ public class Issue11Test extends TestBase {
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), containsString("&&"));
-      assertThat(lineAt(e.getMessage(), 2), allOf(containsString("size("), containsString(")")));
-      assertThat(lineAt(e.getMessage(), 3), containsString("isEqualTo[1]"));
-      assertThat(lineAt(e.getMessage(), 4), containsString("at[0]"));
-      assertThat(lineAt(e.getMessage(), 5), containsString("&&"));
-      assertThat(lineAt(e.getMessage(), 6), containsString("isNotNull"));
-      assertThat(lineAt(e.getMessage(), 7), containsString("isInstanceOf"));
+      assertThat(lineAt(e.getMessage(), 2), containsString("=>"));
+      assertThat(lineAt(e.getMessage(), 3), containsString("size"));
+      assertThat(lineAt(e.getMessage(), 4), containsString("isEqualTo[1]"));
+      assertThat(lineAt(e.getMessage(), 5), containsString("=>"));
+      assertThat(lineAt(e.getMessage(), 6), containsString("at[0]"));
+      assertThat(lineAt(e.getMessage(), 7), containsString("&&"));
+      assertThat(lineAt(e.getMessage(), 8), containsString("isNotNull"));
+      assertThat(lineAt(e.getMessage(), 9), containsString("isInstanceOf"));
       throw e;
     }
   }

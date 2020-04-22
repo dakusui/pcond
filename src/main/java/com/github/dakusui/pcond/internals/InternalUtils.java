@@ -44,11 +44,13 @@ public enum InternalUtils {
         s = s.substring(0, 12) + "..." + s.substring(s.length() - 5);
       return format("\"%s\"", s);
     }
-    String ret = value.toString();
-    ret = ret.contains("$")
-        ? ret.substring(ret.lastIndexOf("$") + 1)
-        : ret;
-    return ret;
+    if (isToStringOverridden(value))
+      return value.toString();
+    return value.toString().substring(value.getClass().getPackage().getName().length() + 1);
+  }
+
+  private static boolean isToStringOverridden(Object object) {
+    return getMethod(object.getClass(), "toString").getDeclaringClass() != Object.class;
   }
 
   /**

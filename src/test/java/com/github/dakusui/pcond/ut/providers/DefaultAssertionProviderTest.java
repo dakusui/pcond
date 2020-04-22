@@ -64,19 +64,22 @@ public class DefaultAssertionProviderTest extends TestBase {
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.startsWith("||"),
+          CoreMatchers.containsString("Hello"),
+          CoreMatchers.containsString("||"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.startsWith("  isEqualTo[\"hello\"](\"Hello\")"),
+          CoreMatchers.containsString("Hello"),
+          CoreMatchers.containsString("  isEqualTo[\"hello\"]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       assertThat(lineAt(e.getMessage(), 3), allOf(
-          CoreMatchers.startsWith("  isEqualTo[\"HELLO\"](\"Hello\")"),
+          CoreMatchers.containsString("Hello"),
+          CoreMatchers.containsString("  isEqualTo[\"HELLO\"]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
@@ -93,15 +96,22 @@ public class DefaultAssertionProviderTest extends TestBase {
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.startsWith("length"),
+          CoreMatchers.containsString("=>"),
+          CoreMatchers.containsString("Hello"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("false")
+
+      ));
+      assertThat(lineAt(e.getMessage(), 2), allOf(
+          CoreMatchers.containsString("length"),
           CoreMatchers.containsString("Hello"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("5")
 
       ));
-      assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.startsWith(">[10]"),
-          CoreMatchers.containsString("(5)"),
+      assertThat(lineAt(e.getMessage(), 3), allOf(
+          CoreMatchers.containsString("5"),
+          CoreMatchers.containsString(">[10]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
@@ -130,19 +140,20 @@ public class DefaultAssertionProviderTest extends TestBase {
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.startsWith("&&"),
+          CoreMatchers.containsString("&&"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.startsWith("  &&"),
+          CoreMatchers.containsString("  &&"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       assertThat(lineAt(e.getMessage(), 3), allOf(
-          CoreMatchers.startsWith("    isNotNull(null)"),
+          CoreMatchers.containsString("null"),
+          CoreMatchers.containsString("    isNotNull"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 

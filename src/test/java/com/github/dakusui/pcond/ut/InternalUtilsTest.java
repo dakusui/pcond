@@ -62,7 +62,7 @@ public class InternalUtilsTest {
     public void testFormatObject$InnerClassObject() {
       assertThat(
           InternalUtils.formatObject(new InnerClass()),
-          startsWith("InnerClass@"));
+          startsWith("InternalUtilsTest$FormatObject$InnerClass@"));
     }
 
     @Test

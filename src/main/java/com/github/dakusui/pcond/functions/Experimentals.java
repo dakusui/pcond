@@ -50,7 +50,7 @@ public enum Experimentals {
 
   public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate, int argIndex) {
     return Printables.predicate(
-        () -> String.format("toContextPredicate[%s,%s]", predicate, argIndex),
+        () -> String.format("contextPredicate[%s,%s]", predicate, argIndex),
         context -> predicate.test(context.valueAt(argIndex)));
   }
 
