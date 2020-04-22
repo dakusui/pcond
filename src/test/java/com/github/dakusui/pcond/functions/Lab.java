@@ -1,5 +1,8 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.core.MultiParameterFunction;
+import com.github.dakusui.pcond.functions.preds.BasePredUtils;
+
 import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
@@ -19,15 +22,15 @@ enum Lab {
   ;
 
   @SuppressWarnings("unchecked")
-  private static final PrintablePredicate.Factory<?, List<Object>> MATCHES_ALL_OF_FACTORY = Printables.predicateFactory(
+  private static final BasePredUtils.Factory<?, List<Object>> MATCHES_ALL_OF_FACTORY = Printables.predicateFactory(
       (List<Object> v) -> format("%s matchesAllOf(%s)", v.get(1), v.get(0)),
       (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().allMatch((Predicate<Object>) v.get(1)));
   @SuppressWarnings("unchecked")
-  private static final PrintablePredicate.Factory<?, List<Object>> MATCHES_ANY_OF_FACTORY = Printables.predicateFactory(
+  private static final BasePredUtils.Factory<?, List<Object>> MATCHES_ANY_OF_FACTORY = Printables.predicateFactory(
       (List<Object> v) -> format("matchesAnyOf(%s,%s)", v.get(0), v.get(1)),
       (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().anyMatch((Predicate<Object>) v.get(1)));
   @SuppressWarnings("unchecked")
-  private static final PrintablePredicate.Factory<?, List<Object>> MATCHES_NONE_OF_FACTORY = Printables.predicateFactory(
+  private static final BasePredUtils.Factory<?, List<Object>> MATCHES_NONE_OF_FACTORY = Printables.predicateFactory(
       (List<Object> v) -> format("matchesNoneOf(%s,%s)", v.get(0), v.get(1)),
       (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().noneMatch((Predicate<Object>) v.get(1)));
 

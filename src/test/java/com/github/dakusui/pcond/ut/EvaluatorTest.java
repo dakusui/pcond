@@ -1,10 +1,9 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.Evaluable;
-import com.github.dakusui.pcond.functions.Evaluator;
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import java.util.function.Predicate;

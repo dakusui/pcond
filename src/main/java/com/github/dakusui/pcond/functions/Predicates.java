@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.functions.preds.BasePredUtils;
+import com.github.dakusui.pcond.functions.preds.StreamUtils;
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
 import java.util.Collection;
@@ -194,63 +196,63 @@ public enum Predicates {
     private static final Predicate<String>                                   IS_EMPTY_OR_NULL_STRING          = predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
     );
     private static final Predicate<Object[]>                                 IS_EMPTY_ARRAY                   = predicate("isEmptyArray", objects -> objects.length == 0);
-    private static final Predicate<Collection<?>>                            IS_EMPTY_COLLECTION              = predicate("isEmpty", Collection::isEmpty);
-    private static final PrintablePredicate.Factory<Object, Object>          IS_EQUAL_TO_FACTORY              = Printables.predicateFactory(
+    private static final Predicate<Collection<?>>                     IS_EMPTY_COLLECTION = predicate("isEmpty", Collection::isEmpty);
+    private static final BasePredUtils.Factory<Object, Object>        IS_EQUAL_TO_FACTORY = Printables.predicateFactory(
         (arg) -> format("isEqualTo[%s]", formatObject(arg)),
         arg -> v -> Objects.equals(v, arg));
-    private static final PrintablePredicate.Factory<Collection<?>, Object>   CONTAINS_FACTORY                 = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<Collection<?>, Object> CONTAINS_FACTORY    = Printables.predicateFactory(
         (Object arg) -> format("contains[%s]", formatObject(arg)),
         (Object arg) -> (Collection<?> c) -> c.contains(arg));
-    private static final PrintablePredicate.Factory<Object, Object>          OBJECT_IS_SAME_AS_FACTORY        = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<Object, Object>        OBJECT_IS_SAME_AS_FACTORY        = Printables.predicateFactory(
         arg -> format("==[%s]", formatObject(arg)),
         arg -> v -> v == arg);
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final PrintablePredicate.Factory<?, Comparable<?>>        GT_FACTORY                       = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<?, Comparable<?>>      GT_FACTORY                       = Printables.predicateFactory(
         (arg) -> format(">[%s]", formatObject(arg)),
         arg -> v -> ((Comparable) v).compareTo(arg) > 0);
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final PrintablePredicate.Factory<?, Comparable<?>>        GE_FACTORY                       = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<?, Comparable<?>>      GE_FACTORY                       = Printables.predicateFactory(
         (arg) -> format(">=[%s]", formatObject(arg)),
         arg -> v -> ((Comparable) v).compareTo(arg) >= 0);
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final PrintablePredicate.Factory<?, Comparable<?>>        LE_FACTORY                       = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<?, Comparable<?>>      LE_FACTORY                       = Printables.predicateFactory(
         (arg) -> format("<=[%s]", formatObject(arg)),
         arg -> v -> ((Comparable) v).compareTo(arg) <= 0);
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final PrintablePredicate.Factory<?, Comparable<?>>        LT_FACTORY                       = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<?, Comparable<?>>      LT_FACTORY                       = Printables.predicateFactory(
         (arg) -> format("<[%s]", formatObject(arg)),
         arg -> v -> ((Comparable) v).compareTo(arg) < 0);
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final PrintablePredicate.Factory<?, Comparable<?>>        EQ_FACTORY                       = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<?, Comparable<?>>      EQ_FACTORY                       = Printables.predicateFactory(
         (arg) -> format("=[%s]", formatObject(arg)),
         arg -> v -> ((Comparable) v).compareTo(arg) == 0);
-    private static final PrintablePredicate.Factory<String, String>          STRING_MATCHES_REGEX_FACTORY     = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<String, String>        STRING_MATCHES_REGEX_FACTORY     = Printables.predicateFactory(
         (arg) -> format("matchesRegex[%s]", formatObject(arg)),
         arg -> (String s) -> s.matches(arg));
-    private static final PrintablePredicate.Factory<String, String>          STRING_CONTAINS_FACTORY          = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<String, String>        STRING_CONTAINS_FACTORY          = Printables.predicateFactory(
         (arg) -> format("containsString[%s]", formatObject(arg)),
         arg -> (String s) -> s.contains(arg));
-    private static final PrintablePredicate.Factory<String, String>          STRING_STARTS_WITH_FACTORY       = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<String, String>        STRING_STARTS_WITH_FACTORY       = Printables.predicateFactory(
         (arg) -> format("startsWith[%s]", formatObject(arg)),
         (arg) -> (String s) -> s.startsWith(arg));
-    private static final PrintablePredicate.Factory<String, String>          STRING_ENDS_WITH_FACTORY         = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<String, String>        STRING_ENDS_WITH_FACTORY         = Printables.predicateFactory(
         (arg) -> format("endsWith[%s]", formatObject(arg)),
         arg -> (String s) -> s.endsWith(arg));
-    private static final PrintablePredicate.Factory<String, String>          STRING_EQUALS_IGNORECASE_FACTORY = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<String, String>        STRING_EQUALS_IGNORECASE_FACTORY = Printables.predicateFactory(
         (arg) -> format("equalsIgnoreCase[%s]", formatObject(arg)),
         arg -> (String s) -> s.equalsIgnoreCase(arg));
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final PrintablePredicate.Factory<Stream<?>, Predicate<?>> STREAM_ALL_MATCH_FACTORY         = Printables.predicateFactory(
+    private static final StreamUtils.Factory<Stream<?>, Predicate<?>> STREAM_ALL_MATCH_FACTORY         = StreamUtils.factory(
         (arg) -> format("allMatch[%s]", requireNonNull(arg)),
         arg -> (Stream<?> stream) -> stream.allMatch((Predicate) arg)
     );
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final PrintablePredicate.Factory<Stream<?>, Predicate<?>> STREAM_NONE_MATCH_FACTORY        = Printables.predicateFactory(
+    private static final StreamUtils.Factory<Stream<?>, Predicate<?>> STREAM_NONE_MATCH_FACTORY        = StreamUtils.factory(
         (arg) -> format("noneMatch[%s]", requireNonNull(arg)),
         arg -> (Stream<?> stream) -> stream.noneMatch((Predicate) arg)
     );
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final PrintablePredicate.Factory<Stream<?>, Predicate<?>> STREAM_ANY_MATCH_FACTORY         = Printables.predicateFactory(
+    private static final StreamUtils.Factory<Stream<?>, Predicate<?>> STREAM_ANY_MATCH_FACTORY         = StreamUtils.factory(
         (arg) -> format("anyMatch[%s]", requireNonNull(arg)),
         arg -> (Stream<?> stream) -> stream.anyMatch((Predicate) arg)
     );

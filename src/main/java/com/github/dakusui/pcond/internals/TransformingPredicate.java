@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.internals;
 
-import com.github.dakusui.pcond.functions.Evaluable;
+import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.functions.PrintablePredicate;
 import com.github.dakusui.pcond.functions.Printables;
 

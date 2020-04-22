@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.functions.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
 
 import java.util.List;

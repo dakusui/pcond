@@ -1,6 +1,9 @@
 package com.github.dakusui.pcond.functions;
 
 
+import com.github.dakusui.pcond.functions.preds.BasePredUtils;
+import com.github.dakusui.pcond.functions.preds.LeafPredUtils;
+
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -25,7 +28,7 @@ public enum Printables {
   }
 
   public static <T> Predicate<T> printablePredicate(String s, Predicate<T> predicate) {
-    return new LeafKit.LeafPred<>(() -> s, predicate);
+    return new LeafPredUtils.LeafPred<>(() -> s, predicate);
   }
 
   public static <T, R> Function<T, R> printableFunction(String s, Function<? super T, ? extends R> function) {
@@ -113,9 +116,9 @@ public enum Printables {
    * @param <E>          Type of the parameter with which the returned factory create a predicate
    * @return A factory to create a printable predicate.
    */
-  public static <T, E> PrintablePredicate.Factory<T, E> predicateFactory(
+  public static <T, E> BasePredUtils.Factory<T, E> predicateFactory(
       final Function<E, String> nameComposer,
       final Function<E, Predicate<T>> ff) {
-    return PrintablePredicate.factory(nameComposer, ff);
+    return LeafPredUtils.factory(nameComposer, ff);
   }
 }

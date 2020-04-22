@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.Evaluable;
+import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.ut.testdata.FailingConstructor;

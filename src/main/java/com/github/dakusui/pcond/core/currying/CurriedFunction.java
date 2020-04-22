@@ -1,9 +1,9 @@
-package com.github.dakusui.pcond.functions.currying;
+package com.github.dakusui.pcond.core.currying;
 
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.functions.currying.CurryingUtils.Checks.*;
+import static com.github.dakusui.pcond.core.currying.CurryingUtils.Checks.*;
 
 public interface CurriedFunction<T, R> extends Function<T, R> {
   R applyFunction(T value);

@@ -1,13 +1,25 @@
-package com.github.dakusui.pcond.functions;
+package com.github.dakusui.pcond.functions.preds;
 
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.functions.PrintablePredicate;
 import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
 
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public enum LeafKit {
+public enum LeafPredUtils {
   ;
+
+  public static <T, E> Factory<T, E> factory(Function<E, String> nameComposer, Function<E, Predicate<T>> ff) {
+    return new Factory<T, E>(nameComposer) {
+      @Override
+      Predicate<? super T> createPredicate(E arg) {
+        return ff.apply(arg);
+      }
+    };
+  }
 
   public static class LeafPred<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T> {
     public LeafPred(Supplier<String> s, Predicate<? super T> predicate) {
@@ -20,7 +32,7 @@ public enum LeafKit {
     }
   }
 
-  static class LeafPredPrintablePredicateFromFactory<T, E> extends LeafPred<T> implements PrintableLambdaFactory.Lambda<PrintablePredicate.Factory<T, E>, E> {
+  static class LeafPredPrintablePredicateFromFactory<T, E> extends LeafPred<T> implements PrintableLambdaFactory.Lambda<BasePredUtils.Factory<T, E>, E> {
     private final Spec<E> spec;
 
     LeafPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate) {
@@ -42,6 +54,12 @@ public enum LeafKit {
     @Override
     public boolean equals(Object anotherObject) {
       return equals(anotherObject, type());
+    }
+  }
+
+  public abstract static class Factory<T, E> extends BasePredUtils.Factory<T, E> {
+    Factory(Function<E, String> s) {
+      super(s);
     }
   }
 }

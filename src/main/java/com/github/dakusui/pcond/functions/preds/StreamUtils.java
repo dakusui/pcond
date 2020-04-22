@@ -1,16 +1,28 @@
-package com.github.dakusui.pcond.functions;
+package com.github.dakusui.pcond.functions.preds;
 
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.functions.PrintablePredicate;
 import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
 
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.util.Objects.requireNonNull;
 
-public enum StreamKit {
+public enum StreamUtils {
   ;
+  public static <T, E> Factory<T, E> factory(Function<E, String> nameComposer, Function<E, Predicate<T>> ff) {
+    return new Factory<T, E>(nameComposer) {
+      @Override
+      Predicate<? super T> createPredicate(E arg) {
+        return ff.apply(arg);
+      }
+    };
+  }
 
   public static class StreamPred<E> extends PrintablePredicate<Stream<E>> implements Evaluable.StreamPred<E> {
     private final Evaluable<? super E> cut;
@@ -38,7 +50,7 @@ public enum StreamKit {
     }
   }
 
-  static class StreamPredPrintablePredicateFromFactory<EE, E> extends StreamPred<EE> implements PrintableLambdaFactory.Lambda<PrintablePredicate.Factory<Stream<EE>, E>, E> {
+  static class StreamPredPrintablePredicateFromFactory<EE, E> extends StreamPred<EE> implements PrintableLambdaFactory.Lambda<BasePredUtils.Factory<Stream<EE>, E>, E> {
     private final Spec<E> spec;
 
     StreamPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super Stream<EE>> predicate, Evaluable<? super EE> cut, boolean defaultValue) {
@@ -60,6 +72,24 @@ public enum StreamKit {
     @Override
     public boolean equals(Object anotherObject) {
       return equals(anotherObject, type());
+    }
+  }
+
+  public abstract static class Factory<T, E> extends BasePredUtils.Factory<T, E> {
+    Factory(Function<E, String> s) {
+      super(s);
+    }
+
+    @SuppressWarnings({ "RedundantClassCall", "unchecked" })
+    public <EE> StreamUtils.StreamPredPrintablePredicateFromFactory<EE, E> createStreamPred(E arg, Predicate<? super EE> cut, boolean defaultValue) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, StreamUtils.StreamPredPrintablePredicateFromFactory.class);
+      return new StreamUtils.StreamPredPrintablePredicateFromFactory<EE, E>(
+          spec,
+          () -> this.nameComposer().apply(arg),
+          Predicate.class.cast(createPredicate(arg)),
+          toEvaluableIfNecessary(cut),
+          defaultValue
+      );
     }
   }
 }

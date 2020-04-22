@@ -1,13 +1,12 @@
 package com.github.dakusui.pcond.provider.impls;
 
-import com.github.dakusui.pcond.functions.Evaluable;
-import com.github.dakusui.pcond.functions.Evaluator;
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.provider.ApplicationException;
 import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;

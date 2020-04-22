@@ -1,7 +1,8 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.functions.currying.CurriedFunction;
-import com.github.dakusui.pcond.functions.currying.CurryingUtils;
+import com.github.dakusui.pcond.core.MultiParameterFunction;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.currying.CurryingUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

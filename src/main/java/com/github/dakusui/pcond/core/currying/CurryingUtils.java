@@ -1,6 +1,6 @@
-package com.github.dakusui.pcond.functions.currying;
+package com.github.dakusui.pcond.core.currying;
 
-import com.github.dakusui.pcond.functions.MultiParameterFunction;
+import com.github.dakusui.pcond.core.MultiParameterFunction;
 import com.github.dakusui.pcond.functions.PrintableFunction;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.internals.InternalChecks;

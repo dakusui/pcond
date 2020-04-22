@@ -1,44 +1,36 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.functions.preds.ConjunctionUtils;
+import com.github.dakusui.pcond.functions.preds.DisjunctionUtils;
+import com.github.dakusui.pcond.functions.preds.NegationUtils;
 
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T> {
-  private static final PrintablePredicate.Factory<?, List<Predicate<Object>>> AND_FACTORY = factory(
+  private static final ConjunctionUtils.Factory<?, List<Predicate<Object>>> AND_FACTORY = ConjunctionUtils.factory(
       (arg) -> format("(%s&&%s)", arg.get(0), arg.get(1)),
       arg -> (Object t) -> unwrapIfPrintablePredicate(arg.get(0)).test(t) && (unwrapIfPrintablePredicate(arg.get(1))).test(t)
   );
 
-  private static final PrintablePredicate.Factory<?, List<Predicate<Object>>> OR_FACTORY = factory(
+  private static final DisjunctionUtils.Factory<?, List<Predicate<Object>>> OR_FACTORY = DisjunctionUtils.factory(
       (arg) -> format("(%s||%s)", arg.get(0), arg.get(1)),
       arg -> (Object t) -> unwrapIfPrintablePredicate(arg.get(0)).test(t) || (unwrapIfPrintablePredicate(arg.get(1))).test(t)
   );
 
-  private static final PrintablePredicate.Factory<?, Predicate<Object>> NEGATE_FACTORY = factory(
+  private static final NegationUtils.Factory<?, Predicate<Object>> NEGATE_FACTORY = NegationUtils.factory(
       (arg) -> format("!%s", arg),
       arg -> (Object t) -> unwrapIfPrintablePredicate(arg).negate().test(t)
   );
 
-  final Predicate<? super T> predicate;
-  final Supplier<String>     s;
-
-  public static <T, E> Factory<T, E> factory(Function<E, String> nameComposer, Function<E, Predicate<T>> ff) {
-    return new Factory<T, E>(nameComposer) {
-      @Override
-      Predicate<? super T> createPredicate(E arg) {
-        return ff.apply(arg);
-      }
-    };
-  }
+  protected final Predicate<? super T> predicate;
+  final           Supplier<String>     s;
 
   protected PrintablePredicate(Supplier<String> s, Predicate<? super T> predicate) {
     this.predicate = requireNonNull(predicate);
@@ -102,97 +94,4 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     return ret;
   }
 
-  abstract static class Junction<T> extends PrintablePredicate<T> implements Evaluable.Composite<T> {
-    private final Evaluable<? super T> a;
-    private final Evaluable<? super T> b;
-
-    public Junction(Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> a, Evaluable<? super T> b) {
-      super(s, predicate);
-      this.a = a;
-      this.b = b;
-    }
-
-    @Override
-    public Evaluable<? super T> a() {
-      return this.a;
-    }
-
-    @Override
-    public Evaluable<? super T> b() {
-      return this.b;
-    }
-  }
-
-  public static class Negation<T> extends PrintablePredicate<T> implements Evaluable.Negation<T> {
-    private final Evaluable<? super T> body;
-
-    public Negation(Supplier<String> s, Predicate<? super T> predicate, Evaluable<? super T> body) {
-      super(s, predicate);
-      this.body = body;
-    }
-
-    @Override
-    public Evaluable<? super T> target() {
-      return this.body;
-    }
-  }
-
-  public static abstract class Factory<T, E> extends PrintableLambdaFactory<E> {
-    Factory(Function<E, String> s) {
-      super(s);
-    }
-
-    abstract Predicate<? super T> createPredicate(E arg);
-
-    public PrintablePredicate<T> create(E arg) {
-      return createLeafPred(arg);
-    }
-
-    public LeafKit.LeafPredPrintablePredicateFromFactory<T, E> createLeafPred(E arg) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, LeafKit.LeafPredPrintablePredicateFromFactory.class);
-      return new LeafKit.LeafPredPrintablePredicateFromFactory<>(spec, () -> this.nameComposer().apply(arg), createPredicate(arg));
-    }
-
-    @SuppressWarnings({ "RedundantClassCall", "unchecked" })
-    public <EE> StreamKit.StreamPredPrintablePredicateFromFactory<EE, E> createStreamPred(E arg, Predicate<? super EE> cut, boolean defaultValue) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, StreamKit.StreamPredPrintablePredicateFromFactory.class);
-      return new StreamKit.StreamPredPrintablePredicateFromFactory<EE, E>(
-          spec,
-          () -> this.nameComposer().apply(arg),
-          Predicate.class.cast(createPredicate(arg)),
-          toEvaluableIfNecessary(cut),
-          defaultValue
-      );
-    }
-
-    public <P extends Predicate<? super T>> ConjunctionKit.ConjunctionPrintablePredicateFromFactory<T, E> createConjunction(E arg, P p, P q) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, ConjunctionKit.ConjunctionPrintablePredicateFromFactory.class);
-      return new ConjunctionKit.ConjunctionPrintablePredicateFromFactory<>(
-          spec,
-          () -> this.nameComposer().apply(arg),
-          createPredicate(arg),
-          toEvaluableIfNecessary(p),
-          toEvaluableIfNecessary(q));
-    }
-
-    public <P extends Predicate<? super T>> DisjunctionKit.DisjunctionPrintablePredicateFromFactory<T, E> createDisjunction(E arg, P p, P q) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, DisjunctionKit.DisjunctionPrintablePredicateFromFactory.class);
-      return new DisjunctionKit.DisjunctionPrintablePredicateFromFactory<>(
-          spec,
-          () -> this.nameComposer().apply(arg),
-          createPredicate(arg),
-          toEvaluableIfNecessary(p),
-          toEvaluableIfNecessary(q));
-    }
-
-    public <P extends Predicate<? super T>> NegationKit.NegationPrintablePredicateFromFactory<T, E> createNegation(E arg, P p) {
-      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, NegationKit.NegationPrintablePredicateFromFactory.class);
-      return new NegationKit.NegationPrintablePredicateFromFactory<>(
-          spec,
-          () -> this.nameComposer().apply(arg),
-          createPredicate(arg),
-          toEvaluableIfNecessary(p));
-    }
-
-  }
 }
