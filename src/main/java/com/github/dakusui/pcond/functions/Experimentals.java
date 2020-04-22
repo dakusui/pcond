@@ -46,8 +46,8 @@ public enum Experimentals {
    * @param orderArgs       An array to specify the order in which values in the context are applied to the function.
    * @return A predicate converted from the given curried function.
    */
-  public static Predicate<Context> test(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
-    return Def.applyAndTest(curriedFunction, Predicates.isTrue(), Boolean.class, orderArgs);
+  public static Predicate<Context> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
+    return Def.applyAndTest(curriedFunction, Printables.predicate("contextPredicate", Predicates.isTrue()), Boolean.class, orderArgs);
   }
 
   public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate_, int argIndex) {
