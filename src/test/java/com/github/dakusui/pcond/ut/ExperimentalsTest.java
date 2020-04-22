@@ -58,6 +58,13 @@ public class ExperimentalsTest extends TestBase {
   }
 
   @Test
+  public void hello_b_e() {
+    require(
+        asList("Hi", "hello", "world"),
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(test(stringEndsWith(), 0, 1))));
+  }
+
+  @Test
   public void hello_c() {
     require(
         asList("hello", "world"),

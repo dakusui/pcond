@@ -18,7 +18,7 @@ public interface Evaluator {
 
   <T> void evaluate(T value, Evaluable.Func<T> func);
 
-  <T extends Stream<E>, E> void evaluate(T value, Evaluable.StreamPred<T, E> streamPred);
+  <E> void evaluate(Stream<E> value, Evaluable.StreamPred<E> streamPred);
 
   <T> T resultValue();
 
@@ -33,7 +33,6 @@ public interface Evaluator {
     Objects.requireNonNull(evaluable).accept(value, evaluator);
     return new Result(evaluator.resultValue(), evaluator.resultRecords());
   }
-
 
   class Result {
     final boolean      result;
@@ -207,14 +206,14 @@ public interface Evaluator {
     }
 
     @Override
-    public <T extends Stream<E>, E> void evaluate(T value, Evaluable.StreamPred<T, E> streamPred) {
+    public <E> void evaluate(Stream<E> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
       enter(String.format("%s", streamPred), value);
       leave(value.filter(e -> {
         Evaluator evaluator = new Evaluator.Impl();
         streamPred.cut().accept(e, evaluator);
         if (evaluator.resultValue()) {
-          Impl.this.records.addAll(evaluator.resultRecords());
+          importResultRecords(evaluator.resultRecords());
           return true;
         }
         return false;
@@ -232,6 +231,16 @@ public interface Evaluator {
     @Override
     public List<Result.Record> resultRecords() {
       return unmodifiableList(this.records);
+    }
+
+    public void importResultRecords(List<Result.Record> resultRecords) {
+      resultRecords.stream()
+          .map(this::createRecordForImport)
+          .forEach(each -> this.records.add(each));
+    }
+
+    private Result.FinalizedRecord createRecordForImport(Result.Record each) {
+      return new Result.FinalizedRecord(this.onGoingRecords.size() + each.level, each.input, each.output().orElseThrow(IllegalStateException::new), each.name);
     }
   }
 }

@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
@@ -104,7 +105,6 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
   }
 
   public static class LeafPred<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T> {
-
     public LeafPred(Supplier<String> s, Predicate<? super T> predicate) {
       super(s, predicate);
     }
@@ -112,6 +112,34 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     @Override
     public Predicate<? super T> predicate() {
       return predicate;
+    }
+  }
+
+  public static class StreamPred<E> extends PrintablePredicate<Stream<E>> implements Evaluable.StreamPred<E> {
+    private final Evaluable<? super E> cut;
+    private final boolean              valueOnCut;
+    private final boolean              defaultValue;
+
+    protected StreamPred(Supplier<String> s, Predicate<? super Stream<E>> predicate, Evaluable<? super E> cut, boolean defaultValue, boolean valueOnCut) {
+      super(s, predicate);
+      this.cut = requireNonNull(cut);
+      this.defaultValue = defaultValue;
+      this.valueOnCut = valueOnCut;
+    }
+
+    @Override
+    public boolean defaultValue() {
+      return this.defaultValue;
+    }
+
+    @Override
+    public Evaluable<? super E> cut() {
+      return this.cut;
+    }
+
+    @Override
+    public boolean valueOnCut() {
+      return this.valueOnCut;
     }
   }
 
@@ -170,12 +198,23 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
     abstract Predicate<? super T> createPredicate(E arg);
 
     public PrintablePredicate<T> create(E arg) {
-      return createLeaf(arg);
+      return createLeafPred(arg);
     }
 
-    public LeafPredPrintablePredicateFromFactory<T, E> createLeaf(E arg) {
+    public LeafPredPrintablePredicateFromFactory<T, E> createLeafPred(E arg) {
       Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, LeafPredPrintablePredicateFromFactory.class);
       return new LeafPredPrintablePredicateFromFactory<>(spec, () -> this.nameComposer().apply(arg), createPredicate(arg));
+    }
+
+    public <EE> StreamPredPrintablePredicateFromFactory<EE, E> createStreamPred(E arg, Predicate<? super EE> cut, boolean defaultValue, boolean valueOnCut) {
+      Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, StreamPredPrintablePredicateFromFactory.class);
+      return new StreamPredPrintablePredicateFromFactory<EE, E>(
+          spec,
+          () -> this.nameComposer().apply(arg),
+          Predicate.class.cast(createPredicate(arg)),
+          toEvaluableIfNecessary(cut),
+          defaultValue,
+          valueOnCut);
     }
 
     public <P extends Predicate<? super T>> ConjunctionPrintablePredicateFromFactory<T, E> createConjunction(E arg, P p, P q) {
@@ -212,6 +251,31 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
 
       LeafPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super T> predicate) {
         super(s, predicate);
+        this.spec = spec;
+      }
+
+      @Override
+      public Spec<E> spec() {
+        return spec;
+      }
+
+      @Override
+      public int hashCode() {
+        return Objects.hashCode(arg());
+      }
+
+      @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+      @Override
+      public boolean equals(Object anotherObject) {
+        return equals(anotherObject, type());
+      }
+    }
+
+    static class StreamPredPrintablePredicateFromFactory<EE, E> extends StreamPred<EE> implements Lambda<Factory<Stream<EE>, E>, E> {
+      private final Spec<E> spec;
+
+      StreamPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super Stream<EE>> predicate, Evaluable<? super EE> cut, boolean defaultValue, boolean valueOnCut) {
+        super(s, predicate, cut, defaultValue, valueOnCut);
         this.spec = spec;
       }
 

@@ -49,9 +49,9 @@ public interface Evaluable<T> {
     Predicate<? super T> predicate();
   }
 
-  interface StreamPred<T extends Stream<E>, E> extends Pred<T> {
+  interface StreamPred<E> extends Pred<Stream<E>> {
     @Override
-    default void accept(T value, Evaluator evaluator) {
+    default void accept(Stream<E> value, Evaluator evaluator) {
       evaluator.evaluate(value, this);
     }
 
