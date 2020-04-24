@@ -18,10 +18,6 @@ import static java.util.stream.Collectors.joining;
 public enum InternalUtils {
   ;
 
-  public static String center(String s, int size) {
-    return center(s, size, ' ');
-  }
-
   public static String center(String s, int size, char pad) {
     if (s == null || size <= s.length())
       return s;
