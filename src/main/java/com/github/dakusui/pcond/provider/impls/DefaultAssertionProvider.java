@@ -60,13 +60,13 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
         throw error;
       } catch (Throwable t) {
         String message = String.format("An exception(%s) was thrown during evaluation of value: %s: %s", t, value, cond);
-        message = message + String.format("%n") + composeExplanation(evaluator.resultRecords(), t);
+        message = message + String.format("%n") + composeExplanation(evaluator.resultEntries(), t);
         throw wrap(message, t);
       }
-      Evaluator.Result result = new Evaluator.Result(evaluator.resultValue(), evaluator.resultRecords());
+      Result result = new Result(evaluator.resultValue(), evaluator.resultEntries());
       if (result.result())
         return value;
-      String message = messageComposer.apply(value, cond) + String.format("%n") + composeExplanation(evaluator.resultRecords(), null);
+      String message = messageComposer.apply(value, cond) + String.format("%n") + composeExplanation(evaluator.resultEntries(), null);
       throw exceptionComposer.apply(message);
     } else {
       if (!cond.test(value))
@@ -75,25 +75,25 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     }
   }
 
-  private String composeExplanation(List<Evaluator.Result.Record> result, Throwable t) {
-    int maxLevel = result.stream().map(Evaluator.Result.Record::level).max(Integer::compareTo).orElse(0);
-    int maxNameLength = result.stream().map(record -> record.name().length() + record.level() * 2).max(Integer::compareTo).orElse(0);
-    int maxInputLength = result.stream().map(record -> formatObject(record.input()).length() + record.level() * 2).max(Integer::compareTo).orElse(0);
+  private String composeExplanation(List<Evaluator.Entry> result, Throwable t) {
+    int maxLevel = result.stream().map(Evaluator.Entry::level).max(Integer::compareTo).orElse(0);
+    int maxNameLength = result.stream().map(entry -> entry.name().length() + entry.level() * 2).max(Integer::compareTo).orElse(0);
+    int maxInputLength = result.stream().map(entry -> formatObject(entry.input()).length() + entry.level() * 2).max(Integer::compareTo).orElse(0);
     AtomicReference<?> previousInput = new AtomicReference<>(new Object());
     return result.stream()
-        .map(r -> formatRecord(t, maxLevel, maxNameLength, maxInputLength, previousInput, r))
+        .map(r -> formatEntry(t, maxLevel, maxNameLength, maxInputLength, previousInput, r))
         .collect(joining(String.format("%n")));
   }
 
-  private String formatRecord(Throwable t, int maxLevel, int maxNameLength, int maxInputLength, AtomicReference<?> previousInput, Evaluator.Result.Record r) {
+  private String formatEntry(Throwable t, int maxLevel, int maxNameLength, int maxInputLength, AtomicReference<?> previousInput, Evaluator.Entry r) {
     try {
-      return formatRecord(r, previousInput.get(), maxLevel, maxNameLength, maxInputLength, t);
+      return formatEntry(r, previousInput.get(), maxLevel, maxNameLength, maxInputLength, t);
     } finally {
       previousInput.set(r.input());
     }
   }
 
-  protected static String formatRecord(Evaluator.Result.Record r, Object previousInput, int maxLevel, int maxNameLength, int maxInputLength, Throwable throwable) {
+  protected static String formatEntry(Evaluator.Entry r, Object previousInput, int maxLevel, int maxNameLength, int maxInputLength, Throwable throwable) {
     boolean inputValueChanged = !Objects.equals(r.input(), previousInput);
     String indent = spaces(r.level() * 2);
     return String.format("%s %-" + maxNameLength + "s %s %s%s",
@@ -112,7 +112,7 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     return Boolean.parseBoolean(properties.getProperty(myClass.getName() + ".useEvaluator", "true"));
   }
 
-  private static String formatInput(Evaluator.Result.Record r, int maxInputLength, boolean valueChanged) {
+  private static String formatInput(Evaluator.Entry r, int maxInputLength, boolean valueChanged) {
     String formattedInput = InternalUtils.formatObject(r.input());
     String input;
     input = formattedInput;
@@ -120,5 +120,19 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     return valueChanged ?
         String.format("%-" + maxInputLength + "s %s", indent + input, "->") :
         spaces(maxInputLength + 3);
+  }
+
+  public static class Result {
+    final boolean               result;
+    final List<Evaluator.Entry> entries;
+
+    public Result(boolean result, List<Evaluator.Entry> entries) {
+      this.result = result;
+      this.entries = entries;
+    }
+
+    public boolean result() {
+      return this.result;
+    }
   }
 }

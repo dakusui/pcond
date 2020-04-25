@@ -14,14 +14,14 @@ import static org.junit.Assert.*;
 public class EvaluatorTest extends TestBase {
   @SuppressWarnings("unchecked")
   @Test
-  public void testFinalizedRecord() {
+  public void testFinalizedEntry() {
     Evaluator evaluator = new Evaluator.Impl();
     try {
       evaluator.evaluate(
           "hello",
           (Evaluable.Conjunction<String>) and(isNotNull(), errorThrowingPredicate()));
     } catch (EvaluationFailure e) {
-      assertFalse(evaluator.resultRecords().get(0).hasOutput());
+      assertFalse(evaluator.resultEntries().get(0).hasOutput());
     }
   }
 

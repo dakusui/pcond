@@ -11,6 +11,9 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static java.util.Collections.unmodifiableList;
 
+/**
+ * A visitor interface that defines a mechanism to "evaluate" printable predicates.
+ */
 public interface Evaluator {
   <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction);
 
@@ -30,115 +33,29 @@ public interface Evaluator {
 
   <T> T resultValue();
 
-  List<Result.Record> resultRecords();
+  List<Entry> resultEntries();
 
   static Evaluator create() {
     return new Impl();
   }
 
-  class Result {
-    final boolean      result;
-    final List<Record> records;
-
-    public Result(boolean result, List<Record> records) {
-      this.result = result;
-      this.records = records;
-    }
-
-    public boolean result() {
-      return this.result;
-    }
-
-    public static abstract class Record {
-      final int    level;
-      final Object input;
-      final String name;
-
-      Record(int level, Object input, String name) {
-        this.level = level;
-        this.input = input;
-        this.name = name;
-      }
-
-      public int level() {
-        return level;
-      }
-
-      @SuppressWarnings({ "unchecked" })
-      public <T> T input() {
-        return (T) this.input;
-      }
-
-      public String name() {
-        return name;
-      }
-
-      public abstract boolean hasOutput();
-
-      public abstract <T> T output();
-    }
-
-    static class FinalizedRecord extends Record {
-      final Object output;
-
-      FinalizedRecord(int level, Object input, Object output, String name) {
-        super(level, input, name);
-        this.output = output;
-      }
-
-      @Override
-      public boolean hasOutput() {
-        return true;
-      }
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public <T> T output() {
-        return (T) output;
-      }
-    }
-
-    static class OnGoingRecord extends Record {
-      final int positionInRecords;
-
-      OnGoingRecord(int level, int positionInRecords, String name, Object input) {
-        super(level, input, name);
-        this.positionInRecords = positionInRecords;
-      }
-
-      FinalizedRecord result(Object result) {
-        return new FinalizedRecord(this.level, this.input, result, this.name);
-      }
-
-      @Override
-      public boolean hasOutput() {
-        return false;
-      }
-
-      @Override
-      public <T> T output() {
-        throw new UnsupportedOperationException();
-      }
-    }
-  }
-
   class Impl implements Evaluator {
     private static final Object NULL_VALUE = new Object();
-    List<Result.OnGoingRecord> onGoingRecords = new LinkedList<>();
-    List<Result.Record>        records        = new ArrayList<>();
-    Object                     currentResult;
+    List<Entry.OnGoing> onGoingEntries = new LinkedList<>();
+    List<Entry>         entries        = new ArrayList<>();
+    Object              currentResult;
 
     void enter(String name, Object input) {
-      Result.OnGoingRecord newRecord = new Result.OnGoingRecord(onGoingRecords.size(), records.size(), name, input);
-      onGoingRecords.add(newRecord);
-      records.add(newRecord);
+      Entry.OnGoing newEntry = new Entry.OnGoing(onGoingEntries.size(), entries.size(), name, input);
+      onGoingEntries.add(newEntry);
+      entries.add(newEntry);
     }
 
     void leave(Object result) {
-      int positionInOngoingRecords = onGoingRecords.size() - 1;
-      Result.OnGoingRecord current = onGoingRecords.get(positionInOngoingRecords);
-      records.set(current.positionInRecords, current.result(result));
-      onGoingRecords.remove(positionInOngoingRecords);
+      int positionInOngoingEntries = onGoingEntries.size() - 1;
+      Entry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
+      entries.set(current.positionInEntries, current.result(result));
+      onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult = result;
     }
 
@@ -238,7 +155,7 @@ public interface Evaluator {
           throw wrapIfNecessary(t);
         } finally {
           if (!succeeded || evaluator.<Boolean>resultValue() == streamPred.valueToCut()) {
-            importResultRecords(evaluator.resultRecords(), throwable);
+            importResultEntries(evaluator.resultEntries(), throwable);
             ret = true;
           }
         }
@@ -253,18 +170,90 @@ public interface Evaluator {
     }
 
     @Override
-    public List<Result.Record> resultRecords() {
-      return unmodifiableList(this.records);
+    public List<Entry> resultEntries() {
+      return unmodifiableList(this.entries);
     }
 
-    public void importResultRecords(List<Result.Record> resultRecords, Object other) {
-      resultRecords.stream()
-          .map(each1 -> createRecordForImport(each1, other))
-          .forEach(each -> this.records.add(each));
+    public void importResultEntries(List<Entry> resultEntries, Object other) {
+      resultEntries.stream()
+          .map(each -> createEntryForImport(each, other))
+          .forEach(each -> this.entries.add(each));
     }
 
-    private Result.FinalizedRecord createRecordForImport(Result.Record each, Object other) {
-      return new Result.FinalizedRecord(this.onGoingRecords.size() + each.level, each.input, each.hasOutput() ? each.output() : other, each.name);
+    private Entry.Finalized createEntryForImport(Entry each, Object other) {
+      return new Entry.Finalized(this.onGoingEntries.size() + each.level, each.input, each.hasOutput() ? each.output() : other, each.name);
+    }
+  }
+
+  abstract class Entry {
+    final int    level;
+    final Object input;
+    final String name;
+
+    Entry(int level, Object input, String name) {
+      this.level = level;
+      this.input = input;
+      this.name = name;
+    }
+
+    public int level() {
+      return level;
+    }
+
+    @SuppressWarnings({ "unchecked" })
+    public <T> T input() {
+      return (T) this.input;
+    }
+
+    public String name() {
+      return name;
+    }
+
+    public abstract boolean hasOutput();
+
+    public abstract <T> T output();
+
+    static class Finalized extends Entry {
+      final Object output;
+
+      Finalized(int level, Object input, Object output, String name) {
+        super(level, input, name);
+        this.output = output;
+      }
+
+      @Override
+      public boolean hasOutput() {
+        return true;
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public <T> T output() {
+        return (T) output;
+      }
+    }
+
+    static class OnGoing extends Entry {
+      final int positionInEntries;
+
+      OnGoing(int level, int positionInEntries, String name, Object input) {
+        super(level, input, name);
+        this.positionInEntries = positionInEntries;
+      }
+
+      Finalized result(Object result) {
+        return new Finalized(this.level, this.input, result, this.name);
+      }
+
+      @Override
+      public boolean hasOutput() {
+        return false;
+      }
+
+      @Override
+      public <T> T output() {
+        throw new UnsupportedOperationException();
+      }
     }
   }
 }
