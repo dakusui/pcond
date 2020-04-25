@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CurryingUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.currying</a> &gt; <span class="el_source">CurryingUtils.java</span></div><h1>CurryingUtils.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.currying;
+
+import com.github.dakusui.pcond.core.MultiParameterFunction;
+import com.github.dakusui.pcond.functions.PrintableFunction;
+import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.internals.InternalChecks;
+import com.github.dakusui.pcond.internals.InternalUtils;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.*;
+
+/**
+ * Intended for internal use only.
+ */
+<span class="fc" id="L28">public enum CurryingUtils {</span>
+  ;
+
+  public static CurriedFunction&lt;Object, Object&gt; curry(String functionName, MultiParameterFunction&lt;Object&gt; function) {
+<span class="fc" id="L32">    return curry(functionName, function, emptyList());</span>
+  }
+
+  private static CurriedFunction&lt;Object, Object&gt; curry(String functionName, MultiParameterFunction&lt;Object&gt; function, List&lt;? super Object&gt; ongoingContext) {
+<span class="fc" id="L36">    return Printables.functionFactory(</span>
+<span class="fc" id="L37">        Formatters.functionNameFormatter(functionName, ongoingContext),</span>
+<span class="fc" id="L38">        (MultiParameterFunction&lt;Object&gt; arg) -&gt; new CurriedFunction&lt;Object, Object&gt;() {</span>
+          @Override
+          public Class&lt;?&gt; parameterType() {
+<span class="fc" id="L41">            return function.parameterType(ongoingContext.size());</span>
+          }
+
+          @Override
+          public Class&lt;?&gt; returnType() {
+<span class="fc bfc" id="L46" title="All 2 branches covered.">            if (ongoingContext.size() == function.arity() - 1)</span>
+<span class="fc" id="L47">              return function.returnType();</span>
+            else
+<span class="fc" id="L49">              return CurriedFunction.class;</span>
+          }
+
+          @Override
+          public Object applyFunction(Object p) {
+<span class="fc bfc" id="L54" title="All 2 branches covered.">            if (ongoingContext.size() == function.arity() - 1)</span>
+<span class="fc" id="L55">              return function.apply(InternalUtils.append(ongoingContext, p));</span>
+<span class="fc" id="L56">            return curry(functionName, function, InternalUtils.append(ongoingContext, p));</span>
+          }
+<span class="fc" id="L58">        }).create(function);</span>
+  }
+
+<span class="fc" id="L61">  public enum Reflections {</span>
+    ;
+
+<span class="fc" id="L64">    private static final ThreadLocal&lt;Map&lt;List&lt;Object&gt;, MultiParameterFunction&lt;?&gt;&gt;&gt; METHOD_BASED_FUNCTION_POOL = new ThreadLocal&lt;&gt;();</span>
+
+<span class="fc" id="L66">    private static final Map&lt;Class&lt;?&gt;, Set&lt;Class&lt;?&gt;&gt;&gt; WIDER_TYPES = new HashMap&lt;Class&lt;?&gt;, Set&lt;Class&lt;?&gt;&gt;&gt;() {</span>
+      {
+        // https://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.1.2
+<span class="fc" id="L69">        put(wrapperClassOf(byte.class), wrapperClassesOf(asSet(short.class, int.class, long.class, float.class, double.class)));</span>
+<span class="fc" id="L70">        put(wrapperClassOf(short.class), wrapperClassesOf(asSet(int.class, long.class, float.class, double.class)));</span>
+<span class="fc" id="L71">        put(wrapperClassOf(char.class), wrapperClassesOf(asSet(int.class, long.class, float.class, double.class)));</span>
+<span class="fc" id="L72">        put(wrapperClassOf(int.class), wrapperClassesOf(asSet(long.class, float.class, double.class)));</span>
+<span class="fc" id="L73">        put(wrapperClassOf(long.class), wrapperClassesOf(asSet(float.class, double.class)));</span>
+<span class="fc" id="L74">        put(wrapperClassOf(float.class), wrapperClassesOf(asSet(double.class)));</span>
+<span class="fc" id="L75">      }</span>
+
+      private Set&lt;Class&lt;?&gt;&gt; wrapperClassesOf(Set&lt;Class&lt;?&gt;&gt; collect) {
+<span class="fc" id="L78">        return collect.stream().map(InternalUtils::wrapperClassOf).collect(toSet());</span>
+      }
+
+      private Set&lt;Class&lt;?&gt;&gt; asSet(Class&lt;?&gt;... classes) {
+<span class="fc" id="L82">        return new HashSet&lt;Class&lt;?&gt;&gt;() {{</span>
+<span class="fc" id="L83">          addAll(asList(classes));</span>
+<span class="fc" id="L84">        }};</span>
+      }
+    };
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;R&gt; MultiParameterFunction&lt;R&gt; lookupFunctionForStaticMethod(int[] order, Class&lt;?&gt; aClass, String methodName, Class&lt;?&gt;... parameterTypes) {
+<span class="fc" id="L90">      final List&lt;Integer&gt; paramOrder = unmodifiableList(Arrays.stream(order).boxed().distinct().collect(toList()));</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">      InternalChecks.requireArgument(order, o -&gt; o.length == paramOrder.size(), () -&gt; &quot;Duplicated elements are found in the 'order' argument:&quot; + Arrays.toString(order) + &quot; &quot; + paramOrder);</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">      InternalChecks.requireArgument(order, o -&gt; o.length == parameterTypes.length, () -&gt; &quot;Inconsistent number of parameters are supplied by 'order'. Expected:&quot; + parameterTypes.length + &quot;, Actual: &quot; + order.length);</span>
+<span class="fc" id="L93">      Map&lt;List&lt;Object&gt;, MultiParameterFunction&lt;?&gt;&gt; methodBasedMultiParameterFunctionPool = methodBasedMultiParameterFunctionPool();</span>
+<span class="fc" id="L94">      Method method = Checks.validateMethod(InternalUtils.getMethod(aClass, methodName, parameterTypes));</span>
+<span class="fc" id="L95">      methodBasedMultiParameterFunctionPool.computeIfAbsent(</span>
+<span class="fc" id="L96">          asList(method, paramOrder),</span>
+          Reflections::createMultiParameterFunctionForStaticMethod);
+<span class="fc" id="L98">      return (MultiParameterFunction&lt;R&gt;) methodBasedMultiParameterFunctionPool.get(asList(method, paramOrder));</span>
+    }
+
+    public static &lt;R&gt; MultiParameterFunction&lt;R&gt; createMultiParameterFunctionForStaticMethod(List&lt;Object&gt; m) {
+<span class="fc" id="L102">      final Method method = (Method) m.get(0);</span>
+<span class="fc" id="L103">      @SuppressWarnings(&quot;unchecked&quot;) final List&lt;Integer&gt; paramOrder = (List&lt;Integer&gt;) m.get(1);</span>
+<span class="fc" id="L104">      return createMultiParameterFunctionForStaticMethod(method, paramOrder);</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public static &lt;R&gt; MultiParameterFunction&lt;R&gt; createMultiParameterFunctionForStaticMethod(Method method, List&lt;Integer&gt; paramOrder) {
+      class PrintableMultiParameterFunction&lt;RR&gt; extends PrintableFunction&lt;List&lt;? super Object&gt;, RR&gt; implements MultiParameterFunction&lt;RR&gt; {
+<span class="fc" id="L110">        final Object identity = asList(method, paramOrder);</span>
+
+<span class="fc" id="L112">        PrintableMultiParameterFunction() {</span>
+<span class="fc" id="L113">          super(</span>
+<span class="fc" id="L114">              () -&gt; Formatters.formatMethodName(method) + Formatters.formatParameterOrder(paramOrder),</span>
+              objects -&gt; {
+                try {
+<span class="fc" id="L117">                  return (RR) method.invoke(null, (paramOrder).stream().map(objects::get).toArray());</span>
+<span class="fc" id="L118">                } catch (IllegalAccessException | InvocationTargetException e) {</span>
+<span class="pc" id="L119">                  throw InternalUtils.wrap(</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">                      String.format(&quot;Invoked method:%s threw an exception&quot;, Formatters.formatMethodName(method)),</span>
+<span class="pc" id="L121">                      e instanceof InvocationTargetException ? e.getCause() : e);</span>
+                }
+              });
+<span class="fc" id="L124">        }</span>
+
+        @Override
+        public int arity() {
+<span class="fc" id="L128">          return method.getParameterCount();</span>
+        }
+
+        @Override
+        public Class&lt;?&gt; parameterType(int i) {
+<span class="fc" id="L133">          return method.getParameterTypes()[(paramOrder).get(i)];</span>
+        }
+
+        @SuppressWarnings(&quot;unchecked&quot;)
+        @Override
+        public Class&lt;? extends RR&gt; returnType() {
+<span class="fc" id="L139">          return (Class&lt;? extends RR&gt;) (method).getReturnType();</span>
+        }
+
+        @Override
+        public int hashCode() {
+<span class="fc" id="L144">          return identity.hashCode();</span>
+        }
+
+        @Override
+        public boolean equals(Object anotherObject) {
+<span class="fc bfc" id="L149" title="All 2 branches covered.">          if (anotherObject == this)</span>
+<span class="fc" id="L150">            return true;</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">          if (anotherObject instanceof PrintableMultiParameterFunction) {</span>
+<span class="fc" id="L152">            PrintableMultiParameterFunction&lt;?&gt; another = (PrintableMultiParameterFunction&lt;?&gt;) anotherObject;</span>
+<span class="fc" id="L153">            return this.identity().equals(another.identity());</span>
+          }
+<span class="fc" id="L155">          return false;</span>
+        }
+
+        Object identity() {
+<span class="fc" id="L159">          return this.identity;</span>
+        }
+      }
+<span class="fc" id="L162">      return new PrintableMultiParameterFunction&lt;&gt;();</span>
+    }
+
+    private static Map&lt;List&lt;Object&gt;, MultiParameterFunction&lt;?&gt;&gt; methodBasedMultiParameterFunctionPool() {
+<span class="fc bfc" id="L166" title="All 2 branches covered.">      if (METHOD_BASED_FUNCTION_POOL.get() == null)</span>
+<span class="fc" id="L167">        METHOD_BASED_FUNCTION_POOL.set(new HashMap&lt;&gt;());</span>
+<span class="fc" id="L168">      return METHOD_BASED_FUNCTION_POOL.get();</span>
+    }
+
+  }
+
+<span class="fc" id="L173">  enum Formatters {</span>
+    ;
+
+    private static Function&lt;MultiParameterFunction&lt;Object&gt;, String&gt; functionNameFormatter(String functionName, List&lt;? super Object&gt; ongoingContext) {
+<span class="fc" id="L177">      return (MultiParameterFunction&lt;Object&gt; function) -&gt; functionName +</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">          (!ongoingContext.isEmpty() ? IntStream.range(0, ongoingContext.size())</span>
+<span class="fc" id="L179">              .mapToObj(i -&gt; function.parameterType(i).getSimpleName() + &quot;:&quot; + ongoingContext.get(i))</span>
+<span class="fc" id="L180">              .collect(joining(&quot;,&quot;, &quot;(&quot;, &quot;)&quot;)) : &quot;&quot;) +</span>
+<span class="fc" id="L181">          IntStream.range(ongoingContext.size(), function.arity())</span>
+<span class="fc" id="L182">              .mapToObj(i -&gt; &quot;(&quot; + function.parameterType(i).getSimpleName() + &quot;)&quot;)</span>
+<span class="fc" id="L183">              .collect(joining());</span>
+    }
+
+    private static String formatMethodName(Method method) {
+<span class="fc" id="L187">      return String.format(&quot;%s.%s(%s)&quot;,</span>
+<span class="fc" id="L188">          method.getDeclaringClass().getName(),</span>
+<span class="fc" id="L189">          method.getName(),</span>
+<span class="fc" id="L190">          Arrays.stream(method.getParameterTypes()).map(Class::getSimpleName).collect(joining(&quot;,&quot;)));</span>
+    }
+
+    public static String formatParameterOrder(List&lt;Integer&gt; paramOrder) {
+<span class="fc" id="L194">      String formatted = formatParamOrder(paramOrder.stream());</span>
+<span class="fc" id="L195">      String uncustomized = formatParamOrder(IntStream.range(0, paramOrder.size()).boxed());</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">      return formatted.equals(uncustomized) ?</span>
+          &quot;&quot; :
+          formatted;
+    }
+
+    public static String formatParamOrder(Stream&lt;Integer&gt; paramOrderStream) {
+<span class="fc" id="L202">      return paramOrderStream.map(Object::toString).collect(joining(&quot;,&quot;, &quot;(&quot;, &quot;)&quot;));</span>
+    }
+
+    static Supplier&lt;String&gt; messageInvalidTypeArgument(Object value, Class&lt;?&gt; aClass) {
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">      return () -&gt; &quot;Given argument:&quot; + formatObject(value) +</span>
+          (value == null ?
+              &quot;&quot; :
+<span class="fc" id="L209">              &quot;(&quot; + value.getClass() + &quot;)&quot;) +</span>
+<span class="fc" id="L210">          &quot; cannot be assigned to parameter:&quot; + aClass.getCanonicalName();</span>
+    }
+  }
+
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">  enum Checks {</span>
+    ;
+
+    static &lt;T&gt; T validateArgumentType(T arg, Class&lt;?&gt; paramType, Supplier&lt;String&gt; messageFormatter) {
+<span class="fc" id="L218">      InternalChecks.checkArgument(isValidValueForType(arg, paramType), messageFormatter);</span>
+<span class="fc" id="L219">      return arg;</span>
+    }
+
+    static boolean isValidValueForType(Object arg, Class&lt;?&gt; paramType) {
+<span class="fc bfc" id="L223" title="All 2 branches covered.">      if (paramType.isPrimitive()) {</span>
+<span class="fc bfc" id="L224" title="All 2 branches covered.">        if (arg == null)</span>
+<span class="fc" id="L225">          return paramType.equals(void.class);</span>
+<span class="fc" id="L226">        Class&lt;?&gt; wrapperClass = wrapperClassOf(paramType);</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">        if (wrapperClass.equals(arg.getClass()))</span>
+<span class="fc" id="L228">          return true;</span>
+<span class="fc" id="L229">        return isWiderThan(wrapperClass, arg.getClass());</span>
+      } else {
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        if (arg == null)</span>
+<span class="fc" id="L232">          return true;</span>
+<span class="fc" id="L233">        return paramType.isAssignableFrom(arg.getClass());</span>
+      }
+    }
+
+    private static boolean isWiderThan(Class&lt;?&gt; classA, Class&lt;?&gt; classB) {
+<span class="pc bpc" id="L238" title="2 of 4 branches missed.">      assert !classB.isPrimitive();</span>
+<span class="pc bpc" id="L239" title="2 of 4 branches missed.">      assert !classA.isPrimitive();</span>
+<span class="fc" id="L240">      Set&lt;Class&lt;?&gt;&gt; widerBoxedClassesForClassA = Reflections.WIDER_TYPES.get(classB);</span>
+<span class="fc bfc" id="L241" title="All 4 branches covered.">      return widerBoxedClassesForClassA != null &amp;&amp; widerBoxedClassesForClassA.contains(classA);</span>
+    }
+
+    private static Method validateMethod(Method method) {
+<span class="fc bfc" id="L245" title="All 2 branches covered.">      if (!Modifier.isStatic(method.getModifiers()))</span>
+<span class="fc" id="L246">        throw new IllegalArgumentException(String.format(&quot;The specified method '%s' is not static&quot;, method));</span>
+<span class="fc" id="L247">      return method;</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    static &lt;T&gt; T ensureReturnedValueType(Object value, Class&lt;?&gt; returnType) {
+<span class="fc bfc" id="L252" title="All 2 branches covered.">      if (isValidValueForType(value, returnType))</span>
+<span class="fc" id="L253">        return (T) value;</span>
+      else
+<span class="fc" id="L255">        throw new IllegalStateException(&quot;Returned value:&quot;</span>
+<span class="pc bpc" id="L256" title="1 of 2 branches missed.">            + formatObject(value)</span>
+<span class="pc" id="L257">            + (value != null ? &quot;(&quot; + value.getClass().getName() + &quot;)&quot; : &quot;&quot;)</span>
+<span class="fc" id="L258">            + &quot; is neither null nor an instance of &quot; + returnType.getName() + &quot;. &quot;);</span>
+    }
+
+    public static &lt;T extends CurriedFunction&lt;?, ?&gt;&gt; T requireLast(T value) {
+<span class="fc bfc" id="L262" title="All 2 branches covered.">      if (value.hasNext())</span>
+<span class="fc" id="L263">        throw new IllegalStateException();</span>
+<span class="fc" id="L264">      return value;</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

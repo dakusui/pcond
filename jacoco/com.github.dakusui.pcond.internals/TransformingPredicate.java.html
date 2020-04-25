@@ -1,72 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TransformingPredicate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.internals</a> &gt; <span class="el_source">TransformingPredicate.java</span></div><h1>TransformingPredicate.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.internals;
 
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.functions.PrintablePredicate;
 import com.github.dakusui.pcond.functions.Printables;
 
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.Preconditions.requireArgument;
-import static com.github.dakusui.pcond.functions.Predicates.isInstanceOf;
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 
-public class TransformingPredicate&lt;P, O&gt; implements Predicate&lt;O&gt; {
+public class TransformingPredicate&lt;P, O&gt; extends PrintablePredicate&lt;O&gt; implements Predicate&lt;O&gt;, Evaluable.Transformation&lt;O, P&gt; {
   public interface Factory&lt;P, O&gt; {
-    default TransformingPredicate&lt;P, O&gt; then(String condName, Predicate&lt;? super P&gt; cond) {
-<span class="fc" id="L15">      return then(Printables.predicate(condName, cond));</span>
+    default TransformingPredicate&lt;P, O&gt; check(String condName, Predicate&lt;? super P&gt; cond) {
+<span class="fc" id="L16">      return check(Printables.predicate(condName, cond));</span>
     }
 
-    TransformingPredicate&lt;P, O&gt; then(Predicate&lt;? super P&gt; cond);
+    TransformingPredicate&lt;P, O&gt; check(Predicate&lt;? super P&gt; cond);
   }
 
-  private final Predicate&lt;? super P&gt; predicate;
+  private final Predicate&lt;? super P&gt;             predicate;
   private final Function&lt;? super O, ? extends P&gt; function;
-  private final String name;
+  private final String                           name;
 
   public TransformingPredicate(Predicate&lt;? super P&gt; predicate, Function&lt;? super O, ? extends P&gt; function) {
-<span class="fc" id="L26">    this(null, predicate, function);</span>
-<span class="fc" id="L27">  }</span>
+<span class="fc" id="L27">    this(null, predicate, function);</span>
+<span class="fc" id="L28">  }</span>
 
-<span class="fc" id="L29">  public TransformingPredicate(String name, Predicate&lt;? super P&gt; predicate, Function&lt;? super O, ? extends P&gt; function) {</span>
-<span class="fc" id="L30">    this.predicate = predicate;</span>
-<span class="fc" id="L31">    this.function = function;</span>
-<span class="fc" id="L32">    this.name = name;</span>
-<span class="fc" id="L33">  }</span>
-
-  @Override
-  public boolean test(O v) {
-    ////
-    // This method is usually not called. Because Assertion class invokes function
-    // and predicate of this object by itself and do not use this method.
-<span class="fc" id="L40">    return predicate.test(function.apply(v));</span>
-  }
+  public TransformingPredicate(String name, Predicate&lt;? super P&gt; predicate, Function&lt;? super O, ? extends P&gt; function) {
+<span class="pc" id="L31">    super(() -&gt; &quot;&quot;, v -&gt; predicate.test(function.apply(v)));</span>
+<span class="fc" id="L32">    this.predicate = predicate;</span>
+<span class="fc" id="L33">    this.function = function;</span>
+<span class="fc" id="L34">    this.name = name;</span>
+<span class="fc" id="L35">  }</span>
 
   public Predicate&lt;? super P&gt; predicate() {
-<span class="fc" id="L44">    return this.predicate;</span>
+<span class="fc" id="L38">    return this.predicate;</span>
   }
 
   public Function&lt;? super O, ? extends P&gt; function() {
-<span class="fc" id="L48">    return this.function;</span>
+<span class="fc" id="L42">    return this.function;</span>
+  }
+
+  @Override
+  public Evaluable&lt;? super O&gt; mapper() {
+<span class="fc" id="L47">    return toEvaluableIfNecessary(this.function());</span>
+  }
+
+  @Override
+  public Evaluable&lt;? super P&gt; checker() {
+<span class="fc" id="L52">    return toEvaluableIfNecessary(this.predicate());</span>
   }
 
   @Override
   public int hashCode() {
-<span class="fc" id="L53">    return this.predicate.hashCode() + this.function.hashCode();</span>
+<span class="fc" id="L57">    return this.predicate.hashCode() + this.function.hashCode();</span>
   }
 
   @Override
   public boolean equals(Object anotherObject) {
-<span class="fc bfc" id="L58" title="All 2 branches covered.">    if (anotherObject == this)</span>
-<span class="fc" id="L59">      return true;</span>
-<span class="fc bfc" id="L60" title="All 2 branches covered.">    if (!(anotherObject instanceof TransformingPredicate))</span>
-<span class="fc" id="L61">      return false;</span>
-<span class="fc" id="L62">    TransformingPredicate&lt;?, ?&gt; another = (TransformingPredicate&lt;?, ?&gt;) anotherObject;</span>
-<span class="fc bfc" id="L63" title="All 2 branches covered.">    return Objects.equals(this.function, another.function) &amp;&amp;</span>
-<span class="fc bfc" id="L64" title="All 2 branches covered.">        Objects.equals(this.predicate, another.predicate);</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">    if (anotherObject == this)</span>
+<span class="fc" id="L63">      return true;</span>
+<span class="fc bfc" id="L64" title="All 2 branches covered.">    if (!(anotherObject instanceof TransformingPredicate))</span>
+<span class="fc" id="L65">      return false;</span>
+<span class="fc" id="L66">    TransformingPredicate&lt;?, ?&gt; another = (TransformingPredicate&lt;?, ?&gt;) anotherObject;</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">    return Objects.equals(this.function, another.function) &amp;&amp;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">        Objects.equals(this.predicate, another.predicate);</span>
   }
 
   @Override
   public String toString() {
-<span class="fc bfc" id="L69" title="All 2 branches covered.">    return String.format(&quot;%s%s %s&quot;, this.name == null ? &quot;&quot; : this.name, function(), predicate());</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">    return String.format(&quot;%s%s %s&quot;, this.name == null ? &quot;&quot; : this.name, function(), predicate());</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

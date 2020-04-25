@@ -6,7 +6,7 @@ import java.util.function.Function;
 public abstract class PrintableLambdaFactory&lt;E&gt; {
   private final Function&lt;E, String&gt; nameComposer;
 
-<span class="fc" id="L9">  protected PrintableLambdaFactory(Function&lt;E, String&gt; nameComposer) {</span>
+<span class="fc" id="L9">  public PrintableLambdaFactory(Function&lt;E, String&gt; nameComposer) {</span>
 <span class="fc" id="L10">    this.nameComposer = nameComposer;</span>
 <span class="fc" id="L11">  }</span>
 

@@ -1,35 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Printables.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.functions</a> &gt; <span class="el_source">Printables.java</span></div><h1>Printables.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.functions;
 
 
+import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.functions.preds.BasePredUtils;
+import com.github.dakusui.pcond.functions.preds.LeafPredUtils;
+
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-<span class="fc" id="L8">public enum Printables {</span>
+<span class="fc" id="L12">public enum Printables {</span>
   ;
 
   public static &lt;T&gt; Predicate&lt;T&gt; predicate(Supplier&lt;String&gt; s, Predicate&lt;T&gt; predicate) {
-<span class="fc" id="L12">    return Printables.printablePredicate(s.get(), predicate);</span>
+<span class="fc" id="L16">    return Printables.printablePredicate(s.get(), predicate);</span>
   }
 
   public static &lt;T&gt; Predicate&lt;T&gt; predicate(String s, Predicate&lt;T&gt; predicate) {
-<span class="fc" id="L16">    return predicate(() -&gt; s, predicate);</span>
+<span class="fc" id="L20">    return predicate(() -&gt; s, predicate);</span>
   }
 
   public static &lt;T, R&gt; Function&lt;T, R&gt; function(Supplier&lt;String&gt; s, Function&lt;T, R&gt; function) {
-<span class="fc" id="L20">    return Printables.printableFunction(s.get(), function);</span>
+<span class="fc" id="L24">    return Printables.printableFunction(s.get(), function);</span>
   }
 
   public static &lt;T, R&gt; Function&lt;T, R&gt; function(String s, Function&lt;T, R&gt; function) {
-<span class="fc" id="L24">    return function(() -&gt; s, function);</span>
+<span class="fc" id="L28">    return function(() -&gt; s, function);</span>
   }
 
   public static &lt;T&gt; Predicate&lt;T&gt; printablePredicate(String s, Predicate&lt;T&gt; predicate) {
-<span class="fc" id="L28">    return new PrintablePredicate&lt;&gt;(() -&gt; s, predicate);</span>
+<span class="fc" id="L32">    return new LeafPredUtils.LeafPred&lt;&gt;(() -&gt; s, predicate);</span>
   }
 
-  public static &lt;T, R&gt; PrintableFunction&lt;T, R&gt; printableFunction(String s, Function&lt;? super T, ? extends R&gt; function) {
-<span class="fc" id="L32">    return PrintableFunction.create(s, function);</span>
+  public static &lt;T, R&gt; Function&lt;T, R&gt; printableFunction(String s, Function&lt;? super T, ? extends R&gt; function) {
+<span class="fc" id="L36">    return PrintableFunction.create(s, function);</span>
   }
 
   /**
@@ -100,10 +104,10 @@ import java.util.function.Supplier;
    * @param &lt;E&gt;          Type of the parameter with which the returned factory create a function
    * @return A factory to create a printable function.
    */
-  public static &lt;T, R, E&gt; PrintableFunction.Factory&lt;T, R, E&gt; functionFactory(
+  public static &lt;T, R, E&gt; BaseFuncUtils.Factory&lt;T, R, E&gt; functionFactory(
       final Function&lt;E, String&gt; nameComposer,
       final Function&lt;E, Function&lt;T, R&gt;&gt; ff) {
-<span class="fc" id="L106">    return PrintableFunction.factory(nameComposer, ff);</span>
+<span class="fc" id="L110">    return BaseFuncUtils.factory(nameComposer, ff);</span>
   }
 
   /**
@@ -113,10 +117,10 @@ import java.util.function.Supplier;
    * @param &lt;E&gt;          Type of the parameter with which the returned factory create a predicate
    * @return A factory to create a printable predicate.
    */
-  public static &lt;T, E&gt; PrintablePredicate.Factory&lt;T, E&gt; predicateFactory(
+  public static &lt;T, E&gt; BasePredUtils.Factory&lt;T, E&gt; predicateFactory(
       final Function&lt;E, String&gt; nameComposer,
       final Function&lt;E, Predicate&lt;T&gt;&gt; ff) {
-<span class="fc" id="L119">    return PrintablePredicate.factory(nameComposer, ff);</span>
+<span class="fc" id="L123">    return LeafPredUtils.factory(nameComposer, ff);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

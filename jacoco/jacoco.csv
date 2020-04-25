@@ -1,48 +1,92 @@
 GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
-pcond,com.github.dakusui.pcond.provider,AssertionProviderBase,0,144,0,8,0,25,0,23,0,19
-pcond,com.github.dakusui.pcond.provider,PostconditionViolationException,0,4,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.core.currying,CurryingUtils.Reflections.new HashMap() {...},0,159,0,0,0,10,0,3,0,3
+pcond,com.github.dakusui.pcond.core.currying,CurryingUtils.Reflections.1.new HashSet() {...},0,15,0,0,0,3,0,1,0,1
+pcond,com.github.dakusui.pcond.core.currying,CurryingUtils.Checks,11,143,6,24,0,29,6,16,0,7
+pcond,com.github.dakusui.pcond.core.currying,CurryingUtils.new CurriedFunction() {...},0,61,0,4,0,8,0,6,0,4
+pcond,com.github.dakusui.pcond.core.currying,CurriedFunction,0,48,0,2,0,9,0,8,0,7
+pcond,com.github.dakusui.pcond.core.currying,CurryingUtils.Formatters,2,166,1,5,0,19,1,12,0,10
+pcond,com.github.dakusui.pcond.core.currying,CurryingUtils.Reflections,0,154,0,6,0,18,0,12,0,9
+pcond,com.github.dakusui.pcond.core.currying,CurryingUtils.Reflections.new MultiParameterFunction() {...},3,115,1,5,0,21,1,11,0,9
+pcond,com.github.dakusui.pcond.core.currying,CurryingUtils,0,27,0,0,0,6,0,4,0,4
+pcond,com.github.dakusui.pcond.provider,AssertionProviderBase,0,126,0,0,0,19,0,18,0,18
 pcond,com.github.dakusui.pcond.provider,PreconditionViolationException,0,4,0,0,0,2,0,1,0,1
-pcond,com.github.dakusui.pcond.provider,AssertionProvider,0,22,0,2,0,5,0,3,0,2
+pcond,com.github.dakusui.pcond.provider,AssertionProvider,0,25,0,2,0,5,0,3,0,2
 pcond,com.github.dakusui.pcond.provider,ApplicationException,0,10,0,0,0,4,0,2,0,2
-pcond,com.github.dakusui.pcond,Preconditions,0,23,0,0,0,5,0,5,0,5
+pcond,com.github.dakusui.pcond.provider,PostconditionViolationException,0,4,0,0,0,2,0,1,0,1
 pcond,com.github.dakusui.pcond,Assertions,0,22,0,0,0,7,0,4,0,4
 pcond,com.github.dakusui.pcond,Validations,0,9,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond,Preconditions,0,23,0,0,0,5,0,5,0,5
 pcond,com.github.dakusui.pcond,Postconditions,0,18,0,0,0,4,0,4,0,4
-pcond,com.github.dakusui.pcond.functions.currying,CurryingUtils.new CurriedFunction() {...},0,61,0,4,0,8,0,6,0,4
-pcond,com.github.dakusui.pcond.functions.currying,CurryingUtils.Formatters,2,166,1,5,0,19,1,12,0,10
-pcond,com.github.dakusui.pcond.functions.currying,CurryingUtils.Reflections,63,195,5,25,1,38,7,18,2,8
-pcond,com.github.dakusui.pcond.functions.currying,CurryingUtils.Reflections.new HashMap() {...},0,159,0,0,0,10,0,3,0,3
-pcond,com.github.dakusui.pcond.functions.currying,CurryingUtils,0,27,0,0,0,6,0,4,0,4
-pcond,com.github.dakusui.pcond.functions.currying,CurryingUtils.Reflections.new MultiParameterFunction() {...},3,126,1,5,0,21,1,11,0,9
-pcond,com.github.dakusui.pcond.functions.currying,CurriedFunction,0,48,0,2,0,9,0,8,0,7
-pcond,com.github.dakusui.pcond.functions.currying,CurryingUtils.Reflections.1.new HashSet() {...},0,15,0,0,0,3,0,1,0,1
-pcond,com.github.dakusui.pcond.functions.currying,CurryingUtils.Checks,11,143,7,23,0,29,7,15,0,7
+pcond,com.github.dakusui.pcond.core,Evaluable.StreamPred,0,5,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.core,Evaluable.Conjunction,0,5,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.core,Evaluator.Result.OnGoingRecord,4,22,0,0,1,5,1,3,1,3
+pcond,com.github.dakusui.pcond.core,Evaluator.Impl,6,380,0,16,3,81,0,31,0,23
+pcond,com.github.dakusui.pcond.core,Evaluable.Func,0,5,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.core,Evaluable.Negation,0,5,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.core,Evaluable.LeafPred,0,5,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.core,Evaluable.Disjunction,0,5,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.core,Evaluator.Result.FinalizedRecord,0,14,0,0,0,5,0,3,0,3
+pcond,com.github.dakusui.pcond.core,Evaluable.ContextPred,0,5,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.core,Evaluator,0,4,0,0,0,1,0,1,0,1
+pcond,com.github.dakusui.pcond.core,Evaluator.Result,4,12,0,0,1,5,1,2,1,2
+pcond,com.github.dakusui.pcond.core,Evaluable.Transformation,0,5,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.core,Evaluator.Result.Record,0,21,0,0,0,8,0,4,0,4
 pcond,com.github.dakusui.pcond.internals,InternalException,0,5,0,0,0,2,0,1,0,1
-pcond,com.github.dakusui.pcond.internals,InternalChecks,3,23,0,4,1,6,1,4,1,2
-pcond,com.github.dakusui.pcond.internals,InternalUtils.new ArrayList() {...},0,12,0,0,0,3,0,1,0,1
-pcond,com.github.dakusui.pcond.internals,InternalUtils,45,215,3,21,4,46,3,16,0,7
+pcond,com.github.dakusui.pcond.internals,InternalChecks,0,40,0,6,0,10,0,7,0,4
 pcond,com.github.dakusui.pcond.internals,PrintableLambdaFactory.Lambda,0,43,0,8,0,9,0,8,0,4
-pcond,com.github.dakusui.pcond.internals,TransformingPredicate,0,94,0,10,0,19,0,13,0,8
-pcond,com.github.dakusui.pcond.internals,PrintableLambdaFactory,0,9,0,0,0,4,0,2,0,2
 pcond,com.github.dakusui.pcond.internals,TransformingPredicate.Factory,0,6,0,0,0,1,0,1,0,1
+pcond,com.github.dakusui.pcond.internals,InternalUtils.new ArrayList() {...},0,12,0,0,0,3,0,1,0,1
+pcond,com.github.dakusui.pcond.internals,InternalUtils,120,360,13,49,14,81,10,36,1,14
+pcond,com.github.dakusui.pcond.internals,TransformingPredicate,2,104,0,10,0,20,1,15,1,10
+pcond,com.github.dakusui.pcond.internals,PrintableLambdaFactory,0,9,0,0,0,4,0,2,0,2
 pcond,com.github.dakusui.pcond.internals,PrintableLambdaFactory.Lambda.Spec,0,12,0,0,0,5,0,1,0,1
-pcond,com.github.dakusui.pcond.functions,PrintableFunction.Factory,0,29,0,0,0,6,0,3,0,3
-pcond,com.github.dakusui.pcond.functions,PrintablePredicate,0,212,0,14,0,32,0,27,0,20
-pcond,com.github.dakusui.pcond.functions,PrintablePredicate.Factory,0,29,0,0,0,4,0,3,0,3
+pcond,com.github.dakusui.pcond.functions.preds,ConjunctionUtils.ConjunctionPrintablePredicateFromFactory,0,23,0,0,0,6,0,4,0,4
+pcond,com.github.dakusui.pcond.functions.preds,BasePredUtils.Junction,0,17,0,0,0,6,0,3,0,3
+pcond,com.github.dakusui.pcond.functions.preds,ComposedFuncUtils,0,10,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,ComposedFuncUtils.Factory,0,24,0,0,0,6,0,4,0,4
+pcond,com.github.dakusui.pcond.functions.preds,LeafPredUtils.LeafPredPrintablePredicateFromFactory,0,21,0,0,0,6,0,4,0,4
+pcond,com.github.dakusui.pcond.functions.preds,StreamUtils.StreamPredPrintablePredicateFromFactory,13,11,0,0,3,3,3,1,3,1
+pcond,com.github.dakusui.pcond.functions.preds,BaseFuncUtils.Factory.PrintableFunctionFromFactory,0,22,0,0,0,6,0,4,0,4
+pcond,com.github.dakusui.pcond.functions.preds,NegationUtils.Negation,0,11,0,0,0,4,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,NegationUtils,0,10,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,StreamUtils.StreamPred,0,25,0,0,0,8,0,4,0,4
+pcond,com.github.dakusui.pcond.functions.preds,BaseFuncUtils.Factory.new BaseFuncUtils.Factory.PrintableFunctionFromFactory() {...},0,24,0,0,0,3,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,StreamUtils.new StreamUtils.Factory() {...},0,13,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,LeafPredUtils.LeafPred,0,8,0,0,0,3,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,DisjunctionUtils,0,10,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,ConjunctionUtils.Conjunction,0,7,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.functions.preds,ConjunctionUtils.Factory,0,32,0,0,0,8,0,3,0,3
+pcond,com.github.dakusui.pcond.functions.preds,DisjunctionUtils.DisjunctionPrintablePredicateFromFactory,0,23,0,0,0,6,0,4,0,4
+pcond,com.github.dakusui.pcond.functions.preds,NegationUtils.new NegationUtils.Factory() {...},0,13,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,LeafPredUtils.Factory,0,4,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.functions.preds,BaseFuncUtils.Factory,0,24,0,0,0,4,0,3,0,3
+pcond,com.github.dakusui.pcond.functions.preds,StreamUtils.Factory,0,35,0,0,0,7,0,3,0,3
+pcond,com.github.dakusui.pcond.functions.preds,BaseFuncUtils,0,10,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,ConjunctionUtils.new ConjunctionUtils.Factory() {...},0,13,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,BasePredUtils.Factory,0,32,0,0,0,5,0,4,0,4
+pcond,com.github.dakusui.pcond.functions.preds,DisjunctionUtils.new DisjunctionUtils.Factory() {...},0,13,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,DisjunctionUtils.Factory,0,32,0,0,0,8,0,3,0,3
+pcond,com.github.dakusui.pcond.functions.preds,ComposedFuncUtils.new ComposedFuncUtils.Factory() {...},0,38,0,0,0,5,0,3,0,3
+pcond,com.github.dakusui.pcond.functions.preds,NegationUtils.NegationPrintablePredicateFromFactory,0,22,0,0,0,6,0,4,0,4
+pcond,com.github.dakusui.pcond.functions.preds,LeafPredUtils,0,10,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,ComposedFuncUtils.1.new BaseFuncUtils.Factory.PrintableFunctionFromFactory() {...},0,16,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,ConjunctionUtils,0,10,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,BasePredUtils,4,0,0,0,1,0,1,0,1,0
+pcond,com.github.dakusui.pcond.functions.preds,DisjunctionUtils.Disjunction,0,7,0,0,0,2,0,1,0,1
+pcond,com.github.dakusui.pcond.functions.preds,LeafPredUtils.new LeafPredUtils.Factory() {...},0,13,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,NegationUtils.Factory,0,30,0,0,0,7,0,3,0,3
+pcond,com.github.dakusui.pcond.functions.preds,StreamUtils,0,10,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions.preds,BaseFuncUtils.new BaseFuncUtils.Factory() {...},0,13,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions,PrintablePredicate,0,221,0,14,0,36,0,26,0,19
+pcond,com.github.dakusui.pcond.functions,Experimentals.Def,0,101,0,2,0,8,0,10,0,9
+pcond,com.github.dakusui.pcond.functions,Experimentals,0,111,0,4,0,18,0,16,0,14
+pcond,com.github.dakusui.pcond.functions,Functions.Def,0,97,0,0,0,14,0,8,0,8
+pcond,com.github.dakusui.pcond.functions,Experimentals.new Evaluable.ContextPred() {...},6,38,0,0,1,6,1,4,1,4
 pcond,com.github.dakusui.pcond.functions,Printables,0,51,0,0,0,9,0,12,0,12
-pcond,com.github.dakusui.pcond.functions,ExtraFunctions.Def,0,102,0,2,0,7,0,10,0,9
-pcond,com.github.dakusui.pcond.functions,Functions,0,61,0,0,0,13,0,13,0,13
-pcond,com.github.dakusui.pcond.functions,Predicates,0,208,0,4,0,47,0,38,0,36
-pcond,com.github.dakusui.pcond.functions,ExtraFunctions.Context,0,24,0,0,0,4,0,6,0,6
-pcond,com.github.dakusui.pcond.functions,PrintableFunction.new PrintableFunction.Factory() {...},0,13,0,0,0,2,0,2,0,2
-pcond,com.github.dakusui.pcond.functions,PrintableFunction.Factory.new PrintableFunction.Factory.PrintableFunctionFromFactory() {...},0,14,0,0,0,2,0,2,0,2
-pcond,com.github.dakusui.pcond.functions,PrintablePredicate.Factory.new PrintablePredicate.Factory.PrintablePredicateFromFactory() {...},0,14,0,0,0,2,0,2,0,2
-pcond,com.github.dakusui.pcond.functions,PrintableFunction.Factory.PrintableFunctionFromFactory,0,15,0,0,0,4,0,3,0,3
-pcond,com.github.dakusui.pcond.functions,ExtraFunctions,3,85,0,4,1,13,1,11,1,9
-pcond,com.github.dakusui.pcond.functions,PrintablePredicate.new PrintablePredicate.Factory() {...},0,13,0,0,0,2,0,2,0,2
+pcond,com.github.dakusui.pcond.functions,Functions,0,66,0,0,0,14,0,14,0,14
+pcond,com.github.dakusui.pcond.functions,Predicates,0,217,0,4,0,47,0,38,0,36
+pcond,com.github.dakusui.pcond.functions,Experimentals.Context,0,36,0,0,0,6,0,7,0,7
 pcond,com.github.dakusui.pcond.functions,Functions.Def.new ArrayList() {...},0,11,0,0,0,3,0,1,0,1
-pcond,com.github.dakusui.pcond.functions,PrintableFunction,0,184,0,6,0,26,0,21,0,18
+pcond,com.github.dakusui.pcond.functions,PrintableFunction,0,210,0,6,0,35,0,23,0,20
 pcond,com.github.dakusui.pcond.functions,Predicates.Def,0,446,0,20,0,59,0,66,0,56
-pcond,com.github.dakusui.pcond.functions,Functions.Def,0,93,0,0,0,13,0,8,0,8
-pcond,com.github.dakusui.pcond.functions,PrintablePredicate.Factory.PrintablePredicateFromFactory,0,15,0,0,0,4,0,3,0,3
-pcond,com.github.dakusui.pcond.provider.impls,DefaultAssertionProvider,0,66,0,0,0,6,0,6,0,6
+pcond,com.github.dakusui.pcond.provider.impls,DefaultAssertionProvider,7,364,0,12,3,39,0,20,0,14

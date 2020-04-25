@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
-<title>Overview: pcond</title>
+<title>Overview</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -439,308 +439,36 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>Overview: <code>pcond</code></h1>
+<h1>Overview</h1>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#background">Background</a></li>
-<li><a href="#installation">Installation</a></li>
-<li><a href="#getting-started">Getting started</a>
-<ul class="sectlevel2">
-<li><a href="#fluent-style">Fluent Style</a></li>
-<li><a href="#assert-statement-style">Assert statement Style</a></li>
-<li><a href="#validation">Validation</a></li>
-<li><a href="#transforming-predicate">Transforming Predicate</a></li>
-</ul>
-</li>
-<li><a href="#features">Features</a></li>
+<li><a href="#vs-valid4j">vs Valid4J</a></li>
 <li><a href="#references">References</a></li>
 </ul>
 </div>
 </div>
 <div id="content">
-<div class="sect1">
-<h2 id="background"><a class="anchor" href="#background"></a>Background</h2>
+<div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Didn&#8217;t you get bored of writing a code like below repeatedly with Guava or any other small utility functions?</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">public class CheckArg {
-  public void check() {
-    checkArgument(i &gt;= 0, "Argument was %s but expected nonnegative", i);
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>We already say that the condition to be checked is <code>i &gt;= 0</code>.
-Why do we need to come up with a message that explains the violation commited by the value <code>i</code> every time we call the method?
-Especially, methods in the <code>Preconditions</code> class is meant to check whether a given value meets a contract and its intention is to just forget handling values not meeting it.
-We want a message to be human readable on violation to the extent where we are able to understand what is going on without visiting source code but we don&#8217;t need to make it very user friendly.</p>
-</div>
-<div class="paragraph">
-<p>Something like this is enough.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>    Argument: -1 violated a precondition: i &gt;= 0</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>So, I would think of a small method as follows.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">public class Hello {
-  public void helloAssertThat(double var) {
-    double checkedVar = require(var, v -&gt; v &gt;= 0.0 &amp;&amp; v &lt; 20.0);
-    System.out.println(checkedVar);
-  }
-
-  public static &lt;T&gt; T require(T value, Predicate&lt;? super T&gt; cond) {
-    if (!cond.test(value))
-      throw new IllegalArgumentException(String.format("Value: %s violated: %s", value, cond));
-    return value;
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Unfortunately in Java, <code>toString</code> on lambda results in a cryptic string.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>java.lang.IllegalArgumentException: Value:20.0 violated: com.github.dakusui.pcond.examples.Example$$Lambda$1/537548559@5680a178
-
-	at Hello.require(AssertionProviderBase.java:99)</pre>
-</div>
-</div>
-<div class="paragraph">
-<p><code>pcond</code> is a library to build printable functions and predicates to fix it.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">public class HelloPcond {
-  public void helloAssertThat(double var) {
-    double checkedVar = requireArgument(var, ge(0.0).and(lt(20.0)));
-    System.out.println(checkedVar);
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>This will print as message shown below.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>java.lang.IllegalArgument: Value: 20.0 violated: (&gt;=[0.0]&amp;&amp;&lt;[20.0])
-	at com.github.dakusui.pcond.Preconditions.requireArgument(Assertions.java:16)
-    ...</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>It also comes with fancy features like</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Zero-overhead <code>assert</code> style</p>
-</li>
-<li>
-<p>Fluent style</p>
-</li>
-<li>
-<p>Design by Contract supporting methods in both styles</p>
-</li>
-<li>
-<p>Customizable Exception/Message Policy mechanism (<code>AssertionProvider</code>)</p>
-</li>
-<li>
-<p>"Transform and check" predicate building mechanism</p>
-</li>
-<li>
-<p>Predicates and functions returned by <code>pcond</code> returned from the same method with the same arguments in <code>pcond</code> API are <code>equalTo</code> each other.
-And <code>hashCode</code> methods are also implemented in a way Java API&#8217;s standard requires.</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>Enjoy!</p>
+<p>The <code>pcond</code> is a simple library for Java SE 8 which makes it possible to define pre- and post-conditions with informative error messages on a failure without repeating what you write as a code as a text string like with other libraries.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="installation"><a class="anchor" href="#installation"></a>Installation</h2>
+<h2 id="vs-valid4j"><a class="anchor" href="#vs-valid4j"></a>vs Valid4J</h2>
 <div class="sectionbody">
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
-    &lt;groupId&gt;com.github.dakusui&lt;/groupId&gt;
-    &lt;artifactId&gt;pcond&lt;/artifactId&gt;
-    &lt;packaging&gt;jar&lt;/packaging&gt;
-    &lt;version&gt;${pcond.version}&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>For <code>${pcond.version}</code>, <code>1.1.0-SNAPSHOT</code> is the latest one as of Mar/15/2020.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="getting-started"><a class="anchor" href="#getting-started"></a>Getting started</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Import entry points of this library statically.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">import static com.github.dakusui.pcond.Assertions.*;
-import static com.github.dakusui.pcond.Preconditions.*;
-import static com.github.dakusui.pcond.Validations.*;
-import static com.github.dakusui.pcond.functions.Functions.*;
-import static com.github.dakusui.pcond.functions.Predicates.*;</code></pre>
-</div>
-</div>
-<div class="sect2">
-<h3 id="fluent-style"><a class="anchor" href="#fluent-style"></a>Fluent Style</h3>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">class FluentStatementStyle {
-  public int example(int i, int j) {
-    require(i, ge(0).and(lt(20)));
-    require(j, ge(0).and(lt(40)));
-    int ret = i + j;
-    return ensure(ret, ge(0).and(lt(40)));
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Methods defined in <code>Preconditions</code>, <code>Postconditions</code>, and <code>Validations</code> class are designed to return the given value to be able to avoid unnecessary assignments.</p>
-</div>
-<div class="paragraph">
-<p>With the methods, you can write the same code in a following style, either.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">class FluentStatementStyle {
-  public void example(int i, int j) {
-    return ensure(
-        require(i, ge(0).and(lt(20))) + require(j, ge(0).and(lt(40))),
-        ge(0).and(lt(40)));
-  }
-}</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="assert-statement-style"><a class="anchor" href="#assert-statement-style"></a>Assert statement Style</h3>
-<div class="paragraph">
-<p>Another style to describe pre/post-conditions is to use <code>assert</code> statement.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">class AssertStatementStyle {
-  public void example(int i) {
-    assert that(i, ge(0).and(lt(20)));
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>In spite that the <code>assert</code> statement in the example has only one argument, still it gives you a readable message.
-The trick is that the method <code>that</code> throws an <code>AssertionFailure</code> with a composed message rather than simply returning <code>false</code> returned from a given predicate.
-(It will never return <code>false</code>, in other words)</p>
-</div>
-<div class="paragraph">
-<p>In order to be explicit the purpose of an assertion, the <code>Assertion</code> class has also <code>precondition</code> and <code>postcondition</code> methods.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-java" data-lang="java">class AssertStatementStyle {
-  public void example(int i, int j) {
-    assert precondition(i, ge(0).and(lt(20)));
-    assert precondition(j, ge(0).and(lt(20)));
 
-    int ret = i + j;
-
-    assert postcondition(ret, ge(0).and(lt(40)));
-  }
-}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Great point of this approach is to be able to eliminate the overhead coming from the assertion just by giving <code>-da</code> option to your JVM, yet we can get informative messages on a failure.</p>
-</div>
-<div class="paragraph">
-<p>By default, <code>precondition</code>, <code>postcondition</code>, and <code>that</code> methods throw <code>AssertionFailure</code> and behave the same.
-They are defined separately in order to make it possible to customize the behaviors independently by implementing a custom <code>AssertionProvider</code>.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="validation"><a class="anchor" href="#validation"></a>Validation</h3>
-<div class="paragraph">
-<p>(t.b.d.)</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="transforming-predicate"><a class="anchor" href="#transforming-predicate"></a>Transforming Predicate</h3>
-<div class="paragraph">
-<p>(t.b.d)</p>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="features"><a class="anchor" href="#features"></a>Features</h2>
-<div class="sectionbody">
-<div class="ulist">
-<ul>
-<li>
-<p>Pre-condition check</p>
-</li>
-<li>
-<p>Post-condition check</p>
-</li>
-<li>
-<p>Validation</p>
-</li>
-<li>
-<p>Readable in source code and output on error</p>
-</li>
-<li>
-<p>Fluent style</p>
-</li>
-<li>
-<p><code>assert</code> style (zero overhead)</p>
-</li>
-<li>
-<p>Zero-overhead readable assertion message (with <code>assert {that, precondition, postcondition}</code> style and <code>-da</code> option)</p>
-</li>
-<li>
-<p>Transforming predicate.</p>
-</li>
-</ul>
-</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="references"><a class="anchor" href="#references"></a>References</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>(t.b.d.)</p>
-</div>
-<div class="ulist">
-<ul>
+<div class="ulist bibliography">
+<ul class="bibliography">
 <li>
-<p><a href="https://github.com/google/guava/wiki/PreconditionsExplained">Preconditions Explaind, Google Guava</a></p>
-</li>
-<li>
-<p><a href="http://www.valid4j.org">valid4j</a>
-*</p>
+<p><a id="valid4j"></a>[valid4j] valid4j, <a href="http://www.valid4j.org/">valid4j.org</a></p>
 </li>
 </ul>
 </div>
@@ -749,7 +477,7 @@ They are defined separately in order to make it possible to customize the behavi
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-03-17 05:23:19 +0900
+Last updated 2020-04-19 08:52:02 +0900
 </div>
 </div>
 </body>

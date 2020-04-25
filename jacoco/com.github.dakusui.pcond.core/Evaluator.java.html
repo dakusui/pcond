@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Evaluator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core</a> &gt; <span class="el_source">Evaluator.java</span></div><h1>Evaluator.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core;
+
+import com.github.dakusui.pcond.functions.Experimentals;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
+import static java.util.Collections.unmodifiableList;
+
+public interface Evaluator {
+  &lt;T&gt; void evaluate(T value, Evaluable.Conjunction&lt;T&gt; conjunction);
+
+  &lt;T&gt; void evaluate(T value, Evaluable.Disjunction&lt;T&gt; disjunction);
+
+  &lt;T&gt; void evaluate(T value, Evaluable.Negation&lt;T&gt; negation);
+
+  &lt;T&gt; void evaluate(T value, Evaluable.LeafPred&lt;T&gt; leafPred);
+
+  void evaluate(Experimentals.Context value, Evaluable.ContextPred contextPred);
+
+  &lt;T, R&gt; void evaluate(T value, Evaluable.Transformation&lt;T, R&gt; transformation);
+
+  &lt;T&gt; void evaluate(T value, Evaluable.Func&lt;T&gt; func);
+
+  &lt;E&gt; void evaluate(Stream&lt;E&gt; value, Evaluable.StreamPred&lt;E&gt; streamPred);
+
+  &lt;T&gt; T resultValue();
+
+  List&lt;Result.Record&gt; resultRecords();
+
+  static Evaluator create() {
+<span class="fc" id="L36">    return new Impl();</span>
+  }
+
+  class Result {
+    final boolean      result;
+    final List&lt;Record&gt; records;
+
+<span class="fc" id="L43">    public Result(boolean result, List&lt;Record&gt; records) {</span>
+<span class="fc" id="L44">      this.result = result;</span>
+<span class="fc" id="L45">      this.records = records;</span>
+<span class="fc" id="L46">    }</span>
+
+    public boolean result() {
+<span class="fc" id="L49">      return this.result;</span>
+    }
+
+    public Stream&lt;Record&gt; stream() {
+<span class="nc" id="L53">      return this.records.stream();</span>
+    }
+
+    public static abstract class Record {
+      final int    level;
+      final Object input;
+      final String name;
+
+<span class="fc" id="L61">      Record(int level, Object input, String name) {</span>
+<span class="fc" id="L62">        this.level = level;</span>
+<span class="fc" id="L63">        this.input = input;</span>
+<span class="fc" id="L64">        this.name = name;</span>
+<span class="fc" id="L65">      }</span>
+
+      public int level() {
+<span class="fc" id="L68">        return level;</span>
+      }
+
+      @SuppressWarnings({ &quot;unchecked&quot; })
+      public &lt;T&gt; T input() {
+<span class="fc" id="L73">        return (T) this.input;</span>
+      }
+
+      public String name() {
+<span class="fc" id="L77">        return name;</span>
+      }
+
+      public abstract boolean hasOutput();
+
+      public abstract &lt;T&gt; T output();
+    }
+
+    static class FinalizedRecord extends Record {
+      final Object output;
+
+      FinalizedRecord(int level, Object input, Object output, String name) {
+<span class="fc" id="L89">        super(level, input, name);</span>
+<span class="fc" id="L90">        this.output = output;</span>
+<span class="fc" id="L91">      }</span>
+
+      @Override
+      public boolean hasOutput() {
+<span class="fc" id="L95">        return true;</span>
+      }
+
+      @SuppressWarnings(&quot;unchecked&quot;)
+      @Override
+      public &lt;T&gt; T output() {
+<span class="fc" id="L101">        return (T) output;</span>
+      }
+    }
+
+    static class OnGoingRecord extends Record {
+      final int positionInRecords;
+
+      OnGoingRecord(int level, int positionInRecords, String name, Object input) {
+<span class="fc" id="L109">        super(level, input, name);</span>
+<span class="fc" id="L110">        this.positionInRecords = positionInRecords;</span>
+<span class="fc" id="L111">      }</span>
+
+      FinalizedRecord result(Object result) {
+<span class="fc" id="L114">        return new FinalizedRecord(this.level, this.input, result, this.name);</span>
+      }
+
+      @Override
+      public boolean hasOutput() {
+<span class="fc" id="L119">        return false;</span>
+      }
+
+      @Override
+      public &lt;T&gt; T output() {
+<span class="nc" id="L124">        throw new UnsupportedOperationException();</span>
+      }
+    }
+  }
+
+<span class="fc" id="L129">  class Impl implements Evaluator {</span>
+<span class="fc" id="L130">    private static final Object NULL_VALUE = new Object();</span>
+<span class="fc" id="L131">    List&lt;Result.OnGoingRecord&gt; onGoingRecords = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L132">    List&lt;Result.Record&gt;        records        = new ArrayList&lt;&gt;();</span>
+    Object                     currentResult;
+
+    void enter(String name, Object input) {
+<span class="fc" id="L136">      Result.OnGoingRecord newRecord = new Result.OnGoingRecord(onGoingRecords.size(), records.size(), name, input);</span>
+<span class="fc" id="L137">      onGoingRecords.add(newRecord);</span>
+<span class="fc" id="L138">      records.add(newRecord);</span>
+<span class="fc" id="L139">    }</span>
+
+    void leave(Object result) {
+<span class="fc" id="L142">      int positionInOngoingRecords = onGoingRecords.size() - 1;</span>
+<span class="fc" id="L143">      Result.OnGoingRecord current = onGoingRecords.get(positionInOngoingRecords);</span>
+<span class="fc" id="L144">      records.set(current.positionInRecords, current.result(result));</span>
+<span class="fc" id="L145">      onGoingRecords.remove(positionInOngoingRecords);</span>
+<span class="fc" id="L146">      this.currentResult = result;</span>
+<span class="fc" id="L147">    }</span>
+
+    @Override
+    public &lt;T&gt; void evaluate(T value, Evaluable.Conjunction&lt;T&gt; conjunction) {
+<span class="fc" id="L151">      enter(&quot;&amp;&amp;&quot;, value);</span>
+<span class="fc" id="L152">      conjunction.a().accept(value, this);</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">      if (!this.&lt;Boolean&gt;resultValue()) {</span>
+<span class="fc" id="L154">        leave(false);</span>
+<span class="fc" id="L155">        return;</span>
+      }
+<span class="fc" id="L157">      conjunction.b().accept(value, this);</span>
+<span class="fc" id="L158">      leave(this.resultValue());</span>
+<span class="fc" id="L159">    }</span>
+
+    @Override
+    public &lt;T&gt; void evaluate(T value, Evaluable.Disjunction&lt;T&gt; disjunction) {
+<span class="fc" id="L163">      enter(&quot;||&quot;, value);</span>
+<span class="fc" id="L164">      disjunction.a().accept(value, this);</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">      if (this.resultValue()) {</span>
+<span class="fc" id="L166">        leave(true);</span>
+<span class="fc" id="L167">        return;</span>
+      }
+<span class="fc" id="L169">      disjunction.b().accept(value, this);</span>
+<span class="fc" id="L170">      leave(this.resultValue());</span>
+<span class="fc" id="L171">    }</span>
+
+    @Override
+    public &lt;T&gt; void evaluate(T value, Evaluable.Negation&lt;T&gt; negation) {
+<span class="fc" id="L175">      enter(&quot;!&quot;, value);</span>
+<span class="fc" id="L176">      negation.target().accept(value, this);</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">      leave(!this.&lt;Boolean&gt;resultValue());</span>
+<span class="fc" id="L178">    }</span>
+
+    @Override
+    public &lt;T&gt; void evaluate(T value, Evaluable.LeafPred&lt;T&gt; leafPred) {
+<span class="fc" id="L182">      enter(String.format(&quot;%s&quot;, leafPred), value);</span>
+<span class="fc" id="L183">      boolean result = leafPred.predicate().test(value);</span>
+<span class="fc" id="L184">      leave(result);</span>
+<span class="fc" id="L185">    }</span>
+
+    @Override
+    public void evaluate(Experimentals.Context context, Evaluable.ContextPred contextPred) {
+<span class="fc" id="L189">      enter(String.format(&quot;%s&quot;, contextPred), context);</span>
+<span class="fc" id="L190">      contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);</span>
+<span class="fc" id="L191">      leave(this.resultValue());</span>
+<span class="fc" id="L192">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public &lt;T, R&gt; void evaluate(T value, Evaluable.Transformation&lt;T, R&gt; transformation) {
+<span class="fc" id="L197">      enter(&quot;=&gt;&quot;, value);</span>
+<span class="fc" id="L198">      transformation.mapper().accept(value, this);</span>
+<span class="fc" id="L199">      transformation.checker().accept((R) this.currentResult, this);</span>
+<span class="fc" id="L200">      leave(this.resultValue());</span>
+<span class="fc" id="L201">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public &lt;T&gt; void evaluate(T value, Evaluable.Func&lt;T&gt; func) {
+<span class="fc" id="L206">      enter(String.format(&quot;%s&quot;, func.head()), value);</span>
+<span class="fc" id="L207">      Object resultValue = func.head().apply(value);</span>
+<span class="fc" id="L208">      leave(resultValue);</span>
+<span class="fc" id="L209">      func.tail().ifPresent(tailSide -&gt; ((Evaluable&lt;Object&gt;) tailSide).accept(resultValue, this));</span>
+<span class="fc" id="L210">    }</span>
+
+    @Override
+    public &lt;E&gt; void evaluate(Stream&lt;E&gt; value, Evaluable.StreamPred&lt;E&gt; streamPred) {
+<span class="fc" id="L214">      boolean ret = streamPred.defaultValue();</span>
+<span class="fc" id="L215">      enter(String.format(&quot;%s&quot;, streamPred), value);</span>
+      // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
+      // on 'findFirst()'.
+      // Although NULL_VALUE is an ordinary Object, not a value of E, this works
+      // because either way we will just return a boolean and during the execution,
+      // type information is erased.
+<span class="fc" id="L221">      leave(value</span>
+<span class="fc" id="L222">          .filter(valueChecker(streamPred))</span>
+<span class="fc bfc" id="L223" title="All 2 branches covered.">          .map(v -&gt; v != null ? v : NULL_VALUE)</span>
+<span class="fc" id="L224">          .findFirst()</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">          .map(each -&gt; !ret)</span>
+<span class="fc" id="L226">          .orElse(ret));</span>
+<span class="fc" id="L227">    }</span>
+
+    private &lt;E&gt; Predicate&lt;E&gt; valueChecker(Evaluable.StreamPred&lt;E&gt; streamPred) {
+<span class="fc" id="L230">      return e -&gt; {</span>
+<span class="fc" id="L231">        Evaluator evaluator = Evaluator.create();</span>
+<span class="fc" id="L232">        boolean succeeded = false;</span>
+<span class="fc" id="L233">        boolean ret = false;</span>
+<span class="fc" id="L234">        Object throwable = &quot;&lt;&lt;OUTPUT MISSING&gt;&gt;&quot;;</span>
+        try {
+<span class="fc" id="L236">          streamPred.cut().accept(e, evaluator);</span>
+<span class="fc" id="L237">          succeeded = true;</span>
+<span class="nc" id="L238">        } catch (Error error) {</span>
+<span class="nc" id="L239">          throw error;</span>
+<span class="fc" id="L240">        } catch (Throwable t) {</span>
+<span class="fc" id="L241">          throwable = t;</span>
+<span class="nc" id="L242">          throw wrapIfNecessary(t);</span>
+        } finally {
+<span class="fc bfc" id="L244" title="All 4 branches covered.">          if (!succeeded || evaluator.&lt;Boolean&gt;resultValue() == streamPred.valueToCut()) {</span>
+<span class="fc" id="L245">            importResultRecords(evaluator.resultRecords(), throwable);</span>
+<span class="fc" id="L246">            ret = true;</span>
+          }
+        }
+<span class="fc" id="L249">        return ret;</span>
+      };
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public &lt;T&gt; T resultValue() {
+<span class="fc" id="L256">      return (T) currentResult;</span>
+    }
+
+    @Override
+    public List&lt;Result.Record&gt; resultRecords() {
+<span class="fc" id="L261">      return unmodifiableList(this.records);</span>
+    }
+
+    public void importResultRecords(List&lt;Result.Record&gt; resultRecords, Object other) {
+<span class="fc" id="L265">      resultRecords.stream()</span>
+<span class="fc" id="L266">          .map(each1 -&gt; createRecordForImport(each1, other))</span>
+<span class="fc" id="L267">          .forEach(each -&gt; this.records.add(each));</span>
+<span class="fc" id="L268">    }</span>
+
+    private Result.FinalizedRecord createRecordForImport(Result.Record each, Object other) {
+<span class="fc bfc" id="L271" title="All 2 branches covered.">      return new Result.FinalizedRecord(this.onGoingRecords.size() + each.level, each.input, each.hasOutput() ? each.output() : other, each.name);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Functions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.functions</a> &gt; <span class="el_source">Functions.java</span></div><h1>Functions.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.functions.currying.CurriedFunction;
-import com.github.dakusui.pcond.functions.currying.CurryingUtils;
+import com.github.dakusui.pcond.core.MultiParameterFunction;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.currying.CurryingUtils;
+import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,7 +19,7 @@ import static java.util.Objects.requireNonNull;
  * An entry point for acquiring function objects.
  * Functions retrieved by method in this class are all &quot;printable&quot;.
  */
-<span class="fc" id="L20">public enum Functions {</span>
+<span class="fc" id="L22">public enum Functions {</span>
   ;
 
   /**
@@ -28,7 +30,7 @@ import static java.util.Objects.requireNonNull;
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public static &lt;E&gt; Function&lt;E, E&gt; identity() {
-<span class="fc" id="L31">    return (Function&lt;E, E&gt;) Def.IDENTITY;</span>
+<span class="fc" id="L33">    return (Function&lt;E, E&gt;) Def.IDENTITY;</span>
   }
 
   /**
@@ -39,7 +41,7 @@ import static java.util.Objects.requireNonNull;
    */
   @SuppressWarnings(&quot;unchecked&quot;)
   public static &lt;E&gt; Function&lt;? super E, String&gt; stringify() {
-<span class="fc" id="L42">    return (Function&lt;? super E, String&gt;) Def.STRINGIFY;</span>
+<span class="fc" id="L44">    return (Function&lt;? super E, String&gt;) Def.STRINGIFY;</span>
   }
 
   /**
@@ -48,12 +50,12 @@ import static java.util.Objects.requireNonNull;
    * @return The function.
    */
   public static Function&lt;? super String, Integer&gt; length() {
-<span class="fc" id="L51">    return Def.LENGTH;</span>
+<span class="fc" id="L53">    return Def.LENGTH;</span>
   }
 
-  @SuppressWarnings({&quot;unchecked&quot;, &quot;RedundantClassCall&quot;})
+  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
   public static &lt;E&gt; Function&lt;List&lt;? extends E&gt;, ? extends E&gt; elementAt(int i) {
-<span class="fc" id="L56">    return Function.class.cast(Def.ELEMENT_AT_FACTORY.create(i));</span>
+<span class="fc" id="L58">    return Function.class.cast(Def.ELEMENT_AT_FACTORY.create(i));</span>
   }
 
   /**
@@ -62,7 +64,7 @@ import static java.util.Objects.requireNonNull;
    * @return The function.
    */
   public static Function&lt;? super Collection&lt;?&gt;, Integer&gt; size() {
-<span class="fc" id="L65">    return Def.SIZE;</span>
+<span class="fc" id="L67">    return Def.SIZE;</span>
   }
 
   /**
@@ -71,9 +73,20 @@ import static java.util.Objects.requireNonNull;
    * @param &lt;E&gt; Type of elements in the given collection.
    * @return The function.
    */
-  @SuppressWarnings({&quot;unchecked&quot;, &quot;RedundantClassCall&quot;})
+  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
   public static &lt;E&gt; Function&lt;Collection&lt;? extends E&gt;, Stream&lt;? extends E&gt;&gt; stream() {
-<span class="fc" id="L76">    return Function.class.cast(Def.STREAM);</span>
+<span class="fc" id="L78">    return Function.class.cast(Def.STREAM);</span>
+  }
+
+  /**
+   * Returns a function that returns a stream for a given given collection.
+   *
+   * @param &lt;E&gt; Type of elements in the given collection.
+   * @return The function.
+   */
+  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
+  public static &lt;E&gt; Function&lt;E, Stream&lt;? extends E&gt;&gt; streamOf() {
+<span class="fc" id="L89">    return Function.class.cast(Def.STREAM_OF);</span>
   }
 
   /**
@@ -83,20 +96,21 @@ import static java.util.Objects.requireNonNull;
    * @param &lt;E&gt;  The type to which the object is case.
    * @return The function.
    */
-  @SuppressWarnings({&quot;unchecked&quot;, &quot;RedundantClassCall&quot;})
+  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
   public static &lt;E&gt; Function&lt;? super Object, ? extends E&gt; cast(Class&lt;E&gt; type) {
-<span class="fc" id="L88">    return Function.class.cast(Def.CAST_FACTORY.create(type));</span>
+<span class="fc" id="L101">    return Function.class.cast(Def.CAST_FACTORY.create(type));</span>
   }
 
   /**
    * Returns a function that creates and returns a list that contains all the elements in the given list.
+   *
    * @param &lt;I&gt; The type of the input collection.
    * @param &lt;E&gt; Type of the elements in the collection
    * @return The function.
    */
-  @SuppressWarnings({&quot;unchecked&quot;, &quot;RedundantClassCall&quot;})
+  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
   public static &lt;I extends Collection&lt;? extends E&gt;, E&gt; Function&lt;I, List&lt;E&gt;&gt; collectionToList() {
-<span class="fc" id="L99">    return Function.class.cast(Def.COLLECTION_TO_LIST);</span>
+<span class="fc" id="L113">    return Function.class.cast(Def.COLLECTION_TO_LIST);</span>
   }
 
   /**
@@ -105,9 +119,9 @@ import static java.util.Objects.requireNonNull;
    * @param &lt;E&gt; Type of elements in a given array.
    * @return The function.
    */
-  @SuppressWarnings({&quot;unchecked&quot;, &quot;RedundantClassCall&quot;})
+  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
   public static &lt;E&gt; Function&lt;E[], List&lt;E&gt;&gt; arrayToList() {
-<span class="fc" id="L110">    return Function.class.cast(Def.ARRAY_TO_LIST);</span>
+<span class="fc" id="L124">    return Function.class.cast(Def.ARRAY_TO_LIST);</span>
   }
 
   /**
@@ -116,7 +130,7 @@ import static java.util.Objects.requireNonNull;
    * @return The function.
    */
   public static Function&lt;String, Integer&gt; countLines() {
-<span class="fc" id="L119">    return Def.COUNT_LINES;</span>
+<span class="fc" id="L133">    return Def.COUNT_LINES;</span>
   }
 
   /**
@@ -128,31 +142,32 @@ import static java.util.Objects.requireNonNull;
    * @return A printable and curried function of the target method.
    */
   public static CurriedFunction&lt;Object, Object&gt; curry(Class&lt;?&gt; aClass, String methodName, Class&lt;?&gt;... parameterTypes) {
-<span class="fc" id="L131">    return CurryingUtils.curry(methodName, createFunctionFromStaticMethod(aClass, methodName, parameterTypes));</span>
+<span class="fc" id="L145">    return CurryingUtils.curry(methodName, functionForStaticMethod(aClass, methodName, parameterTypes));</span>
   }
 
-  public static &lt;R&gt; MultiParameterFunction&lt;R&gt; createFunctionFromStaticMethod(Class&lt;?&gt; aClass, String methodName, Class&lt;?&gt;... parameterTypes) {
-<span class="fc" id="L135">    return CurryingUtils.Reflections.createFunctionFromStaticMethod(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);</span>
+  public static &lt;R&gt; MultiParameterFunction&lt;R&gt; functionForStaticMethod(Class&lt;?&gt; aClass, String methodName, Class&lt;?&gt;... parameterTypes) {
+<span class="fc" id="L149">    return CurryingUtils.Reflections.lookupFunctionForStaticMethod(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);</span>
   }
 
-<span class="fc" id="L138">  enum Def {</span>
+<span class="fc" id="L152">  enum Def {</span>
     ;
-<span class="fc" id="L140">    private static final Function&lt;?, ?&gt; IDENTITY = Printables.function(&quot;identity&quot;, Function.identity());</span>
-<span class="fc" id="L141">    private static final Function&lt;?, String&gt; STRINGIFY = Printables.function(&quot;stringify&quot;, Object::toString);</span>
-<span class="fc" id="L142">    private static final Function&lt;String, Integer&gt; LENGTH = Printables.function(&quot;length&quot;, String::length);</span>
-<span class="fc" id="L143">    private static final Function&lt;Collection&lt;?&gt;, Integer&gt; SIZE = Printables.function(&quot;size&quot;, Collection::size);</span>
-<span class="fc" id="L144">    private static final Function&lt;Collection&lt;?&gt;, Stream&lt;?&gt;&gt; STREAM = Printables.function(&quot;stream&quot;, Collection::stream);</span>
-<span class="fc" id="L145">    private static final Function&lt;Object[], List&lt;?&gt;&gt; ARRAY_TO_LIST = Printables.function(&quot;arrayToList&quot;, Arrays::asList);</span>
-<span class="fc" id="L146">    private static final Function&lt;String, Integer&gt; COUNT_LINES = Printables.function(&quot;countLines&quot;, (String s) -&gt; s.split(String.format(&quot;%n&quot;)).length);</span>
-<span class="fc" id="L147">    private static final Function&lt;Collection&lt;?&gt;, List&lt;?&gt;&gt; COLLECTION_TO_LIST = Printables.function(&quot;collectionToList&quot;, (Collection&lt;?&gt; c) -&gt; new ArrayList&lt;Object&gt;() {</span>
+<span class="fc" id="L154">    private static final Function&lt;?, ?&gt;                                 IDENTITY           = Printables.function(&quot;identity&quot;, Function.identity());</span>
+<span class="fc" id="L155">    private static final Function&lt;?, String&gt;                            STRINGIFY          = Printables.function(&quot;stringify&quot;, Object::toString);</span>
+<span class="fc" id="L156">    private static final Function&lt;String, Integer&gt;                      LENGTH             = Printables.function(&quot;length&quot;, String::length);</span>
+<span class="fc" id="L157">    private static final Function&lt;Collection&lt;?&gt;, Integer&gt;               SIZE               = Printables.function(&quot;size&quot;, Collection::size);</span>
+<span class="fc" id="L158">    private static final Function&lt;Collection&lt;?&gt;, Stream&lt;?&gt;&gt;             STREAM             = Printables.function(&quot;stream&quot;, Collection::stream);</span>
+<span class="fc" id="L159">    private static final Function&lt;?, Stream&lt;?&gt;&gt;                         STREAM_OF          = Printables.function(&quot;streamOf&quot;, Stream::of);</span>
+<span class="fc" id="L160">    private static final Function&lt;Object[], List&lt;?&gt;&gt;                    ARRAY_TO_LIST      = Printables.function(&quot;arrayToList&quot;, Arrays::asList);</span>
+<span class="fc" id="L161">    private static final Function&lt;String, Integer&gt;                      COUNT_LINES        = Printables.function(&quot;countLines&quot;, (String s) -&gt; s.split(String.format(&quot;%n&quot;)).length);</span>
+<span class="fc" id="L162">    private static final Function&lt;Collection&lt;?&gt;, List&lt;?&gt;&gt;           COLLECTION_TO_LIST = Printables.function(&quot;collectionToList&quot;, (Collection&lt;?&gt; c) -&gt; new ArrayList&lt;Object&gt;() {</span>
       {
-<span class="fc" id="L149">        addAll(c);</span>
-<span class="fc" id="L150">      }</span>
+<span class="fc" id="L164">        addAll(c);</span>
+<span class="fc" id="L165">      }</span>
     });
-<span class="fc" id="L152">    private static final PrintableFunction.Factory&lt;List&lt;?&gt;, ?, Integer&gt; ELEMENT_AT_FACTORY =</span>
-<span class="fc" id="L153">        Printables.functionFactory((Integer v) -&gt; String.format(&quot;at[%s]&quot;, v), (Integer arg) -&gt; (List&lt;?&gt; es) -&gt; es.get((Integer) arg));</span>
-<span class="fc" id="L154">    private static final PrintableFunction.Factory&lt;Object, ?, Class&lt;?&gt;&gt; CAST_FACTORY = Printables.functionFactory(</span>
-<span class="fc" id="L155">        (v) -&gt; String.format(&quot;castTo[%s]&quot;, requireNonNull(v).getSimpleName()), arg -&gt; arg::cast);</span>
+<span class="fc" id="L167">    private static final BaseFuncUtils.Factory&lt;List&lt;?&gt;, ?, Integer&gt; ELEMENT_AT_FACTORY =</span>
+<span class="fc" id="L168">        Printables.functionFactory((Integer v) -&gt; String.format(&quot;at[%s]&quot;, v), (Integer arg) -&gt; (List&lt;?&gt; es) -&gt; es.get((Integer) arg));</span>
+<span class="fc" id="L169">    private static final BaseFuncUtils.Factory&lt;Object, ?, Class&lt;?&gt;&gt; CAST_FACTORY       = Printables.functionFactory(</span>
+<span class="fc" id="L170">        (v) -&gt; String.format(&quot;castTo[%s]&quot;, requireNonNull(v).getSimpleName()), arg -&gt; arg::cast);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

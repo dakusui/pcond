@@ -3,16 +3,23 @@
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-<span class="nc" id="L6">public class InternalChecks {</span>
+<span class="fc" id="L6">public enum InternalChecks {</span>
+  ;
   public static void checkArgument(boolean b, Supplier&lt;String&gt; messageFormatter) {
-<span class="fc bfc" id="L8" title="All 2 branches covered.">    if (!b)</span>
-<span class="fc" id="L9">      throw new IllegalArgumentException(messageFormatter.get());</span>
-<span class="fc" id="L10">  }</span>
+<span class="fc bfc" id="L9" title="All 2 branches covered.">    if (!b)</span>
+<span class="fc" id="L10">      throw new IllegalArgumentException(messageFormatter.get());</span>
+<span class="fc" id="L11">  }</span>
 
   public static &lt;V&gt; V requireArgument(V arg, Predicate&lt;? super V&gt; predicate, Supplier&lt;String&gt; messageFormatter) {
-<span class="fc bfc" id="L13" title="All 2 branches covered.">    if (!predicate.test(arg))</span>
-<span class="fc" id="L14">      throw new IllegalArgumentException(messageFormatter.get());</span>
-<span class="fc" id="L15">    return arg;</span>
+<span class="fc bfc" id="L14" title="All 2 branches covered.">    if (!predicate.test(arg))</span>
+<span class="fc" id="L15">      throw new IllegalArgumentException(messageFormatter.get());</span>
+<span class="fc" id="L16">    return arg;</span>
+  }
+
+  public static &lt;V&gt; V requireState(V arg, Predicate&lt;? super V&gt; predicate, Supplier&lt;String&gt; messageFormatter) {
+<span class="fc bfc" id="L20" title="All 2 branches covered.">    if (!predicate.test(arg))</span>
+<span class="fc" id="L21">      throw new IllegalStateException(messageFormatter.get());</span>
+<span class="fc" id="L22">    return arg;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
