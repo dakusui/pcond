@@ -6,7 +6,9 @@ import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
+import org.junit.experimental.theories.suppliers.TestedOn;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -14,6 +16,7 @@ import static com.github.dakusui.pcond.functions.Functions.length;
 import static com.github.dakusui.pcond.functions.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static com.github.dakusui.pcond.utils.TestUtils.numLines;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -24,7 +27,7 @@ public class DefaultAssertionProviderTest extends TestBase {
   public void withoutEvaluator_conj_thenFail() {
     try {
       createAssertionProvider(useEvaluator(newProperties(), false))
-          .requireArgument("Hello", and(isNotNull(), isEmptyString().negate(), when(length()).then(gt(10))));
+          .requireArgument("Hello", and(isNotNull(), isEmptyString().negate(), transform(length()).check(gt(10))));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertEquals(1, numLines(e.getMessage()));
@@ -35,14 +38,14 @@ public class DefaultAssertionProviderTest extends TestBase {
   @Test
   public void withoutEvaluator_conj_thenPass() {
     createAssertionProvider(useEvaluator(newProperties(), false))
-        .requireArgument("Hello World, everyone", and(isNotNull(), isEmptyString().negate(), when(length()).then(gt(10))));
+        .requireArgument("Hello World, everyone", and(isNotNull(), isEmptyString().negate(), transform(length()).check(gt(10))));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void withEvaluator_columns100_conj() {
     try {
       createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
-          .requireArgument("Hello", and(isNotNull(), isEmptyString().negate(), when(length()).then(gt(10))));
+          .requireArgument("Hello", and(isNotNull(), isEmptyString().negate(), transform(length()).check(gt(10))));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       throw e;
@@ -64,19 +67,22 @@ public class DefaultAssertionProviderTest extends TestBase {
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.startsWith("||"),
+          CoreMatchers.containsString("Hello"),
+          CoreMatchers.containsString("||"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.startsWith("  isEqualTo[\"hello\"](\"Hello\")"),
+          CoreMatchers.containsString("Hello"),
+          CoreMatchers.containsString("  isEqualTo[\"hello\"]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       assertThat(lineAt(e.getMessage(), 3), allOf(
-          CoreMatchers.startsWith("  isEqualTo[\"HELLO\"](\"Hello\")"),
+          CoreMatchers.containsString("Hello"),
+          CoreMatchers.containsString("  isEqualTo[\"HELLO\"]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
@@ -89,19 +95,26 @@ public class DefaultAssertionProviderTest extends TestBase {
   public void withEvaluator_transforming_thenFail() {
     try {
       createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
-          .requireArgument("Hello", when(Functions.length()).then(Predicates.gt(10)));
+          .requireArgument("Hello", transform(Functions.length()).check(Predicates.gt(10)));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.startsWith("length"),
+          CoreMatchers.containsString("=>"),
+          CoreMatchers.containsString("Hello"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("false")
+
+      ));
+      assertThat(lineAt(e.getMessage(), 2), allOf(
+          CoreMatchers.containsString("length"),
           CoreMatchers.containsString("Hello"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("5")
 
       ));
-      assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.startsWith(">[10]"),
-          CoreMatchers.containsString("(5)"),
+      assertThat(lineAt(e.getMessage(), 3), allOf(
+          CoreMatchers.containsString("5"),
+          CoreMatchers.containsString(">[10]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
@@ -126,23 +139,24 @@ public class DefaultAssertionProviderTest extends TestBase {
   public void withEvaluator_columns100$whenNull() {
     try {
       createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
-          .requireArgument(null, and(isNotNull(), isEmptyString().negate(), when(length()).then(gt(10))));
+          .requireArgument(null, and(isNotNull(), isEmptyString().negate(), transform(length()).check(gt(10))));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.startsWith("&&"),
+          CoreMatchers.containsString("&&"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.startsWith("  &&"),
+          CoreMatchers.containsString("  &&"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       assertThat(lineAt(e.getMessage(), 3), allOf(
-          CoreMatchers.startsWith("    isNotNull(null)"),
+          CoreMatchers.containsString("null"),
+          CoreMatchers.containsString("    isNotNull"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 

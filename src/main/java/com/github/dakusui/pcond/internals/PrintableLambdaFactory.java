@@ -6,7 +6,7 @@ import java.util.function.Function;
 public abstract class PrintableLambdaFactory<E> {
   private final Function<E, String> nameComposer;
 
-  protected PrintableLambdaFactory(Function<E, String> nameComposer) {
+  public PrintableLambdaFactory(Function<E, String> nameComposer) {
     this.nameComposer = nameComposer;
   }
 

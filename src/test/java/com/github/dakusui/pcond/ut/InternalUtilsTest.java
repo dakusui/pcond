@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.Evaluable;
+import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.ut.testdata.FailingConstructor;
@@ -27,21 +27,21 @@ public class InternalUtilsTest {
     public void testFormatObject$collection3() {
       assertEquals(
           InternalUtils.formatObject(asList("a", "b", "c")),
-          "(\"a\",\"b\",\"c\")");
+          "[\"a\",\"b\",\"c\"]");
     }
 
     @Test
     public void testFormatObject$collection4() {
       assertEquals(
           InternalUtils.formatObject(asList("a", "b", "c", "d")),
-          "(\"a\",\"b\",\"c\"...;4)");
+          "[\"a\",\"b\",\"c\"...;4]");
     }
 
     @Test
     public void testFormatObject$array4() {
       assertEquals(
           InternalUtils.formatObject(new String[]{"a", "b", "c", "d"}),
-          "(\"a\",\"b\",\"c\"...;4)");
+          "[\"a\",\"b\",\"c\"...;4]");
     }
 
     @Test
@@ -62,7 +62,7 @@ public class InternalUtilsTest {
     public void testFormatObject$InnerClassObject() {
       assertThat(
           InternalUtils.formatObject(new InnerClass()),
-          startsWith("InnerClass@"));
+          startsWith("InternalUtilsTest$FormatObject$InnerClass@"));
     }
 
     @Test

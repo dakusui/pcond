@@ -1,11 +1,12 @@
 package com.github.dakusui.pcond.internals;
 
-import com.github.dakusui.pcond.functions.Evaluable;
+import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.functions.Printables;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -17,16 +18,31 @@ import static java.util.stream.Collectors.joining;
 public enum InternalUtils {
   ;
 
+  public static String center(String s, int size, char pad) {
+    if (s == null || size <= s.length())
+      return s;
+
+    StringBuilder sb = new StringBuilder(size);
+    for (int i = 0; i < (size - s.length()) / 2; i++) {
+      sb.append(pad);
+    }
+    sb.append(s);
+    while (sb.length() < size) {
+      sb.append(pad);
+    }
+    return sb.toString();
+  }
+
   public static String formatObject(Object value) {
     if (value == null)
       return "null";
     if (value instanceof Collection) {
       Collection<?> collection = (Collection<?>) value;
       if (collection.size() < 4)
-        return format("(%s)",
+        return format("[%s]",
             collection.stream().map(InternalUtils::formatObject).collect(Collectors.joining(",")));
       Iterator<?> i = collection.iterator();
-      return format("(%s,%s,%s...;%s)",
+      return format("[%s,%s,%s...;%s]",
           formatObject(i.next()),
           formatObject(i.next()),
           formatObject(i.next()),
@@ -43,11 +59,13 @@ public enum InternalUtils {
         s = s.substring(0, 12) + "..." + s.substring(s.length() - 5);
       return format("\"%s\"", s);
     }
-    String ret = value.toString();
-    ret = ret.contains("$")
-        ? ret.substring(ret.lastIndexOf("$") + 1)
-        : ret;
-    return ret;
+    if (isToStringOverridden(value))
+      return value.toString();
+    return value.toString().substring(value.getClass().getPackage().getName().length() + 1);
+  }
+
+  private static boolean isToStringOverridden(Object object) {
+    return getMethod(object.getClass(), "toString").getDeclaringClass() != Object.class;
   }
 
   /**
@@ -112,6 +130,15 @@ public enum InternalUtils {
       return (Evaluable<T>) p;
     // We know that Printable.predicate returns a PrintablePredicate object, which is an Evaluable.
     return (Evaluable<T>) Printables.predicate(p::toString, p);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Evaluable<T> toEvaluableIfNecessary(Function<? super T, ?> f) {
+    Objects.requireNonNull(f);
+    if (f instanceof Evaluable)
+      return (Evaluable<T>) f;
+    // We know that Printable.predicate returns a PrintableFunction object, which is an Evaluable.
+    return (Evaluable<T>) Printables.function(f::toString, f);
   }
 
   public static String spaces(int num) {

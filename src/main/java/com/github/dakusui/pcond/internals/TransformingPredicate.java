@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.internals;
 
-import com.github.dakusui.pcond.functions.Evaluable;
+import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.functions.PrintablePredicate;
 import com.github.dakusui.pcond.functions.Printables;
 
@@ -8,13 +8,15 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
+
 public class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Predicate<O>, Evaluable.Transformation<O, P> {
   public interface Factory<P, O> {
-    default TransformingPredicate<P, O> then(String condName, Predicate<? super P> cond) {
-      return then(Printables.predicate(condName, cond));
+    default TransformingPredicate<P, O> check(String condName, Predicate<? super P> cond) {
+      return check(Printables.predicate(condName, cond));
     }
 
-    TransformingPredicate<P, O> then(Predicate<? super P> cond);
+    TransformingPredicate<P, O> check(Predicate<? super P> cond);
   }
 
   private final Predicate<? super P>             predicate;
@@ -41,13 +43,13 @@ public class TransformingPredicate<P, O> extends PrintablePredicate<O> implement
   }
 
   @Override
-  public Function<? super O, ? extends P> mapper() {
-    return this.function();
+  public Evaluable<? super O> mapper() {
+    return toEvaluableIfNecessary(this.function());
   }
 
   @Override
   public Evaluable<? super P> checker() {
-    return InternalUtils.toEvaluableIfNecessary(this.predicate());
+    return toEvaluableIfNecessary(this.predicate());
   }
 
   @Override

@@ -25,7 +25,7 @@ public class PredicatesTest {
         assertThat(
             lineAt(e.getMessage(), 1),
             allOf(
-                startsWith("isInstanceOf"),
+                containsString("isInstanceOf"),
                 containsString("java.lang.String"),
                 containsString("100"),
                 containsString("false")));

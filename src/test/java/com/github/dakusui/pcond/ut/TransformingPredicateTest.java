@@ -16,10 +16,10 @@ import static org.junit.Assert.assertThat;
 public class TransformingPredicateTest extends TestBase {
   @Test
   public void testEquals() {
-    Predicate<String> p = Predicates.<String, String>when(Functions.identity()).then(Predicates.isEqualTo("hello"));
-    Predicate<String> q = Predicates.<String, String>when(Functions.identity()).then(Predicates.isEqualTo("hello"));
-    Predicate<String> r = Predicates.<String, String>when(Functions.identity()).then(Predicates.isNotNull());
-    Predicate<String> s = Predicates.<String, String>when(Functions.stringify()).then(Predicates.isEqualTo("hello"));
+    Predicate<String> p = Predicates.<String, String>transform(Functions.identity()).check(Predicates.isEqualTo("hello"));
+    Predicate<String> q = Predicates.<String, String>transform(Functions.identity()).check(Predicates.isEqualTo("hello"));
+    Predicate<String> r = Predicates.<String, String>transform(Functions.identity()).check(Predicates.isNotNull());
+    Predicate<String> s = Predicates.<String, String>transform(Functions.stringify()).check(Predicates.isEqualTo("hello"));
     Object stranger = new Object();
 
     assertThat(
@@ -34,10 +34,10 @@ public class TransformingPredicateTest extends TestBase {
 
   @Test
   public void testHashCode() {
-    Predicate<String> p = Predicates.<String, String>when(Functions.identity()).then(Predicates.isEqualTo("hello"));
-    Predicate<String> q = Predicates.<String, String>when(Functions.identity()).then(Predicates.isEqualTo("hello"));
-    Predicate<String> r = Predicates.<String, String>when(Functions.identity()).then(Predicates.isNotNull());
-    Predicate<String> s = Predicates.<String, String>when(Functions.stringify()).then(Predicates.isEqualTo("hello"));
+    Predicate<String> p = Predicates.<String, String>transform(Functions.identity()).check(Predicates.isEqualTo("hello"));
+    Predicate<String> q = Predicates.<String, String>transform(Functions.identity()).check(Predicates.isEqualTo("hello"));
+    Predicate<String> r = Predicates.<String, String>transform(Functions.identity()).check(Predicates.isNotNull());
+    Predicate<String> s = Predicates.<String, String>transform(Functions.stringify()).check(Predicates.isEqualTo("hello"));
 
     assertThat(
         p.hashCode(),
@@ -53,7 +53,7 @@ public class TransformingPredicateTest extends TestBase {
   public void testHashCodeSimply() {
     Function<String, String> identity = Functions.identity();
     Predicate<String> equalToHello = Predicates.isEqualTo("hello");
-    Predicate<String> p = Predicates.when(identity).then(equalToHello);
+    Predicate<String> p = Predicates.transform(identity).check(equalToHello);
     assertEquals(
         identity.hashCode() + equalToHello.hashCode(),
         p.hashCode());

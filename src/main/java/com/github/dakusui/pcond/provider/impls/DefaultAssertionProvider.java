@@ -1,26 +1,24 @@
 package com.github.dakusui.pcond.provider.impls;
 
-import com.github.dakusui.pcond.functions.Evaluable;
-import com.github.dakusui.pcond.functions.Evaluator;
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.provider.ApplicationException;
 import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
-import static com.github.dakusui.pcond.internals.InternalUtils.spaces;
+import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.util.stream.Collectors.joining;
 
 public class DefaultAssertionProvider implements AssertionProviderBase<ApplicationException> {
-  private final int     evaluableNameWidth;
   private final boolean useEvaluator;
 
   public DefaultAssertionProvider(Properties properties) {
-    this.evaluableNameWidth = evaluableNameWidth(this.getClass(), properties);
     this.useEvaluator = useEvaluator(this.getClass(), properties);
   }
 
@@ -49,18 +47,25 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     return new ApplicationException(message);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E {
     if (useEvaluator() && cond instanceof Evaluable) {
-      @SuppressWarnings("unchecked")
-      Evaluator.Result result = Evaluator.evaluate(value, (Evaluable<? super T>) cond);
+      Evaluator evaluator = Evaluator.create();
+      try {
+        ((Evaluable<T>) cond).accept(value, evaluator);
+      } catch (Error error) {
+        throw error;
+      } catch (Throwable t) {
+        String message = String.format("An exception(%s) was thrown during evaluation of value: %s: %s", t, value, cond);
+        message = message + String.format("%n") + composeExplanation(evaluator.resultRecords(), t);
+        throw wrap(message, t);
+      }
+      Evaluator.Result result = new Evaluator.Result(evaluator.resultValue(), evaluator.resultRecords());
       if (result.result())
         return value;
-      String b = messageComposer.apply(value, cond) + String.format("%n") +
-          result.stream()
-              .map(this::formatRecord)
-              .collect(joining(String.format("%n")));
-      throw exceptionComposer.apply(b);
+      String message = messageComposer.apply(value, cond) + String.format("%n") + composeExplanation(evaluator.resultRecords(), null);
+      throw exceptionComposer.apply(message);
     } else {
       if (!cond.test(value))
         throw exceptionComposer.apply(messageComposer.apply(value, cond));
@@ -68,24 +73,31 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     }
   }
 
-  protected String formatRecord(Evaluator.Result.Record r) {
-    return String.format("%-" + evaluableNameWidth() + "s -> %s",
-        String.format("%s%s",
-            spaces(r.level() * 2),
-            String.format("%s%s", r.name(), r.hasInput() ? "(" + InternalUtils.formatObject(r.input()) + ")" : "")),
-        r.output().map(InternalUtils::formatObject).orElse("<<OUTPUT MISSING>>"));
+  private String composeExplanation(List<Evaluator.Result.Record> result, Throwable t) {
+    int maxLevel = result.stream().map(Evaluator.Result.Record::level).max(Integer::compareTo).orElse(0);
+    int maxNameLength = result.stream().map(record -> record.name().length() + record.level() * 2).max(Integer::compareTo).orElse(0);
+    int maxInputLength = result.stream().map(record -> formatObject(record.input()).length() + record.level() * 2).max(Integer::compareTo).orElse(0);
+    return result.stream()
+        .map(r -> this.formatRecord(r, maxLevel, maxNameLength, maxInputLength, t))
+        .collect(joining(String.format("%n")));
   }
 
-  private int evaluableNameWidth() {
-    return this.evaluableNameWidth;
+  protected String formatRecord(Evaluator.Result.Record r, int maxLevel, int maxNameLength, int maxInputLength, Throwable throwable) {
+    String formattedInput = InternalUtils.formatObject(r.input());
+    String input;
+    input = formattedInput;
+    String indent = spaces(r.level() * 2);
+    return String.format("%-" + maxInputLength + "s %s %-" + maxNameLength + "s %s %s%s",
+        indent + input,
+        "->",
+        indent + r.name(),
+        r.hasOutput() ? "->" : "  ",
+        spaces((maxLevel - r.level()) * 2),
+        r.hasOutput() ? InternalUtils.formatObject(r.output()) : throwable);
   }
 
   private boolean useEvaluator() {
     return this.useEvaluator;
-  }
-
-  private static int evaluableNameWidth(Class<?> myClass, Properties properties) {
-    return Integer.parseInt(properties.getProperty(myClass.getName() + ".evaluableNameWidth", "58"));
   }
 
   private static boolean useEvaluator(Class<?> myClass, Properties properties) {

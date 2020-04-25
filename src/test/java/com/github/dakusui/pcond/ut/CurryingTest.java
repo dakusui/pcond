@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.ut.testdata.IntentionalException;
 import com.github.dakusui.pcond.utils.ut.TestBase;

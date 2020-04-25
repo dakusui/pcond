@@ -1,7 +1,9 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.functions.currying.CurriedFunction;
-import com.github.dakusui.pcond.functions.currying.CurryingUtils;
+import com.github.dakusui.pcond.core.MultiParameterFunction;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.currying.CurryingUtils;
+import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -157,14 +159,14 @@ public enum Functions {
     private static final Function<?, Stream<?>>                         STREAM_OF          = Printables.function("streamOf", Stream::of);
     private static final Function<Object[], List<?>>                    ARRAY_TO_LIST      = Printables.function("arrayToList", Arrays::asList);
     private static final Function<String, Integer>                      COUNT_LINES        = Printables.function("countLines", (String s) -> s.split(String.format("%n")).length);
-    private static final Function<Collection<?>, List<?>>               COLLECTION_TO_LIST = Printables.function("collectionToList", (Collection<?> c) -> new ArrayList<Object>() {
+    private static final Function<Collection<?>, List<?>>           COLLECTION_TO_LIST = Printables.function("collectionToList", (Collection<?> c) -> new ArrayList<Object>() {
       {
         addAll(c);
       }
     });
-    private static final PrintableFunction.Factory<List<?>, ?, Integer> ELEMENT_AT_FACTORY =
+    private static final BaseFuncUtils.Factory<List<?>, ?, Integer> ELEMENT_AT_FACTORY =
         Printables.functionFactory((Integer v) -> String.format("at[%s]", v), (Integer arg) -> (List<?> es) -> es.get((Integer) arg));
-    private static final PrintableFunction.Factory<Object, ?, Class<?>> CAST_FACTORY       = Printables.functionFactory(
+    private static final BaseFuncUtils.Factory<Object, ?, Class<?>> CAST_FACTORY       = Printables.functionFactory(
         (v) -> String.format("castTo[%s]", requireNonNull(v).getSimpleName()), arg -> arg::cast);
   }
 }

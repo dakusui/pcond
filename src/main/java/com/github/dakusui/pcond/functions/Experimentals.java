@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.functions.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.*;
@@ -15,6 +16,7 @@ import static java.util.Collections.singletonList;
 
 public enum Experimentals {
   ;
+
   public static Function<Stream<?>, Stream<Context>> nest(Collection<?> inner) {
     return Printables.function(() -> "nest" + formatObject(inner), (Stream<?> stream) -> Def.nest(stream, inner));
   }
@@ -44,14 +46,31 @@ public enum Experimentals {
    * @param orderArgs       An array to specify the order in which values in the context are applied to the function.
    * @return A predicate converted from the given curried function.
    */
-  public static Predicate<Context> test(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
-    return Def.applyAndTest(curriedFunction, Predicates.isTrue(), Boolean.class, orderArgs);
+  public static Predicate<Context> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
+    return Def.applyAndTest(curriedFunction, Printables.predicate("contextPredicate", Predicates.isTrue()), Boolean.class, orderArgs);
   }
 
-  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate, int argIndex) {
-    return Printables.predicate(
-        () -> String.format("toContextPredicate[%s,%s]", predicate, argIndex),
-        context -> predicate.test(context.valueAt(argIndex)));
+  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate_, int argIndex) {
+    Evaluable<?> enclosed = InternalUtils.toEvaluableIfNecessary(predicate_);
+    class ContextPrintablePredicate extends PrintablePredicate<Context> implements Evaluable.ContextPred {
+      protected ContextPrintablePredicate() {
+        super(
+            () -> String.format("contextPredicate[%s,%s]", predicate_, argIndex),
+            context -> predicate_.test(context.<T>valueAt(argIndex)));
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public <TT> Evaluable<? super TT> enclosed() {
+        return (Evaluable<? super TT>) enclosed;
+      }
+
+      @Override
+      public int argIndex() {
+        return argIndex;
+      }
+    }
+    return new ContextPrintablePredicate();
   }
 
   public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate) {

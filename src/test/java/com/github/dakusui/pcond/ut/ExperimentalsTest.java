@@ -1,9 +1,11 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.functions.Experimentals;
-import com.github.dakusui.pcond.functions.PrintableFunction;
+import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.Printables;
-import com.github.dakusui.pcond.functions.currying.CurriedFunction;
+import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
@@ -18,6 +20,7 @@ import static com.github.dakusui.pcond.Preconditions.require;
 import static com.github.dakusui.pcond.functions.Experimentals.*;
 import static com.github.dakusui.pcond.functions.Functions.*;
 import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static com.github.dakusui.pcond.ut.ExperimentalsTest.Utils.areEqual;
 import static com.github.dakusui.pcond.ut.ExperimentalsTest.Utils.stringEndsWith;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
@@ -29,10 +32,10 @@ public class ExperimentalsTest extends TestBase {
 
   /**
    * Building a nested loop with the {@code pcond} library.
-   *
+   * <p>
    * You can build a check using a multi-parameter static method which returns a boolean value.
    * In this example, {@link TargetMethodHolder#stringEndsWith(String, String)} is the method.
-   * It is turned into a curried function in {@link Utils#stringEndsWith()} and then passed to {@link Experimentals#test(CurriedFunction, int...)}.
+   * It is turned into a curried function in {@link Utils#stringEndsWith()} and then passed to {@link Experimentals#toContextPredicate(CurriedFunction, int...)}.
    * The method {@code Experimentals#test(CurriedFunction, int...)} converts a curried function whose final returned value is a boolean into a predicate of a {@link Context}.
    * A {@code Context} may have one or more values at once and those values are indexed.
    */
@@ -40,35 +43,120 @@ public class ExperimentalsTest extends TestBase {
   public void hello() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2", "o")))).then(anyMatch(test(stringEndsWith()))));
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(toContextPredicate(stringEndsWith()))));
   }
 
   @Test
   public void hello_a() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2", "o")))).then(anyMatch(test(stringEndsWith(), 0, 1))));
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(toContextPredicate(stringEndsWith(), 0, 1))));
   }
 
   @Test
   public void hello_b() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2", "o")))).then(noneMatch(test(stringEndsWith(), 1, 0))));
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toContextPredicate(stringEndsWith(), 1, 0))));
+  }
+
+  @Test(expected = PreconditionViolationException.class)
+  public void hello_b_e() {
+    try {
+      require(
+          asList("Hi", "hello", "world"),
+          transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toContextPredicate(stringEndsWith(), 0, 1))));
+    } catch (PreconditionViolationException e) {
+      e.printStackTrace();
+      assertThat(
+          lineAt(e.getMessage(), 5),
+          allOf(
+              CoreMatchers.containsString("context:[hello, o]"),
+              CoreMatchers.containsString("contextPredicate"),
+              CoreMatchers.containsString("stringEndsWith(String)(String)[0, 1]"),
+              CoreMatchers.containsString("true")
+          ));
+      throw e;
+    }
+  }
+
+  @Test(expected = PreconditionViolationException.class)
+  public void hello_b_e2() {
+    try {
+      require(
+          asList("Hi", "hello", "world", null),
+          transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
+              toContextPredicate(transform(Functions.length()).check(gt(3))))));
+    } catch (PreconditionViolationException e) {
+      e.printStackTrace();
+      assertThat(
+          lineAt(e.getMessage(), 5),
+          allOf(
+              CoreMatchers.containsString("context:[hello, 1]"),
+              CoreMatchers.containsString("contextPredicate"),
+              CoreMatchers.containsString("length >[3]"),
+              CoreMatchers.containsString(",0"),
+              CoreMatchers.containsString("true")
+          ));
+      assertThat(
+          lineAt(e.getMessage(), 7),
+          allOf(
+              CoreMatchers.containsString("hello"),
+              CoreMatchers.containsString("length"),
+              CoreMatchers.containsString("5")
+          ));
+      assertThat(
+          lineAt(e.getMessage(), 8),
+          allOf(
+              CoreMatchers.containsString("5"),
+              CoreMatchers.containsString(">[3]"),
+              CoreMatchers.containsString("true")
+          ));
+      throw e;
+    }
+  }
+
+  @Test(expected = NullPointerException.class)
+  public void hello_b_e3() {
+    try {
+      require(
+          asList(null, "Hi", "hello", "world", null),
+          transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
+              toContextPredicate(transform(Functions.length()).check(gt(3))))));
+    } catch (InternalException e) {
+      e.printStackTrace();
+      assertThat(
+          lineAt(e.getMessage(), 5),
+          allOf(
+              CoreMatchers.containsString("context:[null, 1]"),
+              CoreMatchers.containsString("contextPredicate"),
+              CoreMatchers.containsString("length >[3]"),
+              CoreMatchers.containsString(",0"),
+              CoreMatchers.containsString("NullPointerException")
+          ));
+      assertThat(
+          lineAt(e.getMessage(), 7),
+          allOf(
+              CoreMatchers.containsString("null"),
+              CoreMatchers.containsString("length"),
+              CoreMatchers.containsString("NullPointerException")
+          ));
+      throw wrapIfNecessary(e.getCause());
+    }
   }
 
   @Test
   public void hello_c() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(toContextStream()).andThen(nest(asList("1", "2", "o")))).then(anyMatch(test(stringEndsWith(), 0, 1))));
+        transform(stream().andThen(toContextStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(toContextPredicate(stringEndsWith(), 0, 1))));
   }
 
   @Test
   public void hello_d_1() {
     require(
         "hello",
-        when(streamOf().andThen(nest(asList("Hello", "HELLO", "hello")))).then(anyMatch(test(areEqual()))));
+        transform(streamOf().andThen(nest(asList("Hello", "HELLO", "hello")))).check(anyMatch(toContextPredicate(areEqual()))));
   }
 
   @Test(expected = PreconditionViolationException.class)
@@ -76,20 +164,22 @@ public class ExperimentalsTest extends TestBase {
     try {
       require(
           "hello",
-          when(streamOf().andThen(toContextStream())).then(anyMatch(toContextPredicate(isNull()))));
+          transform(streamOf().andThen(toContextStream())).check(anyMatch(toContextPredicate(isNull()))));
     } catch (PreconditionViolationException e) {
       e.printStackTrace();
       assertThat(
-          lineAt(e.getMessage(), 1),
-          allOf(
-              CoreMatchers.startsWith("streamOf"),
-              CoreMatchers.containsString("toContextStream"),
-              CoreMatchers.containsString("hello")));
-      assertThat(
           lineAt(e.getMessage(), 2),
           allOf(
-              CoreMatchers.startsWith("anyMatch"),
-              CoreMatchers.containsString("toContextPredicate"),
+              CoreMatchers.containsString("streamOf"),
+              CoreMatchers.containsString("hello")));
+      assertThat(
+          lineAt(e.getMessage(), 3),
+          CoreMatchers.containsString("toContextStream"));
+      assertThat(
+          lineAt(e.getMessage(), 4),
+          allOf(
+              CoreMatchers.containsString("anyMatch"),
+              CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("isNull"),
               CoreMatchers.containsString("0"),
               CoreMatchers.containsString("false")));
@@ -101,7 +191,7 @@ public class ExperimentalsTest extends TestBase {
   public void hello_d_2() {
     require(
         "hello",
-        when(toContext()).then(toContextPredicate(isNotNull())));
+        transform(toContext()).check(toContextPredicate(isNotNull())));
   }
 
   @Test(expected = PreconditionViolationException.class)
@@ -109,24 +199,24 @@ public class ExperimentalsTest extends TestBase {
     try {
       require(
           "hello",
-          when(toContext()).then(toContextPredicate(isNull())));
+          transform(toContext()).check(toContextPredicate(isNull())));
     } catch (PreconditionViolationException e) {
       e.printStackTrace();
       assertThat(
-          lineAt(e.getMessage(), 1),
+          lineAt(e.getMessage(), 2),
           allOf(
-              CoreMatchers.startsWith("toContext"),
               CoreMatchers.containsString("hello"),
+              CoreMatchers.containsString("toContext"),
               CoreMatchers.containsString("context:[hello]")
           ));
 
       assertThat(
-          lineAt(e.getMessage(), 2),
+          lineAt(e.getMessage(), 3),
           allOf(
-              CoreMatchers.startsWith("toContextPredicate"),
+              CoreMatchers.containsString("context:[hello]"),
+              CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("isNull"),
               CoreMatchers.containsString("0"),
-              CoreMatchers.containsString("context:[hello]"),
               CoreMatchers.containsString("->"),
               CoreMatchers.containsString("false")
           ));
@@ -139,20 +229,29 @@ public class ExperimentalsTest extends TestBase {
     try {
       require(
           asList("hello", "world"),
-          when(stream().andThen(nest(asList("1", "2", "o")))).then(allMatch(test(stringEndsWith()))));
+          transform(stream().andThen(nest(asList("1", "2", "o")))).check(allMatch(toContextPredicate(stringEndsWith()))));
     } catch (PreconditionViolationException e) {
       e.printStackTrace();
       assertThat(
           lineAt(e.getMessage(), 1),
           allOf(
-              CoreMatchers.startsWith("stream"),
-              CoreMatchers.containsString("nest"),
-              CoreMatchers.containsString("\"1\",\"2\",\"o\"")));
+              CoreMatchers.containsString("\"hello\",\"world\""),
+              CoreMatchers.containsString("=>")));
       assertThat(
           lineAt(e.getMessage(), 2),
           allOf(
-              CoreMatchers.startsWith("allMatch"),
-              CoreMatchers.containsString("isTrue"),
+              CoreMatchers.containsString("stream"),
+              CoreMatchers.containsString("\"hello\",\"world\"")));
+      assertThat(
+          lineAt(e.getMessage(), 3),
+          allOf(
+              CoreMatchers.containsString("nest"),
+              CoreMatchers.containsString("\"1\",\"2\",\"o\"")));
+      assertThat(
+          lineAt(e.getMessage(), 4),
+          allOf(
+              CoreMatchers.containsString("allMatch"),
+              CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("stringEndsWith"),
               CoreMatchers.containsString("String"),
               CoreMatchers.containsString("false")));
@@ -164,35 +263,35 @@ public class ExperimentalsTest extends TestBase {
   public void hello2() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2")))).then(alwaysTrue()));
+        transform(stream().andThen(nest(asList("1", "2")))).check(alwaysTrue()));
   }
 
   @Test
   public void hello3() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2")))).then(anyMatch(alwaysTrue())));
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(alwaysTrue())));
   }
 
   @Test
   public void hello3_a() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).then(alwaysTrue()));
+        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(alwaysTrue()));
   }
 
   @Test
   public void hello3_b() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).then(anyMatch(alwaysTrue())));
+        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(alwaysTrue())));
   }
 
   @Test
   public void hello4() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).then(anyMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(new Predicate<Experimentals.Context>() {
           @Override
           public boolean test(Experimentals.Context context) {
             return context.valueAt(1).equals("1");
@@ -209,7 +308,7 @@ public class ExperimentalsTest extends TestBase {
   public void hello4_a() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2")))).then(anyMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<Experimentals.Context>() {
           @Override
           public boolean test(Experimentals.Context context) {
             return context.valueAt(1).equals("1");
@@ -226,7 +325,7 @@ public class ExperimentalsTest extends TestBase {
   public void hello5() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2")))).then(allMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(allMatch(new Predicate<Experimentals.Context>() {
           @Override
           public boolean test(Experimentals.Context context) {
             return context.valueAt(1).equals("1");
@@ -243,7 +342,7 @@ public class ExperimentalsTest extends TestBase {
   public void hello6() {
     require(
         asList("hello", "world"),
-        when(stream().andThen(nest(asList("1", "2")))).then(anyMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<Experimentals.Context>() {
           @Override
           public boolean test(Experimentals.Context context) {
             return context.valueAt(1).equals("1");
@@ -258,7 +357,7 @@ public class ExperimentalsTest extends TestBase {
 
   @Test
   public void usageExample() {
-    PrintableFunction.Factory<String, String, List<Object>> functionFactory = pathToUriFunctionFactory();
+    BaseFuncUtils.Factory<String, String, List<Object>> functionFactory = pathToUriFunctionFactory();
     Function<String, String> pathToUriOnLocalHost = functionFactory.create(asList("http", "localhost", 80));
     System.out.println(pathToUriOnLocalHost);
     System.out.println(pathToUriOnLocalHost.apply("path/to/resource"));
@@ -277,7 +376,7 @@ public class ExperimentalsTest extends TestBase {
     System.out.println(pathToUriOnLocalHost.equals(pathToUriOnRemoteHost));
   }
 
-  private static PrintableFunction.Factory<String, String, List<Object>> pathToUriFunctionFactory() {
+  private static BaseFuncUtils.Factory<String, String, List<Object>> pathToUriFunctionFactory() {
     return Printables.functionFactory(
         (List<Object> args) -> "buildUri" + args,
         (List<Object> args) -> (String path) -> String.format("%s://%s:%s/%s", args.get(0), args.get(1), args.get(2), path));

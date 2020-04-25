@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.functions.preds.LeafPredUtils;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.functions.PrintablePredicate;
 import com.github.dakusui.pcond.functions.Printables;
@@ -15,7 +16,7 @@ import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
 public class PrintablesPredicateTest {
-  public static class Leaf {
+  public static class LeafPred {
     @Test
     public void test() {
       Predicate<?> p1 = Predicates.isNotNull();
@@ -70,7 +71,7 @@ public class PrintablesPredicateTest {
     }
 
     <T> Predicate<T> create(String name, Predicate<T> p, Predicate<T> q) {
-      return create(new PrintablePredicate.Leaf<>(() -> name + "1", p), new PrintablePredicate.Leaf<>(() -> name + "2", q));
+      return create(new LeafPredUtils.LeafPred<>(() -> name + "1", p), new LeafPredUtils.LeafPred<>(() -> name + "2", q));
     }
 
     abstract <T> Predicate<T> create(PrintablePredicate<T> predicate, PrintablePredicate<T> predicate1);

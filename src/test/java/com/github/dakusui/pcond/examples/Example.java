@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.examples;
 
+import org.junit.Test;
+
 import static com.github.dakusui.pcond.Assertions.that;
 import static com.github.dakusui.pcond.Postconditions.ensureNonNull;
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
@@ -19,5 +21,11 @@ public class Example {
   public static void main(String[] args) {
     System.out.println(hello("John"));
     System.out.println(hello(""));
+  }
+
+  @Test
+  public void testInt() {
+    int i = 10;
+    requireArgument(i, and(ge(0), lt(10)));
   }
 }

@@ -3,7 +3,7 @@
     <groupId>com.github.dakusui</groupId>
     <artifactId>pcond</artifactId>
     <packaging>jar</packaging>
-    <version>1.3.2-SNAPSHOT</version>
+    <version>1.4.0-SNAPSHOT</version>
     <description>A Library for Printable Preconditions</description>
 
     <name>pcond</name>

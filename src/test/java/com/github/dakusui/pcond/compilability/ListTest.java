@@ -32,18 +32,18 @@ public class ListTest {
   @Test(expected = IllegalArgumentException.class)
   public void testAllMatch() {
     Collection<String> var = asList("hello", "world", null);
-    requireArgument(var, when(stream()).then(allMatch(isNotNull())));
+    requireArgument(var, transform(stream()).check(allMatch(isNotNull())));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testAnyMatch() {
     Collection<String> var = asList("hello", "world");
-    requireArgument(var, when(stream()).then(anyMatch(isNull())));
+    requireArgument(var, transform(stream()).check(anyMatch(isNull())));
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testNoneMatch() {
     Collection<String> var = asList("hello", "world", null);
-    requireArgument(var, when(stream()).then(noneMatch(isNull())));
+    requireArgument(var, transform(stream()).check(noneMatch(isNull())));
   }
 }
