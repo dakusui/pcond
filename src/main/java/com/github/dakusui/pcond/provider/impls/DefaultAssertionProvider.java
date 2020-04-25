@@ -7,7 +7,9 @@ import com.github.dakusui.pcond.provider.ApplicationException;
 import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -77,19 +79,25 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     int maxLevel = result.stream().map(Evaluator.Result.Record::level).max(Integer::compareTo).orElse(0);
     int maxNameLength = result.stream().map(record -> record.name().length() + record.level() * 2).max(Integer::compareTo).orElse(0);
     int maxInputLength = result.stream().map(record -> formatObject(record.input()).length() + record.level() * 2).max(Integer::compareTo).orElse(0);
+    AtomicReference<?> previousInput = new AtomicReference<>(new Object());
     return result.stream()
-        .map(r -> this.formatRecord(r, maxLevel, maxNameLength, maxInputLength, t))
+        .map(r -> formatRecord(t, maxLevel, maxNameLength, maxInputLength, previousInput, r))
         .collect(joining(String.format("%n")));
   }
 
-  protected String formatRecord(Evaluator.Result.Record r, int maxLevel, int maxNameLength, int maxInputLength, Throwable throwable) {
-    String formattedInput = InternalUtils.formatObject(r.input());
-    String input;
-    input = formattedInput;
+  private String formatRecord(Throwable t, int maxLevel, int maxNameLength, int maxInputLength, AtomicReference<?> previousInput, Evaluator.Result.Record r) {
+    try {
+      return formatRecord(r, previousInput.get(), maxLevel, maxNameLength, maxInputLength, t);
+    } finally {
+      previousInput.set(r.input());
+    }
+  }
+
+  protected static String formatRecord(Evaluator.Result.Record r, Object previousInput, int maxLevel, int maxNameLength, int maxInputLength, Throwable throwable) {
+    boolean inputValueChanged = !Objects.equals(r.input(), previousInput);
     String indent = spaces(r.level() * 2);
-    return String.format("%-" + maxInputLength + "s %s %-" + maxNameLength + "s %s %s%s",
-        indent + input,
-        "->",
+    return String.format("%s %-" + maxNameLength + "s %s %s%s",
+        formatInput(r, maxInputLength, inputValueChanged),
         indent + r.name(),
         r.hasOutput() ? "->" : "  ",
         spaces((maxLevel - r.level()) * 2),
@@ -102,5 +110,15 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
 
   private static boolean useEvaluator(Class<?> myClass, Properties properties) {
     return Boolean.parseBoolean(properties.getProperty(myClass.getName() + ".useEvaluator", "true"));
+  }
+
+  private static String formatInput(Evaluator.Result.Record r, int maxInputLength, boolean valueChanged) {
+    String formattedInput = InternalUtils.formatObject(r.input());
+    String input;
+    input = formattedInput;
+    String indent = spaces(r.level() * 2);
+    return valueChanged ?
+        String.format("%-" + maxInputLength + "s %s", indent + input, "->") :
+        spaces(maxInputLength + 3);
   }
 }

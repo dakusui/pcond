@@ -49,10 +49,6 @@ public interface Evaluator {
       return this.result;
     }
 
-    public Stream<Record> stream() {
-      return this.records.stream();
-    }
-
     public static abstract class Record {
       final int    level;
       final Object input;
