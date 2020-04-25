@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.functions.Experimentals;
 import com.github.dakusui.pcond.functions.Experimentals.Context;
 
 import java.util.Optional;
@@ -73,7 +72,7 @@ public interface Evaluable<T> {
 
     Evaluable<? super E> cut();
 
-    boolean valueOnCut();
+    boolean valueToCut();
   }
 
   interface Transformation<T, R> extends Pred<T> {

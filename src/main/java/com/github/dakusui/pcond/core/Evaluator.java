@@ -218,10 +218,11 @@ public interface Evaluator {
       // Although NULL_VALUE is an ordinary Object, not a value of E, this works
       // because either way we will just return a boolean and during the execution,
       // type information is erased.
-      leave(value.filter(valueChecker(streamPred))
+      leave(value
+          .filter(valueChecker(streamPred))
           .map(v -> v != null ? v : NULL_VALUE)
           .findFirst()
-          .map(each -> streamPred.valueOnCut())
+          .map(each -> !ret)
           .orElse(ret));
     }
 
@@ -240,7 +241,7 @@ public interface Evaluator {
           throwable = t;
           throw wrapIfNecessary(t);
         } finally {
-          if (!succeeded || evaluator.<Boolean>resultValue()) {
+          if (!succeeded || evaluator.<Boolean>resultValue() == streamPred.valueToCut()) {
             importResultRecords(evaluator.resultRecords(), throwable);
             ret = true;
           }

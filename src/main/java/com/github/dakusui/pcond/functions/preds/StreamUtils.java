@@ -27,11 +27,13 @@ public enum StreamUtils {
   public static class StreamPred<E> extends PrintablePredicate<Stream<E>> implements Evaluable.StreamPred<E> {
     private final Evaluable<? super E> cut;
     private final boolean              defaultValue;
+    private final boolean              cutOn;
 
-    protected StreamPred(Supplier<String> s, Predicate<? super Stream<E>> predicate, Evaluable<? super E> cut, boolean defaultValue) {
+    protected StreamPred(Supplier<String> s, Predicate<? super Stream<E>> predicate, Evaluable<? super E> cut, boolean defaultValue, boolean cutOn) {
       super(s, predicate);
       this.cut = requireNonNull(cut);
       this.defaultValue = defaultValue;
+      this.cutOn = cutOn;
     }
 
     @Override
@@ -45,16 +47,16 @@ public enum StreamUtils {
     }
 
     @Override
-    public boolean valueOnCut() {
-      return !defaultValue();
+    public boolean valueToCut() {
+      return cutOn;
     }
   }
 
   static class StreamPredPrintablePredicateFromFactory<EE, E> extends StreamPred<EE> implements PrintableLambdaFactory.Lambda<BasePredUtils.Factory<Stream<EE>, E>, E> {
     private final Spec<E> spec;
 
-    StreamPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super Stream<EE>> predicate, Evaluable<? super EE> cut, boolean defaultValue) {
-      super(s, predicate, cut, defaultValue);
+    StreamPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super Stream<EE>> predicate, Evaluable<? super EE> cut, boolean defaultValue, boolean cutOn) {
+      super(s, predicate, cut, defaultValue, cutOn);
       this.spec = spec;
     }
 
@@ -81,14 +83,15 @@ public enum StreamUtils {
     }
 
     @SuppressWarnings({ "RedundantClassCall", "unchecked" })
-    public <EE> StreamUtils.StreamPredPrintablePredicateFromFactory<EE, E> createStreamPred(E arg, Predicate<? super EE> cut, boolean defaultValue) {
+    public <EE> StreamUtils.StreamPredPrintablePredicateFromFactory<EE, E> createStreamPred(E arg, Predicate<? super EE> cut, boolean defaultValue, boolean cutOn) {
       Lambda.Spec<E> spec = new Lambda.Spec<>(Factory.this, arg, StreamUtils.StreamPredPrintablePredicateFromFactory.class);
       return new StreamUtils.StreamPredPrintablePredicateFromFactory<EE, E>(
           spec,
           () -> this.nameComposer().apply(arg),
           Predicate.class.cast(createPredicate(arg)),
           toEvaluableIfNecessary(cut),
-          defaultValue
+          defaultValue,
+          cutOn
       );
     }
   }
