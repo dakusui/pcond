@@ -78,7 +78,7 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
   private String composeExplanation(List<Evaluator.Entry> result, Throwable t) {
     int maxLevel = result.stream().map(Evaluator.Entry::level).max(Integer::compareTo).orElse(0);
     int maxNameLength = result.stream().map(entry -> entry.name().length() + entry.level() * 2).max(Integer::compareTo).orElse(0);
-    int maxInputLength = result.stream().map(entry -> formatObject(entry.input()).length() + entry.level() * 2).max(Integer::compareTo).orElse(0);
+    int maxInputLength = result.stream().map(entry -> formatObject(entry.input()).length()).max(Integer::compareTo).orElse(0);
     AtomicReference<?> previousInput = new AtomicReference<>(new Object());
     return result.stream()
         .map(r -> formatEntry(t, maxLevel, maxNameLength, maxInputLength, previousInput, r))
@@ -116,9 +116,8 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     String formattedInput = InternalUtils.formatObject(r.input());
     String input;
     input = formattedInput;
-    String indent = spaces(r.level() * 2);
     return valueChanged ?
-        String.format("%-" + maxInputLength + "s %s", indent + input, "->") :
+        String.format("%-" + maxInputLength + "s %s", input, "->") :
         spaces(maxInputLength + 3);
   }
 
