@@ -2,6 +2,12 @@
 
 = Quick Start
 
+`pcond` is a library that allows you to write a program in the "Design by Contract"<<DbC>> style.
+Not only that, it gives a very informative message when a check you defined fails.
+
+Unlike `Guava` 's `Preconditions` class<<GuavaPreconditions>>, you do not need to repeat the same fact both in Java for the actual check and in a natural language of yours for the message on its failure.
+Unlike `valid4j`<<v4j>>, it provides a set of human-readable predicates, which can be used as normal `java.util.function.Predicate` s instead of depending on `hamcrest` library.
+
 == Installation
 
 Have a following maven dependency in your `pom.xml`.
@@ -123,6 +129,9 @@ transform(length()).check(gt(0))
 
 This line constructs a printable predicate which returns true if a length of a given string is greater than (`gt`) 0.
 
+NOTE: This is a bit artificial example to illustrate the usage of the `transform` and `check` structure.
+You can achieve the same thing with `Predicates.isEmptyString()` and it will be simpler and faster.
+
 First the method `transfom` accepts, preferably a printable, function.
 In this case a function returned by `length` method, which is defined in `Functions` class, is passed to the method.
 Now it returns a factory for a printable predicate.
@@ -137,18 +146,27 @@ You can simply call methods with the value and the condition you are going to ex
 Followings are methods for it and classes in which they are defined.
 
 `requireXyz` (`Preconditions`):: Methods for checking "preconditions", which a user of your product needs to satisfy.
+On a failure, a `RuntimeException` such as `NullPointerException` etc. will be thrown depending on the actual method.
+`Xyz` can be `NonNull`, `Argument`, or `State`.
 `ensureXyz` (`Postconditions`):: Methods for checking "postconditions" , which your product needs to satisfy for its user.
-`validate` (`Validations`):: This is also used for checking "predoncitions".
+These methods also throw `RuntimeException` s depending on a actual prefix `Xyz` .
+`Xyz` can be `NonNull` or `State`.
+`validate` (`Validations`):: This is also used for checking "preconditions".
 However, unlike `requireXyz` methods, it throws an `ApplicationException`, which is a checked exception (not a `RuntimeException`).
 This method should be used in a situation where a "recoverable" failure happens.
 `assert xyz` (`Assertions`):: This should be used for checking "internal" error, where you want to disable the check in production code.
+`xyz` can be `precondition`, `postcondition`, `invariant` and `that`.
+The usege of the first three is self-explanatory.
+`that` is used for the other purposes.
+In case you want to use `assert` for any other purposes than them, use `that`.
 
 To check your user's fault, use `requireXyz` or `validate`.
-When there is a simple way to check the condition, use `requireXyz`.
-Otherwise use `validate`.
+When there is a simple and easy way to check the condition, use `requireXyz`.
+Otherwise, use `validate` to allow your user to handle the error.
 To check your own fault, use `ensureXyz` or `assert xyz`.
-If the check should be done even in the production, use `ensureXyz`.
+If the check should be done even in the production, i.e. it can be broken by your user, use `ensureXyz`.
 Otherwise, use `assert xyz`.
+Because the check can only be broken by your own fault (bug), which should not exist in your production code.
 
 Among all of those, `assert xyz` has a quite outstanding characteristic, where it can be completely disabled by `-da` option to your JVM and does not have any performance overhead at all if it is disabled.
 
@@ -177,4 +195,13 @@ The next several lines explain how a given value violated a condition to be sati
 See the last line, this means the given string `JohnDoe` made a condition `containsString[" "]` `false` and it made the entire check fail.
 `pcond` is designed to shortcur an evaluation as soon as a value of a disjunctive or conjunctive predicate becomes fixed.
 That is if you have an `or` condition and the first predicate under it becomes `true`, the rest will not be evaluated at all.
-So the last line in the message always shows the direct reason why the check was failed.
+So the last line in the message always shows the direct reason why the check failed.
+
+Thus, you can read the output above as "The check failed because the value `\"JohnDoe\"` `containsString[" "]` was `false`.
+"
+
+== References
+
+- [[[DbC]]] Wikipedia article on Design by Contract, https://en.wikipedia.org/wiki/Design_by_contract
+- [[[v4j]]] Valid4j, http://www.valid4j.org
+- [[[GuavaPreconditions]]] PreconditionsExplained, https://github.com/google/guava/wiki/PreconditionsExplained
