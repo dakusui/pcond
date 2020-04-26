@@ -1,7 +1,7 @@
 <project>
     <body>
         <menu name="Documents">
-            <item href="quickstart.htm" name="Quick Start"/>
+            <item href="quickstart.html" name="Quick Start"/>
         </menu>
         <menu ref="reports" inherit="top"/>
         <menu ref="modules"/>
