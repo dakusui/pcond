@@ -99,9 +99,11 @@ public class ExperimentalsTest extends TestBase {
               CoreMatchers.containsString("true")
           ));
       assertThat(
+          lineAt(e.getMessage(), 6),
+          CoreMatchers.containsString("hello"));
+      assertThat(
           lineAt(e.getMessage(), 7),
           allOf(
-              CoreMatchers.containsString("hello"),
               CoreMatchers.containsString("length"),
               CoreMatchers.containsString("5")
           ));
@@ -135,14 +137,29 @@ public class ExperimentalsTest extends TestBase {
               CoreMatchers.containsString("NullPointerException")
           ));
       assertThat(
+          lineAt(e.getMessage(), 6),
+          CoreMatchers.containsString("null"));
+      assertThat(
           lineAt(e.getMessage(), 7),
           allOf(
-              CoreMatchers.containsString("null"),
               CoreMatchers.containsString("length"),
               CoreMatchers.containsString("NullPointerException")
           ));
       throw wrapIfNecessary(e.getCause());
     }
+  }
+
+  @Test(expected = IntentionalError.class)
+  public void hello_b_e4() {
+    require(
+        asList(null, "Hi", "hello", "world", null),
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
+            toContextPredicate(transform((Function<String, Integer>) s -> {
+              throw new IntentionalError();
+            }).check(gt(3))))));
+  }
+
+  public static class IntentionalError extends Error {
   }
 
   @Test
@@ -168,10 +185,11 @@ public class ExperimentalsTest extends TestBase {
     } catch (PreconditionViolationException e) {
       e.printStackTrace();
       assertThat(
+          lineAt(e.getMessage(), 1),
+          CoreMatchers.containsString("hello"));
+      assertThat(
           lineAt(e.getMessage(), 2),
-          allOf(
-              CoreMatchers.containsString("streamOf"),
-              CoreMatchers.containsString("hello")));
+          CoreMatchers.containsString("streamOf"));
       assertThat(
           lineAt(e.getMessage(), 3),
           CoreMatchers.containsString("toContextStream"));
@@ -239,9 +257,7 @@ public class ExperimentalsTest extends TestBase {
               CoreMatchers.containsString("=>")));
       assertThat(
           lineAt(e.getMessage(), 2),
-          allOf(
-              CoreMatchers.containsString("stream"),
-              CoreMatchers.containsString("\"hello\",\"world\"")));
+          CoreMatchers.containsString("stream"));
       assertThat(
           lineAt(e.getMessage(), 3),
           allOf(

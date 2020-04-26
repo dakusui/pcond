@@ -6,9 +6,7 @@ import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-import org.junit.experimental.theories.suppliers.TestedOn;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Properties;
 
@@ -16,7 +14,6 @@ import static com.github.dakusui.pcond.functions.Functions.length;
 import static com.github.dakusui.pcond.functions.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static com.github.dakusui.pcond.utils.TestUtils.numLines;
-import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
@@ -74,14 +71,12 @@ public class DefaultAssertionProviderTest extends TestBase {
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.containsString("Hello"),
           CoreMatchers.containsString("  isEqualTo[\"hello\"]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       assertThat(lineAt(e.getMessage(), 3), allOf(
-          CoreMatchers.containsString("Hello"),
           CoreMatchers.containsString("  isEqualTo[\"HELLO\"]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
@@ -107,7 +102,6 @@ public class DefaultAssertionProviderTest extends TestBase {
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
           CoreMatchers.containsString("length"),
-          CoreMatchers.containsString("Hello"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("5")
 
@@ -155,7 +149,6 @@ public class DefaultAssertionProviderTest extends TestBase {
 
       ));
       assertThat(lineAt(e.getMessage(), 3), allOf(
-          CoreMatchers.containsString("null"),
           CoreMatchers.containsString("    isNotNull"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
