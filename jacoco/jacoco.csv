@@ -19,24 +19,23 @@ pcond,com.github.dakusui.pcond,Preconditions,0,23,0,0,0,5,0,5,0,5
 pcond,com.github.dakusui.pcond,Postconditions,0,18,0,0,0,4,0,4,0,4
 pcond,com.github.dakusui.pcond.core,Evaluable.StreamPred,0,5,0,0,0,2,0,1,0,1
 pcond,com.github.dakusui.pcond.core,Evaluable.Conjunction,0,5,0,0,0,2,0,1,0,1
-pcond,com.github.dakusui.pcond.core,Evaluator.Result.OnGoingRecord,4,22,0,0,1,5,1,3,1,3
-pcond,com.github.dakusui.pcond.core,Evaluator.Impl,6,380,0,16,3,81,0,31,0,23
+pcond,com.github.dakusui.pcond.core,Evaluator.Entry,21,0,0,0,8,0,4,0,4,0
+pcond,com.github.dakusui.pcond.core,Evaluator.Impl,386,0,16,0,84,0,31,0,23,0
+pcond,com.github.dakusui.pcond.core,Evaluator.Entry.Finalized,14,0,0,0,5,0,3,0,3,0
 pcond,com.github.dakusui.pcond.core,Evaluable.Func,0,5,0,0,0,2,0,1,0,1
 pcond,com.github.dakusui.pcond.core,Evaluable.Negation,0,5,0,0,0,2,0,1,0,1
 pcond,com.github.dakusui.pcond.core,Evaluable.LeafPred,0,5,0,0,0,2,0,1,0,1
 pcond,com.github.dakusui.pcond.core,Evaluable.Disjunction,0,5,0,0,0,2,0,1,0,1
-pcond,com.github.dakusui.pcond.core,Evaluator.Result.FinalizedRecord,0,14,0,0,0,5,0,3,0,3
+pcond,com.github.dakusui.pcond.core,Evaluator.Entry.OnGoing,26,0,0,0,6,0,4,0,4,0
 pcond,com.github.dakusui.pcond.core,Evaluable.ContextPred,0,5,0,0,0,2,0,1,0,1
-pcond,com.github.dakusui.pcond.core,Evaluator,0,4,0,0,0,1,0,1,0,1
-pcond,com.github.dakusui.pcond.core,Evaluator.Result,4,12,0,0,1,5,1,2,1,2
+pcond,com.github.dakusui.pcond.core,Evaluator,4,0,0,0,1,0,1,0,1,0
 pcond,com.github.dakusui.pcond.core,Evaluable.Transformation,0,5,0,0,0,2,0,1,0,1
-pcond,com.github.dakusui.pcond.core,Evaluator.Result.Record,0,21,0,0,0,8,0,4,0,4
 pcond,com.github.dakusui.pcond.internals,InternalException,0,5,0,0,0,2,0,1,0,1
 pcond,com.github.dakusui.pcond.internals,InternalChecks,0,40,0,6,0,10,0,7,0,4
 pcond,com.github.dakusui.pcond.internals,PrintableLambdaFactory.Lambda,0,43,0,8,0,9,0,8,0,4
 pcond,com.github.dakusui.pcond.internals,TransformingPredicate.Factory,0,6,0,0,0,1,0,1,0,1
 pcond,com.github.dakusui.pcond.internals,InternalUtils.new ArrayList() {...},0,12,0,0,0,3,0,1,0,1
-pcond,com.github.dakusui.pcond.internals,InternalUtils,120,360,13,49,14,81,10,36,1,14
+pcond,com.github.dakusui.pcond.internals,InternalUtils,75,360,5,49,5,81,5,36,0,14
 pcond,com.github.dakusui.pcond.internals,TransformingPredicate,2,104,0,10,0,20,1,15,1,10
 pcond,com.github.dakusui.pcond.internals,PrintableLambdaFactory,0,9,0,0,0,4,0,2,0,2
 pcond,com.github.dakusui.pcond.internals,PrintableLambdaFactory.Lambda.Spec,0,12,0,0,0,5,0,1,0,1
@@ -89,4 +88,5 @@ pcond,com.github.dakusui.pcond.functions,Experimentals.Context,0,36,0,0,0,6,0,7,
 pcond,com.github.dakusui.pcond.functions,Functions.Def.new ArrayList() {...},0,11,0,0,0,3,0,1,0,1
 pcond,com.github.dakusui.pcond.functions,PrintableFunction,0,210,0,6,0,35,0,23,0,20
 pcond,com.github.dakusui.pcond.functions,Predicates.Def,0,446,0,20,0,59,0,66,0,56
-pcond,com.github.dakusui.pcond.provider.impls,DefaultAssertionProvider,7,364,0,12,3,39,0,20,0,14
+pcond,com.github.dakusui.pcond.provider.impls,DefaultAssertionProvider.Result,12,0,0,0,5,0,2,0,2,0
+pcond,com.github.dakusui.pcond.provider.impls,DefaultAssertionProvider,416,0,16,0,50,0,24,0,16,0

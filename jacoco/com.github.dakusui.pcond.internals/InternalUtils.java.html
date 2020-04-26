@@ -18,54 +18,39 @@ import static java.util.stream.Collectors.joining;
 <span class="pc bpc" id="L18" title="1 of 2 branches missed.">public enum InternalUtils {</span>
   ;
 
-  public static String center(String s, int size, char pad) {
-<span class="nc bnc" id="L22" title="All 4 branches missed.">    if (s == null || size &lt;= s.length())</span>
-<span class="nc" id="L23">      return s;</span>
-
-<span class="nc" id="L25">    StringBuilder sb = new StringBuilder(size);</span>
-<span class="nc bnc" id="L26" title="All 2 branches missed.">    for (int i = 0; i &lt; (size - s.length()) / 2; i++) {</span>
-<span class="nc" id="L27">      sb.append(pad);</span>
-    }
-<span class="nc" id="L29">    sb.append(s);</span>
-<span class="nc bnc" id="L30" title="All 2 branches missed.">    while (sb.length() &lt; size) {</span>
-<span class="nc" id="L31">      sb.append(pad);</span>
-    }
-<span class="nc" id="L33">    return sb.toString();</span>
-  }
-
   public static String formatObject(Object value) {
-<span class="fc bfc" id="L37" title="All 2 branches covered.">    if (value == null)</span>
-<span class="fc" id="L38">      return &quot;null&quot;;</span>
-<span class="fc bfc" id="L39" title="All 2 branches covered.">    if (value instanceof Collection) {</span>
-<span class="fc" id="L40">      Collection&lt;?&gt; collection = (Collection&lt;?&gt;) value;</span>
-<span class="fc bfc" id="L41" title="All 2 branches covered.">      if (collection.size() &lt; 4)</span>
-<span class="fc" id="L42">        return format(&quot;[%s]&quot;,</span>
-<span class="fc" id="L43">            collection.stream().map(InternalUtils::formatObject).collect(Collectors.joining(&quot;,&quot;)));</span>
-<span class="fc" id="L44">      Iterator&lt;?&gt; i = collection.iterator();</span>
-<span class="fc" id="L45">      return format(&quot;[%s,%s,%s...;%s]&quot;,</span>
-<span class="fc" id="L46">          formatObject(i.next()),</span>
-<span class="fc" id="L47">          formatObject(i.next()),</span>
-<span class="fc" id="L48">          formatObject(i.next()),</span>
-<span class="fc" id="L49">          collection.size()</span>
+<span class="fc bfc" id="L22" title="All 2 branches covered.">    if (value == null)</span>
+<span class="fc" id="L23">      return &quot;null&quot;;</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">    if (value instanceof Collection) {</span>
+<span class="fc" id="L25">      Collection&lt;?&gt; collection = (Collection&lt;?&gt;) value;</span>
+<span class="fc bfc" id="L26" title="All 2 branches covered.">      if (collection.size() &lt; 4)</span>
+<span class="fc" id="L27">        return format(&quot;[%s]&quot;,</span>
+<span class="fc" id="L28">            collection.stream().map(InternalUtils::formatObject).collect(Collectors.joining(&quot;,&quot;)));</span>
+<span class="fc" id="L29">      Iterator&lt;?&gt; i = collection.iterator();</span>
+<span class="fc" id="L30">      return format(&quot;[%s,%s,%s...;%s]&quot;,</span>
+<span class="fc" id="L31">          formatObject(i.next()),</span>
+<span class="fc" id="L32">          formatObject(i.next()),</span>
+<span class="fc" id="L33">          formatObject(i.next()),</span>
+<span class="fc" id="L34">          collection.size()</span>
       );
     }
-<span class="fc bfc" id="L52" title="All 2 branches covered.">    if (value instanceof Object[])</span>
-<span class="fc" id="L53">      return formatObject(asList((Object[]) value));</span>
-<span class="fc bfc" id="L54" title="All 2 branches covered.">    if (value instanceof Formattable)</span>
-<span class="fc" id="L55">      return String.format(&quot;%s&quot;, value);</span>
-<span class="fc bfc" id="L56" title="All 2 branches covered.">    if (value instanceof String) {</span>
-<span class="fc" id="L57">      String s = (String) value;</span>
-<span class="fc bfc" id="L58" title="All 2 branches covered.">      if (s.length() &gt; 20)</span>
-<span class="fc" id="L59">        s = s.substring(0, 12) + &quot;...&quot; + s.substring(s.length() - 5);</span>
-<span class="fc" id="L60">      return format(&quot;\&quot;%s\&quot;&quot;, s);</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">    if (value instanceof Object[])</span>
+<span class="fc" id="L38">      return formatObject(asList((Object[]) value));</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">    if (value instanceof Formattable)</span>
+<span class="fc" id="L40">      return String.format(&quot;%s&quot;, value);</span>
+<span class="fc bfc" id="L41" title="All 2 branches covered.">    if (value instanceof String) {</span>
+<span class="fc" id="L42">      String s = (String) value;</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">      if (s.length() &gt; 20)</span>
+<span class="fc" id="L44">        s = s.substring(0, 12) + &quot;...&quot; + s.substring(s.length() - 5);</span>
+<span class="fc" id="L45">      return format(&quot;\&quot;%s\&quot;&quot;, s);</span>
     }
-<span class="fc bfc" id="L62" title="All 2 branches covered.">    if (isToStringOverridden(value))</span>
-<span class="fc" id="L63">      return value.toString();</span>
-<span class="fc" id="L64">    return value.toString().substring(value.getClass().getPackage().getName().length() + 1);</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">    if (isToStringOverridden(value))</span>
+<span class="fc" id="L48">      return value.toString();</span>
+<span class="fc" id="L49">    return value.toString().substring(value.getClass().getPackage().getName().length() + 1);</span>
   }
 
   private static boolean isToStringOverridden(Object object) {
-<span class="fc bfc" id="L68" title="All 2 branches covered.">    return getMethod(object.getClass(), &quot;toString&quot;).getDeclaringClass() != Object.class;</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">    return getMethod(object.getClass(), &quot;toString&quot;).getDeclaringClass() != Object.class;</span>
   }
 
   /**
@@ -75,106 +60,106 @@ import static java.util.stream.Collectors.joining;
    * @return {@code true} - assertion failed with the given value {@code v} / {@code false} - otherwise.
    */
   public static boolean assertFailsWith(boolean v) {
-<span class="fc" id="L78">    boolean ret = false;</span>
+<span class="fc" id="L63">    boolean ret = false;</span>
     try {
-<span class="pc bpc" id="L80" title="1 of 4 branches missed.">      assert v;</span>
-<span class="fc" id="L81">    } catch (AssertionError e) {</span>
-<span class="fc" id="L82">      ret = true;</span>
-<span class="fc" id="L83">    }</span>
-<span class="fc" id="L84">    return ret;</span>
+<span class="pc bpc" id="L65" title="1 of 4 branches missed.">      assert v;</span>
+<span class="fc" id="L66">    } catch (AssertionError e) {</span>
+<span class="fc" id="L67">      ret = true;</span>
+<span class="fc" id="L68">    }</span>
+<span class="fc" id="L69">    return ret;</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)
   public static &lt;T&gt; T createInstanceFromClassName(Class&lt;? super T&gt; expectedClass, String requestedClassName, Object... args) {
     try {
-<span class="fc" id="L90">      Class&lt;?&gt; loadedClass = Class.forName(requestedClassName);</span>
+<span class="fc" id="L75">      Class&lt;?&gt; loadedClass = Class.forName(requestedClassName);</span>
       try {
-<span class="fc" id="L92">        return (T) expectedClass.cast(loadedClass.getDeclaredConstructor(Arrays.stream(args).map(Object::getClass).toArray(Class&lt;?&gt;[]::new)).newInstance(args));</span>
-<span class="fc" id="L93">      } catch (ClassCastException e) {</span>
-<span class="pc" id="L94">        throw wrap(&quot;The requested class:'&quot; + requestedClassName +</span>
-<span class="fc" id="L95">                &quot;' was found but not an instance of &quot; + expectedClass.getCanonicalName() + &quot;.: &quot; +</span>
-<span class="fc" id="L96">                &quot;It was '&quot; + loadedClass.getCanonicalName() + &quot;'.&quot;,</span>
+<span class="fc" id="L77">        return (T) expectedClass.cast(loadedClass.getDeclaredConstructor(Arrays.stream(args).map(Object::getClass).toArray(Class&lt;?&gt;[]::new)).newInstance(args));</span>
+<span class="fc" id="L78">      } catch (ClassCastException e) {</span>
+<span class="pc" id="L79">        throw wrap(&quot;The requested class:'&quot; + requestedClassName +</span>
+<span class="fc" id="L80">                &quot;' was found but not an instance of &quot; + expectedClass.getCanonicalName() + &quot;.: &quot; +</span>
+<span class="fc" id="L81">                &quot;It was '&quot; + loadedClass.getCanonicalName() + &quot;'.&quot;,</span>
             e);
-<span class="fc" id="L98">      } catch (NoSuchMethodException e) {</span>
-<span class="nc" id="L99">        throw wrap(&quot;Public constructor without parameters was not found in &quot; + requestedClassName, e);</span>
-<span class="fc" id="L100">      } catch (InvocationTargetException e) {</span>
-<span class="nc" id="L101">        throw wrap(&quot;Public constructor without parameters was found in &quot; + requestedClassName + &quot; but threw an exception&quot;, e.getCause());</span>
+<span class="fc" id="L83">      } catch (NoSuchMethodException e) {</span>
+<span class="nc" id="L84">        throw wrap(&quot;Public constructor without parameters was not found in &quot; + requestedClassName, e);</span>
+<span class="fc" id="L85">      } catch (InvocationTargetException e) {</span>
+<span class="nc" id="L86">        throw wrap(&quot;Public constructor without parameters was found in &quot; + requestedClassName + &quot; but threw an exception&quot;, e.getCause());</span>
       }
-<span class="fc" id="L103">    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {</span>
-<span class="nc" id="L104">      throw wrap(&quot;The requested class was not found or not accessible.: &quot; + requestedClassName, e);</span>
+<span class="fc" id="L88">    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {</span>
+<span class="nc" id="L89">      throw wrap(&quot;The requested class was not found or not accessible.: &quot; + requestedClassName, e);</span>
     }
   }
 
   public static InternalException wrap(String message, Throwable cause) {
-<span class="fc" id="L109">    throw new InternalException(message, cause);</span>
+<span class="fc" id="L94">    throw new InternalException(message, cause);</span>
   }
 
   public static InternalException wrapIfNecessary(Throwable cause) {
-<span class="fc bfc" id="L113" title="All 2 branches covered.">    if (cause instanceof Error)</span>
-<span class="fc" id="L114">      throw (Error) cause;</span>
-<span class="pc bpc" id="L115" title="1 of 2 branches missed.">    if (cause instanceof RuntimeException)</span>
-<span class="fc" id="L116">      throw (RuntimeException) cause;</span>
-<span class="nc" id="L117">    throw wrap(cause.getMessage(), cause);</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">    if (cause instanceof Error)</span>
+<span class="fc" id="L99">      throw (Error) cause;</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">    if (cause instanceof RuntimeException)</span>
+<span class="fc" id="L101">      throw (RuntimeException) cause;</span>
+<span class="nc" id="L102">    throw wrap(cause.getMessage(), cause);</span>
   }
 
   public static List&lt;? super Object&gt; append(List&lt;? super Object&gt; list, Object p) {
-<span class="fc" id="L121">    return unmodifiableList(new ArrayList&lt;Object&gt;(list) {{</span>
-<span class="fc" id="L122">      add(p);</span>
-<span class="fc" id="L123">    }});</span>
+<span class="fc" id="L106">    return unmodifiableList(new ArrayList&lt;Object&gt;(list) {{</span>
+<span class="fc" id="L107">      add(p);</span>
+<span class="fc" id="L108">    }});</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)
   public static &lt;T&gt; Evaluable&lt;T&gt; toEvaluableIfNecessary(Predicate&lt;? super T&gt; p) {
-<span class="fc" id="L128">    Objects.requireNonNull(p);</span>
-<span class="fc bfc" id="L129" title="All 2 branches covered.">    if (p instanceof Evaluable)</span>
-<span class="fc" id="L130">      return (Evaluable&lt;T&gt;) p;</span>
+<span class="fc" id="L113">    Objects.requireNonNull(p);</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">    if (p instanceof Evaluable)</span>
+<span class="fc" id="L115">      return (Evaluable&lt;T&gt;) p;</span>
     // We know that Printable.predicate returns a PrintablePredicate object, which is an Evaluable.
-<span class="fc" id="L132">    return (Evaluable&lt;T&gt;) Printables.predicate(p::toString, p);</span>
+<span class="fc" id="L117">    return (Evaluable&lt;T&gt;) Printables.predicate(p::toString, p);</span>
   }
 
   @SuppressWarnings(&quot;unchecked&quot;)
   public static &lt;T&gt; Evaluable&lt;T&gt; toEvaluableIfNecessary(Function&lt;? super T, ?&gt; f) {
-<span class="fc" id="L137">    Objects.requireNonNull(f);</span>
-<span class="fc bfc" id="L138" title="All 2 branches covered.">    if (f instanceof Evaluable)</span>
-<span class="fc" id="L139">      return (Evaluable&lt;T&gt;) f;</span>
+<span class="fc" id="L122">    Objects.requireNonNull(f);</span>
+<span class="fc bfc" id="L123" title="All 2 branches covered.">    if (f instanceof Evaluable)</span>
+<span class="fc" id="L124">      return (Evaluable&lt;T&gt;) f;</span>
     // We know that Printable.predicate returns a PrintableFunction object, which is an Evaluable.
-<span class="fc" id="L141">    return (Evaluable&lt;T&gt;) Printables.function(f::toString, f);</span>
+<span class="fc" id="L126">    return (Evaluable&lt;T&gt;) Printables.function(f::toString, f);</span>
   }
 
   public static String spaces(int num) {
-<span class="fc" id="L145">    char[] buf = new char[num];</span>
-<span class="fc" id="L146">    Arrays.fill(buf, ' ');</span>
-<span class="fc" id="L147">    return String.valueOf(buf);</span>
+<span class="fc" id="L130">    char[] buf = new char[num];</span>
+<span class="fc" id="L131">    Arrays.fill(buf, ' ');</span>
+<span class="fc" id="L132">    return String.valueOf(buf);</span>
   }
 
   public static Class&lt;?&gt; wrapperClassOf(Class&lt;?&gt; clazz) {
-<span class="pc bpc" id="L151" title="2 of 4 branches missed.">    assert clazz != null;</span>
-<span class="fc bfc" id="L152" title="All 2 branches covered.">    if (clazz == Integer.TYPE)</span>
-<span class="fc" id="L153">      return Integer.class;</span>
-<span class="fc bfc" id="L154" title="All 2 branches covered.">    if (clazz == Long.TYPE)</span>
-<span class="fc" id="L155">      return Long.class;</span>
-<span class="fc bfc" id="L156" title="All 2 branches covered.">    if (clazz == Boolean.TYPE)</span>
-<span class="fc" id="L157">      return Boolean.class;</span>
-<span class="fc bfc" id="L158" title="All 2 branches covered.">    if (clazz == Byte.TYPE)</span>
-<span class="fc" id="L159">      return Byte.class;</span>
-<span class="fc bfc" id="L160" title="All 2 branches covered.">    if (clazz == Character.TYPE)</span>
-<span class="fc" id="L161">      return Character.class;</span>
-<span class="fc bfc" id="L162" title="All 2 branches covered.">    if (clazz == Float.TYPE)</span>
-<span class="fc" id="L163">      return Float.class;</span>
-<span class="fc bfc" id="L164" title="All 2 branches covered.">    if (clazz == Double.TYPE)</span>
-<span class="fc" id="L165">      return Double.class;</span>
-<span class="fc bfc" id="L166" title="All 2 branches covered.">    if (clazz == Short.TYPE)</span>
-<span class="fc" id="L167">      return Short.class;</span>
-<span class="fc bfc" id="L168" title="All 2 branches covered.">    if (clazz == Void.TYPE)</span>
-<span class="fc" id="L169">      return Void.class;</span>
-<span class="fc" id="L170">    throw new IllegalArgumentException(&quot;Unsupported type:&quot; + clazz.getName() + &quot; was given.&quot;);</span>
+<span class="pc bpc" id="L136" title="2 of 4 branches missed.">    assert clazz != null;</span>
+<span class="fc bfc" id="L137" title="All 2 branches covered.">    if (clazz == Integer.TYPE)</span>
+<span class="fc" id="L138">      return Integer.class;</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">    if (clazz == Long.TYPE)</span>
+<span class="fc" id="L140">      return Long.class;</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">    if (clazz == Boolean.TYPE)</span>
+<span class="fc" id="L142">      return Boolean.class;</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">    if (clazz == Byte.TYPE)</span>
+<span class="fc" id="L144">      return Byte.class;</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">    if (clazz == Character.TYPE)</span>
+<span class="fc" id="L146">      return Character.class;</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">    if (clazz == Float.TYPE)</span>
+<span class="fc" id="L148">      return Float.class;</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">    if (clazz == Double.TYPE)</span>
+<span class="fc" id="L150">      return Double.class;</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">    if (clazz == Short.TYPE)</span>
+<span class="fc" id="L152">      return Short.class;</span>
+<span class="fc bfc" id="L153" title="All 2 branches covered.">    if (clazz == Void.TYPE)</span>
+<span class="fc" id="L154">      return Void.class;</span>
+<span class="fc" id="L155">    throw new IllegalArgumentException(&quot;Unsupported type:&quot; + clazz.getName() + &quot; was given.&quot;);</span>
   }
 
   public static Method getMethod(Class&lt;?&gt; aClass, String methodName, Class&lt;?&gt;... parameterTypes) {
     try {
-<span class="fc" id="L175">      return aClass.getMethod(methodName, parameterTypes);</span>
-<span class="fc" id="L176">    } catch (NoSuchMethodException e) {</span>
-<span class="nc" id="L177">      throw wrap(format(&quot;Requested method: %s(%s) was not found in %s&quot;, methodName, Arrays.stream(parameterTypes).map(Class::getName).collect(joining(&quot;,&quot;)), aClass.getName()), e);</span>
+<span class="fc" id="L160">      return aClass.getMethod(methodName, parameterTypes);</span>
+<span class="fc" id="L161">    } catch (NoSuchMethodException e) {</span>
+<span class="nc" id="L162">      throw wrap(format(&quot;Requested method: %s(%s) was not found in %s&quot;, methodName, Arrays.stream(parameterTypes).map(Class::getName).collect(joining(&quot;,&quot;)), aClass.getName()), e);</span>
     }
   }
 }

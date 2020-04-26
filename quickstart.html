@@ -444,11 +444,29 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
 <li><a href="#installation">Installation</a></li>
-<li><a href="#getting-started">Getting started</a></li>
+<li><a href="#getting-started">Getting started</a>
+<ul class="sectlevel2">
+<li><a href="#writing-the-code">Writing the code</a></li>
+<li><a href="#reading-the-output">Reading the output</a></li>
+</ul>
+</li>
+<li><a href="#references">References</a></li>
 </ul>
 </div>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>pcond</code> is a library that allows you to write a program in the "Design by Contract"<a href="#DbC">[DbC]</a> style.
+Not only that, it gives a very informative message when a check you defined fails.</p>
+</div>
+<div class="paragraph">
+<p>Unlike <code>Guava</code> 's <code>Preconditions</code> class<a href="#GuavaPreconditions">[GuavaPreconditions]</a>, you do not need to repeat the same fact both in Java for the actual check and in a natural language of yours for the message on its failure.
+Unlike <code>valid4j</code><a href="#v4j">[v4j]</a>, it provides a set of human-readable predicates, which can be used as normal <code>java.util.function.Predicate</code> s instead of depending on <code>hamcrest</code> library.</p>
+</div>
+</div>
+</div>
 <div class="sect1">
 <h2 id="installation"><a class="anchor" href="#installation"></a>Installation</h2>
 <div class="sectionbody">
@@ -460,7 +478,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <pre class="highlight"><code class="language-xml" data-lang="xml">&lt;dependency&gt;
   &lt;groupId&gt;com.github.dakusui&lt;/groupId&gt;
   &lt;artifactId&gt;pcond&lt;/artifactId&gt;
-  &lt;version&gt;1.2.0&lt;/version&gt;
+  &lt;version&gt;1.4.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 </div>
 </div>
@@ -478,25 +496,29 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <pre class="highlight"><code class="language-java" data-lang="java">package com.github.dakusui.pcond.examples;
 
 <i class="conum" data-value="1"></i><b>(1)</b>
-import static com.github.dakusui.pcond.Assertions.*;
-import static com.github.dakusui.pcond.Postconditions.*;
-import static com.github.dakusui.pcond.Preconditions.*;
+import static com.github.dakusui.pcond.Assertions.precondition;
+import static com.github.dakusui.pcond.Postconditions.ensureNonNull;
+import static com.github.dakusui.pcond.Preconditions.requireArgument;
+import static com.github.dakusui.pcond.functions.Functions.*;
 import static com.github.dakusui.pcond.functions.Predicates.*;
 
 public class Example {
   public static String hello(String yourName) {
-    requireArgument(yourName, and(isNotNull(), not(isEmptyString()))); <i class="conum" data-value="2"></i><b>(2)</b>
+    <i class="conum" data-value="2"></i><b>(2)</b>
+    requireArgument(yourName, and(isNotNull(), transform(length()).check(gt(0)), containsString(" ")));
+    String ret = String.format("Hello, %s", firstNameOf(yourName));
+    <i class="conum" data-value="3"></i><b>(3)</b>
+    return ensureNonNull(ret);
+  }
 
-    String format = "Hello, %s";
-    assert that(format, isNotNull()); <i class="conum" data-value="3"></i><b>(3)</b>
-
-    String ret = String.format(format, yourName);
-    return ensureNonNull(ret); <i class="conum" data-value="4"></i><b>(4)</b>
+  private static String firstNameOf(String yourName) {
+    <i class="conum" data-value="4"></i><b>(4)</b>
+    assert precondition(yourName, containsString(" "));
+    return yourName.substring(0, yourName.indexOf(' '));
   }
 
   public static void main(String[] args) {
-    System.out.println(hello("John"));
-    System.out.println(hello("")); <i class="conum" data-value="5"></i><b>(5)</b>
+    System.out.println(hello("JohnDoe"));
   }
 }</code></pre>
 </div>
@@ -513,15 +535,11 @@ public class Example {
 </tr>
 <tr>
 <td><i class="conum" data-value="3"></i><b>3</b></td>
-<td>In a situation, where if a certain value does not satisfy a certain condition, and it will be your own bug, (neither your user&#8217;s nor a third party library,) use <code>assert</code> with a predicate built with methods in <code>Predicates</code> and <code>Functions</code>.</td>
+<td>In order to ensure <strong>your library</strong> satisfies a certain condition on an output, use <code>ensureXyz</code> methods in <code>Postconditions</code> class.</td>
 </tr>
 <tr>
 <td><i class="conum" data-value="4"></i><b>4</b></td>
-<td>In order to ensure an output of a library whose user is you satisfy a certain condition, user <code>ensureXyz</code> methods in <code>Postconditions</code> class.</td>
-</tr>
-<tr>
-<td><i class="conum" data-value="5"></i><b>5</b></td>
-<td>This intentionally violates a requirement of the <code>hello(String)</code> method.</td>
+<td>If a certain value does not satisfy a certain condition, and it will be your own bug, (neither your user&#8217;s nor a third party library,) use <code>assert</code> with a predicate built with methods in <code>Predicates</code> and <code>Functions</code>.</td>
 </tr>
 </table>
 </div>
@@ -531,31 +549,215 @@ public class Example {
 <div class="listingblock">
 <div class="title">Output of Example.java</div>
 <div class="content">
-<pre class="highlight"><code>Hello, John
-Exception in thread "main" java.lang.IllegalArgumentException: value:"" violated precondition:value (isNotNull&amp;&amp;!isEmpty)
-	at com.github.dakusui.pcond...
-	at com.github.dakusui.pcond...
-	at...</code></pre>
+<pre class="highlight"><code>Exception in thread "main" java.lang.IllegalArgumentException: value:"JohnDoe" violated precondition:value ((isNotNull&amp;&amp;!isEmpty)&amp;&amp;containsString[" "])
+"JohnDoe" -&gt; &amp;&amp;                    -&gt;       false
+               &amp;&amp;                  -&gt;     true
+                 isNotNull         -&gt;   true
+                 =&gt;                -&gt;   true
+                   length          -&gt; 7
+7         -&gt;       &gt;[0]            -&gt; true
+"JohnDoe" -&gt;   containsString[" "] -&gt;     false
+	at com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider.checkValue...
+	at ...</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Look at the second line.
+<p>You can see the violated condition and how it is violated in the stacktrace.</p>
+</div>
+<div class="sect2">
+<h3 id="writing-the-code"><a class="anchor" href="#writing-the-code"></a>Writing the code</h3>
+<div class="paragraph">
+<p>To verify a value with <code>pcond</code>, you can call an entry point method of <code>pcond</code> with your value and a predicate to be checked.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>entryPointMethod(aValue, predicate);</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Checking methods are defined in the entry point classes, which are <code>Assertions</code>, <code>Postconditions</code>, and <code>Preconditions</code>.
+It is recommended to import them statically at the beginning of your class.</p>
+</div>
+<div class="paragraph">
+<p>You can give your own lambda as a predicate to the method, however it will result in non-user friendly string such as following.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>Exception in thread "main" java.lang.IllegalArgumentException: value:"JohnDoe" violated precondition:value java.util.function.Predicate$$Lambda$78/2047329716@46f7f36a</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This is still better than nothing, however, probably it will be much better if you can see what a condition the value "JohnDoe" violated and how it did without visiting the source code.
+In order to make <code>pcond</code> print such a message on a failure, you need to give a "printable" predicate, which we will be describing here.</p>
+</div>
+<div class="sect3">
+<h4 id="building-a-printable-predicate"><a class="anchor" href="#building-a-printable-predicate"></a>Building a "Printable" Predicate</h4>
+<div class="paragraph">
+<p><code>pcond</code> offers a set of method to create a printable predicate in <code>Predicates</code> class.
+It also offers a way to construct a conjuntion, disjunction, and negation of given printable predicates.</p>
+</div>
+<div class="paragraph">
+<p>Following is an example.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>and(isNotNull(), transform(length()).check(gt(0)), containsString(" "))</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>isNotNull</code> is a method that returns a predicate which returns <code>true</code> if a value given to <code>test</code> method is not <code>null</code>.
+And its <code>toString</code> method is overridden so that it returns a string <code>isNotNull</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>and</code> is another method that returns a printable predicate.
+The method accepts predicates and constructs a new printable predicate that is a conjunction of them.</p>
+</div>
+<div class="paragraph">
+<p><code>transform</code> and <code>check</code> structure needs a bit more explanation than others.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>transform(length()).check(gt(0))</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This line constructs a printable predicate which returns true if a length of a given string is greater than (<code>gt</code>) 0.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This is a bit artificial example to illustrate the usage of the <code>transform</code> and <code>check</code> structure.
+You can achieve the same thing with <code>Predicates.isEmptyString()</code> and it will be simpler and faster.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>First the method <code>transfom</code> accepts, preferably a printable, function.
+In this case a function returned by <code>length</code> method, which is defined in <code>Functions</code> class, is passed to the method.
+Now it returns a factory for a printable predicate.
+The <code>check</code> method of the factory returns a new predicate that checks a transformed value by the first function.
+With this <code>transform</code> and <code>check</code> approach, you can build various printable predicates from preset ones.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="examining-a-value"><a class="anchor" href="#examining-a-value"></a>Examining a value</h4>
+<div class="paragraph">
+<p>Depending on the context, where you are going to examine a given value, an appropriate message and exception to be thrown on a failure can be different.
+<code>pcond</code> provides methods that offer such messages and exceptions.
+You can simply call methods with the value and the condition you are going to examine.
+Followings are methods for it and classes in which they are defined.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>requireXyz</code> (<code>Preconditions</code>)</dt>
+<dd>
+<p>Methods for checking "preconditions", which a user of your product needs to satisfy.
+On a failure, a <code>RuntimeException</code> such as <code>NullPointerException</code> etc. will be thrown depending on the actual method.
+<code>Xyz</code> can be <code>NonNull</code>, <code>Argument</code>, or <code>State</code>.</p>
+</dd>
+<dt class="hdlist1"><code>ensureXyz</code> (<code>Postconditions</code>)</dt>
+<dd>
+<p>Methods for checking "postconditions" , which your product needs to satisfy for its user.
+These methods also throw <code>RuntimeException</code> s depending on a actual prefix <code>Xyz</code> .
+<code>Xyz</code> can be <code>NonNull</code> or <code>State</code>.</p>
+</dd>
+<dt class="hdlist1"><code>validate</code> (<code>Validations</code>)</dt>
+<dd>
+<p>This is also used for checking "preconditions".
+However, unlike <code>requireXyz</code> methods, it throws an <code>ApplicationException</code>, which is a checked exception (not a <code>RuntimeException</code>).
+This method should be used in a situation where a "recoverable" failure happens.</p>
+</dd>
+<dt class="hdlist1"><code>assert xyz</code> (<code>Assertions</code>)</dt>
+<dd>
+<p>This should be used for checking "internal" error, where you want to disable the check in production code.
+<code>xyz</code> can be <code>precondition</code>, <code>postcondition</code>, <code>invariant</code> and <code>that</code>.
+The usege of the first three is self-explanatory.
+<code>that</code> is used for the other purposes.
+In case you want to use <code>assert</code> for any other purposes than them, use <code>that</code>.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>To check your user&#8217;s fault, use <code>requireXyz</code> or <code>validate</code>.
+When there is a simple and easy way to check the condition, use <code>requireXyz</code>.
+Otherwise, use <code>validate</code> to allow your user to handle the error.
+To check your own fault, use <code>ensureXyz</code> or <code>assert xyz</code>.
+If the check should be done even in the production, i.e. it can be broken by your user, use <code>ensureXyz</code>.
+Otherwise, use <code>assert xyz</code>.
+Because the check can only be broken by your own fault (bug), which should not exist in your production code.</p>
+</div>
+<div class="paragraph">
+<p>Among all of those, <code>assert xyz</code> has a quite outstanding characteristic, where it can be completely disabled by <code>-da</code> option to your JVM and does not have any performance overhead at all if it is disabled.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="reading-the-output"><a class="anchor" href="#reading-the-output"></a>Reading the output</h3>
+<div class="paragraph">
+<p>Look at the first line.
 There&#8217;s a message:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>`value:"" violated precondition:value (isNotNull&amp;&amp;!isEmpty)`</pre>
+<pre>value:"JohnDoe" violated precondition:value ((isNotNull&amp;&amp;!isEmpty)&amp;&amp;containsString[" "])</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>, which explains how a given value violated a condition to be satisfied.</p>
+<p>This is describing the value that was examined and the condition violated by it.</p>
+</div>
+<div class="paragraph">
+<p>The next several lines explain how a given value violated a condition to be satisfied.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>"JohnDoe" -&gt; &amp;&amp;                    -&gt;       false
+               &amp;&amp;                  -&gt;     true
+                 isNotNull         -&gt;   true
+                 !                 -&gt;   true
+                   isEmpty         -&gt; false
+               containsString[" "] -&gt;     false</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See the last line, this means the given string <code>JohnDoe</code> made a condition <code>containsString[" "]</code> <code>false</code> and it made the entire check fail.
+<code>pcond</code> is designed to shortcur an evaluation as soon as a value of a disjunctive or conjunctive predicate becomes fixed.
+That is if you have an <code>or</code> condition and the first predicate under it becomes <code>true</code>, the rest will not be evaluated at all.
+So the last line in the message always shows the direct reason why the check failed.</p>
+</div>
+<div class="paragraph">
+<p>Thus, you can read the output above as "The check failed because the value <code>\"JohnDoe\"</code> <code>containsString[" "]</code> was <code>false</code>.
+"</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="references"><a class="anchor" href="#references"></a>References</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>[<a id="DbC"></a>] Wikipedia article on Design by Contract, <a href="https://en.wikipedia.org/wiki/Design_by_contract" class="bare">https://en.wikipedia.org/wiki/Design_by_contract</a></p>
+</li>
+<li>
+<p>[<a id="v4j"></a>] Valid4j, <a href="http://www.valid4j.org" class="bare">http://www.valid4j.org</a></p>
+</li>
+<li>
+<p>[<a id="GuavaPreconditions"></a>] PreconditionsExplained, <a href="https://github.com/google/guava/wiki/PreconditionsExplained" class="bare">https://github.com/google/guava/wiki/PreconditionsExplained</a></p>
+</li>
+</ul>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-19 08:52:02 +0900
+Last updated 2020-04-27 03:34:30 +0900
 </div>
 </div>
 </body>
