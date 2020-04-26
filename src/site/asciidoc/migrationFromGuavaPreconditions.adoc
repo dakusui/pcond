@@ -1,9 +1,0 @@
-= Migration from Google Guava's Preconditions
-
-- `checkArgument`
-- `checkNotNull`
-- `checkElementIndex`
-
-[bibliography]
-== Reefrfences
-- [[[GuavaP]]] Google, https://github.com/google/guava/wiki/PreconditionsExplained[PreconditionsExplained]
