@@ -4,7 +4,7 @@
     <artifactId>pcond</artifactId>
     <packaging>jar</packaging>
     <version>1.4.1-SNAPSHOT</version>
-    <description>A Library for Printable Preconditions</description>
+    <description>A Small Java Library for Design by Contract style programming with printable preconditions.</description>
 
     <name>pcond</name>
     <url>http://dakusui.github.io/pcond</url>
