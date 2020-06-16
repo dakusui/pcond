@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.util.Arrays.asList;
 
 public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable.Func<T> {
@@ -94,6 +93,19 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable
   @Override
   public Optional<Evaluable<?>> tail() {
     return Optional.ofNullable(this.tail);
+  }
+
+  @Override
+  public int hashCode() {
+    return this.function.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object anotherObject) {
+    if (!(anotherObject instanceof PrintableFunction))
+      return false;
+    @SuppressWarnings("unchecked") PrintableFunction<T, R> another = (PrintableFunction<T, R>) anotherObject;
+    return this.function.equals(another.function) && this.toString().equals(another.toString());
   }
 
   @Override
