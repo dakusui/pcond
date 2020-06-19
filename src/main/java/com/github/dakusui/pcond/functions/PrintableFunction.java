@@ -19,11 +19,6 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable
       arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
   );
 
-  private static final BaseFuncUtils.Factory<Object, Object, List<Function<Object, Object>>> ANDTHEN_FACTORY = ComposedFuncUtils.factory(
-      arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
-      arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
-  );
-
   private final Supplier<String>                 s;
   private final Function<? super T, ? extends R> function;
   private final Function<? super T, ?>           head;
@@ -53,7 +48,7 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable
   @SuppressWarnings({ "unchecked" })
   public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
     Objects.requireNonNull(after);
-    return (Function<T, V>) ANDTHEN_FACTORY.create(asList((Function<Object, Object>) this, (Function<Object, Object>) after));
+    return (Function<T, V>) COMPOSE_FACTORY.create(asList((Function<Object, Object>) this, (Function<Object, Object>) after));
   }
 
   @SuppressWarnings("unchecked")

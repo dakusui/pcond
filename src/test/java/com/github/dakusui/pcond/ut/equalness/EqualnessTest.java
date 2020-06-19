@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut.equalness;
 
 import com.github.dakusui.pcond.functions.Functions;
+import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.FixMethodOrder;
@@ -10,109 +11,164 @@ import org.junit.runners.MethodSorters;
 import org.junit.runners.Parameterized;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static com.github.dakusui.pcond.Preconditions.requireNonNull;
+import static org.junit.Assert.*;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(Parameterized.class)
 @FixMethodOrder(value = MethodSorters.JVM)
 public class EqualnessTest extends TestBase {
-  final Object f;
-  final Object g;
-  final Object another;
+  final Object  target;
+  final Object  targetSecond;
+  final Object  equal;
+  final Object  another;
+  final boolean cached;
 
-  @SuppressWarnings("unchecked")
-  public EqualnessTest(Object arg1, Object arg2, Object arg3, Object arg4) {
-    final Function<Object[], Object> targetFunctionFactory;
-    final Object[] argsForTarget;
-    final Function<Object[], Object> anotherFunctionFactory;
-    final Object[] argsForAnother;
-    targetFunctionFactory = (Function<Object[], Object>) arg1;
-    argsForTarget = (Object[]) arg2;
-    anotherFunctionFactory = (Function<Object[], Object>) arg3;
-    argsForAnother = (Object[]) arg4;
-
-    f = targetFunctionFactory.apply(argsForTarget);
-    g = targetFunctionFactory.apply(argsForTarget);
-    another = anotherFunctionFactory.apply(argsForAnother);
+  public EqualnessTest(TestDef testDef) {
+    target = testDef.targetObjectSupplier.get();
+    targetSecond = testDef.targetObjectSupplier.get();
+    equal = testDef.equalObjectSupplier.get();
+    another = testDef.nonEqualObjectSupplier.get();
+    cached = testDef.cached;
   }
 
   @Test
   public void print() {
     System.out.println("Test:");
-    System.out.printf("  Target function (f):                                    %s%n", f);
-    System.out.printf("  A function g that should return true when f.equals(g):  %s%n", g);
+    System.out.printf("  Target function (f):                                    %s%n", target);
+    System.out.printf("  A function g that should return true when f.equals(g):  %s%n", targetSecond);
     System.out.printf("  A function g that should return false when f.equals(g): %s%n", another);
   }
 
   @Test
   public void returnsSameHashCode() {
-    assertEquals(f.hashCode(), g.hashCode());
+    assertEquals(target.hashCode(), targetSecond.hashCode());
   }
 
   @Test
   public void equalsWithOneCreatedFromSameFactoryAndArguments() {
-    assertEquals(f, g);
+    assertEquals(target, targetSecond);
   }
 
   @Test
   public void equalsWithOneCreatedFromSameFactoryAndArguments_reversed() {
-    assertEquals(g, f);
+    assertEquals(targetSecond, target);
   }
 
   @Test
   public void equalsWithItself() {
-    assertEquals(f, f);
+    assertEquals(target, target);
   }
 
   @Test
   public void notEqualsWithAnother() {
-    assertNotEquals(f, another);
+    assertNotEquals(target, another);
+  }
+
+  @Test
+  public void sameObject() {
+    assumeTrue(this.cached);
+    assertSame(this.target, this.targetSecond);
   }
 
   @Parameterized.Parameters
-  public static Object[][] parameters() {
-    return new Object[][] {
-        new Object[] { Utils.length(), args(), Utils.dummyFunctionFactory(), args() },
-        new Object[] { Utils.elementAt(), args(1), Utils.dummyFunctionFactory(), args() },
-        new Object[] { Utils.elementAt(), args(1), Utils.elementAt(), args(2) },
-        new Object[] { Utils.stringifyAndThenIdentity(), args(), Utils.identityComposeStringify(), args() }, // This is desired to fail.
-        new Object[] { Utils.custom(), args(), Utils.dummyFunctionFactory(), args() },
-        new Object[] { Utils.raw(), args(), Utils.dummyFunctionFactory(), args() },
+  public static TestDef[] parameters() {
+    return new TestDef[] {
+        define(args -> Functions.length()).$(),
+        define(args -> Functions.elementAt((int) args[0]), 1).cached(false).$(),
+        define(args -> Functions.elementAt((int) args[0]), 1)
+            .nonEqualObjectFactory(args -> Functions.elementAt((int) args[0]), 2)
+            .cached(false).$(),
+        define(args -> Functions.stringify().andThen(Functions.identity()))
+            .equalObjectFactory(args -> Functions.identity().compose(Functions.stringify()))
+            .cached(false).$(),
+        define(args -> Printables.function("custom", Function.identity()))
+            .cached(false).$(),
+        define(args -> Function.identity()).$(),
+        define(args -> Predicates.allMatch((Predicate<?>) args[0]), Predicates.alwaysTrue())
+            .cached(false).$(),
+        define(args -> Predicates.alwaysTrue()).$(),
+        define(args -> Predicates.isTrue()).$(),
+        define(args -> Predicates.isFalse()).$(),
+        define(args -> Predicates.isNull()).$(),
+        define(args -> Predicates.isNotNull()).$(),
+        define(args -> Predicates.isEqualTo(args[0]), new Object()).cached(false).$(),
+        define(args -> Predicates.isSameReferenceAs(args[0]), new Object())
+            .cached(false).$(),
+        define(args -> Predicates.isSameReferenceAs(args[0]), new Object())
+            .nonEqualObjectFactory(args -> Predicates.isSameReferenceAs(args[0]), new Object())
+            .cached(false).$(),
     };
   }
 
-  private static Object[] args(Object... args) {
-    return args;
+  static TestDef.Builder define(Function<Object[], Object> targetObjectFactory, Object... args) {
+    return new TestDef.Builder(targetObjectFactory, args);
+  }
+
+  static class TestDef {
+    final Supplier<Object> targetObjectSupplier;
+    final Supplier<Object> equalObjectSupplier;
+    final Supplier<Object> nonEqualObjectSupplier;
+    final boolean          cached;
+
+    TestDef(Supplier<Object> targetObjectSupplier, Supplier<Object> equalObjectSupplier, Supplier<Object> nonEqualObjectSupplier, boolean cached) {
+      this.targetObjectSupplier = targetObjectSupplier;
+      this.equalObjectSupplier = equalObjectSupplier;
+      this.nonEqualObjectSupplier = nonEqualObjectSupplier;
+      this.cached = cached;
+    }
+
+    static class Builder {
+      private final Supplier<Object> targetObjectSupplier;
+      private       Supplier<Object> equalObjectSupplier;
+      private       Supplier<Object> nonEqualObjectSupplier;
+      private       boolean          cached;
+
+      Builder(Function<Object[], Object> targetObjectFactory, Object... args) {
+        this(() -> targetObjectFactory.apply(args));
+      }
+
+      Builder(Supplier<Object> targetObjectSupplier) {
+        this.targetObjectSupplier = targetObjectSupplier;
+        this.equalObjectSupplier = targetObjectSupplier;
+        this.nonEqualObjectSupplier = () -> Utils.dummyFunctionFactory().apply(new Object[0]);
+        this.cached(true);
+      }
+
+      Builder equalObjectFactory(Function<Object[], Object> equalObjectFactory, Object... args) {
+        return this.equalObjectSupplier(() -> equalObjectFactory.apply(args));
+      }
+
+      Builder equalObjectSupplier(Supplier<Object> equalObjectSupplier) {
+        this.equalObjectSupplier = requireNonNull(equalObjectSupplier);
+        return this;
+      }
+
+      Builder nonEqualObjectFactory(Function<Object[], Object> nonEqualObjectFactory, Object... args) {
+        return this.nonEqualObjectSupplier(() -> nonEqualObjectFactory.apply(args));
+      }
+
+      Builder nonEqualObjectSupplier(Supplier<Object> nonEqualObjectSupplier) {
+        this.nonEqualObjectSupplier = requireNonNull(nonEqualObjectSupplier);
+        return this;
+      }
+
+      Builder cached(boolean cached) {
+        this.cached = cached;
+        return this;
+      }
+
+      TestDef $() {
+        return new TestDef(this.targetObjectSupplier, this.equalObjectSupplier, this.nonEqualObjectSupplier, this.cached);
+      }
+    }
   }
 
   enum Utils {
     ;
-
-    @SuppressWarnings("RedundantCast")
-    private static Function<Object[], Object> elementAt() {
-      return args -> Functions.elementAt((int) args[0]);
-    }
-
-    private static Function<Object[], Object> length() {
-      return args -> Functions.length();
-    }
-
-    private static Function<Object[], Object> stringifyAndThenIdentity() {
-      return args -> Functions.stringify().andThen(Functions.identity());
-    }
-
-    private static Function<Object[], Object> identityComposeStringify() {
-      return args -> Functions.identity().compose(Functions.stringify());
-    }
-
-    private static Function<Object[], Object> custom() {
-      return args -> Printables.function("custom", Function.identity());
-    }
-
-    private static Function<Object[], Object> raw() {
-      return args -> Function.identity();
-    }
 
     @SuppressWarnings("Convert2Lambda")
     private static Function<Object[], Object> dummyFunctionFactory() {
