@@ -69,9 +69,9 @@ public class StringTest {
   @Test(expected = IllegalArgumentException.class)
   public void testIsEmptyOrNullString() {
     String var = "hello";
-    requireArgument(var, isEmptyOrNullString());
-    requireArgument(var, and(isEmptyOrNullString(), isEmptyOrNullString()));
-    requireArgument(var, and(isNotNull(), or(isEmptyOrNullString()), isEmptyOrNullString()));
+    requireArgument(var, isNullOrEmptyString());
+    requireArgument(var, and(isNullOrEmptyString(), isNullOrEmptyString()));
+    requireArgument(var, and(isNotNull(), or(isNullOrEmptyString()), isNullOrEmptyString()));
   }
 
   @Test(expected = IllegalArgumentException.class)

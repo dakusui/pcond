@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.core.MultiParameterFunction;
-import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -222,14 +222,14 @@ public class FunctionsTest {
     }
 
     private static MultiParameterFunction<String> greeting(int... order) {
-      return CurryingUtils.Reflections.lookupFunctionForStaticMethod(order, TargetMethodHolder.class, "greeting", String.class, String.class);
+      return ReflectionsUtils.lookupFunctionForStaticMethod(order, TargetMethodHolder.class, "greeting", String.class, String.class);
     }
 
     private static MultiParameterFunction<String> greeting2(int... order) {
       Method m = getMethod(TargetMethodHolder.class, "greeting", String.class, String.class);
       List<Integer> paramOrder = Arrays.stream(order).boxed().collect(toList());
       List<Object> args = asList(m, paramOrder);
-      return CurryingUtils.Reflections.createMultiParameterFunctionForStaticMethod(args);
+      return ReflectionsUtils.createMultiParameterFunctionForStaticMethod(args);
     }
 
     private static MultiParameterFunction<String> voidMethod() {

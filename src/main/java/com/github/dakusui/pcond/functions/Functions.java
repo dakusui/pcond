@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.functions;
 import com.github.dakusui.pcond.core.MultiParameterFunction;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
+import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
 import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
 
 import java.util.ArrayList;
@@ -142,23 +143,27 @@ public enum Functions {
    * @return A printable and curried function of the target method.
    */
   public static CurriedFunction<Object, Object> curry(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    return CurryingUtils.curry(methodName, functionForStaticMethod(aClass, methodName, parameterTypes));
+    return curry(methodName, functionForStaticMethod(aClass, methodName, parameterTypes));
+  }
+
+  public static CurriedFunction<Object, Object> curry(String functionName, MultiParameterFunction<Object> function) {
+    return CurryingUtils.curry(functionName, function);
   }
 
   public static <R> MultiParameterFunction<R> functionForStaticMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    return CurryingUtils.Reflections.lookupFunctionForStaticMethod(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);
+    return ReflectionsUtils.lookupFunctionForStaticMethod(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);
   }
 
   enum Def {
     ;
-    private static final Function<?, ?>                                 IDENTITY           = Printables.function("identity", Function.identity());
-    private static final Function<?, String>                            STRINGIFY          = Printables.function("stringify", Object::toString);
-    private static final Function<String, Integer>                      LENGTH             = Printables.function("length", String::length);
-    private static final Function<Collection<?>, Integer>               SIZE               = Printables.function("size", Collection::size);
-    private static final Function<Collection<?>, Stream<?>>             STREAM             = Printables.function("stream", Collection::stream);
-    private static final Function<?, Stream<?>>                         STREAM_OF          = Printables.function("streamOf", Stream::of);
-    private static final Function<Object[], List<?>>                    ARRAY_TO_LIST      = Printables.function("arrayToList", Arrays::asList);
-    private static final Function<String, Integer>                      COUNT_LINES        = Printables.function("countLines", (String s) -> s.split(String.format("%n")).length);
+    private static final Function<?, ?>                             IDENTITY           = Printables.function("identity", Function.identity());
+    private static final Function<?, String>                        STRINGIFY          = Printables.function("stringify", Object::toString);
+    private static final Function<String, Integer>                  LENGTH             = Printables.function("length", String::length);
+    private static final Function<Collection<?>, Integer>           SIZE               = Printables.function("size", Collection::size);
+    private static final Function<Collection<?>, Stream<?>>         STREAM             = Printables.function("stream", Collection::stream);
+    private static final Function<?, Stream<?>>                     STREAM_OF          = Printables.function("streamOf", Stream::of);
+    private static final Function<Object[], List<?>>                ARRAY_TO_LIST      = Printables.function("arrayToList", Arrays::asList);
+    private static final Function<String, Integer>                  COUNT_LINES        = Printables.function("countLines", (String s) -> s.split(String.format("%n")).length);
     private static final Function<Collection<?>, List<?>>           COLLECTION_TO_LIST = Printables.function("collectionToList", (Collection<?> c) -> new ArrayList<Object>() {
       {
         addAll(c);
