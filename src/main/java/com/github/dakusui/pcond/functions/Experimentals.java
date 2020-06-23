@@ -1,8 +1,6 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.*;
 import java.util.function.Function;
@@ -12,7 +10,6 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 
 public enum Experimentals {
   ;
@@ -39,44 +36,6 @@ public enum Experimentals {
     };
   }
 
-  /**
-   * Converts a curried function which results in a boolean value in to a predicate.
-   *
-   * @param curriedFunction A curried function to be converted.
-   * @param orderArgs       An array to specify the order in which values in the context are applied to the function.
-   * @return A predicate converted from the given curried function.
-   */
-  public static Predicate<Context> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
-    return Def.applyAndTest(curriedFunction, Printables.predicate("contextPredicate", Predicates.isTrue()), Boolean.class, orderArgs);
-  }
-
-  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate_, int argIndex) {
-    Evaluable<?> enclosed = InternalUtils.toEvaluableIfNecessary(predicate_);
-    class ContextPrintablePredicate extends PrintablePredicate<Context> implements Evaluable.ContextPred {
-      protected ContextPrintablePredicate() {
-        super(
-            () -> String.format("contextPredicate[%s,%s]", predicate_, argIndex),
-            context -> predicate_.test(context.<T>valueAt(argIndex)));
-      }
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public <TT> Evaluable<? super TT> enclosed() {
-        return (Evaluable<? super TT>) enclosed;
-      }
-
-      @Override
-      public int argIndex() {
-        return argIndex;
-      }
-    }
-    return new ContextPrintablePredicate();
-  }
-
-  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate) {
-    return toContextPredicate(predicate, 0);
-  }
-
   public static int[] normalizeOrderArgs(Context context, int[] orderArgs) {
     int[] order;
     if (orderArgs.length == 0)
@@ -84,32 +43,6 @@ public enum Experimentals {
     else
       order = orderArgs;
     return order;
-  }
-
-  public interface Context extends Formattable {
-    default int size() {
-      return values().size();
-    }
-
-    @SuppressWarnings("unchecked")
-    default <T> T valueAt(int i) {
-      return (T) values().get(i);
-    }
-
-    default Context append(Object o) {
-      return () -> InternalUtils.append(values(), o);
-    }
-
-    @Override
-    default void formatTo(Formatter formatter, int flags, int width, int precision) {
-      formatter.format("context:%s", this.values());
-    }
-
-    List<Object> values();
-
-    static Context from(Object o) {
-      return () -> singletonList(o);
-    }
   }
 
   enum Def {

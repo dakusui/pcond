@@ -158,6 +158,7 @@ public class EqualnessTest extends TestBase {
             .nonEqualObjectSupplier(() -> Functions.functionForStaticMethod(TargetMethodHolder.class, "voidMethod", String.class, String.class))
             .cached(false)
             .$(),
+        // - curry (2)
         // - functionForStaticMethod
         define(args -> Functions.functionForStaticMethod(TargetMethodHolder.class, "voidMethod", String.class, String.class))
             .nonEqualObjectSupplier(() -> Functions.functionForStaticMethod(TargetMethodHolder.class, "greeting", String.class, String.class))

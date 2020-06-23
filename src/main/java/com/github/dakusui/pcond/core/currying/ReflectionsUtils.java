@@ -1,14 +1,14 @@
 package com.github.dakusui.pcond.core.currying;
 
-import com.github.dakusui.pcond.core.MultiParameterFunction;
-import com.github.dakusui.pcond.functions.PrintableFunction;
-import com.github.dakusui.pcond.internals.InternalChecks;
+import com.github.dakusui.pcond.functions.MultiParameterFunction;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
+import static com.github.dakusui.pcond.core.currying.FormattingUtils.formatMethodName;
+import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
@@ -31,8 +31,8 @@ public enum ReflectionsUtils {
       put(wrapperClassOf(float.class), wrapperClassesOf(asSet(double.class)));
     }
 
-    private Set<Class<?>> wrapperClassesOf(Set<Class<?>> collect) {
-      return collect.stream().map(InternalUtils::wrapperClassOf).collect(toSet());
+    private Set<Class<?>> wrapperClassesOf(Set<Class<?>> primitiveClasses) {
+      return primitiveClasses.stream().map(InternalUtils::wrapperClassOf).collect(toSet());
     }
 
     private Set<Class<?>> asSet(Class<?>... classes) {
@@ -53,85 +53,29 @@ public enum ReflectionsUtils {
   }
 
   private static List<Object> composeFuncDef(int[] order, Class<?> aClass, String methodName, Class<?>[] parameterTypes) {
-    final List<Integer> paramOrder = checkOrderArrayAndConvertToList(order, parameterTypes);
-    Method method = Checks.validateMethod(InternalUtils.getMethod(aClass, methodName, parameterTypes));
-    return asList(method, paramOrder);
+    return asList(InternalUtils.getMethod(aClass, methodName, parameterTypes), Arrays.stream(order).boxed().collect(toList()));
   }
 
-  private static List<Integer> checkOrderArrayAndConvertToList(int[] order, Class<?>[] parameterTypes) {
-    final List<Integer> paramOrder = unmodifiableList(Arrays.stream(order).boxed().distinct().collect(toList()));
-    InternalChecks.requireArgument(order, o -> o.length == paramOrder.size(), () -> "Duplicated elements are found in the 'order' argument:" + Arrays.toString(order) + " " + paramOrder);
-    InternalChecks.requireArgument(order, o -> o.length == parameterTypes.length, () -> "Inconsistent number of parameters are supplied by 'order'. Expected:" + parameterTypes.length + ", Actual: " + order.length);
-    return paramOrder;
-  }
-
-  public static <R> MultiParameterFunction<R> createMultiParameterFunctionForStaticMethod(List<Object> multiParamFuncDef) {
+  private static <R> MultiParameterFunction<R> createMultiParameterFunctionForStaticMethod(List<Object> multiParamFuncDef) {
     final Method method = (Method) multiParamFuncDef.get(0);
     @SuppressWarnings("unchecked") final List<Integer> paramOrder = (List<Integer>) multiParamFuncDef.get(1);
-    return createMultiParameterFunctionForStaticMethod(method, paramOrder);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <R> MultiParameterFunction<R> createMultiParameterFunctionForStaticMethod(Method method, List<Integer> paramOrder) {
-    class PrintableMultiParameterFunction<RR> extends PrintableFunction<List<? super Object>, RR> implements MultiParameterFunction<RR> {
-      final Object identity = asList(method, paramOrder);
-
-      PrintableMultiParameterFunction() {
-        super(
-            () -> FormattingUtils.formatMethodName(method) + FormattingUtils.formatParameterOrder(paramOrder),
-            objects -> {
-              try {
-                return (RR) method.invoke(null, (paramOrder).stream().map(objects::get).toArray());
-              } catch (IllegalAccessException | InvocationTargetException e) {
-                throw InternalUtils.wrap(
-                    String.format("Invoked method:%s threw an exception", FormattingUtils.formatMethodName(method)),
-                    e instanceof InvocationTargetException ? e.getCause() : e);
-              }
-            });
-      }
-
-      @Override
-      public int arity() {
-        return method.getParameterCount();
-      }
-
-      @Override
-      public Class<?> parameterType(int i) {
-        return method.getParameterTypes()[(paramOrder).get(i)];
-      }
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public Class<? extends RR> returnType() {
-        return (Class<? extends RR>) (method).getReturnType();
-      }
-
-      @Override
-      public int hashCode() {
-        return identity.hashCode();
-      }
-
-      @Override
-      public boolean equals(Object anotherObject) {
-        if (anotherObject == this)
-          return true;
-        if (anotherObject instanceof PrintableMultiParameterFunction) {
-          PrintableMultiParameterFunction<?> another = (PrintableMultiParameterFunction<?>) anotherObject;
-          return this.identity().equals(another.identity());
-        }
-        return false;
-      }
-
-      Object identity() {
-        return this.identity;
-      }
-    }
-    return new PrintableMultiParameterFunction<>();
+    return MultiParameterFunction.createFromStaticMethod(method, paramOrder);
   }
 
   private static Map<List<Object>, MultiParameterFunction<?>> methodBasedMultiParameterFunctionPool() {
     if (METHOD_BASED_FUNCTION_POOL.get() == null)
       METHOD_BASED_FUNCTION_POOL.set(new HashMap<>());
     return METHOD_BASED_FUNCTION_POOL.get();
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <R> R invokeStaticMethod(Method method, Object[] args) {
+    try {
+      return (R) method.invoke(null, args);
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw InternalUtils.wrap(
+          String.format("Invoked method:%s threw an exception", formatMethodName(method)),
+          e instanceof InvocationTargetException ? e.getCause() : e);
+    }
   }
 }

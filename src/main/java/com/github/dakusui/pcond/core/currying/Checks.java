@@ -4,13 +4,17 @@ import com.github.dakusui.pcond.internals.InternalChecks;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;
+import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.toList;
 
-enum Checks {
+public enum Checks {
   ;
 
   static <T> T validateArgumentType(T arg, Class<?> paramType, Supplier<String> messageFormatter) {
@@ -40,12 +44,6 @@ enum Checks {
     return widerBoxedClassesForClassA != null && widerBoxedClassesForClassA.contains(classA);
   }
 
-  static Method validateMethod(Method method) {
-    if (!Modifier.isStatic(method.getModifiers()))
-      throw new IllegalArgumentException(String.format("The specified method '%s' is not static", method));
-    return method;
-  }
-
   @SuppressWarnings("unchecked")
   static <T> T ensureReturnedValueType(Object value, Class<?> returnType) {
     if (isValidValueForType(value, returnType))
@@ -61,5 +59,12 @@ enum Checks {
     if (value.hasNext())
       throw new IllegalStateException();
     return value;
+  }
+
+  public static List<Integer> validateParamOrderList(List<Integer> order, int numParameters) {
+    final List<Integer> paramOrder = unmodifiableList(order.stream().distinct().collect(toList()));
+    requireArgument(order, o -> o.size() == paramOrder.size(), () -> "Duplicated elements are found in the 'order' argument:" + order.toString() + " " + paramOrder);
+    requireArgument(order, o -> o.size() == numParameters, () -> "Inconsistent number of parameters are supplied by 'order'. Expected:" + numParameters + ", Actual: " + order.size());
+    return paramOrder;
   }
 }

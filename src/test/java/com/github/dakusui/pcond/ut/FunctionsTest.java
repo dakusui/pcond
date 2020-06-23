@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
 import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.core.MultiParameterFunction;
+import com.github.dakusui.pcond.functions.MultiParameterFunction;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -207,6 +207,17 @@ public class FunctionsTest {
       assertNotEquals(func1.hashCode(), func2.hashCode());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void whenWrongNumberArgumentsThenFails() {
+      MultiParameterFunction<String> func1 = greeting(0, 1);
+      try {
+        System.out.println(func1.apply(asList("Hello", "World", "!")));
+      } catch (IllegalArgumentException e) {
+        assertThat(e.getMessage(), allOf(startsWith("Wrong number of"), containsString("required: 2"), containsString("actual: 3")));
+        throw e;
+      }
+    }
+
     @Test
     public void testEqualsWithDifferentTypeObjects() {
       MultiParameterFunction<String> func1 = greeting(0, 1);
@@ -228,8 +239,7 @@ public class FunctionsTest {
     private static MultiParameterFunction<String> greeting2(int... order) {
       Method m = getMethod(TargetMethodHolder.class, "greeting", String.class, String.class);
       List<Integer> paramOrder = Arrays.stream(order).boxed().collect(toList());
-      List<Object> args = asList(m, paramOrder);
-      return ReflectionsUtils.createMultiParameterFunctionForStaticMethod(args);
+      return MultiParameterFunction.createFromStaticMethod(m, paramOrder);
     }
 
     private static MultiParameterFunction<String> voidMethod() {

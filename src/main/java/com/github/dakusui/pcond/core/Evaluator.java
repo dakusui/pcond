@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.functions.Experimentals;
+import com.github.dakusui.pcond.functions.Context;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -23,7 +23,7 @@ public interface Evaluator {
 
   <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred);
 
-  void evaluate(Experimentals.Context value, Evaluable.ContextPred contextPred);
+  void evaluate(Context value, Evaluable.ContextPred contextPred);
 
   <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation);
 
@@ -98,7 +98,7 @@ public interface Evaluator {
     }
 
     @Override
-    public void evaluate(Experimentals.Context context, Evaluable.ContextPred contextPred) {
+    public void evaluate(Context context, Evaluable.ContextPred contextPred) {
       enter(String.format("%s", contextPred), context);
       contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
       leave(this.resultValue());

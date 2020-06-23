@@ -74,10 +74,10 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable
 
   @SuppressWarnings("unchecked")
   @Override
-  public Class<?> returnType() {
+  public Class<? extends R> returnType() {
     return function instanceof CurriedFunction ?
-        ((CurriedFunction<? super T, ? extends R>) function).returnType() :
-        Object.class;
+        (Class<? extends R>) ((CurriedFunction<? super T, ? extends R>) function).returnType() :
+        (Class<? extends R>) Object.class;
   }
 
   @Override

@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.core.MultiParameterFunction;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
@@ -143,11 +142,11 @@ public enum Functions {
    * @return A printable and curried function of the target method.
    */
   public static CurriedFunction<Object, Object> curry(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    return curry(methodName, functionForStaticMethod(aClass, methodName, parameterTypes));
+    return curry(functionForStaticMethod(aClass, methodName, parameterTypes));
   }
 
-  public static CurriedFunction<Object, Object> curry(String functionName, MultiParameterFunction<Object> function) {
-    return CurryingUtils.curry(functionName, function);
+  public static CurriedFunction<Object, Object> curry(MultiParameterFunction<Object> function) {
+    return CurryingUtils.curry(function);
   }
 
   public static <R> MultiParameterFunction<R> functionForStaticMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {

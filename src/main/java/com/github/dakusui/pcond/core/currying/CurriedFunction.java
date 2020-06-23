@@ -1,11 +1,10 @@
 package com.github.dakusui.pcond.core.currying;
 
-import com.github.dakusui.pcond.core.MultiParameterFunction;
+import com.github.dakusui.pcond.functions.MultiParameterFunction;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.core.currying.Checks.isValidValueForType;
@@ -50,15 +49,13 @@ public interface CurriedFunction<T, R> extends Function<T, R> {
     return validateArgumentType(arg, parameterType(), FormattingUtils.messageInvalidTypeArgument(arg, parameterType()));
   }
 
-  class Base implements CurriedFunction<Object, Object> {
+  class Impl implements CurriedFunction<Object, Object> {
     private final MultiParameterFunction<Object> function;
     private final List<? super Object>           ongoingContext;
-    private final String                         functionName;
 
-    public Base(MultiParameterFunction<Object> function, List<? super Object> ongoingContext, String functionName) {
+    public Impl(MultiParameterFunction<Object> function, List<? super Object> ongoingContext) {
       this.function = function;
       this.ongoingContext = ongoingContext;
-      this.functionName = functionName;
     }
 
     @Override
@@ -78,22 +75,7 @@ public interface CurriedFunction<T, R> extends Function<T, R> {
     public Object applyFunction(Object p) {
       if (ongoingContext.size() == function.arity() - 1)
         return function.apply(InternalUtils.append(ongoingContext, p));
-      return CurryingUtils.curry(functionName, function, InternalUtils.append(ongoingContext, p));
-    }
-
-    @Override
-    public int hashCode() {
-      return functionName.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object anotherObject) {
-      if (!(anotherObject instanceof Base))
-        return false;
-      Base another = (Base) anotherObject;
-      return Objects.equals(this.functionName, another.functionName) &&
-          Objects.equals(this.function, another.function) &&
-          Objects.equals(this.ongoingContext, another.ongoingContext);
+      return CurryingUtils.curry(function, InternalUtils.append(ongoingContext, p));
     }
   }
 }

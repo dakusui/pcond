@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.currying;
 
-import com.github.dakusui.pcond.core.MultiParameterFunction;
+import com.github.dakusui.pcond.functions.MultiParameterFunction;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.util.stream.Collectors.joining;
 
-enum FormattingUtils {
+public enum FormattingUtils {
   ;
 
   static Function<MultiParameterFunction<Object>, String> functionNameFormatter(String functionName, List<? super Object> ongoingContext) {
@@ -26,7 +26,7 @@ enum FormattingUtils {
             .collect(joining());
   }
 
-  static String formatMethodName(Method method) {
+  public static String formatMethodName(Method method) {
     return String.format("%s.%s(%s)",
         method.getDeclaringClass().getName(),
         method.getName(),

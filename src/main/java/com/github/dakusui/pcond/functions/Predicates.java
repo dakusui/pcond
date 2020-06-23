@@ -1,7 +1,10 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.functions.preds.BasePredUtils;
 import com.github.dakusui.pcond.functions.preds.StreamUtils;
+import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
 import java.util.Collection;
@@ -14,6 +17,7 @@ import static com.github.dakusui.pcond.functions.Printables.function;
 import static com.github.dakusui.pcond.functions.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 public enum Predicates {
@@ -201,6 +205,68 @@ public enum Predicates {
 
   public static <O, P> TransformingPredicate.Factory<P, O> transform(Function<? super O, ? extends P> function) {
     return cond -> new TransformingPredicate<>(cond, function);
+  }
+
+  public static Predicate<Context> endsWith() {
+    return null;
+  }
+
+  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate_, int argIndex) {
+    return new PrintableContextPredicate(predicate_, argIndex);
+  }
+
+  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate) {
+    return toContextPredicate(predicate, 0);
+  }
+
+  /**
+   * Converts a curried function which results in a boolean value in to a predicate.
+   *
+   * @param curriedFunction A curried function to be converted.
+   * @param orderArgs       An array to specify the order in which values in the context are applied to the function.
+   * @return A predicate converted from the given curried function.
+   */
+  public static Predicate<Context> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
+    return Experimentals.Def.applyAndTest(curriedFunction, predicate("contextPredicate", isTrue()), Boolean.class, orderArgs);
+  }
+
+  static class PrintableContextPredicate extends PrintablePredicate<Context> implements Evaluable.ContextPred {
+    final Evaluable<?> enclosed;
+    final Object       identity;
+    final int          argIndex;
+
+    protected <T> PrintableContextPredicate(Predicate<T> predicate_, int argIndex) {
+      super(
+          () -> format("contextPredicate[%s,%s]", predicate_, argIndex),
+          context -> predicate_.test(context.<T>valueAt(argIndex)));
+      this.enclosed = InternalUtils.toEvaluableIfNecessary(predicate_);
+      this.argIndex = argIndex;
+      this.identity = asList(predicate_, argIndex);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <TT> Evaluable<? super TT> enclosed() {
+      return (Evaluable<? super TT>) enclosed;
+    }
+
+    @Override
+    public int argIndex() {
+      return argIndex;
+    }
+
+    @Override
+    public int hashCode() {
+      return this.identity.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object anotherObject) {
+      if (!(anotherObject instanceof PrintableContextPredicate))
+        return false;
+      PrintableContextPredicate another = (PrintableContextPredicate) anotherObject;
+      return this.identity.equals(another.identity);
+    }
   }
 
   enum Def {

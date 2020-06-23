@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.currying;
 
-import com.github.dakusui.pcond.core.MultiParameterFunction;
+import com.github.dakusui.pcond.functions.MultiParameterFunction;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
 
@@ -17,13 +17,12 @@ public enum CurryingUtils {
   ;
   private static final ThreadLocal<BaseFuncUtils.Factory<Object, Object, List<Object>>> CURRIED_FUNCTION_FACTORY_POOL = new ThreadLocal<>();
 
-  public static CurriedFunction<Object, Object> curry(String functionName, MultiParameterFunction<Object> function) {
-    return curry(functionName, function, emptyList());
+  public static CurriedFunction<Object, Object> curry(MultiParameterFunction<Object> function) {
+    return curry(function, emptyList());
   }
 
-  static CurriedFunction<Object, Object> curry(String functionName, MultiParameterFunction<Object> function, List<? super Object> ongoingContext) {
-    requireNonNull(functionName);
-    return curriedFunctionFactory().create(asList(functionName, function, ongoingContext));
+  static CurriedFunction<Object, Object> curry(MultiParameterFunction<Object> function, List<? super Object> ongoingContext) {
+    return curriedFunctionFactory().create(asList(function.name(), function, ongoingContext));
   }
 
   private static BaseFuncUtils.Factory<Object, Object, List<Object>> curriedFunctionFactory() {
@@ -35,7 +34,7 @@ public enum CurryingUtils {
   private static BaseFuncUtils.Factory<Object, Object, List<Object>> createCurriedFunctionFactory() {
     return Printables.functionFactory(
         (args) -> FormattingUtils.functionNameFormatter(functionName(args), ongoingContext(args)).apply(function(args)),
-        (args) -> new CurriedFunction.Base(function(args), ongoingContext(args), functionName(args)));
+        (args) -> new CurriedFunction.Impl(function(args), ongoingContext(args)));
   }
 
   private static String functionName(List<Object> args) {
