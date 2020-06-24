@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.currying;
 
-import com.github.dakusui.pcond.functions.MultiParameterFunction;
+import com.github.dakusui.pcond.functions.MultiFunction;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.List;
@@ -50,10 +50,10 @@ public interface CurriedFunction<T, R> extends Function<T, R> {
   }
 
   class Impl implements CurriedFunction<Object, Object> {
-    private final MultiParameterFunction<Object> function;
-    private final List<? super Object>           ongoingContext;
+    private final MultiFunction<Object> function;
+    private final List<? super Object>  ongoingContext;
 
-    public Impl(MultiParameterFunction<Object> function, List<? super Object> ongoingContext) {
+    public Impl(MultiFunction<Object> function, List<? super Object> ongoingContext) {
       this.function = function;
       this.ongoingContext = ongoingContext;
     }

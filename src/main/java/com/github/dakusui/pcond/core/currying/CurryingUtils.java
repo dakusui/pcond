@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.currying;
 
-import com.github.dakusui.pcond.functions.MultiParameterFunction;
+import com.github.dakusui.pcond.functions.MultiFunction;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
 
@@ -17,11 +17,11 @@ public enum CurryingUtils {
   ;
   private static final ThreadLocal<BaseFuncUtils.Factory<Object, Object, List<Object>>> CURRIED_FUNCTION_FACTORY_POOL = new ThreadLocal<>();
 
-  public static CurriedFunction<Object, Object> curry(MultiParameterFunction<Object> function) {
+  public static CurriedFunction<Object, Object> curry(MultiFunction<Object> function) {
     return curry(function, emptyList());
   }
 
-  static CurriedFunction<Object, Object> curry(MultiParameterFunction<Object> function, List<? super Object> ongoingContext) {
+  static CurriedFunction<Object, Object> curry(MultiFunction<Object> function, List<? super Object> ongoingContext) {
     return curriedFunctionFactory().create(asList(function.name(), function, ongoingContext));
   }
 
@@ -42,8 +42,8 @@ public enum CurryingUtils {
   }
 
   @SuppressWarnings("unchecked")
-  private static MultiParameterFunction<Object> function(List<Object> args) {
-    return (MultiParameterFunction<Object>) args.get(1);
+  private static MultiFunction<Object> function(List<Object> args) {
+    return (MultiFunction<Object>) args.get(1);
   }
 
   @SuppressWarnings("unchecked")

@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
 import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.MultiParameterFunction;
+import com.github.dakusui.pcond.functions.MultiFunction;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -117,7 +117,7 @@ public class FunctionsTest {
     }
   }
 
-  public static class MultiParameterFunctionTest extends TestBase {
+  public static class MultiFunctionTest extends TestBase {
     @Test(expected = IllegalArgumentException.class)
     public void lookUpWithInvalidArgument_duplicatedOrder() {
       try {
@@ -150,7 +150,7 @@ public class FunctionsTest {
 
     @Test
     public void runMultiParameterFunction$thenExpectedValueReturned() {
-      MultiParameterFunction<String> func = greeting(0, 1);
+      MultiFunction<String> func = greeting(0, 1);
       String ret = func.apply(asList("Hello", "John"));
       System.out.println(ret);
       assertEquals("Hello, John", ret);
@@ -158,13 +158,13 @@ public class FunctionsTest {
 
     @Test
     public void toStringMultiParameterFunction$thenExpectedValueReturned() {
-      MultiParameterFunction<String> func = greeting(0, 1);
-      assertEquals("com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest$TargetMethodHolder.greeting(String,String)", func.toString());
+      MultiFunction<String> func = greeting(0, 1);
+      assertEquals("com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest$TargetMethodHolder.greeting(String,String)", func.toString());
     }
 
     @Test
     public void testMultiParameterFunction$withReversedOrder$thenExpectedValueReturned() {
-      MultiParameterFunction<String> func = greeting(1, 0);
+      MultiFunction<String> func = greeting(1, 0);
       String ret = func.apply(asList("John", "Hello"));
       System.out.println(ret);
       assertEquals("Hello, John", ret);
@@ -172,44 +172,44 @@ public class FunctionsTest {
 
     @Test
     public void toStringMultiParameterFunction$withReversedOrder$thenExpectedValueReturned() {
-      MultiParameterFunction<String> func = greeting(1, 0);
-      assertEquals("com.github.dakusui.pcond.ut.FunctionsTest$MultiParameterFunctionTest$TargetMethodHolder.greeting(String,String)(1,0)", func.toString());
+      MultiFunction<String> func = greeting(1, 0);
+      assertEquals("com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest$TargetMethodHolder.greeting(String,String)(1,0)", func.toString());
     }
 
     @Test
     public void testHashCodeWithIdenticalObjects() {
-      MultiParameterFunction<String> func1 = greeting(0, 1);
-      MultiParameterFunction<String> func2 = greeting(0, 1);
+      MultiFunction<String> func1 = greeting(0, 1);
+      MultiFunction<String> func2 = greeting(0, 1);
       assertEquals(func1.hashCode(), func2.hashCode());
     }
 
     @Test
     public void testEqualsWithIdenticalObjects() {
-      MultiParameterFunction<String> func1 = greeting(0, 1);
-      MultiParameterFunction<String> func2 = greeting(0, 1);
+      MultiFunction<String> func1 = greeting(0, 1);
+      MultiFunction<String> func2 = greeting(0, 1);
       assertEquals(func1, func2);
       assertEquals(func1.hashCode(), func2.hashCode());
     }
 
     @Test
     public void testEqualsWithIdenticalObjectsCreatedSeparately() {
-      MultiParameterFunction<String> func1 = greeting(0, 1);
-      MultiParameterFunction<String> func2 = greeting2(0, 1);
+      MultiFunction<String> func1 = greeting(0, 1);
+      MultiFunction<String> func2 = greeting2(0, 1);
       assertEquals(func1, func2);
       assertEquals(func1.hashCode(), func2.hashCode());
     }
 
     @Test
     public void testEqualsWithDifferentObjects() {
-      MultiParameterFunction<String> func1 = greeting(0, 1);
-      MultiParameterFunction<String> func2 = greeting(1, 0);
+      MultiFunction<String> func1 = greeting(0, 1);
+      MultiFunction<String> func2 = greeting(1, 0);
       assertNotEquals(func1, func2);
       assertNotEquals(func1.hashCode(), func2.hashCode());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void whenWrongNumberArgumentsThenFails() {
-      MultiParameterFunction<String> func1 = greeting(0, 1);
+      MultiFunction<String> func1 = greeting(0, 1);
       try {
         System.out.println(func1.apply(asList("Hello", "World", "!")));
       } catch (IllegalArgumentException e) {
@@ -220,29 +220,29 @@ public class FunctionsTest {
 
     @Test
     public void testEqualsWithDifferentTypeObjects() {
-      MultiParameterFunction<String> func1 = greeting(0, 1);
+      MultiFunction<String> func1 = greeting(0, 1);
       assertNotEquals(func1, new Object());
     }
 
     @Test
     public void runVoidReturningMultiParameterFunction$thenNullReturned() {
-      MultiParameterFunction<String> func = voidMethod();
+      MultiFunction<String> func = voidMethod();
       String ret = func.apply(asList("Hello", "John"));
       System.out.println(ret);
       assertNull(ret);
     }
 
-    private static MultiParameterFunction<String> greeting(int... order) {
+    private static MultiFunction<String> greeting(int... order) {
       return ReflectionsUtils.lookupFunctionForStaticMethod(order, TargetMethodHolder.class, "greeting", String.class, String.class);
     }
 
-    private static MultiParameterFunction<String> greeting2(int... order) {
+    private static MultiFunction<String> greeting2(int... order) {
       Method m = getMethod(TargetMethodHolder.class, "greeting", String.class, String.class);
       List<Integer> paramOrder = Arrays.stream(order).boxed().collect(toList());
-      return MultiParameterFunction.createFromStaticMethod(m, paramOrder);
+      return MultiFunction.createFromStaticMethod(m, paramOrder);
     }
 
-    private static MultiParameterFunction<String> voidMethod() {
+    private static MultiFunction<String> voidMethod() {
       return Functions.functionForStaticMethod(TargetMethodHolder.class, "voidMethod", String.class, String.class);
     }
 

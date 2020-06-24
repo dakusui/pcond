@@ -3,7 +3,7 @@ package com.github.dakusui.pcond.ut.equalness;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.functions.Printables;
-import com.github.dakusui.pcond.ut.FunctionsTest.MultiParameterFunctionTest.TargetMethodHolder;
+import com.github.dakusui.pcond.ut.FunctionsTest.MultiFunctionTest.TargetMethodHolder;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.FixMethodOrder;
 import org.junit.Test;

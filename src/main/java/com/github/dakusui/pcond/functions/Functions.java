@@ -145,11 +145,11 @@ public enum Functions {
     return curry(functionForStaticMethod(aClass, methodName, parameterTypes));
   }
 
-  public static CurriedFunction<Object, Object> curry(MultiParameterFunction<Object> function) {
+  public static CurriedFunction<Object, Object> curry(MultiFunction<Object> function) {
     return CurryingUtils.curry(function);
   }
 
-  public static <R> MultiParameterFunction<R> functionForStaticMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
+  public static <R> MultiFunction<R> functionForStaticMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
     return ReflectionsUtils.lookupFunctionForStaticMethod(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);
   }
 

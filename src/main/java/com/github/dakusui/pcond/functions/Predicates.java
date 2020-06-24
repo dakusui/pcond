@@ -8,6 +8,7 @@ import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -208,7 +209,14 @@ public enum Predicates {
   }
 
   public static Predicate<Context> endsWith() {
-    return null;
+    return multiParameterPredicate((args) -> ((String) args.get(0)).endsWith((String) args.get(1)))
+        .addParameters(asList(String.class, String.class))
+        .$()
+        .toContextPredicate();
+  }
+
+  public static MultiFunction.Builder<Boolean> multiParameterPredicate(Predicate<List<Object>> predicateBody) {
+    return new MultiFunction.Builder<>(args -> requireNonNull(predicateBody).test(args));
   }
 
   public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate_, int argIndex) {

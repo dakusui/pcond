@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.currying;
 
-import com.github.dakusui.pcond.functions.MultiParameterFunction;
+import com.github.dakusui.pcond.functions.MultiFunction;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -8,17 +8,15 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static com.github.dakusui.pcond.core.currying.FormattingUtils.formatMethodName;
-import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;
 import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 
 public enum ReflectionsUtils {
   ;
 
-  private static final ThreadLocal<Map<List<Object>, MultiParameterFunction<?>>> METHOD_BASED_FUNCTION_POOL = new ThreadLocal<>();
+  private static final ThreadLocal<Map<List<Object>, MultiFunction<?>>> METHOD_BASED_FUNCTION_POOL = new ThreadLocal<>();
 
   static final Map<Class<?>, Set<Class<?>>> WIDER_TYPES = new HashMap<Class<?>, Set<Class<?>>>() {
     {
@@ -43,26 +41,26 @@ public enum ReflectionsUtils {
   };
 
   @SuppressWarnings("unchecked")
-  public static <R> MultiParameterFunction<R> lookupFunctionForStaticMethod(int[] order, Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    Map<List<Object>, MultiParameterFunction<?>> methodBasedMultiParameterFunctionPool = methodBasedMultiParameterFunctionPool();
+  public static <R> MultiFunction<R> lookupFunctionForStaticMethod(int[] order, Class<?> aClass, String methodName, Class<?>... parameterTypes) {
+    Map<List<Object>, MultiFunction<?>> methodBasedMultiParameterFunctionPool = methodBasedMultiParameterFunctionPool();
     List<Object> multiParamFuncDef = composeFuncDef(order, aClass, methodName, parameterTypes);
     methodBasedMultiParameterFunctionPool.computeIfAbsent(
         multiParamFuncDef,
         ReflectionsUtils::createMultiParameterFunctionForStaticMethod);
-    return (MultiParameterFunction<R>) methodBasedMultiParameterFunctionPool.get(multiParamFuncDef);
+    return (MultiFunction<R>) methodBasedMultiParameterFunctionPool.get(multiParamFuncDef);
   }
 
   private static List<Object> composeFuncDef(int[] order, Class<?> aClass, String methodName, Class<?>[] parameterTypes) {
     return asList(InternalUtils.getMethod(aClass, methodName, parameterTypes), Arrays.stream(order).boxed().collect(toList()));
   }
 
-  private static <R> MultiParameterFunction<R> createMultiParameterFunctionForStaticMethod(List<Object> multiParamFuncDef) {
+  private static <R> MultiFunction<R> createMultiParameterFunctionForStaticMethod(List<Object> multiParamFuncDef) {
     final Method method = (Method) multiParamFuncDef.get(0);
     @SuppressWarnings("unchecked") final List<Integer> paramOrder = (List<Integer>) multiParamFuncDef.get(1);
-    return MultiParameterFunction.createFromStaticMethod(method, paramOrder);
+    return MultiFunction.createFromStaticMethod(method, paramOrder);
   }
 
-  private static Map<List<Object>, MultiParameterFunction<?>> methodBasedMultiParameterFunctionPool() {
+  private static Map<List<Object>, MultiFunction<?>> methodBasedMultiParameterFunctionPool() {
     if (METHOD_BASED_FUNCTION_POOL.get() == null)
       METHOD_BASED_FUNCTION_POOL.set(new HashMap<>());
     return METHOD_BASED_FUNCTION_POOL.get();

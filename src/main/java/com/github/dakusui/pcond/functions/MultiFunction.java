@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.FormattingUtils;
 
 import java.lang.reflect.Method;
@@ -7,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.core.currying.Checks.validateParamOrderList;
@@ -19,12 +21,12 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public interface MultiParameterFunction<R> extends Function<List<? super Object>, R> {
+public interface MultiFunction<R> extends Function<List<? super Object>, R> {
   @SuppressWarnings("unchecked")
-  static <R> MultiParameterFunction<R> createFromStaticMethod(Method method, List<Integer> paramOrder) {
+  static <R> MultiFunction<R> createFromStaticMethod(Method method, List<Integer> paramOrder) {
     validateParamOrderList(paramOrder, method.getParameterCount());
     requireStaticMethod(method);
-    return (MultiParameterFunction<R>) new Builder<>(objects -> invokeStaticMethod(method, (paramOrder).stream().map(objects::get).toArray()))
+    return (MultiFunction<R>) new Builder<>(objects -> invokeStaticMethod(method, (paramOrder).stream().map(objects::get).toArray()))
         .name(method.getName())
         .formatter(() -> formatMethodName(method) + FormattingUtils.formatParameterOrder(paramOrder))
         .addParameters(paramOrder.stream().map(i -> method.getParameterTypes()[i]).collect(toList()))
@@ -40,7 +42,16 @@ public interface MultiParameterFunction<R> extends Function<List<? super Object>
 
   Class<? extends R> returnType();
 
-  abstract class Base<RR> extends PrintableFunction<List<? super Object>, RR> implements MultiParameterFunction<RR> {
+  @SuppressWarnings("unchecked")
+  default CurriedFunction<Object, Object> curry() {
+    return Functions.curry((MultiFunction<Object>) this);
+  }
+
+  default Predicate<Context> toContextPredicate() {
+    return Predicates.toContextPredicate(this.curry());
+  }
+
+  abstract class Base<RR> extends PrintableFunction<List<? super Object>, RR> implements MultiFunction<RR> {
     final Object identity;
 
     protected Base(Supplier<String> s, Function<? super List<? super Object>, ? extends RR> function, Object identity) {
@@ -57,7 +68,7 @@ public interface MultiParameterFunction<R> extends Function<List<? super Object>
     public boolean equals(Object anotherObject) {
       if (anotherObject == this)
         return true;
-      if (anotherObject instanceof MultiParameterFunction.Base) {
+      if (anotherObject instanceof MultiFunction.Base) {
         Base<?> another = (Base<?>) anotherObject;
         return this.identity.equals(another.identity);
       }
@@ -68,7 +79,7 @@ public interface MultiParameterFunction<R> extends Function<List<? super Object>
   class Builder<R> {
     final Function<List<Object>, R> body;
     final List<Class<?>>            parameterTypes = new LinkedList<>();
-    Object           identity     = new Object();
+    Object           identity  = new Object();
     String           name      = "(anonymous)";
     Supplier<String> formatter = () -> this.name + "(" + parameterTypes.stream().map(Class::getSimpleName).collect(joining(",")) + ")";
 
@@ -102,7 +113,7 @@ public interface MultiParameterFunction<R> extends Function<List<? super Object>
       return this;
     }
 
-    public MultiParameterFunction<R> $() {
+    public MultiFunction<R> $() {
       return new Base<R>(this.formatter, this.body, this.identity) {
         @Override
         public String name() {
