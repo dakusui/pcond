@@ -1,7 +1,8 @@
 package com.github.dakusui.pcond.functions.chain;
 
+import com.github.dakusui.pcond.functions.MultiFunction;
 import com.github.dakusui.pcond.functions.Printables;
-import com.github.dakusui.pcond.functions.chain.Call.Arg;
+import com.github.dakusui.pcond.functions.chain.CompatCall.Arg;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,11 +16,6 @@ import static java.util.stream.Collectors.toList;
 
 public enum ChainUtils {
   ;
-  public static final Object THIS = new Object() {
-    public String toString() {
-      return "(THIS)";
-    }
-  };
 
   public static final Class<?>[][] PRIMITIVE_WRAPPER_TABLE = {
       { boolean.class, Boolean.class },
@@ -125,23 +121,22 @@ public enum ChainUtils {
         methodSelector,
         methodSelector.select(
             Arrays.stream(
-                getMethods(aClass)
-            ).filter(
-                (Method m) -> m.getName().equals(methodName)
-            ).collect(
-                LinkedList::new,
-                ChainUtils::addMethodIfNecessary,
-                (List<Method> methods, List<Method> methods2) -> methods2.forEach(
-                    method -> {
-                      addMethodIfNecessary(methods, method);
-                    })),
-            args
-        ),
+                getMethods(aClass))
+                .filter((Method m) -> m.getName().equals(methodName))
+                .collect(
+                    LinkedList::new,
+                    ChainUtils::addMethodIfNecessary,
+                    (List<Method> methods, List<Method> methods2) -> methods2.forEach(
+                        method -> {
+                          addMethodIfNecessary(methods, method);
+                        })),
+            args),
         aClass,
         methodName,
         args
     );
   }
+
   public static boolean withBoxingIsAssignableFrom(Class<?> a, Class<?> b) {
     if (a.isAssignableFrom(b))
       return true;
@@ -192,7 +187,7 @@ public enum ChainUtils {
   }
 
   public static <I> Object replaceTarget(Object on, I target) {
-    return on == THIS ?
+    return on == CallChain.THIS ?
         target :
         on instanceof Object[] ?
             replaceTargetInArray(target, (Object[]) on) :
@@ -209,9 +204,11 @@ public enum ChainUtils {
     }
     methods.add(method);
   }
+
   private static Method[] getMethods(Class<?> aClass) {
     return aClass.getMethods();
   }
+
   public static Object[] replaceArgInArray(Object[] args) {
     return Arrays.stream(args)
         .map(e -> e instanceof Arg
@@ -243,13 +240,27 @@ public enum ChainUtils {
     return value.getClass();
   }
 
-  public static <I, E> Function<? super I, ? extends E> invokeOn(Object on, String methodName, Object... args) {
-    return Printables.function(
-        on == THIS
+  public static <I, E> MultiFunction<? extends E> invoke(Object self, String methodName, Object... args) {
+
+    return null;
+    /*Printables.function(
+        self == CallChain.THIS
             ? () -> String.format("%s%s", methodName, summarize(args))
-            : () -> String.format("->%s.%s%s", on, methodName, summarize(args)),
+            : () -> String.format("->%s.%s%s", self, methodName, summarize(args)),
         (I target) -> ChainUtils.invokeMethod(
-            ChainUtils.replaceTarget(on, target),
+            ChainUtils.replaceTarget(self, target),
+            methodName,
+            args
+        ))*/
+  }
+
+  public static <I, E> Function<? super I, ? extends E> invokeOn(Object self, String methodName, Object... args) {
+    return Printables.function(
+        self == CallChain.THIS
+            ? () -> String.format("%s%s", methodName, summarize(args))
+            : () -> String.format("->%s.%s%s", self, methodName, summarize(args)),
+        (I target) -> ChainUtils.invokeMethod(
+            ChainUtils.replaceTarget(self, target),
             methodName,
             args
         ));

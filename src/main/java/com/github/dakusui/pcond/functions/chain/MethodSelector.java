@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.functions.chain;
 
-import com.github.dakusui.pcond.functions.chain.Call.Arg;
+import com.github.dakusui.pcond.functions.chain.CompatCall.Arg;
 import com.github.dakusui.pcond.internals.InternalChecks;
 
 import java.lang.reflect.Method;

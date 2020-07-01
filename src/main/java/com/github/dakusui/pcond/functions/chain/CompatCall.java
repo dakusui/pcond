@@ -38,7 +38,7 @@ import static java.util.Objects.requireNonNull;
  *   "com.github.dakusui.crest.ut.CrestTest$CallMechanismTest$$Lambda$9/1556956098@4aa8f0b4"
  * </pre>
  */
-public interface Call {
+public interface CompatCall {
 
   /**
    * Add a method call of a method specified by {@code methodName} and {@code args}
@@ -52,8 +52,8 @@ public interface Call {
    * @param args       Arguments with which the method is invoked.
    * @return This object.
    */
-  default Call andThen(String methodName, Object... args) {
-    return andThenOn(ChainUtils.THIS, methodName, args);
+  default CompatCall andThen(String methodName, Object... args) {
+    return andThenOn(CallChain.THIS, methodName, args);
   }
 
   /**
@@ -65,7 +65,7 @@ public interface Call {
    * @param args       Arguments with which the method is invoked.
    * @return This object.
    */
-  Call andThenOn(Object object, String methodName, Object... args);
+  CompatCall andThenOn(Object object, String methodName, Object... args);
 
   /**
    * Builds a function.
@@ -91,10 +91,10 @@ public interface Call {
    * @param methodName A name of the method to be invoked.
    * @param args       Arguements with which the method is invoked.
    * @return The result of the invocation.
-   * @see Call#createOn(Object, String, Object...)
+   * @see CompatCall#createOn(Object, String, Object...)
    */
-  static Call create(String methodName, Object... args) {
-    return createOn(ChainUtils.THIS, methodName, args);
+  static CompatCall create(String methodName, Object... args) {
+    return createOn(CallChain.THIS, methodName, args);
   }
 
   /**
@@ -115,11 +115,11 @@ public interface Call {
    * @param methodName A name to specify a method to be invoked
    * @param args       Argument values with which the method is invoked
    * @return A result of the invocation.
-   * @see ChainUtils#THIS
+   * @see CallChain#THIS
    * @see ChainUtils#findMethod(Class, String, Object[])
    */
-  static Call createOn(Object object, String methodName, Object... args) {
-    return new Call.Impl(null, object, methodName, args);
+  static CompatCall createOn(Object object, String methodName, Object... args) {
+    return new CompatCall.Impl(null, object, methodName, args);
   }
 
   interface Arg<T> {
@@ -154,11 +154,11 @@ public interface Call {
     }
   }
 
-  class Impl implements Call {
-    private final String   methodName;
-    private final Object[] args;
-    private final Call     parent;
-    private final Object   object;
+  class Impl implements CompatCall {
+    private final String     methodName;
+    private final Object[]   args;
+    private final CompatCall parent;
+    private final Object     object;
 
     /**
      * Creates a new {@code Call.Impl} object.
@@ -169,7 +169,7 @@ public interface Call {
      * @param methodName A name of a method to be invoked.
      * @param args       Arguments of a method to be invoked.
      */
-    Impl(Call parent, Object object, String methodName, Object... args) {
+    Impl(CompatCall parent, Object object, String methodName, Object... args) {
       this.parent = parent;
       this.object = requireNonNull(object);
       this.methodName = requireNonNull(methodName);
@@ -177,7 +177,7 @@ public interface Call {
     }
 
     @Override
-    public Call andThenOn(Object object, String methodName, Object... args) {
+    public CompatCall andThenOn(Object object, String methodName, Object... args) {
       return new Impl(this, object, methodName, args);
     }
 
