@@ -1,4 +1,8 @@
-package com.github.dakusui.pcond.functions.chain;
+package com.github.dakusui.pcond.functions.chain.compat;
+
+import com.github.dakusui.pcond.functions.chain.CallChain;
+import com.github.dakusui.pcond.functions.chain.ChainUtils;
+import com.github.dakusui.pcond.functions.chain.ChainedFunction;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -194,7 +198,7 @@ public interface CompatCall {
       return ChainedFunction.create(
           this.object instanceof Class
               ? (Function) ChainUtils.invokeStatic((Class<?>) this.object, methodName, args)
-              : (Function) ChainUtils.invokeOn(this.object, methodName, args)
+              : (Function) CompatUtils.invokeOn(this.object, methodName, args)
       );
     }
   }

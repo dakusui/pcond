@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.functions.chain;
 
 import com.github.dakusui.pcond.functions.MultiFunction;
+import com.github.dakusui.pcond.functions.chain.compat.CompatCall;
 
 import java.util.function.Function;
 
@@ -67,7 +68,7 @@ public interface CallChain {
    * @see ChainUtils#findMethod(Class, String, Object[])
    */
   static CallChain createOn(Object object, String methodName, Object... args) {
-    return new CallChain.Impl(this,  methodName, args);
+    return new CallChain.Impl(null,  methodName, args);
   }
 
   class Impl implements CallChain {

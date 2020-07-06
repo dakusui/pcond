@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.functions.chain;
 
 import com.github.dakusui.pcond.functions.MultiFunction;
 import com.github.dakusui.pcond.functions.Printables;
-import com.github.dakusui.pcond.functions.chain.CompatCall.Arg;
+import com.github.dakusui.pcond.functions.chain.compat.CompatCall.Arg;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -240,30 +240,15 @@ public enum ChainUtils {
     return value.getClass();
   }
 
-  public static <I, E> MultiFunction<? extends E> invoke(Object self, String methodName, Object... args) {
-
-    return null;
-    /*Printables.function(
-        self == CallChain.THIS
-            ? () -> String.format("%s%s", methodName, summarize(args))
-            : () -> String.format("->%s.%s%s", self, methodName, summarize(args)),
-        (I target) -> ChainUtils.invokeMethod(
-            ChainUtils.replaceTarget(self, target),
-            methodName,
-            args
-        ))*/
-  }
-
-  public static <I, E> Function<? super I, ? extends E> invokeOn(Object self, String methodName, Object... args) {
-    return Printables.function(
-        self == CallChain.THIS
-            ? () -> String.format("%s%s", methodName, summarize(args))
-            : () -> String.format("->%s.%s%s", self, methodName, summarize(args)),
-        (I target) -> ChainUtils.invokeMethod(
-            ChainUtils.replaceTarget(self, target),
-            methodName,
-            args
-        ));
+  public static <E> MultiFunction<? extends E> invoke(Object self, String methodName, Object... args) {
+    return new MultiFunction.Builder<E>(argList -> invokeMethod(self, methodName, args))
+        .addParameters(
+            Arrays.stream(args)
+                .filter(v -> v instanceof Parameter)
+                .map(v -> (Parameter)v)
+                .map(Parameter::type)
+            .collect(toList()))
+        .$();
   }
 
   public static <I, E> Function<? super I, ? extends E> invokeStatic(Class<?> klass, String methodName, Object... args) {
@@ -275,5 +260,11 @@ public enum ChainUtils {
             methodName,
             args
         ));
+  }
+
+  interface Parameter {
+    default Class<?> type() {
+      return Object.class;
+    }
   }
 }
