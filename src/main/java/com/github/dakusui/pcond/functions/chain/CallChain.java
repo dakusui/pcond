@@ -8,14 +8,9 @@ import java.util.function.Function;
 import static java.util.Objects.requireNonNull;
 
 public interface CallChain {
-  Object THIS = new Object() {
-    public String toString() {
-      return "(THIS)";
-    }
-  };
 
   default CallChain then(String methodName, Object... args) {
-    return thenOn(THIS, methodName, args);
+    return thenOn(CompatCall.THIS, methodName, args);
   }
 
   /**
@@ -43,7 +38,7 @@ public interface CallChain {
    * @see CompatCall#createOn(Object, String, Object...)
    */
   static CallChain create(String methodName, Object... args) {
-    return createOn(THIS, methodName, args);
+    return createOn(CompatCall.THIS, methodName, args);
   }
 
   /**
@@ -64,7 +59,7 @@ public interface CallChain {
    * @param methodName A name to specify a method to be invoked
    * @param args       Argument values with which the method is invoked
    * @return A result of the invocation.
-   * @see CallChain#THIS
+   * @see CompatCall#THIS
    * @see ChainUtils#findMethod(Class, String, Object[])
    */
   static CallChain createOn(Object object, String methodName, Object... args) {

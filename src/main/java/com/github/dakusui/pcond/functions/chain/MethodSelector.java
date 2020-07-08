@@ -8,12 +8,35 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
-import static com.github.dakusui.pcond.functions.chain.ChainUtils.areArgsCompatible;
-import static com.github.dakusui.pcond.functions.chain.ChainUtils.withBoxingIsAssignableFrom;
+import static com.github.dakusui.pcond.functions.chain.MethodSelector.Utils.withBoxingIsAssignableFrom;
+import static com.github.dakusui.pcond.functions.chain.MethodSelector.areArgsCompatible;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 public interface MethodSelector extends BiFunction<List<Method>, Object[], List<Method>>, Formattable {
+  static boolean areArgsCompatible(Class<?>[] formalParameters, Object[] args) {
+    if (formalParameters.length != args.length)
+      return false;
+    for (int i = 0; i < args.length; i++) {
+      if (args[i] == null)
+        if (formalParameters[i].isPrimitive())
+          return false;
+        else
+          continue;
+      if (!withBoxingIsAssignableFrom(formalParameters[i], toClass(args[i])))
+        return false;
+    }
+    return true;
+  }
+
+  static Class<?> toClass(Object value) {
+    if (value == null)
+      return null;
+    if (value instanceof Arg)
+      return ((Arg<?>) value).type();
+    return value.getClass();
+  }
+
   default MethodSelector andThen(MethodSelector another) {
     return new MethodSelector() {
       @Override
@@ -100,12 +123,12 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
     }
 
     private static boolean isCompatibleWith(Method a, Method b) {
-      InternalChecks.requireArgument(requireNonNull(a), (Method v) -> v.getParameterCount() == requireNonNull(b).getParameterCount(), () ->"");
+      InternalChecks.requireArgument(requireNonNull(a), (Method v) -> v.getParameterCount() == requireNonNull(b).getParameterCount(), () -> "");
       if (Objects.equals(a, b))
         return true;
-      return IntStream.range(0, a.getParameterCount()).allMatch(
-          i -> withBoxingIsAssignableFrom(a.getParameterTypes()[i], b.getParameterTypes()[i])
-      );
+      return IntStream
+          .range(0, a.getParameterCount())
+          .allMatch(i -> withBoxingIsAssignableFrom(a.getParameterTypes()[i], b.getParameterTypes()[i]));
     }
   }
 
@@ -120,7 +143,10 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
         if (!(argObj instanceof Arg))
           continue;
         int ii = i;
-        List<Method> tmp = work.stream().filter(m -> m.getParameterTypes()[ii].equals(((Arg<?>) argObj).type())).collect(toList());
+        List<Method> tmp = work
+            .stream()
+            .filter(m -> m.getParameterTypes()[ii].equals(((Arg<?>) argObj).type()))
+            .collect(toList());
         if (!tmp.isEmpty())
           work = tmp;
       }
@@ -130,6 +156,35 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
     @Override
     public String describe() {
       return "preferExact";
+    }
+  }
+
+  enum Utils {
+    ;
+
+    public static final Class<?>[][] PRIMITIVE_WRAPPER_TABLE = {
+        { boolean.class, Boolean.class },
+        { byte.class, Byte.class },
+        { char.class, Character.class },
+        { short.class, Short.class },
+        { int.class, Integer.class },
+        { long.class, Long.class },
+        { float.class, Float.class },
+        { double.class, Double.class },
+    };
+
+    public static boolean withBoxingIsAssignableFrom(Class<?> a, Class<?> b) {
+      if (a.isAssignableFrom(b))
+        return true;
+      return toWrapperIfPrimitive(a).isAssignableFrom(toWrapperIfPrimitive(b));
+    }
+
+    private static Class<?> toWrapperIfPrimitive(Class<?> in) {
+      for (Class<?>[] pair : PRIMITIVE_WRAPPER_TABLE) {
+        if (Objects.equals(in, pair[0]))
+          return pair[1];
+      }
+      return in;
     }
   }
 }

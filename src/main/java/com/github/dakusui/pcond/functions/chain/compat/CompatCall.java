@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.functions.chain.compat;
 
-import com.github.dakusui.pcond.functions.chain.CallChain;
 import com.github.dakusui.pcond.functions.chain.ChainUtils;
 import com.github.dakusui.pcond.functions.chain.ChainedFunction;
 
@@ -44,6 +43,12 @@ import static java.util.Objects.requireNonNull;
  */
 public interface CompatCall {
 
+  Object THIS = new Object() {
+    public String toString() {
+      return "(THIS)";
+    }
+  };
+
   /**
    * Add a method call of a method specified by {@code methodName} and {@code args}
    * to this builder on the current target object.
@@ -57,7 +62,7 @@ public interface CompatCall {
    * @return This object.
    */
   default CompatCall andThen(String methodName, Object... args) {
-    return andThenOn(CallChain.THIS, methodName, args);
+    return andThenOn(THIS, methodName, args);
   }
 
   /**
@@ -98,7 +103,7 @@ public interface CompatCall {
    * @see CompatCall#createOn(Object, String, Object...)
    */
   static CompatCall create(String methodName, Object... args) {
-    return createOn(CallChain.THIS, methodName, args);
+    return createOn(THIS, methodName, args);
   }
 
   /**
@@ -119,7 +124,7 @@ public interface CompatCall {
    * @param methodName A name to specify a method to be invoked
    * @param args       Argument values with which the method is invoked
    * @return A result of the invocation.
-   * @see CallChain#THIS
+   * @see CompatCall#THIS
    * @see ChainUtils#findMethod(Class, String, Object[])
    */
   static CompatCall createOn(Object object, String methodName, Object... args) {
@@ -197,7 +202,7 @@ public interface CompatCall {
     private Function toFunction() {
       return ChainedFunction.create(
           this.object instanceof Class
-              ? (Function) ChainUtils.invokeStatic((Class<?>) this.object, methodName, args)
+              ? (Function) CompatUtils.invokeStatic((Class<?>) this.object, methodName, args)
               : (Function) CompatUtils.invokeOn(this.object, methodName, args)
       );
     }

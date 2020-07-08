@@ -1,75 +1,147 @@
 package com.github.dakusui.pcond.functions.chain;
 
 import com.github.dakusui.pcond.functions.MultiFunction;
-import com.github.dakusui.pcond.functions.Printables;
-import com.github.dakusui.pcond.functions.chain.compat.CompatCall.Arg;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
+import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public enum ChainUtils {
   ;
 
-  public static final Class<?>[][] PRIMITIVE_WRAPPER_TABLE = {
-      { boolean.class, Boolean.class },
-      { byte.class, Byte.class },
-      { char.class, Character.class },
-      { short.class, Short.class },
-      { int.class, Integer.class },
-      { long.class, Long.class },
-      { float.class, Float.class },
-      { double.class, Double.class },
-  };
+  public static <E> MultiFunction<? extends E> methodCall(MethodQuery methodQuery) {
+    return new MultiFunction.Builder<E>(
+        argList -> invokeMethod(methodQuery.bindActualArguments(requireNonNull(argList))))
+        .addParameters(Stream.concat(Stream.of(methodQuery.targetObject()), Arrays.stream(methodQuery.arguments()))
+            .filter(v -> v instanceof Parameter)
+            .map(v -> (Parameter) v)
+            .map(Parameter::type)
+            .collect(toList()))
+        .name(methodQuery.describe())
+        .$();
+  }
 
-  public static String summarize(Object value) {
-    if (value == null)
-      return "null";
-    if (value instanceof Collection) {
-      Collection<?> collection = (Collection<?>) value;
-      if (collection.size() < 4)
-        return format("(%s)",
-            collection.stream().map(ChainUtils::summarize).collect(Collectors.joining(",")));
-      Iterator<?> i = collection.iterator();
-      return format("(%s,%s,%s...;%s)",
-          summarize(i.next()),
-          summarize(i.next()),
-          summarize(i.next()),
-          collection.size()
-      );
+  public static Parameter parameter(Class<?> type, int arg) {
+    return Parameter.create(type, arg);
+  }
+
+  public static Parameter parameter(int arg) {
+    return parameter(Object.class, arg);
+  }
+
+  interface Parameter {
+    static Parameter create(Class<?> type, int i) {
+      requireNonNull(type);
+      requireArgument(i, v -> v >= 0, () -> "i must not be negative, but " + i + " was given.");
+      return new Parameter() {
+        @Override
+        public int index() {
+          return i;
+        }
+
+        @Override
+        public Class<?> type() {
+          return type;
+        }
+      };
     }
-    if (value instanceof Object[])
-      return summarize(asList((Object[]) value));
-    if (value instanceof String) {
-      String s = (String) value;
-      if (s.length() > 20)
-        s = s.substring(0, 12) + "..." + s.substring(s.length() - 5);
-      return format("\"%s\"", s);
+
+    int index();
+
+    Class<?> type();
+  }
+
+  interface MethodQuery {
+    boolean isStatic();
+
+    Object targetObject();
+
+    Class<?> targetClass();
+
+    String methodName();
+
+    Object[] arguments();
+
+    String describe();
+
+    default MethodQuery bindActualArguments(List<Object> args) {
+      Function<Object, Object> argReplacer = replacePlaceHolderWithActualArgument(args);
+      return create(this.isStatic(), argReplacer.apply(this.targetObject()), this.targetClass(), this.methodName(), Arrays.stream(this.arguments()).map(argReplacer).toArray());
     }
-    String ret = value.toString();
-    ret = ret.contains("$")
-        ? ret.substring(ret.lastIndexOf("$") + 1)
-        : ret;
-    return ret;
+
+    static MethodQuery create(boolean isStatic, Object targetObject, Class<?> targetClass, String methodName, Object[] arguments) {
+      requireNonNull(targetClass);
+      requireNonNull(arguments);
+      requireNonNull(methodName);
+      if (isStatic)
+        requireArgument(targetObject, Objects::nonNull, () -> "targetObject must be null when isStatic is true.");
+      else {
+        requireNonNull(targetObject);
+        requireArgument(targetObject, v -> targetClass.isAssignableFrom(v.getClass()), () -> format("Incompatible object '%s' was given it needs to be assignable to '%s'.", targetObject, targetClass.getName()));
+      }
+
+      return new MethodQuery() {
+        @Override
+        public boolean isStatic() {
+          return isStatic;
+        }
+
+        @Override
+        public Object targetObject() {
+          return targetObject;
+        }
+
+        @Override
+        public String methodName() {
+          return methodName;
+        }
+
+        @Override
+        public Class<?> targetClass() {
+          return targetClass;
+        }
+
+        @Override
+        public Object[] arguments() {
+          return arguments;
+        }
+
+        @Override
+        public String describe() {
+          return String.format("%s.%s(%s)",
+              isStatic ? targetClass.getName() : "",
+              methodName,
+              Arrays.stream(arguments).map(Objects::toString).collect(joining(",")));
+        }
+      };
+    }
+
+    static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
+      return create(false, requireNonNull(targetObject), targetObject.getClass(), methodName, arguments);
+    }
+
+    static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
+      return create(true, null, targetClass, methodName, arguments);
+    }
   }
 
   @SuppressWarnings("unchecked")
-  public static <R> R invokeMethod(Object target, String methodName, Object[] args) {
+  public static <R> R invokeMethod(MethodQuery methodQuery) {
     try {
-      Method m = findMethod(Objects.requireNonNull(target).getClass(), methodName, replaceTargetInArray(target, args));
-      boolean accessible = m.isAccessible();
-      try {
-        m.setAccessible(true);
-        return (R) m.invoke(target, replaceTargetInArray(target, replaceArgInArray(args)));
-      } finally {
-        m.setAccessible(accessible);
-      }
+      return (R) setAccessible(findMethod(methodQuery.targetClass(), methodQuery.methodName(), methodQuery.arguments()))
+          .invoke(methodQuery.targetObject(), methodQuery.arguments());
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     } catch (InvocationTargetException e) {
@@ -77,22 +149,9 @@ public enum ChainUtils {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public static <R> R invokeStaticMethod(Class<?> klass, Object target, String methodName, Object[] args) {
-    try {
-      Method m = findMethod(Objects.requireNonNull(klass), methodName, replaceTargetInArray(target, args));
-      boolean accessible = m.isAccessible();
-      try {
-        m.setAccessible(true);
-        return (R) m.invoke(null, replaceTargetInArray(target, replaceArgInArray(args)));
-      } finally {
-        m.setAccessible(accessible);
-      }
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
-    } catch (InvocationTargetException e) {
-      throw new RuntimeException(e.getTargetException());
-    }
+  private static Method setAccessible(Method m) {
+    m.setAccessible(true);
+    return m;
   }
 
   /**
@@ -118,80 +177,80 @@ public enum ChainUtils {
         .andThen(new MethodSelector.PreferNarrower())
         .andThen(new MethodSelector.PreferExact());
     return getIfOnlyOneElseThrow(
-        methodSelector,
         methodSelector.select(
             Arrays.stream(
-                getMethods(aClass))
+                getMethodsOf(aClass))
                 .filter((Method m) -> m.getName().equals(methodName))
-                .collect(
-                    LinkedList::new,
-                    ChainUtils::addMethodIfNecessary,
-                    (List<Method> methods, List<Method> methods2) -> methods2.forEach(
-                        method -> {
-                          addMethodIfNecessary(methods, method);
-                        })),
+                .collect(toMethodList()),
             args),
-        aClass,
+        () -> exceptionOnAmbiguity(aClass, methodName, args, methodSelector),
+        () -> exceptionOnMethodNotFound(aClass, methodName, args, methodSelector));
+  }
+
+  private static RuntimeException exceptionOnMethodNotFound(Class<?> aClass, String methodName, Object[] args, MethodSelector methodSelector) {
+    return new RuntimeException(format(
+        "Method matching '%s%s' was not found by selector=%s in %s.",
         methodName,
-        args
-    );
-  }
-
-  public static boolean withBoxingIsAssignableFrom(Class<?> a, Class<?> b) {
-    if (a.isAssignableFrom(b))
-      return true;
-    return toWrapperIfPrimitive(a).isAssignableFrom(toWrapperIfPrimitive(b));
-  }
-
-  private static Class<?> toWrapperIfPrimitive(Class<?> in) {
-    for (Class<?>[] pair : PRIMITIVE_WRAPPER_TABLE) {
-      if (Objects.equals(in, pair[0]))
-        return pair[1];
-    }
-    return in;
-  }
-
-  private static Method getIfOnlyOneElseThrow(MethodSelector selector, List<Method> foundMethods, Class<?> aClass, String methodName, Object[] args) {
-    if (foundMethods.isEmpty())
-      throw new RuntimeException(String.format(
-          "Method matching '%s%s' was not found by selector=%s in %s.",
-          methodName,
-          Arrays.asList(args),
-          selector,
-          aClass.getCanonicalName()
-      ));
-    if (foundMethods.size() == 1)
-      return foundMethods.get(0);
-    throw new RuntimeException(String.format(
-        "Methods matching '%s%s' were found more than one in %s by selector=%s.: %s ",
-        methodName,
-        summarize(args),
-        aClass.getCanonicalName(),
-        selector,
-        summarizeMethods(foundMethods)
+        asList(args),
+        methodSelector,
+        aClass.getCanonicalName()
     ));
   }
 
+  private static RuntimeException exceptionOnAmbiguity(Class<?> aClass, String methodName, Object[] args, MethodSelector methodSelector) {
+    return new RuntimeException(format(
+        "Methods matching '%s%s' were found more than one in %s by selector=%s.: %s ",
+        methodName,
+        asList(args),
+        aClass.getCanonicalName(),
+        methodSelector,
+        summarizeMethods(methodSelector.select(
+            Arrays.stream(
+                getMethodsOf(aClass))
+                .filter((Method m) -> m.getName().equals(methodName))
+                .collect(toMethodList()),
+            args))));
+  }
+
+  /**
+   * A collector to gather methods which have narrowest possible signatures.
+   *
+   * @return A collector.
+   */
+  private static Collector<Method, List<Method>, List<Method>> toMethodList() {
+    return Collector.of(
+        LinkedList::new,
+        ChainUtils::addMethodIfNecessary,
+        new BinaryOperator<List<Method>>() {
+          @Override
+          public List<Method> apply(List<Method> methods, List<Method> methods2) {
+            return new LinkedList<Method>() {{
+              addAll(methods);
+              methods2.forEach(each -> addMethodIfNecessary(this, each));
+            }};
+          }
+        });
+  }
+
+  private static Method getIfOnlyOneElseThrow(List<Method> foundMethods, Supplier<RuntimeException> exceptionSupplierOnAmbiguity, Supplier<RuntimeException> exceptionSupplierOnNotFound) {
+    if (foundMethods.isEmpty())
+      throw exceptionSupplierOnNotFound.get();
+    if (foundMethods.size() == 1)
+      return foundMethods.get(0);
+    throw exceptionSupplierOnAmbiguity.get();
+  }
+
   private static List<String> summarizeMethods(List<Method> methods) {
-    return methods.stream().map(
-        method -> method.toString().replace(
-            method.getDeclaringClass().getCanonicalName() + "." + method.getName(),
-            method.getName()
-        )
-    ).collect(toList());
+    return methods
+        .stream()
+        .map(ChainUtils::summarizeMethodName)
+        .collect(toList());
   }
 
-  public static Object[] replaceTargetInArray(Object target, Object[] args) {
-    return Arrays.stream(args)
-        .map(e -> replaceTarget(e, target)).toArray();
-  }
-
-  public static <I> Object replaceTarget(Object on, I target) {
-    return on == CallChain.THIS ?
-        target :
-        on instanceof Object[] ?
-            replaceTargetInArray(target, (Object[]) on) :
-            on;
+  private static String summarizeMethodName(Method method) {
+    return method.toString().replace(
+        method.getDeclaringClass().getCanonicalName() + "." + method.getName(),
+        method.getName());
   }
 
   private static void addMethodIfNecessary(List<Method> methods, Method method) {
@@ -205,66 +264,14 @@ public enum ChainUtils {
     methods.add(method);
   }
 
-  private static Method[] getMethods(Class<?> aClass) {
+  private static Method[] getMethodsOf(Class<?> aClass) {
     return aClass.getMethods();
   }
 
-  public static Object[] replaceArgInArray(Object[] args) {
-    return Arrays.stream(args)
-        .map(e -> e instanceof Arg
-            ? ((Arg<?>) e).value()
-            : e)
-        .toArray();
+  private static Function<Object, Object> replacePlaceHolderWithActualArgument(List<Object> argList) {
+    return each -> each instanceof Parameter ?
+        argList.get(((Parameter) each).index()) :
+        each;
   }
 
-  public static boolean areArgsCompatible(Class<?>[] formalParameters, Object[] args) {
-    if (formalParameters.length != args.length)
-      return false;
-    for (int i = 0; i < args.length; i++) {
-      if (args[i] == null)
-        if (formalParameters[i].isPrimitive())
-          return false;
-        else
-          continue;
-      if (!withBoxingIsAssignableFrom(formalParameters[i], toClass(args[i])))
-        return false;
-    }
-    return true;
-  }
-
-  private static Class<?> toClass(Object value) {
-    if (value == null)
-      return null;
-    if (value instanceof Arg)
-      return ((Arg<?>) value).type();
-    return value.getClass();
-  }
-
-  public static <E> MultiFunction<? extends E> invoke(Object self, String methodName, Object... args) {
-    return new MultiFunction.Builder<E>(argList -> invokeMethod(self, methodName, args))
-        .addParameters(
-            Arrays.stream(args)
-                .filter(v -> v instanceof Parameter)
-                .map(v -> (Parameter)v)
-                .map(Parameter::type)
-            .collect(toList()))
-        .$();
-  }
-
-  public static <I, E> Function<? super I, ? extends E> invokeStatic(Class<?> klass, String methodName, Object... args) {
-    return Printables.function(
-        () -> String.format("->%s.%s%s", klass.getSimpleName(), methodName, summarize(args)),
-        (I target) -> ChainUtils.invokeStaticMethod(
-            klass,
-            target,
-            methodName,
-            args
-        ));
-  }
-
-  interface Parameter {
-    default Class<?> type() {
-      return Object.class;
-    }
-  }
 }
