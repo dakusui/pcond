@@ -1,16 +1,14 @@
 package com.github.dakusui.pcond.functions.chain;
 
-import com.github.dakusui.pcond.core.currying.Checks;
 import com.github.dakusui.pcond.functions.chain.compat.CompatCall.Arg;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
-import static com.github.dakusui.pcond.core.currying.Checks.isWiderThan;
+import static com.github.dakusui.pcond.core.currying.Checks.isWiderThanOrEqualTo;
 import static com.github.dakusui.pcond.functions.chain.MethodSelector.Utils.isAssignableWithBoxingFrom;
 import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
 import static java.lang.String.format;
@@ -169,7 +167,7 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
     public static boolean isAssignableWithBoxingFrom(Class<?> a, Class<?> b) {
       if (a.isAssignableFrom(b))
         return true;
-      return isWiderThan(toWrapperIfPrimitive(a), toWrapperIfPrimitive(b));
+      return isWiderThanOrEqualTo(toWrapperIfPrimitive(a), toWrapperIfPrimitive(b));
     }
 
     private static Class<?> toWrapperIfPrimitive(Class<?> in) {

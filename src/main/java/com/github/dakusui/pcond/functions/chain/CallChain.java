@@ -2,11 +2,15 @@ package com.github.dakusui.pcond.functions.chain;
 
 import com.github.dakusui.pcond.functions.MultiFunction;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 
-import static com.github.dakusui.pcond.functions.chain.ChainUtils.instanceMethod;
-import static com.github.dakusui.pcond.functions.chain.ChainUtils.methodCall;
+import static com.github.dakusui.pcond.functions.chain.ChainUtils.*;
+import static java.lang.Math.max;
+import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.IntStream.range;
 
 public interface CallChain {
 
@@ -16,41 +20,89 @@ public interface CallChain {
    *
    * @return This object.
    */
-  CallChain andThen(ChainUtils.MethodQuery methodQuery);
+  CallChain andThen(MethodQuery methodQuery);
 
-  <R> MultiFunction<? extends R> build();
+  int numParameters();
 
+  default CallChain andThen(String methodName, Object... args) {
+    return andThenOn(parameter(0), methodName, args);
+  }
 
-  static CallChain create(ChainUtils.MethodQuery query) {
+  default CallChain andThan(Class<?> clazz, String methodName, Object... args) {
+    return andThen(classMethod(clazz, methodName, args));
+  }
+
+  default CallChain andThenOn(Object target, String methodName, Object... args) {
+    return andThen(instanceMethod(target, methodName, args));
+  }
+
+  <R> MultiFunction<R> build();
+
+  static CallChain create(MethodQuery query) {
     return new Impl(null, query);
   }
 
-  class Impl implements CallChain {
-    private final CallChain              parent;
-    private final ChainUtils.MethodQuery methodQuery;
+  static CallChain create(Object target, String metodName, Object... args) {
+    return create(instanceMethod(target, metodName, args));
+  }
 
-    public Impl(CallChain parent, ChainUtils.MethodQuery methodQuery) {
+  class Impl implements CallChain {
+    private final CallChain   parent;
+    private final MethodQuery methodQuery;
+
+    public Impl(CallChain parent, MethodQuery methodQuery) {
       this.parent = parent;
       this.methodQuery = requireNonNull(methodQuery);
     }
 
     @Override
-    public CallChain andThen(ChainUtils.MethodQuery methodQuery) {
+    public CallChain andThen(MethodQuery methodQuery) {
       return new Impl(this, methodQuery);
+    }
+
+    @Override
+    public int numParameters() {
+      int parentNumParameters =
+          this.parent == null ?
+              0 :
+              parent.numParameters();
+      return max(
+          parentNumParameters,
+          Arrays.stream(methodQuery.arguments())
+              .filter(each -> each instanceof Parameter)
+              .map(each -> (Parameter) each)
+              .map(Parameter::index)
+              .max(comparingInt(o -> o))
+              .orElse(0));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <R> MultiFunction<? extends R> build() {
+    public <R> MultiFunction<R> build() {
       if (this.parent == null)
         return methodCall(this.methodQuery);
-      return new MultiFunction.Builder<>(args ->
-          (R) methodCall(instanceMethod(
-              this.parent.build().apply(args),
-              this.methodQuery.methodName(),
-              this.methodQuery.arguments())).apply(args))
-          .addParameters(Collections.emptyList())
-          .$();
+      List<Class<?>> parameterTypes = range(0, numParameters())
+          .mapToObj(i -> Object.class)
+          .collect(toList());
+      return this.methodQuery.isStatic() ?
+          new MultiFunction.Builder<>(args -> {
+            Object tail = this.parent.build().apply(args);
+            return (R) methodCall(classMethod(
+                this.methodQuery.targetClass(),
+                this.methodQuery.methodName(),
+                this.methodQuery.arguments())).apply(args);
+          })
+              .addParameters(parameterTypes)
+              .$() :
+          new MultiFunction.Builder<>(args -> {
+            Object tail = this.parent.build().apply(args);
+            return (R) methodCall(instanceMethod(
+                tail,
+                this.methodQuery.methodName(),
+                this.methodQuery.arguments())).apply(args);
+          })
+              .addParameters(parameterTypes)
+              .$();
     }
   }
 }

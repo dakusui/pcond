@@ -2,7 +2,6 @@ package com.github.dakusui.pcond.core.currying;
 
 import com.github.dakusui.pcond.internals.InternalChecks;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -51,7 +50,6 @@ public enum Checks {
   }
 
   /**
-   *
    * @param classA A non-primitive type class.
    * @param classB Another non-primitive type class.
    * @return {@code true} iff {@code classA} is a "wider" wrapper class than {@code classB}.
@@ -61,6 +59,12 @@ public enum Checks {
     assert !classA.isPrimitive();
     Set<Class<?>> widerBoxedClassesForClassA = widerTypesThan(classB);
     return widerBoxedClassesForClassA.contains(classA);
+  }
+
+  public static boolean isWiderThanOrEqualTo(Class<?> classA, Class<?> classB) {
+    assert !classB.isPrimitive();
+    assert !classA.isPrimitive();
+    return classA.equals(classB) || isWiderThan(classA, classB);
   }
 
   private static Set<Class<?>> widerTypesThan(Class<?> classB) {

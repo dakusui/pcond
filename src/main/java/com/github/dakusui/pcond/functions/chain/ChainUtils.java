@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.functions.chain;
 
-import com.github.dakusui.pcond.core.currying.Checks;
 import com.github.dakusui.pcond.functions.MultiFunction;
 
 import java.lang.reflect.InvocationTargetException;
@@ -22,28 +21,23 @@ import static java.util.stream.Collectors.toList;
 public enum ChainUtils {
   ;
 
-  public static <R> MultiFunction<? extends R> methodCall(MethodQuery methodQuery) {
+  public static <R> MultiFunction<R> methodCall(MethodQuery methodQuery) {
     return new MultiFunction.Builder<R>(
         argList -> invokeMethod(methodQuery.bindActualArguments(requireNonNull(argList))))
         .addParameters(Stream.concat(Stream.of(methodQuery.targetObject()), Arrays.stream(methodQuery.arguments()))
             .filter(v -> v instanceof Parameter)
-            .map(v -> (Parameter) v)
-            .map(Parameter::type)
+            .map(v -> Object.class)
             .collect(toList()))
         .name(methodQuery.describe())
         .$();
   }
 
-  public static Parameter parameter(Class<?> type, int arg) {
-    return Parameter.create(type, arg);
-  }
-
   public static Parameter parameter(int arg) {
-    return parameter(Object.class, arg);
+    return Parameter.create(arg);
   }
 
   static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
-    return MethodQuery.create(false, requireNonNull(targetObject), targetObject.getClass(), methodName, arguments);
+    return MethodQuery.create(false, requireNonNull(targetObject), targetTypeOf(targetObject), methodName, arguments);
   }
 
   static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
@@ -51,9 +45,8 @@ public enum ChainUtils {
   }
 
   interface Parameter {
-    static Parameter create(Class<?> type, int i) {
-      requireNonNull(type);
-      requireArgument(i, v -> v >= 0, () -> "i must not be negative, but " + i + " was given.");
+    static Parameter create(int i) {
+      requireArgument(i, v -> v >= 0, () -> "parameter index must not be negative, but " + i + " was given.");
       return new Parameter() {
         @Override
         public int index() {
@@ -61,20 +54,26 @@ public enum ChainUtils {
         }
 
         @Override
-        public Class<?> type() {
-          return type;
+        public String toString() {
+          return format("p_%s", i);
         }
 
         @Override
-        public String toString() {
-          return format("p%s[%s]", i, type.getSimpleName());
+        public int hashCode() {
+          return i;
+        }
+
+        @Override
+        public boolean equals(Object anotherObject) {
+          if (!(anotherObject instanceof Parameter))
+            return false;
+          Parameter another = (Parameter) anotherObject;
+          return this.index() == another.index();
         }
       };
     }
 
     int index();
-
-    Class<?> type();
   }
 
   interface MethodQuery {
@@ -91,8 +90,9 @@ public enum ChainUtils {
     String describe();
 
     default MethodQuery bindActualArguments(List<Object> args) {
-      Function<Object, Object> argReplacer = replacePlaceHolderWithActualArgument(args);
-      return create(this.isStatic(), argReplacer.apply(this.targetObject()), this.targetClass(), this.methodName(), Arrays.stream(this.arguments()).map(argReplacer).toArray());
+      Function<Object, Object> argReplacer = object -> replacePlaceHolderWithActualArgument(object, args);
+      Object targetObject = argReplacer.apply(this.targetObject());
+      return create(this.isStatic(), targetObject, targetObject.getClass(), this.methodName(), Arrays.stream(this.arguments()).map(argReplacer).toArray());
     }
 
     static MethodQuery create(boolean isStatic, Object targetObject, Class<?> targetClass, String methodName, Object[] arguments) {
@@ -218,6 +218,13 @@ public enum ChainUtils {
             args))));
   }
 
+  private static Class<?> targetTypeOf(Object targetObject) {
+    requireNonNull(targetObject);
+    return targetObject instanceof Parameter ?
+        Object.class :
+        targetObject.getClass();
+  }
+
   /**
    * A collector to gather methods which have narrowest possible signatures.
    *
@@ -260,9 +267,10 @@ public enum ChainUtils {
   }
 
   private static void addMethodIfNecessary(List<Method> methods, Method method) {
-    Optional<Method> found = methods.stream().filter(
-        each -> Arrays.equals(each.getParameterTypes(), method.getParameterTypes())
-    ).findAny();
+    Optional<Method> found = methods
+        .stream()
+        .filter(each -> Arrays.equals(each.getParameterTypes(), method.getParameterTypes()))
+        .findAny();
     if (found.isPresent()) {
       if (found.get().getDeclaringClass().isAssignableFrom(method.getDeclaringClass()))
         methods.remove(found.get());
@@ -274,17 +282,11 @@ public enum ChainUtils {
     return aClass.getMethods();
   }
 
-  private static Function<Object, Object> replacePlaceHolderWithActualArgument(List<Object> argList) {
-    return each -> {
-      if (each instanceof Parameter) {
-        Parameter eachParameter = (Parameter) each;
-        return validateArgument(argList.get(eachParameter.index()), eachParameter);
-      }
-      return each;
-    };
-  }
-
-  private static Object validateArgument(Object argument, Parameter parameter) {
-    return Checks.validateArgumentType(argument, parameter.type(), () -> format("Illegal argument: '%s' for parameter: '%s'", argument, parameter));
+  private static Object replacePlaceHolderWithActualArgument(Object object, List<Object> argList) {
+    if (object instanceof Parameter) {
+      Parameter eachParameter = (Parameter) object;
+      return argList.get(eachParameter.index());
+    }
+    return object;
   }
 }
