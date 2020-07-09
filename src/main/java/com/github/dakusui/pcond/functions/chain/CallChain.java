@@ -28,7 +28,7 @@ public interface CallChain {
     return andThenOn(parameter(0), methodName, args);
   }
 
-  default CallChain andThan(Class<?> clazz, String methodName, Object... args) {
+  default CallChain andThen(Class<?> clazz, String methodName, Object... args) {
     return andThen(classMethod(clazz, methodName, args));
   }
 
@@ -62,16 +62,14 @@ public interface CallChain {
 
     @Override
     public int numParameters() {
-      int parentNumParameters =
-          this.parent == null ?
-              0 :
-              parent.numParameters();
+      int parentNumParameters = 0;
       return max(
           parentNumParameters,
           Arrays.stream(methodQuery.arguments())
               .filter(each -> each instanceof Parameter)
               .map(each -> (Parameter) each)
               .map(Parameter::index)
+              .map(i -> i + 1)
               .max(comparingInt(o -> o))
               .orElse(0));
     }
@@ -95,11 +93,11 @@ public interface CallChain {
               .addParameters(parameterTypes)
               .$() :
           new MultiFunction.Builder<>(args -> {
-            Object tail = this.parent.build().apply(args);
+            Object tail = this.parent.build().apply(args.subList(0, this.parent.numParameters()));
             return (R) methodCall(instanceMethod(
                 tail,
                 this.methodQuery.methodName(),
-                this.methodQuery.arguments())).apply(args);
+                this.methodQuery.arguments())).apply(args.subList(0, this.numParameters()));
           })
               .addParameters(parameterTypes)
               .$();

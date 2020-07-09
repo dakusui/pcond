@@ -7,12 +7,13 @@ import static com.github.dakusui.pcond.functions.chain.ChainUtils.instanceMethod
 import static com.github.dakusui.pcond.functions.chain.ChainUtils.parameter;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 public class CallChainTest {
   @Test
   public void test0() {
-    MultiFunction<Boolean> func = CallChain.create("hello", "startsWith").build();
-    System.out.println(func.apply(emptyList()));
+    MultiFunction<Boolean> func = CallChain.create("hello", "startsWith", parameter(0)).build();
+    System.out.println(func.apply(singletonList("h")));
   }
 
   @Test

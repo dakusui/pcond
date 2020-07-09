@@ -9,11 +9,13 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -24,9 +26,14 @@ public enum ChainUtils {
   public static <R> MultiFunction<R> methodCall(MethodQuery methodQuery) {
     return new MultiFunction.Builder<R>(
         argList -> invokeMethod(methodQuery.bindActualArguments(requireNonNull(argList))))
-        .addParameters(Stream.concat(Stream.of(methodQuery.targetObject()), Arrays.stream(methodQuery.arguments()))
-            .filter(v -> v instanceof Parameter)
-            .map(v -> Object.class)
+        .addParameters(IntStream.range(0, Stream.concat(Stream.of(methodQuery.targetObject()), Arrays.stream(methodQuery.arguments()))
+            .filter(each -> each instanceof Parameter)
+            .map(each -> (Parameter) each)
+            .map(Parameter::index)
+            .map(i -> i + 1)
+            .max(comparingInt(o -> o))
+            .orElse(0))
+            .mapToObj(i -> Object.class)
             .collect(toList()))
         .name(methodQuery.describe())
         .$();
