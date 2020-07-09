@@ -26,7 +26,7 @@ public interface MultiFunction<R> extends Function<List<? super Object>, R> {
   static <R> MultiFunction<R> createFromStaticMethod(Method method, List<Integer> paramOrder) {
     validateParamOrderList(paramOrder, method.getParameterCount());
     requireStaticMethod(method);
-    return (MultiFunction<R>) new Builder<>(objects -> invokeStaticMethod(method, (paramOrder).stream().map(objects::get).toArray()))
+    return (MultiFunction<R>) new Builder<>(args -> invokeStaticMethod(method, (paramOrder).stream().map(args::get).toArray()))
         .name(method.getName())
         .formatter(() -> formatMethodName(method) + FormattingUtils.formatParameterOrder(paramOrder))
         .addParameters(paramOrder.stream().map(i -> method.getParameterTypes()[i]).collect(toList()))

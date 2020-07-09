@@ -1,41 +1,23 @@
 package com.github.dakusui.pcond.functions.chain;
 
+import com.github.dakusui.pcond.core.currying.Checks;
 import com.github.dakusui.pcond.functions.chain.compat.CompatCall.Arg;
-import com.github.dakusui.pcond.internals.InternalChecks;
+import com.github.dakusui.pcond.internals.InternalUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
-import static com.github.dakusui.pcond.functions.chain.MethodSelector.Utils.withBoxingIsAssignableFrom;
-import static com.github.dakusui.pcond.functions.chain.MethodSelector.areArgsCompatible;
+import static com.github.dakusui.pcond.core.currying.Checks.isWiderThan;
+import static com.github.dakusui.pcond.functions.chain.MethodSelector.Utils.isAssignableWithBoxingFrom;
+import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 public interface MethodSelector extends BiFunction<List<Method>, Object[], List<Method>>, Formattable {
-  static boolean areArgsCompatible(Class<?>[] formalParameters, Object[] args) {
-    if (formalParameters.length != args.length)
-      return false;
-    for (int i = 0; i < args.length; i++) {
-      if (args[i] == null)
-        if (formalParameters[i].isPrimitive())
-          return false;
-        else
-          continue;
-      if (!withBoxingIsAssignableFrom(formalParameters[i], toClass(args[i])))
-        return false;
-    }
-    return true;
-  }
-
-  static Class<?> toClass(Object value) {
-    if (value == null)
-      return null;
-    if (value instanceof Arg)
-      return ((Arg<?>) value).type();
-    return value.getClass();
-  }
 
   default MethodSelector andThen(MethodSelector another) {
     return new MethodSelector() {
@@ -46,7 +28,7 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
 
       @Override
       public String describe() {
-        return String.format("%s&&%s", MethodSelector.this.describe(), another.describe());
+        return format("%s&&%s", MethodSelector.this.describe(), another.describe());
       }
     };
   }
@@ -76,6 +58,21 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
     @Override
     public String describe() {
       return "default";
+    }
+
+    private static boolean areArgsCompatible(Class<?>[] formalParameters, Object[] args) {
+      if (formalParameters.length != args.length)
+        return false;
+      for (int i = 0; i < args.length; i++) {
+        if (args[i] == null)
+          if (formalParameters[i].isPrimitive())
+            return false;
+          else
+            continue;
+        if (!isAssignableWithBoxingFrom(formalParameters[i], Utils.toClass(args[i])))
+          return false;
+      }
+      return true;
     }
   }
 
@@ -123,12 +120,19 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
     }
 
     private static boolean isCompatibleWith(Method a, Method b) {
-      InternalChecks.requireArgument(requireNonNull(a), (Method v) -> v.getParameterCount() == requireNonNull(b).getParameterCount(), () -> "");
+      requireSameParameterCounts(a, b);
       if (Objects.equals(a, b))
         return true;
       return IntStream
           .range(0, a.getParameterCount())
-          .allMatch(i -> withBoxingIsAssignableFrom(a.getParameterTypes()[i], b.getParameterTypes()[i]));
+          .allMatch(i -> isAssignableWithBoxingFrom(a.getParameterTypes()[i], b.getParameterTypes()[i]));
+    }
+
+    private static void requireSameParameterCounts(Method a, Method b) {
+      requireArgument(
+          requireNonNull(a),
+          (Method v) -> v.getParameterCount() == requireNonNull(b).getParameterCount(),
+          () -> format("Parameter counts are different: a: %s, b: %s", a, b));
     }
   }
 
@@ -162,29 +166,24 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
   enum Utils {
     ;
 
-    public static final Class<?>[][] PRIMITIVE_WRAPPER_TABLE = {
-        { boolean.class, Boolean.class },
-        { byte.class, Byte.class },
-        { char.class, Character.class },
-        { short.class, Short.class },
-        { int.class, Integer.class },
-        { long.class, Long.class },
-        { float.class, Float.class },
-        { double.class, Double.class },
-    };
-
-    public static boolean withBoxingIsAssignableFrom(Class<?> a, Class<?> b) {
+    public static boolean isAssignableWithBoxingFrom(Class<?> a, Class<?> b) {
       if (a.isAssignableFrom(b))
         return true;
-      return toWrapperIfPrimitive(a).isAssignableFrom(toWrapperIfPrimitive(b));
+      return isWiderThan(toWrapperIfPrimitive(a), toWrapperIfPrimitive(b));
     }
 
     private static Class<?> toWrapperIfPrimitive(Class<?> in) {
-      for (Class<?>[] pair : PRIMITIVE_WRAPPER_TABLE) {
-        if (Objects.equals(in, pair[0]))
-          return pair[1];
-      }
+      if (in.isPrimitive())
+        return InternalUtils.wrapperClassOf(in);
       return in;
+    }
+
+    public static Class<?> toClass(Object value) {
+      if (value == null)
+        return null;
+      if (value instanceof Arg)
+        return ((Arg<?>) value).type();
+      return value.getClass();
     }
   }
 }

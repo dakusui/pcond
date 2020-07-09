@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.functions.chain;
 
+import com.github.dakusui.pcond.core.currying.Checks;
 import com.github.dakusui.pcond.functions.MultiFunction;
 
 import java.lang.reflect.InvocationTargetException;
@@ -21,8 +22,8 @@ import static java.util.stream.Collectors.toList;
 public enum ChainUtils {
   ;
 
-  public static <E> MultiFunction<? extends E> methodCall(MethodQuery methodQuery) {
-    return new MultiFunction.Builder<E>(
+  public static <R> MultiFunction<? extends R> methodCall(MethodQuery methodQuery) {
+    return new MultiFunction.Builder<R>(
         argList -> invokeMethod(methodQuery.bindActualArguments(requireNonNull(argList))))
         .addParameters(Stream.concat(Stream.of(methodQuery.targetObject()), Arrays.stream(methodQuery.arguments()))
             .filter(v -> v instanceof Parameter)
@@ -41,6 +42,14 @@ public enum ChainUtils {
     return parameter(Object.class, arg);
   }
 
+  static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
+    return MethodQuery.create(false, requireNonNull(targetObject), targetObject.getClass(), methodName, arguments);
+  }
+
+  static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
+    return MethodQuery.create(true, null, targetClass, methodName, arguments);
+  }
+
   interface Parameter {
     static Parameter create(Class<?> type, int i) {
       requireNonNull(type);
@@ -54,6 +63,11 @@ public enum ChainUtils {
         @Override
         public Class<?> type() {
           return type;
+        }
+
+        @Override
+        public String toString() {
+          return format("p%s[%s]", i, type.getSimpleName());
         }
       };
     }
@@ -120,20 +134,12 @@ public enum ChainUtils {
 
         @Override
         public String describe() {
-          return String.format("%s.%s(%s)",
+          return format("%s.%s(%s)",
               isStatic ? targetClass.getName() : "",
               methodName,
               Arrays.stream(arguments).map(Objects::toString).collect(joining(",")));
         }
       };
-    }
-
-    static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
-      return create(false, requireNonNull(targetObject), targetObject.getClass(), methodName, arguments);
-    }
-
-    static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
-      return create(true, null, targetClass, methodName, arguments);
     }
   }
 
@@ -269,9 +275,16 @@ public enum ChainUtils {
   }
 
   private static Function<Object, Object> replacePlaceHolderWithActualArgument(List<Object> argList) {
-    return each -> each instanceof Parameter ?
-        argList.get(((Parameter) each).index()) :
-        each;
+    return each -> {
+      if (each instanceof Parameter) {
+        Parameter eachParameter = (Parameter) each;
+        return validateArgument(argList.get(eachParameter.index()), eachParameter);
+      }
+      return each;
+    };
   }
 
+  private static Object validateArgument(Object argument, Parameter parameter) {
+    return Checks.validateArgumentType(argument, parameter.type(), () -> format("Illegal argument: '%s' for parameter: '%s'", argument, parameter));
+  }
 }

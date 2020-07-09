@@ -203,7 +203,7 @@ public interface CompatCall {
       return ChainedFunction.create(
           this.object instanceof Class
               ? (Function) CompatUtils.invokeStatic((Class<?>) this.object, methodName, args)
-              : (Function) CompatUtils.invokeOn(this.object, methodName, args)
+              : null///(Function) CompatUtils.invoke(this.object, methodName, args)
       );
     }
   }
