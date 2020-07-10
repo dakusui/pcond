@@ -2,17 +2,22 @@ package com.github.dakusui.pcond.functions.chain;
 
 import com.github.dakusui.pcond.functions.MultiFunction;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static com.github.dakusui.pcond.functions.chain.ChainUtils.*;
-import static java.lang.Math.max;
-import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 
 public interface CallChain {
+  /**
+   * A place holder to represent an object on which a method call
+   */
+  Object TAIL = new Object() {
+    public String toString() {
+      return "(TAIL)";
+    }
+  };
 
   /**
    * Adds a call of a method specified by {@code object}, {@code methodName} and
@@ -25,7 +30,7 @@ public interface CallChain {
   int numParameters();
 
   default CallChain andThen(String methodName, Object... args) {
-    return andThenOn(parameter(0), methodName, args);
+    return andThenOn(TAIL, methodName, args);
   }
 
   default CallChain andThen(Class<?> clazz, String methodName, Object... args) {
@@ -62,45 +67,26 @@ public interface CallChain {
 
     @Override
     public int numParameters() {
-      int parentNumParameters = 0;
-      return max(
-          parentNumParameters,
-          Arrays.stream(methodQuery.arguments())
-              .filter(each -> each instanceof Parameter)
-              .map(each -> (Parameter) each)
-              .map(Parameter::index)
-              .map(i -> i + 1)
-              .max(comparingInt(o -> o))
-              .orElse(0));
+      return methodQuery.numUnboundParameters();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <R> MultiFunction<R> build() {
-      if (this.parent == null)
-        return methodCall(this.methodQuery);
-      List<Class<?>> parameterTypes = range(0, numParameters())
+      List<Class<?>> parameterTypes = range(0, methodQuery.numUnboundParameters())
           .mapToObj(i -> Object.class)
           .collect(toList());
-      return this.methodQuery.isStatic() ?
-          new MultiFunction.Builder<>(args -> {
-            Object tail = this.parent.build().apply(args);
-            return (R) methodCall(classMethod(
-                this.methodQuery.targetClass(),
-                this.methodQuery.methodName(),
-                this.methodQuery.arguments())).apply(args);
-          })
-              .addParameters(parameterTypes)
-              .$() :
-          new MultiFunction.Builder<>(args -> {
-            Object tail = this.parent.build().apply(args.subList(0, this.parent.numParameters()));
-            return (R) methodCall(instanceMethod(
-                tail,
-                this.methodQuery.methodName(),
-                this.methodQuery.arguments())).apply(args.subList(0, this.numParameters()));
-          })
-              .addParameters(parameterTypes)
-              .$();
+      if (this.parent == null)
+        return methodCall(this.methodQuery);
+      return new MultiFunction.Builder<>(args -> {
+        Object tail = this.parent.build().apply(args.subList(0, this.parent.numParameters()));
+        return (R) methodCall(instanceMethod(
+            tail,
+            this.methodQuery.methodName(),
+            this.methodQuery.arguments())).apply(args.subList(0, this.numParameters()));
+      })
+          .addParameters(parameterTypes)
+          .$();
     }
   }
 }

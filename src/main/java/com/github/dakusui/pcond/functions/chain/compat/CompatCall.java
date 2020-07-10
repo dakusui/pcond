@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.functions.chain.compat;
 
+import com.github.dakusui.pcond.functions.chain.CallChain;
 import com.github.dakusui.pcond.functions.chain.ChainUtils;
 import com.github.dakusui.pcond.functions.chain.ChainedFunction;
 
@@ -43,12 +44,6 @@ import static java.util.Objects.requireNonNull;
  */
 public interface CompatCall {
 
-  Object THIS = new Object() {
-    public String toString() {
-      return "(THIS)";
-    }
-  };
-
   /**
    * Add a method call of a method specified by {@code methodName} and {@code args}
    * to this builder on the current target object.
@@ -62,7 +57,7 @@ public interface CompatCall {
    * @return This object.
    */
   default CompatCall andThen(String methodName, Object... args) {
-    return andThenOn(THIS, methodName, args);
+    return andThenOn(CallChain.TAIL, methodName, args);
   }
 
   /**
@@ -103,7 +98,7 @@ public interface CompatCall {
    * @see CompatCall#createOn(Object, String, Object...)
    */
   static CompatCall create(String methodName, Object... args) {
-    return createOn(THIS, methodName, args);
+    return createOn(CallChain.TAIL, methodName, args);
   }
 
   /**
@@ -124,7 +119,7 @@ public interface CompatCall {
    * @param methodName A name to specify a method to be invoked
    * @param args       Argument values with which the method is invoked
    * @return A result of the invocation.
-   * @see CompatCall#THIS
+   * @see CallChain#TAIL
    * @see ChainUtils#findMethod(Class, String, Object[])
    */
   static CompatCall createOn(Object object, String methodName, Object... args) {

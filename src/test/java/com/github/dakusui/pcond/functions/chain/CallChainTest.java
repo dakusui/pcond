@@ -24,7 +24,7 @@ public class CallChainTest {
 
   @Test
   public void test2() {
-    MultiFunction<Boolean> func = CallChain.create(instanceMethod(parameter(0), "startsWith", parameter(0))).build();
+    MultiFunction<Boolean> func = CallChain.create(instanceMethod(parameter(0), "startsWith", parameter(1))).build();
     System.out.println(func.apply(asList("hello", "h")));
   }
 
@@ -36,7 +36,8 @@ public class CallChainTest {
 
   @Test
   public void test4() {
-    MultiFunction<Boolean> func = CallChain.create(parameter(0), "substring", parameter(1)).andThen("startsWith", parameter(2)).build();
+    MultiFunction<Boolean> func = CallChain.create(parameter(0), "substring", parameter(1))
+        .andThen("startsWith", parameter(2)).build();
     System.out.println(func.apply(asList("helloWorld", 5, "W")));
   }
 }

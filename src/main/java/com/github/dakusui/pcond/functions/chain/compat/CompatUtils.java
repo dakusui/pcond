@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.functions.chain.compat;
 
 import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.functions.chain.CallChain;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -60,7 +61,7 @@ public class CompatUtils {
   }
 
   public static <I> Object replaceTarget(Object on, I target) {
-    return on == CompatCall.THIS ?
+    return on == CallChain.TAIL ?
         target :
         on instanceof Object[] ?
             replaceTargetInArray(target, (Object[]) on) :

@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.IntStream;
@@ -25,14 +26,8 @@ public enum ChainUtils {
 
   public static <R> MultiFunction<R> methodCall(MethodQuery methodQuery) {
     return new MultiFunction.Builder<R>(
-        argList -> invokeMethod(methodQuery.bindActualArguments(requireNonNull(argList))))
-        .addParameters(IntStream.range(0, Stream.concat(Stream.of(methodQuery.targetObject()), Arrays.stream(methodQuery.arguments()))
-            .filter(each -> each instanceof Parameter)
-            .map(each -> (Parameter) each)
-            .map(Parameter::index)
-            .map(i -> i + 1)
-            .max(comparingInt(o -> o))
-            .orElse(0))
+        argList -> invokeMethod(methodQuery.bindActualArguments(o -> o instanceof Parameter, o -> requireNonNull(argList).get(((Parameter) o).index()))))
+        .addParameters(IntStream.range(0, methodQuery.numUnboundParameters())
             .mapToObj(i -> Object.class)
             .collect(toList()))
         .name(methodQuery.describe())
@@ -96,8 +91,18 @@ public enum ChainUtils {
 
     String describe();
 
-    default MethodQuery bindActualArguments(List<Object> args) {
-      Function<Object, Object> argReplacer = object -> replacePlaceHolderWithActualArgument(object, args);
+    default Integer numUnboundParameters() {
+      return Stream.concat(Stream.of(this.targetObject()), Arrays.stream(this.arguments()))
+          .filter(each -> each instanceof Parameter)
+          .map(each -> (Parameter) each)
+          .map(Parameter::index)
+          .map(i -> i + 1)
+          .max(comparingInt(o -> o))
+          .orElse(0);
+    }
+
+    default MethodQuery bindActualArguments(Predicate<Object> isPlaceHolder, Function<Object, Object> replace) {
+      Function<Object, Object> argReplacer = object -> replacePlaceHolderWithActualArgument(object, isPlaceHolder, replace);
       Object targetObject = argReplacer.apply(this.targetObject());
       return create(this.isStatic(), targetObject, targetObject.getClass(), this.methodName(), Arrays.stream(this.arguments()).map(argReplacer).toArray());
     }
@@ -289,10 +294,9 @@ public enum ChainUtils {
     return aClass.getMethods();
   }
 
-  private static Object replacePlaceHolderWithActualArgument(Object object, List<Object> argList) {
-    if (object instanceof Parameter) {
-      Parameter eachParameter = (Parameter) object;
-      return argList.get(eachParameter.index());
+  private static Object replacePlaceHolderWithActualArgument(Object object, Predicate<Object> isPlaceHolder, Function<Object, Object> replace) {
+    if (isPlaceHolder.test(object)) {
+      return replace.apply(object);
     }
     return object;
   }
