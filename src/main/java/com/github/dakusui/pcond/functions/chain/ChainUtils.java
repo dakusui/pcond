@@ -1,7 +1,5 @@
 package com.github.dakusui.pcond.functions.chain;
 
-import com.github.dakusui.pcond.functions.MultiFunction;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -10,7 +8,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
@@ -23,16 +20,6 @@ import static java.util.stream.Collectors.toList;
 
 public enum ChainUtils {
   ;
-
-  public static <R> MultiFunction<R> methodCall(MethodQuery methodQuery) {
-    return new MultiFunction.Builder<R>(
-        argList -> invokeMethod(methodQuery.bindActualArguments(o -> o instanceof Parameter, o -> requireNonNull(argList).get(((Parameter) o).index()))))
-        .addParameters(IntStream.range(0, methodQuery.numUnboundParameters())
-            .mapToObj(i -> Object.class)
-            .collect(toList()))
-        .name(methodQuery.describe())
-        .$();
-  }
 
   public static Parameter parameter(int arg) {
     return Parameter.create(arg);
