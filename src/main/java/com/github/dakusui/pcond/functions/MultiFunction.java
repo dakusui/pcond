@@ -34,6 +34,24 @@ public interface MultiFunction<R> extends Function<List<? super Object>, R> {
         .$();
   }
 
+  @SuppressWarnings("unchecked")
+  static <T, R> MultiFunction<R> toMulti(Function<T, R> func) {
+    requireNonNull(func);
+    return new Builder<>(args -> func.apply((T) args.get(0)))
+        .addParameter(Object.class)
+        .name(func.toString())
+        .$();
+  }
+
+  @SuppressWarnings("unchecked")
+  static <T> MultiFunction<Boolean> toMulti(Predicate<T> pred) {
+    requireNonNull(pred);
+    return new Builder<>(args -> pred.test((T) args.get(0)))
+        .addParameter(Object.class)
+        .name(pred.toString())
+        .$();
+  }
+
   String name();
 
   int arity();

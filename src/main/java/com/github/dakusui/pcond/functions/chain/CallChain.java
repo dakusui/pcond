@@ -2,12 +2,17 @@ package com.github.dakusui.pcond.functions.chain;
 
 import com.github.dakusui.pcond.functions.Context;
 import com.github.dakusui.pcond.functions.MultiFunction;
+import com.github.dakusui.pcond.functions.Printables;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 import static com.github.dakusui.pcond.functions.chain.ChainUtils.*;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
@@ -42,16 +47,22 @@ public interface CallChain {
     return andThen(classMethod(clazz, methodName, args));
   }
 
+  <T, R> CallChain andThen(Function<T, R> func);
+
+  <T> CallChain andThen(Predicate<T> pred);
+
   default CallChain andThenOn(Object target, String methodName, Object... args) {
     return andThen(instanceMethod(target, methodName, args));
   }
+
 
   default Predicate<Context> toContextPredicate() {
     return this.build().toContextPredicate();
   }
 
   default <T> Predicate<T> toPredicate() {
-    return (T value) -> (boolean) this.build().apply(Collections.singletonList(value));
+    MultiFunction<Object> p = this.build();
+    return Printables.printablePredicate(p.name(), (T value) -> (boolean) p.apply(singletonList(value)));
   }
 
   static CallChain create(MethodQuery query) {
@@ -66,23 +77,91 @@ public interface CallChain {
     <R> MultiFunction<R> create(Object actualTailValue);
 
     int numUnboundParameters();
+
+    String name();
   }
 
   class Impl implements CallChain {
-    private final CallChain         parent;
-    //private final MethodQuery  methodQuery;
+    private final CallChain            parent;
     private final MultiFunctionFactory multiFuncFactory;
 
     public Impl(CallChain parent, MethodQuery methodQuery) {
       this(parent, new MultiFunctionFactory() {
         @Override
         public <R> MultiFunction<R> create(Object actualTailValue) {
-          return toMultiFunction(actualTailValue, methodQuery);
+          return new MultiFunction.Builder<R>(
+              argList -> invokeMethod(
+                  methodQuery
+                      .bindActualArguments(o -> o instanceof Parameter, o -> argList.get(((Parameter) o).index()))
+                      .bindActualArguments(o -> o == TAIL, o -> actualTailValue)))
+              .addParameters(range(0, methodQuery.numUnboundParameters())
+                  .mapToObj(i -> Object.class)
+                  .collect(toList()))
+              .name(methodQuery.describe())
+              .$();
         }
 
         @Override
         public int numUnboundParameters() {
           return methodQuery.numUnboundParameters();
+        }
+
+        @Override
+        public String name() {
+          return methodQuery.methodName();
+        }
+      });
+    }
+
+    public Impl(CallChain parent, MultiFunction<?> multiFunc, Function<Integer, Optional<Object>> assignments) {
+      this(parent, new MultiFunctionFactory() {
+        @Override
+        public <R> MultiFunction<R> create(Object actualTailValue) {
+          AtomicInteger j = new AtomicInteger(0);
+          return new MultiFunction.Builder<R>(createListFunction(actualTailValue))
+              .name(multiFunc.name())
+              .addParameters(
+                  IntStream.range(0, multiFunc.arity())
+                      .mapToObj(i -> assignments.apply(i).orElse(parameter(j.getAndIncrement())))
+                      .filter(v -> v instanceof Parameter)
+                      .map(v -> Object.class)
+                      .collect(toList()))
+              .$();
+        }
+
+        private <R> Function<List<Object>, R> createListFunction(Object actualTailValue) {
+          return new Function<List<Object>, R>() {
+            @Override
+            public R apply(List<Object> args) {
+              //noinspection unchecked
+              return (R) multiFunc.apply(args(args));
+            }
+
+            public List<Object> args(List<Object> args) {
+              AtomicInteger j = new AtomicInteger(0);
+              return IntStream.range(0, multiFunc.arity())
+                  .mapToObj(i -> assignments.apply(i).orElse(parameter(j.getAndIncrement())))
+                  .map(v -> v == TAIL ? actualTailValue : v)
+                  .map(v -> v instanceof Parameter ? args.get(((Parameter) v).index()) : v)
+                  .collect(toList());
+            }
+
+            public String toString() {
+              return multiFunc.toString();
+            }
+          };
+        }
+
+        @Override
+        public int numUnboundParameters() {
+          return (int) IntStream.range(0, multiFunc.arity())
+              .filter(i -> !assignments.apply(i).isPresent())
+              .count();
+        }
+
+        @Override
+        public String name() {
+          return multiFunc.toString();
         }
       });
     }
@@ -98,6 +177,16 @@ public interface CallChain {
     }
 
     @Override
+    public <T, R> CallChain andThen(Function<T, R> func) {
+      return new Impl(this, MultiFunction.toMulti(func), i -> i == 0 ? Optional.of(TAIL) : Optional.empty());
+    }
+
+    @Override
+    public <T> CallChain andThen(Predicate<T> pred) {
+      return new Impl(this, MultiFunction.toMulti(pred), i -> i == 0 ? Optional.of(TAIL) : Optional.empty());
+    }
+
+    @Override
     public int numParameters() {
       return multiFuncFactory.numUnboundParameters();
     }
@@ -105,14 +194,15 @@ public interface CallChain {
     @SuppressWarnings("unchecked")
     @Override
     public <R> MultiFunction<R> build() {
-      List<Class<?>> parameterTypes = range(0, multiFuncFactory.numUnboundParameters())
+      List<Class<?>> parameterTypes = range(0, numParameters())
           .mapToObj(i -> Object.class)
           .collect(toList());
       if (this.parent == null)
         return toMultiFunction(null);
-      return new MultiFunction.Builder<>(
-          args -> (R) toMultiFunction(applyParent(args)).apply(parametersFor(this, args)))
+      MultiFunction<Object> parentFunc = parent.build();
+      return new MultiFunction.Builder<>(args -> (R) toMultiFunction(applyParent(args, parentFunc)).apply(parametersFor(this, args)))
           .addParameters(parameterTypes)
+          .name(parentFunc.name() + "." + multiFuncFactory.name())
           .$();
     }
 
@@ -120,25 +210,12 @@ public interface CallChain {
       return multiFuncFactory.create(actualTailValue);
     }
 
-    private Object applyParent(List<Object> args) {
-      return parent.build().apply(parametersFor(parent, args));
+    private Object applyParent(List<Object> args, MultiFunction<Object> build) {
+      return build.apply(parametersFor(parent, args));
     }
 
     private static List<Object> parametersFor(CallChain chain, List<Object> args) {
       return args.subList(0, chain.numParameters());
-    }
-
-    private static <R> MultiFunction<R> toMultiFunction(Object actualTailValue, MethodQuery methodQuery) {
-      return new MultiFunction.Builder<R>(
-          argList -> invokeMethod(
-              methodQuery
-                  .bindActualArguments(o -> o instanceof Parameter, o -> argList.get(((Parameter) o).index()))
-                  .bindActualArguments(o -> o == TAIL, o -> actualTailValue)))
-          .addParameters(range(0, methodQuery.numUnboundParameters())
-              .mapToObj(i -> Object.class)
-              .collect(toList()))
-          .name(methodQuery.describe())
-          .$();
     }
   }
 }

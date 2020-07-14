@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.functions.chain;
 
-import com.github.dakusui.pcond.functions.chain.compat.CompatCall.Arg;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.lang.reflect.Method;
@@ -140,17 +139,12 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
       if (methods.size() < 2)
         return methods;
       List<Method> work = methods;
-      for (int i = 0; i < args.length; i++) {
-        Object argObj = args[i];
-        if (!(argObj instanceof Arg))
-          continue;
-        int ii = i;
-        List<Method> tmp = work
-            .stream()
-            .filter(m -> m.getParameterTypes()[ii].equals(((Arg<?>) argObj).type()))
-            .collect(toList());
-        if (!tmp.isEmpty())
+      for (Object ignored : args) {
+        List<Method> tmp = new ArrayList<>(work);
+        if (!tmp.isEmpty()) {
           work = tmp;
+          break;
+        }
       }
       return work;
     }
@@ -179,8 +173,6 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
     public static Class<?> toClass(Object value) {
       if (value == null)
         return null;
-      if (value instanceof Arg)
-        return ((Arg<?>) value).type();
       return value.getClass();
     }
   }
