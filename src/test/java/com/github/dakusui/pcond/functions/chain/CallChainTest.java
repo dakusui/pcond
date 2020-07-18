@@ -59,5 +59,30 @@ public class CallChainTest {
     System.out.println(p);
     System.out.println(p.test("hello"));
   }
+
+  @Test
+  public void test5a() {
+    MultiFunction<Integer> p = CallChain.create(parameter(0), "length").build();
+
+    System.out.println(p);
+    System.out.println(p.apply(singletonList("hello")));
+
+  }
+
+  @Test
+  public void test5b() {
+    MultiFunction<Integer> p = CallChain.create(parameter(0), "length").andThen(greaterThan(1)).build();
+
+    System.out.println(p);
+    System.out.println(p.apply(singletonList("hello")));
+  }
+
+  @Test
+  public void test5c() {
+    MultiFunction<Boolean> p = MultiFunction.toMulti(greaterThan(1));
+
+    System.out.println(p);
+    System.out.println(p.apply(singletonList(6)));
+  }
 }
 

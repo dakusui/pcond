@@ -35,8 +35,6 @@ public interface CallChain {
    */
   CallChain andThen(MethodQuery methodQuery);
 
-  int numParameters();
-
   <R> MultiFunction<R> build();
 
   default CallChain andThen(String methodName, Object... args) {
@@ -186,21 +184,19 @@ public interface CallChain {
       return new Impl(this, MultiFunction.toMulti(pred), i -> i == 0 ? Optional.of(TAIL) : Optional.empty());
     }
 
-    @Override
-    public int numParameters() {
-      return multiFuncFactory.numUnboundParameters();
-    }
-
     @SuppressWarnings("unchecked")
     @Override
     public <R> MultiFunction<R> build() {
-      List<Class<?>> parameterTypes = range(0, numParameters())
-          .mapToObj(i -> Object.class)
-          .collect(toList());
       if (this.parent == null)
         return toMultiFunction(null);
       MultiFunction<Object> parentFunc = parent.build();
-      return new MultiFunction.Builder<>(args -> (R) toMultiFunction(applyParent(args, parentFunc)).apply(parametersFor(this, args)))
+
+      List<Class<?>> parameterTypes = range(
+          0,
+          Integer.max(multiFuncFactory.numUnboundParameters(), ((Impl) parent).multiFuncFactory.numUnboundParameters()))
+          .mapToObj(i -> Object.class)
+          .collect(toList());
+      return new MultiFunction.Builder<>(args -> (R) toMultiFunction(parentFunc.apply(parametersFor(args, ((Impl) parent).multiFuncFactory))).apply(parametersFor(args, this.multiFuncFactory)))
           .addParameters(parameterTypes)
           .name(parentFunc.name() + "." + multiFuncFactory.name())
           .$();
@@ -210,12 +206,8 @@ public interface CallChain {
       return multiFuncFactory.create(actualTailValue);
     }
 
-    private Object applyParent(List<Object> args, MultiFunction<Object> build) {
-      return build.apply(parametersFor(parent, args));
-    }
-
-    private static List<Object> parametersFor(CallChain chain, List<Object> args) {
-      return args.subList(0, chain.numParameters());
+    private static List<Object> parametersFor(List<Object> args, MultiFunctionFactory multiFuncFactory) {
+      return args.subList(0, multiFuncFactory.numUnboundParameters());
     }
   }
 }
