@@ -1,10 +1,10 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.Context;
+import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.Printables;
-import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;

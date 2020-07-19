@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.functions.preds;
+package com.github.dakusui.pcond.core.preds;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.internals.PrintableLambdaFactory;

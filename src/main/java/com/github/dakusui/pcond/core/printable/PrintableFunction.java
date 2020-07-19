@@ -2,8 +2,8 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
-import com.github.dakusui.pcond.functions.preds.ComposedFuncUtils;
+import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.core.preds.ComposedFuncUtils;
 
 import java.util.List;
 import java.util.Objects;

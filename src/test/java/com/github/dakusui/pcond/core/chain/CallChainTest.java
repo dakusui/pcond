@@ -13,7 +13,6 @@ import static com.github.dakusui.pcond.functions.Predicates.*;
 import static com.github.dakusui.pcond.core.chain.ChainUtils.instanceMethod;
 import static com.github.dakusui.pcond.core.chain.ChainUtils.parameter;
 import static java.util.Arrays.asList;
-import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 

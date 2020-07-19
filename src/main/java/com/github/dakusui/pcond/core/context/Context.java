@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.core;
+package com.github.dakusui.pcond.core.context;
 
 import com.github.dakusui.pcond.internals.InternalUtils;
 

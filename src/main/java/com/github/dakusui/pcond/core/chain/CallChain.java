@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.chain;
 
-import com.github.dakusui.pcond.core.Context;
+import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
 

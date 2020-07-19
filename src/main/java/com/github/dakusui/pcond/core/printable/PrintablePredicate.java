@@ -1,9 +1,9 @@
 package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.functions.preds.ConjunctionUtils;
-import com.github.dakusui.pcond.functions.preds.DisjunctionUtils;
-import com.github.dakusui.pcond.functions.preds.NegationUtils;
+import com.github.dakusui.pcond.core.preds.ConjunctionUtils;
+import com.github.dakusui.pcond.core.preds.DisjunctionUtils;
+import com.github.dakusui.pcond.core.preds.NegationUtils;
 
 import java.util.List;
 import java.util.function.Predicate;

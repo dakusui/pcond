@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.core.multi.MultiFunction;
-import com.github.dakusui.pcond.functions.preds.BasePredUtils;
-import com.github.dakusui.pcond.core.Context;
+import com.github.dakusui.pcond.core.preds.BasePredUtils;
+import com.github.dakusui.pcond.core.context.Context;
 
 import java.io.Serializable;
 import java.util.*;

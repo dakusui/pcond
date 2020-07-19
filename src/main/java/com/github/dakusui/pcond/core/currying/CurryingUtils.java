@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.core.currying;
 
 import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.functions.Printables;
-import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
 
 import java.util.List;
 

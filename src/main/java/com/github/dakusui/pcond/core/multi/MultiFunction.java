@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.core.multi;
 
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.FormattingUtils;
-import com.github.dakusui.pcond.core.Context;
+import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.printable.PrintableFunction;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.functions.Functions;

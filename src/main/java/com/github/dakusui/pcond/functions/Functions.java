@@ -4,7 +4,7 @@ import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
-import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
