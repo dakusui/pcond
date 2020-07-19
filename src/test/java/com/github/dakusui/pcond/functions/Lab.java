@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.core.preds.BasePredUtils;
 import com.github.dakusui.pcond.core.context.Context;
@@ -114,7 +115,7 @@ enum Lab {
 
   public static <R> Function<Context, R> apply(MultiFunction<R> multiFunction, int... orderArgs) {
     return context -> {
-      IntStream orderStream = Arrays.stream(Experimentals.normalizeOrderArgs(context, orderArgs));
+      IntStream orderStream = Arrays.stream(CurryingUtils.normalizeOrderArgs(context, orderArgs));
       return multiFunction.apply(orderStream.distinct().mapToObj(context::valueAt).collect(Collectors.toList()));
     };
   }

@@ -26,23 +26,4 @@ public enum Experimentals {
     return Printables.function(() -> "toContext", ContextUtils::toContext);
   }
 
-  public static <R> Function<Context, R> apply(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
-    return context -> {
-      CurriedFunction<?, ?> cur = curriedFunction;
-      int[] normalizedOrderArgs = normalizeOrderArgs(context, orderArgs);
-      for (int i = 0; i < normalizedOrderArgs.length - 1; i++)
-        cur = cur.applyNext(context.valueAt(normalizedOrderArgs[i]));
-      return cur.applyLast(context.valueAt(normalizedOrderArgs[context.size() - 1]));
-    };
-  }
-
-  public static int[] normalizeOrderArgs(Context context, int[] orderArgs) {
-    int[] order;
-    if (orderArgs.length == 0)
-      order = IntStream.range(0, context.size()).toArray();
-    else
-      order = orderArgs;
-    return order;
-  }
-
 }

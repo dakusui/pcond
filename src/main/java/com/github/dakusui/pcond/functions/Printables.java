@@ -11,6 +11,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
+
 public enum Printables {
   ;
 
@@ -19,6 +21,7 @@ public enum Printables {
   }
 
   public static <T> Predicate<T> predicate(String s, Predicate<T> predicate) {
+    requireNonNull(s);
     return predicate(() -> s, predicate);
   }
 

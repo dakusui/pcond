@@ -1,10 +1,12 @@
 package com.github.dakusui.pcond.core.currying;
 
+import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
-import com.github.dakusui.pcond.functions.Printables;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.IntStream;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -31,7 +33,7 @@ public enum CurryingUtils {
 	}
 
 	private static BaseFuncUtils.Factory<Object, Object, List<Object>> createCurriedFunctionFactory() {
-		return Printables.functionFactory(
+		return BaseFuncUtils.factory(
 				(args) -> FormattingUtils.functionNameFormatter(functionName(args), ongoingContext(args)).apply(function(args)),
 				(args) -> new CurriedFunction.Impl(function(args), ongoingContext(args)));
 	}
@@ -48,5 +50,24 @@ public enum CurryingUtils {
 	@SuppressWarnings("unchecked")
 	private static List<? super Object> ongoingContext(List<Object> args) {
 		return (List<? super Object>) args.get((2));
+	}
+
+	public static <R> Function<Context, R> applyCurriedFunction(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
+	  return context -> {
+	    CurriedFunction<?, ?> cur = curriedFunction;
+	    int[] normalizedOrderArgs = normalizeOrderArgs(context, orderArgs);
+	    for (int i = 0; i < normalizedOrderArgs.length - 1; i++)
+	      cur = cur.applyNext(context.valueAt(normalizedOrderArgs[i]));
+	    return cur.applyLast(context.valueAt(normalizedOrderArgs[context.size() - 1]));
+	  };
+	}
+
+	public static int[] normalizeOrderArgs(Context context, int[] orderArgs) {
+	  int[] order;
+	  if (orderArgs.length == 0)
+	    order = IntStream.range(0, context.size()).toArray();
+	  else
+	    order = orderArgs;
+	  return order;
 	}
 }
