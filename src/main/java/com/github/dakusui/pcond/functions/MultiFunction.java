@@ -7,6 +7,7 @@ import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -49,6 +50,7 @@ public interface MultiFunction<R> extends Function<List<? super Object>, R> {
     return new Builder<>(args -> pred.test((T) args.get(0)))
         .addParameter(Object.class)
         .name(pred.toString())
+        .formatter(pred::toString)
         .$();
   }
 

@@ -35,6 +35,10 @@ public interface CallChain {
    */
   CallChain andThen(MethodQuery methodQuery);
 
+  <T, R> CallChain andThen(Function<T, R> func);
+
+  <T> CallChain andThen(Predicate<T> pred);
+
   <R> MultiFunction<R> build();
 
   default CallChain andThen(String methodName, Object... args) {
@@ -44,10 +48,6 @@ public interface CallChain {
   default CallChain andThen(Class<?> clazz, String methodName, Object... args) {
     return andThen(classMethod(clazz, methodName, args));
   }
-
-  <T, R> CallChain andThen(Function<T, R> func);
-
-  <T> CallChain andThen(Predicate<T> pred);
 
   default CallChain andThenOn(Object target, String methodName, Object... args) {
     return andThen(instanceMethod(target, methodName, args));
@@ -71,12 +71,38 @@ public interface CallChain {
     return create(instanceMethod(target, metodName, args));
   }
 
-  interface MultiFunctionFactory {
-    <R> MultiFunction<R> create(Object actualTailValue);
+  static CallChain call(String methodName, Object... args) {
+    return create(instanceMethod(parameter(0), methodName, args));
+  }
 
-    int numUnboundParameters();
+  static CallChain fromMultiFunction(MultiFunction<?> func, Assignments assignments) {
+    return new Impl(null, func, assignments);
+  }
 
-    String name();
+  static <T, R> CallChain fromFunction(Function<T, R> func) {
+    return fromMultiFunction(MultiFunction.toMulti(func), Assignments.EMPTY);
+  }
+
+  /**
+   * An interface that represents "assignments" passed to a Multi-function.
+   */
+  @FunctionalInterface
+  interface Assignments extends Function<Integer, Optional<Object>> {
+    Assignments CHAINING = i -> i == 0 ? Optional.of(TAIL) : Optional.empty();
+    Assignments EMPTY    = i -> Optional.empty();
+
+    /**
+     * A method that should return an argument of index {@code i}.
+     *
+     * @param i The argument index.
+     * @return The {@code i}the argument passed to a multi-function passed to this object.
+     */
+    @Override
+    Optional<Object> apply(Integer i);
+
+    static Assignments create(Object... args) {
+      return i -> i < args.length ? Optional.of(args[i]) : Optional.empty();
+    }
   }
 
   class Impl implements CallChain {
@@ -111,7 +137,7 @@ public interface CallChain {
       });
     }
 
-    public Impl(CallChain parent, MultiFunction<?> multiFunc, Function<Integer, Optional<Object>> assignments) {
+    public Impl(CallChain parent, MultiFunction<?> multiFunc, Assignments assignments) {
       this(parent, new MultiFunctionFactory() {
         @Override
         public <R> MultiFunction<R> create(Object actualTailValue) {
@@ -176,7 +202,7 @@ public interface CallChain {
 
     @Override
     public <T, R> CallChain andThen(Function<T, R> func) {
-      return new Impl(this, MultiFunction.toMulti(func), i -> i == 0 ? Optional.of(TAIL) : Optional.empty());
+      return new Impl(this, MultiFunction.toMulti(func), Assignments.CHAINING);
     }
 
     @Override
@@ -208,6 +234,14 @@ public interface CallChain {
 
     private static List<Object> parametersFor(List<Object> args, MultiFunctionFactory multiFuncFactory) {
       return args.subList(0, multiFuncFactory.numUnboundParameters());
+    }
+
+    public interface MultiFunctionFactory {
+      <R> MultiFunction<R> create(Object actualTailValue);
+
+      int numUnboundParameters();
+
+      String name();
     }
   }
 }

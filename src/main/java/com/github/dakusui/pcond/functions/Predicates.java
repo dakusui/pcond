@@ -208,34 +208,6 @@ public enum Predicates {
     return cond -> new TransformingPredicate<>(cond, function);
   }
 
-  public static Predicate<Context> isEqualTo() {
-    return multiPredicate((args) -> ((String) args.get(0)).endsWith((String) args.get(1)))
-        .name("endsWith")
-        .addParameters(asList(String.class, String.class))
-        .$()
-        .toContextPredicate();
-  }
-
-  public static Predicate<Context> endsWith() {
-    return multiPredicate((args) -> ((String) args.get(0)).endsWith((String) args.get(1)))
-        .name("endsWith")
-        .addParameters(asList(String.class, String.class))
-        .$()
-        .toContextPredicate();
-  }
-
-  public static Predicate<Context> startsWith() {
-    return multiPredicate((args) -> ((String) args.get(0)).endsWith((String) args.get(1)))
-        .name("startsWith")
-        .addParameters(asList(String.class, String.class))
-        .$()
-        .toContextPredicate();
-  }
-
-  public static MultiFunction.Builder<Boolean> multiPredicate(Predicate<List<Object>> predicateBody) {
-    return new MultiFunction.Builder<>(args -> requireNonNull(predicateBody).test(args));
-  }
-
   public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate_, int argIndex) {
     return new PrintableContextPredicate(predicate_, argIndex);
   }
