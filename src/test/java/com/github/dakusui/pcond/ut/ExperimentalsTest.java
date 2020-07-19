@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.functions.Context;
+import com.github.dakusui.pcond.core.Context;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;

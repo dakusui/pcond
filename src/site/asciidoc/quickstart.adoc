@@ -200,6 +200,10 @@ So the last line in the message always shows the direct reason why the check fai
 Thus, you can read the output above as "The check failed because the value `\"JohnDoe\"` `containsString[" "]` was `false`.
 "
 
+== Build dependencies
+
+- `gem` needs to be installed in advance.
+
 == References
 
 - [[[DbC]]] Wikipedia article on Design by Contract, https://en.wikipedia.org/wiki/Design_by_contract

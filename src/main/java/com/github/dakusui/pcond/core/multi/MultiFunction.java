@@ -1,13 +1,16 @@
-package com.github.dakusui.pcond.functions;
+package com.github.dakusui.pcond.core.multi;
 
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.FormattingUtils;
+import com.github.dakusui.pcond.core.Context;
+import com.github.dakusui.pcond.core.printable.PrintableFunction;
+import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.functions.Functions;
 
 import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;

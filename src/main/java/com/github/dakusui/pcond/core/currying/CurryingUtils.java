@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.currying;
 
-import com.github.dakusui.pcond.functions.MultiFunction;
+import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
 

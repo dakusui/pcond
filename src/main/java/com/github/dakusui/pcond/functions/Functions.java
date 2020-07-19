@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.functions;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
+import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
 
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public enum Functions {
   public static Function<? super String, Integer> length() {
     return Def.LENGTH;
   }
+
 
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   public static <E> Function<List<? extends E>, ? extends E> elementAt(int i) {

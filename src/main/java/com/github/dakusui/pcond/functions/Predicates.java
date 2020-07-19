@@ -2,13 +2,14 @@ package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 import com.github.dakusui.pcond.functions.preds.BasePredUtils;
 import com.github.dakusui.pcond.functions.preds.StreamUtils;
+import com.github.dakusui.pcond.core.Context;
 import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;

@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.functions.chain;
+package com.github.dakusui.pcond.core.chain;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -286,5 +286,27 @@ public enum ChainUtils {
       return replace.apply(object);
     }
     return object;
+  }
+
+  /**
+   * An interface that represents "assignments" passed to a Multi-function.
+   */
+  @FunctionalInterface
+  interface Assignments extends Function<Integer, Optional<Object>> {
+    Assignments CHAINING = i -> i == 0 ? Optional.of(CallChain.TAIL) : Optional.empty();
+    Assignments EMPTY    = i -> Optional.empty();
+
+    /**
+     * A method that should return an argument of index {@code i}.
+     *
+     * @param i The argument index.
+     * @return The {@code i}the argument passed to a multi-function passed to this object.
+     */
+    @Override
+    Optional<Object> apply(Integer i);
+
+    static Assignments create(Object... args) {
+      return i -> i < args.length ? Optional.of(args[i]) : Optional.empty();
+    }
   }
 }

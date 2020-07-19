@@ -1,7 +1,8 @@
-package com.github.dakusui.pcond.functions.chain;
+package com.github.dakusui.pcond.core.chain;
 
 import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.MultiFunction;
+import com.github.dakusui.pcond.core.multi.MultiFunction;
+import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
 import java.util.function.Predicate;
@@ -9,14 +10,14 @@ import java.util.function.Predicate;
 import static com.github.dakusui.pcond.Preconditions.require;
 import static com.github.dakusui.pcond.functions.Experimentals.toContextStream;
 import static com.github.dakusui.pcond.functions.Predicates.*;
-import static com.github.dakusui.pcond.functions.chain.ChainUtils.instanceMethod;
-import static com.github.dakusui.pcond.functions.chain.ChainUtils.parameter;
+import static com.github.dakusui.pcond.core.chain.ChainUtils.instanceMethod;
+import static com.github.dakusui.pcond.core.chain.ChainUtils.parameter;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-public class CallChainTest {
+public class CallChainTest extends TestBase {
 
   @Test
   public void test0() {
@@ -100,7 +101,7 @@ public class CallChainTest {
 
   @Test
   public void test7() {
-    Predicate<String> p = CallChain.fromMultiFunction(MultiFunction.toMulti(Functions.length()), CallChain.Assignments.EMPTY).andThen(greaterThan(2)).toPredicate();
+    Predicate<String> p = CallChain.fromMultiFunction(MultiFunction.toMulti(Functions.length()), ChainUtils.Assignments.EMPTY).andThen(greaterThan(2)).toPredicate();
 
     System.out.println(p);
     System.out.println(p.test("hello"));

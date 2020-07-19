@@ -1,7 +1,5 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.functions.Context;
-
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;

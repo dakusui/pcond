@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
 import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.MultiFunction;
+import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;

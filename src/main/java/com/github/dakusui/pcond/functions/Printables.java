@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.functions;
 
 
+import com.github.dakusui.pcond.core.printable.PrintableFunction;
 import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
 import com.github.dakusui.pcond.functions.preds.BasePredUtils;
 import com.github.dakusui.pcond.functions.preds.LeafPredUtils;

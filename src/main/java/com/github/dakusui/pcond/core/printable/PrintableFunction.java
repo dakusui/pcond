@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.functions;
+package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;

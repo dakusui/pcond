@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.functions.preds;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.functions.PrintableFunction;
+import com.github.dakusui.pcond.core.printable.PrintableFunction;
 
 import java.util.List;
 import java.util.function.Function;

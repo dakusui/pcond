@@ -1,8 +1,8 @@
-package com.github.dakusui.pcond.functions.chain;
+package com.github.dakusui.pcond.core.chain;
 
-import com.github.dakusui.pcond.functions.Context;
-import com.github.dakusui.pcond.functions.MultiFunction;
+import com.github.dakusui.pcond.core.Context;
 import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.core.multi.MultiFunction;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +11,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
-import static com.github.dakusui.pcond.functions.chain.ChainUtils.*;
+import static com.github.dakusui.pcond.core.chain.ChainUtils.*;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -81,28 +81,6 @@ public interface CallChain {
 
   static <T, R> CallChain fromFunction(Function<T, R> func) {
     return fromMultiFunction(MultiFunction.toMulti(func), Assignments.EMPTY);
-  }
-
-  /**
-   * An interface that represents "assignments" passed to a Multi-function.
-   */
-  @FunctionalInterface
-  interface Assignments extends Function<Integer, Optional<Object>> {
-    Assignments CHAINING = i -> i == 0 ? Optional.of(TAIL) : Optional.empty();
-    Assignments EMPTY    = i -> Optional.empty();
-
-    /**
-     * A method that should return an argument of index {@code i}.
-     *
-     * @param i The argument index.
-     * @return The {@code i}the argument passed to a multi-function passed to this object.
-     */
-    @Override
-    Optional<Object> apply(Integer i);
-
-    static Assignments create(Object... args) {
-      return i -> i < args.length ? Optional.of(args[i]) : Optional.empty();
-    }
   }
 
   class Impl implements CallChain {

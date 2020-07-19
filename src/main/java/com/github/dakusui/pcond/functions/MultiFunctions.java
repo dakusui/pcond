@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.functions;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
+import com.github.dakusui.pcond.core.multi.MultiFunction;
 
 import java.util.List;
 import java.util.function.Predicate;
