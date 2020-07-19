@@ -109,7 +109,8 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable
   }
 
   public static <T, R> PrintableFunction<T, R> create(String s, Function<? super T, ? extends R> function) {
-    return new PrintableFunction<>(() -> Objects.requireNonNull(s), function);
+    Objects.requireNonNull(s);
+    return new PrintableFunction<>(() -> s, function);
   }
 
 }

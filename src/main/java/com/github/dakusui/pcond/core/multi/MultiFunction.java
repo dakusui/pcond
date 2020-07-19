@@ -1,11 +1,11 @@
 package com.github.dakusui.pcond.core.multi;
 
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.currying.FormattingUtils;
 import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.preds.ContextUtils;
 import com.github.dakusui.pcond.core.printable.PrintableFunction;
-import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.functions.Functions;
 
 import java.lang.reflect.Method;
 import java.util.LinkedList;
@@ -67,11 +67,11 @@ public interface MultiFunction<R> extends Function<List<? super Object>, R> {
 
   @SuppressWarnings("unchecked")
   default CurriedFunction<Object, Object> curry() {
-    return Functions.curry((MultiFunction<Object>) this);
+    return CurryingUtils.curry((MultiFunction<Object>) this);
   }
 
   default Predicate<Context> toContextPredicate() {
-    return Predicates.toContextPredicate(this.curry());
+    return ContextUtils.toContextPredicate(this.curry());
   }
 
   abstract class Base<RR> extends PrintableFunction<List<? super Object>, RR> implements MultiFunction<RR> {

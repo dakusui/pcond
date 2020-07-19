@@ -5,6 +5,7 @@ import com.github.dakusui.pcond.core.printable.PrintableFunction;
 import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
 import com.github.dakusui.pcond.core.preds.BasePredUtils;
 import com.github.dakusui.pcond.core.preds.LeafPredUtils;
+import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -30,7 +31,7 @@ public enum Printables {
   }
 
   public static <T> Predicate<T> printablePredicate(String s, Predicate<T> predicate) {
-    return new LeafPredUtils.LeafPred<>(() -> s, predicate);
+    return PrintablePredicate.create(s, predicate);
   }
 
   public static <T, R> Function<T, R> printableFunction(String s, Function<? super T, ? extends R> function) {

@@ -223,7 +223,7 @@ public enum Predicates {
    * @return A predicate converted from the given curried function.
    */
   public static Predicate<Context> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
-    return ContextUtils.applyAndTest(curriedFunction, predicate("contextPredicate", isTrue()), Boolean.class, orderArgs);
+    return ContextUtils.toContextPredicate(curriedFunction, orderArgs);
   }
 
   enum Def {

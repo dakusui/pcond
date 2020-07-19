@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core.chain;
 
 import com.github.dakusui.pcond.core.context.Context;
-import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
 
 import java.util.List;
@@ -60,7 +60,7 @@ public interface CallChain {
 
   default <T> Predicate<T> toPredicate() {
     MultiFunction<Object> p = this.build();
-    return Printables.printablePredicate(p.name(), (T value) -> (boolean) p.apply(singletonList(value)));
+    return PrintablePredicate.create(p.name(), (T value) -> (boolean) p.apply(singletonList(value)));
   }
 
   static CallChain create(MethodQuery query) {
