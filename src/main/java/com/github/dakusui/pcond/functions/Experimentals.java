@@ -1,12 +1,10 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.preds.ContextUtils;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;

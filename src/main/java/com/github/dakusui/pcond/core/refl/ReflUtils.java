@@ -1,149 +1,48 @@
-package com.github.dakusui.pcond.core.chain;
+package com.github.dakusui.pcond.core.refl;
+
+import com.github.dakusui.pcond.Assertions;
+import com.github.dakusui.pcond.functions.Predicates;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
-import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public enum ChainUtils {
+/**
+ * This class consists of {@code static} utility methods for creating printable functions and predicate
+ * on objects.
+ */
+public enum ReflUtils {
   ;
 
-  public static Parameter parameter(int arg) {
-    return Parameter.create(arg);
-  }
-
-  static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
-    return MethodQuery.create(false, requireNonNull(targetObject), targetTypeOf(targetObject), methodName, arguments);
-  }
-
-  static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
-    return MethodQuery.create(true, null, targetClass, methodName, arguments);
-  }
-
-  interface Parameter {
-    static Parameter create(int i) {
-      requireArgument(i, v -> v >= 0, () -> "parameter index must not be negative, but " + i + " was given.");
-      return new Parameter() {
-        @Override
-        public int index() {
-          return i;
-        }
-
-        @Override
-        public String toString() {
-          return format("p_%s", i);
-        }
-
-        @Override
-        public int hashCode() {
-          return i;
-        }
-
-        @Override
-        public boolean equals(Object anotherObject) {
-          if (!(anotherObject instanceof Parameter))
-            return false;
-          Parameter another = (Parameter) anotherObject;
-          return this.index() == another.index();
-        }
-      };
-    }
-
-    int index();
-  }
-
-  interface MethodQuery {
-    boolean isStatic();
-
-    Object targetObject();
-
-    Class<?> targetClass();
-
-    String methodName();
-
-    Object[] arguments();
-
-    String describe();
-
-    default Integer numUnboundParameters() {
-      return Stream.concat(Stream.of(this.targetObject()), Arrays.stream(this.arguments()))
-          .filter(each -> each instanceof Parameter)
-          .map(each -> (Parameter) each)
-          .map(Parameter::index)
-          .map(i -> i + 1)
-          .max(comparingInt(o -> o))
-          .orElse(0);
-    }
-
-    default MethodQuery bindActualArguments(Predicate<Object> isPlaceHolder, Function<Object, Object> replace) {
-      Function<Object, Object> argReplacer = object -> replacePlaceHolderWithActualArgument(object, isPlaceHolder, replace);
-      Object targetObject = argReplacer.apply(this.targetObject());
-      return create(this.isStatic(), targetObject, targetObject.getClass(), this.methodName(), Arrays.stream(this.arguments()).map(argReplacer).toArray());
-    }
-
-    static MethodQuery create(boolean isStatic, Object targetObject, Class<?> targetClass, String methodName, Object[] arguments) {
-      requireNonNull(targetClass);
-      requireNonNull(arguments);
-      requireNonNull(methodName);
-      if (isStatic)
-        requireArgument(targetObject, Objects::nonNull, () -> "targetObject must be null when isStatic is true.");
-      else {
-        requireNonNull(targetObject);
-        requireArgument(targetObject, v -> targetClass.isAssignableFrom(v.getClass()), () -> format("Incompatible object '%s' was given it needs to be assignable to '%s'.", targetObject, targetClass.getName()));
-      }
-
-      return new MethodQuery() {
-        @Override
-        public boolean isStatic() {
-          return isStatic;
-        }
-
-        @Override
-        public Object targetObject() {
-          return targetObject;
-        }
-
-        @Override
-        public String methodName() {
-          return methodName;
-        }
-
-        @Override
-        public Class<?> targetClass() {
-          return targetClass;
-        }
-
-        @Override
-        public Object[] arguments() {
-          return arguments;
-        }
-
-        @Override
-        public String describe() {
-          return format("%s.%s(%s)",
-              isStatic ? targetClass.getName() : "",
-              methodName,
-              Arrays.stream(arguments).map(Objects::toString).collect(joining(",")));
-        }
-      };
-    }
-  }
-
+  /**
+   * Invokes a method found by {@code methodQuery}.
+   * All parameters in the query needs to be bound before calling this method.
+   * When a query matches no or more than one methods, an exception will be thrown.
+   * <p>
+   * If an exception is thrown by the method, it will be wrapped by {@link RuntimeException} and re-thrown.
+   *
+   * @param methodQuery A query that speficies the method to be executed.
+   * @param <R>         Type of the returned value.
+   * @return The value returned from the method found by the query.
+   * @see MethodQuery
+   * @see ReflUtils#findMethod(Class, String, Object[])
+   */
   @SuppressWarnings("unchecked")
   public static <R> R invokeMethod(MethodQuery methodQuery) {
+    assert Assertions.precondition(methodQuery, Predicates.isNotNull());
     try {
       return (R) setAccessible(findMethod(methodQuery.targetClass(), methodQuery.methodName(), methodQuery.arguments()))
           .invoke(methodQuery.targetObject(), methodQuery.arguments());
@@ -152,11 +51,6 @@ public enum ChainUtils {
     } catch (InvocationTargetException e) {
       throw new RuntimeException(e.getCause());
     }
-  }
-
-  private static Method setAccessible(Method m) {
-    m.setAccessible(true);
-    return m;
   }
 
   /**
@@ -192,6 +86,11 @@ public enum ChainUtils {
         () -> exceptionOnMethodNotFound(aClass, methodName, args, methodSelector));
   }
 
+  private static Method setAccessible(Method m) {
+    m.setAccessible(true);
+    return m;
+  }
+
   private static RuntimeException exceptionOnMethodNotFound(Class<?> aClass, String methodName, Object[] args, MethodSelector methodSelector) {
     return new RuntimeException(format(
         "Method matching '%s%s' was not found by selector=%s in %s.",
@@ -217,7 +116,7 @@ public enum ChainUtils {
             args))));
   }
 
-  private static Class<?> targetTypeOf(Object targetObject) {
+  static Class<?> targetTypeOf(Object targetObject) {
     requireNonNull(targetObject);
     return targetObject instanceof Parameter ?
         Object.class :
@@ -232,7 +131,7 @@ public enum ChainUtils {
   private static Collector<Method, List<Method>, List<Method>> toMethodList() {
     return Collector.of(
         LinkedList::new,
-        ChainUtils::addMethodIfNecessary,
+        ReflUtils::addMethodIfNecessary,
         new BinaryOperator<List<Method>>() {
           @Override
           public List<Method> apply(List<Method> methods, List<Method> methods2) {
@@ -255,7 +154,7 @@ public enum ChainUtils {
   private static List<String> summarizeMethods(List<Method> methods) {
     return methods
         .stream()
-        .map(ChainUtils::summarizeMethodName)
+        .map(ReflUtils::summarizeMethodName)
         .collect(toList());
   }
 
@@ -281,32 +180,10 @@ public enum ChainUtils {
     return aClass.getMethods();
   }
 
-  private static Object replacePlaceHolderWithActualArgument(Object object, Predicate<Object> isPlaceHolder, Function<Object, Object> replace) {
+  static Object replacePlaceHolderWithActualArgument(Object object, Predicate<Object> isPlaceHolder, Function<Object, Object> replace) {
     if (isPlaceHolder.test(object)) {
       return replace.apply(object);
     }
     return object;
-  }
-
-  /**
-   * An interface that represents "assignments" passed to a Multi-function.
-   */
-  @FunctionalInterface
-  interface Assignments extends Function<Integer, Optional<Object>> {
-    Assignments CHAINING = i -> i == 0 ? Optional.of(CallChain.TAIL) : Optional.empty();
-    Assignments EMPTY    = i -> Optional.empty();
-
-    /**
-     * A method that should return an argument of index {@code i}.
-     *
-     * @param i The argument index.
-     * @return The {@code i}the argument passed to a multi-function passed to this object.
-     */
-    @Override
-    Optional<Object> apply(Integer i);
-
-    static Assignments create(Object... args) {
-      return i -> i < args.length ? Optional.of(args[i]) : Optional.empty();
-    }
   }
 }

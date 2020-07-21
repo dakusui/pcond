@@ -1,10 +1,6 @@
 package com.github.dakusui.pcond.core.multi;
 
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.currying.FormattingUtils;
-import com.github.dakusui.pcond.core.context.Context;
-import com.github.dakusui.pcond.core.preds.ContextUtils;
 import com.github.dakusui.pcond.core.printable.PrintableFunction;
 
 import java.lang.reflect.Method;
@@ -12,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.core.currying.Checks.validateParamOrderList;
@@ -25,6 +20,12 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * An interface that represents a function that can have more than one parameters.
+ * This interface is often used in combination with {@link com.github.dakusui.pcond.functions.Functions#curry(MultiFunction)} method.
+ *
+ * @param <R>
+ */
 public interface MultiFunction<R> extends Function<List<? super Object>, R> {
   @SuppressWarnings("unchecked")
   static <R> MultiFunction<R> createFromStaticMethod(Method method, List<Integer> paramOrder) {
@@ -38,42 +39,40 @@ public interface MultiFunction<R> extends Function<List<? super Object>, R> {
         .$();
   }
 
-  @SuppressWarnings("unchecked")
-  static <T, R> MultiFunction<R> toMulti(Function<T, R> func) {
-    requireNonNull(func);
-    return new Builder<>(args -> func.apply((T) args.get(0)))
-        .addParameter(Object.class)
-        .name(func.toString())
-        .$();
-  }
-
-  @SuppressWarnings("unchecked")
-  static <T> MultiFunction<Boolean> toMulti(Predicate<T> pred) {
-    requireNonNull(pred);
-    return new Builder<>(args -> pred.test((T) args.get(0)))
-        .addParameter(Object.class)
-        .name(pred.toString())
-        .formatter(pred::toString)
-        .$();
-  }
-
+  /**
+   * Returns a name of this function.
+   *
+   * @return The name of this function.
+   */
   String name();
 
+  /**
+   * Returns the number of parameters that this function can take.
+   *
+   * @return the number of parameters
+   */
   int arity();
 
+  /**
+   * The expected type of the {@code i}th parameter.
+   *
+   * @param i The parameter index.
+   * @return The type of {@code i}th parameter.
+   */
   Class<?> parameterType(int i);
 
+  /**
+   * The type of the value returned by this function.
+   *
+   * @return The type of the returned value.
+   */
   Class<? extends R> returnType();
 
-  @SuppressWarnings("unchecked")
-  default CurriedFunction<Object, Object> curry() {
-    return CurryingUtils.curry((MultiFunction<Object>) this);
-  }
-
-  default Predicate<Context> toContextPredicate() {
-    return ContextUtils.toContextPredicate(this.curry());
-  }
-
+  /**
+   * A base class for implementing a {@link MultiFunction}.
+   *
+   * @param <RR> The type of value returned by the multi-function implemented extending this class.
+   */
   abstract class Base<RR> extends PrintableFunction<List<? super Object>, RR> implements MultiFunction<RR> {
     final Object identity;
 
@@ -99,6 +98,11 @@ public interface MultiFunction<R> extends Function<List<? super Object>, R> {
     }
   }
 
+  /**
+   * A builder for a {@link MultiFunction} instance.
+   *
+   * @param <R> The type of value returned by the multi-function built by this object.
+   */
   class Builder<R> {
     final Function<List<Object>, R> body;
     final List<Class<?>>            parameterTypes = new LinkedList<>();

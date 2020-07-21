@@ -13,6 +13,9 @@ import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * An entry point class that provides methods to create a new "printable" function from a given conventional function.
+ */
 public enum Printables {
   ;
 
@@ -21,7 +24,6 @@ public enum Printables {
   }
 
   public static <T> Predicate<T> predicate(String s, Predicate<T> predicate) {
-    requireNonNull(s);
     return predicate(() -> s, predicate);
   }
 

@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.core.refl.MethodQuery;
+import com.github.dakusui.pcond.core.refl.Parameter;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
@@ -11,9 +13,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -153,6 +157,20 @@ public enum Functions {
 
   public static <R> MultiFunction<R> functionForStaticMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
     return ReflectionsUtils.lookupFunctionForStaticMethod(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);
+  }
+
+  public static <T, R> Function<T, R> call(MethodQuery methodQuery) {
+    requireNonNull(methodQuery);
+    return Printables.function(methodQuery.describe(), t -> invokeMethod(methodQuery.bindActualArguments((o) -> o instanceof Parameter, o -> t)));
+  }
+
+  public static <T> Predicate<T> callp(MethodQuery methodQuery) {
+    requireNonNull(methodQuery);
+    return Printables.predicate(methodQuery.describe(), t -> invokeMethod(methodQuery.bindActualArguments((o) -> o instanceof Parameter, o -> t)));
+  }
+
+  public static Parameter parameter(int arg) {
+    return Parameter.create(arg);
   }
 
   enum Def {

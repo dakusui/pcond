@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.core.chain;
+package com.github.dakusui.pcond.core.refl;
 
 import com.github.dakusui.pcond.internals.InternalUtils;
 
@@ -8,7 +8,7 @@ import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
 import static com.github.dakusui.pcond.core.currying.Checks.isWiderThanOrEqualTo;
-import static com.github.dakusui.pcond.core.chain.MethodSelector.Utils.isAssignableWithBoxingFrom;
+import static com.github.dakusui.pcond.core.refl.MethodSelector.Utils.isAssignableWithBoxingFrom;
 import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
