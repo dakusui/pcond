@@ -17,6 +17,20 @@ public class TransformingPredicate<P, O> extends PrintablePredicate<O> implement
     }
 
     TransformingPredicate<P, O> check(Predicate<? super P> cond);
+
+    /**
+     * When you are sure that the input type of your predicate {@code cond} is correct,
+     * but your compiler complains about it, try this method.
+     * This method automatically and forcibly casts {@code cond} into the type this
+     * factory object expects and then calls {@link TransformingPredicate.Factory#check(Predicate)} method internally.
+     *
+     * @param cond A predicate to be cast and given to {@code check} method.
+     * @return A transforming predicate.
+     */
+    @SuppressWarnings("unchecked")
+    default TransformingPredicate<P, O> castAndCheck(Predicate<?> cond) {
+      return check((Predicate<? super P>) cond);
+    }
   }
 
   private final Predicate<? super P>             predicate;

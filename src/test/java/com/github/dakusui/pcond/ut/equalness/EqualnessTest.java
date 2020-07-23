@@ -74,7 +74,6 @@ public class EqualnessTest extends TestBase {
 
   @Test
   public void notEqualsWithAnother() {
-    ;
     assertThat(
         target,
         allOf(nonEquals.stream().map(each -> not(equalTo(each))).collect(toList())));

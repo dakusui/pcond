@@ -14,8 +14,38 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * //@formater:off
+ * An interface representing an object that selects {@link Method}s from given ones.
+ * <p>
+ * This interface is used to choose methods that are appropriate to invoke with
+ * given arguments.
+ * //@formater:on
+ */
 public interface MethodSelector extends BiFunction<List<Method>, Object[], List<Method>>, Formattable {
+  /**
+   * Selects methods that can be invoked with given {@code args}.
+   *
+   * @param methods Methods from which returned methods are selected.
+   * @param args    Arguments to be passed to selected methods.
+   * @return Selected methods.
+   */
+  List<Method> select(List<Method> methods, Object[] args);
 
+  /**
+   * Returns a string that describes this object.
+   *
+   * @return A description of this object
+   */
+  String describe();
+
+  /**
+   * Returns a composed {@link MethodSelector} that first applies this and
+   * then applies {@code another}.
+   *
+   * @param another The method selector to apply after this.
+   * @return The composed method selector
+   */
   default MethodSelector andThen(MethodSelector another) {
     return new MethodSelector() {
       @Override
@@ -38,10 +68,6 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
   default void formatTo(Formatter formatter, int flags, int width, int precision) {
     formatter.format("%s", this.describe());
   }
-
-  List<Method> select(List<Method> methods, Object[] args);
-
-  String describe();
 
   class Default implements MethodSelector {
     @Override
@@ -158,7 +184,7 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
   enum Utils {
     ;
 
-    public static boolean isAssignableWithBoxingFrom(Class<?> a, Class<?> b) {
+    static boolean isAssignableWithBoxingFrom(Class<?> a, Class<?> b) {
       if (a.isAssignableFrom(b))
         return true;
       return isWiderThanOrEqualTo(toWrapperIfPrimitive(a), toWrapperIfPrimitive(b));
@@ -170,9 +196,7 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
       return in;
     }
 
-    public static Class<?> toClass(Object value) {
-      if (value == null)
-        return null;
+    private static Class<?> toClass(Object value) {
       return value.getClass();
     }
   }

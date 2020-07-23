@@ -35,7 +35,12 @@ public interface MethodQuery {
   default MethodQuery bindActualArguments(Predicate<Object> isPlaceHolder, Function<Object, Object> replace) {
     Function<Object, Object> argReplacer = object -> replacePlaceHolderWithActualArgument(object, isPlaceHolder, replace);
     Object targetObject = argReplacer.apply(this.targetObject());
-    return create(this.isStatic(), targetObject, targetObject.getClass(), this.methodName(), Arrays.stream(this.arguments()).map(argReplacer).toArray());
+    return create(
+        this.isStatic(),
+        targetObject,
+        this.isStatic() ? this.targetClass() : targetObject.getClass(),
+        this.methodName(),
+        Arrays.stream(this.arguments()).map(argReplacer).toArray());
   }
 
   static MethodQuery create(boolean isStatic, Object targetObject, Class<?> targetClass, String methodName, Object[] arguments) {
@@ -43,7 +48,7 @@ public interface MethodQuery {
     requireNonNull(arguments);
     requireNonNull(methodName);
     if (isStatic)
-      requireArgument(targetObject, Objects::nonNull, () -> "targetObject must be null when isStatic is true.");
+      requireArgument(targetObject, Objects::isNull, () -> "targetObject must be null when isStatic is true.");
     else {
       requireNonNull(targetObject);
       requireArgument(targetObject, v -> targetClass.isAssignableFrom(v.getClass()), () -> format("Incompatible object '%s' was given it needs to be assignable to '%s'.", targetObject, targetClass.getName()));

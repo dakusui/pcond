@@ -3,11 +3,13 @@ package com.github.dakusui.pcond.internals;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public enum InternalChecks {
   ;
+
   public static void checkArgument(boolean b, Supplier<String> messageFormatter) {
     if (!b)
       throw new IllegalArgumentException(messageFormatter.get());
@@ -17,6 +19,12 @@ public enum InternalChecks {
     if (!predicate.test(arg))
       throw new IllegalArgumentException(messageFormatter.get());
     return arg;
+  }
+
+  public static <V> V ensureValue(V value, Predicate<? super V> predicate, Function<V, String> messageFormatter) {
+    if (!predicate.test(value))
+      throw new IllegalStateException(messageFormatter.apply(value));
+    return value;
   }
 
   public static <V> V requireState(V arg, Predicate<? super V> predicate, Supplier<String> messageFormatter) {
