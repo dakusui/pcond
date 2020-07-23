@@ -1,7 +1,9 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.core.MultiParameterFunction;
-import com.github.dakusui.pcond.functions.preds.BasePredUtils;
+import com.github.dakusui.pcond.core.currying.CurryingUtils;
+import com.github.dakusui.pcond.core.multi.MultiFunction;
+import com.github.dakusui.pcond.core.preds.BasePredUtils;
+import com.github.dakusui.pcond.core.context.Context;
 
 import java.io.Serializable;
 import java.util.*;
@@ -111,10 +113,10 @@ enum Lab {
     return (Predicate<E>) MATCHES_NONE_OF_FACTORY.create(asList(collection, cond));
   }
 
-  public static <R> Function<Experimentals.Context, R> apply(MultiParameterFunction<R> multiParameterFunction, int... orderArgs) {
+  public static <R> Function<Context, R> apply(MultiFunction<R> multiFunction, int... orderArgs) {
     return context -> {
-      IntStream orderStream = Arrays.stream(Experimentals.normalizeOrderArgs(context, orderArgs));
-      return multiParameterFunction.apply(orderStream.distinct().mapToObj(context::valueAt).collect(Collectors.toList()));
+      IntStream orderStream = Arrays.stream(CurryingUtils.normalizeOrderArgs(context, orderArgs));
+      return multiFunction.apply(orderStream.distinct().mapToObj(context::valueAt).collect(Collectors.toList()));
     };
   }
 }

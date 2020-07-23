@@ -99,7 +99,7 @@ public class PrintablesFunctionTest {
               is(f2),
               not(is(g)),
               not(is(h)),
-              not(is(i)),
+              is(i),
               not(is(o))
           ));
     }

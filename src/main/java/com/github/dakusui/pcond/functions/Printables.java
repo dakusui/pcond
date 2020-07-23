@@ -1,14 +1,21 @@
 package com.github.dakusui.pcond.functions;
 
 
-import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
-import com.github.dakusui.pcond.functions.preds.BasePredUtils;
-import com.github.dakusui.pcond.functions.preds.LeafPredUtils;
+import com.github.dakusui.pcond.core.printable.PrintableFunction;
+import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.core.preds.BasePredUtils;
+import com.github.dakusui.pcond.core.preds.LeafPredUtils;
+import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static java.util.Objects.requireNonNull;
+
+/**
+ * An entry point class that provides methods to create a new "printable" function from a given conventional function.
+ */
 public enum Printables {
   ;
 
@@ -29,7 +36,7 @@ public enum Printables {
   }
 
   public static <T> Predicate<T> printablePredicate(String s, Predicate<T> predicate) {
-    return new LeafPredUtils.LeafPred<>(() -> s, predicate);
+    return PrintablePredicate.create(s, predicate);
   }
 
   public static <T, R> Function<T, R> printableFunction(String s, Function<? super T, ? extends R> function) {

@@ -1,15 +1,14 @@
-package com.github.dakusui.pcond.functions.preds;
+package com.github.dakusui.pcond.core.preds;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.functions.PrintableFunction;
+import com.github.dakusui.pcond.core.printable.PrintableFunction;
 import com.github.dakusui.pcond.internals.PrintableLambdaFactory;
 
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public enum
-BaseFuncUtils {
+public enum BaseFuncUtils {
   ;
 
   public static <T, R, E> Factory<T, R, E> factory(Function<E, String> nameComposer, Function<E, Function<T, R>> ff) {

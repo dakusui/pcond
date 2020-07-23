@@ -1,10 +1,10 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.functions.Experimentals;
+import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.Printables;
-import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
@@ -35,7 +35,7 @@ public class ExperimentalsTest extends TestBase {
    * <p>
    * You can build a check using a multi-parameter static method which returns a boolean value.
    * In this example, {@link TargetMethodHolder#stringEndsWith(String, String)} is the method.
-   * It is turned into a curried function in {@link Utils#stringEndsWith()} and then passed to {@link Experimentals#toContextPredicate(CurriedFunction, int...)}.
+   * It is turned into a curried function in {@link Utils#stringEndsWith()} and then passed to {@link Predicates#toContextPredicate(CurriedFunction, int...)}.
    * The method {@code Experimentals#test(CurriedFunction, int...)} converts a curried function whose final returned value is a boolean into a predicate of a {@link Context}.
    * A {@code Context} may have one or more values at once and those values are indexed.
    */
@@ -307,9 +307,9 @@ public class ExperimentalsTest extends TestBase {
   public void hello4() {
     require(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(new Predicate<Context>() {
           @Override
-          public boolean test(Experimentals.Context context) {
+          public boolean test(Context context) {
             return context.valueAt(1).equals("1");
           }
 
@@ -324,9 +324,9 @@ public class ExperimentalsTest extends TestBase {
   public void hello4_a() {
     require(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<Context>() {
           @Override
-          public boolean test(Experimentals.Context context) {
+          public boolean test(Context context) {
             return context.valueAt(1).equals("1");
           }
 
@@ -341,9 +341,9 @@ public class ExperimentalsTest extends TestBase {
   public void hello5() {
     require(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2")))).check(allMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(allMatch(new Predicate<Context>() {
           @Override
-          public boolean test(Experimentals.Context context) {
+          public boolean test(Context context) {
             return context.valueAt(1).equals("1");
           }
 
@@ -358,9 +358,9 @@ public class ExperimentalsTest extends TestBase {
   public void hello6() {
     require(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<Experimentals.Context>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<Context>() {
           @Override
-          public boolean test(Experimentals.Context context) {
+          public boolean test(Context context) {
             return context.valueAt(1).equals("1");
           }
 

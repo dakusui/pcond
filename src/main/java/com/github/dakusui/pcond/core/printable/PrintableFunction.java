@@ -1,9 +1,9 @@
-package com.github.dakusui.pcond.functions;
+package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
-import com.github.dakusui.pcond.functions.preds.ComposedFuncUtils;
+import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.core.preds.ComposedFuncUtils;
 
 import java.util.List;
 import java.util.Objects;
@@ -11,16 +11,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.util.Arrays.asList;
 
 public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable.Func<T> {
   private static final BaseFuncUtils.Factory<Object, Object, List<Function<Object, Object>>> COMPOSE_FACTORY = ComposedFuncUtils.factory(
-      arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
-      arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
-  );
-
-  private static final BaseFuncUtils.Factory<Object, Object, List<Function<Object, Object>>> ANDTHEN_FACTORY = ComposedFuncUtils.factory(
       arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
       arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
   );
@@ -54,7 +48,7 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable
   @SuppressWarnings({ "unchecked" })
   public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
     Objects.requireNonNull(after);
-    return (Function<T, V>) ANDTHEN_FACTORY.create(asList((Function<Object, Object>) this, (Function<Object, Object>) after));
+    return (Function<T, V>) COMPOSE_FACTORY.create(asList((Function<Object, Object>) this, (Function<Object, Object>) after));
   }
 
   @SuppressWarnings("unchecked")
@@ -80,10 +74,10 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable
 
   @SuppressWarnings("unchecked")
   @Override
-  public Class<?> returnType() {
+  public Class<? extends R> returnType() {
     return function instanceof CurriedFunction ?
-        ((CurriedFunction<? super T, ? extends R>) function).returnType() :
-        Object.class;
+        (Class<? extends R>) ((CurriedFunction<? super T, ? extends R>) function).returnType() :
+        (Class<? extends R>) Object.class;
   }
 
   @Override
@@ -97,12 +91,26 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable
   }
 
   @Override
+  public int hashCode() {
+    return this.function.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object anotherObject) {
+    if (!(anotherObject instanceof PrintableFunction))
+      return false;
+    @SuppressWarnings("unchecked") PrintableFunction<T, R> another = (PrintableFunction<T, R>) anotherObject;
+    return this.function.equals(another.function) && this.toString().equals(another.toString());
+  }
+
+  @Override
   public String toString() {
     return s.get();
   }
 
   public static <T, R> PrintableFunction<T, R> create(String s, Function<? super T, ? extends R> function) {
-    return new PrintableFunction<>(() -> Objects.requireNonNull(s), function);
+    Objects.requireNonNull(s);
+    return new PrintableFunction<>(() -> s, function);
   }
 
 }

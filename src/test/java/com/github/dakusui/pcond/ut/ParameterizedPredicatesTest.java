@@ -93,8 +93,8 @@ public class ParameterizedPredicatesTest extends TestBase.ForAssertionEnabledVM 
             $("HELLO!", false),
         } },
         new Object[] { new Object[] {
-            Predicates.isEmptyOrNullString(),
-            "isEmptyOrNullString",
+            Predicates.isNullOrEmptyString(),
+            "isNullOrEmptyString",
             $("", true),
             $(null, true),
             $("HELLO", false),

@@ -1,7 +1,11 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.functions.preds.BasePredUtils;
-import com.github.dakusui.pcond.functions.preds.StreamUtils;
+import com.github.dakusui.pcond.core.context.PrintableContextPredicate;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.preds.ContextUtils;
+import com.github.dakusui.pcond.core.preds.BasePredUtils;
+import com.github.dakusui.pcond.core.preds.StreamUtils;
+import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
 import java.util.Collection;
@@ -65,28 +69,48 @@ public enum Predicates {
     return predicate(() -> format("%s[%s]", p, formatObject(value)), p.apply(value));
   }
 
-  @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> Predicate<T> gt(T value) {
+    return greaterThan(value);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T extends Comparable<? super T>> Predicate<T> greaterThan(T value) {
     return (Predicate<T>) Def.GT_FACTORY.create(value);
   }
 
-  @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> Predicate<T> ge(T value) {
+    return greaterThanOrEqualTo(value);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T extends Comparable<? super T>> Predicate<T> greaterThanOrEqualTo(T value) {
     return (Predicate<T>) Def.GE_FACTORY.create(value);
   }
 
-  @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> Predicate<T> lt(T value) {
+    return lessThan(value);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T extends Comparable<? super T>> Predicate<T> lessThan(T value) {
     return (Predicate<T>) Def.LT_FACTORY.create(value);
   }
 
-  @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> Predicate<T> le(T value) {
-    return (Predicate<T>) Def.LE_FACTORY.create(value);
+    return lessThanOrEqualTo(value);
   }
 
   @SuppressWarnings("unchecked")
+  public static <T extends Comparable<? super T>> Predicate<T> lessThanOrEqualTo(T value) {
+    return (Predicate<T>) Def.LE_FACTORY.create(value);
+  }
+
   public static <T extends Comparable<? super T>> Predicate<T> eq(T value) {
+    return equalTo(value);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T extends Comparable<? super T>> Predicate<T> equalTo(T value) {
     return (Predicate<T>) Def.EQ_FACTORY.create(value);
   }
 
@@ -119,8 +143,8 @@ public enum Predicates {
     return Def.IS_EMPTY_STRING;
   }
 
-  public static Predicate<String> isEmptyOrNullString() {
-    return Def.IS_EMPTY_OR_NULL_STRING;
+  public static Predicate<String> isNullOrEmptyString() {
+    return Def.IS_NULL_OR_EMPTY_STRING;
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -183,24 +207,43 @@ public enum Predicates {
     return cond -> new TransformingPredicate<>(cond, function);
   }
 
+  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate_, int argIndex) {
+    return new PrintableContextPredicate(predicate_, argIndex);
+  }
+
+  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate) {
+    return toContextPredicate(predicate, 0);
+  }
+
+  /**
+   * Converts a curried function which results in a boolean value in to a predicate.
+   *
+   * @param curriedFunction A curried function to be converted.
+   * @param orderArgs       An array to specify the order in which values in the context are applied to the function.
+   * @return A predicate converted from the given curried function.
+   */
+  public static Predicate<Context> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
+    return ContextUtils.toContextPredicate(curriedFunction, orderArgs);
+  }
+
   enum Def {
     ;
 
-    public static final  Function<Class<?>, Predicate<?>>                    IS_INSTANCE_OF$2                 = function(() -> "isInstanceOf", (Class<?> c) -> c::isInstance);
-    private static final Predicate<?>                                        ALWAYS_TRUE                      = predicate("alwaysTrue", t -> true);
-    private static final Predicate<Boolean>                                  IS_TRUE                          = predicate("isTrue", (Boolean v) -> v);
-    private static final Predicate<Boolean>                                  IS_FALSE                         = predicate("isFalse", (Boolean v) -> !v);
-    private static final Predicate<?>                                        IS_NULL                          = predicate("isNull", Objects::isNull);
-    private static final Predicate<?>                                        IS_NOT_NULL                      = predicate("isNotNull", Objects::nonNull);
-    private static final Predicate<String>                                   IS_EMPTY_STRING                  = predicate("isEmpty", String::isEmpty);
-    private static final Predicate<String>                                   IS_EMPTY_OR_NULL_STRING          = predicate("isEmptyOrNullString", s -> Objects.isNull(s) || isEmptyString().test(s)
+    public static final  Function<Class<?>, Predicate<?>>             IS_INSTANCE_OF$2                 = function(() -> "isInstanceOf", (Class<?> c) -> c::isInstance);
+    private static final Predicate<?>                                 ALWAYS_TRUE                      = predicate("alwaysTrue", t -> true);
+    private static final Predicate<Boolean>                           IS_TRUE                          = predicate("isTrue", (Boolean v) -> v);
+    private static final Predicate<Boolean>                           IS_FALSE                         = predicate("isFalse", (Boolean v) -> !v);
+    private static final Predicate<?>                                 IS_NULL                          = predicate("isNull", Objects::isNull);
+    private static final Predicate<?>                                 IS_NOT_NULL                      = predicate("isNotNull", Objects::nonNull);
+    private static final Predicate<String>                            IS_EMPTY_STRING                  = predicate("isEmpty", String::isEmpty);
+    private static final Predicate<String>                            IS_NULL_OR_EMPTY_STRING          = predicate("isNullOrEmptyString", s -> Objects.isNull(s) || isEmptyString().test(s)
     );
-    private static final Predicate<Object[]>                                 IS_EMPTY_ARRAY                   = predicate("isEmptyArray", objects -> objects.length == 0);
-    private static final Predicate<Collection<?>>                     IS_EMPTY_COLLECTION = predicate("isEmpty", Collection::isEmpty);
-    private static final BasePredUtils.Factory<Object, Object>        IS_EQUAL_TO_FACTORY = Printables.predicateFactory(
+    private static final Predicate<Object[]>                          IS_EMPTY_ARRAY                   = predicate("isEmptyArray", objects -> objects.length == 0);
+    private static final Predicate<Collection<?>>                     IS_EMPTY_COLLECTION              = predicate("isEmpty", Collection::isEmpty);
+    private static final BasePredUtils.Factory<Object, Object>        IS_EQUAL_TO_FACTORY              = Printables.predicateFactory(
         (arg) -> format("isEqualTo[%s]", formatObject(arg)),
         arg -> v -> Objects.equals(v, arg));
-    private static final BasePredUtils.Factory<Collection<?>, Object> CONTAINS_FACTORY    = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<Collection<?>, Object> CONTAINS_FACTORY                 = Printables.predicateFactory(
         (Object arg) -> format("contains[%s]", formatObject(arg)),
         (Object arg) -> (Collection<?> c) -> c.contains(arg));
     private static final BasePredUtils.Factory<Object, Object>        OBJECT_IS_SAME_AS_FACTORY        = Printables.predicateFactory(
