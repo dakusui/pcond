@@ -2,6 +2,10 @@ package com.github.dakusui.pcond.core.refl;
 
 import com.github.dakusui.pcond.Assertions;
 import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.internals.MethodAccessException;
+import com.github.dakusui.pcond.internals.MethodAmbiguous;
+import com.github.dakusui.pcond.internals.MethodInvocationException;
+import com.github.dakusui.pcond.internals.MethodNotFound;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -43,13 +47,18 @@ public enum ReflUtils {
   @SuppressWarnings("unchecked")
   public static <R> R invokeMethod(MethodQuery methodQuery) {
     assert Assertions.precondition(methodQuery, Predicates.isNotNull());
+    Method method = findMethod(methodQuery.targetClass(), methodQuery.methodName(), methodQuery.arguments());
+    return invokeMethod(method, methodQuery.targetObject(), methodQuery.arguments());
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <R> R invokeMethod(Method method, Object obj, Object[] arguments) {
     try {
-      return (R) setAccessible(findMethod(methodQuery.targetClass(), methodQuery.methodName(), methodQuery.arguments()))
-          .invoke(methodQuery.targetObject(), methodQuery.arguments());
+      return (R) method.invoke(obj, arguments);
     } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+      throw new MethodAccessException(format("Method access to '%s' was failed", method), e);
     } catch (InvocationTargetException e) {
-      throw new RuntimeException(e.getCause());
+      throw new MethodInvocationException(format("Method invocation of '%s' was failed", method), e.getCause());
     }
   }
 
@@ -86,13 +95,8 @@ public enum ReflUtils {
         () -> exceptionOnMethodNotFound(aClass, methodName, args, methodSelector));
   }
 
-  private static Method setAccessible(Method m) {
-    m.setAccessible(true);
-    return m;
-  }
-
   private static RuntimeException exceptionOnMethodNotFound(Class<?> aClass, String methodName, Object[] args, MethodSelector methodSelector) {
-    return new RuntimeException(format(
+    return new MethodNotFound(format(
         "Method matching '%s%s' was not found by selector=%s in %s.",
         methodName,
         asList(args),
@@ -102,7 +106,7 @@ public enum ReflUtils {
   }
 
   private static RuntimeException exceptionOnAmbiguity(Class<?> aClass, String methodName, Object[] args, MethodSelector methodSelector) {
-    return new RuntimeException(format(
+    return new MethodAmbiguous(format(
         "Methods matching '%s%s' were found more than one in %s by selector=%s.: %s ",
         methodName,
         asList(args),
