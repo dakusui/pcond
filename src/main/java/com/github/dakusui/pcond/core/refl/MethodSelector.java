@@ -4,7 +4,6 @@ import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
 import static com.github.dakusui.pcond.core.currying.Checks.isWiderThanOrEqualTo;
@@ -22,7 +21,7 @@ import static java.util.stream.Collectors.toList;
  * given arguments.
  * //@formater:on
  */
-public interface MethodSelector extends BiFunction<List<Method>, Object[], List<Method>>, Formattable {
+public interface MethodSelector extends Formattable {
   /**
    * Selects methods that can be invoked with given {@code args}.
    *
@@ -50,7 +49,7 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
     return new MethodSelector() {
       @Override
       public List<Method> select(List<Method> methods, Object[] args) {
-        return another.select(MethodSelector.this.apply(methods, args), args);
+        return another.select(MethodSelector.this.select(methods, args), args);
       }
 
       @Override
@@ -60,10 +59,9 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
     };
   }
 
-  default List<Method> apply(List<Method> methods, Object[] args) {
-    return this.select(methods, args);
-  }
-
+  /**
+   * Formats this object using the {@link MethodSelector#describe()} method.
+   */
   @Override
   default void formatTo(Formatter formatter, int flags, int width, int precision) {
     formatter.format("%s", this.describe());
@@ -99,6 +97,9 @@ public interface MethodSelector extends BiFunction<List<Method>, Object[], List<
     }
   }
 
+  /**
+   * A method selector that selects "narrower" methods over "wider" ones.
+   */
   class PreferNarrower implements MethodSelector {
     @Override
     public List<Method> select(List<Method> methods, Object[] args) {

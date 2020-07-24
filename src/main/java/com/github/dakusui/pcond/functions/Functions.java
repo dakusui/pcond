@@ -7,7 +7,6 @@ import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
-import com.github.dakusui.pcond.internals.InternalChecks;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -181,26 +180,6 @@ public enum Functions {
     return Printables.function(methodQuery.describe(), t -> invokeMethod(methodQuery.bindActualArguments((o) -> o instanceof Parameter, o -> t)));
   }
 
-  /**
-   * Returns a {@link Predicate} created from a method specified by a {@code methodQuery}.
-   * If the {@code methodQuery} matches none or more than one methods, a {@code RuntimeException} will be thrown.
-   *
-   * @param methodQuery A query object that specifies a method to be invoked by the returned predicate.
-   * @param <T>         the type of the input to the returned predicate
-   * @return Created predicate.
-   * @see Functions#classMethod(Class, String, Object[])
-   * @see Functions#instanceMethod(Object, String, Object[])
-   */
-  @SuppressWarnings("ConstantConditions")
-  public static <T> Predicate<T> callp(MethodQuery methodQuery) {
-    return Printables.predicate(
-        methodQuery.describe(),
-        t -> InternalChecks.ensureValue(
-            invokeMethod(methodQuery.bindActualArguments((o) -> o instanceof Parameter, o -> t)),
-            v -> v instanceof Boolean,
-            v -> String.format("Method matched with '%s' must return a boolean value but it gave: '%s'.", methodQuery.describe(), v)));
-  }
-
 
   /**
    * // @formatter:off
@@ -280,7 +259,7 @@ public enum Functions {
    * Returns a {@link Parameter} object, which is used in combination with {@link Functions#instanceMethod(Object, String, Object[])}
    * or {@link Functions#classMethod(Class, String, Object[])}.
    * This object is replaced with the actual input value passed to a function built
-   * through {@link Functions#call(MethodQuery)} or {@link Functions#callp(MethodQuery)}
+   * through {@link Functions#call(MethodQuery)} or {@link Predicates#callp(MethodQuery)}
    * when it is applied.
    *
    * @return a {@code Parameter} object
@@ -348,7 +327,7 @@ public enum Functions {
    * @return A predicate that invokes the method matching the {@code methodName} and {@code args}
    */
   public static <T> Predicate<T> chainp(String methodName, Object... arguments) {
-    return callp(instanceMethod(parameter(), methodName, arguments));
+    return Predicates.callp(instanceMethod(parameter(), methodName, arguments));
   }
 
   enum Def {

@@ -1,10 +1,11 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.functions.Experimentals;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.Printables;
-import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
@@ -26,7 +27,7 @@ import static com.github.dakusui.pcond.ut.ExperimentalsTest.Utils.stringEndsWith
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.allOf;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class ExperimentalsTest extends TestBase {
 
@@ -35,7 +36,7 @@ public class ExperimentalsTest extends TestBase {
    * <p>
    * You can build a check using a multi-parameter static method which returns a boolean value.
    * In this example, {@link TargetMethodHolder#stringEndsWith(String, String)} is the method.
-   * It is turned into a curried function in {@link Utils#stringEndsWith()} and then passed to {@link Predicates#toContextPredicate(CurriedFunction, int...)}.
+   * It is turned into a curried function in {@link Utils#stringEndsWith()} and then passed to {@link Experimentals#toContextPredicate(CurriedFunction, int...)}.
    * The method {@code Experimentals#test(CurriedFunction, int...)} converts a curried function whose final returned value is a boolean into a predicate of a {@link Context}.
    * A {@code Context} may have one or more values at once and those values are indexed.
    */
@@ -85,8 +86,11 @@ public class ExperimentalsTest extends TestBase {
     try {
       require(
           asList("Hi", "hello", "world", null),
-          transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
-              toContextPredicate(transform(Functions.length()).check(gt(3))))));
+          transform(stream().andThen(nest(asList("1", "2", "o"))))
+              .check(
+                  noneMatch(
+                      toContextPredicate(transform(Functions.length()).check(gt(3))))
+              ));
     } catch (PreconditionViolationException e) {
       e.printStackTrace();
       assertThat(
@@ -157,6 +161,12 @@ public class ExperimentalsTest extends TestBase {
             toContextPredicate(transform((Function<String, Integer>) s -> {
               throw new IntentionalError();
             }).check(gt(3))))));
+  }
+
+  @Test
+  public void toContextPredicateTest() {
+    assertFalse(toContextPredicate(isNotNull()).test(Context.from(null)));
+    assertTrue(toContextPredicate(isNotNull()).test(Context.from(new Object())));
   }
 
   public static class IntentionalError extends Error {
@@ -369,6 +379,20 @@ public class ExperimentalsTest extends TestBase {
             return "context#valueAt(1) equals '1'";
           }
         })));
+  }
+
+  @Test
+  public void nestedLoop_success() {
+    require(
+        asList("hello", "world"),
+        transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toContextPredicate(equalTo("msg-2"), 1))));
+  }
+
+  @Test(expected = PreconditionViolationException.class)
+  public void nestedLoop_fail() {
+    require(
+        asList("hello", "world"),
+        transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toContextPredicate(equalTo("msg-3"), 1))));
   }
 
   @Test
