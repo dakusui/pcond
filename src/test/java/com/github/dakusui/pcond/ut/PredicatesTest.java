@@ -15,6 +15,26 @@ import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
 public class PredicatesTest {
+  public static class MessageTest extends TestBase {
+    @Test(expected = IllegalArgumentException.class)
+    public void testFormat() {
+      try {
+        requireArgument(100, Predicates.and(Predicates.isNotNull(), Predicates.isInstanceOf(String.class)));
+      } catch (IllegalArgumentException e) {
+        assertThat(
+            lineAt(e.getMessage(), 1),
+            equalTo("100 -> &&                                     ->   false"));
+        assertThat(
+            lineAt(e.getMessage(), 2),
+            equalTo("         isNotNull                            -> true"));
+        assertThat(
+            lineAt(e.getMessage(), 3),
+            equalTo("         isInstanceOf[class java.lang.String] -> false"));
+        throw e;
+      }
+    }
+  }
+
   public static class IsInstanceOfTest extends TestBase {
     @Test(expected = IllegalArgumentException.class)
     public void test() {

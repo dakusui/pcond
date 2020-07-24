@@ -30,6 +30,11 @@ public interface MethodQuery {
 
   Object[] arguments();
 
+  /**
+   * Returns a string that describes this object.
+   *
+   * @return A description of this object.
+   */
   String describe();
 
   default MethodQuery bindActualArguments(Predicate<Object> isPlaceHolder, Function<Object, Object> replace) {
@@ -82,10 +87,18 @@ public interface MethodQuery {
 
       @Override
       public String describe() {
+        Function<Object, String> parameterFormatter =
+            o -> o instanceof Parameter ?
+                Objects.toString(o) :
+                "<" + o + ">";
         return format("%s.%s(%s)",
-            isStatic ? targetClass.getName() : "",
+            isStatic ?
+                targetClass.getName() :
+                parameterFormatter.apply(targetObject),
             methodName,
-            Arrays.stream(arguments).map(Objects::toString).collect(joining(",")));
+            Arrays.stream(arguments)
+                .map(parameterFormatter)
+                .collect(joining(",")));
       }
     };
   }

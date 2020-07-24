@@ -1,10 +1,13 @@
 package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.context.PrintableContextPredicate;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.preds.ContextUtils;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
@@ -24,4 +27,22 @@ public enum Experimentals {
     return Printables.function(() -> "toContext", ContextUtils::toContext);
   }
 
+  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate_, int argIndex) {
+    return new PrintableContextPredicate(predicate_, argIndex);
+  }
+
+  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate) {
+    return toContextPredicate(predicate, 0);
+  }
+
+  /**
+   * Converts a curried function which results in a boolean value into a predicate.
+   *
+   * @param curriedFunction A curried function to be converted.
+   * @param orderArgs       An array to specify the order in which values in the context are applied to the function.
+   * @return A predicate converted from the given curried function.
+   */
+  public static Predicate<Context> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
+    return ContextUtils.toContextPredicate(curriedFunction, orderArgs);
+  }
 }

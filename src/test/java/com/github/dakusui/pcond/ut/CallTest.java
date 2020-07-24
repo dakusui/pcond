@@ -3,10 +3,11 @@ package com.github.dakusui.pcond.ut;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.MethodInvocationException;
+import com.github.dakusui.pcond.internals.MethodNotFound;
 import com.github.dakusui.pcond.utils.ut.TestBase;
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
+import java.util.Objects;
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
@@ -19,7 +20,7 @@ public class CallTest extends TestBase {
   public void classMethodCaBeCalled() {
     Function<Double, Double> cos = call(classMethod(Math.class, "cos", 0));
     System.out.println(cos.apply(Math.PI / 2));
-    assertThat(1.0, CoreMatchers.equalTo(cos.apply(Math.PI / 2)));
+    assertThat(cos.apply(Math.PI / 2), equalTo(1.0));
   }
 
   @Test
@@ -27,7 +28,19 @@ public class CallTest extends TestBase {
     Function<String, Integer> length = call(instanceMethod(parameter(), "length"));
     System.out.println(length.apply("hello"));
 
-    assertThat(5, CoreMatchers.equalTo(length.apply("hello")));
+    assertThat(length.apply("hello"), equalTo(5));
+    assertThat(length.toString(), equalTo("p[0].length()"));
+  }
+
+  @Test
+  public void instanceMethodCanBeCreatedOnSpecifiedObject() {
+    Function<String, Integer> contains = call(instanceMethod("Hello, world", "contains", parameter()));
+    System.out.println(contains);
+    System.out.println(contains.apply("hello"));
+
+    assertThat(contains.apply("Hello"), equalTo(true));
+    assertThat(contains.apply("HELLO"), equalTo(false));
+    assertThat(contains.toString(), equalTo("<Hello, world>.contains(p[0])"));
   }
 
   @Test
@@ -40,7 +53,7 @@ public class CallTest extends TestBase {
   }
 
   @Test
-  public void test4() {
+  public void functionsCanBeChained() {
     String var = "hello, world";
 
     Function<String, String> chained = Functions.<String, String>chain("substring", 7).andThen(chain("toUpperCase"));
@@ -103,7 +116,9 @@ public class CallTest extends TestBase {
           e.getMessage(),
           allOf(
               containsString("method[hello, world]"),
-              containsString("were found more than one")
+              containsString("were found more than one"),
+              containsString("Ambiguous.method(java.lang.String,java.lang.Object)"),
+              containsString("Ambiguous.method(java.lang.Object,java.lang.String)")
           ));
       throw e;
     }
@@ -149,6 +164,29 @@ public class CallTest extends TestBase {
               containsString("Method invocation"),
               containsString("throwException"),
               containsString("was failed")));
+      throw e;
+    }
+  }
+
+  @Test
+  public void covariantOverridingMethodCanBeInvokedCorrectly() {
+    Object r = chain("method", "Hello").apply(new ExtendsBase());
+
+    assertThat(
+        Objects.toString(r),
+        allOf(containsString("Hello"), containsString("extendsBase")));
+  }
+
+  @Test(expected = MethodNotFound.class)
+  public void parameterUnmatchedWhileNameMatching() {
+    try {
+      chain("method", 123).apply(new Base());
+    } catch (MethodNotFound e) {
+      assertThat(e.getMessage(), allOf(
+          containsString("method[123]"),
+          containsString("not found"),
+          containsString(Base.class.getCanonicalName())
+      ));
       throw e;
     }
   }
@@ -214,6 +252,20 @@ public class CallTest extends TestBase {
     }
 
     public static class TestException extends RuntimeException {
+    }
+  }
+
+  @SuppressWarnings("unused")
+  public static class Base {
+    public Object method(String s) {
+      return "base: " + s;
+    }
+  }
+
+  @SuppressWarnings("unused")
+  public static class ExtendsBase extends Base {
+    public String method(String s) {
+      return "extendsBase: " + s;
     }
   }
 }

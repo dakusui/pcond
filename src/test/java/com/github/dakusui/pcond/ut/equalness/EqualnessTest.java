@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut.equalness;
 
+import com.github.dakusui.pcond.functions.Experimentals;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.functions.Printables;
@@ -289,6 +290,13 @@ public class EqualnessTest extends TestBase {
             .nonEqualObjectFactory(args -> Predicates.not(Predicates.not(Predicates.isNotNull())))
             .cached(false)
             .$(),
+        define(args -> Experimentals.toContextPredicate(Predicates.isNotNull()))
+            .nonEqualObjectFactory(args -> Predicates.isNull())
+            .nonEqualObjectFactory(args -> Experimentals.toContextPredicate(Predicates.isNull()))
+            .nonEqualObjectFactory(args -> Experimentals.toContextPredicate(Predicates.isNotNull(), 1))
+            .equalObjectFactory(args -> Experimentals.toContextPredicate(Predicates.isNotNull()))
+            .cached(false)
+            .$()
     };
   }
 

@@ -1,11 +1,13 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.core.context.PrintableContextPredicate;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.preds.ContextUtils;
 import com.github.dakusui.pcond.core.preds.BasePredUtils;
 import com.github.dakusui.pcond.core.preds.StreamUtils;
 import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.refl.MethodQuery;
+import com.github.dakusui.pcond.core.refl.Parameter;
+import com.github.dakusui.pcond.internals.InternalChecks;
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
 import java.util.Collection;
@@ -14,6 +16,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
 import static com.github.dakusui.pcond.functions.Printables.function;
 import static com.github.dakusui.pcond.functions.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
@@ -207,23 +210,29 @@ public enum Predicates {
     return cond -> new TransformingPredicate<>(cond, function);
   }
 
-  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate_, int argIndex) {
-    return new PrintableContextPredicate(predicate_, argIndex);
-  }
-
-  public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate) {
-    return toContextPredicate(predicate, 0);
-  }
-
   /**
-   * Converts a curried function which results in a boolean value in to a predicate.
+   * // @formatter:off
+   * Returns a {@link Predicate} created from a method specified by a {@code methodQuery}.
+   * If the {@code methodQuery} matches none or more than one methods, a {@code RuntimeException} will be thrown.
    *
-   * @param curriedFunction A curried function to be converted.
-   * @param orderArgs       An array to specify the order in which values in the context are applied to the function.
-   * @return A predicate converted from the given curried function.
+   * The suffix {@code p} stands for "predicate" following the custom in LISP culture
+   * and it is necessary to avoid collision with {@link Functions#call( MethodQuery )} method.
+   *
+   * // @formatter:on
+   * @param methodQuery A query object that specifies a method to be invoked by the returned predicate.
+   * @param <T>         the type of the input to the returned predicate
+   * @return Created predicate.
+   * @see Functions#classMethod(Class, String, Object[])
+   * @see Functions#instanceMethod(Object, String, Object[])
    */
-  public static Predicate<Context> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
-    return ContextUtils.toContextPredicate(curriedFunction, orderArgs);
+  @SuppressWarnings("ConstantConditions")
+  public static <T> Predicate<T> callp(MethodQuery methodQuery) {
+    return predicate(
+        methodQuery.describe(),
+        t -> InternalChecks.ensureValue(
+            invokeMethod(methodQuery.bindActualArguments((o) -> o instanceof Parameter, o -> t)),
+            v -> v instanceof Boolean,
+            v -> format("Method matched with '%s' must return a boolean value but it gave: '%s'.", methodQuery.describe(), v)));
   }
 
   enum Def {

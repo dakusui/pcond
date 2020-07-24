@@ -47,10 +47,21 @@ public enum ReflUtils {
   @SuppressWarnings("unchecked")
   public static <R> R invokeMethod(MethodQuery methodQuery) {
     assert Assertions.precondition(methodQuery, Predicates.isNotNull());
-    Method method = findMethod(methodQuery.targetClass(), methodQuery.methodName(), methodQuery.arguments());
-    return invokeMethod(method, methodQuery.targetObject(), methodQuery.arguments());
+    return invokeMethod(
+        findMethod(methodQuery.targetClass(), methodQuery.methodName(), methodQuery.arguments()),
+        methodQuery.targetObject(),
+        methodQuery.arguments());
   }
 
+  /**
+   * Invokes a given {@code method} on the object with arguments passed as {@code obj} and {@code arguments}.
+   *
+   * @param method    A method to be invoked.
+   * @param obj       An object on which the {@code method} is invoked.
+   * @param arguments Arguments passed to the {@code method}.
+   * @param <R>       The type of the value returned from the {@code method}.
+   * @return The value returned by {@code method}.
+   */
   @SuppressWarnings("unchecked")
   public static <R> R invokeMethod(Method method, Object obj, Object[] arguments) {
     try {
@@ -86,8 +97,7 @@ public enum ReflUtils {
         .andThen(new MethodSelector.PreferExact());
     return getIfOnlyOneElseThrow(
         methodSelector.select(
-            Arrays.stream(
-                getMethodsOf(aClass))
+            Arrays.stream(aClass.getMethods())
                 .filter((Method m) -> m.getName().equals(methodName))
                 .collect(toMethodList()),
             args),
@@ -113,8 +123,7 @@ public enum ReflUtils {
         aClass.getCanonicalName(),
         methodSelector,
         summarizeMethods(methodSelector.select(
-            Arrays.stream(
-                getMethodsOf(aClass))
+            Arrays.stream(aClass.getMethods())
                 .filter((Method m) -> m.getName().equals(methodName))
                 .collect(toMethodList()),
             args))));
@@ -136,15 +145,26 @@ public enum ReflUtils {
     return Collector.of(
         LinkedList::new,
         ReflUtils::addMethodIfNecessary,
-        new BinaryOperator<List<Method>>() {
-          @Override
-          public List<Method> apply(List<Method> methods, List<Method> methods2) {
-            return new LinkedList<Method>() {{
-              addAll(methods);
-              methods2.forEach(each -> addMethodIfNecessary(this, each));
-            }};
-          }
-        });
+        createCombinerForMethodList());
+  }
+
+  /**
+   * This method is made public in order only for unit testing since with Java 8,
+   * the combiner returned by this method will never be used.
+   * - https://stackoverflow.com/questions/29210176/can-a-collectors-combiner-function-ever-be-used-on-sequential-streams[Can a Collector's combiner function ever be used on sequential streams?]
+   *
+   * @return A combiner for method list.
+   */
+  public static BinaryOperator<List<Method>> createCombinerForMethodList() {
+    return new BinaryOperator<List<Method>>() {
+      @Override
+      public List<Method> apply(List<Method> methods, List<Method> methods2) {
+        return new LinkedList<Method>() {{
+          addAll(methods);
+          methods2.forEach(each -> addMethodIfNecessary(this, each));
+        }};
+      }
+    };
   }
 
   private static Method getIfOnlyOneElseThrow(List<Method> foundMethods, Supplier<RuntimeException> exceptionSupplierOnAmbiguity, Supplier<RuntimeException> exceptionSupplierOnNotFound) {
@@ -168,6 +188,15 @@ public enum ReflUtils {
         method.getName());
   }
 
+  /**
+   * Add {@code method} to {@code methods} if necessary.
+   * Since {@link Class#getMethods()} may return methods of the same signature when
+   * a method is overridden in a sub-class with returning a narrow class in the super,
+   * this consideration is necessary.
+   *
+   * @param methods A list of methods
+   * @param method  A method to be examined if it is necessay to be added to {@code methods}.
+   */
   private static void addMethodIfNecessary(List<Method> methods, Method method) {
     Optional<Method> found = methods
         .stream()
@@ -178,10 +207,6 @@ public enum ReflUtils {
         methods.remove(found.get());
     }
     methods.add(method);
-  }
-
-  private static Method[] getMethodsOf(Class<?> aClass) {
-    return aClass.getMethods();
   }
 
   static Object replacePlaceHolderWithActualArgument(Object object, Predicate<Object> isPlaceHolder, Function<Object, Object> replace) {
