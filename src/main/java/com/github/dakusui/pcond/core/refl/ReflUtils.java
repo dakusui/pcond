@@ -46,7 +46,6 @@ public enum ReflUtils {
    */
   @SuppressWarnings("unchecked")
   public static <R> R invokeMethod(MethodQuery methodQuery) {
-    assert Assertions.precondition(methodQuery, Predicates.isNotNull());
     return invokeMethod(
         findMethod(methodQuery.targetClass(), methodQuery.methodName(), methodQuery.arguments()),
         methodQuery.targetObject(),
