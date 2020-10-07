@@ -93,7 +93,7 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
 		return s.get();
 	}
 
-	private static Predicate<Object> unwrapIfPrintablePredicate(Predicate<Object> predicate) {
+	public static Predicate<Object> unwrapIfPrintablePredicate(Predicate<Object> predicate) {
 		Predicate<Object> ret = predicate;
 		if (predicate instanceof PrintablePredicate)
 			ret = ((PrintablePredicate<Object>) predicate).predicate;

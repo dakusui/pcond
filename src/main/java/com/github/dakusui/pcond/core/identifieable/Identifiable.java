@@ -1,13 +1,11 @@
-package com.github.dakusui.pcond.core;
+package com.github.dakusui.pcond.core.identifieable;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.Preconditions.requireNonNull;
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -17,8 +15,6 @@ import static java.util.stream.Collectors.toList;
  * {@link Identifiable.Base} class.
  */
 public interface Identifiable {
-  ;
-
   Object creator();
 
   /**
@@ -104,52 +100,6 @@ public interface Identifiable {
     @Override
     public boolean equals(Object obj) {
       return defaultEquals(obj);
-    }
-  }
-
-  interface Factory<T extends Identifiable> extends Identifiable {
-    T create(List<Object> args);
-
-    interface IdentifiablePredicate<T> extends Identifiable, Predicate<T> {
-      abstract class Base<T> extends Identifiable.Base implements IdentifiablePredicate<T> {
-        protected Base(Factory<IdentifiablePredicate<T>> factory, List<Object> args) {
-          super(factory, args);
-        }
-      }
-    }
-
-    abstract class ForParameterizedPredicate<V> extends Identifiable.Base implements Factory<IdentifiablePredicate<V>> {
-      protected ForParameterizedPredicate(Object creator, List<Object> args) {
-        super(creator, args);
-      }
-
-      protected ForParameterizedPredicate() {
-        this(new Object(), emptyList());
-      }
-
-      @Override
-      public IdentifiablePredicate<V> create(List<Object> args) {
-        Predicate<V> predicate = createPredicate(args);
-        return new IdentifiablePredicate.Base<V>(this, args) {
-          @Override
-          public boolean test(V v) {
-            assert predicate != null;
-            return predicate.test(v);
-          }
-        };
-      }
-
-      protected abstract Predicate<V> createPredicate(List<Object> args);
-    }
-
-    abstract class Base<T extends Identifiable> extends Identifiable.Base implements Factory<T>, Identifiable {
-      protected Base(Object creator, List<Object> args) {
-        super(creator, args);
-      }
-
-      protected Base(List<Object> args) {
-        this(new Object(), args);
-      }
     }
   }
 
