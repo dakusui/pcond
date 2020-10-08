@@ -10,10 +10,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 public abstract class PrintablePredicate<T> extends Identifiable.Base implements Predicate<T>, Evaluable<T> {
-  final Predicate<T>     predicate;
-  final Supplier<String> formatter;
+  protected final Predicate<? super T> predicate;
+  final Supplier<String>     formatter;
 
-  protected PrintablePredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<T> predicate) {
+  protected PrintablePredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<? super T> predicate) {
     super(creator, args);
     this.formatter = formatter;
     this.predicate = predicate;

@@ -38,7 +38,7 @@ public abstract class PrintablePredicate<T> implements Predicate<T>, Evaluable<T
 		this.s = requireNonNull(s);
 	}
 
-	public static <T> PrintablePredicate<T> create(String s, Predicate<T> predicate) {
+	public static <T> Predicate<T> create(String s, Predicate<T> predicate) {
 		requireNonNull(s);
 		return new LeafPredUtils.LeafPred<>(() -> s, predicate);
 	}
