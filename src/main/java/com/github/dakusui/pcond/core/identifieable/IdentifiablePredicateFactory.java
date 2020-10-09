@@ -1,15 +1,20 @@
 package com.github.dakusui.pcond.core.identifieable;
 
 import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.context.Context;
 
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 
 enum IdentifiablePredicateFactory {
   FOR_NEGATION {
@@ -84,19 +89,20 @@ enum IdentifiablePredicateFactory {
       List<Object> args_ = args.subList(2, args.size());
       return new LeafPredicate<>(predicateFactory, args_, formatterFactory.apply(args_), predicateFactory.apply(args_));
     }
-  };
+  },
+  ;
 
   abstract <T> PrintablePredicate<T> create(List<Object> args);
 
   @SuppressWarnings("unchecked")
-  static <T> Predicate<T> unwrapIfPrintablePredicate(Predicate<? super T> predicate) {
+  private static <T> Predicate<T> unwrapIfPrintablePredicate(Predicate<? super T> predicate) {
     Predicate<? super T> ret = predicate;
     if (predicate instanceof PrintablePredicate)
       ret = unwrapIfPrintablePredicate(((PrintablePredicate<? super T>) predicate).predicate);
     return (Predicate<T>) ret;
   }
 
-  static class LeafPredicate<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T> {
+  private static class LeafPredicate<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T> {
     protected LeafPredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<? super T> predicate) {
       super(creator, args, formatter, predicate);
     }
@@ -138,6 +144,147 @@ enum IdentifiablePredicateFactory {
     @Override
     public Evaluable<? super T> b() {
       return b;
+    }
+  }
+
+  static class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Evaluable.Transformation<O, P> {
+    private final Evaluable<? super P> checker;
+    private final Evaluable<? super O> mapper;
+
+    private TransformingPredicate(String name, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
+      super(
+          TransformingPredicate.class,
+          asList(predicate, function),
+          () -> format("%s%s %s", name == null ? "" : name, function, predicate),
+          v -> predicate.test(function.apply(v)));
+      this.checker = toEvaluableIfNecessary(predicate);
+      this.mapper = toEvaluableIfNecessary(function);
+    }
+
+    @Override
+    public Evaluable<? super O> mapper() {
+      return this.mapper;
+    }
+
+    @Override
+    public Evaluable<? super P> checker() {
+      return this.checker;
+    }
+  }
+
+  static class ContextPredicate extends PrintablePredicate<Context> implements Evaluable.ContextPred {
+    public static <T> ContextPredicate create(PrintablePredicate<T> predicate, int argIndex) {
+      return new ContextPredicate(ContextPredicate.class, asList(predicate, argIndex), predicate, argIndex);
+    }
+
+    private final Evaluable<?> enclosed;
+    private final int          argIndex;
+
+    private <T> ContextPredicate(Object creator, List<Object> args, Predicate<T> predicate, int argIndex) {
+      super(
+          creator,
+          args,
+          () -> format("contextPredicate[%s,%s]", predicate, argIndex),
+          context -> predicate.test(context.valueAt(argIndex)));
+      this.enclosed = toEvaluableIfNecessary(predicate);
+      this.argIndex = argIndex;
+
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <TT> Evaluable<? super TT> enclosed() {
+      return (Evaluable<? super TT>) this.enclosed;
+    }
+
+    @Override
+    public int argIndex() {
+      return argIndex;
+    }
+  }
+
+  static class AllMatch<E> extends StreamPredicate<E> {
+    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
+      return new AllMatch<>(
+          predicate
+      );
+    }
+
+    private AllMatch(Predicate<? super E> predicate) {
+      super(
+          AllMatch.class,
+          singletonList(predicate),
+          () -> format("allMatch[%s]", predicate),
+          (Stream<E> stream) -> stream.allMatch(predicate),
+          toEvaluableIfNecessary(predicate),
+          true,
+          false);
+    }
+  }
+
+  static class NoneMatch<E> extends StreamPredicate<E> {
+    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
+      return new NoneMatch<>(
+          predicate
+      );
+    }
+
+    private NoneMatch(Predicate<? super E> predicate) {
+      super(
+          NoneMatch.class,
+          singletonList(predicate),
+          () -> format("noneMatch[%s]", predicate),
+          (Stream<E> stream) -> stream.allMatch(predicate),
+          toEvaluableIfNecessary(predicate),
+          true,
+          true);
+    }
+  }
+
+  static class AnyMatch<E> extends StreamPredicate<E> {
+    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
+      return new AnyMatch<>(
+          predicate
+      );
+    }
+
+    private AnyMatch(Predicate<? super E> predicate) {
+      super(
+          AnyMatch.class,
+          singletonList(predicate),
+          () -> format("anyMatch[%s]", predicate),
+          (Stream<E> stream) -> stream.allMatch(predicate),
+          toEvaluableIfNecessary(predicate),
+          false,
+          true);
+    }
+  }
+
+  abstract static class StreamPredicate<E> extends PrintablePredicate<Stream<E>> implements Evaluable.StreamPred<E> {
+    private final Evaluable<? super E> cut;
+    private final boolean              defaultValue;
+    private final boolean              cutOn;
+
+    private StreamPredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<? super Stream<E>> predicate, Evaluable<? super E> cut, boolean defaultValue, boolean cutOn) {
+      super(creator, args, formatter, predicate);
+      this.cut = requireNonNull(cut);
+      this.defaultValue = defaultValue;
+      this.cutOn = cutOn;
+    }
+
+    @Override
+    public boolean defaultValue() {
+      return defaultValue;
+    }
+
+    @Override
+    public Evaluable<? super E> cut() {
+      return cut;
+    }
+
+    @Override
+    public boolean valueToCut() {
+      return cutOn;
     }
   }
 }
