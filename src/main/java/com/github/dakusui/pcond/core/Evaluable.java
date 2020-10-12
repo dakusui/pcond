@@ -62,9 +62,9 @@ public interface Evaluable<T> {
     int argIndex();
   }
 
-  interface StreamPred<E> extends Pred<Stream<E>> {
+  interface StreamPred<E> extends Pred<Stream<? extends E>> {
     @Override
-    default void accept(Stream<E> value, Evaluator evaluator) {
+    default void accept(Stream<? extends E> value, Evaluator evaluator) {
       evaluator.evaluate(value, this);
     }
 

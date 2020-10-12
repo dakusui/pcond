@@ -29,7 +29,7 @@ public interface Evaluator {
 
   <T> void evaluate(T value, Evaluable.Func<T> func);
 
-  <E> void evaluate(Stream<E> value, Evaluable.StreamPred<E> streamPred);
+  <E> void evaluate(Stream<? extends E> value, Evaluable.StreamPred<E> streamPred);
 
   <T> T resultValue();
 
@@ -123,7 +123,7 @@ public interface Evaluator {
     }
 
     @Override
-    public <E> void evaluate(Stream<E> value, Evaluable.StreamPred<E> streamPred) {
+    public <E> void evaluate(Stream<? extends E> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
       enter(String.format("%s", streamPred), value);
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException

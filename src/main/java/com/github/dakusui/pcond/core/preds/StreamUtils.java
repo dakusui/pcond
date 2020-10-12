@@ -24,12 +24,12 @@ public enum StreamUtils {
     };
   }
 
-  public static class StreamPred<E> extends PrintablePredicate<Stream<E>> implements Evaluable.StreamPred<E> {
+  public static class StreamPred<E> extends PrintablePredicate<Stream<? extends E>> implements Evaluable.StreamPred<E> {
     private final Evaluable<? super E> cut;
     private final boolean              defaultValue;
     private final boolean              cutOn;
 
-    private StreamPred(Supplier<String> s, Predicate<? super Stream<E>> predicate, Evaluable<? super E> cut, boolean defaultValue, boolean cutOn) {
+    private StreamPred(Supplier<String> s, Predicate<? super Stream<? extends E>> predicate, Evaluable<? super E> cut, boolean defaultValue, boolean cutOn) {
       super(s, predicate);
       this.cut = requireNonNull(cut);
       this.defaultValue = defaultValue;
@@ -55,7 +55,7 @@ public enum StreamUtils {
   static class StreamPredPrintablePredicateFromFactory<EE, E> extends StreamPred<EE> implements PrintableLambdaFactory.Lambda<BasePredUtils.Factory<Stream<EE>, E>, E> {
     private final Spec<E> spec;
 
-    private StreamPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super Stream<EE>> predicate, Evaluable<? super EE> cut, boolean defaultValue, boolean cutOn) {
+    private StreamPredPrintablePredicateFromFactory(Spec<E> spec, Supplier<String> s, Predicate<? super Stream<? extends EE>> predicate, Evaluable<? super EE> cut, boolean defaultValue, boolean cutOn) {
       super(s, predicate, cut, defaultValue, cutOn);
       this.spec = spec;
     }
