@@ -1,10 +1,8 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.preds.ContextUtils;
+import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory;
+import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory.ParameterizedLeafFactory;
 import com.github.dakusui.pcond.core.preds.BasePredUtils;
-import com.github.dakusui.pcond.core.preds.StreamUtils;
-import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
 import com.github.dakusui.pcond.internals.InternalChecks;
@@ -76,70 +74,65 @@ public enum Predicates {
     return greaterThan(value);
   }
 
-  @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> Predicate<T> greaterThan(T value) {
-    return (Predicate<T>) Def.GT_FACTORY.create(value);
+    return ParameterizedLeafFactory.greaterThan(value);
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> ge(T value) {
     return greaterThanOrEqualTo(value);
   }
 
-  @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> Predicate<T> greaterThanOrEqualTo(T value) {
-    return (Predicate<T>) Def.GE_FACTORY.create(value);
+    return ParameterizedLeafFactory.greaterThanOrEqualTo(value);
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> lt(T value) {
     return lessThan(value);
   }
 
-  @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> Predicate<T> lessThan(T value) {
-    return (Predicate<T>) Def.LT_FACTORY.create(value);
+    return ParameterizedLeafFactory.lessThan(value);
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> le(T value) {
     return lessThanOrEqualTo(value);
   }
 
-  @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> Predicate<T> lessThanOrEqualTo(T value) {
-    return (Predicate<T>) Def.LE_FACTORY.create(value);
+    return ParameterizedLeafFactory.lessThanOrEqualTo(value);
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> eq(T value) {
     return equalTo(value);
   }
 
-  @SuppressWarnings("unchecked")
   public static <T extends Comparable<? super T>> Predicate<T> equalTo(T value) {
-    return (Predicate<T>) Def.EQ_FACTORY.create(value);
+    return ParameterizedLeafFactory.equalTo(value);
   }
 
   public static Predicate<String> matchesRegex(String regex) {
     requireNonNull(regex);
-    return Def.STRING_MATCHES_REGEX_FACTORY.create(regex);
+    return ParameterizedLeafFactory.matchesRegex(regex);
   }
 
   public static Predicate<String> containsString(String string) {
     requireNonNull(string);
-    return Def.STRING_CONTAINS_FACTORY.create(string);
+    return ParameterizedLeafFactory.containsString(string);
   }
 
   public static Predicate<String> startsWith(String string) {
     requireNonNull(string);
-    return Def.STRING_STARTS_WITH_FACTORY.create(string);
+    return ParameterizedLeafFactory.startsWith(string);
   }
 
   public static Predicate<String> endsWith(String string) {
     requireNonNull(string);
-    return Def.STRING_ENDS_WITH_FACTORY.create(string);
+    return ParameterizedLeafFactory.endsWith(string);
   }
 
   public static Predicate<String> equalsIgnoreCase(String string) {
     requireNonNull(string);
-    return Def.STRING_EQUALS_IGNORECASE_FACTORY.create(string);
+    return ParameterizedLeafFactory.equalsIgnoreCase(string);
   }
 
   public static Predicate<String> isEmptyString() {
@@ -165,15 +158,18 @@ public enum Predicates {
   }
 
   public static <E> Predicate<Stream<? extends E>> allMatch(Predicate<E> predicate) {
-    return Def.STREAM_ALL_MATCH_FACTORY.createStreamPred(predicate, predicate, true, false);
+    requireNonNull(predicate);
+    return IdentifiablePredicateFactory.allMatch(predicate);
   }
 
   public static <E> Predicate<Stream<? extends E>> noneMatch(Predicate<E> predicate) {
-    return Def.STREAM_NONE_MATCH_FACTORY.createStreamPred(predicate, predicate, true, true);
+    requireNonNull(predicate);
+    return IdentifiablePredicateFactory.noneMatch(predicate);
   }
 
   public static <E> Predicate<Stream<? extends E>> anyMatch(Predicate<E> predicate) {
-    return Def.STREAM_ANY_MATCH_FACTORY.createStreamPred(predicate, predicate, false, true);
+    requireNonNull(predicate);
+    return IdentifiablePredicateFactory.anyMatch(predicate);
   }
 
   @SuppressWarnings("unchecked")
@@ -235,75 +231,25 @@ public enum Predicates {
   enum Def {
     ;
 
-    public static final  Function<Class<?>, Predicate<?>>             IS_INSTANCE_OF$2                 = function(() -> "isInstanceOf", (Class<?> c) -> c::isInstance);
-    private static final Predicate<?>                                 ALWAYS_TRUE                      = predicate("alwaysTrue", t -> true);
-    private static final Predicate<Boolean>                           IS_TRUE                          = predicate("isTrue", (Boolean v) -> v);
-    private static final Predicate<Boolean>                           IS_FALSE                         = predicate("isFalse", (Boolean v) -> !v);
-    private static final Predicate<?>                                 IS_NULL                          = predicate("isNull", Objects::isNull);
-    private static final Predicate<?>                                 IS_NOT_NULL                      = predicate("isNotNull", Objects::nonNull);
-    private static final Predicate<String>                            IS_EMPTY_STRING                  = predicate("isEmpty", String::isEmpty);
-    private static final Predicate<String>                            IS_NULL_OR_EMPTY_STRING          = predicate("isNullOrEmptyString", s -> Objects.isNull(s) || isEmptyString().test(s)
+    public static final  Function<Class<?>, Predicate<?>>             IS_INSTANCE_OF$2          = function(() -> "isInstanceOf", (Class<?> c) -> c::isInstance);
+    private static final Predicate<?>                                 ALWAYS_TRUE               = predicate("alwaysTrue", t -> true);
+    private static final Predicate<Boolean>                           IS_TRUE                   = predicate("isTrue", (Boolean v) -> v);
+    private static final Predicate<Boolean>                           IS_FALSE                  = predicate("isFalse", (Boolean v) -> !v);
+    private static final Predicate<?>                                 IS_NULL                   = predicate("isNull", Objects::isNull);
+    private static final Predicate<?>                                 IS_NOT_NULL               = predicate("isNotNull", Objects::nonNull);
+    private static final Predicate<String>                            IS_EMPTY_STRING           = predicate("isEmpty", String::isEmpty);
+    private static final Predicate<String>                            IS_NULL_OR_EMPTY_STRING   = predicate("isNullOrEmptyString", s -> Objects.isNull(s) || isEmptyString().test(s)
     );
-    private static final Predicate<Object[]>                          IS_EMPTY_ARRAY                   = predicate("isEmptyArray", objects -> objects.length == 0);
-    private static final Predicate<Collection<?>>                     IS_EMPTY_COLLECTION              = predicate("isEmpty", Collection::isEmpty);
-    private static final BasePredUtils.Factory<Object, Object>        IS_EQUAL_TO_FACTORY              = Printables.predicateFactory(
+    private static final Predicate<Object[]>                          IS_EMPTY_ARRAY            = predicate("isEmptyArray", objects -> objects.length == 0);
+    private static final Predicate<Collection<?>>                     IS_EMPTY_COLLECTION       = predicate("isEmpty", Collection::isEmpty);
+    private static final BasePredUtils.Factory<Object, Object>        IS_EQUAL_TO_FACTORY       = Printables.predicateFactory(
         (arg) -> format("isEqualTo[%s]", formatObject(arg)),
         arg -> v -> Objects.equals(v, arg));
-    private static final BasePredUtils.Factory<Collection<?>, Object> CONTAINS_FACTORY                 = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<Collection<?>, Object> CONTAINS_FACTORY          = Printables.predicateFactory(
         (Object arg) -> format("contains[%s]", formatObject(arg)),
         (Object arg) -> (Collection<?> c) -> c.contains(arg));
-    private static final BasePredUtils.Factory<Object, Object>        OBJECT_IS_SAME_AS_FACTORY        = Printables.predicateFactory(
+    private static final BasePredUtils.Factory<Object, Object>        OBJECT_IS_SAME_AS_FACTORY = Printables.predicateFactory(
         arg -> format("==[%s]", formatObject(arg)),
         arg -> v -> v == arg);
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final BasePredUtils.Factory<?, Comparable<?>>      GT_FACTORY                       = Printables.predicateFactory(
-        (arg) -> format(">[%s]", formatObject(arg)),
-        arg -> v -> ((Comparable) v).compareTo(arg) > 0);
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final BasePredUtils.Factory<?, Comparable<?>>      GE_FACTORY                       = Printables.predicateFactory(
-        (arg) -> format(">=[%s]", formatObject(arg)),
-        arg -> v -> ((Comparable) v).compareTo(arg) >= 0);
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final BasePredUtils.Factory<?, Comparable<?>>      LE_FACTORY                       = Printables.predicateFactory(
-        (arg) -> format("<=[%s]", formatObject(arg)),
-        arg -> v -> ((Comparable) v).compareTo(arg) <= 0);
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final BasePredUtils.Factory<?, Comparable<?>>      LT_FACTORY                       = Printables.predicateFactory(
-        (arg) -> format("<[%s]", formatObject(arg)),
-        arg -> v -> ((Comparable) v).compareTo(arg) < 0);
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final BasePredUtils.Factory<?, Comparable<?>>      EQ_FACTORY                       = Printables.predicateFactory(
-        (arg) -> format("=[%s]", formatObject(arg)),
-        arg -> v -> ((Comparable) v).compareTo(arg) == 0);
-    private static final BasePredUtils.Factory<String, String>        STRING_MATCHES_REGEX_FACTORY     = Printables.predicateFactory(
-        (arg) -> format("matchesRegex[%s]", formatObject(arg)),
-        arg -> (String s) -> s.matches(arg));
-    private static final BasePredUtils.Factory<String, String>        STRING_CONTAINS_FACTORY          = Printables.predicateFactory(
-        (arg) -> format("containsString[%s]", formatObject(arg)),
-        arg -> (String s) -> s.contains(arg));
-    private static final BasePredUtils.Factory<String, String>        STRING_STARTS_WITH_FACTORY       = Printables.predicateFactory(
-        (arg) -> format("startsWith[%s]", formatObject(arg)),
-        (arg) -> (String s) -> s.startsWith(arg));
-    private static final BasePredUtils.Factory<String, String>        STRING_ENDS_WITH_FACTORY         = Printables.predicateFactory(
-        (arg) -> format("endsWith[%s]", formatObject(arg)),
-        arg -> (String s) -> s.endsWith(arg));
-    private static final BasePredUtils.Factory<String, String>        STRING_EQUALS_IGNORECASE_FACTORY = Printables.predicateFactory(
-        (arg) -> format("equalsIgnoreCase[%s]", formatObject(arg)),
-        arg -> (String s) -> s.equalsIgnoreCase(arg));
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final StreamUtils.Factory<Stream<?>, Predicate<?>> STREAM_ALL_MATCH_FACTORY         = StreamUtils.factory(
-        (arg) -> format("allMatch[%s]", requireNonNull(arg)),
-        arg -> (Stream<?> stream) -> stream.allMatch((Predicate) arg)
-    );
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final StreamUtils.Factory<Stream<?>, Predicate<?>> STREAM_NONE_MATCH_FACTORY        = StreamUtils.factory(
-        (arg) -> format("noneMatch[%s]", requireNonNull(arg)),
-        arg -> (Stream<?> stream) -> stream.noneMatch((Predicate) arg)
-    );
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final StreamUtils.Factory<Stream<?>, Predicate<?>> STREAM_ANY_MATCH_FACTORY         = StreamUtils.factory(
-        (arg) -> format("anyMatch[%s]", requireNonNull(arg)),
-        arg -> (Stream<?> stream) -> stream.anyMatch((Predicate) arg)
-    );
   }
 }

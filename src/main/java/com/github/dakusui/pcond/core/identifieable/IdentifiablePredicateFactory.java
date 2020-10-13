@@ -17,17 +17,32 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
-enum IdentifiablePredicateFactory {
-  FOR_NEGATION,
-  FOR_CONJUNCTION,
-  FOR_DISJUNCTION,
-  FOR_LEAF,
-  FOR_PARAMETERIZED_LEAF,
-  FOR_MATCHES_REGEX;
+public enum IdentifiablePredicateFactory {
+  NEGATION,
+  CONJUNCTION,
+  DISJUNCTION,
+  LEAF,
+  PARAMETERIZED_LEAF,
+  ;
 
-  enum ParameterizedLeafFactory {
+  public enum ParameterizedLeafFactory {
+    @SuppressWarnings("unchecked") GREATER_THAN(
+        (args) -> () -> format(">[%s]", formatObject(args.get(0))),
+        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) > 0),
+    @SuppressWarnings("unchecked") GREATER_THAN_OR_EQUAL_TO(
+        (args) -> () -> format(">=[%s]", formatObject(args.get(0))),
+        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) >= 0),
+    @SuppressWarnings("unchecked") LESS_THAN_OR_EQUAL_TO(
+        (args) -> () -> format("<=[%s]", formatObject(args.get(0))),
+        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) <= 0),
+    @SuppressWarnings("unchecked") LESS_THAN(
+        (args) -> () -> format("<[%s]", formatObject(args.get(0))),
+        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) < 0),
+    @SuppressWarnings("unchecked") EQUAL_TO(
+        (args) -> () -> format("=[%s]", formatObject(args.get(0))),
+        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) == 0),
     MATCHES_REGEX(
-        (args) -> () -> String.format("matchesRegex[%s]", args.get(0)),
+        (args) -> () -> String.format("matchesRegex[%s]", formatObject(args.get(0))),
         (args) -> (s) -> ((String) s).matches((String) args.get(0))),
     CONTAINS_STRING(
         (args) -> () -> format("containsString[%s]", formatObject(args.get(0))),
@@ -57,6 +72,26 @@ enum IdentifiablePredicateFactory {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     <T> Function<List<Object>, Predicate<T>> functionFactory() {
       return (Function) this.predicateFactory;
+    }
+
+    public static <T extends Comparable<? super T>> Predicate<T> greaterThan(T value) {
+      return create(GREATER_THAN, singletonList(value));
+    }
+
+    public static <T extends Comparable<? super T>> Predicate<T> greaterThanOrEqualTo(T value) {
+      return create(GREATER_THAN_OR_EQUAL_TO, singletonList(value));
+    }
+
+    public static <T extends Comparable<? super T>> Predicate<T> lessThan(T value) {
+      return create(LESS_THAN, singletonList(value));
+    }
+
+    public static <T extends Comparable<? super T>> Predicate<T> lessThanOrEqualTo(T value) {
+      return create(LESS_THAN_OR_EQUAL_TO, singletonList(value));
+    }
+
+    public static <T extends Comparable<? super T>> Predicate<T> equalTo(T value) {
+      return create(EQUAL_TO, singletonList(value));
     }
 
     public static Predicate<String> matchesRegex(String regex) {
@@ -89,7 +124,7 @@ enum IdentifiablePredicateFactory {
   }
 
   public static <T> Predicate<T> leaf(Supplier<String> formatter, Predicate<? super T> predicate) {
-    return new LeafPredicate<>(FOR_LEAF, singletonList(predicate), formatter, predicate);
+    return new LeafPredicate<>(LEAF, singletonList(predicate), formatter, predicate);
   }
 
   public static <T> Predicate<T> parameterizedLeaf(
@@ -162,7 +197,7 @@ enum IdentifiablePredicateFactory {
     @SuppressWarnings("unchecked")
     protected Negation(Predicate<T> predicate, List<Object> args) {
       super(
-          FOR_NEGATION,
+          NEGATION,
           args,
           () -> format("!%s", predicate),
           (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).negate().test(t));
@@ -181,7 +216,7 @@ enum IdentifiablePredicateFactory {
       super(
           predicate,
           other,
-          FOR_CONJUNCTION,
+          CONJUNCTION,
           args,
           () -> format("(%s||%s)", predicate, other),
           (p, o) -> ((Predicate<T>) PrintablePredicate.unwrap(p)).or(PrintablePredicate.unwrap(o)));
@@ -194,7 +229,7 @@ enum IdentifiablePredicateFactory {
       super(
           predicate,
           other,
-          FOR_DISJUNCTION,
+          DISJUNCTION,
           args,
           () -> format("(%s&&%s)", predicate, other),
           (p, o) -> ((Predicate<T>) PrintablePredicate.unwrap(p)).and(PrintablePredicate.unwrap(o)));
@@ -331,7 +366,7 @@ enum IdentifiablePredicateFactory {
           NoneMatch.class,
           singletonList(predicate),
           () -> format("noneMatch[%s]", predicate),
-          (Stream<? extends E> stream) -> stream.allMatch(predicate),
+          (Stream<? extends E> stream) -> stream.noneMatch(predicate),
           toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
           true,
           true);
@@ -351,7 +386,7 @@ enum IdentifiablePredicateFactory {
           AnyMatch.class,
           singletonList(predicate),
           () -> format("anyMatch[%s]", predicate),
-          (Stream<? extends E> stream) -> stream.allMatch(PrintablePredicate.<E>unwrap(predicate)),
+          (Stream<? extends E> stream) -> stream.anyMatch(PrintablePredicate.<E>unwrap(predicate)),
           toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
           false,
           true);
