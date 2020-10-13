@@ -85,16 +85,17 @@ enum IdentifiablePredicateFactory {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> Predicate<T> unwrapIfPrintablePredicate(Predicate<? super T> predicate) {
+  private static <T> Predicate<? super T> unwrapIfPrintablePredicate(Predicate<? super T> predicate) {
     Predicate<? super T> ret = predicate;
     if (predicate instanceof PrintablePredicate)
       ret = unwrapIfPrintablePredicate(((PrintablePredicate<? super T>) predicate).predicate);
-    return (Predicate<T>) ret;
+    return ret;
   }
 
   private static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
+    @SuppressWarnings("unchecked")
     protected Disjunction(PrintablePredicate<T> predicate, PrintablePredicate<T> other, List<Object> args) {
-      super(predicate, other, FOR_DISJUNCTION, args, () -> format("(%s&&%s)", predicate, other), (p, o) -> unwrapIfPrintablePredicate(p).and(unwrapIfPrintablePredicate(o)));
+      super(predicate, other, FOR_DISJUNCTION, args, () -> format("(%s&&%s)", predicate, other), (p, o) -> ((Predicate<T>) unwrapIfPrintablePredicate(p)).and(unwrapIfPrintablePredicate(o)));
     }
   }
 
@@ -134,8 +135,9 @@ enum IdentifiablePredicateFactory {
   }
 
   static class Conjunction<T> extends Junction<T> implements Evaluable.Conjunction<T> {
+    @SuppressWarnings("unchecked")
     protected Conjunction(PrintablePredicate<T> predicate, PrintablePredicate<T> other, List<Object> args) {
-      super(predicate, other, FOR_CONJUNCTION, args, () -> format("(%s||%s)", predicate, other), (p, o) -> unwrapIfPrintablePredicate(p).or(unwrapIfPrintablePredicate(o)));
+      super(predicate, other, FOR_CONJUNCTION, args, () -> format("(%s||%s)", predicate, other), (p, o) -> ((Predicate<T>) unwrapIfPrintablePredicate(p)).or(unwrapIfPrintablePredicate(o)));
     }
   }
 

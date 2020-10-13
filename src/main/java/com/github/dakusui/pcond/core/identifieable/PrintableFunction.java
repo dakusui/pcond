@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class PrintableFunction<T, R> extends Identifiable.Base implements Evaluable.Func<T>, CurriedFunction<T, R> {
-  private final Function<? super T, ? extends R> function;
+  final         Function<? super T, ? extends R> function;
   private final Function<? super T, ?>           head;
   private final Evaluable<?>                     tail;
   private final Supplier<String>                 s;
@@ -21,6 +21,18 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
     this.function = Objects.requireNonNull(function);
     this.head = head != null ? head : this;
     this.tail = tail;
+  }
+
+  @Override
+  public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
+    Objects.requireNonNull(before);
+    return IdentifiableFunctionFactory.<V, T, R>compose(before, this);
+  }
+
+  @Override
+  public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
+    Objects.requireNonNull(after);
+    return IdentifiableFunctionFactory.<T, R, V>compose(this, after);
   }
 
   protected PrintableFunction(Object creator, List<Object> args, Supplier<String> s, Function<? super T, ? extends R> function) {
