@@ -1,15 +1,21 @@
 package com.github.dakusui.pcond.core.identifieable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 public enum IdentifiableFunctionFactory {
-  COMPOSE,
+  COMPOSE {
+    public void hello() {
+
+    }
+  },
   ELEMENT_AT;
 
   public static <T, R, S> PrintableFunction<T, S> compose(Function<? super T, ? extends R> before, Function<? super R, ? extends S> after) {
@@ -17,7 +23,15 @@ public enum IdentifiableFunctionFactory {
         COMPOSE,
         asList(toPrintableFunction(before), toPrintableFunction(after)),
         () -> format("%s->%s", before, after),
-        (T v) -> unwrapIfPrintableFunction(after).apply(unwrapIfPrintableFunction(before).apply(v)));
+        (T v) -> PrintableFunction.unwrap(after).apply(PrintableFunction.unwrap(before).apply(v)));
+  }
+
+  public static <T, R> Function<T, R> function(Supplier<String> formatter, Function<T, R> function) {
+    return new PrintableFunction<>(
+        creatorOf(function).orElse(Identifiable.class),
+        argsOf(function),
+        formatter,
+        function);
   }
 
   public static <T, R> PrintableFunction<T, R> create(Object creator, List<Object> args, Function<List<Object>, Supplier<String>> formatterFactory, Function<List<Object>, Function<T, R>> functionFactory) {
@@ -37,11 +51,17 @@ public enum IdentifiableFunctionFactory {
     return new PrintableFunction<>(IdentifiableFunctionFactory.class, singletonList(function), () -> "noname:" + function, function);
   }
 
-  @SuppressWarnings("unchecked")
-  private static <T, R> Function<T, R> unwrapIfPrintableFunction(Function<T, R> function) {
-    Function<T, R> ret = function;
+  private static <T, R> Optional<Object> creatorOf(Function<T, R> function) {
+    Optional<Object> ret = Optional.empty();
     if (function instanceof PrintableFunction)
-      ret = unwrapIfPrintableFunction((Function<T, R>) ((PrintableFunction<T, R>) function).function);
+      ret = Optional.of(((PrintableFunction<T, R>) function).creator());
+    return ret;
+  }
+
+  private static <T, R> List<Object> argsOf(Function<T, R> function) {
+    List<Object> ret = emptyList();
+    if (function instanceof PrintableFunction)
+      ret = ((PrintableFunction<T, R>) function).args();
     return ret;
   }
 }

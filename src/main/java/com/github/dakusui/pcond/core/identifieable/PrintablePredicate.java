@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.core.identifieable;
 import com.github.dakusui.pcond.core.Evaluable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -12,8 +13,8 @@ public abstract class PrintablePredicate<T> extends Identifiable.Base implements
 
   protected PrintablePredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<? super T> predicate) {
     super(creator, args);
-    this.formatter = formatter;
-    this.predicate = predicate;
+    this.formatter = Objects.requireNonNull(formatter);
+    this.predicate = requireNonPrintablePredicate(unwrap(Objects.requireNonNull(predicate)));
   }
 
   @Override
@@ -40,4 +41,20 @@ public abstract class PrintablePredicate<T> extends Identifiable.Base implements
   public Predicate<T> negate() {
     return IdentifiablePredicateFactory.not(this);
   }
+
+  @SuppressWarnings("unchecked")
+  static <T> Predicate<? super T> unwrap(Predicate<? super T> predicate) {
+    Predicate<? super T> ret = predicate;
+    if (predicate instanceof PrintablePredicate) {
+      ret = ((PrintablePredicate<? super T>) predicate).predicate;
+      assert !(ret instanceof PrintablePredicate);
+    }
+    return ret;
+  }
+
+  private static <T> Predicate<T> requireNonPrintablePredicate(Predicate<T> predicate) {
+    assert !(predicate instanceof PrintablePredicate);
+    return predicate;
+  }
+
 }

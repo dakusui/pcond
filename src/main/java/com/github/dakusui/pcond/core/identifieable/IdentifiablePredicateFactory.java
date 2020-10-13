@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -24,11 +25,74 @@ enum IdentifiablePredicateFactory {
   FOR_PARAMETERIZED_LEAF,
   FOR_MATCHES_REGEX;
 
-  public static <T> PrintablePredicate<T> leaf(Supplier<String> formatter, Predicate<? super T> predicate) {
+  enum ParameterizedLeafFactory {
+    MATCHES_REGEX(
+        (args) -> () -> String.format("matchesRegex[%s]", args.get(0)),
+        (args) -> (s) -> ((String) s).matches((String) args.get(0))),
+    CONTAINS_STRING(
+        (args) -> () -> format("containsString[%s]", formatObject(args.get(0))),
+        (args) -> (s) -> ((String) s).contains((String) args.get(0))),
+    STARTS_WITH(
+        (args) -> () -> format("startsWith[%s]", formatObject(args.get(0))),
+        (args) -> (s) -> ((String) s).startsWith((String) args.get(0))),
+    ENDS_WITH(
+        (args) -> () -> format("endsWith[%s]", formatObject(args.get(0))),
+        (args) -> (s) -> ((String) s).endsWith((String) args.get(0))),
+    EQUALS_IGNORE_CASE(
+        (args) -> () -> format("equalsIgnoreCase[%s]", formatObject(args.get(0))),
+        (args) -> (s) -> ((String) s).equalsIgnoreCase((String) args.get(0))),
+    ;
+    private final Function<List<Object>, Predicate<Object>> predicateFactory;
+    private final Function<List<Object>, Supplier<String>>  formatterFactory;
+
+    ParameterizedLeafFactory(Function<List<Object>, Supplier<String>> formatterFactory, Function<List<Object>, Predicate<Object>> predicateFactory) {
+      this.predicateFactory = predicateFactory;
+      this.formatterFactory = formatterFactory;
+    }
+
+    Function<List<Object>, Supplier<String>> formatterFactory() {
+      return this.formatterFactory;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    <T> Function<List<Object>, Predicate<T>> functionFactory() {
+      return (Function) this.predicateFactory;
+    }
+
+    public static Predicate<String> matchesRegex(String regex) {
+      return create(MATCHES_REGEX, singletonList(regex));
+    }
+
+    public static Predicate<String> containsString(String string) {
+      return create(CONTAINS_STRING, singletonList(string));
+    }
+
+    public static Predicate<String> startsWith(String string) {
+      return create(STARTS_WITH, singletonList(string));
+    }
+
+    public static Predicate<String> endsWith(String string) {
+      return create(ENDS_WITH, singletonList(string));
+    }
+
+    public static Predicate<String> equalsIgnoreCase(String string) {
+      return create(EQUALS_IGNORE_CASE, singletonList(string));
+    }
+
+    private static <T> Predicate<T> create(ParameterizedLeafFactory parameterizedLeafFactory, List<Object> args) {
+      return parameterizedLeaf(
+          parameterizedLeafFactory,
+          parameterizedLeafFactory.formatterFactory(),
+          parameterizedLeafFactory.functionFactory(),
+          args);
+    }
+  }
+
+  public static <T> Predicate<T> leaf(Supplier<String> formatter, Predicate<? super T> predicate) {
     return new LeafPredicate<>(FOR_LEAF, singletonList(predicate), formatter, predicate);
   }
 
-  public static <T> PrintablePredicate<T> parameterizedLeaf(
+  public static <T> Predicate<T> parameterizedLeaf(
       Object factoryIdentifier,
       Function<List<Object>, Supplier<String>> formatterFactory,
       Function<List<Object>, Predicate<T>> predicateFactory,
@@ -37,27 +101,19 @@ enum IdentifiablePredicateFactory {
     return new LeafPredicate<>(factoryIdentifier, args, formatterFactory.apply(args), predicateFactory.apply(args));
   }
 
-  public static PrintablePredicate<String> matchesRegex(String regex) {
-    return parameterizedLeaf(
-        FOR_MATCHES_REGEX,
-        (args) -> () -> format("matchesRegex[%s]", regex),
-        (args) -> (String s) -> s.matches(regex),
-        singletonList(regex));
-  }
-
   public static <P, O> TransformingPredicate.Factory<P, O> transform(Function<O, P> function) {
     return TransformingPredicate.Factory.create(function);
   }
 
-  public static <T> PrintablePredicate<T> and(Predicate<? super T> predicate, Predicate<? super T> other) {
+  public static <T> Predicate<T> and(Predicate<? super T> predicate, Predicate<? super T> other) {
     return new Conjunction<T>(toPrintablePredicate(predicate), toPrintablePredicate(other), asList(predicate, other));
   }
 
-  public static <T> PrintablePredicate<T> or(Predicate<? super T> predicate, Predicate<? super T> other) {
+  public static <T> Predicate<T> or(Predicate<? super T> predicate, Predicate<? super T> other) {
     return new Disjunction<T>(toPrintablePredicate(predicate), toPrintablePredicate(other), asList(predicate, other));
   }
 
-  public static <T> PrintablePredicate<T> not(Predicate<T> predicate) {
+  public static <T> Predicate<T> not(Predicate<T> predicate) {
     return new Negation<T>(toPrintablePredicate(predicate), singletonList(predicate));
   }
 
@@ -78,25 +134,10 @@ enum IdentifiablePredicateFactory {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T> PrintablePredicate<T> toPrintablePredicate(Predicate<? super T> predicate) {
+  private static <T> Predicate<T> toPrintablePredicate(Predicate<? super T> predicate) {
     if (!(predicate instanceof PrintablePredicate))
       return leaf(() -> "noname:" + predicate.toString(), predicate);
     return (PrintablePredicate<T>) predicate;
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <T> Predicate<? super T> unwrapIfPrintablePredicate(Predicate<? super T> predicate) {
-    Predicate<? super T> ret = predicate;
-    if (predicate instanceof PrintablePredicate)
-      ret = unwrapIfPrintablePredicate(((PrintablePredicate<? super T>) predicate).predicate);
-    return ret;
-  }
-
-  private static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
-    @SuppressWarnings("unchecked")
-    protected Disjunction(PrintablePredicate<T> predicate, PrintablePredicate<T> other, List<Object> args) {
-      super(predicate, other, FOR_DISJUNCTION, args, () -> format("(%s&&%s)", predicate, other), (p, o) -> ((Predicate<T>) unwrapIfPrintablePredicate(p)).and(unwrapIfPrintablePredicate(o)));
-    }
   }
 
   private static class LeafPredicate<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T> {
@@ -119,12 +160,12 @@ enum IdentifiablePredicateFactory {
     final Evaluable<T> target;
 
     @SuppressWarnings("unchecked")
-    protected Negation(PrintablePredicate<T> predicate, List<Object> args) {
+    protected Negation(Predicate<T> predicate, List<Object> args) {
       super(
           FOR_NEGATION,
           args,
           () -> format("!%s", predicate),
-          (t) -> unwrapIfPrintablePredicate((Predicate<Object>) predicate).negate().test(t));
+          (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).negate().test(t));
       target = toEvaluableIfNecessary(predicate);
     }
 
@@ -136,8 +177,27 @@ enum IdentifiablePredicateFactory {
 
   static class Conjunction<T> extends Junction<T> implements Evaluable.Conjunction<T> {
     @SuppressWarnings("unchecked")
-    protected Conjunction(PrintablePredicate<T> predicate, PrintablePredicate<T> other, List<Object> args) {
-      super(predicate, other, FOR_CONJUNCTION, args, () -> format("(%s||%s)", predicate, other), (p, o) -> ((Predicate<T>) unwrapIfPrintablePredicate(p)).or(unwrapIfPrintablePredicate(o)));
+    protected Conjunction(Predicate<T> predicate, Predicate<T> other, List<Object> args) {
+      super(
+          predicate,
+          other,
+          FOR_CONJUNCTION,
+          args,
+          () -> format("(%s||%s)", predicate, other),
+          (p, o) -> ((Predicate<T>) PrintablePredicate.unwrap(p)).or(PrintablePredicate.unwrap(o)));
+    }
+  }
+
+  private static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
+    @SuppressWarnings("unchecked")
+    protected Disjunction(Predicate<T> predicate, Predicate<T> other, List<Object> args) {
+      super(
+          predicate,
+          other,
+          FOR_DISJUNCTION,
+          args,
+          () -> format("(%s&&%s)", predicate, other),
+          (p, o) -> ((Predicate<T>) PrintablePredicate.unwrap(p)).and(PrintablePredicate.unwrap(o)));
     }
   }
 
@@ -146,8 +206,8 @@ enum IdentifiablePredicateFactory {
     final Evaluable<T> b;
 
     protected Junction(
-        PrintablePredicate<T> predicate,
-        PrintablePredicate<T> other,
+        Predicate<T> predicate,
+        Predicate<T> other,
         IdentifiablePredicateFactory creator,
         List<Object> args, Supplier<String> formatter, BiFunction<Predicate<T>, Predicate<T>, Predicate<T>> predicateFactory) {
       super(
@@ -208,7 +268,7 @@ enum IdentifiablePredicateFactory {
   }
 
   static class ContextPredicate extends PrintablePredicate<Context> implements Evaluable.ContextPred {
-    public static <T> ContextPredicate create(PrintablePredicate<T> predicate, int argIndex) {
+    public static <T> ContextPredicate create(Predicate<T> predicate, int argIndex) {
       return new ContextPredicate(ContextPredicate.class, asList(predicate, argIndex), predicate, argIndex);
     }
 
@@ -291,7 +351,7 @@ enum IdentifiablePredicateFactory {
           AnyMatch.class,
           singletonList(predicate),
           () -> format("anyMatch[%s]", predicate),
-          (Stream<? extends E> stream) -> stream.allMatch(predicate),
+          (Stream<? extends E> stream) -> stream.allMatch(PrintablePredicate.<E>unwrap(predicate)),
           toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
           false,
           true);

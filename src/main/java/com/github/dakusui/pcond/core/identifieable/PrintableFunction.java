@@ -13,14 +13,19 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
   final         Function<? super T, ? extends R> function;
   private final Function<? super T, ?>           head;
   private final Evaluable<?>                     tail;
-  private final Supplier<String>                 s;
+  private final Supplier<String>                 formatter;
 
   protected PrintableFunction(Object creator, List<Object> args, Supplier<String> s, Function<? super T, ? extends R> function, Function<? super T, ?> head, Evaluable<?> tail) {
     super(creator, args);
-    this.s = Objects.requireNonNull(s);
-    this.function = Objects.requireNonNull(function);
+    this.formatter = Objects.requireNonNull(s);
+    this.function = requireNonPrintableFunction(unwrap(Objects.requireNonNull(function)));
     this.head = head != null ? head : this;
     this.tail = tail;
+  }
+
+  @Override
+  public String toString() {
+    return this.formatter.get();
   }
 
   @Override
@@ -69,5 +74,20 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
     return function instanceof CurriedFunction ?
         (Class<? extends R>) ((CurriedFunction<? super T, ? extends R>) function).returnType() :
         (Class<? extends R>) Object.class;
+  }
+
+  @SuppressWarnings("unchecked")
+  static <T, R> Function<T, R> unwrap(Function<T, R> function) {
+    Function<T, R> ret = function;
+    if (function instanceof PrintableFunction) {
+      ret = (Function<T, R>) ((PrintableFunction<T, R>) function).function;
+      assert !(ret instanceof PrintableFunction);
+    }
+    return ret;
+  }
+
+  private static <T, R> Function<T, R> requireNonPrintableFunction(Function<T, R> function) {
+    assert !(function instanceof PrintableFunction);
+    return function;
   }
 }
