@@ -80,7 +80,11 @@ public enum IdentifiableFunctionFactory {
         function);
   }
 
-  public static <T, R> PrintableFunction<T, R> create(Object creator, List<Object> args, Function<List<Object>, Supplier<String>> formatterFactory, Function<List<Object>, Function<T, R>> functionFactory) {
+  public static <T, R> PrintableFunction<T, R> create(
+      Object creator,
+      List<Object> args,
+      Function<List<Object>, Supplier<String>> formatterFactory,
+      Function<List<Object>, Function<T, R>> functionFactory) {
     return new PrintableFunction<>(creator, args, formatterFactory.apply(args), functionFactory.apply(args));
   }
 

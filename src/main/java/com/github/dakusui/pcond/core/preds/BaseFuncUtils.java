@@ -22,10 +22,6 @@ public enum BaseFuncUtils {
 
   public static abstract class Factory<T, R, E> extends PrintableLambdaFactory<E> {
     public abstract static class PrintableFunctionFromFactory<T, R, E> extends PrintableFunction<T, R> implements Lambda<Factory<T, R, E>, E> {
-      protected PrintableFunctionFromFactory(Supplier<String> s, Function<? super T, ? extends R> function, Function<? super T, ?> head, Evaluable<?> tail) {
-        super(s, function, head, tail);
-      }
-
       public PrintableFunctionFromFactory(Supplier<String> s, Function<? super T, ? extends R> function) {
         super(s, function);
       }
