@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.multi;
 
 import com.github.dakusui.pcond.core.currying.FormattingUtils;
+import com.github.dakusui.pcond.core.identifieable.PrintableMultiFunction;
 import com.github.dakusui.pcond.core.printable.PrintableFunction;
 
 import java.lang.reflect.Method;
@@ -27,15 +28,14 @@ import static java.util.stream.Collectors.toList;
  * @param <R>
  */
 public interface MultiFunction<R> extends Function<List<? super Object>, R> {
-  @SuppressWarnings("unchecked")
-  static <R> MultiFunction<R> createFromStaticMethod(Method method, List<Integer> paramOrder) {
+  static <R> PrintableMultiFunction<R> createFromStaticMethod(Method method, List<Integer> paramOrder) {
     validateParamOrderList(paramOrder, method.getParameterCount());
     requireStaticMethod(method);
-    return (MultiFunction<R>) new Builder<>(args -> invokeStaticMethod(method, (paramOrder).stream().map(args::get).toArray()))
+    return new PrintableMultiFunction.Builder<R>(args -> invokeStaticMethod(method, (paramOrder).stream().map(args::get).toArray()))
         .name(method.getName())
         .formatter(() -> formatMethodName(method) + FormattingUtils.formatParameterOrder(paramOrder))
         .addParameters(paramOrder.stream().map(i -> method.getParameterTypes()[i]).collect(toList()))
-        .identity(asList(method, validateParamOrderList(paramOrder, method.getParameterCount())))
+        .identityArgs(asList(method, validateParamOrderList(paramOrder, method.getParameterCount())))
         .$();
   }
 

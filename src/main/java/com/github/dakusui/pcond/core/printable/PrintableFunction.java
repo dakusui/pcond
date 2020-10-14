@@ -2,61 +2,27 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
-import com.github.dakusui.pcond.core.preds.ComposedFuncUtils;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static java.util.Arrays.asList;
-
 public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable.Func<T> {
-  private static final BaseFuncUtils.Factory<Object, Object, List<Function<Object, Object>>> COMPOSE_FACTORY = ComposedFuncUtils.factory(
-      arg -> String.format("%s->%s", arg.get(0), arg.get(1)),
-      arg -> p -> unwrapIfPrintableFunction(arg.get(1)).compose(unwrapIfPrintableFunction(arg.get(0))).apply(p)
-  );
-
-  private final Supplier<String>                 s;
   private final Function<? super T, ? extends R> function;
   private final Function<? super T, ?>           head;
   private final Evaluable<?>                     tail;
 
   protected PrintableFunction(Supplier<String> s, Function<? super T, ? extends R> function, Function<? super T, ?> head, Evaluable<?> tail) {
-    this.s = Objects.requireNonNull(s);
     this.function = Objects.requireNonNull(function);
     this.head = head;
     this.tail = tail;
   }
 
   protected PrintableFunction(Supplier<String> s, Function<? super T, ? extends R> function) {
-    this.s = Objects.requireNonNull(s);
     this.function = Objects.requireNonNull(function);
     this.head = this;
     this.tail = null;
-  }
-
-
-  @SuppressWarnings({ "unchecked" })
-  public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
-    Objects.requireNonNull(before);
-    return (Function<V, R>) COMPOSE_FACTORY.create(asList((Function<Object, Object>) before, (Function<Object, Object>) this));
-  }
-
-  @SuppressWarnings({ "unchecked" })
-  public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
-    Objects.requireNonNull(after);
-    return (Function<T, V>) COMPOSE_FACTORY.create(asList((Function<Object, Object>) this, (Function<Object, Object>) after));
-  }
-
-  @SuppressWarnings("unchecked")
-  private static Function<Object, Object> unwrapIfPrintableFunction(Function<Object, Object> function) {
-    Function<Object, Object> ret = function;
-    if (function instanceof PrintableFunction)
-      ret = (Function<Object, Object>) ((PrintableFunction<Object, Object>) function).function;
-    return ret;
   }
 
   @Override
@@ -102,15 +68,4 @@ public class PrintableFunction<T, R> implements CurriedFunction<T, R>, Evaluable
     @SuppressWarnings("unchecked") PrintableFunction<T, R> another = (PrintableFunction<T, R>) anotherObject;
     return this.function.equals(another.function) && this.toString().equals(another.toString());
   }
-
-  @Override
-  public String toString() {
-    return s.get();
-  }
-
-  public static <T, R> PrintableFunction<T, R> create(String s, Function<? super T, ? extends R> function) {
-    Objects.requireNonNull(s);
-    return new PrintableFunction<>(() -> s, function);
-  }
-
 }

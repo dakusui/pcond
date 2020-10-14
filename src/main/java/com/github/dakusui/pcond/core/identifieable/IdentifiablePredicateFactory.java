@@ -241,7 +241,8 @@ public enum IdentifiablePredicateFactory {
         Predicate<T> predicate,
         Predicate<T> other,
         IdentifiablePredicateFactory creator,
-        List<Object> args, Supplier<String> formatter, BiFunction<Predicate<T>, Predicate<T>, Predicate<T>> predicateFactory) {
+        List<Object> args,
+        Supplier<String> formatter, BiFunction<Predicate<T>, Predicate<T>, Predicate<T>> predicateFactory) {
       super(
           creator,
           args,

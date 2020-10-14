@@ -53,7 +53,7 @@ public class PrintableMultiFunction<R> extends PrintableFunction<List<? super Ob
    *
    * @param <R> The type of value returned by the multi-function built by this object.
    */
-  static class Builder<R> {
+  public static class Builder<R> {
     private final Object                                              creator        = Builder.class;
     private       List<Object>                                        identityArgs;
     private       String                                              name           = "(anonymous)";

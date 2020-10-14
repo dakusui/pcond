@@ -1,17 +1,15 @@
 package com.github.dakusui.pcond.functions;
 
 
-import com.github.dakusui.pcond.core.printable.PrintableFunction;
+import com.github.dakusui.pcond.core.identifieable.IdentifiableFunctionFactory;
+import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory;
 import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
 import com.github.dakusui.pcond.core.preds.BasePredUtils;
 import com.github.dakusui.pcond.core.preds.LeafPredUtils;
-import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * An entry point class that provides methods to create a new "printable" function from a given conventional function.
@@ -27,6 +25,10 @@ public enum Printables {
     return predicate(() -> s, predicate);
   }
 
+  public static <T> Predicate<T> printablePredicate(String s, Predicate<T> predicate) {
+    return IdentifiablePredicateFactory.leaf(Printables.class, () -> s, predicate);
+  }
+
   public static <T, R> Function<T, R> function(Supplier<String> s, Function<T, R> function) {
     return Printables.printableFunction(s.get(), function);
   }
@@ -35,12 +37,9 @@ public enum Printables {
     return function(() -> s, function);
   }
 
-  public static <T> Predicate<T> printablePredicate(String s, Predicate<T> predicate) {
-    return PrintablePredicate.create(s, predicate);
-  }
-
+  @SuppressWarnings("unchecked")
   public static <T, R> Function<T, R> printableFunction(String s, Function<? super T, ? extends R> function) {
-    return PrintableFunction.create(s, function);
+    return (Function<T, R>) IdentifiableFunctionFactory.function(() -> s, function);
   }
 
   /**

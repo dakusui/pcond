@@ -84,13 +84,6 @@ public enum IdentifiableFunctionFactory {
     return new PrintableFunction<>(creator, args, formatterFactory.apply(args), functionFactory.apply(args));
   }
 
-  public static <E> PrintableFunction<List<? extends E>, ? extends E> elementAt(int index) {
-    return create(Parameterized.ELEMENT_AT,
-        singletonList(index),
-        args -> () -> String.format("elementAt[%s]", args.get(0)),
-        args -> v -> v.get((int) args.get(0)));
-  }
-
   private static <T, R> PrintableFunction<T, R> toPrintableFunction(Function<T, R> function) {
     if (function instanceof PrintableFunction)
       return (PrintableFunction<T, R>) function;
