@@ -1,11 +1,11 @@
 package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.core.context.Context;
-import com.github.dakusui.pcond.core.context.PrintableContextPredicate;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory;
 import com.github.dakusui.pcond.core.preds.ContextUtils;
 
-import java.util.*;
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -28,7 +28,7 @@ public enum Experimentals {
   }
 
   public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate_, int argIndex) {
-    return new PrintableContextPredicate(predicate_, argIndex);
+    return IdentifiablePredicateFactory.contextPredicate(predicate_, argIndex);
   }
 
   public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate) {

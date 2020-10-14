@@ -1,15 +1,14 @@
 package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory;
+import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory.Leaf;
 import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory.ParameterizedLeafFactory;
-import com.github.dakusui.pcond.core.preds.BasePredUtils;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
 import com.github.dakusui.pcond.internals.InternalChecks;
 import com.github.dakusui.pcond.internals.TransformingPredicate;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -19,42 +18,38 @@ import static com.github.dakusui.pcond.functions.Printables.function;
 import static com.github.dakusui.pcond.functions.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.lang.String.format;
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 public enum Predicates {
   ;
 
-  @SuppressWarnings("unchecked")
   public static <T> Predicate<T> alwaysTrue() {
-    return (Predicate<T>) Def.ALWAYS_TRUE;
+    return Leaf.ALWAYS_TRUE.instance();
   }
 
   public static Predicate<Boolean> isTrue() {
-    return Def.IS_TRUE;
+    return Leaf.IS_TRUE.instance();
   }
 
   public static Predicate<Boolean> isFalse() {
-    return Def.IS_FALSE;
+    return Leaf.IS_FALSE.instance();
   }
 
-  @SuppressWarnings("unchecked")
   public static <T> Predicate<T> isNull() {
-    return (Predicate<T>) Def.IS_NULL;
+    return Leaf.IS_NULL.instance();
   }
 
-  @SuppressWarnings("unchecked")
   public static <T> Predicate<T> isNotNull() {
-    return (Predicate<T>) Def.IS_NOT_NULL;
+    return Leaf.IS_NOT_NULL.instance();
   }
 
-  @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   public static <T> Predicate<T> isEqualTo(T value) {
-    return Predicate.class.cast(Def.IS_EQUAL_TO_FACTORY.create(value));
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.IS_EQUAL_TO, singletonList(value));
   }
 
-  @SuppressWarnings("unchecked")
   public static <T> Predicate<T> isSameReferenceAs(T value) {
-    return (Predicate<T>) Def.OBJECT_IS_SAME_AS_FACTORY.create(value);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.OBJECT_IS_SAME_AS, singletonList(value));
   }
 
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
@@ -75,7 +70,7 @@ public enum Predicates {
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> greaterThan(T value) {
-    return ParameterizedLeafFactory.greaterThan(value);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.GREATER_THAN, singletonList(value));
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> ge(T value) {
@@ -83,7 +78,7 @@ public enum Predicates {
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> greaterThanOrEqualTo(T value) {
-    return ParameterizedLeafFactory.greaterThanOrEqualTo(value);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.GREATER_THAN_OR_EQUAL_TO, singletonList(value));
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> lt(T value) {
@@ -91,7 +86,7 @@ public enum Predicates {
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> lessThan(T value) {
-    return ParameterizedLeafFactory.lessThan(value);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.LESS_THAN, singletonList(value));
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> le(T value) {
@@ -99,7 +94,7 @@ public enum Predicates {
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> lessThanOrEqualTo(T value) {
-    return ParameterizedLeafFactory.lessThanOrEqualTo(value);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.LESS_THAN_OR_EQUAL_TO, singletonList(value));
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> eq(T value) {
@@ -107,54 +102,52 @@ public enum Predicates {
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> equalTo(T value) {
-    return ParameterizedLeafFactory.equalTo(value);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.EQUAL_TO, singletonList(value));
   }
 
   public static Predicate<String> matchesRegex(String regex) {
     requireNonNull(regex);
-    return ParameterizedLeafFactory.matchesRegex(regex);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.MATCHES_REGEX, singletonList(regex));
   }
 
   public static Predicate<String> containsString(String string) {
     requireNonNull(string);
-    return ParameterizedLeafFactory.containsString(string);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.CONTAINS_STRING, singletonList(string));
   }
 
   public static Predicate<String> startsWith(String string) {
     requireNonNull(string);
-    return ParameterizedLeafFactory.startsWith(string);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.STARTS_WITH, singletonList(string));
   }
 
   public static Predicate<String> endsWith(String string) {
     requireNonNull(string);
-    return ParameterizedLeafFactory.endsWith(string);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.ENDS_WITH, singletonList(string));
   }
 
   public static Predicate<String> equalsIgnoreCase(String string) {
     requireNonNull(string);
-    return ParameterizedLeafFactory.equalsIgnoreCase(string);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.EQUALS_IGNORE_CASE, singletonList(string));
   }
 
   public static Predicate<String> isEmptyString() {
-    return Def.IS_EMPTY_STRING;
+    return Leaf.IS_EMPTY_STRING.instance();
   }
 
   public static Predicate<String> isNullOrEmptyString() {
-    return Def.IS_NULL_OR_EMPTY_STRING;
+    return Leaf.IS_NULL_OR_EMPTY_STRING.instance();
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
   public static <E> Predicate<Collection<E>> contains(Object entry) {
-    requireNonNull(entry);
-    return (Predicate) Def.CONTAINS_FACTORY.create(entry);
+    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.CONTAINS, singletonList(entry));
   }
 
   public static Predicate<Object[]> isEmptyArray() {
-    return Def.IS_EMPTY_ARRAY;
+    return Leaf.IS_EMPTY_ARRAY.instance();
   }
 
   public static Predicate<? super Collection<?>> isEmpty() {
-    return Def.IS_EMPTY_COLLECTION;
+    return Leaf.IS_EMPTY_COLLECTION.instance();
   }
 
   public static <E> Predicate<Stream<? extends E>> allMatch(Predicate<E> predicate) {
@@ -231,25 +224,6 @@ public enum Predicates {
   enum Def {
     ;
 
-    public static final  Function<Class<?>, Predicate<?>>             IS_INSTANCE_OF$2          = function(() -> "isInstanceOf", (Class<?> c) -> c::isInstance);
-    private static final Predicate<?>                                 ALWAYS_TRUE               = predicate("alwaysTrue", t -> true);
-    private static final Predicate<Boolean>                           IS_TRUE                   = predicate("isTrue", (Boolean v) -> v);
-    private static final Predicate<Boolean>                           IS_FALSE                  = predicate("isFalse", (Boolean v) -> !v);
-    private static final Predicate<?>                                 IS_NULL                   = predicate("isNull", Objects::isNull);
-    private static final Predicate<?>                                 IS_NOT_NULL               = predicate("isNotNull", Objects::nonNull);
-    private static final Predicate<String>                            IS_EMPTY_STRING           = predicate("isEmpty", String::isEmpty);
-    private static final Predicate<String>                            IS_NULL_OR_EMPTY_STRING   = predicate("isNullOrEmptyString", s -> Objects.isNull(s) || isEmptyString().test(s)
-    );
-    private static final Predicate<Object[]>                          IS_EMPTY_ARRAY            = predicate("isEmptyArray", objects -> objects.length == 0);
-    private static final Predicate<Collection<?>>                     IS_EMPTY_COLLECTION       = predicate("isEmpty", Collection::isEmpty);
-    private static final BasePredUtils.Factory<Object, Object>        IS_EQUAL_TO_FACTORY       = Printables.predicateFactory(
-        (arg) -> format("isEqualTo[%s]", formatObject(arg)),
-        arg -> v -> Objects.equals(v, arg));
-    private static final BasePredUtils.Factory<Collection<?>, Object> CONTAINS_FACTORY          = Printables.predicateFactory(
-        (Object arg) -> format("contains[%s]", formatObject(arg)),
-        (Object arg) -> (Collection<?> c) -> c.contains(arg));
-    private static final BasePredUtils.Factory<Object, Object>        OBJECT_IS_SAME_AS_FACTORY = Printables.predicateFactory(
-        arg -> format("==[%s]", formatObject(arg)),
-        arg -> v -> v == arg);
+    public static final Function<Class<?>, Predicate<?>> IS_INSTANCE_OF$2 = function(() -> "isInstanceOf", (Class<?> c) -> c::isInstance);
   }
 }

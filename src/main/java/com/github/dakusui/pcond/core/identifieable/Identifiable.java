@@ -2,10 +2,8 @@ package com.github.dakusui.pcond.core.identifieable;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.Preconditions.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -70,8 +68,8 @@ public interface Identifiable {
     private final Object       identity;
 
     protected Base(Object creator, List<Object> args) {
-      this.creator = requireNonNull(creator);
-      this.args = requireNonNull(args);
+      this.creator = Objects.requireNonNull(creator);
+      this.args = Objects.requireNonNull(args);
       this.identity = createIdentity();
     }
 
