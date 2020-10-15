@@ -193,8 +193,7 @@ public enum Predicates {
 
   @SuppressWarnings("unchecked")
   public static <O, P> IdentifiablePredicateFactory.TransformingPredicate.Factory<P, O> transform(Function<? super O, ? extends P> function) {
-    //return cond -> new TransformingPredicate<>(cond, function);
-    return IdentifiablePredicateFactory.<P, O>transform((Function<O, P>) function);
+    return IdentifiablePredicateFactory.transform((Function<O, P>) function);
   }
 
   /**

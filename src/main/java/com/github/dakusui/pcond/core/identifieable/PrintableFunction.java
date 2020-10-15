@@ -23,6 +23,10 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
     this.tail = tail;
   }
 
+  protected PrintableFunction(Object creator, List<Object> args, Supplier<String> s, Function<? super T, ? extends R> function) {
+    this(creator, args, s, function, null, null);
+  }
+
   @Override
   public String toString() {
     return this.formatter.get();
@@ -39,11 +43,6 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
     Objects.requireNonNull(after);
     return IdentifiableFunctionFactory.<T, R, V>compose(this, after);
   }
-
-  protected PrintableFunction(Object creator, List<Object> args, Supplier<String> s, Function<? super T, ? extends R> function) {
-    this(creator, args, s, function, null, null);
-  }
-
 
   @Override
   public Function<? super T, ?> head() {

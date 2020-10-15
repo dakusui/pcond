@@ -67,6 +67,23 @@ public class ExperimentalsTest extends TestBase {
           asList("Hi", "hello", "world"),
           transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toContextPredicate(stringEndsWith(), 0, 1))));
     } catch (PreconditionViolationException e) {
+      /* BEFORE
+com.github.dakusui.pcond.provider.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
+["Hi","hello","world"]          -> =>                                                                  ->     false
+                                     stream                                                            ->   ReferencePipeline$Head@1888ff2c
+ReferencePipeline$Head@1888ff2c ->   nest["1","2","o"]                                                 ->   ReferencePipeline$7@6adca536
+ReferencePipeline$7@6adca536    ->   noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])] ->   false
+context:[hello, o]              ->     contextPredicate(stringEndsWith(String)(String)[0, 1])          -> true
+	at com.github.dakusui.pcond.provider.AssertionProviderBase.lambda$exceptionComposerForPrecondition$0(AssertionProviderBase.java:83)
+       */
+      /* AFTER
+com.github.dakusui.pcond.provider.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
+["Hi","hello","world"]       -> =>                                                                  ->     false
+                                  stream->nest["1","2","o"]                                         ->   ReferencePipeline$7@6c3708b3
+ReferencePipeline$7@6c3708b3 ->   noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])] ->   false
+context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(String)[0, 1])          -> true
+	at com.github.dakusui.pcond.provider.AssertionProviderBase.lambda$exceptionComposerForPrecondition$0(AssertionProviderBase.java:83)
+       */
       e.printStackTrace();
       assertThat(
           lineAt(e.getMessage(), 5),

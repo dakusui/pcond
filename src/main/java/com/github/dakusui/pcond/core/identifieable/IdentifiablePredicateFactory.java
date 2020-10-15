@@ -278,7 +278,7 @@ public enum IdentifiablePredicateFactory {
       }
 
       default TransformingPredicate<P, O> check(String condName, Predicate<? super P> cond) {
-        return check(leaf(TransformingPredicate.class, () -> condName, cond));
+        return check(leaf(() -> condName, cond));
       }
 
       TransformingPredicate<P, O> check(Predicate<? super P> cond);

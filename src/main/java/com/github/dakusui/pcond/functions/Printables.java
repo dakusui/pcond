@@ -27,7 +27,7 @@ public enum Printables {
   }
 
   public static <T, R> Function<T, R> function(String s, Function<T, R> function) {
-    return Printables.function(() -> s, function);
+    return Printables.printableFunction(s, function);
   }
 
 

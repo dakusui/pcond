@@ -61,11 +61,15 @@ public enum IdentifiableFunctionFactory {
   }
 
   public static <T, R, S> PrintableFunction<T, S> compose(Function<? super T, ? extends R> before, Function<? super R, ? extends S> after) {
+    PrintableFunction<? super T, ? extends R> before_ = toPrintableFunction(before);
+    PrintableFunction<? super R, ? extends S> after_ = toPrintableFunction(after);
     return new PrintableFunction<>(
         COMPOSE,
-        asList(toPrintableFunction(before), toPrintableFunction(after)),
+        asList(before_, after_),
         () -> format("%s->%s", before, after),
-        (T v) -> PrintableFunction.unwrap(after).apply(PrintableFunction.unwrap(before).apply(v)));
+        (T v) -> PrintableFunction.unwrap(after).apply(PrintableFunction.unwrap(before).apply(v)),
+        before_,
+        after_);
   }
 
   public static <T, R> Function<T, R> function(Supplier<String> formatter, Function<T, R> function) {

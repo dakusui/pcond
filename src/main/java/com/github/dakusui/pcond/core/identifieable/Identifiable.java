@@ -51,16 +51,9 @@ public interface Identifiable {
    *
    * @return The identity object.
    */
-  default Object identityObject() {
-    return this.createIdentity();
-  }
+  Object identityObject();
 
   List<Object> args();
-
-  @SuppressWarnings("unchecked")
-  default <T> T arg(int i) {
-    return (T) args().get(i);
-  }
 
   class Base implements Identifiable {
     private final Object       creator;
