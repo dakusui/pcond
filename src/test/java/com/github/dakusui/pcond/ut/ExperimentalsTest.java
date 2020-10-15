@@ -2,15 +2,13 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.core.identifieable.IdentifiableFunctionFactory;
 import com.github.dakusui.pcond.functions.Experimentals;
 import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -398,18 +396,18 @@ public class ExperimentalsTest extends TestBase {
 
   @Test
   public void usageExample() {
-    BaseFuncUtils.Factory<String, String, List<Object>> functionFactory = pathToUriFunctionFactory();
-    Function<String, String> pathToUriOnLocalHost = functionFactory.create(asList("http", "localhost", 80));
+    Function<List<Object>, Function<String, String>> functionFactory = pathToUriFunctionFactory();
+    Function<String, String> pathToUriOnLocalHost = functionFactory.apply(asList("http", "localhost", 80));
     System.out.println(pathToUriOnLocalHost);
     System.out.println(pathToUriOnLocalHost.apply("path/to/resource"));
     System.out.println(pathToUriOnLocalHost.apply("path/to/another/resource"));
 
-    Function<String, String> pathToUriOnRemoteHost = functionFactory.create(asList("https", "example.com", 8443));
+    Function<String, String> pathToUriOnRemoteHost = functionFactory.apply(asList("https", "example.com", 8443));
     System.out.println(pathToUriOnRemoteHost);
     System.out.println(pathToUriOnRemoteHost.apply("path/to/resource"));
     System.out.println(pathToUriOnRemoteHost.apply("path/to/another/resource"));
 
-    Function<String, String> pathToUriOnLocalHost_2 = functionFactory.create(asList("http", "localhost", 80));
+    Function<String, String> pathToUriOnLocalHost_2 = functionFactory.apply(asList("http", "localhost", 80));
     System.out.println(pathToUriOnLocalHost.hashCode() == pathToUriOnLocalHost_2.hashCode());
     System.out.println(pathToUriOnLocalHost.equals(pathToUriOnLocalHost_2));
 
@@ -417,9 +415,13 @@ public class ExperimentalsTest extends TestBase {
     System.out.println(pathToUriOnLocalHost.equals(pathToUriOnRemoteHost));
   }
 
-  private static BaseFuncUtils.Factory<String, String, List<Object>> pathToUriFunctionFactory() {
-    return Printables.functionFactory(
-        (List<Object> args) -> "buildUri" + args,
+  private static
+  Function<List<Object>, Function<String, String>>
+  pathToUriFunctionFactory() {
+    return v -> IdentifiableFunctionFactory.create(
+        ExperimentalsTest.class,
+        v,
+        (List<Object> args) -> () -> "buildUri" + args,
         (List<Object> args) -> (String path) -> String.format("%s://%s:%s/%s", args.get(0), args.get(1), args.get(2), path));
   }
 

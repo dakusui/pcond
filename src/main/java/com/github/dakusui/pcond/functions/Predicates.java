@@ -6,7 +6,6 @@ import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory.
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
 import com.github.dakusui.pcond.internals.InternalChecks;
-import com.github.dakusui.pcond.internals.TransformingPredicate;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -188,12 +187,14 @@ public enum Predicates {
     return cond.negate();
   }
 
-  public static <O, P> TransformingPredicate.Factory<P, O> transform(String funcName, Function<? super O, ? extends P> func) {
+  public static <O, P> IdentifiablePredicateFactory.TransformingPredicate.Factory<P, O> transform(String funcName, Function<? super O, ? extends P> func) {
     return transform(function(funcName, func));
   }
 
-  public static <O, P> TransformingPredicate.Factory<P, O> transform(Function<? super O, ? extends P> function) {
-    return cond -> new TransformingPredicate<>(cond, function);
+  @SuppressWarnings("unchecked")
+  public static <O, P> IdentifiablePredicateFactory.TransformingPredicate.Factory<P, O> transform(Function<? super O, ? extends P> function) {
+    //return cond -> new TransformingPredicate<>(cond, function);
+    return IdentifiablePredicateFactory.<P, O>transform((Function<O, P>) function);
   }
 
   /**

@@ -4,7 +4,6 @@ import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory;
-import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 import com.github.dakusui.pcond.functions.Predicates;
 
 import java.util.Arrays;
@@ -15,6 +14,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 
 public enum ContextUtils {
   ;
@@ -42,6 +42,11 @@ public enum ContextUtils {
   }
 
   public static Predicate<Context> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
-    return ContextUtils.applyAndTest(curriedFunction, PrintablePredicate.create("contextPredicate", Predicates.isTrue()), Boolean.class, orderArgs);
+    return ContextUtils.applyAndTest(curriedFunction, createPredicate("contextPredicate", Predicates.isTrue()), Boolean.class, orderArgs);
+  }
+
+  public static <T> Predicate<T> createPredicate(String s, Predicate<T> predicate) {
+    requireNonNull(s);
+    return IdentifiablePredicateFactory.leaf(ContextUtils.class, () -> s, predicate);
   }
 }

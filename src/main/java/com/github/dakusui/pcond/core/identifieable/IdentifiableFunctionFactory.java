@@ -94,17 +94,17 @@ public enum IdentifiableFunctionFactory {
     return new PrintableFunction<>(IdentifiableFunctionFactory.class, singletonList(function), () -> "noname:" + function, function);
   }
 
-  private static <T, R> Optional<Object> creatorOf(Function<T, R> function) {
+  public static Optional<Object> creatorOf(Object object) {
     Optional<Object> ret = Optional.empty();
-    if (function instanceof PrintableFunction)
-      ret = Optional.of(((PrintableFunction<T, R>) function).creator());
+    if (object instanceof Identifiable)
+      ret = Optional.of(((Identifiable) object).creator());
     return ret;
   }
 
-  private static <T, R> List<Object> argsOf(Function<T, R> function) {
+  public static List<Object> argsOf(Object object) {
     List<Object> ret = emptyList();
-    if (function instanceof PrintableFunction)
-      ret = ((PrintableFunction<T, R>) function).args();
+    if (object instanceof Identifiable)
+      ret = ((Identifiable) object).args();
     return ret;
   }
 }

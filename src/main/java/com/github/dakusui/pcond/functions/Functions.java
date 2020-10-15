@@ -5,12 +5,9 @@ import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
 import com.github.dakusui.pcond.core.identifieable.IdentifiableFunctionFactory;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
-import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -20,7 +17,6 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
 import static java.util.Collections.singletonList;
-import static java.util.Objects.requireNonNull;
 
 /**
  * An entry point for acquiring function objects.

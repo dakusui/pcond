@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.utils.TestBase;
 import org.junit.Test;
@@ -84,24 +85,6 @@ public class PrintablesTest {
     @Test
     public void givenPredicateReturnedByNegate$whenToString$thenWorksRight() {
       assertEquals("!is[A]", isA.negate().toString());
-    }
-  }
-
-  public static class FactoryTest {
-    @Test
-    public void testFunctionFactory() {
-      assertNotNull(Printables.functionFactory(
-          (e) -> "hello:" + e,
-          (e) -> (t) -> "world"
-      ));
-    }
-
-    @Test
-    public void testPredicateFactory() {
-      assertNotNull(Printables.predicateFactory(
-          (e) -> "hello:" + e,
-          (e) -> (t) -> true
-      ));
     }
   }
 }

@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.core.currying;
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.identifieable.IdentifiableFunctionFactory;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
-import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
 
 import java.util.List;
 import java.util.function.Function;

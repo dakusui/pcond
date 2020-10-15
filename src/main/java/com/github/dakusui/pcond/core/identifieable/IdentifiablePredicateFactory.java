@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.core.identifieable.IdentifiableFunctionFactory.argsOf;
+import static com.github.dakusui.pcond.core.identifieable.IdentifiableFunctionFactory.creatorOf;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
@@ -25,10 +27,11 @@ public enum IdentifiablePredicateFactory {
   DISJUNCTION,
   LEAF,
   ;
-/*
-    Expected: "100 -> &&                                     ->   false"
-     but: was "100 -> &&                                            ->   false"
- */
+
+  /*
+      Expected: "100 -> &&                                     ->   false"
+       but: was "100 -> &&                                            ->   false"
+   */
   public enum Leaf {
     ALWAYS_TRUE("alwaysTrue", v -> true),
     IS_TRUE("isTrue", (Boolean v) -> v),
@@ -119,9 +122,14 @@ public enum IdentifiablePredicateFactory {
     }
   }
 
-  public static <T> Predicate<T> leaf(Object creator, Supplier<String> formatter, Predicate<? super T> predicate) {
-    predicate = PrintablePredicate.unwrap(predicate);
-    return new LeafPredicate<>(creator, singletonList(predicate), formatter, predicate);
+  public static <T> Predicate<T> leaf(Supplier<String> formatter, Predicate<? super T> predicate) {
+    return leaf(IdentifiablePredicateFactory.class, formatter, predicate);
+  }
+
+  public static <T> Predicate<T> leaf(Object fallbackCreator, Supplier<String> formatter, Predicate<? super T> predicate) {
+    return creatorOf(predicate)
+        .map(c -> new LeafPredicate<T>(c, argsOf(predicate), formatter, PrintablePredicate.unwrap(predicate)))
+        .orElse(new LeafPredicate<T>(fallbackCreator, singletonList(formatter), formatter, PrintablePredicate.unwrap(predicate)));
   }
 
   public static <T> Predicate<T> parameterizedLeaf(
@@ -168,7 +176,7 @@ public enum IdentifiablePredicateFactory {
   @SuppressWarnings("unchecked")
   private static <T> Predicate<T> toPrintablePredicate(Predicate<? super T> predicate) {
     if (!(predicate instanceof PrintablePredicate))
-      return leaf(Leaf.class, () -> "noname:" + predicate.toString(), predicate);
+      return leaf(() -> "noname:" + predicate.toString(), predicate);
     return (PrintablePredicate<T>) predicate;
   }
 
@@ -263,8 +271,8 @@ public enum IdentifiablePredicateFactory {
     }
   }
 
-  static class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Evaluable.Transformation<O, P> {
-    interface Factory<P, O> {
+  public static class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Evaluable.Transformation<O, P> {
+    public interface Factory<P, O> {
       static <P, O> Factory<P, O> create(Function<O, P> function) {
         return cond -> new TransformingPredicate<>(null, toPrintablePredicate(cond), function);
       }
@@ -279,7 +287,7 @@ public enum IdentifiablePredicateFactory {
     private final Evaluable<? super P> checker;
     private final Evaluable<? super O> mapper;
 
-    private TransformingPredicate(String name, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
+    public TransformingPredicate(String name, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
       super(
           TransformingPredicate.class,
           asList(predicate, function),

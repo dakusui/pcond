@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
@@ -14,7 +13,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
-public class PrintablesPredicateTest {
+public class PrintablePredicateTest {
   public static class LeafPred {
     @Test
     public void test() {
@@ -35,7 +34,7 @@ public class PrintablesPredicateTest {
 
     @Test
     public void testHashCode() {
-      Predicate<String> pp = Predicate.isEqual("hello");
+      Predicate<String> pp = Predicates.isEqualTo("hello");
       Predicate<String> p = Printables.predicate("hello", pp);
       assertEquals(pp.hashCode(), p.hashCode());
     }
