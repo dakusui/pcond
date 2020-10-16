@@ -1,9 +1,8 @@
 package com.github.dakusui.pcond.functions;
 
+import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
-import com.github.dakusui.pcond.core.preds.BasePredUtils;
-import com.github.dakusui.pcond.core.context.Context;
 
 import java.io.Serializable;
 import java.util.*;
@@ -16,25 +15,11 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
 import static com.github.dakusui.pcond.functions.Predicates.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 enum Lab {
   ;
-
-  @SuppressWarnings("unchecked")
-  private static final BasePredUtils.Factory<?, List<Object>> MATCHES_ALL_OF_FACTORY = Printables.predicateFactory(
-      (List<Object> v) -> format("%s matchesAllOf(%s)", v.get(1), v.get(0)),
-      (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().allMatch((Predicate<Object>) v.get(1)));
-  @SuppressWarnings("unchecked")
-  private static final BasePredUtils.Factory<?, List<Object>> MATCHES_ANY_OF_FACTORY = Printables.predicateFactory(
-      (List<Object> v) -> format("matchesAnyOf(%s,%s)", v.get(0), v.get(1)),
-      (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().anyMatch((Predicate<Object>) v.get(1)));
-  @SuppressWarnings("unchecked")
-  private static final BasePredUtils.Factory<?, List<Object>> MATCHES_NONE_OF_FACTORY = Printables.predicateFactory(
-      (List<Object> v) -> format("matchesNoneOf(%s,%s)", v.get(0), v.get(1)),
-      (List<Object> v) -> p -> ((Collection<Object>) v.get(0)).stream().noneMatch((Predicate<Object>) v.get(1)));
 
   public static Function<Collection<?>, Stream<List<?>>> cartesianWith(Collection<?>... inners) {
     return Printables.function(() -> "cartesianWith" + formatObject(inners), outer -> cartesian(outer, asList(inners)));
@@ -96,21 +81,6 @@ enum Lab {
 
   private static Stream<List<?>> wrapWithList(Stream<?> stream) {
     return stream.map(Collections::singletonList);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <E> Predicate<E> matchesAllOf(Collection<? extends E> collection, Predicate<E> cond) {
-    return (Predicate<E>) MATCHES_ALL_OF_FACTORY.create(asList(collection, cond));
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <E> Predicate<E> matchesAnyOf(Collection<? extends E> collection, Predicate<E> cond) {
-    return (Predicate<E>) MATCHES_ANY_OF_FACTORY.create(asList(collection, cond));
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <E> Predicate<E> matchesNoneOf(Collection<? extends E> collection, Predicate<E> cond) {
-    return (Predicate<E>) MATCHES_NONE_OF_FACTORY.create(asList(collection, cond));
   }
 
   public static <R> Function<Context, R> apply(MultiFunction<R> multiFunction, int... orderArgs) {

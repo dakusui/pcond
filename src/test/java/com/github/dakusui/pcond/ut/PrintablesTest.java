@@ -86,22 +86,4 @@ public class PrintablesTest {
       assertEquals("!is[A]", isA.negate().toString());
     }
   }
-
-  public static class FactoryTest {
-    @Test
-    public void testFunctionFactory() {
-      assertNotNull(Printables.functionFactory(
-          (e) -> "hello:" + e,
-          (e) -> (t) -> "world"
-      ));
-    }
-
-    @Test
-    public void testPredicateFactory() {
-      assertNotNull(Printables.predicateFactory(
-          (e) -> "hello:" + e,
-          (e) -> (t) -> true
-      ));
-    }
-  }
 }

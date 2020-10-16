@@ -2,10 +2,9 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.functions.Experimentals;
 import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
@@ -68,6 +67,23 @@ public class ExperimentalsTest extends TestBase {
           asList("Hi", "hello", "world"),
           transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toContextPredicate(stringEndsWith(), 0, 1))));
     } catch (PreconditionViolationException e) {
+      /* BEFORE
+com.github.dakusui.pcond.provider.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
+["Hi","hello","world"]          -> =>                                                                  ->     false
+                                     stream                                                            ->   ReferencePipeline$Head@1888ff2c
+ReferencePipeline$Head@1888ff2c ->   nest["1","2","o"]                                                 ->   ReferencePipeline$7@6adca536
+ReferencePipeline$7@6adca536    ->   noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])] ->   false
+context:[hello, o]              ->     contextPredicate(stringEndsWith(String)(String)[0, 1])          -> true
+	at com.github.dakusui.pcond.provider.AssertionProviderBase.lambda$exceptionComposerForPrecondition$0(AssertionProviderBase.java:83)
+       */
+      /* AFTER
+com.github.dakusui.pcond.provider.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
+["Hi","hello","world"]       -> =>                                                                  ->     false
+                                  stream->nest["1","2","o"]                                         ->   ReferencePipeline$7@6c3708b3
+ReferencePipeline$7@6c3708b3 ->   noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])] ->   false
+context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(String)[0, 1])          -> true
+	at com.github.dakusui.pcond.provider.AssertionProviderBase.lambda$exceptionComposerForPrecondition$0(AssertionProviderBase.java:83)
+       */
       e.printStackTrace();
       assertThat(
           lineAt(e.getMessage(), 5),
@@ -397,18 +413,18 @@ public class ExperimentalsTest extends TestBase {
 
   @Test
   public void usageExample() {
-    BaseFuncUtils.Factory<String, String, List<Object>> functionFactory = pathToUriFunctionFactory();
-    Function<String, String> pathToUriOnLocalHost = functionFactory.create(asList("http", "localhost", 80));
+    Function<List<Object>, Function<String, String>> functionFactory = pathToUriFunctionFactory();
+    Function<String, String> pathToUriOnLocalHost = functionFactory.apply(asList("http", "localhost", 80));
     System.out.println(pathToUriOnLocalHost);
     System.out.println(pathToUriOnLocalHost.apply("path/to/resource"));
     System.out.println(pathToUriOnLocalHost.apply("path/to/another/resource"));
 
-    Function<String, String> pathToUriOnRemoteHost = functionFactory.create(asList("https", "example.com", 8443));
+    Function<String, String> pathToUriOnRemoteHost = functionFactory.apply(asList("https", "example.com", 8443));
     System.out.println(pathToUriOnRemoteHost);
     System.out.println(pathToUriOnRemoteHost.apply("path/to/resource"));
     System.out.println(pathToUriOnRemoteHost.apply("path/to/another/resource"));
 
-    Function<String, String> pathToUriOnLocalHost_2 = functionFactory.create(asList("http", "localhost", 80));
+    Function<String, String> pathToUriOnLocalHost_2 = functionFactory.apply(asList("http", "localhost", 80));
     System.out.println(pathToUriOnLocalHost.hashCode() == pathToUriOnLocalHost_2.hashCode());
     System.out.println(pathToUriOnLocalHost.equals(pathToUriOnLocalHost_2));
 
@@ -416,10 +432,12 @@ public class ExperimentalsTest extends TestBase {
     System.out.println(pathToUriOnLocalHost.equals(pathToUriOnRemoteHost));
   }
 
-  private static BaseFuncUtils.Factory<String, String, List<Object>> pathToUriFunctionFactory() {
-    return Printables.functionFactory(
-        (List<Object> args) -> "buildUri" + args,
-        (List<Object> args) -> (String path) -> String.format("%s://%s:%s/%s", args.get(0), args.get(1), args.get(2), path));
+  private static
+  Function<List<Object>, Function<String, String>>
+  pathToUriFunctionFactory() {
+    return v -> PrintableFunctionFactory.create(
+        (List<Object> args) -> () -> "buildUri" + args, (List<Object> args) -> (String path) -> String.format("%s://%s:%s/%s", args.get(0), args.get(1), args.get(2), path), v, ExperimentalsTest.class
+    );
   }
 
 

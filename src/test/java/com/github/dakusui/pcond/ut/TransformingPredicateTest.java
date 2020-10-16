@@ -1,8 +1,9 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.internals.TransformingPredicate;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
@@ -54,21 +55,25 @@ public class TransformingPredicateTest extends TestBase {
     Function<String, String> identity = Functions.identity();
     Predicate<String> equalToHello = Predicates.isEqualTo("hello");
     Predicate<String> p = Predicates.transform(identity).check(equalToHello);
+
+    Predicate<String> q = Predicates.transform(PrintableFunctionFactory.function(() -> "", identity))
+        .check(PrintablePredicateFactory.leaf(() -> "", equalToHello));
+
     assertEquals(
-        identity.hashCode() + equalToHello.hashCode(),
-        p.hashCode());
+        p.hashCode(),
+        q.hashCode());
   }
 
   @Test
   public void givenNullForName$whenToString$thenLooksGood() {
-    TransformingPredicate<Object, Object> p = new TransformingPredicate<>(null, Predicates.alwaysTrue(), Functions.identity());
+    PrintablePredicateFactory.TransformingPredicate<Object, Object> p = new PrintablePredicateFactory.TransformingPredicate<>(null, Predicates.alwaysTrue(), Functions.identity());
     System.out.println(p.toString());
     assertEquals("identity alwaysTrue", p.toString());
   }
 
   @Test
   public void givenNonNullName$whenToString$thenLooksGood() {
-    TransformingPredicate<Object, Object> p = new TransformingPredicate<>("hello->", Predicates.alwaysTrue(), Functions.identity());
+    PrintablePredicateFactory.TransformingPredicate<Object, Object> p = new PrintablePredicateFactory.TransformingPredicate<>("hello->", Predicates.alwaysTrue(), Functions.identity());
     System.out.println(p.toString());
     assertEquals("hello->identity alwaysTrue", p.toString());
   }

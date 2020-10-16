@@ -1,8 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.core.preds.LeafPredUtils;
 import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
@@ -15,7 +13,7 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
-public class PrintablesPredicateTest {
+public class PrintablePredicateTest {
   public static class LeafPred {
     @Test
     public void test() {
@@ -36,7 +34,7 @@ public class PrintablesPredicateTest {
 
     @Test
     public void testHashCode() {
-      Predicate<String> pp = Predicate.isEqual("hello");
+      Predicate<String> pp = Predicates.isEqualTo("hello");
       Predicate<String> p = Printables.predicate("hello", pp);
       assertEquals(pp.hashCode(), p.hashCode());
     }
@@ -71,15 +69,15 @@ public class PrintablesPredicateTest {
     }
 
     <T> Predicate<T> create(String name, Predicate<T> p, Predicate<T> q) {
-      return create(new LeafPredUtils.LeafPred<>(() -> name + "1", p), new LeafPredUtils.LeafPred<>(() -> name + "2", q));
+      return create(Printables.predicate(() -> name + "1", p), Printables.predicate(() -> name + "2", q));
     }
 
-    abstract <T> Predicate<T> create(PrintablePredicate<T> predicate, PrintablePredicate<T> predicate1);
+    abstract <T> Predicate<T> create(Predicate<T> predicate, Predicate<T> predicate1);
   }
 
   public static class And extends Conj {
     @Override
-    <T> Predicate<T> create(PrintablePredicate<T> predicate1, PrintablePredicate<T> predicate2) {
+    <T> Predicate<T> create(Predicate<T> predicate1, Predicate<T> predicate2) {
       return predicate1.and(predicate2);
     }
 
@@ -95,7 +93,7 @@ public class PrintablesPredicateTest {
 
   public static class Or extends Conj {
     @Override
-    <T> Predicate<T> create(PrintablePredicate<T> predicate1, PrintablePredicate<T> predicate2) {
+    <T> Predicate<T> create(Predicate<T> predicate1, Predicate<T> predicate2) {
       return predicate1.or(predicate2);
     }
   }
