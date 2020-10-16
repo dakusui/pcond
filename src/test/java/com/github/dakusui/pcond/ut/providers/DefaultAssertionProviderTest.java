@@ -129,6 +129,15 @@ public class DefaultAssertionProviderTest extends TestBase {
   }
 
 
+  /**
+   * Expected message:
+   *<pre>
+   * java.lang.IllegalArgumentException: value:null violated precondition:value ((isNotNull&&!isEmpty)&&length >[10])
+   * null -> &&            ->     false
+   *           &&          ->   false
+   *             isNotNull -> false
+   *</pre>
+   */
   @Test(expected = IllegalArgumentException.class)
   public void withEvaluator_columns100$whenNull() {
     try {

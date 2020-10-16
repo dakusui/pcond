@@ -240,7 +240,7 @@ public class FunctionsTest {
     private static MultiFunction<String> greeting2(int... order) {
       Method m = getMethod(TargetMethodHolder.class, "greeting", String.class, String.class);
       List<Integer> paramOrder = Arrays.stream(order).boxed().collect(toList());
-      return PrintableFunctionFactory.createFromStaticMethod(m, paramOrder);
+      return PrintableFunctionFactory.multifunction(m, paramOrder);
     }
 
     private static MultiFunction<String> voidMethod() {
