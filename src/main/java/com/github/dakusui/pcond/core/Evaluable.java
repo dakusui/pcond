@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.core.context.Context;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -14,9 +15,7 @@ public interface Evaluable<T> {
   }
 
   interface Composite<T> extends Pred<T> {
-    Evaluable<? super T> a();
-
-    Evaluable<? super T> b();
+    List<Evaluable<? super T>> children();
   }
 
   interface Conjunction<T> extends Composite<T> {

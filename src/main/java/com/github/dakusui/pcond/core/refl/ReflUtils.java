@@ -1,7 +1,5 @@
 package com.github.dakusui.pcond.core.refl;
 
-import com.github.dakusui.pcond.Assertions;
-import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.internals.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -61,7 +59,6 @@ public enum ReflUtils {
    * @see MethodQuery
    * @see ReflUtils#findMethod(Class, String, Object[])
    */
-  @SuppressWarnings("unchecked")
   public static <R> R invokeMethod(MethodQuery methodQuery) {
     return invokeMethod(
         findMethod(methodQuery.targetClass(), methodQuery.methodName(), methodQuery.arguments()),

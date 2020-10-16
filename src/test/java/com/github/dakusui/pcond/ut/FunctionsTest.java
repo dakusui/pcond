@@ -255,7 +255,7 @@ public class FunctionsTest {
 
       @SuppressWarnings("unused") // Called through reflection.
       public static void voidMethod(String hello, String name) {
-        System.out.println(String.format("%s, %s", hello, name));
+        System.out.printf("%s, %s%n", hello, name);
       }
     }
   }

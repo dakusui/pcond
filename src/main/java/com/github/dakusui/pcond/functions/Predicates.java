@@ -17,6 +17,7 @@ import static com.github.dakusui.pcond.functions.Printables.function;
 import static com.github.dakusui.pcond.functions.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
@@ -164,23 +165,14 @@ public enum Predicates {
     return PrintablePredicateFactory.anyMatch(predicate);
   }
 
-  @SuppressWarnings("unchecked")
   @SafeVarargs
-  public static <T> Predicate<T> and(Predicate<? super T> car, Predicate<? super T>... cdr) {
-    Predicate<T> ret = (Predicate<T>) car;
-    for (Predicate<? super T> predicate : cdr)
-      ret = ret.and(predicate);
-    return ret;
+  public static <T> Predicate<T> and(Predicate<? super T>... predicates) {
+    return PrintablePredicateFactory.and(asList(predicates));
   }
 
-  @SuppressWarnings("unchecked")
   @SafeVarargs
-  public static <T> Predicate<T> or(Predicate<? super T> car, Predicate<? super T>... cdr) {
-    requireNonNull(car);
-    Predicate<T> ret = (Predicate<T>) car;
-    for (Predicate<? super T> predicate : cdr)
-      ret = ret.or(predicate);
-    return ret;
+  public static <T> Predicate<T> or(Predicate<? super T>... predicates) {
+    return PrintablePredicateFactory.or(asList(predicates));
   }
 
   public static <T> Predicate<T> not(Predicate<T> cond) {
@@ -211,7 +203,6 @@ public enum Predicates {
    * @see Functions#classMethod(Class, String, Object[])
    * @see Functions#instanceMethod(Object, String, Object[])
    */
-  @SuppressWarnings("ConstantConditions")
   public static <T> Predicate<T> callp(MethodQuery methodQuery) {
     return predicate(
         methodQuery.describe(),

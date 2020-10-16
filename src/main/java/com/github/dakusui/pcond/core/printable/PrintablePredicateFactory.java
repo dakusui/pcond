@@ -2,11 +2,13 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.internals.InternalUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -21,6 +23,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public enum PrintablePredicateFactory {
   NEGATION,
@@ -164,15 +168,19 @@ public enum PrintablePredicateFactory {
     return TransformingPredicate.Factory.create(function);
   }
 
-  public static <T> Predicate<T> and(Predicate<? super T> predicate, Predicate<? super T> other) {
-    return new Conjunction<T>(toPrintablePredicate(predicate), toPrintablePredicate(other), asList(predicate, other));
+  public static <T> Conjunction<T> and(List<Predicate<? super T>> predicates) {
+    return new Conjunction<T>(predicates);
   }
 
-  public static <T> Predicate<T> or(Predicate<? super T> predicate, Predicate<? super T> other) {
-    return new Disjunction<T>(toPrintablePredicate(predicate), toPrintablePredicate(other), asList(predicate, other));
+  public static <T> Disjunction<T> or(List<Predicate<? super T>> predicates) {
+    return new Disjunction<T>(predicates);
   }
 
   public static <T> Predicate<T> not(Predicate<T> predicate) {
+    return not_(predicate);
+  }
+
+  public static <T> Negation<T> not_(Predicate<T> predicate) {
     return new Negation<T>(toPrintablePredicate(predicate), singletonList(predicate));
   }
 
@@ -228,58 +236,65 @@ public enum PrintablePredicateFactory {
   }
 
   static class Conjunction<T> extends Junction<T> implements Evaluable.Conjunction<T> {
-    @SuppressWarnings("unchecked")
-    protected Conjunction(Predicate<? super T> predicate, Predicate<? super T> other, List<Object> args) {
+    protected Conjunction(List<Predicate<? super T>> predicates) {
       super(
-          predicate,
-          other,
+          predicates,
           CONJUNCTION,
-          args,
-          () -> format("(%s&&%s)", predicate, other),
-          (p, o) -> ((Predicate<T>) PrintablePredicate.unwrap(p)).and(PrintablePredicate.unwrap(o)));
+          "&&",
+          Predicate::and);
     }
   }
 
+  private static RuntimeException noPredicateGiven() {
+    throw new IllegalArgumentException("No predicate was given");
+  }
+
   private static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
-    @SuppressWarnings("unchecked")
-    protected Disjunction(Predicate<? super T> predicate, Predicate<? super T> other, List<Object> args) {
+    protected Disjunction(List<Predicate<? super T>> predicates) {
       super(
-          predicate,
-          other,
+          predicates,
           DISJUNCTION,
-          args,
-          () -> format("(%s||%s)", predicate, other),
-          (p, o) -> ((Predicate<T>) PrintablePredicate.unwrap(p)).or(PrintablePredicate.unwrap(o)));
+          "||",
+          Predicate::or);
     }
   }
 
   abstract static class Junction<T> extends PrintablePredicate<T> implements Evaluable.Composite<T> {
-    final Evaluable<T> a;
-    final Evaluable<T> b;
+    final List<Evaluable<? super T>> children;
 
     protected Junction(
-        Predicate<? super T> predicate,
-        Predicate<? super T> other,
+        List<Predicate<? super T>> predicates,
         PrintablePredicateFactory creator,
-        List<Object> args,
-        Supplier<String> formatter, BiFunction<Predicate<? super T>, Predicate<? super T>, Predicate<T>> predicateFactory) {
+        String junctionSymbol,
+        BinaryOperator<Predicate<T>> junctionOp) {
       super(
           creator,
-          args,
-          formatter,
-          predicateFactory.apply(predicate, other));
-      a = toEvaluableIfNecessary(predicate);
-      b = toEvaluableIfNecessary(other);
+          new ArrayList<>(predicates),
+          () -> formatJunction(predicates, junctionSymbol),
+          junction(predicates, junctionOp));
+      this.children = predicates.stream().map(InternalUtils::toEvaluableIfNecessary).collect(toList());
     }
 
     @Override
-    public Evaluable<? super T> a() {
-      return a;
+    public List<Evaluable<? super T>> children() {
+      return this.children;
     }
 
-    @Override
-    public Evaluable<? super T> b() {
-      return b;
+    static <T> String formatJunction(List<Predicate<? super T>> predicates, String junctionSymbol) {
+      return predicates.stream()
+          .map(PrintablePredicateFactory::toPrintablePredicate)
+          .map(Object::toString)
+          .collect(joining(junctionSymbol, "(", ")"));
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T> Predicate<T> junction(List<Predicate<? super T>> predicates_, BinaryOperator<Predicate<T>> junctionOp) {
+      return predicates_
+          .stream()
+          .map(PrintablePredicate::unwrap)
+          .map(p -> (Predicate<T>) p)
+          .reduce(junctionOp)
+          .orElseThrow(PrintablePredicateFactory::noPredicateGiven);
     }
   }
 

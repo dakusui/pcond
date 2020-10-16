@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
+import com.github.dakusui.pcond.functions.Predicates;
 
 import java.util.List;
 import java.util.Objects;
@@ -30,12 +31,12 @@ public abstract class PrintablePredicate<T> extends Identifiable.Base implements
 
   @Override
   public Predicate<T> and(Predicate<? super T> other) {
-    return PrintablePredicateFactory.and(this, other);
+    return Predicates.and(this, other);
   }
 
   @Override
   public Predicate<T> or(Predicate<? super T> other) {
-    return PrintablePredicateFactory.or(this, other);
+    return Predicates.or(this, other);
   }
 
   @Override

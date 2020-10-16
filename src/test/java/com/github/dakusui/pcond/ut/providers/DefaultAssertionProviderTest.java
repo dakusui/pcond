@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import java.util.Objects;
 import java.util.Properties;
+import java.util.function.Function;
 
 import static com.github.dakusui.pcond.functions.Functions.length;
 import static com.github.dakusui.pcond.functions.Predicates.*;
@@ -128,15 +129,13 @@ public class DefaultAssertionProviderTest extends TestBase {
     }
   }
 
-
   /**
    * Expected message:
-   *<pre>
+   * <pre>
    * java.lang.IllegalArgumentException: value:null violated precondition:value ((isNotNull&&!isEmpty)&&length >[10])
-   * null -> &&            ->     false
-   *           &&          ->   false
-   *             isNotNull -> false
-   *</pre>
+   * null -> &&          ->     false
+   *           isNotNull -> false
+   * </pre>
    */
   @Test(expected = IllegalArgumentException.class)
   public void withEvaluator_columns100$whenNull() {
@@ -152,13 +151,74 @@ public class DefaultAssertionProviderTest extends TestBase {
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.containsString("  &&"),
+          CoreMatchers.containsString("    isNotNull"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
+      throw e;
+    }
+  }
+
+  /**
+   * Expected message:
+   * <pre>
+   * java.lang.IllegalArgumentException: value:"hello" violated precondition:value (isNotNull&&!isEmpty&&length >[10])
+   * "hello" -> &&          ->     false
+   *              isNotNull ->   true
+   *              !         ->   true
+   *                isEmpty -> false
+   *              =>        ->   false
+   *                length  -> 5
+   * 5       ->     >[10]   -> false
+   * </pre>
+   */
+  @Test(expected = IllegalArgumentException.class)
+  public void withEvaluator_columns100$whenShorterThan10() {
+    try {
+      createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
+          .requireArgument("hello", and(isNotNull(), isEmptyString().negate(), transform(length()).check(gt(10))));
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+      assertThat(lineAt(e.getMessage(), 1), allOf(
+          CoreMatchers.containsString("&&"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("false")
+
+      ));
+      assertThat(lineAt(e.getMessage(), 2), allOf(
+          CoreMatchers.containsString("  isNotNull"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("true")
+
+      ));
       assertThat(lineAt(e.getMessage(), 3), allOf(
-          CoreMatchers.containsString("    isNotNull"),
+          CoreMatchers.containsString("  !"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("true")
+
+      ));
+      assertThat(lineAt(e.getMessage(), 4), allOf(
+          CoreMatchers.containsString("  isEmpty"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("false")
+
+      ));
+      assertThat(lineAt(e.getMessage(), 5), allOf(
+          CoreMatchers.containsString("  =>"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("false")
+
+      ));
+      assertThat(lineAt(e.getMessage(), 6), allOf(
+          CoreMatchers.containsString("  length"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("5")
+
+      ));
+      assertThat(lineAt(e.getMessage(), 7), allOf(
+          CoreMatchers.startsWith("5"),
+          CoreMatchers.containsString("  >[10]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 

@@ -61,26 +61,34 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction) {
-      enter("&&", value);
-      conjunction.a().accept(value, this);
-      if (!this.<Boolean>resultValue()) {
-        leave(false);
-        return;
+      int i = 0;
+      for (Evaluable<? super T> each : conjunction.children()) {
+        if (i == 0)
+          enter("&&", value);
+        each.accept(value, this);
+        boolean cur = this.<Boolean>resultValue();
+        if (!cur || i == conjunction.children().size() - 1) {
+          leave(cur);
+          return;
+        }
+        i++;
       }
-      conjunction.b().accept(value, this);
-      leave(this.resultValue());
     }
 
     @Override
     public <T> void evaluate(T value, Evaluable.Disjunction<T> disjunction) {
-      enter("||", value);
-      disjunction.a().accept(value, this);
-      if (this.resultValue()) {
-        leave(true);
-        return;
+      int i = 0;
+      for (Evaluable<? super T> each : disjunction.children()) {
+        if (i == 0)
+          enter("||", value);
+        each.accept(value, this);
+        boolean cur = this.<Boolean>resultValue();
+        if (cur || i == disjunction.children().size() - 1) {
+          leave(cur);
+          return;
+        }
+        i++;
       }
-      disjunction.b().accept(value, this);
-      leave(this.resultValue());
     }
 
     @Override
