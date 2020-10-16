@@ -2,27 +2,22 @@ package com.github.dakusui.pcond.core.refl;
 
 import com.github.dakusui.pcond.Assertions;
 import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.internals.MethodAccessException;
-import com.github.dakusui.pcond.internals.MethodAmbiguous;
-import com.github.dakusui.pcond.internals.MethodInvocationException;
-import com.github.dakusui.pcond.internals.MethodNotFound;
+import com.github.dakusui.pcond.internals.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.*;
 
 /**
  * This class consists of {@code static} utility methods for creating printable functions and predicate
@@ -30,6 +25,28 @@ import static java.util.stream.Collectors.toList;
  */
 public enum ReflUtils {
   ;
+
+  public static final Map<Class<?>, Set<Class<?>>> WIDER_TYPES = new HashMap<Class<?>, Set<Class<?>>>() {
+    {
+      // https://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.1.2
+      put(wrapperClassOf(byte.class), wrapperClassesOf(asSet(short.class, int.class, long.class, float.class, double.class)));
+      put(wrapperClassOf(short.class), wrapperClassesOf(asSet(int.class, long.class, float.class, double.class)));
+      put(wrapperClassOf(char.class), wrapperClassesOf(asSet(int.class, long.class, float.class, double.class)));
+      put(wrapperClassOf(int.class), wrapperClassesOf(asSet(long.class, float.class, double.class)));
+      put(wrapperClassOf(long.class), wrapperClassesOf(asSet(float.class, double.class)));
+      put(wrapperClassOf(float.class), wrapperClassesOf(asSet(double.class)));
+    }
+
+    private Set<Class<?>> wrapperClassesOf(Set<Class<?>> primitiveClasses) {
+      return primitiveClasses.stream().map(InternalUtils::wrapperClassOf).collect(toSet());
+    }
+
+    private Set<Class<?>> asSet(Class<?>... classes) {
+      return new HashSet<Class<?>>() {{
+        addAll(asList(classes));
+      }};
+    }
+  };
 
   /**
    * Invokes a method found by {@code methodQuery}.
@@ -213,5 +230,23 @@ public enum ReflUtils {
       return replace.apply(object);
     }
     return object;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <R> R invokeStaticMethod(Method method, Object[] args) {
+    try {
+      return (R) method.invoke(null, args);
+    } catch (IllegalAccessException | InvocationTargetException e) {
+      throw InternalUtils.wrap(
+          format("Invoked method:%s threw an exception", formatMethodName(method)),
+          e instanceof InvocationTargetException ? e.getCause() : e);
+    }
+  }
+
+  public static String formatMethodName(Method method) {
+    return format("%s.%s(%s)",
+        method.getDeclaringClass().getName(),
+        method.getName(),
+        Arrays.stream(method.getParameterTypes()).map(Class::getSimpleName).collect(joining(",")));
   }
 }

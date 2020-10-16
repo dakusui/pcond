@@ -1,15 +1,19 @@
 package com.github.dakusui.pcond.core.currying;
 
 import com.github.dakusui.pcond.core.context.Context;
-import com.github.dakusui.pcond.core.identifieable.IdentifiableFunctionFactory;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
+import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.joining;
 
 /**
  * Intended for internal use only.
@@ -25,11 +29,9 @@ public enum CurryingUtils {
   public static Function<List<Object>, CurriedFunction<Object, Object>> currier() {
     if (CURRIED_FUNCTION_FACTORY_POOL.get() == null)
       CURRIED_FUNCTION_FACTORY_POOL.set((List<Object> args) ->
-          IdentifiableFunctionFactory.create(
-              CurryingUtils.class,
-              args,
-              (args_) -> () -> FormattingUtils.functionNameFormatter(functionName(args_), ongoingContext(args_)).apply(function(args_)),
-              (args_) -> new CurriedFunction.Impl(function(args_), ongoingContext(args_))));
+          PrintableFunctionFactory.create(
+              (args_) -> () -> functionNameFormatter(functionName(args_), ongoingContext(args_)).apply(function(args_)), (args_) -> new CurriedFunction.Impl(function(args_), ongoingContext(args_)), args, CurryingUtils.class
+          ));
     return CURRIED_FUNCTION_FACTORY_POOL.get();
   }
 
@@ -68,5 +70,35 @@ public enum CurryingUtils {
   @SuppressWarnings("unchecked")
   private static List<? super Object> ongoingContext(List<Object> args) {
     return (List<? super Object>) args.get((2));
+  }
+
+  private static Function<MultiFunction<Object>, String> functionNameFormatter(String functionName, List<? super Object> ongoingContext) {
+    return (MultiFunction<Object> function) -> functionName +
+        (!ongoingContext.isEmpty() ? IntStream.range(0, ongoingContext.size())
+            .mapToObj(i -> function.parameterType(i).getSimpleName() + ":" + ongoingContext.get(i))
+            .collect(joining(",", "(", ")")) : "") +
+        IntStream.range(ongoingContext.size(), function.arity())
+            .mapToObj(i -> "(" + function.parameterType(i).getSimpleName() + ")")
+            .collect(joining());
+  }
+
+  public static String formatParameterOrder(List<Integer> paramOrder) {
+    String formatted = formatParamOrder(paramOrder.stream());
+    String uncustomized = formatParamOrder(IntStream.range(0, paramOrder.size()).boxed());
+    return formatted.equals(uncustomized) ?
+        "" :
+        formatted;
+  }
+
+  private static String formatParamOrder(Stream<Integer> paramOrderStream) {
+    return paramOrderStream.map(Object::toString).collect(joining(",", "(", ")"));
+  }
+
+  static Supplier<String> messageInvalidTypeArgument(Object value, Class<?> aClass) {
+    return () -> "Given argument:" + formatObject(value) +
+        (value == null ?
+            "" :
+            "(" + value.getClass() + ")") +
+        " cannot be assigned to parameter:" + aClass.getCanonicalName();
   }
 }

@@ -2,8 +2,8 @@ package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory;
-import com.github.dakusui.pcond.core.preds.ContextUtils;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
+import com.github.dakusui.pcond.core.context.ContextUtils;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -28,7 +28,7 @@ public enum Experimentals {
   }
 
   public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate_, int argIndex) {
-    return IdentifiablePredicateFactory.contextPredicate(predicate_, argIndex);
+    return PrintablePredicateFactory.contextPredicate(predicate_, argIndex);
   }
 
   public static <T> Predicate<Context> toContextPredicate(Predicate<T> predicate) {

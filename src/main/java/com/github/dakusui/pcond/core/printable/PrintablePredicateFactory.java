@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.core.identifieable;
+package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.context.Context;
@@ -12,16 +12,17 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.identifieable.IdentifiableFunctionFactory.argsOf;
-import static com.github.dakusui.pcond.core.identifieable.IdentifiableFunctionFactory.creatorOf;
+import static com.github.dakusui.pcond.core.identifieable.Identifiable.argsOf;
+import static com.github.dakusui.pcond.core.identifieable.Identifiable.creatorOf;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
-public enum IdentifiablePredicateFactory {
+public enum PrintablePredicateFactory {
   NEGATION,
   CONJUNCTION,
   DISJUNCTION,
@@ -47,7 +48,7 @@ public enum IdentifiablePredicateFactory {
 
     @SuppressWarnings("unchecked")
     Leaf(String s, Predicate<?> predicate) {
-      this.instance = leaf(this, () -> s, (Predicate<? super Object>) predicate);
+      this.instance = leaf(() -> s, (Predicate<? super Object>) predicate, this);
     }
 
     @SuppressWarnings("unchecked")
@@ -115,30 +116,48 @@ public enum IdentifiablePredicateFactory {
 
     public static <T> Predicate<T> create(ParameterizedLeafFactory parameterizedLeafFactory, List<Object> args) {
       return parameterizedLeaf(
-          parameterizedLeafFactory,
-          parameterizedLeafFactory.formatterFactory(),
-          parameterizedLeafFactory.functionFactory(),
-          args);
+          parameterizedLeafFactory.formatterFactory(), parameterizedLeafFactory.functionFactory(), args, parameterizedLeafFactory
+      );
     }
   }
 
-  public static <T> Predicate<T> leaf(Supplier<String> formatter, Predicate<? super T> predicate) {
-    return leaf(IdentifiablePredicateFactory.class, formatter, predicate);
+  private static <T> PrintablePredicate<T> toPrintablePredicate(Predicate<T> predicate) {
+    return (PrintablePredicate<T>) leaf(predicate);
   }
 
-  public static <T> Predicate<T> leaf(Object fallbackCreator, Supplier<String> formatter, Predicate<? super T> predicate) {
-    return creatorOf(predicate)
-        .map(c -> new LeafPredicate<T>(c, argsOf(predicate), formatter, PrintablePredicate.unwrap(predicate)))
-        .orElse(new LeafPredicate<T>(fallbackCreator, singletonList(formatter), formatter, PrintablePredicate.unwrap(predicate)));
+  public static <T> Predicate<T> leaf(Predicate<T> predicate) {
+    if (!(predicate instanceof PrintablePredicate))
+      return leaf("noname:" + predicate.toString(), predicate);
+    return predicate;
+  }
+
+  public static <T> Predicate<T> leaf(String name, Predicate<T> predicate) {
+    return leaf(() -> name, predicate);
+  }
+
+  public static <T> Predicate<T> leaf(Supplier<String> formatter, Predicate<T> predicate) {
+    return leaf(formatter, predicate, PrintablePredicateFactory.class);
+  }
+
+  public static <T> Predicate<T> leaf(Supplier<String> formatter, Predicate<T> predicate, Object fallbackCreator) {
+    return parameterizedLeaf(
+        (args) -> formatter,
+        (args) -> predicate,
+        emptyList(),
+        fallbackCreator);
   }
 
   public static <T> Predicate<T> parameterizedLeaf(
-      Object factoryIdentifier,
       Function<List<Object>, Supplier<String>> formatterFactory,
       Function<List<Object>, Predicate<T>> predicateFactory,
-      List<Object> args
+      List<Object> args,
+      Object fallbackCreator
   ) {
-    return new LeafPredicate<>(factoryIdentifier, args, formatterFactory.apply(args), predicateFactory.apply(args));
+    Supplier<String> formatter = formatterFactory.apply(args);
+    Predicate<T> predicate = predicateFactory.apply(args);
+    return creatorOf(predicate)
+        .map(c -> new LeafPredicate<>(c, argsOf(predicate), formatter, predicate))
+        .orElse(new LeafPredicate<>(fallbackCreator, args, formatter, predicate));
   }
 
   public static <P, O> TransformingPredicate.Factory<P, O> transform(Function<O, P> function) {
@@ -171,13 +190,6 @@ public enum IdentifiablePredicateFactory {
 
   public static <T> Predicate<Context> contextPredicate(Predicate<T> predicate, int argIndex) {
     return ContextPredicate.create(toPrintablePredicate(predicate), argIndex);
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <T> Predicate<T> toPrintablePredicate(Predicate<? super T> predicate) {
-    if (!(predicate instanceof PrintablePredicate))
-      return leaf(() -> "noname:" + predicate.toString(), predicate);
-    return (PrintablePredicate<T>) predicate;
   }
 
   private static class LeafPredicate<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T> {
@@ -217,7 +229,7 @@ public enum IdentifiablePredicateFactory {
 
   static class Conjunction<T> extends Junction<T> implements Evaluable.Conjunction<T> {
     @SuppressWarnings("unchecked")
-    protected Conjunction(Predicate<T> predicate, Predicate<T> other, List<Object> args) {
+    protected Conjunction(Predicate<? super T> predicate, Predicate<? super T> other, List<Object> args) {
       super(
           predicate,
           other,
@@ -230,7 +242,7 @@ public enum IdentifiablePredicateFactory {
 
   private static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
     @SuppressWarnings("unchecked")
-    protected Disjunction(Predicate<T> predicate, Predicate<T> other, List<Object> args) {
+    protected Disjunction(Predicate<? super T> predicate, Predicate<? super T> other, List<Object> args) {
       super(
           predicate,
           other,
@@ -246,11 +258,11 @@ public enum IdentifiablePredicateFactory {
     final Evaluable<T> b;
 
     protected Junction(
-        Predicate<T> predicate,
-        Predicate<T> other,
-        IdentifiablePredicateFactory creator,
+        Predicate<? super T> predicate,
+        Predicate<? super T> other,
+        PrintablePredicateFactory creator,
         List<Object> args,
-        Supplier<String> formatter, BiFunction<Predicate<T>, Predicate<T>, Predicate<T>> predicateFactory) {
+        Supplier<String> formatter, BiFunction<Predicate<? super T>, Predicate<? super T>, Predicate<T>> predicateFactory) {
       super(
           creator,
           args,
@@ -278,7 +290,7 @@ public enum IdentifiablePredicateFactory {
       }
 
       default TransformingPredicate<P, O> check(String condName, Predicate<? super P> cond) {
-        return check(leaf(() -> condName, cond));
+        return check(leaf(condName, cond));
       }
 
       TransformingPredicate<P, O> check(Predicate<? super P> cond);

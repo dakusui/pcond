@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory;
-import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory.Leaf;
-import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory.ParameterizedLeafFactory;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.Leaf;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.ParameterizedLeafFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
 import com.github.dakusui.pcond.internals.InternalChecks;
@@ -151,17 +151,17 @@ public enum Predicates {
 
   public static <E> Predicate<Stream<? extends E>> allMatch(Predicate<E> predicate) {
     requireNonNull(predicate);
-    return IdentifiablePredicateFactory.allMatch(predicate);
+    return PrintablePredicateFactory.allMatch(predicate);
   }
 
   public static <E> Predicate<Stream<? extends E>> noneMatch(Predicate<E> predicate) {
     requireNonNull(predicate);
-    return IdentifiablePredicateFactory.noneMatch(predicate);
+    return PrintablePredicateFactory.noneMatch(predicate);
   }
 
   public static <E> Predicate<Stream<? extends E>> anyMatch(Predicate<E> predicate) {
     requireNonNull(predicate);
-    return IdentifiablePredicateFactory.anyMatch(predicate);
+    return PrintablePredicateFactory.anyMatch(predicate);
   }
 
   @SuppressWarnings("unchecked")
@@ -187,13 +187,13 @@ public enum Predicates {
     return cond.negate();
   }
 
-  public static <O, P> IdentifiablePredicateFactory.TransformingPredicate.Factory<P, O> transform(String funcName, Function<? super O, ? extends P> func) {
+  public static <O, P> PrintablePredicateFactory.TransformingPredicate.Factory<P, O> transform(String funcName, Function<? super O, ? extends P> func) {
     return transform(function(funcName, func));
   }
 
   @SuppressWarnings("unchecked")
-  public static <O, P> IdentifiablePredicateFactory.TransformingPredicate.Factory<P, O> transform(Function<? super O, ? extends P> function) {
-    return IdentifiablePredicateFactory.transform((Function<O, P>) function);
+  public static <O, P> PrintablePredicateFactory.TransformingPredicate.Factory<P, O> transform(Function<? super O, ? extends P> function) {
+    return PrintablePredicateFactory.transform((Function<O, P>) function);
   }
 
   /**

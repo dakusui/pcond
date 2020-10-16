@@ -1,7 +1,8 @@
-package com.github.dakusui.pcond.core.identifieable;
+package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.identifieable.Identifiable;
 
 import java.util.List;
 import java.util.Objects;
@@ -35,13 +36,13 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
   @Override
   public <V> Function<V, R> compose(Function<? super V, ? extends T> before) {
     Objects.requireNonNull(before);
-    return IdentifiableFunctionFactory.<V, T, R>compose(before, this);
+    return PrintableFunctionFactory.<V, T, R>compose(before, this);
   }
 
   @Override
   public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
     Objects.requireNonNull(after);
-    return IdentifiableFunctionFactory.<T, R, V>compose(this, after);
+    return PrintableFunctionFactory.<T, R, V>compose(this, after);
   }
 
   @Override
@@ -76,7 +77,7 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
   }
 
   @SuppressWarnings("unchecked")
-  static <T, R> Function<T, R> unwrap(Function<T, R> function) {
+  public static <T, R> Function<T, R> unwrap(Function<T, R> function) {
     Function<T, R> ret = function;
     if (function instanceof PrintableFunction) {
       ret = (Function<T, R>) ((PrintableFunction<T, R>) function).function;

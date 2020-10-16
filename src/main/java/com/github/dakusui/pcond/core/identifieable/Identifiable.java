@@ -2,8 +2,10 @@ package com.github.dakusui.pcond.core.identifieable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -13,6 +15,20 @@ import static java.util.stream.Collectors.toList;
  * {@link Identifiable.Base} class.
  */
 public interface Identifiable {
+  static Optional<Object> creatorOf(Object object) {
+    Optional<Object> ret = Optional.empty();
+    if (object instanceof Identifiable)
+      ret = Optional.of(((Identifiable) object).creator());
+    return ret;
+  }
+
+  static List<Object> argsOf(Object object) {
+    List<Object> ret = singletonList(object);
+    if (object instanceof Identifiable)
+      ret = ((Identifiable) object).args();
+    return ret;
+  }
+
   Object creator();
 
   /**
@@ -55,7 +71,7 @@ public interface Identifiable {
 
   List<Object> args();
 
-  class Base implements Identifiable {
+  public class Base implements Identifiable {
     private final Object       creator;
     private final List<Object> args;
     private final Object       identity;
@@ -93,5 +109,4 @@ public interface Identifiable {
       return defaultEquals(obj);
     }
   }
-
 }

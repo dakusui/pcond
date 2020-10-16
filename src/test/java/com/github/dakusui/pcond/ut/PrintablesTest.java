@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory;
 import com.github.dakusui.pcond.functions.Printables;
 import com.github.dakusui.pcond.utils.TestBase;
 import org.junit.Test;

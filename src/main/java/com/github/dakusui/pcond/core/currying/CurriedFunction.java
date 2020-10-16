@@ -46,7 +46,7 @@ public interface CurriedFunction<T, R> extends Function<T, R> {
   }
 
   default <V> V validateArg(V arg) {
-    return validateArgumentType(arg, parameterType(), FormattingUtils.messageInvalidTypeArgument(arg, parameterType()));
+    return validateArgumentType(arg, parameterType(), CurryingUtils.messageInvalidTypeArgument(arg, parameterType()));
   }
 
   class Impl implements CurriedFunction<Object, Object> {

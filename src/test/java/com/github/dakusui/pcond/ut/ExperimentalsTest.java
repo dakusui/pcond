@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.identifieable.IdentifiableFunctionFactory;
+import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.functions.Experimentals;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.internals.InternalException;
@@ -435,11 +435,9 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   private static
   Function<List<Object>, Function<String, String>>
   pathToUriFunctionFactory() {
-    return v -> IdentifiableFunctionFactory.create(
-        ExperimentalsTest.class,
-        v,
-        (List<Object> args) -> () -> "buildUri" + args,
-        (List<Object> args) -> (String path) -> String.format("%s://%s:%s/%s", args.get(0), args.get(1), args.get(2), path));
+    return v -> PrintableFunctionFactory.create(
+        (List<Object> args) -> () -> "buildUri" + args, (List<Object> args) -> (String path) -> String.format("%s://%s:%s/%s", args.get(0), args.get(1), args.get(2), path), v, ExperimentalsTest.class
+    );
   }
 
 

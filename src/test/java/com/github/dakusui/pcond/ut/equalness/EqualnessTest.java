@@ -155,13 +155,13 @@ public class EqualnessTest extends TestBase {
         // - curry
         define(args -> Functions.curry(TargetMethodHolder.class, "voidMethod", String.class, String.class))
             .nonEqualObjectSupplier(() -> Functions.curry(TargetMethodHolder.class, "greeting", String.class, String.class))
-            .nonEqualObjectSupplier(() -> Functions.functionForStaticMethod(TargetMethodHolder.class, "voidMethod", String.class, String.class))
+            .nonEqualObjectSupplier(() -> Functions.multifunction(TargetMethodHolder.class, "voidMethod", String.class, String.class))
             .cached(false)
             .$(),
         // - curry (2)
         // - functionForStaticMethod
-        define(args -> Functions.functionForStaticMethod(TargetMethodHolder.class, "voidMethod", String.class, String.class))
-            .nonEqualObjectSupplier(() -> Functions.functionForStaticMethod(TargetMethodHolder.class, "greeting", String.class, String.class))
+        define(args -> Functions.multifunction(TargetMethodHolder.class, "voidMethod", String.class, String.class))
+            .nonEqualObjectSupplier(() -> Functions.multifunction(TargetMethodHolder.class, "greeting", String.class, String.class))
             .nonEqualObjectSupplier(() -> Functions.curry(TargetMethodHolder.class, "voidMethod", String.class, String.class))
             .cached(true)
             .$(),

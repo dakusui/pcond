@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.currying;
 
+import com.github.dakusui.pcond.core.refl.ReflUtils;
 import com.github.dakusui.pcond.internals.InternalChecks;
 
 import java.util.List;
@@ -69,7 +70,7 @@ public enum Checks {
 
   private static Set<Class<?>> widerTypesThan(Class<?> classB) {
     assert !classB.isPrimitive();
-    return ReflectionsUtils.WIDER_TYPES.getOrDefault(classB, emptySet());
+    return ReflUtils.WIDER_TYPES.getOrDefault(classB, emptySet());
   }
 
   @SuppressWarnings("unchecked")

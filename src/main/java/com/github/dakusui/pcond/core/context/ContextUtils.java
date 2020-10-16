@@ -1,9 +1,8 @@
-package com.github.dakusui.pcond.core.preds;
+package com.github.dakusui.pcond.core.context;
 
-import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
-import com.github.dakusui.pcond.core.identifieable.IdentifiablePredicateFactory;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.functions.Predicates;
 
 import java.util.Arrays;
@@ -33,11 +32,8 @@ public enum ContextUtils {
 
   public static <R> Predicate<Context> applyAndTest(CurriedFunction<Object, Object> curriedFunction, Predicate<? super R> pred, @SuppressWarnings("SameParameterValue") Class<? extends R> type, int... orderArgs) {
     List<Object> spec = asList(curriedFunction, pred, asList(Arrays.stream(orderArgs).boxed().toArray()));
-    return IdentifiablePredicateFactory.parameterizedLeaf(
-        ContextUtils.class,
-        args -> () -> String.format("%s(%s%s)", args.get(1), args.get(0), args.get(2)),
-        args -> (Context context) -> (pred).test(type.cast(CurryingUtils.applyCurriedFunction(curriedFunction, orderArgs).apply(context))),
-        spec
+    return PrintablePredicateFactory.parameterizedLeaf(
+        args -> () -> String.format("%s(%s%s)", args.get(1), args.get(0), args.get(2)), args -> (Context context) -> (pred).test(type.cast(CurryingUtils.applyCurriedFunction(curriedFunction, orderArgs).apply(context))), spec, ContextUtils.class
     );
   }
 
@@ -47,6 +43,6 @@ public enum ContextUtils {
 
   public static <T> Predicate<T> createPredicate(String s, Predicate<T> predicate) {
     requireNonNull(s);
-    return IdentifiablePredicateFactory.leaf(ContextUtils.class, () -> s, predicate);
+    return PrintablePredicateFactory.leaf(() -> s, predicate, ContextUtils.class);
   }
 }

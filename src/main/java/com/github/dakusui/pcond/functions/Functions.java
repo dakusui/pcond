@@ -2,8 +2,8 @@ package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
-import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
-import com.github.dakusui.pcond.core.identifieable.IdentifiableFunctionFactory;
+import com.github.dakusui.pcond.core.multi.MultiFunctionUtils;
+import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
@@ -31,9 +31,8 @@ public enum Functions {
    * @param <E> The type of the object.
    * @return The function.
    */
-  @SuppressWarnings("unchecked")
   public static <E> Function<E, E> identity() {
-    return IdentifiableFunctionFactory.Simple.IDENTITY.instance();
+    return PrintableFunctionFactory.Simple.IDENTITY.instance();
   }
 
   /**
@@ -43,7 +42,7 @@ public enum Functions {
    * @return The function.
    */
   public static <E> Function<? super E, String> stringify() {
-    return IdentifiableFunctionFactory.Simple.STRINGIFY.instance();
+    return PrintableFunctionFactory.Simple.STRINGIFY.instance();
   }
 
   /**
@@ -52,13 +51,13 @@ public enum Functions {
    * @return The function.
    */
   public static Function<? super String, Integer> length() {
-    return IdentifiableFunctionFactory.Simple.LENGTH.instance();
+    return PrintableFunctionFactory.Simple.LENGTH.instance();
   }
 
 
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   public static <E> Function<List<? extends E>, ? extends E> elementAt(int i) {
-    return Function.class.cast(IdentifiableFunctionFactory.Parameterized.ELEMENT_AT.create(singletonList(i)));
+    return Function.class.cast(PrintableFunctionFactory.Parameterized.ELEMENT_AT.create(singletonList(i)));
   }
 
   /**
@@ -67,7 +66,7 @@ public enum Functions {
    * @return The function.
    */
   public static Function<? super Collection<?>, Integer> size() {
-    return IdentifiableFunctionFactory.Simple.SIZE.instance();
+    return PrintableFunctionFactory.Simple.SIZE.instance();
   }
 
   /**
@@ -77,7 +76,7 @@ public enum Functions {
    * @return The function.
    */
   public static <E> Function<Collection<? extends E>, Stream<? extends E>> stream() {
-    return IdentifiableFunctionFactory.Simple.STREAM.instance();
+    return PrintableFunctionFactory.Simple.STREAM.instance();
   }
 
   /**
@@ -87,7 +86,7 @@ public enum Functions {
    * @return The function.
    */
   public static <E> Function<E, Stream<? extends E>> streamOf() {
-    return IdentifiableFunctionFactory.Simple.STREAM_OF.instance();
+    return PrintableFunctionFactory.Simple.STREAM_OF.instance();
   }
 
   /**
@@ -98,7 +97,7 @@ public enum Functions {
    * @return The function.
    */
   public static <E> Function<? super Object, ? extends E> cast(Class<E> type) {
-    return IdentifiableFunctionFactory.Parameterized.CAST.create(singletonList(type));
+    return PrintableFunctionFactory.Parameterized.CAST.create(singletonList(type));
   }
 
   /**
@@ -109,7 +108,7 @@ public enum Functions {
    * @return The function.
    */
   public static <I extends Collection<? extends E>, E> Function<I, List<E>> collectionToList() {
-    return IdentifiableFunctionFactory.Simple.COLLECTION_TO_LIST.instance();
+    return PrintableFunctionFactory.Simple.COLLECTION_TO_LIST.instance();
   }
 
   /**
@@ -119,7 +118,7 @@ public enum Functions {
    * @return The function.
    */
   public static <E> Function<E[], List<E>> arrayToList() {
-    return IdentifiableFunctionFactory.Simple.ARRAY_TO_LIST.instance();
+    return PrintableFunctionFactory.Simple.ARRAY_TO_LIST.instance();
   }
 
   /**
@@ -128,7 +127,7 @@ public enum Functions {
    * @return The function.
    */
   public static Function<String, Integer> countLines() {
-    return IdentifiableFunctionFactory.Simple.COUNT_LINES.instance();
+    return PrintableFunctionFactory.Simple.COUNT_LINES.instance();
   }
 
   /**
@@ -140,7 +139,7 @@ public enum Functions {
    * @return A printable and curried function of the target method.
    */
   public static CurriedFunction<Object, Object> curry(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    return curry(functionForStaticMethod(aClass, methodName, parameterTypes));
+    return curry(multifunction(aClass, methodName, parameterTypes));
   }
 
   /**
@@ -154,8 +153,8 @@ public enum Functions {
     return CurryingUtils.curry(function);
   }
 
-  public static <R> MultiFunction<R> functionForStaticMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
-    return ReflectionsUtils.lookupFunctionForStaticMethod(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);
+  public static <R> MultiFunction<R> multifunction(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
+    return MultiFunctionUtils.multifunction(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);
   }
 
   /**

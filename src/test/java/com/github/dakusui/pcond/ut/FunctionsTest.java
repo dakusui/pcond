@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.core.currying.ReflectionsUtils;
+import com.github.dakusui.pcond.core.multi.MultiFunctionUtils;
+import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.functions.Functions;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.utils.ut.TestBase;
@@ -233,17 +234,17 @@ public class FunctionsTest {
     }
 
     private static MultiFunction<String> greeting(int... order) {
-      return ReflectionsUtils.lookupFunctionForStaticMethod(order, TargetMethodHolder.class, "greeting", String.class, String.class);
+      return MultiFunctionUtils.multifunction(order, TargetMethodHolder.class, "greeting", String.class, String.class);
     }
 
     private static MultiFunction<String> greeting2(int... order) {
       Method m = getMethod(TargetMethodHolder.class, "greeting", String.class, String.class);
       List<Integer> paramOrder = Arrays.stream(order).boxed().collect(toList());
-      return MultiFunction.createFromStaticMethod(m, paramOrder);
+      return PrintableFunctionFactory.createFromStaticMethod(m, paramOrder);
     }
 
     private static MultiFunction<String> voidMethod() {
-      return Functions.functionForStaticMethod(TargetMethodHolder.class, "voidMethod", String.class, String.class);
+      return Functions.multifunction(TargetMethodHolder.class, "voidMethod", String.class, String.class);
     }
 
     public static class TargetMethodHolder {
