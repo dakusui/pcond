@@ -1,9 +1,11 @@
 package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.core.context.Context;
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.core.context.ContextUtils;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.printable.ParameterizedFunctionFactory;
+import com.github.dakusui.pcond.core.printable.ParameterizedPredicateFactory;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -45,4 +47,13 @@ public enum Experimentals {
   public static Predicate<Context> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
     return ContextUtils.toContextPredicate(curriedFunction, orderArgs);
   }
+
+  public static <T> ParameterizedPredicateFactory.Builder<T> parameterizedPredicate(String name) {
+    return new ParameterizedPredicateFactory.Builder<T>().name(name);
+  }
+
+  public static <T, R> ParameterizedFunctionFactory.Builder<T, R> parameterizedFunction(String name) {
+    return new ParameterizedFunctionFactory.Builder<T, R>().name(name);
+  }
+
 }

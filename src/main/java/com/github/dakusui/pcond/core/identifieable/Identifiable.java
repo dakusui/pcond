@@ -29,6 +29,10 @@ public interface Identifiable {
     return ret;
   }
 
+  static <T> String formatObjectName(Object object) {
+    return "noname:" + object.toString();
+  }
+
   Object creator();
 
   /**
