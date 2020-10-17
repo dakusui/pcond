@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.ArrayList;
@@ -131,7 +132,7 @@ public enum PrintablePredicateFactory {
 
   public static <T> Predicate<T> leaf(Predicate<T> predicate) {
     if (!(predicate instanceof PrintablePredicate))
-      return leaf("noname:" + predicate.toString(), predicate);
+      return leaf(Identifiable.formatObjectName(predicate), predicate);
     return predicate;
   }
 

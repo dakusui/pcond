@@ -26,6 +26,7 @@ import static com.github.dakusui.pcond.ut.ExperimentalsTest.Utils.stringEndsWith
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 public class ExperimentalsTest extends TestBase {
@@ -409,6 +410,27 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
     require(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toContextPredicate(equalTo("msg-3"), 1))));
+  }
+
+  @Test
+  public void parameterizedPredicateTest() {
+    Predicate<String> p = Experimentals.<String>parameterizedPredicate("containsStringIgnoreCase")
+        .factory(args -> v -> v.toUpperCase().contains(args.get(0).toString().toUpperCase()))
+        .create("hello");
+    assertTrue(p.test("hello!"));
+    assertTrue(p.test("Hello!"));
+    assertFalse(p.test("World!"));
+    assertEquals("containsStringIgnoreCase[hello]", p.toString());
+  }
+
+  @Test
+  public void parameterizedFunctionTest() {
+    Function<Object[], Object> f = Experimentals.<Object[], Object>parameterizedFunction("arrayElementAt")
+        .factory(args -> v -> v[(int)args.get(0)])
+        .create(1);
+    assertEquals("HELLO1", f.apply(new Object[]{0, "HELLO1"}));
+    assertEquals("HELLO2", f.apply(new Object[]{"hello", "HELLO2"}));
+    assertEquals("arrayElementAt[1]", f.toString());
   }
 
   @Test

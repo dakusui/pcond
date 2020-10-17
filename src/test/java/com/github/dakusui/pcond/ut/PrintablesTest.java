@@ -10,7 +10,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(Enclosed.class)
 public class PrintablesTest {
