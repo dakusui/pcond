@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.functions;
 
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.Leaf;
-import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.ParameterizedLeafFactory;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.PresetParameterizedLeafFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
 import com.github.dakusui.pcond.internals.InternalChecks;
@@ -45,11 +45,11 @@ public enum Predicates {
   }
 
   public static <T> Predicate<T> isEqualTo(T value) {
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.IS_EQUAL_TO, singletonList(value));
+    return PresetParameterizedLeafFactory.IS_EQUAL_TO.create(singletonList(value));
   }
 
   public static <T> Predicate<T> isSameReferenceAs(T value) {
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.OBJECT_IS_SAME_AS, singletonList(value));
+    return PresetParameterizedLeafFactory.OBJECT_IS_SAME_AS.create(singletonList(value));
   }
 
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
@@ -70,7 +70,7 @@ public enum Predicates {
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> greaterThan(T value) {
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.GREATER_THAN, singletonList(value));
+    return PresetParameterizedLeafFactory.GREATER_THAN.create(singletonList(value));
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> ge(T value) {
@@ -78,7 +78,7 @@ public enum Predicates {
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> greaterThanOrEqualTo(T value) {
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.GREATER_THAN_OR_EQUAL_TO, singletonList(value));
+    return PresetParameterizedLeafFactory.GREATER_THAN_OR_EQUAL_TO.create(singletonList(value));
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> lt(T value) {
@@ -86,7 +86,7 @@ public enum Predicates {
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> lessThan(T value) {
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.LESS_THAN, singletonList(value));
+    return PresetParameterizedLeafFactory.LESS_THAN.create(singletonList(value));
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> le(T value) {
@@ -94,7 +94,7 @@ public enum Predicates {
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> lessThanOrEqualTo(T value) {
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.LESS_THAN_OR_EQUAL_TO, singletonList(value));
+    return PresetParameterizedLeafFactory.LESS_THAN_OR_EQUAL_TO.create(singletonList(value));
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> eq(T value) {
@@ -102,32 +102,32 @@ public enum Predicates {
   }
 
   public static <T extends Comparable<? super T>> Predicate<T> equalTo(T value) {
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.EQUAL_TO, singletonList(value));
+    return PresetParameterizedLeafFactory.EQUAL_TO.create(singletonList(value));
   }
 
   public static Predicate<String> matchesRegex(String regex) {
     requireNonNull(regex);
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.MATCHES_REGEX, singletonList(regex));
+    return PresetParameterizedLeafFactory.MATCHES_REGEX.create(singletonList(regex));
   }
 
   public static Predicate<String> containsString(String string) {
     requireNonNull(string);
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.CONTAINS_STRING, singletonList(string));
+    return PresetParameterizedLeafFactory.CONTAINS_STRING.create(singletonList(string));
   }
 
   public static Predicate<String> startsWith(String string) {
     requireNonNull(string);
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.STARTS_WITH, singletonList(string));
+    return PresetParameterizedLeafFactory.STARTS_WITH.create(singletonList(string));
   }
 
   public static Predicate<String> endsWith(String string) {
     requireNonNull(string);
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.ENDS_WITH, singletonList(string));
+    return PresetParameterizedLeafFactory.ENDS_WITH.create(singletonList(string));
   }
 
   public static Predicate<String> equalsIgnoreCase(String string) {
     requireNonNull(string);
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.EQUALS_IGNORE_CASE, singletonList(string));
+    return PresetParameterizedLeafFactory.EQUALS_IGNORE_CASE.create(singletonList(string));
   }
 
   public static Predicate<String> isEmptyString() {
@@ -139,7 +139,7 @@ public enum Predicates {
   }
 
   public static <E> Predicate<Collection<E>> contains(Object entry) {
-    return ParameterizedLeafFactory.create(ParameterizedLeafFactory.CONTAINS, singletonList(entry));
+    return PresetParameterizedLeafFactory.CONTAINS.create(singletonList(entry));
   }
 
   public static Predicate<Object[]> isEmptyArray() {

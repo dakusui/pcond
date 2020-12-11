@@ -4,7 +4,6 @@ import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -29,14 +28,7 @@ enum Lab {
     return Printables.predicate(() -> "uncurried:" + curriedFunc, args -> applyValues(curriedFunc, args));
   }
 
-  public static void main2(String... args) {
-    System.out.println(isInstanceOf(Serializable.class));
-    System.out.println(isInstanceOf(Serializable.class).test(null));
-
-    System.out.println(applyValues(isInstanceOf(), asList("hello", String.class)) + "");
-    System.out.println(applyValues(isInstanceOf(), asList("hello", Map.class)) + "");
-  }
-
+  @SuppressWarnings("unchecked")
   public static <T> T applyValues(Function<?, ?> func, List<?> args) {
     requireArgument(requireNonNull(args), not(isEmpty()));
     Object ret = func;
@@ -45,6 +37,7 @@ enum Lab {
     return (T) ret;
   }
 
+  @SuppressWarnings("unchecked")
   private static Object applyOrTest(Object func, Object arg) {
     requireArgument(func, or(isInstanceOf(Function.class), isInstanceOf(Predicate.class)));
     if (func instanceof Predicate)

@@ -21,6 +21,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.getMethod;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)

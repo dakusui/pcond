@@ -62,7 +62,23 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  public enum ParameterizedLeafFactory {
+  public interface ParameterizedLeafFactory {
+    static <T> Predicate<T> create_(ParameterizedLeafFactory parameterizedLeafFactory, List<Object> args) {
+      return parameterizedLeaf(
+          parameterizedLeafFactory.formatterFactory(), parameterizedLeafFactory.functionFactory(), args, parameterizedLeafFactory
+      );
+    }
+
+    Function<List<Object>, Supplier<String>> formatterFactory();
+
+    <T> Function<List<Object>, Predicate<T>> functionFactory();
+
+    default <T> Predicate<T> create(List<Object> args) {
+      return create_(this, args);
+    }
+  }
+
+  public enum PresetParameterizedLeafFactory implements ParameterizedLeafFactory {
     IS_EQUAL_TO(
         (args) -> () -> format("isEqualTo[%s]", formatObject(args.get(0))),
         (args) -> v -> Objects.equals(v, args.get(0))),
@@ -105,25 +121,22 @@ public enum PrintablePredicateFactory {
     private final Function<List<Object>, Predicate<Object>> predicateFactory;
     private final Function<List<Object>, Supplier<String>>  formatterFactory;
 
-    ParameterizedLeafFactory(Function<List<Object>, Supplier<String>> formatterFactory, Function<List<Object>, Predicate<Object>> predicateFactory) {
+    PresetParameterizedLeafFactory(Function<List<Object>, Supplier<String>> formatterFactory, Function<List<Object>, Predicate<Object>> predicateFactory) {
       this.predicateFactory = predicateFactory;
       this.formatterFactory = formatterFactory;
     }
 
-    Function<List<Object>, Supplier<String>> formatterFactory() {
+    @Override
+    public Function<List<Object>, Supplier<String>> formatterFactory() {
       return this.formatterFactory;
     }
 
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    <T> Function<List<Object>, Predicate<T>> functionFactory() {
+    public <T> Function<List<Object>, Predicate<T>> functionFactory() {
       return (Function) this.predicateFactory;
     }
 
-    public static <T> Predicate<T> create(ParameterizedLeafFactory parameterizedLeafFactory, List<Object> args) {
-      return parameterizedLeaf(
-          parameterizedLeafFactory.formatterFactory(), parameterizedLeafFactory.functionFactory(), args, parameterizedLeafFactory
-      );
-    }
   }
 
   private static <T> PrintablePredicate<T> toPrintablePredicate(Predicate<T> predicate) {

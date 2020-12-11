@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.ut.bugfixes;
 
-import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.utils.TestBase;
 import org.junit.Test;
 
@@ -10,9 +9,8 @@ import static com.github.dakusui.pcond.functions.Functions.size;
 import static com.github.dakusui.pcond.functions.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class Issue11Test extends TestBase {
   @Test(expected = IllegalArgumentException.class)

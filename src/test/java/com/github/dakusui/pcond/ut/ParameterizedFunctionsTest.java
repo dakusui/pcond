@@ -13,16 +13,16 @@ import java.util.function.Function;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
 public class ParameterizedFunctionsTest {
-  private final Function       function;
+  private final Function<?, ?> function;
   private final String         expectationForToString;
   private final List<TestItem> testItems;
 
-  public ParameterizedFunctionsTest(Function function, String expectationForToString, List<TestItem> testItems) {
+  public ParameterizedFunctionsTest(Function<?, ?> function, String expectationForToString, List<TestItem> testItems) {
     this.function = function;
     this.expectationForToString = expectationForToString;
     this.testItems = testItems;
@@ -36,9 +36,8 @@ public class ParameterizedFunctionsTest {
   @SuppressWarnings("unchecked")
   @Test
   public void exercisePredicate() {
-    for (TestItem testItem : testItems) {
-      assertThat(String.format("testItem:%s", testItem), function.apply(testItem.data), testItem.matcher);
-    }
+    for (TestItem testItem : testItems)
+      assertThat(String.format("testItem:%s", testItem), ((Function<Object, Object>) function).apply(testItem.data), ((Matcher<Object>) testItem.matcher));
   }
 
   @Parameterized.Parameters
@@ -116,10 +115,10 @@ public class ParameterizedFunctionsTest {
   }
 
   static class TestItem {
-    final Object  data;
-    final Matcher matcher;
+    final Object     data;
+    final Matcher<?> matcher;
 
-    TestItem(Object data, Matcher matcher) {
+    TestItem(Object data, Matcher<?> matcher) {
       this.data = data;
       this.matcher = matcher;
     }
@@ -129,7 +128,7 @@ public class ParameterizedFunctionsTest {
       return String.format("data:%s; matcher:%s", data, matcher);
     }
 
-    static TestItem $(Object data, Matcher matcher) {
+    static TestItem $(Object data, Matcher<?> matcher) {
       return new TestItem(data, matcher);
     }
   }
