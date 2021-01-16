@@ -65,7 +65,7 @@ public class Perf {
     }
 
     private void formatResult(long nanos, Description description, String label) {
-      System.out.println(String.format("%-40s %10s (%s)", description.getMethodName(), formatNanos(nanos), label));
+      System.out.printf("%-40s %10s (%s)%n", description.getMethodName(), formatNanos(nanos), label);
     }
 
     private String formatNanos(long nanos) {
