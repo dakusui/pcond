@@ -5,20 +5,23 @@ import com.github.dakusui.pcond.provider.AssertionProvider;
 import java.util.function.Predicate;
 
 /**
+ * @formatter:off
  * Use methods in this class with the ```assert``` statement.
- * <p>
+ *
  * [source, java]
  * ----
  * import static com.github.dakusui.pcond.functions.Predicates.isNotNull;
  * import static com.github.dakusui.pcond.Assertions.*
- * <p>
+ *
  * public class TestClass {
- * public void aMethod(Object value) {
- * assert that(value, isNotNull());
- * }
+ *   public void aMethod(Object value) {
+ *     assert that(value, isNotNull());
+ *   }
  * }
  * ----
+ * @formatter:on
  */
+@SuppressWarnings("JavaDoc")
 public enum Assertions {
   ;
 
