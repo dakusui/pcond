@@ -68,15 +68,14 @@ This results in a following output.
 [source]
 .Output of Example.java
 ----
-Exception in thread "main" java.lang.IllegalArgumentException: value:"JohnDoe" violated precondition:value ((isNotNull&&!isEmpty)&&containsString[" "])
-"JohnDoe" -> &&                    ->       false
-               &&                  ->     true
-                 isNotNull         ->   true
-                 =>                ->   true
-                   length          -> 7
-7         ->       >[0]            -> true
-"JohnDoe" ->   containsString[" "] ->     false
-	at com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider.checkValue...
+Exception in thread "main" java.lang.IllegalArgumentException: value:"JohnDoe" violated precondition:value (isNotNull&&length >[0]&&containsString[" "])
+&&                               -> false
+  isNotNull("JohnDoe")           -> true
+  transformAndCheck              -> true
+    length("JohnDoe")            -> 7
+    >[0](7)                      -> true
+  containsString[" "]("JohnDoe") -> false
+at com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider.checkValue...
 	at ...
 ----
 

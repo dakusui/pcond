@@ -8,7 +8,6 @@ import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
 import java.util.List;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -17,7 +16,6 @@ import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.util.stream.Collectors.joining;
 
 public class DefaultAssertionProvider implements AssertionProviderBase<ApplicationException> {
-  public static final Object INITIAL_VALUE = new Object();
   private final boolean useEvaluator;
 
   public DefaultAssertionProvider(Properties properties) {
@@ -76,31 +74,21 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
   }
 
   private String composeExplanation(List<Evaluator.Entry> result, Throwable t) {
-    int maxLevel = result.stream().map(Evaluator.Entry::level).max(Integer::compareTo).orElse(0);
-    int maxNameLength = result.stream().map(entry -> entry.name().length() + entry.level() * 2).max(Integer::compareTo).orElse(0);
-    int maxInputLength = result.stream().map(entry -> formatObject(entry.input()).length()).max(Integer::compareTo).orElse(0);
-    AtomicReference<?> previousInput = new AtomicReference<>(INITIAL_VALUE);
+    int maxNameColumnLength = result
+        .stream()
+        .map(entry -> entry.name().length() + entry.level() * 2 + formatObject(entry.input()).length() + 3)
+        .max(Integer::compareTo)
+        .orElse(0);
     return result.stream()
-        .map(r -> formatEntry(t, maxLevel, maxNameLength, maxInputLength, previousInput, r))
+        .map(r -> formatEntry(r, maxNameColumnLength, t))
         .collect(joining(String.format("%n")));
   }
 
-  private String formatEntry(Throwable t, int maxLevel, int maxNameLength, int maxInputLength, AtomicReference<?> previousInput, Evaluator.Entry r) {
-    try {
-      return formatEntry(r, previousInput.get(), maxLevel, maxNameLength, maxInputLength, t);
-    } finally {
-      previousInput.set(r.input());
-    }
-  }
-
-  protected static String formatEntry(Evaluator.Entry r, Object previousInput, int maxLevel, int maxNameLength, int maxInputLength, Throwable throwable) {
-    boolean inputValueChanged = previousInput == INITIAL_VALUE;
+  protected static String formatEntry(Evaluator.Entry r, int maxNameLength, Throwable throwable) {
     String indent = spaces(r.level() * 2);
-    return String.format("%s %-" + maxNameLength + "s %s %s%s",
-        formatInput(r, maxInputLength, inputValueChanged),
-        indent + r.name(),
+    return String.format("%-" + maxNameLength + "s%s %s",
+        indent + r.name() + formatInput(r),
         r.hasOutput() ? "->" : "  ",
-        spaces((maxLevel - r.level()) * 2),
         r.hasOutput() ? InternalUtils.formatObject(r.output()) : throwable);
   }
 
@@ -112,13 +100,9 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     return Boolean.parseBoolean(properties.getProperty(myClass.getName() + ".useEvaluator", "true"));
   }
 
-  private static String formatInput(Evaluator.Entry r, int maxInputLength, boolean valueChanged) {
+  private static String formatInput(Evaluator.Entry r) {
     String formattedInput = InternalUtils.formatObject(r.input());
-    String input;
-    input = formattedInput;
-    return valueChanged ?
-        String.format("%-" + maxInputLength + "s %s", input, "->") :
-        spaces(maxInputLength + 3);
+    return r.isLeaf() ? String.format("%s %s", "(" + formattedInput + ")", "") : "";
   }
 
   public static class Result {

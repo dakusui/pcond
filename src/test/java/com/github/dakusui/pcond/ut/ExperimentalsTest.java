@@ -121,7 +121,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           ));
       assertThat(
           lineAt(e.getMessage(), 6),
-          CoreMatchers.containsString("hello"));
+          CoreMatchers.containsString("transformAndCheck"));
       assertThat(
           lineAt(e.getMessage(), 7),
           allOf(
@@ -159,7 +159,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           ));
       assertThat(
           lineAt(e.getMessage(), 6),
-          CoreMatchers.containsString("null"));
+          CoreMatchers.containsString("transformAndCheck"));
       assertThat(
           lineAt(e.getMessage(), 7),
           allOf(
@@ -213,10 +213,12 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       e.printStackTrace();
       assertThat(
           lineAt(e.getMessage(), 1),
-          CoreMatchers.containsString("hello"));
+          CoreMatchers.containsString("transformAndCheck"));
       assertThat(
           lineAt(e.getMessage(), 2),
-          CoreMatchers.containsString("streamOf"));
+          allOf(
+              CoreMatchers.containsString("streamOf"),
+              CoreMatchers.containsString("hello")));
       assertThat(
           lineAt(e.getMessage(), 3),
           CoreMatchers.containsString("toContextStream"));
@@ -279,12 +281,12 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       e.printStackTrace();
       assertThat(
           lineAt(e.getMessage(), 1),
-          allOf(
-              CoreMatchers.containsString("\"hello\",\"world\""),
-              CoreMatchers.containsString("=>")));
+          CoreMatchers.containsString("transformAndCheck"));
       assertThat(
           lineAt(e.getMessage(), 2),
-          CoreMatchers.containsString("stream"));
+          allOf(
+              CoreMatchers.containsString("\"hello\",\"world\""),
+              CoreMatchers.containsString("stream")));
       assertThat(
           lineAt(e.getMessage(), 3),
           allOf(
@@ -426,10 +428,10 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   @Test
   public void parameterizedFunctionTest() {
     Function<Object[], Object> f = Experimentals.<Object[], Object>parameterizedFunction("arrayElementAt")
-        .factory(args -> v -> v[(int)args.get(0)])
+        .factory(args -> v -> v[(int) args.get(0)])
         .create(1);
-    assertEquals("HELLO1", f.apply(new Object[]{0, "HELLO1"}));
-    assertEquals("HELLO2", f.apply(new Object[]{"hello", "HELLO2"}));
+    assertEquals("HELLO1", f.apply(new Object[] { 0, "HELLO1" }));
+    assertEquals("HELLO2", f.apply(new Object[] { "hello", "HELLO2" }));
     assertEquals("arrayElementAt[1]", f.toString());
   }
 
@@ -454,8 +456,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
     System.out.println(pathToUriOnLocalHost.equals(pathToUriOnRemoteHost));
   }
 
-  private static
-  Function<List<Object>, Function<String, String>>
+  private static Function<List<Object>, Function<String, String>>
   pathToUriFunctionFactory() {
     return v -> PrintableFunctionFactory.create(
         (List<Object> args) -> () -> "buildUri" + args, (List<Object> args) -> (String path) -> String.format("%s://%s:%s/%s", args.get(0), args.get(1), args.get(2), path), v, ExperimentalsTest.class

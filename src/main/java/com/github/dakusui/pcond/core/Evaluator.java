@@ -45,8 +45,8 @@ public interface Evaluator {
     List<Entry>         entries        = new ArrayList<>();
     Object              currentResult;
 
-    void enter(String name, Object input) {
-      Entry.OnGoing newEntry = new Entry.OnGoing(onGoingEntries.size(), entries.size(), name, input);
+    void enter(Entry.Type type, String name, Object input) {
+      Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, input);
       onGoingEntries.add(newEntry);
       entries.add(newEntry);
     }
@@ -64,7 +64,7 @@ public interface Evaluator {
       int i = 0;
       for (Evaluable<? super T> each : conjunction.children()) {
         if (i == 0)
-          enter("&&", value);
+          enter(Entry.Type.COMPOSITE, "&&", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (!cur || i == conjunction.children().size() - 1) {
@@ -80,7 +80,7 @@ public interface Evaluator {
       int i = 0;
       for (Evaluable<? super T> each : disjunction.children()) {
         if (i == 0)
-          enter("||", value);
+          enter(Entry.Type.COMPOSITE, "||", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (cur || i == disjunction.children().size() - 1) {
@@ -93,21 +93,21 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.Negation<T> negation) {
-      enter("!", value);
+      enter(Entry.Type.COMPOSITE, "!", value);
       negation.target().accept(value, this);
       leave(!this.<Boolean>resultValue());
     }
 
     @Override
     public <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred) {
-      enter(String.format("%s", leafPred), value);
+      enter(Entry.Type.LEAF, String.format("%s", leafPred), value);
       boolean result = leafPred.predicate().test(value);
       leave(result);
     }
 
     @Override
     public void evaluate(Context context, Evaluable.ContextPred contextPred) {
-      enter(String.format("%s", contextPred), context);
+      enter(Entry.Type.LEAF, String.format("%s", contextPred), context);
       contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
       leave(this.resultValue());
     }
@@ -115,7 +115,7 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      enter("transformAndCheck", value);
+      enter(Entry.Type.COMPOSITE,"transformAndCheck", value);
       transformation.mapper().accept(value, this);
       transformation.checker().accept((R) this.currentResult, this);
       leave(this.resultValue());
@@ -124,7 +124,7 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T> void evaluate(T value, Evaluable.Func<T> func) {
-      enter(String.format("%s", func.head()), value);
+      enter(Entry.Type.LEAF, String.format("%s", func.head()), value);
       Object resultValue = func.head().apply(value);
       leave(resultValue);
       func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(resultValue, this));
@@ -133,7 +133,7 @@ public interface Evaluator {
     @Override
     public <E> void evaluate(Stream<? extends E> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
-      enter(String.format("%s", streamPred), value);
+      enter(Entry.Type.LEAF, String.format("%s", streamPred), value);
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
       // on 'findFirst()'.
       // Although NULL_VALUE is an ordinary Object, not a value of E, this works
@@ -189,16 +189,23 @@ public interface Evaluator {
     }
 
     private Entry.Finalized createEntryForImport(Entry each, Object other) {
-      return new Entry.Finalized(this.onGoingEntries.size() + each.level, each.input, each.hasOutput() ? each.output() : other, each.name);
+      return new Entry.Finalized(each.type, this.onGoingEntries.size() + each.level, each.input, each.hasOutput() ? each.output() : other, each.name);
     }
   }
 
   abstract class Entry {
+    enum Type {
+      COMPOSITE,
+      LEAF
+    }
+
+    final Type   type;
     final int    level;
     final Object input;
     final String name;
 
-    Entry(int level, Object input, String name) {
+    Entry(Type type, int level, Object input, String name) {
+      this.type = type;
       this.level = level;
       this.input = input;
       this.name = name;
@@ -221,11 +228,15 @@ public interface Evaluator {
 
     public abstract <T> T output();
 
+    public boolean isLeaf() {
+      return this.type == Type.LEAF;
+    }
+
     static class Finalized extends Entry {
       final Object output;
 
-      Finalized(int level, Object input, Object output, String name) {
-        super(level, input, name);
+      Finalized(Type type, int level, Object input, Object output, String name) {
+        super(type, level, input, name);
         this.output = output;
       }
 
@@ -244,13 +255,13 @@ public interface Evaluator {
     static class OnGoing extends Entry {
       final int positionInEntries;
 
-      OnGoing(int level, int positionInEntries, String name, Object input) {
-        super(level, input, name);
+      OnGoing(Type type, int level, int positionInEntries, String name, Object input) {
+        super(type, level, input, name);
         this.positionInEntries = positionInEntries;
       }
 
       Finalized result(Object result) {
-        return new Finalized(this.level, this.input, result, this.name);
+        return new Finalized(this.type, this.level, this.input, result, this.name);
       }
 
       @Override
