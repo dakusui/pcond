@@ -9,7 +9,6 @@ import org.junit.Test;
 
 import java.util.Objects;
 import java.util.Properties;
-import java.util.function.Function;
 
 import static com.github.dakusui.pcond.functions.Functions.length;
 import static com.github.dakusui.pcond.functions.Predicates.*;
@@ -65,14 +64,14 @@ public class DefaultAssertionProviderTest extends TestBase {
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.containsString("Hello"),
           CoreMatchers.containsString("||"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.containsString("  isEqualTo[\"hello\"]"),
+          CoreMatchers.containsString("Hello"),
+          CoreMatchers.containsString("isEqualTo[\"hello\"]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
@@ -95,20 +94,19 @@ public class DefaultAssertionProviderTest extends TestBase {
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.containsString("=>"),
-          CoreMatchers.containsString("Hello"),
+          CoreMatchers.containsString("transformAndCheck"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
           CoreMatchers.containsString("length"),
+          CoreMatchers.containsString("Hello"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("5")
 
       ));
       assertThat(lineAt(e.getMessage(), 3), allOf(
-          CoreMatchers.containsString("5"),
           CoreMatchers.containsString(">[10]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
@@ -151,7 +149,7 @@ public class DefaultAssertionProviderTest extends TestBase {
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.containsString("    isNotNull"),
+          CoreMatchers.containsString("isNotNull"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
@@ -205,7 +203,7 @@ public class DefaultAssertionProviderTest extends TestBase {
 
       ));
       assertThat(lineAt(e.getMessage(), 5), allOf(
-          CoreMatchers.containsString("  =>"),
+          CoreMatchers.containsString("  transformAndCheck"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
@@ -217,7 +215,6 @@ public class DefaultAssertionProviderTest extends TestBase {
 
       ));
       assertThat(lineAt(e.getMessage(), 7), allOf(
-          CoreMatchers.startsWith("5"),
           CoreMatchers.containsString("  >[10]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")

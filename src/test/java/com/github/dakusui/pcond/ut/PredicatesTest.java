@@ -23,13 +23,13 @@ public class PredicatesTest {
       } catch (IllegalArgumentException e) {
         assertThat(
             lineAt(e.getMessage(), 1),
-            equalTo("100 -> &&                                     ->   false"));
+            equalTo("&&                                          -> false"));
         assertThat(
             lineAt(e.getMessage(), 2),
-            equalTo("         isNotNull                            -> true"));
+            equalTo("  isNotNull(100)                            -> true"));
         assertThat(
             lineAt(e.getMessage(), 3),
-            equalTo("         isInstanceOf[class java.lang.String] -> false"));
+            equalTo("  isInstanceOf[class java.lang.String](100) -> false"));
         throw e;
       }
     }
