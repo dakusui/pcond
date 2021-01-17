@@ -7,7 +7,6 @@ import com.github.dakusui.pcond.provider.ApplicationException;
 import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -18,6 +17,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.util.stream.Collectors.joining;
 
 public class DefaultAssertionProvider implements AssertionProviderBase<ApplicationException> {
+  public static final Object INITIAL_VALUE = new Object();
   private final boolean useEvaluator;
 
   public DefaultAssertionProvider(Properties properties) {
@@ -79,7 +79,7 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     int maxLevel = result.stream().map(Evaluator.Entry::level).max(Integer::compareTo).orElse(0);
     int maxNameLength = result.stream().map(entry -> entry.name().length() + entry.level() * 2).max(Integer::compareTo).orElse(0);
     int maxInputLength = result.stream().map(entry -> formatObject(entry.input()).length()).max(Integer::compareTo).orElse(0);
-    AtomicReference<?> previousInput = new AtomicReference<>(new Object());
+    AtomicReference<?> previousInput = new AtomicReference<>(INITIAL_VALUE);
     return result.stream()
         .map(r -> formatEntry(t, maxLevel, maxNameLength, maxInputLength, previousInput, r))
         .collect(joining(String.format("%n")));
@@ -94,7 +94,7 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
   }
 
   protected static String formatEntry(Evaluator.Entry r, Object previousInput, int maxLevel, int maxNameLength, int maxInputLength, Throwable throwable) {
-    boolean inputValueChanged = !Objects.equals(r.input(), previousInput);
+    boolean inputValueChanged = previousInput == INITIAL_VALUE;
     String indent = spaces(r.level() * 2);
     return String.format("%s %-" + maxNameLength + "s %s %s%s",
         formatInput(r, maxInputLength, inputValueChanged),

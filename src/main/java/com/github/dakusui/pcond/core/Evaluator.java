@@ -115,7 +115,7 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      enter("=>", value);
+      enter("transformAndCheck", value);
       transformation.mapper().accept(value, this);
       transformation.checker().accept((R) this.currentResult, this);
       leave(this.resultValue());
