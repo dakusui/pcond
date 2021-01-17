@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrintablePredicateFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.printable</a> &gt; <span class="el_source">PrintablePredicateFactory.java</span></div><h1>PrintablePredicateFactory.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.printable;
+
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.identifieable.Identifiable;
+import com.github.dakusui.pcond.internals.InternalUtils;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.core.identifieable.Identifiable.argsOf;
+import static com.github.dakusui.pcond.core.identifieable.Identifiable.creatorOf;
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
+<span class="fc" id="L30">public enum PrintablePredicateFactory {</span>
+<span class="fc" id="L31">  NEGATION,</span>
+<span class="fc" id="L32">  CONJUNCTION,</span>
+<span class="fc" id="L33">  DISJUNCTION,</span>
+<span class="fc" id="L34">  LEAF,</span>
+  ;
+
+  /*
+      Expected: &quot;100 -&gt; &amp;&amp;                                     -&gt;   false&quot;
+       but: was &quot;100 -&gt; &amp;&amp;                                            -&gt;   false&quot;
+   */
+<span class="fc" id="L41">  public enum Leaf {</span>
+<span class="fc" id="L42">    ALWAYS_TRUE(&quot;alwaysTrue&quot;, v -&gt; true),</span>
+<span class="fc" id="L43">    IS_TRUE(&quot;isTrue&quot;, (Boolean v) -&gt; v),</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">    IS_FALSE(&quot;isFalse&quot;, (Boolean v) -&gt; !v),</span>
+<span class="fc" id="L45">    IS_NULL(&quot;isNull&quot;, Objects::isNull),</span>
+<span class="fc" id="L46">    IS_NOT_NULL(&quot;isNotNull&quot;, Objects::nonNull),</span>
+<span class="fc" id="L47">    IS_EMPTY_STRING(&quot;isEmpty&quot;, v -&gt; ((String) v).isEmpty()),</span>
+<span class="fc bfc" id="L48" title="All 4 branches covered.">    IS_NULL_OR_EMPTY_STRING(&quot;isNullOrEmptyString&quot;, v -&gt; v == null || ((String) v).isEmpty()),</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">    IS_EMPTY_ARRAY(&quot;isEmptyArray&quot;, objects -&gt; ((Object[]) objects).length == 0),</span>
+<span class="fc" id="L50">    IS_EMPTY_COLLECTION(&quot;isEmpty&quot;, v -&gt; ((Collection&lt;?&gt;) v).isEmpty()),</span>
+    ;
+    final Predicate&lt;?&gt; instance;
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L55">    Leaf(String s, Predicate&lt;?&gt; predicate) {</span>
+<span class="fc" id="L56">      this.instance = leaf(() -&gt; s, (Predicate&lt;? super Object&gt;) predicate, this);</span>
+<span class="fc" id="L57">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public &lt;T&gt; Predicate&lt;T&gt; instance() {
+<span class="fc" id="L61">      return (Predicate&lt;T&gt;) this.instance;</span>
+    }
+  }
+
+<span class="fc" id="L65">  public enum ParameterizedLeafFactory {</span>
+<span class="fc" id="L66">    IS_EQUAL_TO(</span>
+<span class="fc" id="L67">        (args) -&gt; () -&gt; format(&quot;isEqualTo[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc" id="L68">        (args) -&gt; v -&gt; Objects.equals(v, args.get(0))),</span>
+<span class="fc" id="L69">    @SuppressWarnings(&quot;unchecked&quot;) GREATER_THAN(</span>
+<span class="fc" id="L70">        (args) -&gt; () -&gt; format(&quot;&gt;[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        (args) -&gt; v -&gt; ((Comparable&lt;? super Comparable&lt;?&gt;&gt;) v).compareTo((Comparable&lt;? super Comparable&lt;?&gt;&gt;) args.get(0)) &gt; 0),</span>
+<span class="fc" id="L72">    @SuppressWarnings(&quot;unchecked&quot;) GREATER_THAN_OR_EQUAL_TO(</span>
+<span class="fc" id="L73">        (args) -&gt; () -&gt; format(&quot;&gt;=[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">        (args) -&gt; v -&gt; ((Comparable&lt;? super Comparable&lt;?&gt;&gt;) v).compareTo((Comparable&lt;? super Comparable&lt;?&gt;&gt;) args.get(0)) &gt;= 0),</span>
+<span class="fc" id="L75">    @SuppressWarnings(&quot;unchecked&quot;) LESS_THAN_OR_EQUAL_TO(</span>
+<span class="fc" id="L76">        (args) -&gt; () -&gt; format(&quot;&lt;=[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        (args) -&gt; v -&gt; ((Comparable&lt;? super Comparable&lt;?&gt;&gt;) v).compareTo((Comparable&lt;? super Comparable&lt;?&gt;&gt;) args.get(0)) &lt;= 0),</span>
+<span class="fc" id="L78">    @SuppressWarnings(&quot;unchecked&quot;) LESS_THAN(</span>
+<span class="fc" id="L79">        (args) -&gt; () -&gt; format(&quot;&lt;[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        (args) -&gt; v -&gt; ((Comparable&lt;? super Comparable&lt;?&gt;&gt;) v).compareTo((Comparable&lt;? super Comparable&lt;?&gt;&gt;) args.get(0)) &lt; 0),</span>
+<span class="fc" id="L81">    @SuppressWarnings(&quot;unchecked&quot;) EQUAL_TO(</span>
+<span class="fc" id="L82">        (args) -&gt; () -&gt; format(&quot;=[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        (args) -&gt; v -&gt; ((Comparable&lt;? super Comparable&lt;?&gt;&gt;) v).compareTo((Comparable&lt;? super Comparable&lt;?&gt;&gt;) args.get(0)) == 0),</span>
+<span class="fc" id="L84">    MATCHES_REGEX(</span>
+<span class="fc" id="L85">        (args) -&gt; () -&gt; String.format(&quot;matchesRegex[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc" id="L86">        (args) -&gt; (s) -&gt; ((String) s).matches((String) args.get(0))),</span>
+<span class="fc" id="L87">    CONTAINS_STRING(</span>
+<span class="fc" id="L88">        (args) -&gt; () -&gt; format(&quot;containsString[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc" id="L89">        (args) -&gt; (s) -&gt; ((String) s).contains((String) args.get(0))),</span>
+<span class="fc" id="L90">    STARTS_WITH(</span>
+<span class="fc" id="L91">        (args) -&gt; () -&gt; format(&quot;startsWith[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc" id="L92">        (args) -&gt; (s) -&gt; ((String) s).startsWith((String) args.get(0))),</span>
+<span class="fc" id="L93">    ENDS_WITH(</span>
+<span class="fc" id="L94">        (args) -&gt; () -&gt; format(&quot;endsWith[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc" id="L95">        (args) -&gt; (s) -&gt; ((String) s).endsWith((String) args.get(0))),</span>
+<span class="fc" id="L96">    EQUALS_IGNORE_CASE(</span>
+<span class="fc" id="L97">        (args) -&gt; () -&gt; format(&quot;equalsIgnoreCase[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc" id="L98">        (args) -&gt; (s) -&gt; ((String) s).equalsIgnoreCase((String) args.get(0))),</span>
+<span class="fc" id="L99">    OBJECT_IS_SAME_AS(</span>
+<span class="fc" id="L100">        arg -&gt; () -&gt; format(&quot;==[%s]&quot;, formatObject(arg.get(0))),</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">        args -&gt; v -&gt; v == args.get(0)),</span>
+<span class="fc" id="L102">    CONTAINS(</span>
+<span class="fc" id="L103">        (args) -&gt; () -&gt; format(&quot;contains[%s]&quot;, formatObject(args.get(0))),</span>
+<span class="fc" id="L104">        (args) -&gt; (c) -&gt; ((Collection&lt;?&gt;) c).contains(args.get(0)));</span>
+    private final Function&lt;List&lt;Object&gt;, Predicate&lt;Object&gt;&gt; predicateFactory;
+    private final Function&lt;List&lt;Object&gt;, Supplier&lt;String&gt;&gt;  formatterFactory;
+
+<span class="fc" id="L108">    ParameterizedLeafFactory(Function&lt;List&lt;Object&gt;, Supplier&lt;String&gt;&gt; formatterFactory, Function&lt;List&lt;Object&gt;, Predicate&lt;Object&gt;&gt; predicateFactory) {</span>
+<span class="fc" id="L109">      this.predicateFactory = predicateFactory;</span>
+<span class="fc" id="L110">      this.formatterFactory = formatterFactory;</span>
+<span class="fc" id="L111">    }</span>
+
+    Function&lt;List&lt;Object&gt;, Supplier&lt;String&gt;&gt; formatterFactory() {
+<span class="fc" id="L114">      return this.formatterFactory;</span>
+    }
+
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+    &lt;T&gt; Function&lt;List&lt;Object&gt;, Predicate&lt;T&gt;&gt; functionFactory() {
+<span class="fc" id="L119">      return (Function) this.predicateFactory;</span>
+    }
+
+    public static &lt;T&gt; Predicate&lt;T&gt; create(ParameterizedLeafFactory parameterizedLeafFactory, List&lt;Object&gt; args) {
+<span class="fc" id="L123">      return parameterizedLeaf(</span>
+<span class="fc" id="L124">          parameterizedLeafFactory.formatterFactory(), parameterizedLeafFactory.functionFactory(), args, parameterizedLeafFactory</span>
+      );
+    }
+  }
+
+  private static &lt;T&gt; PrintablePredicate&lt;T&gt; toPrintablePredicate(Predicate&lt;T&gt; predicate) {
+<span class="fc" id="L130">    return (PrintablePredicate&lt;T&gt;) leaf(predicate);</span>
+  }
+
+  public static &lt;T&gt; Predicate&lt;T&gt; leaf(Predicate&lt;T&gt; predicate) {
+<span class="fc bfc" id="L134" title="All 2 branches covered.">    if (!(predicate instanceof PrintablePredicate))</span>
+<span class="fc" id="L135">      return leaf(Identifiable.formatObjectName(predicate), predicate);</span>
+<span class="fc" id="L136">    return predicate;</span>
+  }
+
+  public static &lt;T&gt; Predicate&lt;T&gt; leaf(String name, Predicate&lt;T&gt; predicate) {
+<span class="fc" id="L140">    return leaf(() -&gt; name, predicate);</span>
+  }
+
+  public static &lt;T&gt; Predicate&lt;T&gt; leaf(Supplier&lt;String&gt; formatter, Predicate&lt;T&gt; predicate) {
+<span class="fc" id="L144">    return leaf(formatter, predicate, PrintablePredicateFactory.class);</span>
+  }
+
+  public static &lt;T&gt; Predicate&lt;T&gt; leaf(Supplier&lt;String&gt; formatter, Predicate&lt;T&gt; predicate, Object fallbackCreator) {
+<span class="fc" id="L148">    return parameterizedLeaf(</span>
+<span class="fc" id="L149">        (args) -&gt; formatter,</span>
+<span class="fc" id="L150">        (args) -&gt; predicate,</span>
+<span class="fc" id="L151">        emptyList(),</span>
+        fallbackCreator);
+  }
+
+  public static &lt;T&gt; Predicate&lt;T&gt; parameterizedLeaf(
+      Function&lt;List&lt;Object&gt;, Supplier&lt;String&gt;&gt; formatterFactory,
+      Function&lt;List&lt;Object&gt;, Predicate&lt;T&gt;&gt; predicateFactory,
+      List&lt;Object&gt; args,
+      Object fallbackCreator
+  ) {
+<span class="fc" id="L161">    Supplier&lt;String&gt; formatter = formatterFactory.apply(args);</span>
+<span class="fc" id="L162">    Predicate&lt;T&gt; predicate = predicateFactory.apply(args);</span>
+<span class="fc" id="L163">    return creatorOf(predicate)</span>
+<span class="fc" id="L164">        .map(c -&gt; new LeafPredicate&lt;&gt;(c, argsOf(predicate), formatter, predicate))</span>
+<span class="fc" id="L165">        .orElse(new LeafPredicate&lt;&gt;(fallbackCreator, args, formatter, predicate));</span>
+  }
+
+  public static &lt;P, O&gt; TransformingPredicate.Factory&lt;P, O&gt; transform(Function&lt;O, P&gt; function) {
+<span class="fc" id="L169">    return TransformingPredicate.Factory.create(function);</span>
+  }
+
+  public static &lt;T&gt; Conjunction&lt;T&gt; and(List&lt;Predicate&lt;? super T&gt;&gt; predicates) {
+<span class="fc" id="L173">    return new Conjunction&lt;T&gt;(predicates);</span>
+  }
+
+  public static &lt;T&gt; Disjunction&lt;T&gt; or(List&lt;Predicate&lt;? super T&gt;&gt; predicates) {
+<span class="fc" id="L177">    return new Disjunction&lt;T&gt;(predicates);</span>
+  }
+
+  public static &lt;T&gt; Predicate&lt;T&gt; not(Predicate&lt;T&gt; predicate) {
+<span class="fc" id="L181">    return not_(predicate);</span>
+  }
+
+  public static &lt;T&gt; Negation&lt;T&gt; not_(Predicate&lt;T&gt; predicate) {
+<span class="fc" id="L185">    return new Negation&lt;T&gt;(toPrintablePredicate(predicate), singletonList(predicate));</span>
+  }
+
+  public static &lt;E&gt; Predicate&lt;Stream&lt;? extends E&gt;&gt; allMatch(Predicate&lt;E&gt; predicate) {
+<span class="fc" id="L189">    return AllMatch.create(predicate);</span>
+  }
+
+  public static &lt;E&gt; Predicate&lt;Stream&lt;? extends E&gt;&gt; noneMatch(Predicate&lt;E&gt; predicate) {
+<span class="fc" id="L193">    return NoneMatch.create(predicate);</span>
+  }
+
+  public static &lt;E&gt; Predicate&lt;Stream&lt;? extends E&gt;&gt; anyMatch(Predicate&lt;E&gt; predicate) {
+<span class="fc" id="L197">    return AnyMatch.create(predicate);</span>
+  }
+
+  public static &lt;T&gt; Predicate&lt;Context&gt; contextPredicate(Predicate&lt;T&gt; predicate, int argIndex) {
+<span class="fc" id="L201">    return ContextPredicate.create(toPrintablePredicate(predicate), argIndex);</span>
+  }
+
+  private static class LeafPredicate&lt;T&gt; extends PrintablePredicate&lt;T&gt; implements Evaluable.LeafPred&lt;T&gt; {
+    protected LeafPredicate(Object creator, List&lt;Object&gt; args, Supplier&lt;String&gt; formatter, Predicate&lt;? super T&gt; predicate) {
+<span class="fc" id="L206">      super(creator, args, formatter, predicate);</span>
+<span class="fc" id="L207">    }</span>
+
+    @Override
+    public Predicate&lt;? super T&gt; predicate() {
+<span class="fc" id="L211">      return predicate;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L216">      return formatter.get();</span>
+    }
+  }
+
+  static class Negation&lt;T&gt; extends PrintablePredicate&lt;T&gt; implements Evaluable.Negation&lt;T&gt; {
+    final Evaluable&lt;T&gt; target;
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    protected Negation(Predicate&lt;T&gt; predicate, List&lt;Object&gt; args) {
+<span class="fc" id="L225">      super(</span>
+          NEGATION,
+          args,
+<span class="fc" id="L228">          () -&gt; format(&quot;!%s&quot;, predicate),</span>
+<span class="fc" id="L229">          (t) -&gt; PrintablePredicate.unwrap((Predicate&lt;Object&gt;) predicate).negate().test(t));</span>
+<span class="fc" id="L230">      target = toEvaluableIfNecessary(predicate);</span>
+<span class="fc" id="L231">    }</span>
+
+    @Override
+    public Evaluable&lt;? super T&gt; target() {
+<span class="fc" id="L235">      return target;</span>
+    }
+  }
+
+  static class Conjunction&lt;T&gt; extends Junction&lt;T&gt; implements Evaluable.Conjunction&lt;T&gt; {
+    protected Conjunction(List&lt;Predicate&lt;? super T&gt;&gt; predicates) {
+<span class="fc" id="L241">      super(</span>
+          predicates,
+          CONJUNCTION,
+          &quot;&amp;&amp;&quot;,
+          Predicate::and);
+<span class="fc" id="L246">    }</span>
+  }
+
+  private static RuntimeException noPredicateGiven() {
+<span class="nc" id="L250">    throw new IllegalArgumentException(&quot;No predicate was given&quot;);</span>
+  }
+
+  private static class Disjunction&lt;T&gt; extends Junction&lt;T&gt; implements Evaluable.Disjunction&lt;T&gt; {
+    protected Disjunction(List&lt;Predicate&lt;? super T&gt;&gt; predicates) {
+<span class="fc" id="L255">      super(</span>
+          predicates,
+          DISJUNCTION,
+          &quot;||&quot;,
+          Predicate::or);
+<span class="fc" id="L260">    }</span>
+  }
+
+  abstract static class Junction&lt;T&gt; extends PrintablePredicate&lt;T&gt; implements Evaluable.Composite&lt;T&gt; {
+    final List&lt;Evaluable&lt;? super T&gt;&gt; children;
+
+    protected Junction(
+        List&lt;Predicate&lt;? super T&gt;&gt; predicates,
+        PrintablePredicateFactory creator,
+        String junctionSymbol,
+        BinaryOperator&lt;Predicate&lt;T&gt;&gt; junctionOp) {
+<span class="fc" id="L271">      super(</span>
+          creator,
+          new ArrayList&lt;&gt;(predicates),
+<span class="fc" id="L274">          () -&gt; formatJunction(predicates, junctionSymbol),</span>
+<span class="fc" id="L275">          junction(predicates, junctionOp));</span>
+<span class="fc" id="L276">      this.children = predicates.stream().map(InternalUtils::toEvaluableIfNecessary).collect(toList());</span>
+<span class="fc" id="L277">    }</span>
+
+    @Override
+    public List&lt;Evaluable&lt;? super T&gt;&gt; children() {
+<span class="fc" id="L281">      return this.children;</span>
+    }
+
+    static &lt;T&gt; String formatJunction(List&lt;Predicate&lt;? super T&gt;&gt; predicates, String junctionSymbol) {
+<span class="fc" id="L285">      return predicates.stream()</span>
+<span class="fc" id="L286">          .map(PrintablePredicateFactory::toPrintablePredicate)</span>
+<span class="fc" id="L287">          .map(Object::toString)</span>
+<span class="fc" id="L288">          .collect(joining(junctionSymbol, &quot;(&quot;, &quot;)&quot;));</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    static &lt;T&gt; Predicate&lt;T&gt; junction(List&lt;Predicate&lt;? super T&gt;&gt; predicates_, BinaryOperator&lt;Predicate&lt;T&gt;&gt; junctionOp) {
+<span class="fc" id="L293">      return predicates_</span>
+<span class="fc" id="L294">          .stream()</span>
+<span class="fc" id="L295">          .map(PrintablePredicate::unwrap)</span>
+<span class="fc" id="L296">          .map(p -&gt; (Predicate&lt;T&gt;) p)</span>
+<span class="fc" id="L297">          .reduce(junctionOp)</span>
+<span class="pc" id="L298">          .orElseThrow(PrintablePredicateFactory::noPredicateGiven);</span>
+    }
+  }
+
+  public static class TransformingPredicate&lt;P, O&gt; extends PrintablePredicate&lt;O&gt; implements Evaluable.Transformation&lt;O, P&gt; {
+    public interface Factory&lt;P, O&gt; {
+      static &lt;P, O&gt; Factory&lt;P, O&gt; create(Function&lt;O, P&gt; function) {
+<span class="fc" id="L305">        return cond -&gt; new TransformingPredicate&lt;&gt;(null, toPrintablePredicate(cond), function);</span>
+      }
+
+      default TransformingPredicate&lt;P, O&gt; check(String condName, Predicate&lt;? super P&gt; cond) {
+<span class="fc" id="L309">        return check(leaf(condName, cond));</span>
+      }
+
+      TransformingPredicate&lt;P, O&gt; check(Predicate&lt;? super P&gt; cond);
+    }
+
+    private final Evaluable&lt;? super P&gt; checker;
+    private final Evaluable&lt;? super O&gt; mapper;
+
+    public TransformingPredicate(String name, Predicate&lt;? super P&gt; predicate, Function&lt;? super O, ? extends P&gt; function) {
+<span class="fc" id="L319">      super(</span>
+          TransformingPredicate.class,
+<span class="fc" id="L321">          asList(predicate, function),</span>
+<span class="fc bfc" id="L322" title="All 2 branches covered.">          () -&gt; format(&quot;%s%s %s&quot;, name == null ? &quot;&quot; : name, function, predicate),</span>
+<span class="fc" id="L323">          v -&gt; predicate.test(function.apply(v)));</span>
+<span class="fc" id="L324">      this.checker = toEvaluableIfNecessary(predicate);</span>
+<span class="fc" id="L325">      this.mapper = toEvaluableIfNecessary(function);</span>
+<span class="fc" id="L326">    }</span>
+
+    @Override
+    public Evaluable&lt;? super O&gt; mapper() {
+<span class="fc" id="L330">      return this.mapper;</span>
+    }
+
+    @Override
+    public Evaluable&lt;? super P&gt; checker() {
+<span class="fc" id="L335">      return this.checker;</span>
+    }
+  }
+
+  static class ContextPredicate extends PrintablePredicate&lt;Context&gt; implements Evaluable.ContextPred {
+    public static &lt;T&gt; ContextPredicate create(Predicate&lt;T&gt; predicate, int argIndex) {
+<span class="fc" id="L341">      return new ContextPredicate(ContextPredicate.class, asList(predicate, argIndex), predicate, argIndex);</span>
+    }
+
+    private final Evaluable&lt;?&gt; enclosed;
+    private final int          argIndex;
+
+    private &lt;T&gt; ContextPredicate(Object creator, List&lt;Object&gt; args, Predicate&lt;T&gt; predicate, int argIndex) {
+<span class="fc" id="L348">      super(</span>
+          creator,
+          args,
+<span class="fc" id="L351">          () -&gt; format(&quot;contextPredicate[%s,%s]&quot;, predicate, argIndex),</span>
+<span class="fc" id="L352">          context -&gt; PrintablePredicate.unwrap(predicate).test(context.valueAt(argIndex)));</span>
+<span class="fc" id="L353">      this.enclosed = toEvaluableIfNecessary(predicate);</span>
+<span class="fc" id="L354">      this.argIndex = argIndex;</span>
+
+<span class="fc" id="L356">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public &lt;TT&gt; Evaluable&lt;? super TT&gt; enclosed() {
+<span class="fc" id="L361">      return (Evaluable&lt;? super TT&gt;) this.enclosed;</span>
+    }
+
+    @Override
+    public int argIndex() {
+<span class="fc" id="L366">      return argIndex;</span>
+    }
+  }
+
+  static class AllMatch&lt;E&gt; extends StreamPredicate&lt;E&gt; {
+    static &lt;E&gt; StreamPredicate&lt;E&gt; create(Predicate&lt;? super E&gt; predicate) {
+<span class="fc" id="L372">      return new AllMatch&lt;&gt;(</span>
+          predicate
+      );
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private AllMatch(Predicate&lt;? super E&gt; predicate) {
+<span class="fc" id="L379">      super(</span>
+          AllMatch.class,
+<span class="fc" id="L381">          singletonList(predicate),</span>
+<span class="fc" id="L382">          () -&gt; format(&quot;allMatch[%s]&quot;, predicate),</span>
+<span class="fc" id="L383">          (Stream&lt;? extends E&gt; stream) -&gt; stream.allMatch(predicate),</span>
+<span class="fc" id="L384">          toEvaluableIfNecessary((Predicate&lt;? super Stream&lt;? extends E&gt;&gt;) predicate),</span>
+          true,
+          false);
+<span class="fc" id="L387">    }</span>
+  }
+
+  static class NoneMatch&lt;E&gt; extends StreamPredicate&lt;E&gt; {
+    public static &lt;E&gt; StreamPredicate&lt;E&gt; create(Predicate&lt;? super E&gt; predicate) {
+<span class="fc" id="L392">      return new NoneMatch&lt;&gt;(</span>
+          predicate
+      );
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private NoneMatch(Predicate&lt;? super E&gt; predicate) {
+<span class="fc" id="L399">      super(</span>
+          NoneMatch.class,
+<span class="fc" id="L401">          singletonList(predicate),</span>
+<span class="fc" id="L402">          () -&gt; format(&quot;noneMatch[%s]&quot;, predicate),</span>
+<span class="fc" id="L403">          (Stream&lt;? extends E&gt; stream) -&gt; stream.noneMatch(predicate),</span>
+<span class="fc" id="L404">          toEvaluableIfNecessary((Predicate&lt;? super Stream&lt;? extends E&gt;&gt;) predicate),</span>
+          true,
+          true);
+<span class="fc" id="L407">    }</span>
+  }
+
+  static class AnyMatch&lt;E&gt; extends StreamPredicate&lt;E&gt; {
+    public static &lt;E&gt; StreamPredicate&lt;E&gt; create(Predicate&lt;? super E&gt; predicate) {
+<span class="fc" id="L412">      return new AnyMatch&lt;&gt;(</span>
+          predicate
+      );
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private AnyMatch(Predicate&lt;? super E&gt; predicate) {
+<span class="fc" id="L419">      super(</span>
+          AnyMatch.class,
+<span class="fc" id="L421">          singletonList(predicate),</span>
+<span class="fc" id="L422">          () -&gt; format(&quot;anyMatch[%s]&quot;, predicate),</span>
+<span class="fc" id="L423">          (Stream&lt;? extends E&gt; stream) -&gt; stream.anyMatch(PrintablePredicate.&lt;E&gt;unwrap(predicate)),</span>
+<span class="fc" id="L424">          toEvaluableIfNecessary((Predicate&lt;? super Stream&lt;? extends E&gt;&gt;) predicate),</span>
+          false,
+          true);
+<span class="fc" id="L427">    }</span>
+  }
+
+  public abstract static class StreamPredicate&lt;E&gt; extends PrintablePredicate&lt;Stream&lt;? extends E&gt;&gt; implements Evaluable.StreamPred&lt;E&gt; {
+    private final Evaluable&lt;? super Stream&lt;? extends E&gt;&gt; cut;
+    private final boolean                                defaultValue;
+    private final boolean                                cutOn;
+
+    private StreamPredicate(Object creator, List&lt;Object&gt; args, Supplier&lt;String&gt; formatter, Predicate&lt;? super Stream&lt;? extends E&gt;&gt; predicate, Evaluable&lt;? super Stream&lt;? extends E&gt;&gt; cut, boolean defaultValue, boolean cutOn) {
+<span class="fc" id="L436">      super(creator, args, formatter, predicate);</span>
+<span class="fc" id="L437">      this.cut = requireNonNull(cut);</span>
+<span class="fc" id="L438">      this.defaultValue = defaultValue;</span>
+<span class="fc" id="L439">      this.cutOn = cutOn;</span>
+<span class="fc" id="L440">    }</span>
+
+    @Override
+    public boolean defaultValue() {
+<span class="fc" id="L444">      return defaultValue;</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public Evaluable&lt;? super E&gt; cut() {
+<span class="fc" id="L450">      return (Evaluable&lt;? super E&gt;) this.cut;</span>
+    }
+
+    @Override
+    public boolean valueToCut() {
+<span class="fc" id="L455">      return cutOn;</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

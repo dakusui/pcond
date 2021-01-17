@@ -4,22 +4,91 @@ import com.github.dakusui.pcond.provider.AssertionProvider;
 
 import java.util.function.Predicate;
 
-<span class="fc" id="L7">public enum Assertions {</span>
+/**
+ * // @formatter:off
+ * Use methods in this class with the ```assert``` statement.
+ *
+ * [source, java]
+ * ----
+ * import static com.github.dakusui.pcond.functions.Predicates.isNotNull;
+ * import static com.github.dakusui.pcond.Assertions.*
+ *
+ * public class TestClass {
+ *   public static void aMethod(Object value) {
+ *     assert that(value, isNotNull());
+ *   }
+ * }
+ * ----
+ *
+ * This prints a much more readable error message than one you see for a usual assertion failure.
+ *
+ * ----
+ * Exception in thread &quot;main&quot; java.lang.AssertionError: Value:null violated: isNotNull
+ * null -&gt; isNotNull -&gt; false
+ * 	at com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider.checkValue(DefaultAssertionProvider.java:70)
+ * 	at com.github.dakusui.pcond.provider.AssertionProviderBase.checkInvariant(AssertionProviderBase.java:78)
+ * 	at com.github.dakusui.pcond.Assertions.that(Assertions.java:51)
+ * 	...
+ * ----
+ *
+ * NOTE::
+ * Do not forget giving ```-ea``` VM option to enable assertions.
+ *
+ * // @formatter:on
+ */
+<span class="fc" id="L39">public enum Assertions {</span>
   ;
 
+  /**
+   * A method to be used for checking a value satisfies a given invariant condition.
+   *
+   * @param value     A value to be checked.
+   * @param predicate An invariant condition to check the {@code value}.
+   * @param &lt;T&gt;       The type of {@code value}.
+   * @return {@code true}, if the condition given as {@code predicate} is satisfied.
+   */
   public static &lt;T&gt; boolean that(T value, Predicate&lt;? super T&gt; predicate) {
-<span class="fc" id="L11">    AssertionProvider.INSTANCE.checkInvariant(value, predicate);</span>
-<span class="fc" id="L12">    return true;</span>
+<span class="fc" id="L51">    AssertionProvider.INSTANCE.checkInvariant(value, predicate);</span>
+<span class="fc" id="L52">    return trueValue();</span>
   }
 
+  /**
+   * A method to be used for checking a value satisfies a given pre-condition.
+   *
+   * @param value     A value to be checked.
+   * @param predicate A pre-condition to check the {@code value}.
+   * @param &lt;T&gt;       The type of {@code value}.
+   * @return {@code true}, if the condition given as {@code predicate} is satisfied.
+   */
   public static &lt;T&gt; boolean precondition(T value, Predicate&lt;? super T&gt; predicate) {
-<span class="fc" id="L16">    AssertionProvider.INSTANCE.checkPrecondition(value, predicate);</span>
-<span class="fc" id="L17">    return true;</span>
+<span class="fc" id="L64">    AssertionProvider.INSTANCE.checkPrecondition(value, predicate);</span>
+<span class="fc" id="L65">    return trueValue();</span>
   }
 
+  /**
+   * A method to be used for checking a value satisfies a given post-condition.
+   *
+   * @param value     A value to be checked.
+   * @param predicate A post-condition to check the {@code value}.
+   * @param &lt;T&gt;       The type of {@code value}.
+   * @return {@code true}, if the condition given as {@code predicate} is satisfied.
+   */
   public static &lt;T&gt; boolean postcondition(T value, Predicate&lt;? super T&gt; predicate) {
-<span class="fc" id="L21">    AssertionProvider.INSTANCE.checkPostcondition(value, predicate);</span>
-<span class="fc" id="L22">    return true;</span>
+<span class="fc" id="L77">    AssertionProvider.INSTANCE.checkPostcondition(value, predicate);</span>
+<span class="fc" id="L78">    return trueValue();</span>
+  }
+
+  /**
+   * This method always return {@code true}.
+   * This method is defined in order not to let an IDE report a warning
+   * Condition 'that(methodType, Predicates.isNotNull())' is always 'true'
+   * for caller codes of methods in this class.
+   *
+   * @return {@code true}
+   */
+  @SuppressWarnings(&quot;ConstantConditions&quot;)
+  private static boolean trueValue() {
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">    return Assertions.class != null;</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

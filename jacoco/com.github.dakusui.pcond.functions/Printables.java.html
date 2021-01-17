@@ -1,126 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Printables.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.functions</a> &gt; <span class="el_source">Printables.java</span></div><h1>Printables.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.functions;
 
 
-import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
-import com.github.dakusui.pcond.functions.preds.BasePredUtils;
-import com.github.dakusui.pcond.functions.preds.LeafPredUtils;
+import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-<span class="fc" id="L12">public enum Printables {</span>
+/**
+ * An entry point class that provides methods to create a new &quot;printable&quot; function from a given conventional function.
+ */
+<span class="fc" id="L14">public enum Printables {</span>
   ;
 
-  public static &lt;T&gt; Predicate&lt;T&gt; predicate(Supplier&lt;String&gt; s, Predicate&lt;T&gt; predicate) {
-<span class="fc" id="L16">    return Printables.printablePredicate(s.get(), predicate);</span>
+  public static &lt;T&gt; Predicate&lt;T&gt; predicate(String name, Predicate&lt;T&gt; predicate) {
+<span class="fc" id="L18">    return PrintablePredicateFactory.leaf(name, predicate);</span>
   }
 
-  public static &lt;T&gt; Predicate&lt;T&gt; predicate(String s, Predicate&lt;T&gt; predicate) {
-<span class="fc" id="L20">    return predicate(() -&gt; s, predicate);</span>
+  public static &lt;T&gt; Predicate&lt;T&gt; predicate(Supplier&lt;String&gt; formatter, Predicate&lt;T&gt; predicate) {
+<span class="fc" id="L22">    return PrintablePredicateFactory.leaf(formatter, predicate);</span>
   }
 
-  public static &lt;T, R&gt; Function&lt;T, R&gt; function(Supplier&lt;String&gt; s, Function&lt;T, R&gt; function) {
-<span class="fc" id="L24">    return Printables.printableFunction(s.get(), function);</span>
+  public static &lt;T, R&gt; Function&lt;T, R&gt; function(String name, Function&lt;T, R&gt; function) {
+<span class="fc" id="L26">    return PrintableFunctionFactory.function(name, function);</span>
   }
 
-  public static &lt;T, R&gt; Function&lt;T, R&gt; function(String s, Function&lt;T, R&gt; function) {
-<span class="fc" id="L28">    return function(() -&gt; s, function);</span>
-  }
-
-  public static &lt;T&gt; Predicate&lt;T&gt; printablePredicate(String s, Predicate&lt;T&gt; predicate) {
-<span class="fc" id="L32">    return new LeafPredUtils.LeafPred&lt;&gt;(() -&gt; s, predicate);</span>
-  }
-
-  public static &lt;T, R&gt; Function&lt;T, R&gt; printableFunction(String s, Function&lt;? super T, ? extends R&gt; function) {
-<span class="fc" id="L36">    return PrintableFunction.create(s, function);</span>
-  }
-
-  /**
-   * //@formatter:off
-   * Returns a factory object with which you can create a new &quot;printable&quot; function.
-   * The returned factory has a method `PrintableFunction.Factory&lt;T,R,E&gt;#create(E)`.
-   * `E` is the type of a parameter from which a desired function is created.
-   * The returned factory creates a function object, which uses the argument passed as the parameter to compute values to be returned from `hashCode()` and `equals(Object)` methods.
-   *
-   * `E` can be anything, however, it is useful to use `List&lt;Object&gt;`, which contains elements necessary to build your own function.
-   *
-   * Following is an example to illustrate how to use this method.
-   *
-   * [source,java]
-   * ----
-   * class Example {
-   *   public void example() {
-   *     PrintableFunction.Factory&lt;String, String, List&lt;Object&gt;&gt; functionFactory = pathToUriFunctionFactory();
-   *     Function&lt;String, String&gt; pathToUriOnLocalHost = functionFactory.create(asList(&quot;http&quot;, &quot;localhost&quot;, 80));
-   *     System.out.println(pathToUriOnLocalHost);
-   *     System.out.println(pathToUriOnLocalHost.apply(&quot;path/to/resource&quot;));
-   *     System.out.println(pathToUriOnLocalHost.apply(&quot;path/to/another/resource&quot;));
-   *
-   *     Function&lt;String, String&gt; pathToUriOnRemoteHost = functionFactory.create(asList(&quot;https&quot;, &quot;example.com&quot;, 8443));
-   *     System.out.println(pathToUriOnRemoteHost);
-   *     System.out.println(pathToUriOnRemoteHost.apply(&quot;path/to/resource&quot;));
-   *     System.out.println(pathToUriOnRemoteHost.apply(&quot;path/to/another/resource&quot;));
-   *
-   *     Function&lt;String, String&gt; pathToUriOnLocalHost_2 = functionFactory.create(asList(&quot;http&quot;, &quot;localhost&quot;, 80));
-   *     System.out.println(pathToUriOnLocalHost.hashCode() == pathToUriOnLocalHost_2.hashCode()); //&lt;1&gt;
-   *     System.out.println(pathToUriOnLocalHost.equals(pathToUriOnLocalHost_2)); //&lt;2&gt;
-   *
-   *     System.out.println(pathToUriOnLocalHost.hashCode() == pathToUriOnRemoteHost.hashCode()); //&lt;1&gt;
-   *     System.out.println(pathToUriOnLocalHost.equals(pathToUriOnRemoteHost)); //&lt;2&gt;
-   *   }
-   *
-   *   private PrintableFunction.Factory&lt;String, String, List&lt;Object&gt;&gt; pathToUriFunctionFactory() {
-   *     return Printables.functionFactory(
-   *         (List&lt;Object&gt; args) -&gt; &quot;buildUri&quot; + args,
-   *         (List&lt;Object&gt; args) -&gt; (String path) -&gt; String.format(&quot;%s://%s:%s/%s&quot;, args.get(0), args.get(1), args.get(2), path));
-   *   }
-   * }
-   * ----
-   * &lt;1&gt;Note that the functions created by the same factory object with the `equal` value given to the `create(E)` method return the same `hashCode()` but not vice versa.
-   * &lt;2&gt;Also note that the function create by the same factory object with the `equal` value given to the `create(E) method result in `true` on `equals(Object)` method.
-   *
-   * And this results in a following output.
-   * [source, console]
-   * ----
-   * buildUri[http, localhost, 80]
-   * http://localhost:80/path/to/resource
-   * http://localhost:80/path/to/another/resource
-   * buildUri[https, example.com, 8443]
-   * https://example.com:8443/path/to/resource
-   * https://example.com:8443/path/to/another/resource
-   * true&lt;1&gt;
-   * true&lt;2&gt;
-   * false&lt;1&gt;
-   * false&lt;2&gt;
-   * ----
-   *
-   * //@formatter:on
-   *
-   * @param nameComposer A function that creates a descriptive string from the argument passed to the returned factory
-   * @param ff           A function that creates a function to be made printable from a value of {@code E}.
-   * @param &lt;T&gt;          Type of the parameter of the function created by the returned factory.
-   * @param &lt;R&gt;          Type of the returned value of the function create by the returned factory.
-   * @param &lt;E&gt;          Type of the parameter with which the returned factory create a function
-   * @return A factory to create a printable function.
-   */
-  public static &lt;T, R, E&gt; BaseFuncUtils.Factory&lt;T, R, E&gt; functionFactory(
-      final Function&lt;E, String&gt; nameComposer,
-      final Function&lt;E, Function&lt;T, R&gt;&gt; ff) {
-<span class="fc" id="L110">    return BaseFuncUtils.factory(nameComposer, ff);</span>
-  }
-
-  /**
-   * @param nameComposer A function that creates a descriptive string from the argument passed to the returned factory
-   * @param ff           A function that creates a predicate to be made printable.
-   * @param &lt;T&gt;          Type of the parameter of the function created by the returned factory.
-   * @param &lt;E&gt;          Type of the parameter with which the returned factory create a predicate
-   * @return A factory to create a printable predicate.
-   */
-  public static &lt;T, E&gt; BasePredUtils.Factory&lt;T, E&gt; predicateFactory(
-      final Function&lt;E, String&gt; nameComposer,
-      final Function&lt;E, Predicate&lt;T&gt;&gt; ff) {
-<span class="fc" id="L123">    return LeafPredUtils.factory(nameComposer, ff);</span>
+  public static &lt;T, R&gt; Function&lt;T, R&gt; function(Supplier&lt;String&gt; formatter, Function&lt;T, R&gt; function) {
+<span class="fc" id="L30">    return PrintableFunctionFactory.function(formatter, function);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

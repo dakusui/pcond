@@ -1,0 +1,2339 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>PrintableFunctionFactory.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.github.dakusui.pcond.core.printable;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.github.dakusui.pcond.core.currying.CurryingUtils;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.github.dakusui.pcond.core.identifieable.Identifiable;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.github.dakusui.pcond.core.multi.MultiFunction;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.lang.reflect.Method;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.ArrayList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Arrays;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Collection;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.List;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.function.Function;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.function.Supplier;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.stream.Stream;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.github.dakusui.pcond.core.currying.Checks.validateParamOrderList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.github.dakusui.pcond.core.refl.ReflUtils.formatMethodName;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeStaticMethod;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.github.dakusui.pcond.internals.InternalChecks.requireStaticMethod;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static java.lang.String.format;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static java.util.Arrays.asList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static java.util.Collections.emptyList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static java.util.Objects.requireNonNull;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static java.util.stream.Collectors.toList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>public enum PrintableFunctionFactory {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  COMPOSE,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  ;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  public enum Simple {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    IDENTITY(&#34;identity&#34;, Function.identity()),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    STRINGIFY(&#34;stringify&#34;, Object::toString),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    LENGTH(&#34;length&#34;, (Function&#60;String, Integer&#62;) String::length),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    SIZE(&#34;size&#34;, (Function&#60;Collection&#60;?&#62;, Integer&#62;) Collection::size),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_35'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    STREAM(&#34;stream&#34;, (Function&#60;Collection&#60;?&#62;, Stream&#60;?&#62;&#62;) Collection::stream),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    STREAM_OF(&#34;streamOf&#34;, Stream::of),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    ARRAY_TO_LIST(&#34;arrayToList&#34;, (Function&#60;Object[], List&#60;Object&#62;&#62;) Arrays::asList),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_38'/>
+38
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_38'>1</a>
+<span>
+1. lambda$static$0 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Simple::lambda$static$0 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    COUNT_LINES(&#34;countLines&#34;, (String v) -&#62; v.split(String.format(&#34;%n&#34;)).length),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_39'/>
+39
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_39'>1</a>
+<span>
+1. lambda$static$1 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Simple::lambda$static$1 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    COLLECTION_TO_LIST(&#34;collectionToList&#34;, (Collection&#60;?&#62; c) -&#62; new ArrayList&#60;Object&#62;() {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        addAll(c);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    ;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    private final Function&#60;?, ?&#62; instance;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    Simple(String name, Function&#60;?, ?&#62; function) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_48'/>
+48
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_48'>1</a>
+<span>
+1. lambda$new$2 : replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Simple::lambda$new$2 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      instance = PrintableFunctionFactory.function(() -&#62; name, function, this);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_49'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @SuppressWarnings(&#34;unchecked&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public &#60;T, R&#62; Function&#60;T, R&#62; instance() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_53'/>
+53
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_53'>1</a>
+<span>
+1. instance : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Simple::instance &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return (Function&#60;T, R&#62;) this.instance;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_56'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_57'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  public enum Parameterized {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_58'/>
+58
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_58'>4</a>
+<span>
+1. lambda$null$0 : replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$null$0 &rarr; KILLED<br/>
+2. lambda$null$2 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$null$2 &rarr; KILLED<br/>
+3. lambda$static$1 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$static$1 &rarr; KILLED<br/>
+4. lambda$static$3 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$static$3 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    ELEMENT_AT((args) -&#62; () -&#62; format(&#34;at[%s]&#34;, args.get(0)), (args) -&#62; (List&#60;?&#62; v) -&#62; v.get((int) args.get(0))),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_59'/>
+59
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_59'>4</a>
+<span>
+1. lambda$null$4 : replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$null$4 &rarr; KILLED<br/>
+2. lambda$null$6 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$null$6 &rarr; KILLED<br/>
+3. lambda$static$5 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$static$5 &rarr; KILLED<br/>
+4. lambda$static$7 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$static$7 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    CAST((args) -&#62; () -&#62; format(&#34;castTo[%s]&#34;, requireNonNull((Class&#60;?&#62;) args.get(0)).getSimpleName()), (args) -&#62; (Object v) -&#62; ((Class&#60;?&#62;) args.get(0)).cast(v)),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_60'/>
+60
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_60'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    ;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_61'/>
+61
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_61'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    final Function&#60;List&#60;Object&#62;, Supplier&#60;String&#62;&#62; formatterFactory;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_62'/>
+62
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_62'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    final Function&#60;List&#60;Object&#62;, Function&#60;?, ?&#62;&#62;   functionFactory;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_63'/>
+63
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_63'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_64'/>
+64
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_64'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    Parameterized(Function&#60;List&#60;Object&#62;, Supplier&#60;String&#62;&#62; formatterFactory, Function&#60;List&#60;Object&#62;, Function&#60;?, ?&#62;&#62; functionFactory) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_65'/>
+65
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_65'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      this.formatterFactory = formatterFactory;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_66'/>
+66
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_66'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      this.functionFactory = functionFactory;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_67'/>
+67
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_67'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_68'/>
+68
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_68'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_69'/>
+69
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_69'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @SuppressWarnings({ &#34;unchecked&#34;, &#34;rawtypes&#34; })</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_70'/>
+70
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_70'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public &#60;T, R&#62; Function&#60;T, R&#62; create(List&#60;Object&#62; args) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_71'/>
+71
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_71'>1</a>
+<span>
+1. create : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::create &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return PrintableFunctionFactory.create(this.formatterFactory, (Function) this.functionFactory, args, this);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_72'/>
+72
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_72'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_73'/>
+73
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_73'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_74'/>
+74
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_74'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_75'/>
+75
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_75'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static &#60;T, R, S&#62; PrintableFunction&#60;T, S&#62; compose(Function&#60;? super T, ? extends R&#62; before, Function&#60;? super R, ? extends S&#62; after) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_76'/>
+76
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_76'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    PrintableFunction&#60;? super T, ? extends R&#62; before_ = toPrintableFunction(before);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_77'/>
+77
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_77'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    PrintableFunction&#60;? super R, ? extends S&#62; after_ = toPrintableFunction(after);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_78'/>
+78
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_78'>1</a>
+<span>
+1. compose : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::compose &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return new PrintableFunction&#60;&#62;(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_79'/>
+79
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_79'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        COMPOSE,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_80'/>
+80
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_80'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        asList(before_, after_),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_81'/>
+81
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_81'>1</a>
+<span>
+1. lambda$compose$0 : replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$compose$0 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        () -&#62; format(&#34;%s-&#62;%s&#34;, before, after),</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_82'/>
+82
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_82'>1</a>
+<span>
+1. lambda$compose$1 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$compose$1 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        (T v) -&#62; PrintableFunction.unwrap(after).apply(PrintableFunction.unwrap(before).apply(v)),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_83'/>
+83
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_83'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        before_,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_84'/>
+84
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_84'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        after_);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_85'/>
+85
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_85'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_86'/>
+86
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_86'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_87'/>
+87
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_87'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static &#60;R&#62; MultiFunction&#60;R&#62; multifunction(Method method, List&#60;Integer&#62; paramOrder) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_88'/>
+88
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_88'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    validateParamOrderList(paramOrder, method.getParameterCount());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_89'/>
+89
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_89'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    requireStaticMethod(method);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_90'/>
+90
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_90'>2</a>
+<span>
+1. lambda$multifunction$2 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$multifunction$2 &rarr; KILLED<br/>
+2. multifunction : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::multifunction &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return new MultiFunction.Builder&#60;R&#62;(args -&#62; invokeStaticMethod(method, (paramOrder).stream().map(args::get).toArray()))</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_91'/>
+91
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_91'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        .name(method.getName())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_92'/>
+92
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_92'>1</a>
+<span>
+1. lambda$multifunction$3 : replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$multifunction$3 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        .formatter(() -&#62; formatMethodName(method) + CurryingUtils.formatParameterOrder(paramOrder))</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_93'/>
+93
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_93'>1</a>
+<span>
+1. lambda$multifunction$4 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$multifunction$4 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        .addParameters(paramOrder.stream().map(i -&#62; method.getParameterTypes()[i]).collect(toList()))</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_94'/>
+94
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_94'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        .identityArgs(asList(method, validateParamOrderList(paramOrder, method.getParameterCount())))</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_95'/>
+95
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_95'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        .$();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_96'/>
+96
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_96'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_97'/>
+97
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_97'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_98'/>
+98
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_98'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static &#60;T, R&#62; Function&#60;T, R&#62; function(Function&#60;T, R&#62; function) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_99'/>
+99
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_99'>1</a>
+<span>
+1. function : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    if (function instanceof PrintableFunction)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_100'/>
+100
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_100'>1</a>
+<span>
+1. function : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::function &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return function;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_101'/>
+101
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_101'>1</a>
+<span>
+1. function : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::function &rarr; SURVIVED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>    return function(&#34;noname:&#34; + function.toString(), function);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_102'/>
+102
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_102'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_103'/>
+103
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_103'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_104'/>
+104
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_104'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static &#60;T, R&#62; Function&#60;T, R&#62; function(String name, Function&#60;T, R&#62; function) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_105'/>
+105
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_105'>2</a>
+<span>
+1. function : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::function &rarr; KILLED<br/>
+2. lambda$function$5 : replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$function$5 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return function(() -&#62; name, function);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_106'/>
+106
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_106'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_107'/>
+107
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_107'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_108'/>
+108
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_108'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static &#60;T, R&#62; Function&#60;T, R&#62; function(Supplier&#60;String&#62; formatter, Function&#60;T, R&#62; function) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_109'/>
+109
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_109'>1</a>
+<span>
+1. function : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::function &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return function(formatter, function, PrintableFunctionFactory.class);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_110'/>
+110
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_110'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_111'/>
+111
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_111'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_112'/>
+112
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_112'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static &#60;T, R&#62; Function&#60;T, R&#62; function(Supplier&#60;String&#62; formatter, Function&#60;T, R&#62; function, Object fallbackCreator) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_113'/>
+113
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_113'>1</a>
+<span>
+1. function : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::function &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return create(</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_114'/>
+114
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_114'>1</a>
+<span>
+1. lambda$function$6 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$function$6 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        (args) -&#62; formatter,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_115'/>
+115
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_115'>1</a>
+<span>
+1. lambda$function$7 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$function$7 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        (args) -&#62; function,</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_116'/>
+116
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_116'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        emptyList(),</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_117'/>
+117
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_117'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        fallbackCreator);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_118'/>
+118
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_118'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_119'/>
+119
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_119'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_120'/>
+120
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_120'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static &#60;T, R&#62; PrintableFunction&#60;T, R&#62; create(</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_121'/>
+121
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_121'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      Function&#60;List&#60;Object&#62;, Supplier&#60;String&#62;&#62; formatterFactory, Function&#60;List&#60;Object&#62;, Function&#60;T, R&#62;&#62; functionFactory, List&#60;Object&#62; args,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_122'/>
+122
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_122'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      Object fallbackCreator) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_123'/>
+123
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_123'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    Supplier&#60;String&#62; formatter = formatterFactory.apply(args);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_124'/>
+124
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_124'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    Function&#60;T, R&#62; function = functionFactory.apply(args);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_125'/>
+125
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_125'>1</a>
+<span>
+1. create : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::create &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return Identifiable.creatorOf(function)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_126'/>
+126
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_126'>1</a>
+<span>
+1. lambda$create$8 : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$create$8 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        .map(c -&#62; new PrintableFunction&#60;&#62;(c, Identifiable.argsOf(function), formatter, function))</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_127'/>
+127
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_127'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        .orElse(new PrintableFunction&#60;&#62;(fallbackCreator, args, formatter, function));</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_128'/>
+128
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_128'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_129'/>
+129
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_129'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_130'/>
+130
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_130'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  private static &#60;T, R&#62; PrintableFunction&#60;T, R&#62; toPrintableFunction(Function&#60;T, R&#62; function) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_131'/>
+131
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_131'>1</a>
+<span>
+1. toPrintableFunction : replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::toPrintableFunction &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return (PrintableFunction&#60;T, R&#62;) function(function);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_132'/>
+132
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_132'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_133'/>
+133
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_133'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_38'>38</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_38'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$static$0<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[5](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Simple::lambda$static$0 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_39'>39</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_39'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$static$1<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[3](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Simple::lambda$static$1 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_48'>48</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_48'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$new$2<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenToString$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Simple::lambda$new$2 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_53'>53</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_53'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>instance<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenToString$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Simple::instance &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_58'>58</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_58'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$null$0<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenToString$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest)</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$null$0 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$null$2<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$null$2 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>lambda$static$1<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenToString$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$static$1 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>lambda$static$3<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenToString$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$static$3 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_59'>59</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_59'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$null$4<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exerciseToString[2](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest)</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$null$4 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$null$6<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[2](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$null$6 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>lambda$static$5<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Parameterized.test(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Parameterized)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$static$5 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>4.<span><b>4</b><br/><b>Location : </b>lambda$static$7<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Parameterized.test(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Parameterized)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::lambda$static$7 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_71'>71</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_71'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>create<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenToString$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory$Parameterized::create &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_78'>78</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_78'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>compose<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::compose &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_81'>81</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_81'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$compose$0<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest)</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$compose$0 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_82'>82</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_82'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$compose$1<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByCompose$whenApply$thenWorksRight(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$compose$1 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_90'>90</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_90'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$multifunction$2<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.testMultiParameterFunction$withReversedOrder$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$multifunction$2 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>multifunction<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.testEqualsWithIdenticalObjectsCreatedSeparately(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::multifunction &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_92'>92</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_92'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$multifunction$3<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.toStringMultiParameterFunction$withReversedOrder$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest)</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$multifunction$3 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_93'>93</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_93'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$multifunction$4<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.testEqualsWithIdenticalObjectsCreatedSeparately(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$multifunction$4 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_99'>99</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_99'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>function<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testAndThen$toString(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_100'>100</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_100'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>function<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testCompose(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::function &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_101'>101</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_101'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>function<br/><b>Killed by : </b>none</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::function &rarr; SURVIVED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_105'>105</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_105'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>function<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::function &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$function$5<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest)</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$function$5 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_109'>109</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_109'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>function<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::function &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_113'>113</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_113'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>function<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::function &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_114'>114</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_114'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$function$6<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$function$6 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_115'>115</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_115'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$function$7<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$function$7 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_125'>125</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_125'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>create<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenToString$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::create &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_126'>126</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_126'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$create$8<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.TransformingPredicateTest.testHashCodeSimply(com.github.dakusui.pcond.ut.TransformingPredicateTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::lambda$create$8 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4b5fc36d_131'>131</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4b5fc36d_131'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>toPrintableFunction<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testCompose(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed)</span></span> replaced return value with null for com/github/dakusui/pcond/core/printable/PrintableFunctionFactory::toPrintableFunction &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>BOOLEAN_FALSE_RETURN</li>
+<li class='mutator'>BOOLEAN_TRUE_RETURN</li>
+<li class='mutator'>CONDITIONALS_BOUNDARY_MUTATOR</li>
+<li class='mutator'>EMPTY_RETURN_VALUES</li>
+<li class='mutator'>INCREMENTS_MUTATOR</li>
+<li class='mutator'>INVERT_NEGS_MUTATOR</li>
+<li class='mutator'>MATH_MUTATOR</li>
+<li class='mutator'>NEGATE_CONDITIONALS_MUTATOR</li>
+<li class='mutator'>NULL_RETURN_VALUES</li>
+<li class='mutator'>PRIMITIVE_RETURN_VALS_MUTATOR</li>
+<li class='mutator'>VOID_METHOD_CALL_MUTATOR</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[7](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[5](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[3](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello(com.github.dakusui.pcond.ut.ExperimentalsTest) (22 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[8](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[3](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[6](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByCompose$whenApply$thenWorksRight(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest) (0 ms)</li><li>com.github.dakusui.pcond.compilability.BooleanTest.testIsFalse(com.github.dakusui.pcond.compilability.BooleanTest) (18 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[6](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[9](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_d_2(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[1](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.testEqualsWithIdenticalObjectsCreatedSeparately(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[9](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.TransformingPredicateTest.givenNullForName$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.TransformingPredicateTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[5](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_IntegerToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_shortToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[5](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[2](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[4](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[4](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.covariantOverridingMethodCanBeInvokedCorrectly(com.github.dakusui.pcond.ut.CallTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[7](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testCompose$toString(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[4](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[5](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.compilability.ListTest.testNoneMatch(com.github.dakusui.pcond.compilability.ListTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[6](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[3](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[13](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[8](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenExceptionThrowingFunction$whenApplythenThrown(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[9](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[6](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[1](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[2](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[7](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenHashCode$thenSameIsSameAndDifferentIsDifferent(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[4](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[6](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_d_3e(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[5](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[3](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[1](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[2](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[7](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[14](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exerciseToString[0](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[5](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[3](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exerciseToString[5](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello4_a(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[14](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$StringifyTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$StringifyTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[9](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[10](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[14](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_longToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithStringParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[4](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[12](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[8](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[4](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Parameterized.test(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Parameterized) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[11](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[1](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello6(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_b_e2(com.github.dakusui.pcond.ut.ExperimentalsTest) (9 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[13](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[3](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenApply$thenWorksRight(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[14](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.toStringMultiParameterFunction$withReversedOrder$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[1](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[9](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[4](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[3](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[4](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[12](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.parameterUnmatchedWhileNameMatching(com.github.dakusui.pcond.ut.CallTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[14](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exerciseToString[6](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[2](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenStringToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[13](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.instanceMethodCanBeCreatedOnSpecifiedObject(com.github.dakusui.pcond.ut.CallTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenToString$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[13](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[7](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[6](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[11](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[11](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exerciseToString[4](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_b_e3(com.github.dakusui.pcond.ut.ExperimentalsTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[9](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.nestedLoop_success(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.nestedLoop_fail(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.bugfixes.Issue11Test.whenReproduceIssue(com.github.dakusui.pcond.ut.bugfixes.Issue11Test) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[7](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (6 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$StreamTest.whenToString$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$StreamTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.TransformingPredicateTest.testHashCodeSimply(com.github.dakusui.pcond.ut.TransformingPredicateTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[1](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[8](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_e(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[4](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[10](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_b_e(com.github.dakusui.pcond.ut.ExperimentalsTest) (6 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exerciseToString[7](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.functionsCanBeChained(com.github.dakusui.pcond.ut.CallTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[7](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[5](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[0](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[4](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest.withEvaluator_transforming_thenFail(com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[14](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.testMultiParameterFunction$withReversedOrder$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[10](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[11](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.toStringMultiParameterFunction$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.compilability.ListTest.testAllMatch(com.github.dakusui.pcond.compilability.ListTest) (28 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[10](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[5](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[12](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.runMultiParameterFunction$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyWithInvalidArg$thenThrown(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.TransformingPredicateTest.testHashCode(com.github.dakusui.pcond.ut.TransformingPredicateTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Simple.test(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Simple) (0 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello3_a(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[10](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[3](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[12](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[6](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (6 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[11](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[13](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[7](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_c(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exerciseToString[3](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[6](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[2](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[7](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[9](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest.withEvaluator_columns100$whenNull(com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByCompose$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exerciseToString[2](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[14](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest.withoutEvaluator_conj_thenPass(com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[10](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_a(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello2(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exerciseToString[1](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_byteToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[8](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.compilability.ListTest.testAnyMatch(com.github.dakusui.pcond.compilability.ListTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[14](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (6 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyLastBeforeLast$thenIllegalStateIsThrown(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[12](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[13](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[8](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.test3(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[1](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[8](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[12](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[12](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testAndThen(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[3](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[10](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyExpectedTimes$thenExpectedResultReturned(com.github.dakusui.pcond.ut.CurryingTest) (23 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyNextMoreThanExpected$thenNoSuchElementIsThrown(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[11](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[2](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$StreamTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$StreamTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_b_e4(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.parameterizedFunctionTest(com.github.dakusui.pcond.ut.ExperimentalsTest) (10 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[13](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[11](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello3_b(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.instanceMethodCanBeCalled(com.github.dakusui.pcond.ut.CallTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[6](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[12](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[14](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.TransformingPredicateTest.testEquals(com.github.dakusui.pcond.ut.TransformingPredicateTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[1](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[6](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[2](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenToStringOnOngoing$thenExpectedResultReturned(com.github.dakusui.pcond.ut.CurryingTest) (6 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello5(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[13](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[13](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[11](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.PreconditionsTest (4 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[9](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[7](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[5](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[12](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest.withoutEvaluator_conj_thenFail(com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[5](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.TransformingPredicateTest.givenNonNullName$whenToString$thenLooksGood(com.github.dakusui.pcond.ut.TransformingPredicateTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[3](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Simple.testHandleNull(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Simple) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[4](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[7](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[2](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[10](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello3(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$StringifyTest.whenToString$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$StringifyTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[8](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithForeignObject[3](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[11](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.classMethodCaBeCalled(com.github.dakusui.pcond.ut.CallTest) (9 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_intToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[10](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.testEqualsWithDifferentObjects(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments_reversed[2](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[10](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.usageExample(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithItself[1](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (6 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[9](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testAndThen$toString(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testCompose(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_d_1(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[2](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.sameObject[6](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[8](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[14](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[9](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalsWithOneCreatedFromSameFactoryAndArguments[2](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[1](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest.withEvaluator_columns100$whenShorterThan10(com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[8](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello4(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.equalHashCode[12](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (12 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notSameObject[5](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.print[1](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testComposeParameterized(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed) (0 ms)</li><li>com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest.withEvaluator_columns100_conj(com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenToString$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.functionCanBeCreatedFromInstanceMethod(com.github.dakusui.pcond.ut.CallTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_d_2e(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_b(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenEqualityIsChecked$thenSameIsSameAndDifferentIsDifferent(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.runVoidReturningMultiParameterFunction$thenNullReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.notEqualsWithAnother[13](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.equalness.EqualnessTest.returnsSameHashCode[11](com.github.dakusui.pcond.ut.equalness.EqualnessTest) (2 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='http://pitest.org'>PIT</a> 1.5.0
+
+</body>
+</html>

@@ -1,8 +1,12 @@
 com.github.dakusui.pcond
 com.github.dakusui.pcond.core
+com.github.dakusui.pcond.core.context
 com.github.dakusui.pcond.core.currying
+com.github.dakusui.pcond.core.identifieable
+com.github.dakusui.pcond.core.multi
+com.github.dakusui.pcond.core.printable
+com.github.dakusui.pcond.core.refl
 com.github.dakusui.pcond.functions
-com.github.dakusui.pcond.functions.preds
 com.github.dakusui.pcond.internals
 com.github.dakusui.pcond.provider
 com.github.dakusui.pcond.provider.impls

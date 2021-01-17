@@ -1,138 +1,59 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Experimentals.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.functions</a> &gt; <span class="el_source">Experimentals.java</span></div><h1>Experimentals.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.context.ContextUtils;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.internals.InternalUtils;
+import com.github.dakusui.pcond.core.printable.ParameterizedFunctionFactory;
+import com.github.dakusui.pcond.core.printable.ParameterizedPredicateFactory;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 
-import java.util.*;
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 
 <span class="fc" id="L17">public enum Experimentals {</span>
   ;
 
   public static Function&lt;Stream&lt;?&gt;, Stream&lt;Context&gt;&gt; nest(Collection&lt;?&gt; inner) {
-<span class="fc" id="L21">    return Printables.function(() -&gt; &quot;nest&quot; + formatObject(inner), (Stream&lt;?&gt; stream) -&gt; Def.nest(stream, inner));</span>
+<span class="fc" id="L21">    return Printables.function(() -&gt; &quot;nest&quot; + formatObject(inner), (Stream&lt;?&gt; stream) -&gt; ContextUtils.nest(stream, inner));</span>
   }
 
   public static Function&lt;Stream&lt;?&gt;, Stream&lt;Context&gt;&gt; toContextStream() {
-<span class="fc" id="L25">    return Printables.function(() -&gt; &quot;toContextStream&quot;, Def::toContextStream);</span>
+<span class="fc" id="L25">    return Printables.function(() -&gt; &quot;toContextStream&quot;, ContextUtils::toContextStream);</span>
   }
 
   public static &lt;T&gt; Function&lt;T, Context&gt; toContext() {
-<span class="fc" id="L29">    return Printables.function(() -&gt; &quot;toContext&quot;, Def::toContext);</span>
+<span class="fc" id="L29">    return Printables.function(() -&gt; &quot;toContext&quot;, ContextUtils::toContext);</span>
   }
 
-  public static &lt;R&gt; Function&lt;Context, R&gt; apply(CurriedFunction&lt;Object, Object&gt; curriedFunction, int... orderArgs) {
-<span class="fc" id="L33">    return context -&gt; {</span>
-<span class="fc" id="L34">      CurriedFunction&lt;?, ?&gt; cur = curriedFunction;</span>
-<span class="fc" id="L35">      int[] normalizedOrderArgs = normalizeOrderArgs(context, orderArgs);</span>
-<span class="fc bfc" id="L36" title="All 2 branches covered.">      for (int i = 0; i &lt; normalizedOrderArgs.length - 1; i++)</span>
-<span class="fc" id="L37">        cur = cur.applyNext(context.valueAt(normalizedOrderArgs[i]));</span>
-<span class="fc" id="L38">      return cur.applyLast(context.valueAt(normalizedOrderArgs[context.size() - 1]));</span>
-    };
+  public static &lt;T&gt; Predicate&lt;Context&gt; toContextPredicate(Predicate&lt;T&gt; predicate_, int argIndex) {
+<span class="fc" id="L33">    return PrintablePredicateFactory.contextPredicate(predicate_, argIndex);</span>
+  }
+
+  public static &lt;T&gt; Predicate&lt;Context&gt; toContextPredicate(Predicate&lt;T&gt; predicate) {
+<span class="fc" id="L37">    return toContextPredicate(predicate, 0);</span>
   }
 
   /**
-   * Converts a curried function which results in a boolean value in to a predicate.
+   * Converts a curried function which results in a boolean value into a predicate.
    *
    * @param curriedFunction A curried function to be converted.
    * @param orderArgs       An array to specify the order in which values in the context are applied to the function.
    * @return A predicate converted from the given curried function.
    */
   public static Predicate&lt;Context&gt; toContextPredicate(CurriedFunction&lt;Object, Object&gt; curriedFunction, int... orderArgs) {
-<span class="fc" id="L50">    return Def.applyAndTest(curriedFunction, Printables.predicate(&quot;contextPredicate&quot;, Predicates.isTrue()), Boolean.class, orderArgs);</span>
+<span class="fc" id="L48">    return ContextUtils.toContextPredicate(curriedFunction, orderArgs);</span>
   }
 
-  public static &lt;T&gt; Predicate&lt;Context&gt; toContextPredicate(Predicate&lt;T&gt; predicate_, int argIndex) {
-<span class="fc" id="L54">    Evaluable&lt;?&gt; enclosed = InternalUtils.toEvaluableIfNecessary(predicate_);</span>
-    class ContextPrintablePredicate extends PrintablePredicate&lt;Context&gt; implements Evaluable.ContextPred {
-<span class="fc" id="L56">      protected ContextPrintablePredicate() {</span>
-<span class="fc" id="L57">        super(</span>
-<span class="fc" id="L58">            () -&gt; String.format(&quot;contextPredicate[%s,%s]&quot;, predicate_, argIndex),</span>
-<span class="nc" id="L59">            context -&gt; predicate_.test(context.&lt;T&gt;valueAt(argIndex)));</span>
-<span class="fc" id="L60">      }</span>
-
-      @SuppressWarnings(&quot;unchecked&quot;)
-      @Override
-      public &lt;TT&gt; Evaluable&lt;? super TT&gt; enclosed() {
-<span class="fc" id="L65">        return (Evaluable&lt;? super TT&gt;) enclosed;</span>
-      }
-
-      @Override
-      public int argIndex() {
-<span class="fc" id="L70">        return argIndex;</span>
-      }
-    }
-<span class="fc" id="L73">    return new ContextPrintablePredicate();</span>
+  public static &lt;T&gt; ParameterizedPredicateFactory.Builder&lt;T&gt; parameterizedPredicate(String name) {
+<span class="fc" id="L52">    return new ParameterizedPredicateFactory.Builder&lt;T&gt;().name(name);</span>
   }
 
-  public static &lt;T&gt; Predicate&lt;Context&gt; toContextPredicate(Predicate&lt;T&gt; predicate) {
-<span class="fc" id="L77">    return toContextPredicate(predicate, 0);</span>
-  }
-
-  public static int[] normalizeOrderArgs(Context context, int[] orderArgs) {
-    int[] order;
-<span class="fc bfc" id="L82" title="All 2 branches covered.">    if (orderArgs.length == 0)</span>
-<span class="fc" id="L83">      order = IntStream.range(0, context.size()).toArray();</span>
-    else
-<span class="fc" id="L85">      order = orderArgs;</span>
-<span class="fc" id="L86">    return order;</span>
-  }
-
-  public interface Context extends Formattable {
-    default int size() {
-<span class="fc" id="L91">      return values().size();</span>
-    }
-
-    @SuppressWarnings(&quot;unchecked&quot;)
-    default &lt;T&gt; T valueAt(int i) {
-<span class="fc" id="L96">      return (T) values().get(i);</span>
-    }
-
-    default Context append(Object o) {
-<span class="fc" id="L100">      return () -&gt; InternalUtils.append(values(), o);</span>
-    }
-
-    @Override
-    default void formatTo(Formatter formatter, int flags, int width, int precision) {
-<span class="fc" id="L105">      formatter.format(&quot;context:%s&quot;, this.values());</span>
-<span class="fc" id="L106">    }</span>
-
-    List&lt;Object&gt; values();
-
-    static Context from(Object o) {
-<span class="fc" id="L111">      return () -&gt; singletonList(o);</span>
-    }
-  }
-
-<span class="fc" id="L115">  enum Def {</span>
-    ;
-
-    public static Stream&lt;Context&gt; nest(Stream&lt;?&gt; stream, Collection&lt;?&gt; inner) {
-<span class="fc" id="L119">      return toContextStream(stream).flatMap(context -&gt; inner.stream().map((Function&lt;Object, Context&gt;) context::append));</span>
-    }
-
-    public static Stream&lt;Context&gt; toContextStream(Stream&lt;?&gt; stream) {
-<span class="fc" id="L123">      return stream.map(Def::toContext);</span>
-    }
-
-    public static &lt;T&gt; Context toContext(T t) {
-<span class="fc bfc" id="L127" title="All 2 branches covered.">      return t instanceof Context ? (Context) t : Context.from(t);</span>
-    }
-
-    static &lt;R&gt; Predicate&lt;Context&gt; applyAndTest(CurriedFunction&lt;Object, Object&gt; curriedFunction, Predicate&lt;? super R&gt; pred, @SuppressWarnings(&quot;SameParameterValue&quot;) Class&lt;? extends R&gt; type, int... orderArgs) {
-<span class="fc" id="L131">      List&lt;Object&gt; spec = asList(curriedFunction, pred, asList(Arrays.stream(orderArgs).boxed().toArray()));</span>
-<span class="fc" id="L132">      return Printables.predicateFactory(</span>
-<span class="fc" id="L133">          (List&lt;Object&gt; e) -&gt; String.format(&quot;%s(%s%s)&quot;, e.get(1), e.get(0), e.get(2)),</span>
-<span class="fc" id="L134">          (List&lt;Object&gt; e) -&gt; (Context context) -&gt; (pred).test(type.cast(apply(curriedFunction, orderArgs).apply(context)))).create(spec);</span>
-    }
+  public static &lt;T, R&gt; ParameterizedFunctionFactory.Builder&lt;T, R&gt; parameterizedFunction(String name) {
+<span class="fc" id="L56">    return new ParameterizedFunctionFactory.Builder&lt;T, R&gt;().name(name);</span>
   }
 
 }

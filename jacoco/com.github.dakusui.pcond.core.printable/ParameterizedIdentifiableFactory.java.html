@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ParameterizedIdentifiableFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.printable</a> &gt; <span class="el_source">ParameterizedIdentifiableFactory.java</span></div><h1>ParameterizedIdentifiableFactory.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.printable;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+public interface ParameterizedIdentifiableFactory&lt;T&gt; {
+  T create(Object... args);
+
+<span class="fc" id="L11">  abstract class Builder&lt;T, B extends Builder&lt;T, B&gt;&gt; {</span>
+    Function&lt;List&lt;Object&gt;, Supplier&lt;String&gt;&gt; formatterFactory;
+
+    Function&lt;List&lt;Object&gt;, T&gt; factory;
+
+    public B name(String name) {
+<span class="fc" id="L17">      return this.formatterFactory((List&lt;Object&gt; args) -&gt; () -&gt; String.format(&quot;%s%s&quot;, name, args));</span>
+    }
+
+
+    public ParameterizedIdentifiableFactory&lt;T&gt; factory(Function&lt;List&lt;Object&gt;, T&gt; predicateFactory) {
+<span class="fc" id="L22">      this.factory = Objects.requireNonNull(predicateFactory);</span>
+<span class="fc" id="L23">      return this.build();</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public B formatterFactory(Function&lt;List&lt;Object&gt;, Supplier&lt;String&gt;&gt; formatterFactory) {
+<span class="fc" id="L28">      this.formatterFactory = Objects.requireNonNull(formatterFactory);</span>
+<span class="fc" id="L29">      return (B) this;</span>
+    }
+
+    final public ParameterizedIdentifiableFactory&lt;T&gt; build() {
+<span class="fc" id="L33">      Objects.requireNonNull(this.factory);</span>
+<span class="fc" id="L34">      return buildProtected();</span>
+    }
+
+    public abstract ParameterizedIdentifiableFactory&lt;T&gt; buildProtected();
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

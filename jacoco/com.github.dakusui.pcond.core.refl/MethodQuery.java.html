@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MethodQuery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.refl</a> &gt; <span class="el_source">MethodQuery.java</span></div><h1>MethodQuery.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.refl;
+
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import static com.github.dakusui.pcond.core.refl.ReflUtils.replacePlaceHolderWithActualArgument;
+import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
+
+public interface MethodQuery {
+  static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
+<span class="fc" id="L16">    return create(false, requireNonNull(targetObject), ReflUtils.targetTypeOf(targetObject), methodName, arguments);</span>
+  }
+
+  static MethodQuery classMethod(Class&lt;?&gt; targetClass, String methodName, Object... arguments) {
+<span class="fc" id="L20">    return create(true, null, targetClass, methodName, arguments);</span>
+  }
+
+  boolean isStatic();
+
+  Object targetObject();
+
+  Class&lt;?&gt; targetClass();
+
+  String methodName();
+
+  Object[] arguments();
+
+  /**
+   * Returns a string that describes this object.
+   *
+   * @return A description of this object.
+   */
+  String describe();
+
+  default MethodQuery bindActualArguments(Predicate&lt;Object&gt; isPlaceHolder, Function&lt;Object, Object&gt; replace) {
+<span class="fc" id="L41">    Function&lt;Object, Object&gt; argReplacer = object -&gt; replacePlaceHolderWithActualArgument(object, isPlaceHolder, replace);</span>
+<span class="fc" id="L42">    Object targetObject = argReplacer.apply(this.targetObject());</span>
+<span class="fc" id="L43">    return create(</span>
+<span class="fc" id="L44">        this.isStatic(),</span>
+        targetObject,
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        this.isStatic() ? this.targetClass() : targetObject.getClass(),</span>
+<span class="fc" id="L47">        this.methodName(),</span>
+<span class="fc" id="L48">        Arrays.stream(this.arguments()).map(argReplacer).toArray());</span>
+  }
+
+  static MethodQuery create(boolean isStatic, Object targetObject, Class&lt;?&gt; targetClass, String methodName, Object[] arguments) {
+<span class="fc" id="L52">    requireNonNull(targetClass);</span>
+<span class="fc" id="L53">    requireNonNull(arguments);</span>
+<span class="fc" id="L54">    requireNonNull(methodName);</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">    if (isStatic)</span>
+<span class="pc" id="L56">      requireArgument(targetObject, Objects::isNull, () -&gt; &quot;targetObject must be null when isStatic is true.&quot;);</span>
+    else {
+<span class="fc" id="L58">      requireNonNull(targetObject);</span>
+<span class="pc" id="L59">      requireArgument(targetObject, v -&gt; targetClass.isAssignableFrom(v.getClass()), () -&gt; format(&quot;Incompatible object '%s' was given it needs to be assignable to '%s'.&quot;, targetObject, targetClass.getName()));</span>
+    }
+
+<span class="fc" id="L62">    return new MethodQuery() {</span>
+      @Override
+      public boolean isStatic() {
+<span class="fc" id="L65">        return isStatic;</span>
+      }
+
+      @Override
+      public Object targetObject() {
+<span class="fc" id="L70">        return targetObject;</span>
+      }
+
+      @Override
+      public String methodName() {
+<span class="fc" id="L75">        return methodName;</span>
+      }
+
+      @Override
+      public Class&lt;?&gt; targetClass() {
+<span class="fc" id="L80">        return targetClass;</span>
+      }
+
+      @Override
+      public Object[] arguments() {
+<span class="fc" id="L85">        return arguments;</span>
+      }
+
+      @Override
+      public String describe() {
+<span class="fc" id="L90">        Function&lt;Object, String&gt; parameterFormatter =</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">            o -&gt; o instanceof Parameter ?</span>
+<span class="fc" id="L92">                Objects.toString(o) :</span>
+                &quot;&lt;&quot; + o + &quot;&gt;&quot;;
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        return format(&quot;%s.%s(%s)&quot;,</span>
+            isStatic ?
+<span class="fc" id="L96">                targetClass.getName() :</span>
+<span class="fc" id="L97">                parameterFormatter.apply(targetObject),</span>
+            methodName,
+<span class="fc" id="L99">            Arrays.stream(arguments)</span>
+<span class="fc" id="L100">                .map(parameterFormatter)</span>
+<span class="fc" id="L101">                .collect(joining(&quot;,&quot;)));</span>
+      }
+    };
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Checks.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.currying</a> &gt; <span class="el_source">Checks.java</span></div><h1>Checks.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.currying;
+
+import com.github.dakusui.pcond.core.refl.ReflUtils;
+import com.github.dakusui.pcond.internals.InternalChecks;
+
+import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
+
+import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.toList;
+
+<span class="pc bpc" id="L17" title="1 of 2 branches missed.">public enum Checks {</span>
+  ;
+
+  public static &lt;T extends CurriedFunction&lt;?, ?&gt;&gt; T requireLast(T value) {
+<span class="fc bfc" id="L21" title="All 2 branches covered.">    if (value.hasNext())</span>
+<span class="fc" id="L22">      throw new IllegalStateException();</span>
+<span class="fc" id="L23">    return value;</span>
+  }
+
+  public static List&lt;Integer&gt; validateParamOrderList(List&lt;Integer&gt; order, int numParameters) {
+<span class="fc" id="L27">    final List&lt;Integer&gt; paramOrder = unmodifiableList(order.stream().distinct().collect(toList()));</span>
+<span class="fc bfc" id="L28" title="All 2 branches covered.">    requireArgument(order, o -&gt; o.size() == paramOrder.size(), () -&gt; &quot;Duplicated elements are found in the 'order' argument:&quot; + order.toString() + &quot; &quot; + paramOrder);</span>
+<span class="fc bfc" id="L29" title="All 2 branches covered.">    requireArgument(order, o -&gt; o.size() == numParameters, () -&gt; &quot;Inconsistent number of parameters are supplied by 'order'. Expected:&quot; + numParameters + &quot;, Actual: &quot; + order.size());</span>
+<span class="fc" id="L30">    return paramOrder;</span>
+  }
+
+  public static &lt;T&gt; T validateArgumentType(T arg, Class&lt;?&gt; paramType, Supplier&lt;String&gt; messageFormatter) {
+<span class="fc" id="L34">    InternalChecks.checkArgument(isValidValueForType(arg, paramType), messageFormatter);</span>
+<span class="fc" id="L35">    return arg;</span>
+  }
+
+  static boolean isValidValueForType(Object arg, Class&lt;?&gt; paramType) {
+<span class="fc bfc" id="L39" title="All 2 branches covered.">    if (paramType.isPrimitive()) {</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">      if (arg == null)</span>
+<span class="fc" id="L41">        return paramType.equals(void.class);</span>
+<span class="fc" id="L42">      Class&lt;?&gt; wrapperClass = wrapperClassOf(paramType);</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">      if (wrapperClass.equals(arg.getClass()))</span>
+<span class="fc" id="L44">        return true;</span>
+<span class="fc" id="L45">      return isWiderThan(wrapperClass, arg.getClass());</span>
+    } else {
+<span class="fc bfc" id="L47" title="All 2 branches covered.">      if (arg == null)</span>
+<span class="fc" id="L48">        return true;</span>
+<span class="fc" id="L49">      return paramType.isAssignableFrom(arg.getClass());</span>
+    }
+  }
+
+  /**
+   * @param classA A non-primitive type class.
+   * @param classB Another non-primitive type class.
+   * @return {@code true} iff {@code classA} is a &quot;wider&quot; wrapper class than {@code classB}.
+   */
+  public static boolean isWiderThan(Class&lt;?&gt; classA, Class&lt;?&gt; classB) {
+<span class="pc bpc" id="L59" title="2 of 4 branches missed.">    assert !classB.isPrimitive();</span>
+<span class="pc bpc" id="L60" title="2 of 4 branches missed.">    assert !classA.isPrimitive();</span>
+<span class="fc" id="L61">    Set&lt;Class&lt;?&gt;&gt; widerBoxedClassesForClassA = widerTypesThan(classB);</span>
+<span class="fc" id="L62">    return widerBoxedClassesForClassA.contains(classA);</span>
+  }
+
+  public static boolean isWiderThanOrEqualTo(Class&lt;?&gt; classA, Class&lt;?&gt; classB) {
+<span class="pc bpc" id="L66" title="2 of 4 branches missed.">    assert !classB.isPrimitive();</span>
+<span class="pc bpc" id="L67" title="2 of 4 branches missed.">    assert !classA.isPrimitive();</span>
+<span class="fc bfc" id="L68" title="All 4 branches covered.">    return classA.equals(classB) || isWiderThan(classA, classB);</span>
+  }
+
+  private static Set&lt;Class&lt;?&gt;&gt; widerTypesThan(Class&lt;?&gt; classB) {
+<span class="pc bpc" id="L72" title="2 of 4 branches missed.">    assert !classB.isPrimitive();</span>
+<span class="fc" id="L73">    return ReflUtils.WIDER_TYPES.getOrDefault(classB, emptySet());</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  static &lt;T&gt; T ensureReturnedValueType(Object value, Class&lt;?&gt; returnType) {
+<span class="fc bfc" id="L78" title="All 2 branches covered.">    if (isValidValueForType(value, returnType))</span>
+<span class="fc" id="L79">      return (T) value;</span>
+    else
+<span class="fc" id="L81">      throw new IllegalStateException(&quot;Returned value:&quot;</span>
+<span class="pc bpc" id="L82" title="1 of 2 branches missed.">          + formatObject(value)</span>
+<span class="pc" id="L83">          + (value != null ? &quot;(&quot; + value.getClass().getName() + &quot;)&quot; : &quot;&quot;)</span>
+<span class="fc" id="L84">          + &quot; is neither null nor an instance of &quot; + returnType.getName() + &quot;. &quot;);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

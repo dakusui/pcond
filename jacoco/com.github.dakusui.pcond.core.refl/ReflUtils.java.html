@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReflUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.refl</a> &gt; <span class="el_source">ReflUtils.java</span></div><h1>ReflUtils.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.refl;
+
+import com.github.dakusui.pcond.internals.*;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.*;
+
+/**
+ * This class consists of {@code static} utility methods for creating printable functions and predicate
+ * on objects.
+ */
+<span class="fc" id="L24">public enum ReflUtils {</span>
+  ;
+
+<span class="fc" id="L27">  public static final Map&lt;Class&lt;?&gt;, Set&lt;Class&lt;?&gt;&gt;&gt; WIDER_TYPES = new HashMap&lt;Class&lt;?&gt;, Set&lt;Class&lt;?&gt;&gt;&gt;() {</span>
+    {
+      // https://docs.oracle.com/javase/specs/jls/se7/html/jls-5.html#jls-5.1.2
+<span class="fc" id="L30">      put(wrapperClassOf(byte.class), wrapperClassesOf(asSet(short.class, int.class, long.class, float.class, double.class)));</span>
+<span class="fc" id="L31">      put(wrapperClassOf(short.class), wrapperClassesOf(asSet(int.class, long.class, float.class, double.class)));</span>
+<span class="fc" id="L32">      put(wrapperClassOf(char.class), wrapperClassesOf(asSet(int.class, long.class, float.class, double.class)));</span>
+<span class="fc" id="L33">      put(wrapperClassOf(int.class), wrapperClassesOf(asSet(long.class, float.class, double.class)));</span>
+<span class="fc" id="L34">      put(wrapperClassOf(long.class), wrapperClassesOf(asSet(float.class, double.class)));</span>
+<span class="fc" id="L35">      put(wrapperClassOf(float.class), wrapperClassesOf(asSet(double.class)));</span>
+<span class="fc" id="L36">    }</span>
+
+    private Set&lt;Class&lt;?&gt;&gt; wrapperClassesOf(Set&lt;Class&lt;?&gt;&gt; primitiveClasses) {
+<span class="fc" id="L39">      return primitiveClasses.stream().map(InternalUtils::wrapperClassOf).collect(toSet());</span>
+    }
+
+    private Set&lt;Class&lt;?&gt;&gt; asSet(Class&lt;?&gt;... classes) {
+<span class="fc" id="L43">      return new HashSet&lt;Class&lt;?&gt;&gt;() {{</span>
+<span class="fc" id="L44">        addAll(asList(classes));</span>
+<span class="fc" id="L45">      }};</span>
+    }
+  };
+
+  /**
+   * Invokes a method found by {@code methodQuery}.
+   * All parameters in the query needs to be bound before calling this method.
+   * When a query matches no or more than one methods, an exception will be thrown.
+   * &lt;p&gt;
+   * If an exception is thrown by the method, it will be wrapped by {@link RuntimeException} and re-thrown.
+   *
+   * @param methodQuery A query that speficies the method to be executed.
+   * @param &lt;R&gt;         Type of the returned value.
+   * @return The value returned from the method found by the query.
+   * @see MethodQuery
+   * @see ReflUtils#findMethod(Class, String, Object[])
+   */
+  public static &lt;R&gt; R invokeMethod(MethodQuery methodQuery) {
+<span class="fc" id="L63">    return invokeMethod(</span>
+<span class="fc" id="L64">        findMethod(methodQuery.targetClass(), methodQuery.methodName(), methodQuery.arguments()),</span>
+<span class="fc" id="L65">        methodQuery.targetObject(),</span>
+<span class="fc" id="L66">        methodQuery.arguments());</span>
+  }
+
+  /**
+   * Invokes a given {@code method} on the object with arguments passed as {@code obj} and {@code arguments}.
+   *
+   * @param method    A method to be invoked.
+   * @param obj       An object on which the {@code method} is invoked.
+   * @param arguments Arguments passed to the {@code method}.
+   * @param &lt;R&gt;       The type of the value returned from the {@code method}.
+   * @return The value returned by {@code method}.
+   */
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;R&gt; R invokeMethod(Method method, Object obj, Object[] arguments) {
+    try {
+<span class="fc" id="L81">      return (R) method.invoke(obj, arguments);</span>
+<span class="fc" id="L82">    } catch (IllegalAccessException e) {</span>
+<span class="fc" id="L83">      throw new MethodAccessException(format(&quot;Method access to '%s' was failed&quot;, method), e);</span>
+<span class="fc" id="L84">    } catch (InvocationTargetException e) {</span>
+<span class="fc" id="L85">      throw new MethodInvocationException(format(&quot;Method invocation of '%s' was failed&quot;, method), e.getCause());</span>
+    }
+  }
+
+  /**
+   * Tries to find a method whose name is {@code methodName} from a given class {@code aClass}
+   * and that can be invoked with parameter values {@code args}.
+   * &lt;p&gt;
+   * Unless one and only one method is found appropriate, an exception will be
+   * thrown.
+   * &lt;p&gt;
+   * In this version, boxing/unboxing and casting are not attempted to determine
+   * the methodto be returned during the search. This means, if there are overloaded
+   * methods of the {@code methodName} that can be invoked with {@code args}, this
+   * method will fail. Also even if there is a method of the {@code methodName}
+   * that can be invoked if boxing/unboxing happens, this method will fail.
+   *
+   * @param aClass     A class from which the method is searched.
+   * @param methodName A name of the method
+   * @param args       Arguments which should be given to the method
+   * @return A method for given class {@code aClass}, {@code method}, and {@code args}.
+   */
+  public static Method findMethod(Class&lt;?&gt; aClass, String methodName, Object[] args) {
+<span class="fc" id="L108">    MethodSelector methodSelector = new MethodSelector.Default()</span>
+<span class="fc" id="L109">        .andThen(new MethodSelector.PreferNarrower())</span>
+<span class="fc" id="L110">        .andThen(new MethodSelector.PreferExact());</span>
+<span class="fc" id="L111">    return getIfOnlyOneElseThrow(</span>
+<span class="fc" id="L112">        methodSelector.select(</span>
+<span class="fc" id="L113">            Arrays.stream(aClass.getMethods())</span>
+<span class="fc" id="L114">                .filter((Method m) -&gt; m.getName().equals(methodName))</span>
+<span class="fc" id="L115">                .collect(toMethodList()),</span>
+            args),
+<span class="fc" id="L117">        () -&gt; exceptionOnAmbiguity(aClass, methodName, args, methodSelector),</span>
+<span class="fc" id="L118">        () -&gt; exceptionOnMethodNotFound(aClass, methodName, args, methodSelector));</span>
+  }
+
+  private static RuntimeException exceptionOnMethodNotFound(Class&lt;?&gt; aClass, String methodName, Object[] args, MethodSelector methodSelector) {
+<span class="fc" id="L122">    return new MethodNotFound(format(</span>
+        &quot;Method matching '%s%s' was not found by selector=%s in %s.&quot;,
+        methodName,
+<span class="fc" id="L125">        asList(args),</span>
+        methodSelector,
+<span class="fc" id="L127">        aClass.getCanonicalName()</span>
+    ));
+  }
+
+  private static RuntimeException exceptionOnAmbiguity(Class&lt;?&gt; aClass, String methodName, Object[] args, MethodSelector methodSelector) {
+<span class="fc" id="L132">    return new MethodAmbiguous(format(</span>
+        &quot;Methods matching '%s%s' were found more than one in %s by selector=%s.: %s &quot;,
+        methodName,
+<span class="fc" id="L135">        asList(args),</span>
+<span class="fc" id="L136">        aClass.getCanonicalName(),</span>
+        methodSelector,
+<span class="fc" id="L138">        summarizeMethods(methodSelector.select(</span>
+<span class="fc" id="L139">            Arrays.stream(aClass.getMethods())</span>
+<span class="fc" id="L140">                .filter((Method m) -&gt; m.getName().equals(methodName))</span>
+<span class="fc" id="L141">                .collect(toMethodList()),</span>
+            args))));
+  }
+
+  static Class&lt;?&gt; targetTypeOf(Object targetObject) {
+<span class="fc" id="L146">    requireNonNull(targetObject);</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">    return targetObject instanceof Parameter ?</span>
+        Object.class :
+<span class="fc" id="L149">        targetObject.getClass();</span>
+  }
+
+  /**
+   * A collector to gather methods which have narrowest possible signatures.
+   *
+   * @return A collector.
+   */
+  private static Collector&lt;Method, List&lt;Method&gt;, List&lt;Method&gt;&gt; toMethodList() {
+<span class="fc" id="L158">    return Collector.of(</span>
+        LinkedList::new,
+        ReflUtils::addMethodIfNecessary,
+<span class="fc" id="L161">        createCombinerForMethodList());</span>
+  }
+
+  /**
+   * This method is made public in order only for unit testing since with Java 8,
+   * the combiner returned by this method will never be used.
+   * - https://stackoverflow.com/questions/29210176/can-a-collectors-combiner-function-ever-be-used-on-sequential-streams[Can a Collector's combiner function ever be used on sequential streams?]
+   *
+   * @return A combiner for method list.
+   */
+  public static BinaryOperator&lt;List&lt;Method&gt;&gt; createCombinerForMethodList() {
+<span class="fc" id="L172">    return new BinaryOperator&lt;List&lt;Method&gt;&gt;() {</span>
+      @Override
+      public List&lt;Method&gt; apply(List&lt;Method&gt; methods, List&lt;Method&gt; methods2) {
+<span class="fc" id="L175">        return new LinkedList&lt;Method&gt;() {{</span>
+<span class="fc" id="L176">          addAll(methods);</span>
+<span class="fc" id="L177">          methods2.forEach(each -&gt; addMethodIfNecessary(this, each));</span>
+<span class="fc" id="L178">        }};</span>
+      }
+    };
+  }
+
+  private static Method getIfOnlyOneElseThrow(List&lt;Method&gt; foundMethods, Supplier&lt;RuntimeException&gt; exceptionSupplierOnAmbiguity, Supplier&lt;RuntimeException&gt; exceptionSupplierOnNotFound) {
+<span class="fc bfc" id="L184" title="All 2 branches covered.">    if (foundMethods.isEmpty())</span>
+<span class="fc" id="L185">      throw exceptionSupplierOnNotFound.get();</span>
+<span class="fc bfc" id="L186" title="All 2 branches covered.">    if (foundMethods.size() == 1)</span>
+<span class="fc" id="L187">      return foundMethods.get(0);</span>
+<span class="fc" id="L188">    throw exceptionSupplierOnAmbiguity.get();</span>
+  }
+
+  private static List&lt;String&gt; summarizeMethods(List&lt;Method&gt; methods) {
+<span class="fc" id="L192">    return methods</span>
+<span class="fc" id="L193">        .stream()</span>
+<span class="fc" id="L194">        .map(ReflUtils::summarizeMethodName)</span>
+<span class="fc" id="L195">        .collect(toList());</span>
+  }
+
+  private static String summarizeMethodName(Method method) {
+<span class="fc" id="L199">    return method.toString().replace(</span>
+<span class="fc" id="L200">        method.getDeclaringClass().getCanonicalName() + &quot;.&quot; + method.getName(),</span>
+<span class="fc" id="L201">        method.getName());</span>
+  }
+
+  /**
+   * Add {@code method} to {@code methods} if necessary.
+   * Since {@link Class#getMethods()} may return methods of the same signature when
+   * a method is overridden in a sub-class with returning a narrow class in the super,
+   * this consideration is necessary.
+   *
+   * @param methods A list of methods
+   * @param method  A method to be examined if it is necessay to be added to {@code methods}.
+   */
+  private static void addMethodIfNecessary(List&lt;Method&gt; methods, Method method) {
+<span class="fc" id="L214">    Optional&lt;Method&gt; found = methods</span>
+<span class="fc" id="L215">        .stream()</span>
+<span class="fc" id="L216">        .filter(each -&gt; Arrays.equals(each.getParameterTypes(), method.getParameterTypes()))</span>
+<span class="fc" id="L217">        .findAny();</span>
+<span class="fc bfc" id="L218" title="All 2 branches covered.">    if (found.isPresent()) {</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">      if (found.get().getDeclaringClass().isAssignableFrom(method.getDeclaringClass()))</span>
+<span class="fc" id="L220">        methods.remove(found.get());</span>
+    }
+<span class="fc" id="L222">    methods.add(method);</span>
+<span class="fc" id="L223">  }</span>
+
+  static Object replacePlaceHolderWithActualArgument(Object object, Predicate&lt;Object&gt; isPlaceHolder, Function&lt;Object, Object&gt; replace) {
+<span class="fc bfc" id="L226" title="All 2 branches covered.">    if (isPlaceHolder.test(object)) {</span>
+<span class="fc" id="L227">      return replace.apply(object);</span>
+    }
+<span class="fc" id="L229">    return object;</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;R&gt; R invokeStaticMethod(Method method, Object[] args) {
+    try {
+<span class="fc" id="L235">      return (R) method.invoke(null, args);</span>
+<span class="fc" id="L236">    } catch (IllegalAccessException | InvocationTargetException e) {</span>
+<span class="pc" id="L237">      throw InternalUtils.wrap(</span>
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">          format(&quot;Invoked method:%s threw an exception&quot;, formatMethodName(method)),</span>
+<span class="pc" id="L239">          e instanceof InvocationTargetException ? e.getCause() : e);</span>
+    }
+  }
+
+  public static String formatMethodName(Method method) {
+<span class="fc" id="L244">    return format(&quot;%s.%s(%s)&quot;,</span>
+<span class="fc" id="L245">        method.getDeclaringClass().getName(),</span>
+<span class="fc" id="L246">        method.getName(),</span>
+<span class="fc" id="L247">        Arrays.stream(method.getParameterTypes()).map(Class::getSimpleName).collect(joining(&quot;,&quot;)));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

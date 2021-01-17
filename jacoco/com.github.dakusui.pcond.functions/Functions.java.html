@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Functions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.functions</a> &gt; <span class="el_source">Functions.java</span></div><h1>Functions.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.functions;
 
-import com.github.dakusui.pcond.core.MultiParameterFunction;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
-import com.github.dakusui.pcond.functions.preds.BaseFuncUtils;
+import com.github.dakusui.pcond.core.multi.MultiFunctionUtils;
+import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
+import com.github.dakusui.pcond.core.multi.MultiFunction;
+import com.github.dakusui.pcond.core.refl.MethodQuery;
+import com.github.dakusui.pcond.core.refl.Parameter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
+import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
+import static java.util.Collections.singletonList;
 
 /**
  * An entry point for acquiring function objects.
  * Functions retrieved by method in this class are all &quot;printable&quot;.
  */
-<span class="fc" id="L22">public enum Functions {</span>
+<span class="fc" id="L25">public enum Functions {</span>
   ;
 
   /**
@@ -28,9 +31,8 @@ import static java.util.Objects.requireNonNull;
    * @param &lt;E&gt; The type of the object.
    * @return The function.
    */
-  @SuppressWarnings(&quot;unchecked&quot;)
   public static &lt;E&gt; Function&lt;E, E&gt; identity() {
-<span class="fc" id="L33">    return (Function&lt;E, E&gt;) Def.IDENTITY;</span>
+<span class="fc" id="L35">    return PrintableFunctionFactory.Simple.IDENTITY.instance();</span>
   }
 
   /**
@@ -39,9 +41,8 @@ import static java.util.Objects.requireNonNull;
    * @param &lt;E&gt; The type of the object
    * @return The function.
    */
-  @SuppressWarnings(&quot;unchecked&quot;)
   public static &lt;E&gt; Function&lt;? super E, String&gt; stringify() {
-<span class="fc" id="L44">    return (Function&lt;? super E, String&gt;) Def.STRINGIFY;</span>
+<span class="fc" id="L45">    return PrintableFunctionFactory.Simple.STRINGIFY.instance();</span>
   }
 
   /**
@@ -50,12 +51,13 @@ import static java.util.Objects.requireNonNull;
    * @return The function.
    */
   public static Function&lt;? super String, Integer&gt; length() {
-<span class="fc" id="L53">    return Def.LENGTH;</span>
+<span class="fc" id="L54">    return PrintableFunctionFactory.Simple.LENGTH.instance();</span>
   }
+
 
   @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
   public static &lt;E&gt; Function&lt;List&lt;? extends E&gt;, ? extends E&gt; elementAt(int i) {
-<span class="fc" id="L58">    return Function.class.cast(Def.ELEMENT_AT_FACTORY.create(i));</span>
+<span class="fc" id="L60">    return Function.class.cast(PrintableFunctionFactory.Parameterized.ELEMENT_AT.create(singletonList(i)));</span>
   }
 
   /**
@@ -64,7 +66,7 @@ import static java.util.Objects.requireNonNull;
    * @return The function.
    */
   public static Function&lt;? super Collection&lt;?&gt;, Integer&gt; size() {
-<span class="fc" id="L67">    return Def.SIZE;</span>
+<span class="fc" id="L69">    return PrintableFunctionFactory.Simple.SIZE.instance();</span>
   }
 
   /**
@@ -73,9 +75,8 @@ import static java.util.Objects.requireNonNull;
    * @param &lt;E&gt; Type of elements in the given collection.
    * @return The function.
    */
-  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
   public static &lt;E&gt; Function&lt;Collection&lt;? extends E&gt;, Stream&lt;? extends E&gt;&gt; stream() {
-<span class="fc" id="L78">    return Function.class.cast(Def.STREAM);</span>
+<span class="fc" id="L79">    return PrintableFunctionFactory.Simple.STREAM.instance();</span>
   }
 
   /**
@@ -84,9 +85,8 @@ import static java.util.Objects.requireNonNull;
    * @param &lt;E&gt; Type of elements in the given collection.
    * @return The function.
    */
-  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
   public static &lt;E&gt; Function&lt;E, Stream&lt;? extends E&gt;&gt; streamOf() {
-<span class="fc" id="L89">    return Function.class.cast(Def.STREAM_OF);</span>
+<span class="fc" id="L89">    return PrintableFunctionFactory.Simple.STREAM_OF.instance();</span>
   }
 
   /**
@@ -96,9 +96,8 @@ import static java.util.Objects.requireNonNull;
    * @param &lt;E&gt;  The type to which the object is case.
    * @return The function.
    */
-  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
   public static &lt;E&gt; Function&lt;? super Object, ? extends E&gt; cast(Class&lt;E&gt; type) {
-<span class="fc" id="L101">    return Function.class.cast(Def.CAST_FACTORY.create(type));</span>
+<span class="fc" id="L100">    return PrintableFunctionFactory.Parameterized.CAST.create(singletonList(type));</span>
   }
 
   /**
@@ -108,9 +107,8 @@ import static java.util.Objects.requireNonNull;
    * @param &lt;E&gt; Type of the elements in the collection
    * @return The function.
    */
-  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
   public static &lt;I extends Collection&lt;? extends E&gt;, E&gt; Function&lt;I, List&lt;E&gt;&gt; collectionToList() {
-<span class="fc" id="L113">    return Function.class.cast(Def.COLLECTION_TO_LIST);</span>
+<span class="fc" id="L111">    return PrintableFunctionFactory.Simple.COLLECTION_TO_LIST.instance();</span>
   }
 
   /**
@@ -119,9 +117,8 @@ import static java.util.Objects.requireNonNull;
    * @param &lt;E&gt; Type of elements in a given array.
    * @return The function.
    */
-  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
   public static &lt;E&gt; Function&lt;E[], List&lt;E&gt;&gt; arrayToList() {
-<span class="fc" id="L124">    return Function.class.cast(Def.ARRAY_TO_LIST);</span>
+<span class="fc" id="L121">    return PrintableFunctionFactory.Simple.ARRAY_TO_LIST.instance();</span>
   }
 
   /**
@@ -130,7 +127,7 @@ import static java.util.Objects.requireNonNull;
    * @return The function.
    */
   public static Function&lt;String, Integer&gt; countLines() {
-<span class="fc" id="L133">    return Def.COUNT_LINES;</span>
+<span class="fc" id="L130">    return PrintableFunctionFactory.Simple.COUNT_LINES.instance();</span>
   }
 
   /**
@@ -142,32 +139,186 @@ import static java.util.Objects.requireNonNull;
    * @return A printable and curried function of the target method.
    */
   public static CurriedFunction&lt;Object, Object&gt; curry(Class&lt;?&gt; aClass, String methodName, Class&lt;?&gt;... parameterTypes) {
-<span class="fc" id="L145">    return CurryingUtils.curry(methodName, functionForStaticMethod(aClass, methodName, parameterTypes));</span>
+<span class="fc" id="L142">    return curry(multifunction(aClass, methodName, parameterTypes));</span>
   }
 
-  public static &lt;R&gt; MultiParameterFunction&lt;R&gt; functionForStaticMethod(Class&lt;?&gt; aClass, String methodName, Class&lt;?&gt;... parameterTypes) {
-<span class="fc" id="L149">    return CurryingUtils.Reflections.lookupFunctionForStaticMethod(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);</span>
+  /**
+   * Curries a given multi-function.
+   *
+   * @param function A multi-function to be curried
+   * @return A curried function
+   * @see Functions#curry(Class, String, Class[])
+   */
+  public static CurriedFunction&lt;Object, Object&gt; curry(MultiFunction&lt;Object&gt; function) {
+<span class="fc" id="L153">    return CurryingUtils.curry(function);</span>
   }
 
-<span class="fc" id="L152">  enum Def {</span>
-    ;
-<span class="fc" id="L154">    private static final Function&lt;?, ?&gt;                                 IDENTITY           = Printables.function(&quot;identity&quot;, Function.identity());</span>
-<span class="fc" id="L155">    private static final Function&lt;?, String&gt;                            STRINGIFY          = Printables.function(&quot;stringify&quot;, Object::toString);</span>
-<span class="fc" id="L156">    private static final Function&lt;String, Integer&gt;                      LENGTH             = Printables.function(&quot;length&quot;, String::length);</span>
-<span class="fc" id="L157">    private static final Function&lt;Collection&lt;?&gt;, Integer&gt;               SIZE               = Printables.function(&quot;size&quot;, Collection::size);</span>
-<span class="fc" id="L158">    private static final Function&lt;Collection&lt;?&gt;, Stream&lt;?&gt;&gt;             STREAM             = Printables.function(&quot;stream&quot;, Collection::stream);</span>
-<span class="fc" id="L159">    private static final Function&lt;?, Stream&lt;?&gt;&gt;                         STREAM_OF          = Printables.function(&quot;streamOf&quot;, Stream::of);</span>
-<span class="fc" id="L160">    private static final Function&lt;Object[], List&lt;?&gt;&gt;                    ARRAY_TO_LIST      = Printables.function(&quot;arrayToList&quot;, Arrays::asList);</span>
-<span class="fc" id="L161">    private static final Function&lt;String, Integer&gt;                      COUNT_LINES        = Printables.function(&quot;countLines&quot;, (String s) -&gt; s.split(String.format(&quot;%n&quot;)).length);</span>
-<span class="fc" id="L162">    private static final Function&lt;Collection&lt;?&gt;, List&lt;?&gt;&gt;           COLLECTION_TO_LIST = Printables.function(&quot;collectionToList&quot;, (Collection&lt;?&gt; c) -&gt; new ArrayList&lt;Object&gt;() {</span>
-      {
-<span class="fc" id="L164">        addAll(c);</span>
-<span class="fc" id="L165">      }</span>
-    });
-<span class="fc" id="L167">    private static final BaseFuncUtils.Factory&lt;List&lt;?&gt;, ?, Integer&gt; ELEMENT_AT_FACTORY =</span>
-<span class="fc" id="L168">        Printables.functionFactory((Integer v) -&gt; String.format(&quot;at[%s]&quot;, v), (Integer arg) -&gt; (List&lt;?&gt; es) -&gt; es.get((Integer) arg));</span>
-<span class="fc" id="L169">    private static final BaseFuncUtils.Factory&lt;Object, ?, Class&lt;?&gt;&gt; CAST_FACTORY       = Printables.functionFactory(</span>
-<span class="fc" id="L170">        (v) -&gt; String.format(&quot;castTo[%s]&quot;, requireNonNull(v).getSimpleName()), arg -&gt; arg::cast);</span>
+  public static &lt;R&gt; MultiFunction&lt;R&gt; multifunction(Class&lt;?&gt; aClass, String methodName, Class&lt;?&gt;... parameterTypes) {
+<span class="fc" id="L157">    return MultiFunctionUtils.multifunction(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);</span>
+  }
+
+  /**
+   * Returns a {@link Function} created from a method specified by a {@code methodQuery}.
+   * If the {@code methodQuery} matches none or more than one methods, a {@code RuntimeException} will be thrown.
+   *
+   * @param methodQuery A query object that specifies a method to be invoked by the returned function.
+   * @param &lt;T&gt;         the type of the input to the returned function
+   * @return Created function.
+   * @see Functions#classMethod(Class, String, Object[])
+   * @see Functions#instanceMethod(Object, String, Object[])
+   */
+  public static &lt;T, R&gt; Function&lt;T, R&gt; call(MethodQuery methodQuery) {
+<span class="fc" id="L171">    return Printables.function(methodQuery.describe(), t -&gt; invokeMethod(methodQuery.bindActualArguments((o) -&gt; o instanceof Parameter, o -&gt; t)));</span>
+  }
+
+
+  /**
+   * // @formatter:off
+   * Creates a {@link MethodQuery} object from given arguments to search for {@code static} methods.
+   * Note that {@code arguments} are actual argument values, not the formal parameter types.
+   * The pcond library searches for the &quot;best&quot; matching method for you.
+   * In case no matching method is found or more than one methods are found, a {@link RuntimeException}
+   * will be thrown.
+   *
+   * In order to specify a parameter which should be passed to the returned function at applying,
+   * you can use an object returned by {@link Functions#parameter} method.
+   * This is useful to construct a function from an existing method.
+   *
+   * That is, in order to create a function which computes sin using query a method {@link Math#sin(double)},
+   * you can do following
+   * [source, java]
+   * ----
+   * public void buildSinFunction() {
+   *   MethodQuery mq = classMethod(Math.class, &quot;sin&quot;, parameter());
+   *   Function&lt;Double, Double&gt; sin = call(mq);
+   *   System.out.println(sin(Math.PI/2));
+   * }
+   * ----
+   * This prints {@code 1.0}.
+   *
+   * In case your arguments do not contain any {@link Parameter} object, the input
+   * argument passed to the built function will be simply ignored.
+   *
+   * // @formatter:on
+   *
+   *
+   * @param targetClass A class
+   * @param methodName  A method name
+   * @param arguments   Arguments
+   * @return A method query for static methods specified by arguments.
+   *
+   * @see com.github.dakusui.pcond.core.refl.ReflUtils#findMethod(Class, String, Object[])
+   */
+  public static MethodQuery classMethod(Class&lt;?&gt; targetClass, String methodName, Object... arguments) {
+<span class="fc" id="L213">    return MethodQuery.classMethod(targetClass, methodName, arguments);</span>
+  }
+
+  /**
+   * // @formatter:off
+   * Creates a {@link MethodQuery} object from given arguments to search for {@code static} methods.
+   * Excepting that this method returns a query for instance methods, it is quite
+   * similar to {@link Functions#classMethod( Class, String, Object[])}.
+   *
+   * This method is useful to build a function from an instance method.
+   * That is, you can create a function which returns the length of a given string
+   * from a method {@link String#length()} with a following code snippet.
+   *
+   * [source, java]
+   * ----
+   * public void buildLengthFunction() {
+   *   Function&lt;String, Integer&gt; length = call(instanceMethod(parameter(), &quot;length&quot;));
+   * }
+   * ----
+   *
+   * In case the {@code targetObject} is not an instance of {@link Parameter} and {@code arguments}
+   * contain no {@code Parameter} object, the function will simply ignore the input passed to it.
+   *
+   * // @formatter:on
+   *
+   * @param targetObject An object on which methods matching returned query should be invoked.
+   * @param methodName A name of method.
+   * @param arguments Arguments passed to the method.
+   * @return A method query for instance methods specified by arguments.
+   *
+   * @see Functions#classMethod(Class, String, Object[])
+   */
+  public static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
+<span class="fc" id="L246">    return MethodQuery.instanceMethod(targetObject, methodName, arguments);</span>
+  }
+
+  /**
+   * Returns a {@link Parameter} object, which is used in combination with {@link Functions#instanceMethod(Object, String, Object[])}
+   * or {@link Functions#classMethod(Class, String, Object[])}.
+   * This object is replaced with the actual input value passed to a function built
+   * through {@link Functions#call(MethodQuery)} or {@link Predicates#callp(MethodQuery)}
+   * when it is applied.
+   *
+   * @return a {@code Parameter} object
+   */
+  public static Parameter parameter() {
+<span class="fc" id="L259">    return Parameter.INSTANCE;</span>
+  }
+
+  /**
+   * // @formatter:off
+   * A short hand method to call
+   * [source, java]
+   * ---
+   * call(instanceMethod(object, methodName, args))
+   * ---
+   * // @formatter:on
+   *
+   * @param targetObject An object on which methods matching returned query should be invoked.
+   * @param methodName A name of method.
+   * @param arguments Arguments passed to the method.
+   * @param &lt;T&gt; The type of the input to the returned function.
+   * @param &lt;R&gt; The type of the output from the returned function.
+   * @return The function that calls a method matching a query built from the given arguments.
+   *
+   * @see Functions#call(MethodQuery)
+   * @see Functions#instanceMethod(Object, String, Object[])
+   */
+  private static &lt;T, R&gt; Function&lt;T, R&gt; callInstanceMethod(Object targetObject, String methodName, Object... arguments) {
+<span class="fc" id="L282">    return call(instanceMethod(targetObject, methodName, arguments));</span>
+  }
+
+  /**
+   * Returns a function that calls a method which matches the given {@code methodName}
+   * and {@code args} on the object given as input to it.
+   * &lt;p&gt;
+   * Note that method look up is done when the function is applied.
+   * &lt;p&gt;
+   * Note that method look up is done when the predicate is applied.
+   * This means this method does not throw any exception by itself and in case
+   * you give wrong {@code methodName} or {@code arguments}, an exception will be
+   * thrown when the returned function is applied.
+   *
+   * @param methodName The method name
+   * @param arguments  Arguments passed to the method.
+   * @param &lt;T&gt;        The type of input to the returned function
+   * @param &lt;R&gt;        The type of output from the returned function
+   * @return A function that invokes the method matching the {@code methodName} and {@code args}
+   */
+  public static &lt;T, R&gt; Function&lt;T, R&gt; chain(String methodName, Object... arguments) {
+<span class="fc" id="L303">    return callInstanceMethod(parameter(), methodName, arguments);</span>
+  }
+
+  /**
+   * Returns a predicate that calls a method which matches the given {@code methodName}
+   * and {@code args} on the object given as input to it.
+   * &lt;p&gt;
+   * Note that method look up is done when the predicate is applied.
+   * This means this method does not throw any exception by itself and in case
+   * you give wrong {@code methodName} or {@code arguments}, an exception will be
+   * thrown when the returned function is applied.
+   *
+   * @param methodName The method name
+   * @param arguments  Arguments passed to the method.
+   * @param &lt;T&gt;        The type of input to the returned predicate
+   * @return A predicate that invokes the method matching the {@code methodName} and {@code args}
+   */
+  public static &lt;T&gt; Predicate&lt;T&gt; chainp(String methodName, Object... arguments) {
+<span class="fc" id="L321">    return Predicates.callp(instanceMethod(parameter(), methodName, arguments));</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrintableFunction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.printable</a> &gt; <span class="el_source">PrintableFunction.java</span></div><h1>PrintableFunction.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.printable;
+
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.identifieable.Identifiable;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+<span class="pc bpc" id="L13" title="1 of 2 branches missed.">public class PrintableFunction&lt;T, R&gt; extends Identifiable.Base implements Evaluable.Func&lt;T&gt;, CurriedFunction&lt;T, R&gt; {</span>
+  final         Function&lt;? super T, ? extends R&gt; function;
+  private final Function&lt;? super T, ?&gt;           head;
+  private final Evaluable&lt;?&gt;                     tail;
+  private final Supplier&lt;String&gt;                 formatter;
+
+  protected PrintableFunction(Object creator, List&lt;Object&gt; args, Supplier&lt;String&gt; s, Function&lt;? super T, ? extends R&gt; function, Function&lt;? super T, ?&gt; head, Evaluable&lt;?&gt; tail) {
+<span class="fc" id="L20">    super(creator, args);</span>
+<span class="fc" id="L21">    this.formatter = Objects.requireNonNull(s);</span>
+<span class="fc" id="L22">    this.function = requireNonPrintableFunction(unwrap(Objects.requireNonNull(function)));</span>
+<span class="fc bfc" id="L23" title="All 2 branches covered.">    this.head = head != null ? head : this;</span>
+<span class="fc" id="L24">    this.tail = tail;</span>
+<span class="fc" id="L25">  }</span>
+
+  protected PrintableFunction(Object creator, List&lt;Object&gt; args, Supplier&lt;String&gt; s, Function&lt;? super T, ? extends R&gt; function) {
+<span class="fc" id="L28">    this(creator, args, s, function, null, null);</span>
+<span class="fc" id="L29">  }</span>
+
+  @Override
+  public String toString() {
+<span class="fc" id="L33">    return this.formatter.get();</span>
+  }
+
+  @Override
+  public &lt;V&gt; Function&lt;V, R&gt; compose(Function&lt;? super V, ? extends T&gt; before) {
+<span class="fc" id="L38">    Objects.requireNonNull(before);</span>
+<span class="fc" id="L39">    return PrintableFunctionFactory.&lt;V, T, R&gt;compose(before, this);</span>
+  }
+
+  @Override
+  public &lt;V&gt; Function&lt;T, V&gt; andThen(Function&lt;? super R, ? extends V&gt; after) {
+<span class="fc" id="L44">    Objects.requireNonNull(after);</span>
+<span class="fc" id="L45">    return PrintableFunctionFactory.&lt;T, R, V&gt;compose(this, after);</span>
+  }
+
+  @Override
+  public Function&lt;? super T, ?&gt; head() {
+<span class="fc" id="L50">    return this.head;</span>
+  }
+
+  @Override
+  public Optional&lt;Evaluable&lt;?&gt;&gt; tail() {
+<span class="fc" id="L55">    return Optional.ofNullable(this.tail);</span>
+  }
+
+  @Override
+  public R applyFunction(T value) {
+<span class="fc" id="L60">    return this.function.apply(value);</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  @Override
+  public Class&lt;?&gt; parameterType() {
+<span class="fc bfc" id="L66" title="All 2 branches covered.">    return function instanceof CurriedFunction ?</span>
+<span class="fc" id="L67">        ((CurriedFunction&lt;? super T, ? extends R&gt;) function).parameterType() :</span>
+        Object.class;
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  @Override
+  public Class&lt;? extends R&gt; returnType() {
+<span class="fc bfc" id="L74" title="All 2 branches covered.">    return function instanceof CurriedFunction ?</span>
+<span class="fc" id="L75">        (Class&lt;? extends R&gt;) ((CurriedFunction&lt;? super T, ? extends R&gt;) function).returnType() :</span>
+        (Class&lt;? extends R&gt;) Object.class;
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;T, R&gt; Function&lt;T, R&gt; unwrap(Function&lt;T, R&gt; function) {
+<span class="fc" id="L81">    Function&lt;T, R&gt; ret = function;</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">    if (function instanceof PrintableFunction) {</span>
+<span class="fc" id="L83">      ret = (Function&lt;T, R&gt;) ((PrintableFunction&lt;T, R&gt;) function).function;</span>
+<span class="pc bpc" id="L84" title="2 of 4 branches missed.">      assert !(ret instanceof PrintableFunction);</span>
+    }
+<span class="fc" id="L86">    return ret;</span>
+  }
+
+  private static &lt;T, R&gt; Function&lt;T, R&gt; requireNonPrintableFunction(Function&lt;T, R&gt; function) {
+<span class="pc bpc" id="L90" title="2 of 4 branches missed.">    assert !(function instanceof PrintableFunction);</span>
+<span class="fc" id="L91">    return function;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

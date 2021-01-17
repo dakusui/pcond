@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>Checks.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.github.dakusui.pcond.core.currying;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.github.dakusui.pcond.core.refl.ReflUtils;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.github.dakusui.pcond.internals.InternalChecks;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.List;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.Set;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.function.Supplier;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static java.util.Collections.emptySet;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static java.util.Collections.unmodifiableList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static java.util.stream.Collectors.toList;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>public enum Checks {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  ;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static &#60;T extends CurriedFunction&#60;?, ?&#62;&#62; T requireLast(T value) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_21'/>
+21
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_21'>1</a>
+<span>
+1. requireLast : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    if (value.hasNext())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      throw new IllegalStateException();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_23'/>
+23
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_23'>1</a>
+<span>
+1. requireLast : replaced return value with null for com/github/dakusui/pcond/core/currying/Checks::requireLast &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return value;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static List&#60;Integer&#62; validateParamOrderList(List&#60;Integer&#62; order, int numParameters) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    final List&#60;Integer&#62; paramOrder = unmodifiableList(order.stream().distinct().collect(toList()));</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_28'/>
+28
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_28'>3</a>
+<span>
+1. lambda$validateParamOrderList$0 : replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::lambda$validateParamOrderList$0 &rarr; KILLED<br/>
+2. lambda$validateParamOrderList$0 : negated conditional &rarr; KILLED<br/>
+3. lambda$validateParamOrderList$1 : replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/currying/Checks::lambda$validateParamOrderList$1 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    requireArgument(order, o -&#62; o.size() == paramOrder.size(), () -&#62; &#34;Duplicated elements are found in the &#39;order&#39; argument:&#34; + order.toString() + &#34; &#34; + paramOrder);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_29'/>
+29
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_29'>3</a>
+<span>
+1. lambda$validateParamOrderList$2 : replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::lambda$validateParamOrderList$2 &rarr; KILLED<br/>
+2. lambda$validateParamOrderList$2 : negated conditional &rarr; KILLED<br/>
+3. lambda$validateParamOrderList$3 : replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/currying/Checks::lambda$validateParamOrderList$3 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    requireArgument(order, o -&#62; o.size() == numParameters, () -&#62; &#34;Inconsistent number of parameters are supplied by &#39;order&#39;. Expected:&#34; + numParameters + &#34;, Actual: &#34; + order.size());</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_30'/>
+30
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_30'>1</a>
+<span>
+1. validateParamOrderList : replaced return value with Collections.emptyList for com/github/dakusui/pcond/core/currying/Checks::validateParamOrderList &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return paramOrder;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static &#60;T&#62; T validateArgumentType(T arg, Class&#60;?&#62; paramType, Supplier&#60;String&#62; messageFormatter) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_34'/>
+34
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_34'>1</a>
+<span>
+1. validateArgumentType : removed call to com/github/dakusui/pcond/internals/InternalChecks::checkArgument &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    InternalChecks.checkArgument(isValidValueForType(arg, paramType), messageFormatter);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_35'/>
+35
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_35'>1</a>
+<span>
+1. validateArgumentType : replaced return value with null for com/github/dakusui/pcond/core/currying/Checks::validateArgumentType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return arg;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  static boolean isValidValueForType(Object arg, Class&#60;?&#62; paramType) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_39'/>
+39
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_39'>1</a>
+<span>
+1. isValidValueForType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    if (paramType.isPrimitive()) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_40'/>
+40
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_40'>1</a>
+<span>
+1. isValidValueForType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      if (arg == null)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_41'/>
+41
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_41'>2</a>
+<span>
+1. isValidValueForType : replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; SURVIVED<br/>
+2. isValidValueForType : replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>        return paramType.equals(void.class);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      Class&#60;?&#62; wrapperClass = wrapperClassOf(paramType);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_43'/>
+43
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_43'>1</a>
+<span>
+1. isValidValueForType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      if (wrapperClass.equals(arg.getClass()))</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_44'/>
+44
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_44'>1</a>
+<span>
+1. isValidValueForType : replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return true;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_45'/>
+45
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_45'>2</a>
+<span>
+1. isValidValueForType : replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+2. isValidValueForType : replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return isWiderThan(wrapperClass, arg.getClass());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    } else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_47'/>
+47
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_47'>1</a>
+<span>
+1. isValidValueForType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      if (arg == null)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_48'/>
+48
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_48'>1</a>
+<span>
+1. isValidValueForType : replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return true;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_49'/>
+49
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_49'>2</a>
+<span>
+1. isValidValueForType : replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+2. isValidValueForType : replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return paramType.isAssignableFrom(arg.getClass());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_53'/>
+53
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_53'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  /**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param classA A non-primitive type class.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param classB Another non-primitive type class.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_56'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @return {@code true} iff {@code classA} is a &#34;wider&#34; wrapper class than {@code classB}.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_57'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_58'/>
+58
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_58'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static boolean isWiderThan(Class&#60;?&#62; classA, Class&#60;?&#62; classB) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_59'/>
+59
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_59'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    assert !classB.isPrimitive();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_60'/>
+60
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_60'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    assert !classA.isPrimitive();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_61'/>
+61
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_61'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    Set&#60;Class&#60;?&#62;&#62; widerBoxedClassesForClassA = widerTypesThan(classB);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_62'/>
+62
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_62'>2</a>
+<span>
+1. isWiderThan : replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isWiderThan &rarr; KILLED<br/>
+2. isWiderThan : replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::isWiderThan &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return widerBoxedClassesForClassA.contains(classA);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_63'/>
+63
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_63'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_64'/>
+64
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_64'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_65'/>
+65
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_65'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  public static boolean isWiderThanOrEqualTo(Class&#60;?&#62; classA, Class&#60;?&#62; classB) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_66'/>
+66
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_66'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    assert !classB.isPrimitive();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_67'/>
+67
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_67'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    assert !classA.isPrimitive();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_68'/>
+68
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_68'>3</a>
+<span>
+1. isWiderThanOrEqualTo : replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::isWiderThanOrEqualTo &rarr; KILLED<br/>
+2. isWiderThanOrEqualTo : negated conditional &rarr; KILLED<br/>
+3. isWiderThanOrEqualTo : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return classA.equals(classB) || isWiderThan(classA, classB);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_69'/>
+69
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_69'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_70'/>
+70
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_70'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_71'/>
+71
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_71'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  private static Set&#60;Class&#60;?&#62;&#62; widerTypesThan(Class&#60;?&#62; classB) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_72'/>
+72
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_72'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    assert !classB.isPrimitive();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_73'/>
+73
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_73'>1</a>
+<span>
+1. widerTypesThan : replaced return value with Collections.emptyList for com/github/dakusui/pcond/core/currying/Checks::widerTypesThan &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return ReflUtils.WIDER_TYPES.getOrDefault(classB, emptySet());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_74'/>
+74
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_74'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_75'/>
+75
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_75'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_76'/>
+76
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_76'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @SuppressWarnings(&#34;unchecked&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_77'/>
+77
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_77'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  static &#60;T&#62; T ensureReturnedValueType(Object value, Class&#60;?&#62; returnType) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_78'/>
+78
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_78'>1</a>
+<span>
+1. ensureReturnedValueType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    if (isValidValueForType(value, returnType))</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_79'/>
+79
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_79'>1</a>
+<span>
+1. ensureReturnedValueType : replaced return value with null for com/github/dakusui/pcond/core/currying/Checks::ensureReturnedValueType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return (T) value;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_80'/>
+80
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_80'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    else</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_81'/>
+81
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_81'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      throw new IllegalStateException(&#34;Returned value:&#34;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_82'/>
+82
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_82'>1</a>
+<span>
+1. ensureReturnedValueType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>          + formatObject(value)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_83'/>
+83
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_83'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>          + (value != null ? &#34;(&#34; + value.getClass().getName() + &#34;)&#34; : &#34;&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_84'/>
+84
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_84'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>          + &#34; is neither null nor an instance of &#34; + returnType.getName() + &#34;. &#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_85'/>
+85
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_85'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@12cb9eda_86'/>
+86
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_86'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_21'>21</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_21'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>requireLast<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyLastBeforeLast$thenIllegalStateIsThrown(com.github.dakusui.pcond.ut.CurryingTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_23'>23</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_23'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>requireLast<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.test3(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/currying/Checks::requireLast &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_28'>28</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_28'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$validateParamOrderList$0<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.lookUpWithInvalidArgument_duplicatedOrder(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest)</span></span> replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::lambda$validateParamOrderList$0 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$validateParamOrderList$0<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.lookUpWithInvalidArgument_duplicatedOrder(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>lambda$validateParamOrderList$1<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.lookUpWithInvalidArgument_duplicatedOrder(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest)</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/currying/Checks::lambda$validateParamOrderList$1 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_29'>29</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_29'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>lambda$validateParamOrderList$2<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.lookUpWithInvalidArgument_insufficientNumberOfParamOrder(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest)</span></span> replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::lambda$validateParamOrderList$2 &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$validateParamOrderList$2<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.lookUpWithInvalidArgument_insufficientNumberOfParamOrder(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>lambda$validateParamOrderList$3<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.lookUpWithInvalidArgument_insufficientNumberOfParamOrder(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest)</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/core/currying/Checks::lambda$validateParamOrderList$3 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_30'>30</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_30'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateParamOrderList<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.testEqualsWithDifferentObjects(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest)</span></span> replaced return value with Collections.emptyList for com/github/dakusui/pcond/core/currying/Checks::validateParamOrderList &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_34'>34</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_34'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateArgumentType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyWithInvalidArg$thenThrown(com.github.dakusui.pcond.ut.CurryingTest)</span></span> removed call to com/github/dakusui/pcond/internals/InternalChecks::checkArgument &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_35'>35</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_35'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateArgumentType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/currying/Checks::validateArgumentType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_39'>39</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_39'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_40'>40</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_40'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_41'>41</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_41'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>none</span></span> replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_43'>43</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_43'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_IntegerToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_44'>44</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_44'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_IntegerToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_45'>45</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_45'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_byteToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_longToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_47'>47</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_47'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingUtilsTest.returnedValueIsInvalid(com.github.dakusui.pcond.ut.CurryingUtilsTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_48'>48</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_48'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithStringParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_49'>49</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_49'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingUtilsTest.returnedValueIsInvalid(com.github.dakusui.pcond.ut.CurryingUtilsTest)</span></span> replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::isValidValueForType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_62'>62</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_62'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isWiderThan<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_byteToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with false for com/github/dakusui/pcond/core/currying/Checks::isWiderThan &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>isWiderThan<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_longToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::isWiderThan &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_68'>68</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_68'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isWiderThanOrEqualTo<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CallTest.parameterUnmatchedWhileNameMatching(com.github.dakusui.pcond.ut.CallTest)</span></span> replaced boolean return with true for com/github/dakusui/pcond/core/currying/Checks::isWiderThanOrEqualTo &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>isWiderThanOrEqualTo<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CallTest.functionsCanBeChained(com.github.dakusui.pcond.ut.CallTest)</span></span> negated conditional &rarr; KILLED</p> <p class='KILLED'><span class='pop'>3.<span><b>3</b><br/><b>Location : </b>isWiderThanOrEqualTo<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CallTest.parameterUnmatchedWhileNameMatching(com.github.dakusui.pcond.ut.CallTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_73'>73</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_73'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>widerTypesThan<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_byteToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced return value with Collections.emptyList for com/github/dakusui/pcond/core/currying/Checks::widerTypesThan &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_78'>78</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_78'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>ensureReturnedValueType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_79'>79</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_79'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>ensureReturnedValueType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/currying/Checks::ensureReturnedValueType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@12cb9eda_82'>82</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@12cb9eda_82'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>ensureReturnedValueType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingUtilsTest.returnedValueIsInvalid(com.github.dakusui.pcond.ut.CurryingUtilsTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>BOOLEAN_FALSE_RETURN</li>
+<li class='mutator'>BOOLEAN_TRUE_RETURN</li>
+<li class='mutator'>CONDITIONALS_BOUNDARY_MUTATOR</li>
+<li class='mutator'>EMPTY_RETURN_VALUES</li>
+<li class='mutator'>INCREMENTS_MUTATOR</li>
+<li class='mutator'>INVERT_NEGS_MUTATOR</li>
+<li class='mutator'>MATH_MUTATOR</li>
+<li class='mutator'>NEGATE_CONDITIONALS_MUTATOR</li>
+<li class='mutator'>NULL_RETURN_VALUES</li>
+<li class='mutator'>PRIMITIVE_RETURN_VALS_MUTATOR</li>
+<li class='mutator'>VOID_METHOD_CALL_MUTATOR</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[0](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[10](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[15](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest.withEvaluator_transforming_thenFail(com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.testMultiParameterFunction$withReversedOrder$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.compilability.ListTest.testAllMatch(com.github.dakusui.pcond.compilability.ListTest) (28 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[5](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[14](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[11](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello(com.github.dakusui.pcond.ut.ExperimentalsTest) (22 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.runMultiParameterFunction$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyWithInvalidArg$thenThrown(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.lookUpWithInvalidArgument_insufficientNumberOfParamOrder(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello3_a(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[12](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[13](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByCompose$whenApply$thenWorksRight(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest) (0 ms)</li><li>com.github.dakusui.pcond.compilability.BooleanTest.testIsFalse(com.github.dakusui.pcond.compilability.BooleanTest) (18 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_d_2(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.testEqualsWithIdenticalObjectsCreatedSeparately(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.nonStaticMethod(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_c(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[17](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_IntegerToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_shortToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[16](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest.withoutEvaluator_conj_thenPass(com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest) (0 ms)</li><li>com.github.dakusui.pcond.compilability.StringTest.testIsInstanceOf(com.github.dakusui.pcond.compilability.StringTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.covariantOverridingMethodCanBeInvokedCorrectly(com.github.dakusui.pcond.ut.CallTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_a(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello2(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[3](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testCompose$toString(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[4](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_byteToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.compilability.ObjectTest.givenNull(com.github.dakusui.pcond.compilability.ObjectTest) (1 ms)</li><li>com.github.dakusui.pcond.compilability.ListTest.testAnyMatch(com.github.dakusui.pcond.compilability.ListTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[7](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.compilability.ListTest.testNoneMatch(com.github.dakusui.pcond.compilability.ListTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyLastBeforeLast$thenIllegalStateIsThrown(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[11](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[14](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenExceptionThrowingFunction$whenApplythenThrown(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.methodAmbiguous(com.github.dakusui.pcond.ut.CallTest) (11 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.test3(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[1](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[6](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.narrowerMethodIsChosen(com.github.dakusui.pcond.ut.CallTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.lookUpWithInvalidArgument_duplicatedOrder(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[5](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyExpectedTimes$thenExpectedResultReturned(com.github.dakusui.pcond.ut.CurryingTest) (23 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyNextMoreThanExpected$thenNoSuchElementIsThrown(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_d_3e(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$StreamTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$StreamTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[2](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_b_e4(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.whenWrongNumberArgumentsThenFails(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[3](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.parameterizedFunctionTest(com.github.dakusui.pcond.ut.ExperimentalsTest) (10 ms)</li><li>com.github.dakusui.pcond.ut.CurryingUtilsTest.returnedValueIsInvalid(com.github.dakusui.pcond.ut.CurryingUtilsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[1](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.instanceMethodCanBeCalled(com.github.dakusui.pcond.ut.CallTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello3_b(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[9](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenToStringOnOngoing$thenExpectedResultReturned(com.github.dakusui.pcond.ut.CurryingTest) (6 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[8](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello5(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[3](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.methodAmbiguous_primitiveBoxed(com.github.dakusui.pcond.ut.CallTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.PreconditionsTest (4 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[7](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello4_a(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$StringifyTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$StringifyTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest.withoutEvaluator_conj_thenFail(com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[6](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[5](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_longToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithStringParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Simple.testHandleNull(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Simple) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[7](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[0](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[4](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[1](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello6(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_b_e2(com.github.dakusui.pcond.ut.ExperimentalsTest) (9 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello3(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[17](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenApply$thenWorksRight(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[9](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[2](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.classMethodCaBeCalled(com.github.dakusui.pcond.ut.CallTest) (9 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_intToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[16](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.testEqualsWithDifferentObjects(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[8](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PredicatesTest$IsInstanceOfTest.test(com.github.dakusui.pcond.ut.PredicatesTest$IsInstanceOfTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.usageExample(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[10](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.parameterUnmatchedWhileNameMatching(com.github.dakusui.pcond.ut.CallTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[15](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenStringToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.instanceMethodCanBeCreatedOnSpecifiedObject(com.github.dakusui.pcond.ut.CallTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[4](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed.testAndThen$toString(com.github.dakusui.pcond.ut.PrintablesFunctionTest$Composed) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_b_e3(com.github.dakusui.pcond.ut.ExperimentalsTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[6](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[13](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_d_1(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.nestedLoop_success(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.bugfixes.Issue11Test.whenReproduceIssue(com.github.dakusui.pcond.ut.bugfixes.Issue11Test) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.nestedLoop_fail(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[12](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[0](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest.withEvaluator_columns100$whenShorterThan10(com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello4(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_e(com.github.dakusui.pcond.ut.ExperimentalsTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest.withEvaluator_columns100_conj(com.github.dakusui.pcond.ut.providers.DefaultAssertionProviderTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.PredicatesTest$MessageTest.testFormat(com.github.dakusui.pcond.ut.PredicatesTest$MessageTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.functionCanBeCreatedFromInstanceMethod(com.github.dakusui.pcond.ut.CallTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[2](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.runVoidReturningMultiParameterFunction$thenNullReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_d_2e(com.github.dakusui.pcond.ut.ExperimentalsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_b(com.github.dakusui.pcond.ut.ExperimentalsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ExperimentalsTest.hello_b_e(com.github.dakusui.pcond.ut.ExperimentalsTest) (6 ms)</li><li>com.github.dakusui.pcond.ut.CallTest.functionsCanBeChained(com.github.dakusui.pcond.ut.CallTest) (1 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='http://pitest.org'>PIT</a> 1.5.0
+
+</body>
+</html>
