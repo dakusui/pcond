@@ -169,21 +169,6 @@
                     <artifactId>pitest-maven</artifactId>
                     <version>${pitest-maven.version}</version>
                 </plugin>
-                <plugin>
-                    <!-- Deploy the web site -->
-                    <groupId>com.github.github</groupId>
-                    <artifactId>site-maven-plugin</artifactId>
-                    <version>${github-site-maven-plugin}</version>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>site</goal>
-                            </goals>
-                            <!-- select the Maven phase in which the plugin will be executed -->
-                            <phase>deploy</phase>
-                        </execution>
-                    </executions>
-                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -405,21 +390,6 @@
                         <toclevels>2</toclevels>
                     </attributes>
                 </asciidoc -->
-                </configuration>
-            </plugin>
-            <plugin>
-                <!-- Deploy the web site -->
-                <groupId>com.github.github</groupId>
-                <artifactId>site-maven-plugin</artifactId>
-                <configuration>
-                    <server>github</server>
-                    <!-- The commit message -->
-                    <message>Creating site for ${project.version}</message>
-                    <outputDirectory>${project.build.directory}/mvn-repo</outputDirectory>
-                    <!-- Plugin configuration ges here -->
-                    <merge>true</merge>
-                    <repositoryName>pcond</repositoryName>
-                    <repositoryOwner>dakusui</repositoryOwner>
                 </configuration>
             </plugin>
             <plugin>
