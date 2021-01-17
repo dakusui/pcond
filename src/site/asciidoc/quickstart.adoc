@@ -183,17 +183,17 @@ This is describing the value that was examined and the condition violated by it.
 The next several lines explain how a given value violated a condition to be satisfied.
 
 ----
-"JohnDoe" -> &&                    ->       false
-               &&                  ->     true
-                 isNotNull         ->   true
-                 !                 ->   true
-                   isEmpty         -> false
-               containsString[" "] ->     false
+&&                               -> false
+  isNotNull("JohnDoe")           -> true
+  transformAndCheck              -> true
+    length("JohnDoe")            -> 7
+    >[0](7)                      -> true
+  containsString[" "]("JohnDoe") -> false
 ----
 
-See the last line, this means the given string `JohnDoe` made a condition `containsString[" "]` `false` and it made the entire check fail.
-`pcond` is designed to shortcur an evaluation as soon as a value of a disjunctive or conjunctive predicate becomes fixed.
-That is if you have an `or` condition and the first predicate under it becomes `true`, the rest will not be evaluated at all.
+See the last line, this means the given string `JohnDoe` made a condition `containsString[" "]` `false`, and it made the entire check fail.
+`pcond` is designed to shortcut an evaluation as soon as a value of a disjunctive or conjunctive predicate becomes fixed.
+That is, if you have an `or` condition, and the first predicate under it becomes `true`, the rest will not be evaluated at all.
 So the last line in the message always shows the direct reason why the check failed.
 
 Thus, you can read the output above as "The check failed because the value `\"JohnDoe\"` `containsString[" "]` was `false`.
