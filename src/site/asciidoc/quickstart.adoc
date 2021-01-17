@@ -1,4 +1,4 @@
-:pcond-version: 1.4.0
+include::attributes.adoc[]
 
 = Quick Start
 
