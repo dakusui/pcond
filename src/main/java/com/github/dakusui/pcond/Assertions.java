@@ -5,7 +5,7 @@ import com.github.dakusui.pcond.provider.AssertionProvider;
 import java.util.function.Predicate;
 
 /**
- * @formatter:off
+ * // @formatter:off
  * Use methods in this class with the ```assert``` statement.
  *
  * [source, java]
@@ -14,14 +14,28 @@ import java.util.function.Predicate;
  * import static com.github.dakusui.pcond.Assertions.*
  *
  * public class TestClass {
- *   public void aMethod(Object value) {
+ *   public static void aMethod(Object value) {
  *     assert that(value, isNotNull());
  *   }
  * }
  * ----
- * @formatter:on
+ *
+ * This prints a much more readable error message than one you see for a usual assertion failure.
+ *
+ * ----
+ * Exception in thread "main" java.lang.AssertionError: Value:null violated: isNotNull
+ * null -> isNotNull -> false
+ * 	at com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider.checkValue(DefaultAssertionProvider.java:70)
+ * 	at com.github.dakusui.pcond.provider.AssertionProviderBase.checkInvariant(AssertionProviderBase.java:78)
+ * 	at com.github.dakusui.pcond.Assertions.that(Assertions.java:51)
+ * 	...
+ * ----
+ *
+ * NOTE::
+ * Do not forget giving ```-ea``` VM option to enable assertions.
+ *
+ * // @formatter:on
  */
-@SuppressWarnings("JavaDoc")
 public enum Assertions {
   ;
 
