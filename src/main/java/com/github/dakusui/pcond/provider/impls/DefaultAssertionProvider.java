@@ -6,6 +6,7 @@ import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.provider.ApplicationException;
 import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
@@ -45,6 +46,40 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
   @Override
   public ApplicationException applicationException(String message) {
     return new ApplicationException(message);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T extends RuntimeException> T testSkippedException(String message) {
+    String className;
+    if (isJUnit5Abailable())
+      className = "org.opentest4j.TestSkippedException";
+    else
+      className = "org.junit.AssumptionViolatedException";
+    return (T) createException(message, className);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T extends Error> T testFailedException(String message) {
+    String className;
+    if (isJUnit5Abailable())
+      className = "org.opentest4j.AssertionFailedError";
+    else
+      className = "junit.framework.AssertionFailedError";
+    return (T) createException(message, className);
+  }
+
+  private Object createException(String message, String className) {
+    try {
+      return Class.forName(className).getConstructor(String.class).newInstance(message);
+    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException | ClassNotFoundException e) {
+      throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + className + "'", e);
+    }
+  }
+
+  boolean isJUnit5Abailable() {
+    return false;
   }
 
   @SuppressWarnings("unchecked")

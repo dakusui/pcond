@@ -87,4 +87,8 @@ public interface AssertionProvider<AE extends Throwable> {
   <T> void checkPrecondition(T value, Predicate<? super T> cond);
 
   <T> void checkPostcondition(T value, Predicate<? super T> cond);
+
+  <T> void assertThat(T value, Predicate<? super T> cond);
+
+  <T> void assumeThat(T value, Predicate<? super T> cond);
 }

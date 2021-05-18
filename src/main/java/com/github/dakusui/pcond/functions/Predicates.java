@@ -175,6 +175,16 @@ public enum Predicates {
     return PrintablePredicateFactory.or(asList(predicates));
   }
 
+  @SafeVarargs
+  public static <T> Predicate<T> allOf(Predicate<? super T>... predicates) {
+    return PrintablePredicateFactory.allOf(asList(predicates));
+  }
+
+  @SafeVarargs
+  public static <T> Predicate<T> anyOf(Predicate<? super T>... predicates) {
+    return PrintablePredicateFactory.anyOf(asList(predicates));
+  }
+
   public static <T> Predicate<T> not(Predicate<T> cond) {
     return cond.negate();
   }

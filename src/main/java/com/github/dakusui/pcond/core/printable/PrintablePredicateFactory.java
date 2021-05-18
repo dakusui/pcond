@@ -170,11 +170,19 @@ public enum PrintablePredicateFactory {
   }
 
   public static <T> Conjunction<T> and(List<Predicate<? super T>> predicates) {
-    return new Conjunction<T>(predicates);
+    return new Conjunction<T>(predicates, true);
   }
 
   public static <T> Disjunction<T> or(List<Predicate<? super T>> predicates) {
-    return new Disjunction<T>(predicates);
+    return new Disjunction<T>(predicates, true);
+  }
+
+  public static <T> Conjunction<T> allOf(List<Predicate<? super T>> predicates) {
+    return new Conjunction<T>(predicates, false);
+  }
+
+  public static <T> Disjunction<T> anyOf(List<Predicate<? super T>> predicates) {
+    return new Disjunction<T>(predicates, false);
   }
 
   public static <T> Predicate<T> not(Predicate<T> predicate) {
@@ -237,12 +245,13 @@ public enum PrintablePredicateFactory {
   }
 
   static class Conjunction<T> extends Junction<T> implements Evaluable.Conjunction<T> {
-    protected Conjunction(List<Predicate<? super T>> predicates) {
+    protected Conjunction(List<Predicate<? super T>> predicates, boolean shortcut) {
       super(
           predicates,
           CONJUNCTION,
           "&&",
-          Predicate::and);
+          Predicate::and,
+          shortcut);
     }
   }
 
@@ -251,34 +260,42 @@ public enum PrintablePredicateFactory {
   }
 
   private static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
-    protected Disjunction(List<Predicate<? super T>> predicates) {
+    protected Disjunction(List<Predicate<? super T>> predicates, boolean shortcut) {
       super(
           predicates,
           DISJUNCTION,
           "||",
-          Predicate::or);
+          Predicate::or,
+          shortcut);
     }
   }
 
   abstract static class Junction<T> extends PrintablePredicate<T> implements Evaluable.Composite<T> {
-    final List<Evaluable<? super T>> children;
+    final         List<Evaluable<? super T>> children;
+    final private boolean                    shortcut;
 
     protected Junction(
         List<Predicate<? super T>> predicates,
         PrintablePredicateFactory creator,
         String junctionSymbol,
-        BinaryOperator<Predicate<T>> junctionOp) {
+        BinaryOperator<Predicate<T>> junctionOp, boolean shortcut) {
       super(
           creator,
           new ArrayList<>(predicates),
           () -> formatJunction(predicates, junctionSymbol),
           junction(predicates, junctionOp));
       this.children = predicates.stream().map(InternalUtils::toEvaluableIfNecessary).collect(toList());
+      this.shortcut = shortcut;
     }
 
     @Override
     public List<Evaluable<? super T>> children() {
       return this.children;
+    }
+
+    @Override
+    public boolean shortcut() {
+      return this.shortcut;
     }
 
     static <T> String formatJunction(List<Predicate<? super T>> predicates, String junctionSymbol) {

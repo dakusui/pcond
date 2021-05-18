@@ -78,6 +78,16 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
     checkValue(value, cond, this::composeMessageForAssertion, AssertionError::new);
   }
 
+  @Override
+  default <T> void assertThat(T value, Predicate<? super T> cond) {
+    checkValue(value, cond, this::composeMessageForAssertion, this::<Error>testFailedException);
+  }
+
+  @Override
+  default <T> void assumeThat(T value, Predicate<? super T> cond) {
+    checkValue(value, cond, this::composeMessageForAssertion, this::<RuntimeException>testSkippedException);
+  }
+
   @SuppressWarnings("unchecked")
   default <E extends Exception> Function<String, E> exceptionComposerForPrecondition() {
     return message -> (E) new PreconditionViolationException(message);
@@ -97,6 +107,10 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
   <T> String composeMessageForValidation(T t, Predicate<? super T> predicate);
 
   AE applicationException(String message);
+
+  <T extends RuntimeException> T testSkippedException(String message);
+
+  <T extends Error> T testFailedException(String message);
 
   <T, E extends Throwable>
   T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer)
