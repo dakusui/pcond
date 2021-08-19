@@ -172,7 +172,7 @@ Among all of those, `assert xyz` has a quite outstanding characteristic, where i
 === Reading the output
 
 Look at the first line.
-There's a message:
+There's a message:m
 
 ----
 value:"JohnDoe" violated precondition:value ((isNotNull&&!isEmpty)&&containsString[" "])
@@ -199,7 +199,13 @@ So the last line in the message always shows the direct reason why the check fai
 Thus, you can read the output above as "The check failed because the value `\"JohnDoe\"` `containsString[" "]` was `false`.
 "
 
-== Build dependencies
+== Building the `pcond` Library
+
+=== Building the docs
+
+`mvn clean compile test site`
+
+=== Build dependencies
 
 - `gem` needs to be installed in advance.
 
