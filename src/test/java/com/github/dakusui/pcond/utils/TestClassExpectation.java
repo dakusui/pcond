@@ -1,0 +1,70 @@
+package com.github.dakusui.pcond.utils;
+
+import org.junit.runner.Result;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.util.function.Predicate;
+
+import static com.github.dakusui.pcond.utils.TestClassExpectation.ResultPredicateFactory.*;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+@Retention(RUNTIME)
+@Target(TYPE)
+public @interface TestClassExpectation {
+  EnsureJUnitResult[] value() default {};
+
+  @interface EnsureJUnitResult {
+    Class<? extends ResultPredicateFactory> type();
+
+    String[] args();
+  }
+
+  interface ResultPredicateFactory {
+    Predicate<Result> create(String... args);
+
+    class IgnoreCountIsEqualTo implements ResultPredicateFactory {
+      @Override
+      public Predicate<Result> create(String... args) {
+        final int expected = Integer.parseInt(args[0]);
+        return result -> result.getIgnoreCount() == expected;
+      }
+    }
+
+    class WasSuccessful implements ResultPredicateFactory {
+      @Override
+      public Predicate<Result> create(String... args) {
+        return Result::wasSuccessful;
+      }
+    }
+
+    class RunCountIsEqualTo implements ResultPredicateFactory {
+      @Override
+      public Predicate<Result> create(String... args) {
+        final int expected = Integer.parseInt(args[0]);
+        return result -> result.getRunCount() == expected;
+      }
+    }
+
+    class SizeOfFailuresIsEqualTo implements ResultPredicateFactory {
+      @Override
+      public Predicate<Result> create(String... args) {
+        final int expected = Integer.parseInt(args[0]);
+        return result -> result.getFailures().size() == expected;
+      }
+    }
+  }
+
+  @TestClassExpectation(@EnsureJUnitResult(type = IgnoreCountIsEqualTo.class, args = "1"))
+  class Example {
+    public static void main(String... args) {
+      Result result = new Result();
+      result.getFailures();
+      result.wasSuccessful();
+      result.getIgnoreCount();
+      result.getRunCount();
+      result.getRunTime();
+    }
+  }
+}
