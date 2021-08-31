@@ -172,7 +172,7 @@ Among all of those, `assert xyz` has a quite outstanding characteristic, where i
 === Reading the output
 
 Look at the first line.
-There's a message:m
+There's a message:
 
 ----
 value:"JohnDoe" violated precondition:value ((isNotNull&&!isEmpty)&&containsString[" "])
