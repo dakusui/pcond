@@ -81,6 +81,14 @@ public class AssertionProviderTest extends TestBase {
     @Override
     public <T> void checkPostcondition(T value, Predicate<? super T> cond) {
     }
+
+    @Override
+    public <T> void assertThat(T value, Predicate<? super T> cond) {
+    }
+
+    @Override
+    public <T> void assumeThat(T value, Predicate<? super T> cond) {
+    }
   }
 
   @Test

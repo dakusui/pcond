@@ -199,7 +199,13 @@ So the last line in the message always shows the direct reason why the check fai
 Thus, you can read the output above as "The check failed because the value `\"JohnDoe\"` `containsString[" "]` was `false`.
 "
 
-== Build dependencies
+== Building the `pcond` Library
+
+=== Building the docs
+
+`mvn clean compile test site`
+
+=== Build dependencies
 
 - `gem` needs to be installed in advance.
 

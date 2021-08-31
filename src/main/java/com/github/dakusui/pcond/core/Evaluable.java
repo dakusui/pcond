@@ -16,6 +16,7 @@ public interface Evaluable<T> {
 
   interface Composite<T> extends Pred<T> {
     List<Evaluable<? super T>> children();
+    boolean shortcut();
   }
 
   interface Conjunction<T> extends Composite<T> {

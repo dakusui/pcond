@@ -62,13 +62,17 @@ public interface Evaluator {
     @Override
     public <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction) {
       int i = 0;
+      boolean finalValue = true;
+      boolean shortcut = conjunction.shortcut();
       for (Evaluable<? super T> each : conjunction.children()) {
         if (i == 0)
           enter(Entry.Type.COMPOSITE, "&&", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
-        if (!cur || i == conjunction.children().size() - 1) {
-          leave(cur);
+        if (!cur)
+          finalValue = cur;
+        if ((shortcut && !finalValue) || i == conjunction.children().size() - 1) {
+          leave(finalValue);
           return;
         }
         i++;
@@ -78,13 +82,17 @@ public interface Evaluator {
     @Override
     public <T> void evaluate(T value, Evaluable.Disjunction<T> disjunction) {
       int i = 0;
+      boolean finalValue = false;
+      boolean shortcut = disjunction.shortcut();
       for (Evaluable<? super T> each : disjunction.children()) {
         if (i == 0)
           enter(Entry.Type.COMPOSITE, "||", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
-        if (cur || i == disjunction.children().size() - 1) {
-          leave(cur);
+        if (cur)
+          finalValue = cur;
+        if ((shortcut && finalValue) || i == disjunction.children().size() - 1) {
+          leave(finalValue);
           return;
         }
         i++;
@@ -115,7 +123,7 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      enter(Entry.Type.COMPOSITE,"transformAndCheck", value);
+      enter(Entry.Type.COMPOSITE, "transformAndCheck", value);
       transformation.mapper().accept(value, this);
       transformation.checker().accept((R) this.currentResult, this);
       leave(this.resultValue());
