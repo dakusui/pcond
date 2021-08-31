@@ -146,10 +146,10 @@ Followings are methods for it and classes in which they are defined.
 
 `requireXyz` (`Preconditions`):: Methods for checking "preconditions", which a user of your product needs to satisfy.
 On a failure, a `RuntimeException` such as `NullPointerException` etc. will be thrown depending on the actual method.
-`Xyz` can be `NonNull`, `Argument`, or `State`.
+`Xyz` can be `NonNull`, `Argument`, or `Result`.
 `ensureXyz` (`Postconditions`):: Methods for checking "postconditions" , which your product needs to satisfy for its user.
 These methods also throw `RuntimeException` s depending on a actual prefix `Xyz` .
-`Xyz` can be `NonNull` or `State`.
+`Xyz` can be `NonNull` or `Result`.
 `validate` (`Validations`):: This is also used for checking "preconditions".
 However, unlike `requireXyz` methods, it throws an `ApplicationException`, which is a checked exception (not a `RuntimeException`).
 This method should be used in a situation where a "recoverable" failure happens.

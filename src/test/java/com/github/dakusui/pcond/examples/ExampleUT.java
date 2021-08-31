@@ -1,5 +1,11 @@
 package com.github.dakusui.pcond.examples;
 
+import com.github.dakusui.pcond.utils.TestClassExpectation;
+import com.github.dakusui.pcond.utils.TestClassExpectation.EnsureJUnitResult;
+import com.github.dakusui.pcond.utils.TestClassExpectation.ResultPredicateFactory.RunCountIsEqualTo;
+import com.github.dakusui.pcond.utils.TestClassExpectation.ResultPredicateFactory.SizeOfFailuresIsEqualTo;
+import com.github.dakusui.pcond.utils.TestClassExpectation.ResultPredicateFactory.WasNotSuccessful;
+import com.github.dakusui.pcond.utils.TestMethodExpectation;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.Description;
@@ -10,17 +16,23 @@ import org.junit.runner.notification.RunListener;
 
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.utils.TestMethodExpectation.Result.PASSING;
 
 @RunWith(Enclosed.class)
 public class ExampleUT {
+  @TestClassExpectation({
+      @EnsureJUnitResult(type = WasNotSuccessful.class, args = {}),
+      @EnsureJUnitResult(type = RunCountIsEqualTo.class, args = "4"),
+      @EnsureJUnitResult(type = SizeOfFailuresIsEqualTo.class, args= "3")
+  })
   public static class Inner {
+    @TestMethodExpectation(PASSING)
     @Test
     public void shouldPass_testFirstNameOf() {
       String firstName = NameUtil.firstNameOf("Risa Kitajima");
       assertThat(firstName, and(not(containsString(" ")), startsWith("R")));
     }
 
-    @Deprecated
     @Test
     public void shouldFail_testFirstNameOf() {
       String firstName = NameUtil.firstNameOf("Yoshihiko Naito");
@@ -39,7 +51,7 @@ public class ExampleUT {
   }
 
 
-  public static void main(String... args) throws Exception {
+  public static void main(String... args) {
     JUnitCore core = new JUnitCore();
     core.addListener(new RunListener() {
       @Override
@@ -51,6 +63,12 @@ public class ExampleUT {
       @Override
       public void testSuiteStarted(Description description) {
         System.out.println("testSuiteStarted");
+        printDescription(description);
+      }
+
+      @Override
+      public void testSuiteFinished(Description description) {
+        System.out.println("testSuiteFinished");
         printDescription(description);
       }
 
