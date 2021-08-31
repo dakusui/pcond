@@ -85,7 +85,7 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
 
   @Override
   default <T> void assumeThat(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, this::composeMessageForAssertion, this::<RuntimeException>testSkippedException);
+    checkValue(value, cond, this::composeMessageForAssertion, this::testSkippedException);
   }
 
   @SuppressWarnings("unchecked")
