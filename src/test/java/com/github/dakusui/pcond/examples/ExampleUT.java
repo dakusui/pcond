@@ -22,14 +22,14 @@ public class ExampleUT {
   @TestMethodExpectation(PASSING)
   @Test
   public void shouldPass_testFirstNameOf() {
-    String firstName = NameUtil.firstNameOf("Risa Kitajima");
+    String firstName = NameUtils.firstNameOf("Risa Kitajima");
     assertThat(firstName, and(not(containsString(" ")), startsWith("R")));
   }
 
   @TestMethodExpectation(FAILURE)
   @Test
   public void shouldFail_testFirstNameOf() {
-    String firstName = NameUtil.firstNameOf("Yoshihiko Naito");
+    String firstName = NameUtils.firstNameOf("Yoshihiko Naito");
     assertThat(firstName, and(not(containsString(" ")), startsWith("N")));
   }
 }

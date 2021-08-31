@@ -15,7 +15,7 @@ public class ExampleDbC {
   public static String hello(String yourName) {
     // <2>
     requireArgument(yourName, and(isNotNull(), transform(length()).check(gt(0)), containsString(" ")));
-    String ret = String.format("Hello, %s", NameUtil.firstNameOf(yourName));
+    String ret = String.format("Hello, %s", NameUtils.firstNameOf(yourName));
     // <3>
     return ensureNonNull(ret);
   }

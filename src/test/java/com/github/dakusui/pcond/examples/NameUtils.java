@@ -1,12 +1,9 @@
 package com.github.dakusui.pcond.examples;
 
 import static com.github.dakusui.pcond.Assertions.precondition;
-import static com.github.dakusui.pcond.Postconditions.ensureNonNull;
-import static com.github.dakusui.pcond.Preconditions.requireArgument;
-import static com.github.dakusui.pcond.functions.Functions.length;
 import static com.github.dakusui.pcond.functions.Predicates.*;
 
-public enum NameUtil {
+public enum NameUtils {
   ;
 
   public static String firstNameOf(String yourName) {
