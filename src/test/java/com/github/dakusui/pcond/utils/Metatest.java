@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.utils;
 
-import com.github.dakusui.pcond.examples.ExampleUT;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
@@ -59,13 +58,16 @@ public class Metatest {
           }
         });
       }}.run(this.testClass);
-      Arrays.stream(testClass.getAnnotation(TestClassExpectation.class).value())
-          .forEach((TestClassExpectation.EnsureJUnitResult each) -> {
-            if (!TestClassExpectation.ResultPredicateFactory.createPredicate(each).test(testResult)) {
-              errors.add(new Exception(format("Failed to verify expectation:%s[%s]: result='%s'", each.type().getSimpleName(), Arrays.toString(each.args()), testResultToString(testResult))));
-              testResult.getFailures().forEach(System.out::println);
-            }
-          });
+      TestClassExpectation testClassExpectation = testClass.getAnnotation(TestClassExpectation.class);
+      if (testClassExpectation != null) {
+        Arrays.stream(testClassExpectation.value())
+            .forEach((TestClassExpectation.EnsureJUnitResult each) -> {
+              if (!TestClassExpectation.ResultPredicateFactory.createPredicate(each).test(testResult)) {
+                errors.add(new Exception(format("Failed to verify expectation:%s[%s]: result='%s'", each.type().getSimpleName(), Arrays.toString(each.args()), testResultToString(testResult))));
+                testResult.getFailures().forEach(System.out::println);
+              }
+            });
+      }
     } finally {
       this.run = true;
     }
@@ -81,8 +83,8 @@ public class Metatest {
     return errors;
   }
 
-  public static void main(String... args) {
-    Metatest metatest = new Metatest(ExampleUT.Inner.class);
+  public static void verifyTestClass(Class<?> testClass) {
+    Metatest metatest = new Metatest(testClass);
     metatest.runTestClass();
     List<Throwable> errors = metatest.verifyTestResult();
     if (!errors.isEmpty())

@@ -12,6 +12,7 @@ import static com.github.dakusui.pcond.utils.TestMethodExpectation.TestMethodRes
 import static java.lang.String.format;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 @Retention(RUNTIME)
 public @interface TestMethodExpectation {
@@ -40,11 +41,13 @@ public @interface TestMethodExpectation {
       requireState(this.state, STARTED);
       try {
         TestMethodExpectation annotation = description.getAnnotation(TestMethodExpectation.class);
-        if (annotation != null) {
-          List<Result> expectations = asList(annotation.value());
-          if (!expectations.contains(this.result))
-            return Optional.of(new Exception(format("Expected test result(s) are %s, but actually it was '%s', which is not contained in the expectation.", expectations, this.result)));
-        }
+        List<Result> expectations;
+        if (annotation != null)
+          expectations = asList(annotation.value());
+        else
+          expectations = singletonList(PASSING);
+        if (!expectations.contains(this.result))
+          return Optional.of(new Exception(format("Expected test result(s) are %s, but actually it was '%s', which is not contained in the expectation.", expectations, this.result)));
         return Optional.empty();
       } finally {
         this.state = NOT_STARTED;
