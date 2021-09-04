@@ -40,6 +40,14 @@ public @interface TestClassExpectation {
       }
     }
 
+    class AssumptionFailureCountIsEqualTo implements ResultPredicateFactory {
+      @Override
+      public Predicate<Result> create(String... args) {
+        final int expected = Integer.parseInt(args[0]);
+        return result -> result.getAssumptionFailureCount() == expected;
+      }
+    }
+
     class WasSuccessful implements ResultPredicateFactory {
       @Override
       public Predicate<Result> create(String... args) {

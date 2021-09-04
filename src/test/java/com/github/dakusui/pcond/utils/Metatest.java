@@ -87,10 +87,11 @@ public class Metatest {
     Metatest metatest = new Metatest(testClass);
     metatest.runTestClass();
     List<Throwable> errors = metatest.verifyTestResult();
-    if (!errors.isEmpty())
+    if (!errors.isEmpty()) {
       for (Throwable each : errors)
         each.printStackTrace();
-    else
+      throw new RuntimeException(String.format("%s mismatch(es) are detected.", errors.size()));
+    } else
       System.err.println("All verifications are green!");
   }
 }
