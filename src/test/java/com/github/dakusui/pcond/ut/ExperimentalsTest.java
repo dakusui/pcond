@@ -30,7 +30,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 public class ExperimentalsTest extends TestBase {
-
   /**
    * Building a nested loop with the {@code pcond} library.
    * <p>
