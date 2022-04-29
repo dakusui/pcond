@@ -186,7 +186,7 @@ public enum Predicates {
   }
 
   public static <T> Predicate<T> not(Predicate<T> cond) {
-    return cond.negate();
+    return PrintablePredicateFactory.not(cond);
   }
 
   public static <O, P> PrintablePredicateFactory.TransformingPredicate.Factory<P, O> transform(String funcName, Function<? super O, ? extends P> func) {
@@ -196,6 +196,18 @@ public enum Predicates {
   @SuppressWarnings("unchecked")
   public static <O, P> PrintablePredicateFactory.TransformingPredicate.Factory<P, O> transform(Function<? super O, ? extends P> function) {
     return PrintablePredicateFactory.transform((Function<O, P>) function);
+  }
+
+  /**
+   * Returns a predicate with a message that results in the same value when the
+   * give predicate is tested.
+   * The message is printed as a part of the evaluation result.
+   *
+   * @param message A message printed as a part of the evaluation result is printed of the `predicate`.
+   * @param predicate A predicate the message is attached to.
+   */
+  public static <T> Predicate<T> withMessage(String message, Predicate<T> predicate) {
+    return PrintablePredicateFactory.withMessage(message, predicate);
   }
 
   /**
@@ -213,6 +225,7 @@ public enum Predicates {
    * @see Functions#classMethod(Class, String, Object[])
    * @see Functions#instanceMethod(Object, String, Object[])
    */
+  @SuppressWarnings("ConstantConditions")
   public static <T> Predicate<T> callp(MethodQuery methodQuery) {
     return predicate(
         methodQuery.describe(),
@@ -220,6 +233,27 @@ public enum Predicates {
             invokeMethod(methodQuery.bindActualArguments((o) -> o instanceof Parameter, o -> t)),
             v -> v instanceof Boolean,
             v -> format("Method matched with '%s' must return a boolean value but it gave: '%s'.", methodQuery.describe(), v)));
+  }
+
+  /**
+   * // @formatter:off
+   * Returns a predicate that calls a method which matches the given {@code methodName}
+   * and {@code args} on the object given as input to it.
+   *
+   * Note that method look up is done when the predicate is applied.
+   * This means this method does not throw any exception by itself and in case
+   * you give wrong {@code methodName} or {@code arguments}, an exception will be
+   * thrown when the returned function is applied.
+   *
+   * // @formatter:on
+   *
+   * @param methodName The method name
+   * @param arguments  Arguments passed to the method.
+   * @param <T>        The type of input to the returned predicate
+   * @return A predicate that invokes the method matching the {@code methodName} and {@code args}
+   */
+  public static <T> Predicate<T> callp(String methodName, Object... arguments) {
+    return callp(Functions.instanceMethod(Functions.parameter(), methodName, arguments));
   }
 
   enum Def {

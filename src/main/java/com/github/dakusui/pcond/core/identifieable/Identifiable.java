@@ -75,7 +75,7 @@ public interface Identifiable {
 
   List<Object> args();
 
-  public class Base implements Identifiable {
+  class Base implements Identifiable {
     private final Object       creator;
     private final List<Object> args;
     private final Object       identity;

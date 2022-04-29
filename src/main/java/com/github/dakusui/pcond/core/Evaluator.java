@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static java.util.Collections.unmodifiableList;
 
@@ -22,6 +23,8 @@ public interface Evaluator {
   <T> void evaluate(T value, Evaluable.Negation<T> negation);
 
   <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred);
+
+  <T> void evaluate(T value, Evaluable.Messaged<T> messaged);
 
   void evaluate(Context value, Evaluable.ContextPred contextPred);
 
@@ -46,7 +49,11 @@ public interface Evaluator {
     Object              currentResult;
 
     void enter(Entry.Type type, String name, Object input) {
-      Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, input);
+      enter(type, name, input, false);
+    }
+
+    void enter(Entry.Type type, String name, Object input, boolean suppressPrintingOutput) {
+      Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, input, suppressPrintingOutput);
       onGoingEntries.add(newEntry);
       entries.add(newEntry);
     }
@@ -114,19 +121,28 @@ public interface Evaluator {
     }
 
     @Override
+    public <T> void evaluate(T value, Evaluable.Messaged<T> messaged) {
+      enter(Entry.Type.COMPOSITE, messaged.message(), value, true);
+      messaged.target().accept(value, this);
+      leave(this.<Boolean>resultValue());
+    }
+
+    @Override
     public void evaluate(Context context, Evaluable.ContextPred contextPred) {
       enter(Entry.Type.LEAF, String.format("%s", contextPred), context);
       contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
       leave(this.resultValue());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked" })
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      enter(Entry.Type.COMPOSITE, "transformAndCheck", value);
+      this.enter(Entry.Type.COMPOSITE, String.format("transform(%s)", formatObject(value)), value, true);
       transformation.mapper().accept(value, this);
+      enter(Entry.Type.COMPOSITE, String.format("check(%s)", formatObject(this.resultValue())), value, true);
       transformation.checker().accept((R) this.currentResult, this);
-      leave(this.resultValue());
+      this.leave(this.resultValue());
+      this.leave(this.resultValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -197,26 +213,23 @@ public interface Evaluator {
     }
 
     private Entry.Finalized createEntryForImport(Entry each, Object other) {
-      return new Entry.Finalized(each.type, this.onGoingEntries.size() + each.level, each.input, each.hasOutput() ? each.output() : other, each.name);
+      return new Entry.Finalized(each.type, this.onGoingEntries.size() + each.level, each.input, each.hasOutput() ? each.output() : other, each.name, each.suppressPrintingOutput);
     }
   }
 
   abstract class Entry {
-    enum Type {
-      COMPOSITE,
-      LEAF
-    }
+    final         Type    type;
+    final         int     level;
+    final         Object  input;
+    final         String  name;
+    private final boolean suppressPrintingOutput;
 
-    final Type   type;
-    final int    level;
-    final Object input;
-    final String name;
-
-    Entry(Type type, int level, Object input, String name) {
+    Entry(Type type, int level, Object input, String name, boolean suppressPrintingOutput) {
       this.type = type;
       this.level = level;
       this.input = input;
       this.name = name;
+      this.suppressPrintingOutput = suppressPrintingOutput;
     }
 
     public int level() {
@@ -232,6 +245,10 @@ public interface Evaluator {
       return name;
     }
 
+    public boolean suppressPrintingOutput() {
+      return this.suppressPrintingOutput;
+    }
+
     public abstract boolean hasOutput();
 
     public abstract <T> T output();
@@ -240,11 +257,16 @@ public interface Evaluator {
       return this.type == Type.LEAF;
     }
 
+    enum Type {
+      COMPOSITE,
+      LEAF,
+    }
+
     static class Finalized extends Entry {
       final Object output;
 
-      Finalized(Type type, int level, Object input, Object output, String name) {
-        super(type, level, input, name);
+      Finalized(Type type, int level, Object input, Object output, String name, boolean suppressPrintingOutput) {
+        super(type, level, input, name, suppressPrintingOutput);
         this.output = output;
       }
 
@@ -263,13 +285,13 @@ public interface Evaluator {
     static class OnGoing extends Entry {
       final int positionInEntries;
 
-      OnGoing(Type type, int level, int positionInEntries, String name, Object input) {
-        super(type, level, input, name);
+      OnGoing(Type type, int level, int positionInEntries, String name, Object input, boolean suppressPrintingOutput) {
+        super(type, level, input, name, suppressPrintingOutput);
         this.positionInEntries = positionInEntries;
       }
 
       Finalized result(Object result) {
-        return new Finalized(this.type, this.level, this.input, result, this.name);
+        return new Finalized(this.type, this.level, this.input, result, this.name, this.suppressPrintingOutput());
       }
 
       @Override

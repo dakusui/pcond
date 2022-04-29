@@ -51,6 +51,17 @@ public interface Evaluable<T> {
     Predicate<? super T> predicate();
   }
 
+  interface Messaged<T> extends Pred<T> {
+    @Override
+    default void accept(T value, Evaluator evaluator) {
+      evaluator.evaluate(value, this);
+    }
+
+    Evaluable<? super T> target();
+
+    String message();
+  }
+
   interface ContextPred extends Pred<Context> {
     @Override
     default void accept(Context value, Evaluator evaluator) {

@@ -119,16 +119,21 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
         .collect(joining(String.format("%n")));
   }
 
-  protected static String formatEntry(Evaluator.Entry r, int maxNameLength, Throwable throwable) {
-    String indent = spaces(r.level() * 2);
-    return String.format("%-" + maxNameLength + "s%s %s",
-        indent + r.name() + formatInput(r),
-        r.hasOutput() ? "->" : "  ",
-        r.hasOutput() ? InternalUtils.formatObject(r.output()) : throwable);
-  }
-
   private boolean useEvaluator() {
     return this.useEvaluator;
+  }
+
+  protected static String formatEntry(Evaluator.Entry r, int maxNameLength, Throwable throwable) {
+    String indent = spaces(r.level() * 2);
+    return String.format("%-" + maxNameLength + "s%s",
+        indent + r.name() + formatInput(r),
+        String.format("%s %s",
+            !r.suppressPrintingOutput() && r.hasOutput() ? "->" : "  ",
+            r.suppressPrintingOutput() ?
+                "" :
+                r.hasOutput() ?
+                    InternalUtils.formatObject(r.output()) :
+                    throwable));
   }
 
   private static boolean useEvaluator(Class<?> myClass, Properties properties) {

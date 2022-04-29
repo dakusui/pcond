@@ -56,7 +56,7 @@ public enum Functions {
 
 
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
-  public static <E> Function<List<? extends E>, ? extends E> elementAt(int i) {
+  public static <E> Function<List<? extends E>, E> elementAt(int i) {
     return Function.class.cast(PrintableFunctionFactory.Parameterized.ELEMENT_AT.create(singletonList(i)));
   }
 
@@ -286,8 +286,6 @@ public enum Functions {
    * Returns a function that calls a method which matches the given {@code methodName}
    * and {@code args} on the object given as input to it.
    * <p>
-   * Note that method look up is done when the function is applied.
-   * <p>
    * Note that method look up is done when the predicate is applied.
    * This means this method does not throw any exception by itself and in case
    * you give wrong {@code methodName} or {@code arguments}, an exception will be
@@ -299,25 +297,8 @@ public enum Functions {
    * @param <R>        The type of output from the returned function
    * @return A function that invokes the method matching the {@code methodName} and {@code args}
    */
-  public static <T, R> Function<T, R> chain(String methodName, Object... arguments) {
+  public static <T, R> Function<T, R> call(String methodName, Object... arguments) {
     return callInstanceMethod(parameter(), methodName, arguments);
   }
 
-  /**
-   * Returns a predicate that calls a method which matches the given {@code methodName}
-   * and {@code args} on the object given as input to it.
-   * <p>
-   * Note that method look up is done when the predicate is applied.
-   * This means this method does not throw any exception by itself and in case
-   * you give wrong {@code methodName} or {@code arguments}, an exception will be
-   * thrown when the returned function is applied.
-   *
-   * @param methodName The method name
-   * @param arguments  Arguments passed to the method.
-   * @param <T>        The type of input to the returned predicate
-   * @return A predicate that invokes the method matching the {@code methodName} and {@code args}
-   */
-  public static <T> Predicate<T> chainp(String methodName, Object... arguments) {
-    return Predicates.callp(instanceMethod(parameter(), methodName, arguments));
-  }
 }

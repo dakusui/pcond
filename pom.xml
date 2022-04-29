@@ -3,7 +3,7 @@
     <groupId>com.github.dakusui</groupId>
     <artifactId>${project.name}</artifactId>
     <packaging>jar</packaging>
-    <version>2.0.4-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <description>A Small Java Library for Design by Contract style programming with printable preconditions.
     </description>
 
@@ -274,7 +274,7 @@
                     </execution>
                     <execution><!-- Run our version calculation script -->
                         <id>asciidoctor-diagram-installation</id>
-                        <phase>prepare-package</phase>
+                        <phase>initialize</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>

@@ -31,8 +31,100 @@ public enum PrintablePredicateFactory {
   NEGATION,
   CONJUNCTION,
   DISJUNCTION,
+  MESSAGE,
   LEAF,
   ;
+
+  private static <T> PrintablePredicate<T> toPrintablePredicate(Predicate<T> predicate) {
+    return (PrintablePredicate<T>) leaf(predicate);
+  }
+
+  public static <T> Predicate<T> leaf(Predicate<T> predicate) {
+    if (!(predicate instanceof PrintablePredicate))
+      return leaf(Identifiable.formatObjectName(predicate), predicate);
+    return predicate;
+  }
+
+  public static <T> Predicate<T> leaf(String name, Predicate<T> predicate) {
+    return leaf(() -> name, predicate);
+  }
+
+  public static <T> Predicate<T> leaf(Supplier<String> formatter, Predicate<T> predicate) {
+    return leaf(formatter, predicate, PrintablePredicateFactory.class);
+  }
+
+  public static <T> Predicate<T> leaf(Supplier<String> formatter, Predicate<T> predicate, Object fallbackCreator) {
+    return parameterizedLeaf(
+        (args) -> formatter,
+        (args) -> predicate,
+        emptyList(),
+        fallbackCreator);
+  }
+
+  public static <T> Predicate<T> parameterizedLeaf(
+      Function<List<Object>, Supplier<String>> formatterFactory,
+      Function<List<Object>, Predicate<T>> predicateFactory,
+      List<Object> args,
+      Object fallbackCreator
+  ) {
+    Supplier<String> formatter = formatterFactory.apply(args);
+    Predicate<T> predicate = predicateFactory.apply(args);
+    return creatorOf(predicate)
+        .map(c -> new LeafPredicate<>(c, argsOf(predicate), formatter, predicate))
+        .orElse(new LeafPredicate<>(fallbackCreator, args, formatter, predicate));
+  }
+
+  public static <P, O> TransformingPredicate.Factory<P, O> transform(Function<O, P> function) {
+    return TransformingPredicate.Factory.create(function);
+  }
+
+  public static <T> Conjunction<T> and(List<Predicate<? super T>> predicates) {
+    return new Conjunction<T>(predicates, true);
+  }
+
+  public static <T> Disjunction<T> or(List<Predicate<? super T>> predicates) {
+    return new Disjunction<T>(predicates, true);
+  }
+
+  public static <T> Conjunction<T> allOf(List<Predicate<? super T>> predicates) {
+    return new Conjunction<T>(predicates, false);
+  }
+
+  public static <T> Disjunction<T> anyOf(List<Predicate<? super T>> predicates) {
+    return new Disjunction<T>(predicates, false);
+  }
+
+  public static <T> Predicate<T> not(Predicate<T> predicate) {
+    return not_(predicate);
+  }
+
+  public static <T> Negation<T> not_(Predicate<T> predicate) {
+    return new Negation<T>(toPrintablePredicate(predicate), singletonList(predicate));
+  }
+
+  public static <E> Predicate<Stream<? extends E>> allMatch(Predicate<E> predicate) {
+    return AllMatch.create(predicate);
+  }
+
+  public static <E> Predicate<Stream<? extends E>> noneMatch(Predicate<E> predicate) {
+    return NoneMatch.create(predicate);
+  }
+
+  public static <E> Predicate<Stream<? extends E>> anyMatch(Predicate<E> predicate) {
+    return AnyMatch.create(predicate);
+  }
+
+  public static <T> Predicate<Context> contextPredicate(Predicate<T> predicate, int argIndex) {
+    return ContextPredicate.create(toPrintablePredicate(predicate), argIndex);
+  }
+
+  private static RuntimeException noPredicateGiven() {
+    throw new IllegalArgumentException("No predicate was given");
+  }
+
+  public static <T> Predicate<T> withMessage(String message, Predicate<T> predicate) {
+    return new Messaged<T>(message, toPrintablePredicate(predicate), singletonList(predicate));
+  }
 
   /*
       Expected: "100 -> &&                                     ->   false"
@@ -126,89 +218,6 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  private static <T> PrintablePredicate<T> toPrintablePredicate(Predicate<T> predicate) {
-    return (PrintablePredicate<T>) leaf(predicate);
-  }
-
-  public static <T> Predicate<T> leaf(Predicate<T> predicate) {
-    if (!(predicate instanceof PrintablePredicate))
-      return leaf(Identifiable.formatObjectName(predicate), predicate);
-    return predicate;
-  }
-
-  public static <T> Predicate<T> leaf(String name, Predicate<T> predicate) {
-    return leaf(() -> name, predicate);
-  }
-
-  public static <T> Predicate<T> leaf(Supplier<String> formatter, Predicate<T> predicate) {
-    return leaf(formatter, predicate, PrintablePredicateFactory.class);
-  }
-
-  public static <T> Predicate<T> leaf(Supplier<String> formatter, Predicate<T> predicate, Object fallbackCreator) {
-    return parameterizedLeaf(
-        (args) -> formatter,
-        (args) -> predicate,
-        emptyList(),
-        fallbackCreator);
-  }
-
-  public static <T> Predicate<T> parameterizedLeaf(
-      Function<List<Object>, Supplier<String>> formatterFactory,
-      Function<List<Object>, Predicate<T>> predicateFactory,
-      List<Object> args,
-      Object fallbackCreator
-  ) {
-    Supplier<String> formatter = formatterFactory.apply(args);
-    Predicate<T> predicate = predicateFactory.apply(args);
-    return creatorOf(predicate)
-        .map(c -> new LeafPredicate<>(c, argsOf(predicate), formatter, predicate))
-        .orElse(new LeafPredicate<>(fallbackCreator, args, formatter, predicate));
-  }
-
-  public static <P, O> TransformingPredicate.Factory<P, O> transform(Function<O, P> function) {
-    return TransformingPredicate.Factory.create(function);
-  }
-
-  public static <T> Conjunction<T> and(List<Predicate<? super T>> predicates) {
-    return new Conjunction<T>(predicates, true);
-  }
-
-  public static <T> Disjunction<T> or(List<Predicate<? super T>> predicates) {
-    return new Disjunction<T>(predicates, true);
-  }
-
-  public static <T> Conjunction<T> allOf(List<Predicate<? super T>> predicates) {
-    return new Conjunction<T>(predicates, false);
-  }
-
-  public static <T> Disjunction<T> anyOf(List<Predicate<? super T>> predicates) {
-    return new Disjunction<T>(predicates, false);
-  }
-
-  public static <T> Predicate<T> not(Predicate<T> predicate) {
-    return not_(predicate);
-  }
-
-  public static <T> Negation<T> not_(Predicate<T> predicate) {
-    return new Negation<T>(toPrintablePredicate(predicate), singletonList(predicate));
-  }
-
-  public static <E> Predicate<Stream<? extends E>> allMatch(Predicate<E> predicate) {
-    return AllMatch.create(predicate);
-  }
-
-  public static <E> Predicate<Stream<? extends E>> noneMatch(Predicate<E> predicate) {
-    return NoneMatch.create(predicate);
-  }
-
-  public static <E> Predicate<Stream<? extends E>> anyMatch(Predicate<E> predicate) {
-    return AnyMatch.create(predicate);
-  }
-
-  public static <T> Predicate<Context> contextPredicate(Predicate<T> predicate, int argIndex) {
-    return ContextPredicate.create(toPrintablePredicate(predicate), argIndex);
-  }
-
   private static class LeafPredicate<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T> {
     protected LeafPredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<? super T> predicate) {
       super(creator, args, formatter, predicate);
@@ -255,8 +264,30 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  private static RuntimeException noPredicateGiven() {
-    throw new IllegalArgumentException("No predicate was given");
+  static class Messaged<T> extends PrintablePredicate<T> implements Evaluable.Messaged<T> {
+    private final String               message;
+    private final Evaluable<? super T> target;
+
+    @SuppressWarnings("unchecked")
+    protected Messaged(String message, Predicate<T> predicate, List<Object> args) {
+      super(
+          MESSAGE,
+          args,
+          () -> requireNonNull(message),
+          (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).test(t));
+      this.message = requireNonNull(message);
+      this.target = toEvaluableIfNecessary(predicate);
+    }
+
+    @Override
+    public Evaluable<? super T> target() {
+      return this.target;
+    }
+
+    @Override
+    public String message() {
+      return this.message;
+    }
   }
 
   private static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
@@ -317,18 +348,6 @@ public enum PrintablePredicateFactory {
   }
 
   public static class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Evaluable.Transformation<O, P> {
-    public interface Factory<P, O> {
-      static <P, O> Factory<P, O> create(Function<O, P> function) {
-        return cond -> new TransformingPredicate<>(null, toPrintablePredicate(cond), function);
-      }
-
-      default TransformingPredicate<P, O> check(String condName, Predicate<? super P> cond) {
-        return check(leaf(condName, cond));
-      }
-
-      TransformingPredicate<P, O> check(Predicate<? super P> cond);
-    }
-
     private final Evaluable<? super P> checker;
     private final Evaluable<? super O> mapper;
 
@@ -351,13 +370,26 @@ public enum PrintablePredicateFactory {
     public Evaluable<? super P> checker() {
       return this.checker;
     }
+
+    public interface Factory<P, O> {
+      default TransformingPredicate<P, O> check(String condName, Predicate<? super P> cond) {
+        return check(leaf(condName, cond));
+      }
+
+      @SuppressWarnings("unchecked")
+      default <OO> Factory<P, OO> castTo(Class<OO> ooClass) {
+        return (Factory<P, OO>) this;
+      }
+
+      TransformingPredicate<P, O> check(Predicate<? super P> cond);
+
+      static <P, O> Factory<P, O> create(Function<O, P> function) {
+        return cond -> new TransformingPredicate<>(null, toPrintablePredicate(cond), function);
+      }
+    }
   }
 
   static class ContextPredicate extends PrintablePredicate<Context> implements Evaluable.ContextPred {
-    public static <T> ContextPredicate create(Predicate<T> predicate, int argIndex) {
-      return new ContextPredicate(ContextPredicate.class, asList(predicate, argIndex), predicate, argIndex);
-    }
-
     private final Evaluable<?> enclosed;
     private final int          argIndex;
 
@@ -382,15 +414,13 @@ public enum PrintablePredicateFactory {
     public int argIndex() {
       return argIndex;
     }
+
+    public static <T> ContextPredicate create(Predicate<T> predicate, int argIndex) {
+      return new ContextPredicate(ContextPredicate.class, asList(predicate, argIndex), predicate, argIndex);
+    }
   }
 
   static class AllMatch<E> extends StreamPredicate<E> {
-    static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
-      return new AllMatch<>(
-          predicate
-      );
-    }
-
     @SuppressWarnings("unchecked")
     private AllMatch(Predicate<? super E> predicate) {
       super(
@@ -402,15 +432,15 @@ public enum PrintablePredicateFactory {
           true,
           false);
     }
-  }
 
-  static class NoneMatch<E> extends StreamPredicate<E> {
-    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
-      return new NoneMatch<>(
+    static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
+      return new AllMatch<>(
           predicate
       );
     }
+  }
 
+  static class NoneMatch<E> extends StreamPredicate<E> {
     @SuppressWarnings("unchecked")
     private NoneMatch(Predicate<? super E> predicate) {
       super(
@@ -422,15 +452,15 @@ public enum PrintablePredicateFactory {
           true,
           true);
     }
-  }
 
-  static class AnyMatch<E> extends StreamPredicate<E> {
     public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
-      return new AnyMatch<>(
+      return new NoneMatch<>(
           predicate
       );
     }
+  }
 
+  static class AnyMatch<E> extends StreamPredicate<E> {
     @SuppressWarnings("unchecked")
     private AnyMatch(Predicate<? super E> predicate) {
       super(
@@ -441,6 +471,12 @@ public enum PrintablePredicateFactory {
           toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
           false,
           true);
+    }
+
+    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
+      return new AnyMatch<>(
+          predicate
+      );
     }
   }
 
