@@ -1,15 +1,14 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.TestAssertions;
 import com.github.dakusui.pcond.Validations;
 import com.github.dakusui.pcond.functions.Predicates;
 import com.github.dakusui.pcond.provider.ApplicationException;
 import com.github.dakusui.pcond.utils.TestBase;
 import org.hamcrest.CoreMatchers;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.functions.Predicates.alwaysTrue;
+import static com.github.dakusui.pcond.functions.Predicates.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class WithMessageTest extends TestBase {
@@ -22,7 +21,7 @@ public class WithMessageTest extends TestBase {
       assertThat(
           e.getMessage().replaceAll(" +", " ").replaceAll("\"", "'"),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Hello, world -> false"),
+              CoreMatchers.containsString("Hello, world"),
               CoreMatchers.containsString("! -> false"),
               CoreMatchers.containsString("alwaysTrue('Value') -> true")
           ));
@@ -42,29 +41,13 @@ public class WithMessageTest extends TestBase {
       assertThat(
           e.getMessage().replaceAll(" +", " ").replaceAll("\"", "'"),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Hello, world -> false"),
+              CoreMatchers.containsString("Hello, world"),
               CoreMatchers.containsString("! -> false"),
-              CoreMatchers.containsString("Always true! -> true"),
+              CoreMatchers.containsString("Always true!"),
               CoreMatchers.containsString("alwaysTrue('Value') -> true")
           ));
 
       throw e;
     }
-  }
-
-  @Ignore
-  @Test
-  public void test3allOf() {
-    TestAssertions. assertThat("Hello", Predicates.allOf(not(equalTo("Hello")), equalTo("")));
-  }
-  @Ignore
-  @Test
-  public void test3and() {
-    TestAssertions. assertThat("Hello", Predicates.and(not(equalTo("Hello")), equalTo("")));
-  }
-  @Ignore
-  @Test
-  public void test4() {
-    TestAssertions. assertThat("Hello", Predicates.or(not(equalTo("hello")), equalTo("")));
   }
 }

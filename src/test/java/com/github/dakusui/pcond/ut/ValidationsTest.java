@@ -62,7 +62,7 @@ transformAndCheck                                       -> false
       isEqualTo["Non!"]("HELLO, WORLD")                 -> false
 
    */
-  @Test
+  @Test(expected = ApplicationException.class)
   public void testX() {
     Validations.validate(
         "Hello, World",
@@ -86,7 +86,7 @@ transformAndCheck                             -> false
       isEqualTo["Non!"]("hello, world")       -> false
 
    */
-  @Test
+  @Test(expected = ApplicationException.class)
   public void testY() {
     Validations.validate(
         "Hello, World",

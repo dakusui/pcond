@@ -30,7 +30,7 @@ public class CallTest extends TestBase {
     System.out.println(length.apply("hello"));
 
     assertThat(length.apply("hello"), equalTo(5));
-    assertThat(length.toString(), equalTo("p[0].length()"));
+    assertThat(length.toString(), equalTo("<>.length()"));
   }
 
   @Test
@@ -41,7 +41,7 @@ public class CallTest extends TestBase {
 
     assertThat(contains.apply("Hello"), equalTo(true));
     assertThat(contains.apply("HELLO"), equalTo(false));
-    assertThat(contains.toString(), equalTo("<Hello, world>.contains(p[0])"));
+    assertThat(contains.toString(), equalTo("<Hello, world>.contains(<>)"));
   }
 
   @Test
