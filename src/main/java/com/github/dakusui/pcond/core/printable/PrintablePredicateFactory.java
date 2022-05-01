@@ -122,8 +122,8 @@ public enum PrintablePredicateFactory {
     throw new IllegalArgumentException("No predicate was given");
   }
 
-  public static <T> Predicate<T> withMessage(String message, Predicate<T> predicate) {
-    return new Messaged<T>(message, toPrintablePredicate(predicate), singletonList(predicate));
+  public static <T> Predicate<T> withMessage(Supplier<String> messageSupplier, Predicate<T> predicate) {
+    return new Messaged<T>(messageSupplier, toPrintablePredicate(predicate), singletonList(predicate));
   }
 
   /*
@@ -265,17 +265,17 @@ public enum PrintablePredicateFactory {
   }
 
   static class Messaged<T> extends PrintablePredicate<T> implements Evaluable.Messaged<T> {
-    private final String               message;
+    //private final String               message;
     private final Evaluable<? super T> target;
 
     @SuppressWarnings("unchecked")
-    protected Messaged(String message, Predicate<T> predicate, List<Object> args) {
+    protected Messaged(Supplier<String> messageSupplier, Predicate<T> predicate, List<Object> args) {
       super(
           MESSAGE,
           args,
-          () -> requireNonNull(message),
+          requireNonNull(messageSupplier),
           (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).test(t));
-      this.message = requireNonNull(message);
+      //this.message = requireNonNull(message);
       this.target = toEvaluableIfNecessary(predicate);
     }
 
@@ -286,7 +286,7 @@ public enum PrintablePredicateFactory {
 
     @Override
     public String message() {
-      return this.message;
+      return this.formatter.get();
     }
   }
 

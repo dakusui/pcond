@@ -79,6 +79,10 @@ public enum Functions {
     return PrintableFunctionFactory.Simple.STREAM.instance();
   }
 
+  public static <E> Function<Collection<?>, Stream<? extends E>> stream2() {
+    return PrintableFunctionFactory.Simple.STREAM.instance();
+  }
+
   /**
    * Returns a function that returns a stream for a given given collection.
    *

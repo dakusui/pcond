@@ -10,6 +10,7 @@ import com.github.dakusui.pcond.internals.InternalChecks;
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
@@ -203,11 +204,15 @@ public enum Predicates {
    * give predicate is tested.
    * The message is printed as a part of the evaluation result.
    *
-   * @param message A message printed as a part of the evaluation result is printed of the `predicate`.
+   * @param message   A message printed as a part of the evaluation result is printed of the `predicate`.
    * @param predicate A predicate the message is attached to.
    */
   public static <T> Predicate<T> withMessage(String message, Predicate<T> predicate) {
-    return PrintablePredicateFactory.withMessage(message, predicate);
+    return withMessage(() -> message, predicate);
+  }
+
+  public static <T> Predicate<T> withMessage(Supplier<String> messageSupplier, Predicate<T> predicate) {
+    return PrintablePredicateFactory.withMessage(messageSupplier, predicate);
   }
 
   /**
