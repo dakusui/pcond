@@ -79,7 +79,8 @@ public enum ReflUtils {
   public static <R> R invokeMethod(Method method, Object obj, Object[] arguments) {
     boolean wasAccessible = method.isAccessible();
     try {
-
+      ////
+      // Issue-42
       // Without setting accessible, a public method defined in a private class
       // overriding a public method cannot be invoked.
       method.setAccessible(true);
