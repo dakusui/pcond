@@ -45,7 +45,7 @@ public enum InternalUtils {
       return format("\"%s\"", s);
     }
     if (isToStringOverridden(value))
-      return value.toString();
+      return formatObject(value.toString());
     return value.toString().substring(value.getClass().getPackage().getName().length() + 1);
   }
 
