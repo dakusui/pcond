@@ -7,13 +7,14 @@ import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
+import javax.swing.plaf.synth.SynthStyle;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class MethodSelectorTest extends TestBase {
   @Test(expected = IllegalArgumentException.class)
@@ -101,22 +102,12 @@ public class MethodSelectorTest extends TestBase {
     return this.getClass().getDeclaredMethod("privateMethod");
   }
 
-  @Test(expected = MethodAccessException.class)
+  @Test
   public void testPrivateMethod() throws NoSuchMethodException {
     Method privateMethod = findPrivateMethod();
     System.out.println(privateMethod);
 
-    try {
-      ReflUtils.invokeMethod(privateMethod, null, new Object[0]);
-    } catch (MethodAccessException e) {
-      e.printStackTrace();
-      assertThat(
-          e.getMessage(),
-          allOf(
-              containsString("Method access to"),
-              containsString("privateMethod"),
-              containsString("was failed")));
-      throw e;
-    }
+    boolean ret = ReflUtils.invokeMethod(privateMethod, null, new Object[0]);
+    assertTrue(ret);
   }
 }

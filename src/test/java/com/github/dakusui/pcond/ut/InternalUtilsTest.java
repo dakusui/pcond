@@ -19,6 +19,7 @@ import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
 public class InternalUtilsTest {
+  @SuppressWarnings("NewClassNamingConvention")
   public static class FormatObject {
     static class InnerClass {
     }
@@ -26,36 +27,37 @@ public class InternalUtilsTest {
     @Test
     public void testFormatObject$collection3() {
       assertEquals(
-          InternalUtils.formatObject(asList("a", "b", "c")),
-          "[\"a\",\"b\",\"c\"]");
+          "[\"a\",\"b\",\"c\"]",
+          InternalUtils.formatObject(asList("a", "b", "c")));
     }
 
     @Test
     public void testFormatObject$collection4() {
       assertEquals(
-          InternalUtils.formatObject(asList("a", "b", "c", "d")),
-          "[\"a\",\"b\",\"c\"...;4]");
+          "[\"a\",\"b\",\"c\"...;4]",
+          InternalUtils.formatObject(asList("a", "b", "c", "d")));
     }
 
     @Test
     public void testFormatObject$array4() {
       assertEquals(
-          InternalUtils.formatObject(new String[]{"a", "b", "c", "d"}),
-          "[\"a\",\"b\",\"c\"...;4]");
+          "[\"a\",\"b\",\"c\"...;4]",
+          InternalUtils.formatObject(new String[] { "a", "b", "c", "d" }));
     }
 
     @Test
     public void testFormatObject$longString() {
       assertEquals(
-          InternalUtils.formatObject("HelloWorldHelloWorldHelloWorldHelloWorldHelloWorld"),
-          "\"HelloWorldHe...World\"");
+          "\"HelloWorldHelloWorldHe...WorldHelloWorld\"",
+          InternalUtils.formatObject("HelloWorldHelloWorldHelloWorldHelloWorldHelloWorld")
+      );
     }
 
     @Test
     public void testFormatObject$boundaryLengthString() {
       assertEquals(
-          InternalUtils.formatObject("HelloHelloHelloHello"),
-          "\"HelloHelloHelloHello\"");
+          "\"HelloHelloHelloHelloHelloHelloHelloHello\"",
+          InternalUtils.formatObject("HelloHelloHelloHelloHelloHelloHelloHello"));
     }
 
     @Test
@@ -159,6 +161,7 @@ public class InternalUtilsTest {
     public void testInteger() {
       assertEquals(Integer.class, InternalUtils.wrapperClassOf(int.class));
     }
+
     @Test
     public void testLong() {
       assertEquals(Long.class, InternalUtils.wrapperClassOf(long.class));

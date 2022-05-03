@@ -40,13 +40,32 @@ public enum InternalUtils {
       return String.format("%s", value);
     if (value instanceof String) {
       String s = (String) value;
-      if (s.length() > 20)
-        s = s.substring(0, 12) + "..." + s.substring(s.length() - 5);
+      s = summarizeString(s, summarizedStringLength());
       return format("\"%s\"", s);
     }
     if (isToStringOverridden(value))
-      return formatObject(value.toString());
+      return summarizeString(
+          value.toString(),
+          summarizedStringLength() + 2 /* 2 for margin for single quotes not necessary for non-strings */
+      );
     return value.toString().substring(value.getClass().getPackage().getName().length() + 1);
+  }
+
+  private static String summarizeString(String s, int length) {
+    assert (length & 1) == 0 : "The length must be an even int, but was <" + length + ">";
+    assert length >= 12 : "The length must be greater than or equal to 12. Less than 20 is not recommended. But was <" + length + ">";
+    if (s.length() > length) {
+      int pre = length / 2 - 2;
+      int post = length / 2 - 5;
+      s = s.substring(0, length - pre) + "..." + s.substring(s.length() - post);
+    } else {
+      s = s;
+    }
+    return s;
+  }
+
+  private static int summarizedStringLength() {
+    return 40;
   }
 
   private static boolean isToStringOverridden(Object object) {
@@ -85,7 +104,8 @@ public enum InternalUtils {
       } catch (InvocationTargetException e) {
         throw wrap("Public constructor without parameters was found in " + requestedClassName + " but threw an exception", e.getCause());
       }
-    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+    } catch (InstantiationException | IllegalAccessException |
+             ClassNotFoundException e) {
       throw wrap("The requested class was not found or not accessible.: " + requestedClassName, e);
     }
   }

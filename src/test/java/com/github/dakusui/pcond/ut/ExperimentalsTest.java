@@ -146,7 +146,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
               toContextPredicate(transform(Functions.length()).check(gt(3))))));
     } catch (InternalException e) {
-      e.printStackTrace();
+      e.printStackTrace(System.out);
       assertThat(
           lineAt(e.getMessage(), 6),
           allOf(
