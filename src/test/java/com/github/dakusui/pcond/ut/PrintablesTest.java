@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;

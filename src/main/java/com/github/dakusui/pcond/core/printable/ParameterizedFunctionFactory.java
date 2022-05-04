@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.printable;
 
-import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.List;
 import java.util.function.Function;

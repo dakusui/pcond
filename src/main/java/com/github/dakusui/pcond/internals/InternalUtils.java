@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.internals;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.forms.Printables;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

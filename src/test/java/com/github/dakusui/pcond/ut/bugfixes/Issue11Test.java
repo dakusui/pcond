@@ -4,9 +4,9 @@ import com.github.dakusui.pcond.utils.TestBase;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
-import static com.github.dakusui.pcond.functions.Functions.elementAt;
-import static com.github.dakusui.pcond.functions.Functions.size;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Functions.elementAt;
+import static com.github.dakusui.pcond.forms.Functions.size;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.containsString;

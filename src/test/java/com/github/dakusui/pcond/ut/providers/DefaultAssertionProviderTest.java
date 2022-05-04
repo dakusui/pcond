@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut.providers;
 
-import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
@@ -10,8 +10,8 @@ import org.junit.Test;
 import java.util.Objects;
 import java.util.Properties;
 
-import static com.github.dakusui.pcond.functions.Functions.length;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Functions.length;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static com.github.dakusui.pcond.utils.TestUtils.numLines;
 import static org.hamcrest.CoreMatchers.allOf;

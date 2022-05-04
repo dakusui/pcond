@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.compilability;
 
-import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.forms.Predicates;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

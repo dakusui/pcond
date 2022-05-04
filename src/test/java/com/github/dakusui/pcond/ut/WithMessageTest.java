@@ -1,14 +1,14 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Validations;
-import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.provider.ApplicationException;
 import com.github.dakusui.pcond.utils.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.functions.Predicates.alwaysTrue;
-import static com.github.dakusui.pcond.functions.Predicates.not;
+import static com.github.dakusui.pcond.forms.Predicates.alwaysTrue;
+import static com.github.dakusui.pcond.forms.Predicates.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class WithMessageTest extends TestBase {

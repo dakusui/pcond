@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.multi.MultiFunctionUtils;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
-import com.github.dakusui.pcond.functions.Functions;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
@@ -15,8 +15,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.functions.Functions.stream;
-import static com.github.dakusui.pcond.functions.Functions.stringify;
+import static com.github.dakusui.pcond.forms.Functions.stream;
+import static com.github.dakusui.pcond.forms.Functions.stringify;
 import static com.github.dakusui.pcond.internals.InternalUtils.getMethod;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;

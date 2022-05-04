@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.MethodInvocationException;
 import com.github.dakusui.pcond.internals.MethodNotFound;
@@ -12,7 +12,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
-import static com.github.dakusui.pcond.functions.Functions.*;
+import static com.github.dakusui.pcond.forms.Functions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertThat;
 

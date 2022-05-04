@@ -4,8 +4,8 @@ package com.github.dakusui.pcond.examples;
 
 import static com.github.dakusui.pcond.Postconditions.ensureNonNull;
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
-import static com.github.dakusui.pcond.functions.Functions.length;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Functions.length;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 
 public class ExampleDbC {
   public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.functions;
+package com.github.dakusui.pcond.forms;
 
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.Leaf;
@@ -14,8 +14,8 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
-import static com.github.dakusui.pcond.functions.Printables.function;
-import static com.github.dakusui.pcond.functions.Printables.predicate;
+import static com.github.dakusui.pcond.forms.Printables.function;
+import static com.github.dakusui.pcond.forms.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;

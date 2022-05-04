@@ -8,11 +8,7 @@ First, let's import statically entry points of the library in your code.
 
 [source,java]
 ----
-import static com.github.dakusui.pcond.Assertions.*;
-import static com.github.dakusui.pcond.Preconditions.*;
-import static com.github.dakusui.pcond.Validations.*;
-import static com.github.dakusui.pcond.functions.Functions.*;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+
 
 ----
 

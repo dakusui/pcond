@@ -10,8 +10,8 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.Assertions.that;
 import static com.github.dakusui.pcond.Validations.validate;
-import static com.github.dakusui.pcond.functions.Functions.length;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Functions.length;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 
 /**
  * 1,000,000 times

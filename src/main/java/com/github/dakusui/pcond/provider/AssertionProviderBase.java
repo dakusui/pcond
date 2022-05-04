@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.provider;
 
-import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;

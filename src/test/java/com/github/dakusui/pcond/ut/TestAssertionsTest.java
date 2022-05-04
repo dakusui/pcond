@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.TestAssertions.assumeThat;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 
 public class TestAssertionsTest extends TestBase {
   @Test(expected = AssertionFailedError.class)

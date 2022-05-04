@@ -1,13 +1,13 @@
 package com.github.dakusui.pcond.compilability;
 
-import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.forms.Predicates;
 import org.junit.Test;
 
 import java.io.Serializable;
 import java.util.Map;
 
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 
 public class StringTest {
   @Test(expected = IllegalArgumentException.class)

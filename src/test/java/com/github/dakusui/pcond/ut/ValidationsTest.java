@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Validations;
-import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.provider.ApplicationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
@@ -10,8 +10,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.functions.Functions.call;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Functions.call;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.firstLineOf;
 import static org.junit.Assert.assertEquals;
 

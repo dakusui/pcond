@@ -6,8 +6,8 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
-import static com.github.dakusui.pcond.functions.Functions.stream;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Functions.stream;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 import static java.util.Arrays.asList;
 
 public class ListTest {
