@@ -10,11 +10,13 @@ import com.github.dakusui.pcond.core.refl.Parameter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 
 /**
@@ -134,6 +136,32 @@ public enum Functions {
   }
 
   /**
+   * The returned function tries to find a {@code substring} after a given string.
+   * If found, it returns the result of the following statement.
+   *
+   * [source,java]
+   * ----
+   * s.substring(s.indexOf(substring) + substring.length())
+   * ----
+   *
+   * If not found, a {@link StringIndexOutOfBoundsException} will be thrown.
+   *
+   * @param substring A substring to find in a given string.
+   * @return The string after the {@code substring}.
+   */
+  public static Function<String, String> findString(String substring) {
+    Objects.requireNonNull(substring);
+    return PrintableFunctionFactory.function(
+        () -> format("findString[%s]", substring),
+        s -> {
+          int index = s.indexOf(substring);
+          if (index >= 0)
+            return s.substring(s.indexOf(substring) + substring.length());
+          throw new StringIndexOutOfBoundsException(format("'%s' was not found in '%s'", substring, s));
+        });
+  }
+
+  /**
    * https://en.wikipedia.org/wiki/Currying[Curries] a static method specified by the given arguments.
    *
    * @param aClass         A class to which the method to be curried belongs to.
@@ -141,6 +169,7 @@ public enum Functions {
    * @param parameterTypes Parameters types of the method.
    * @return A printable and curried function of the target method.
    */
+  @SuppressWarnings("JavadocLinkAsPlainText")
   public static CurriedFunction<Object, Object> curry(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
     return curry(multifunction(aClass, methodName, parameterTypes));
   }
@@ -303,5 +332,4 @@ public enum Functions {
   public static <T, R> Function<T, R> call(String methodName, Object... arguments) {
     return callInstanceMethod(parameter(), methodName, arguments);
   }
-
 }

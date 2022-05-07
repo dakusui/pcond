@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.TestAssertions;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
@@ -11,6 +13,7 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 @RunWith(Enclosed.class)
@@ -21,15 +24,15 @@ public class PredicatesTest {
       try {
         requireArgument(100, Predicates.and(Predicates.isNotNull(), Predicates.isInstanceOf(String.class)));
       } catch (IllegalArgumentException e) {
-        assertThat(
+        TestAssertions.assertThat(
             lineAt(e.getMessage(), 1),
-            equalTo("&&                                          -> false"));
-        assertThat(
+            Predicates.equalTo("&&                                          -> false"));
+        TestAssertions.assertThat(
             lineAt(e.getMessage(), 2),
-            equalTo("  isNotNull(100)                            -> true"));
-        assertThat(
+            Predicates.equalTo("  isNotNull(100)                            -> true"));
+        TestAssertions.assertThat(
             lineAt(e.getMessage(), 3),
-            equalTo("  isInstanceOf[class java.lang.String](100) -> false"));
+            Predicates.equalTo("  isInstanceOf[class java.lang.String](100) -> false"));
         throw e;
       }
     }
@@ -308,6 +311,21 @@ public class PredicatesTest {
     @Test
     public void test() {
       assertFalse(Predicates.not(Predicates.alwaysTrue()).test(true));
+    }
+  }
+
+  public static class FindStringTest extends TestBase {
+
+    @Test(expected = StringIndexOutOfBoundsException.class)
+    public void example() {
+      assertFalse(
+          Predicates.allOf(
+                  Predicates.isNotNull(),
+                  Predicates.transform(Functions.findString("aPattern")
+                          .andThen(Functions.findString("nextPattern")
+                              .andThen(Functions.findString("-"))))
+                      .check(Predicates.isNotNull()))
+              .test("hello aPattern, world, gallia est omnis divisa, quarum unum incolunt Belgae,  nextPattern!!!!!"));
     }
   }
 }

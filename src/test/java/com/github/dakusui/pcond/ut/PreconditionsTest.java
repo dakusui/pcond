@@ -24,7 +24,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       assertThat(firstLineOf(e.getMessage()),
           allOf(
               notNullValue(),
-              is("value:null violated precondition:value isNotNull")));
+              is("value:<null> violated precondition:value isNotNull")));
       throw e;
     }
   }
@@ -38,7 +38,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       assertThat(firstLineOf(e.getMessage()),
           allOf(
               notNullValue(),
-              is("value:null violated precondition:value isNotNull")));
+              is("value:<null> violated precondition:value isNotNull")));
       throw e;
     }
   }
@@ -52,7 +52,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       assertThat(firstLineOf(e.getMessage()),
           allOf(
               notNullValue(),
-              is("value:null violated precondition:value isNotNull")));
+              is("value:<null> violated precondition:value isNotNull")));
       throw e;
     }
   }
@@ -83,7 +83,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       e.printStackTrace();
       assertThat(
           firstLineOf(e.getMessage()),
-          CoreMatchers.is("value:\"hello\" violated precondition:value LENGTH GT[100]"));
+          CoreMatchers.is("value:<\"hello\"> violated precondition:value LENGTH GT[100]"));
       throw e;
     }
   }

@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.max;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 
@@ -19,6 +20,10 @@ public enum InternalUtils {
   ;
 
   public static String formatObject(Object value) {
+    return formatObject(value, summarizedStringLength());
+  }
+
+  public static String formatObject(Object value, int maxLength) {
     if (value == null)
       return "null";
     if (value instanceof Collection) {
@@ -40,15 +45,29 @@ public enum InternalUtils {
       return String.format("%s", value);
     if (value instanceof String) {
       String s = (String) value;
-      s = summarizeString(s, summarizedStringLength());
+      s = summarizeString(s, maxLength);
       return format("\"%s\"", s);
+    }
+    if (value instanceof Throwable) {
+      Throwable throwable = (Throwable) value;
+      String simpleName = summarizeString(throwable.getClass().getSimpleName() + ":", maxLength);
+      return simpleName +
+          (simpleName.length() < Math.max(12, maxLength) ?
+              formatObject(throwable.getMessage(), toNextEven(Math.max(12, maxLength - simpleName.length()))) :
+              "");
     }
     if (isToStringOverridden(value))
       return summarizeString(
           value.toString(),
-          summarizedStringLength() + 2 /* 2 for margin for single quotes not necessary for non-strings */
+          maxLength + 2 /* 2 for margin for single quotes not necessary for non-strings */
       );
     return value.toString().substring(value.getClass().getPackage().getName().length() + 1);
+  }
+
+  private static int toNextEven(int value) {
+    if ((value & 1) == 0)
+      return value;
+    return value + 1;
   }
 
   private static String summarizeString(String s, int length) {

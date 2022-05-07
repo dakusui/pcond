@@ -18,7 +18,7 @@ public class PostconditionsTest extends TestBase.ForAssertionEnabledVM {
       Object ret = Postconditions.ensureNonNull(null);
       System.out.println("<" + ret + ">");
     } catch (NullPointerException e) {
-      assertEquals("value:null violated postcondition:value isNotNull", firstLineOf(e.getMessage()));
+      assertEquals("value:<null> violated postcondition:value isNotNull", firstLineOf(e.getMessage()));
       throw e;
     }
   }

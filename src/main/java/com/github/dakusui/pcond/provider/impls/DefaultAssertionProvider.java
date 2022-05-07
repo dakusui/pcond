@@ -25,12 +25,12 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
 
   @Override
   public <T> String composeMessageForPrecondition(T value, Predicate<? super T> predicate) {
-    return String.format("value:%s violated precondition:value %s", formatObject(value), predicate);
+    return String.format("value:<%s> violated precondition:value %s", formatObject(value), predicate);
   }
 
   @Override
   public <T> String composeMessageForPostcondition(T value, Predicate<? super T> predicate) {
-    return String.format("value:%s violated postcondition:value %s", formatObject(value), predicate);
+    return String.format("value:<%s> violated postcondition:value %s", formatObject(value), predicate);
   }
 
   @Override
