@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.core.printable;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
+import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.ArrayList;
@@ -347,6 +348,10 @@ public enum PrintablePredicateFactory {
     }
   }
 
+  /**
+   * This is an interface that corresponds to a "matcher" in other assertion
+   * libraries.
+   */
   public static class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Evaluable.Transformation<O, P> {
     private final Evaluable<? super P> checker;
     private final Evaluable<? super O> mapper;
@@ -371,6 +376,13 @@ public enum PrintablePredicateFactory {
       return this.checker;
     }
 
+    /**
+     * This is an interface that corresponds to a "matcher" in other assertion
+     * libraries.
+     *
+     * @param <P> Intermediate parameter type tested by a predicated.
+     * @param <O> Input parameter type.
+     */
     public interface Factory<P, O> {
       default TransformingPredicate<P, O> check(String condName, Predicate<? super P> cond) {
         return check(leaf(condName, cond));
@@ -385,6 +397,79 @@ public enum PrintablePredicateFactory {
 
       static <P, O> Factory<P, O> create(Function<O, P> function) {
         return cond -> new TransformingPredicate<>(null, toPrintablePredicate(cond), function);
+      }
+    }
+
+    public static class Builder<IN, IM> {
+      private String           name;
+      private Function<IN, IM> function;
+      private Predicate<IM>    predicate;
+
+      public Builder() {
+      }
+
+      public Builder(String name) {
+        this.name(name);
+      }
+
+      public Builder<IN, IM> name(String name) {
+        this.name = name;
+        return this;
+      }
+
+
+      @SuppressWarnings("unchecked")
+      public <NIN> Builder<NIN, IM> forValueOf(Class<NIN> forClass) {
+        return (Builder<NIN, IM>) this;
+      }
+
+      @SuppressWarnings("unchecked")
+      public Builder<String, IM> forString() {
+        return (Builder<String, IM>) this;
+      }
+
+      /**
+       * @param elementClass A placeholder parameter, not accessed in this method.
+       *                     Do not remove.
+       * @param <E>          A type of element in a list.
+       * @return This object cast accordingly.
+       */
+      @SuppressWarnings("unchecked")
+      public <E> Builder<List<E>, IM> forListOf(Class<E> elementClass) {
+        return (Builder<List<E>, IM>) this;
+      }
+
+      @SuppressWarnings("unchecked")
+      public <NIM> Builder<IN, NIM> transformBy(Function<IN, NIM> func) {
+        this.function = (Function<IN, IM>) func;
+        //return Factory.create(Printables.function(this.name, func));
+        return (Builder<IN, NIM>) this;
+      }
+
+      /**
+       * @param intoClass A placeholder parameter, not accessed in this method.
+       *                  Do not remove.
+       * @param <NIM>     An intermediate type evaluated by the predicate part.
+       * @return This object cast.
+       */
+      @SuppressWarnings("unchecked")
+      public <NIM> Builder<IN, NIM> into(@SuppressWarnings("unused") Class<NIM> intoClass) {
+        return (Builder<IN, NIM>) this;
+      }
+
+      public Predicate<IN> thenVerifyWith(Predicate<IM> predicate) {
+        this.predicate = predicate;
+        return build();
+      }
+
+      public Predicate<IN> build() {
+        return TransformingPredicate.Factory.create(makePrintableIfFormatterIsAvailable(this.function)).check(this.predicate);
+      }
+
+      private <I, O> Function<I, O> makePrintableIfFormatterIsAvailable(Function<I, O> func) {
+        return this.name != null ?
+            Printables.function(name, func) :
+            func;
       }
     }
   }
