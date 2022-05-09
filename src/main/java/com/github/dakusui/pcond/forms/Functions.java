@@ -10,6 +10,7 @@ import com.github.dakusui.pcond.core.refl.Parameter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
@@ -157,7 +158,7 @@ public enum Functions {
           int index = s.indexOf(substring);
           if (index >= 0)
             return s.substring(s.indexOf(substring) + substring.length());
-          throw new StringIndexOutOfBoundsException(format("'%s' was not found in '%s'", substring, s));
+          throw new NoSuchElementException(format("'%s' was not found in '%s'", substring, s));
         });
   }
 

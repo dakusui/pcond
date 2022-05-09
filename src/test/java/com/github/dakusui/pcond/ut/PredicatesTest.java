@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
+import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
@@ -316,7 +317,7 @@ public class PredicatesTest {
 
   public static class FindStringTest extends TestBase {
 
-    @Test(expected = StringIndexOutOfBoundsException.class)
+    @Test(expected = NoSuchElementException.class)
     public void example() {
       assertFalse(
           Predicates.allOf(
