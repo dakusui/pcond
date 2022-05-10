@@ -194,7 +194,6 @@ public enum Predicates {
     return transform(function(funcName, func));
   }
 
-  @SuppressWarnings("unchecked")
   public static <O, P> PrintablePredicateFactory.TransformingPredicate.Factory<P, O> transform(Function<O, P> function) {
     return PrintablePredicateFactory.transform((Function<O, P>) function);
   }

@@ -14,12 +14,12 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
 
   @Override
   default <T> T requireArgument(T value, Predicate<? super T> cond) {
-    return checkValue(value, cond, this::composeMessageForPrecondition, IllegalArgumentException::new);
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPrecondition, ExceptionComposer.from(IllegalArgumentException::new));
   }
 
   @Override
   default <T> T requireState(T value, Predicate<? super T> cond) {
-    return checkValue(value, cond, this::composeMessageForPrecondition, IllegalStateException::new);
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPrecondition, ExceptionComposer.from(IllegalStateException::new));
   }
 
   @Override
@@ -29,7 +29,7 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
 
   @Override
   default <T, E extends Exception> T require(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
-    return checkValue(value, cond, this::composeMessageForPrecondition, exceptionComposer);
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPrecondition, ExceptionComposer.from(exceptionComposer));
   }
 
   @Override
@@ -39,18 +39,18 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
 
   @Override
   default <T, E extends Exception> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
-    return checkValue(value, cond, this::composeMessageForValidation, exceptionComposer);
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForValidation, ExceptionComposer.from(exceptionComposer));
   }
 
 
   @Override
   default <T> T ensureNonNull(T value) {
-    return checkValue(value, Predicates.isNotNull(), this::composeMessageForPostcondition, NullPointerException::new);
+    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this::composeMessageForPostcondition, ExceptionComposer.from(NullPointerException::new));
   }
 
   @Override
   default <T> T ensureState(T value, Predicate<? super T> cond) {
-    return checkValue(value, cond, this::composeMessageForPostcondition, IllegalStateException::new);
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPostcondition, ExceptionComposer.from(IllegalStateException::new));
   }
 
   @Override
@@ -60,22 +60,22 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
 
   @Override
   default <T, E extends Exception> T ensure(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
-    return checkValue(value, cond, this::composeMessageForPostcondition, exceptionComposer);
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPostcondition, ExceptionComposer.from(exceptionComposer));
   }
 
   @Override
   default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, this::composeMessageForPrecondition, AssertionError::new);
+    checkValueAndThrowIfFails(value, cond, this::composeMessageForPrecondition, AssertionError::new);
   }
 
   @Override
   default <T> void checkPostcondition(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, this::composeMessageForPostcondition, AssertionError::new);
+    checkValueAndThrowIfFails(value, cond, this::composeMessageForPostcondition, AssertionError::new);
   }
 
   @Override
   default <T> void checkInvariant(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, this::composeMessageForAssertion, AssertionError::new);
+    checkValueAndThrowIfFails(value, cond, this::composeMessageForAssertion, AssertionError::new);
   }
 
   @Override
@@ -86,7 +86,7 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
   @SuppressWarnings("RedundantTypeArguments")
   @Override
   default <T> void assumeThat(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, this::composeMessageForAssertion, this::<RuntimeException>testSkippedException);
+    checkValueAndThrowIfFails(value, cond, this::composeMessageForAssertion, this::<RuntimeException>testSkippedException);
   }
 
   @SuppressWarnings("unchecked")
@@ -110,6 +110,10 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
   AE applicationException(String message);
 
   <T extends RuntimeException> T testSkippedException(String message);
+
+  default <T extends RuntimeException> T testSkippedException(Explanation explanation) {
+    return testSkippedException(explanation.toString());
+  }
 
   <T extends Error> T testFailedException(String message);
   default <T extends Error> T testFailedException(Explanation explanation) {
