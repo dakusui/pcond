@@ -68,7 +68,7 @@ public class MatchersTest extends TestBase {
   public void givenCollection_whenPassingMatcherForListOf_thenPasses() {
     validate(
         unmodifiableCollection(asList("Hello", "World")),
-        matcherForCollectionOf(String.class).transformBy(size()).thenVerifyWith(isEqualTo(1))
+        matcherForCollectionOf(String.class).transformBy(size()).thenVerifyWith(isEqualTo(2))
         );
   }
 
