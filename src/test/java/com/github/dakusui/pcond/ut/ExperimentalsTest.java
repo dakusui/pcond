@@ -88,7 +88,6 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       assertThat(
           lineAt(e.getMessage(), 6),
           allOf(
-              CoreMatchers.containsString("context:[hello, o]"),
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("stringEndsWith(String)(String)[0, 1]"),
               CoreMatchers.containsString("true")
@@ -112,7 +111,6 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       assertThat(
           lineAt(e.getMessage(), 6),
           allOf(
-              CoreMatchers.containsString("context:[hello, 1]"),
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("length >[3]"),
               CoreMatchers.containsString(",0"),
@@ -128,9 +126,14 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
               CoreMatchers.containsString("5")
           ));
       assertThat(
-          lineAt(e.getMessage(), 10),
+          lineAt(e.getMessage(), 9),
           allOf(
               CoreMatchers.containsString("5"),
+              CoreMatchers.containsString("check")
+          ));
+      assertThat(
+          lineAt(e.getMessage(), 10),
+          allOf(
               CoreMatchers.containsString(">[3]"),
               CoreMatchers.containsString("true")
           ));
@@ -150,7 +153,6 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       assertThat(
           lineAt(e.getMessage(), 6),
           allOf(
-              CoreMatchers.containsString("context:[null, 1]"),
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("length >[3]"),
               CoreMatchers.containsString(",0"),
@@ -212,12 +214,12 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       e.printStackTrace();
       assertThat(
           lineAt(e.getMessage(), 1),
-          CoreMatchers.containsString("transform"));
+          allOf(
+              CoreMatchers.containsString("hello"),
+              CoreMatchers.containsString("transform")));
       assertThat(
           lineAt(e.getMessage(), 2),
-          allOf(
-              CoreMatchers.containsString("streamOf"),
-              CoreMatchers.containsString("hello")));
+          CoreMatchers.containsString("streamOf"));
       assertThat(
           lineAt(e.getMessage(), 3),
           CoreMatchers.containsString("toContextStream"));
@@ -257,9 +259,14 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           ));
 
       assertThat(
-          lineAt(e.getMessage(), 4),
+          lineAt(e.getMessage(), 3),
           allOf(
               CoreMatchers.containsString("context:[hello]"),
+              CoreMatchers.containsString("check")
+          ));
+      assertThat(
+          lineAt(e.getMessage(), 4),
+          allOf(
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("isNull"),
               CoreMatchers.containsString("0"),
@@ -280,12 +287,12 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       e.printStackTrace();
       assertThat(
           lineAt(e.getMessage(), 1),
-          CoreMatchers.containsString("transform"));
-      assertThat(
-          lineAt(e.getMessage(), 2),
           allOf(
               CoreMatchers.containsString("\"hello\",\"world\""),
-              CoreMatchers.containsString("stream")));
+              CoreMatchers.containsString("transform")));
+      assertThat(
+          lineAt(e.getMessage(), 2),
+          CoreMatchers.containsString("stream"));
       assertThat(
           lineAt(e.getMessage(), 3),
           allOf(

@@ -135,7 +135,7 @@ public interface Evaluator {
 
     @Override
     public void evaluate(Context context, Evaluable.ContextPred contextPred) {
-      this.enter(Entry.Type.LEAF, String.format("***%s", contextPred), context);
+      this.enter(Entry.Type.LEAF, String.format("%s", contextPred), context);
       contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
       this.leave(this.resultValue());
     }

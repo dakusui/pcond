@@ -56,7 +56,21 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
   @SuppressWarnings("unchecked")
   @Override
   public <T extends RuntimeException> T testSkippedException(String message) {
-    throw (T) createException("org.opentest4j.TestSkippedException", Explanation.fromMessage(message));
+    throw (T) createException("org.opentest4j.TestSkippedException", Explanation.fromMessage(message), c -> new ExceptionComposer<T>() {
+      @Override
+      public T apply(Explanation explanation) {
+        try {
+          return crete(explanation);
+        } catch (InstantiationException | IllegalAccessException |
+                 InvocationTargetException | NoSuchMethodException e) {
+          throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + c.getCanonicalName() + "'", e);
+        }
+      }
+
+      private T crete(Explanation explanation) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        return (T) c.getConstructor(String.class).newInstance(explanation.toString());
+      }
+    });
   }
 
   @Override
@@ -67,21 +81,37 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
   @SuppressWarnings("unchecked")
   @Override
   public <T extends Error> T testFailedException(Explanation explanation) {
-    throw (T) createException("org.opentest4j.AssertionFailedError", explanation);
+    throw (T) createException("org.opentest4j.AssertionFailedError", explanation, c -> new ExceptionComposer<T>() {
+      @Override
+      public T apply(Explanation explanation) {
+        try {
+          return crete(explanation);
+        } catch (InstantiationException | IllegalAccessException |
+                 InvocationTargetException | NoSuchMethodException e) {
+          throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + c.getCanonicalName() + "'", e);
+        }
+      }
+
+      private T crete(Explanation explanation) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
+        return (T) c.getConstructor(String.class, Object.class, Object.class).newInstance(explanation.message(), explanation.expected(), explanation.actual());
+      }
+    });
   }
 
-  @SuppressWarnings("unchecked")
-  private <T extends Throwable> T createException(String className, Explanation explanation) {
+  private <T extends Throwable> T createException(String className, Explanation explanation, Function<Class<?>, ExceptionComposer<T>> exceptionComposerFactory) {
+    try {
+      return (T) exceptionComposerFactory.apply(Class.forName(className)).apply(explanation);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + className + "'", e);
+    }
+  }
+
+
+  private Object newExceptionObject(Explanation explanation, Class<?> aClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
     String message = explanation.message();
     String expected = explanation.expected();
     String actual = explanation.actual();
-    try {
-      return (T) Class.forName(className).getConstructor(String.class, Object.class, Object.class).newInstance(message, expected, actual);
-    } catch (InstantiationException | IllegalAccessException |
-             InvocationTargetException | NoSuchMethodException |
-             ClassNotFoundException e) {
-      throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + className + "'", e);
-    }
+    return aClass.getConstructor(String.class, Object.class, Object.class).newInstance(message, expected, actual);
   }
 
   @SuppressWarnings("unchecked")
@@ -158,7 +188,10 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
   }
 
   private static Function<FormattedEntry, String> formattedEntryToStringForActualResult(int inputColumnWidth, int formNameColumnLength, int outputColumnLength) {
-    return (FormattedEntry formattedEntry) -> format("%-" + inputColumnWidth + "s%-" + (formNameColumnLength + 2) + "s%-" + outputColumnLength + "s",
+    return (FormattedEntry formattedEntry) -> format("%-" +
+            Math.max(2, inputColumnWidth) + "s%-" +
+            (formNameColumnLength + 2) + "s%-" +
+            Math.max(2, outputColumnLength) + "s",
         formattedEntry.input().orElse(""),
         formattedEntry.input().map(v -> "->").orElse("  ") + formattedEntry.indent() + formattedEntry.formName(),
         formattedEntry.output().map(v -> "->" + v).orElse(""));

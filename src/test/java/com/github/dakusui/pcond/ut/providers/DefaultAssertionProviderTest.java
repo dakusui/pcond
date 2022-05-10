@@ -70,7 +70,6 @@ public class DefaultAssertionProviderTest extends TestBase {
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.containsString("Hello"),
           CoreMatchers.containsString("isEqualTo[\"hello\"]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
@@ -98,7 +97,6 @@ public class DefaultAssertionProviderTest extends TestBase {
       );
       assertThat(lineAt(e.getMessage(), 2), allOf(
           CoreMatchers.containsString("length"),
-          CoreMatchers.containsString("Hello"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("5")
 

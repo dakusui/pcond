@@ -22,8 +22,8 @@ public class WithMessageTest extends TestBase {
           e.getMessage().replaceAll(" +", " ").replaceAll("\"", "'"),
           CoreMatchers.allOf(
               CoreMatchers.containsString("Hello, world"),
-              CoreMatchers.containsString("! -> false"),
-              CoreMatchers.containsString("alwaysTrue('Value') -> true")
+              CoreMatchers.containsString("! ->false"),
+              CoreMatchers.containsString("alwaysTrue->true")
           ));
 
       throw e;
@@ -42,9 +42,9 @@ public class WithMessageTest extends TestBase {
           e.getMessage().replaceAll(" +", " ").replaceAll("\"", "'"),
           CoreMatchers.allOf(
               CoreMatchers.containsString("Hello, world"),
-              CoreMatchers.containsString("! -> false"),
+              CoreMatchers.containsString("! ->false"),
               CoreMatchers.containsString("Always true!"),
-              CoreMatchers.containsString("alwaysTrue('Value') -> true")
+              CoreMatchers.containsString("alwaysTrue->true")
           ));
 
       throw e;
