@@ -43,16 +43,17 @@ public interface Evaluator {
 
   class Impl implements Evaluator {
     private static final Object NULL_VALUE = new Object();
-    List<Entry.OnGoing> onGoingEntries = new LinkedList<>();
-    List<Entry>         entries        = new ArrayList<>();
+    List<Entry.OnGoing> onGoingEntries                = new LinkedList<>();
+    List<Entry>         entries                       = new ArrayList<>();
     Object              currentResult;
+    boolean             currentlyExpectedBooleanValue = true;
 
     void enter(Entry.Type type, String name, Object input) {
-      enter(type, name, input, false);
+      this.enter(type, name, input, false);
     }
 
     void enter(Entry.Type type, String name, Object input, boolean suppressPrintingOutput) {
-      Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, input, suppressPrintingOutput);
+      Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, input, suppressPrintingOutput, this.currentlyExpectedBooleanValue);
       onGoingEntries.add(newEntry);
       entries.add(newEntry);
     }
@@ -65,6 +66,10 @@ public interface Evaluator {
       this.currentResult = result;
     }
 
+    void flipCurrentlyExpectedBooleanValue() {
+      this.currentlyExpectedBooleanValue = !this.currentlyExpectedBooleanValue;
+    }
+
     @Override
     public <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction) {
       int i = 0;
@@ -72,13 +77,13 @@ public interface Evaluator {
       boolean shortcut = conjunction.shortcut();
       for (Evaluable<? super T> each : conjunction.children()) {
         if (i == 0)
-          enter(Entry.Type.COMPOSITE, "&&", value);
+          this.enter(Entry.Type.COMPOSITE, "&&", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (!cur)
           finalValue = cur;
         if ((shortcut && !finalValue) || i == conjunction.children().size() - 1) {
-          leave(finalValue);
+          this.leave(finalValue);
           return;
         }
         i++;
@@ -92,13 +97,13 @@ public interface Evaluator {
       boolean shortcut = disjunction.shortcut();
       for (Evaluable<? super T> each : disjunction.children()) {
         if (i == 0)
-          enter(Entry.Type.COMPOSITE, "||", value);
+          this.enter(Entry.Type.COMPOSITE, "||", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (cur)
           finalValue = cur;
         if ((shortcut && finalValue) || i == disjunction.children().size() - 1) {
-          leave(finalValue);
+          this.leave(finalValue);
           return;
         }
         i++;
@@ -107,30 +112,32 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.Negation<T> negation) {
-      enter(Entry.Type.COMPOSITE, "!", value);
+      this.enter(Entry.Type.COMPOSITE, "!", value);
+      this.flipCurrentlyExpectedBooleanValue();
       negation.target().accept(value, this);
-      leave(!this.<Boolean>resultValue());
+      this.flipCurrentlyExpectedBooleanValue();
+      this.leave(!this.<Boolean>resultValue());
     }
 
     @Override
     public <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred) {
-      enter(Entry.Type.LEAF, String.format("%s", leafPred), value);
+      this.enter(Entry.Type.LEAF, String.format("%s", leafPred), value);
       boolean result = leafPred.predicate().test(value);
-      leave(result);
+      this.leave(result);
     }
 
     @Override
     public <T> void evaluate(T value, Evaluable.Messaged<T> messaged) {
-      enter(Entry.Type.COMPOSITE, messaged.message(), value, true);
+      this.enter(Entry.Type.COMPOSITE, messaged.message(), value, true);
       messaged.target().accept(value, this);
-      leave(this.<Boolean>resultValue());
+      this.leave(this.<Boolean>resultValue());
     }
 
     @Override
     public void evaluate(Context context, Evaluable.ContextPred contextPred) {
-      enter(Entry.Type.LEAF, String.format("***%s", contextPred), context);
+      this.enter(Entry.Type.LEAF, String.format("***%s", contextPred), context);
       contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
-      leave(this.resultValue());
+      this.leave(this.resultValue());
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -138,7 +145,7 @@ public interface Evaluator {
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
       this.enter(Entry.Type.COMPOSITE, "transform", value, true);
       transformation.mapper().accept(value, this);
-      enter(Entry.Type.COMPOSITE, "check", this.resultValue(), true);
+      this.enter(Entry.Type.COMPOSITE, "check", this.resultValue(), true);
       transformation.checker().accept((R) this.currentResult, this);
       this.leave(this.resultValue());
       this.leave(this.resultValue());
@@ -147,22 +154,22 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T> void evaluate(T value, Evaluable.Func<T> func) {
-      enter(Entry.Type.LEAF, String.format("%s", func.head()), value);
+      this.enter(Entry.Type.LEAF, String.format("%s", func.head()), value);
       Object resultValue = func.head().apply(value);
-      leave(resultValue);
+      this.leave(resultValue);
       func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(resultValue, this));
     }
 
     @Override
     public <E> void evaluate(Stream<? extends E> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
-      enter(Entry.Type.LEAF, String.format("%s", streamPred), value);
+      this.enter(Entry.Type.LEAF, String.format("%s", streamPred), value);
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
       // on 'findFirst()'.
       // Although NULL_VALUE is an ordinary Object, not a value of E, this works
       // because either way we will just return a boolean and during the execution,
       // type information is erased.
-      leave(value
+      this.leave(value
           .filter(valueChecker(streamPred))
           .map(v -> v != null ? v : NULL_VALUE)
           .findFirst()
@@ -212,7 +219,7 @@ public interface Evaluator {
     }
 
     private Entry.Finalized createEntryForImport(Entry each, Object other) {
-      return new Entry.Finalized(each.type, this.onGoingEntries.size() + each.level, each.input, each.hasOutput() ? each.output() : other, each.name, each.suppressPrintingOutput);
+      return new Entry.Finalized(each.type, this.onGoingEntries.size() + each.level, each.input, each.hasOutput() ? each.output() : other, each.name, each.suppressPrintingOutput, each.expectedBooleanValue);
     }
   }
 
@@ -222,13 +229,15 @@ public interface Evaluator {
     final         Object  input;
     final         String  name;
     private final boolean suppressPrintingOutput;
+    private final boolean expectedBooleanValue;
 
-    Entry(Type type, int level, Object input, String name, boolean suppressPrintingOutput) {
+    Entry(Type type, int level, Object input, String name, boolean suppressPrintingOutput, boolean expectedBooleanValue) {
       this.type = type;
       this.level = level;
       this.input = input;
       this.name = name;
       this.suppressPrintingOutput = suppressPrintingOutput;
+      this.expectedBooleanValue = expectedBooleanValue;
     }
 
     public int level() {
@@ -248,6 +257,10 @@ public interface Evaluator {
       return this.suppressPrintingOutput;
     }
 
+    public boolean expectedBooleanValue() {
+      return this.expectedBooleanValue;
+    }
+
     public abstract boolean hasOutput();
 
     public abstract <T> T output();
@@ -264,8 +277,8 @@ public interface Evaluator {
     static class Finalized extends Entry {
       final Object output;
 
-      Finalized(Type type, int level, Object input, Object output, String name, boolean suppressPrintingOutput) {
-        super(type, level, input, name, suppressPrintingOutput);
+      Finalized(Type type, int level, Object input, Object output, String name, boolean suppressPrintingOutput, boolean expectedBooleanValue) {
+        super(type, level, input, name, suppressPrintingOutput, expectedBooleanValue);
         this.output = output;
       }
 
@@ -284,13 +297,13 @@ public interface Evaluator {
     static class OnGoing extends Entry {
       final int positionInEntries;
 
-      OnGoing(Type type, int level, int positionInEntries, String name, Object input, boolean suppressPrintingOutput) {
-        super(type, level, input, name, suppressPrintingOutput);
+      OnGoing(Type type, int level, int positionInEntries, String name, Object input, boolean suppressPrintingOutput, boolean expectedBooleanValue) {
+        super(type, level, input, name, suppressPrintingOutput, expectedBooleanValue);
         this.positionInEntries = positionInEntries;
       }
 
       Finalized result(Object result) {
-        return new Finalized(this.type, this.level, this.input, result, this.name, this.suppressPrintingOutput());
+        return new Finalized(this.type, this.level, this.input, result, this.name, this.suppressPrintingOutput(), this.expectedBooleanValue());
       }
 
       @Override

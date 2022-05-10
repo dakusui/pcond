@@ -242,7 +242,7 @@ public enum ReflUtils {
     try {
       return (R) method.invoke(null, args);
     } catch (IllegalAccessException | InvocationTargetException e) {
-      throw InternalUtils.wrap(
+      throw InternalUtils.executionFailure(
           format("Invoked method:%s threw an exception", formatMethodName(method)),
           e instanceof InvocationTargetException ? e.getCause() : e);
     }

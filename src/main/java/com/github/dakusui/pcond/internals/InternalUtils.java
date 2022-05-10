@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.internals;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -12,7 +13,6 @@ import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
-import static java.util.Collections.max;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 
@@ -114,23 +114,27 @@ public enum InternalUtils {
       try {
         return (T) expectedClass.cast(loadedClass.getDeclaredConstructor(Arrays.stream(args).map(Object::getClass).toArray(Class<?>[]::new)).newInstance(args));
       } catch (ClassCastException e) {
-        throw wrap("The requested class:'" + requestedClassName +
+        throw executionFailure("The requested class:'" + requestedClassName +
                 "' was found but not an instance of " + expectedClass.getCanonicalName() + ".: " +
                 "It was '" + loadedClass.getCanonicalName() + "'.",
             e);
       } catch (NoSuchMethodException e) {
-        throw wrap("Public constructor without parameters was not found in " + requestedClassName, e);
+        throw executionFailure("Public constructor without parameters was not found in " + requestedClassName, e);
       } catch (InvocationTargetException e) {
-        throw wrap("Public constructor without parameters was found in " + requestedClassName + " but threw an exception", e.getCause());
+        throw executionFailure("Public constructor without parameters was found in " + requestedClassName + " but threw an exception", e.getCause());
       }
     } catch (InstantiationException | IllegalAccessException |
              ClassNotFoundException e) {
-      throw wrap("The requested class was not found or not accessible.: " + requestedClassName, e);
+      throw executionFailure("The requested class was not found or not accessible.: " + requestedClassName, e);
     }
   }
 
-  public static InternalException wrap(String message, Throwable cause) {
-    throw new InternalException(message, cause);
+  public static InternalException executionFailure(String message, Throwable cause) {
+    throw executionFailure(AssertionProviderBase.Explanation.fromMessage(message), cause);
+  }
+
+  public static InternalException executionFailure(AssertionProviderBase.Explanation explanation, Throwable cause) {
+    throw new InternalException(explanation.toString(), cause);
   }
 
   public static InternalException wrapIfNecessary(Throwable cause) {
@@ -138,7 +142,7 @@ public enum InternalUtils {
       throw (Error) cause;
     if (cause instanceof RuntimeException)
       throw (RuntimeException) cause;
-    throw wrap(cause.getMessage(), cause);
+    throw executionFailure(cause.getMessage(), cause);
   }
 
   public static List<? super Object> append(List<? super Object> list, Object p) {
@@ -198,7 +202,7 @@ public enum InternalUtils {
     try {
       return aClass.getMethod(methodName, parameterTypes);
     } catch (NoSuchMethodException e) {
-      throw wrap(format("Requested method: %s(%s) was not found in %s", methodName, Arrays.stream(parameterTypes).map(Class::getName).collect(joining(",")), aClass.getName()), e);
+      throw executionFailure(format("Requested method: %s(%s) was not found in %s", methodName, Arrays.stream(parameterTypes).map(Class::getName).collect(joining(",")), aClass.getName()), e);
     }
   }
 }
