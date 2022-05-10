@@ -5,6 +5,7 @@ import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 
+import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.Validations.validate;
 import static com.github.dakusui.pcond.forms.Functions.elementAt;
 import static com.github.dakusui.pcond.forms.Functions.size;
@@ -56,6 +57,25 @@ public class MatchersTest extends TestBase {
   }
 
   @Test
+  public void exemple() {
+    assertThat(
+        new Parent(),
+        allOf(
+            matcherFor(Parent.class)
+                .name("lambda:Parent::parentMethod1--by name() method")
+                .transformBy(Parent::parentMethod1)
+                .thenVerifyWith(isEqualTo("returnValueFromParentMethod")),
+            matcherFor(Parent.class).name("parentMethod2")
+                .transformBy(Parent::parentMethod2)
+                .thenVerifyWith(
+                    matcherFor(Child.class)
+                        .transformBy(function("lambda:Child::childMethod--by Printables.function() method", Child::childMethod))
+                        // 'not(...)' is added to make the matcher fail.
+                        .thenVerifyWith(not(isEqualTo("returnedStringFromChildMethod")))
+                )));
+  }
+
+  @Test
   public void givenList_whenPassingMatcherForListOf_thenPasses() {
     validate(
         asList("Hello", "World"),
@@ -69,7 +89,7 @@ public class MatchersTest extends TestBase {
     validate(
         unmodifiableCollection(asList("Hello", "World")),
         matcherForCollectionOf(String.class).transformBy(size()).thenVerifyWith(isEqualTo(2))
-        );
+    );
   }
 
   @Test

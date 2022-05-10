@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static java.util.Collections.unmodifiableList;
 
@@ -129,7 +128,7 @@ public interface Evaluator {
 
     @Override
     public void evaluate(Context context, Evaluable.ContextPred contextPred) {
-      enter(Entry.Type.LEAF, String.format("%s", contextPred), context);
+      enter(Entry.Type.LEAF, String.format("***%s", contextPred), context);
       contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
       leave(this.resultValue());
     }
@@ -137,9 +136,9 @@ public interface Evaluator {
     @SuppressWarnings({ "unchecked" })
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      this.enter(Entry.Type.COMPOSITE, String.format("transform(%s)", formatObject(value)), value, true);
+      this.enter(Entry.Type.COMPOSITE, "transform", value, true);
       transformation.mapper().accept(value, this);
-      enter(Entry.Type.COMPOSITE, String.format("check(%s)", formatObject(this.resultValue())), value, true);
+      enter(Entry.Type.COMPOSITE, "check", this.resultValue(), true);
       transformation.checker().accept((R) this.currentResult, this);
       this.leave(this.resultValue());
       this.leave(this.resultValue());

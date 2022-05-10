@@ -9,7 +9,7 @@ import java.util.function.Predicate;
 public interface AssertionProviderBase<AE extends Exception> extends AssertionProvider<AE> {
   @Override
   default <T> T requireNonNull(T value) {
-    return checkValue(value, Predicates.isNotNull(), this::composeMessageForPrecondition, NullPointerException::new);
+    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this::composeMessageForPrecondition, ExceptionComposer.from(NullPointerException::new));
   }
 
   @Override
@@ -80,7 +80,7 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
 
   @Override
   default <T> void assertThat(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, this::composeMessageForAssertion, this::<Error>testFailedException);
+    checkValueAndThrowIfFails(value, cond, this::composeMessageForAssertion, this::<Error>testFailedException);
   }
 
   @SuppressWarnings("RedundantTypeArguments")
@@ -112,8 +112,54 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
   <T extends RuntimeException> T testSkippedException(String message);
 
   <T extends Error> T testFailedException(String message);
+  default <T extends Error> T testFailedException(Explanation explanation) {
+    return testFailedException(explanation.toString());
+  }
 
-  <T, E extends Throwable>
-  T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer)
-      throws E;
+  <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E;
+
+  default <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionComposer<E> exceptionComposer) throws E {
+    return checkValue(value, cond, messageComposer, msg -> exceptionComposer.apply(Explanation.fromMessage(msg)));
+  }
+
+  interface ExceptionComposer<E extends Throwable> extends Function<Explanation, E> {
+    static <E extends Throwable> ExceptionComposer<E> from(Function<String, E> exceptionComposingFunction) {
+      return explanation -> exceptionComposingFunction.apply(explanation.toString());
+    }
+  }
+
+  class Explanation {
+    private final String message;
+    private final String expected;
+    private final String actual;
+
+    public Explanation(String message, String expected, String actual) {
+      this.message = message;
+      this.expected = expected;
+      this.actual = actual;
+    }
+
+    public String message() {
+      return this.message;
+    }
+
+    public String expected() {
+      return this.expected;
+    }
+
+    public String actual() {
+      return this.actual;
+    }
+
+    public String toString() {
+      // Did not include "expected" because it is too much overlapping "actual" in most cases.
+      return actual != null ?
+          String.format("%s%n%s", message, actual) :
+          message;
+    }
+
+    public static Explanation fromMessage(String msg) {
+      return new Explanation(msg, null, null);
+    }
+  }
 }
