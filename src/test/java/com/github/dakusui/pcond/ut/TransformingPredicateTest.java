@@ -75,6 +75,6 @@ public class TransformingPredicateTest extends TestBase {
   public void givenNonNullName$whenToString$thenLooksGood() {
     PrintablePredicateFactory.TransformingPredicate<Object, Object> p = new PrintablePredicateFactory.TransformingPredicate<>("hello->", Predicates.alwaysTrue(), Functions.identity());
     System.out.println(p);
-    assertEquals("hello->identity alwaysTrue", p.toString());
+    assertEquals("hello->(identity alwaysTrue)", p.toString());
   }
 }

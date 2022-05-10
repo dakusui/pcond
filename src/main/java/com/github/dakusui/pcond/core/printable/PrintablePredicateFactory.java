@@ -7,10 +7,7 @@ import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.internals.InternalChecks;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -356,13 +353,17 @@ public enum PrintablePredicateFactory {
   public static class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Evaluable.Transformation<O, P> {
     private final Evaluable<? super P> checker;
     private final Evaluable<? super O> mapper;
+    private final String               name;
 
     public TransformingPredicate(String name, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
       super(
           TransformingPredicate.class,
           asList(predicate, function),
-          () -> format("%s%s %s", name == null ? "" : name, function, predicate),
+          () -> name == null ?
+              format("%s %s", function, predicate) :
+              format("%s(%s %s)", name, function, predicate),
           v -> predicate.test(function.apply(v)));
+      this.name = name;
       this.checker = toEvaluableIfNecessary(predicate);
       this.mapper = toEvaluableIfNecessary(function);
     }
@@ -375,6 +376,11 @@ public enum PrintablePredicateFactory {
     @Override
     public Evaluable<? super P> checker() {
       return this.checker;
+    }
+
+    @Override
+    public Optional<String> name() {
+      return Optional.ofNullable(this.name);
     }
 
     /**
@@ -397,7 +403,11 @@ public enum PrintablePredicateFactory {
       TransformingPredicate<P, O> check(Predicate<? super P> cond);
 
       static <P, O> Factory<P, O> create(Function<O, P> function) {
-        return cond -> new TransformingPredicate<>(null, toPrintablePredicate(cond), function);
+        return create(null, function);
+      }
+
+      static <P, O> Factory<P, O> create(String name, Function<O, P> function) {
+        return cond -> new TransformingPredicate<>(name, toPrintablePredicate(cond), function);
       }
     }
 

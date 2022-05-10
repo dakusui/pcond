@@ -14,8 +14,9 @@ import org.junit.runner.RunWith;
 import java.util.function.Predicate;
 
 import static java.util.Arrays.asList;
+import static junit.framework.TestCase.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(Enclosed.class)
 public class InternalUtilsTest {
@@ -110,9 +111,10 @@ public class InternalUtilsTest {
       try {
         InternalUtils.createInstanceFromClassName(Object.class, requestedClassName);
       } catch (InternalException e) {
+        e.printStackTrace();
         assertThat(e.getMessage(),
             allOf(
-                containsString("Public constructor"),
+                containsString("public constructor"),
                 containsString(requestedClassName),
                 containsString("not found")
             ));
@@ -128,7 +130,7 @@ public class InternalUtilsTest {
       } catch (InternalException e) {
         assertThat(e.getMessage(),
             allOf(
-                containsString("Public constructor"),
+                containsString("public constructor"),
                 containsString(requestedClassName),
                 containsString("but threw an exception")
             ));

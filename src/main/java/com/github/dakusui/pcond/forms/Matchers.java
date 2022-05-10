@@ -1,49 +1,43 @@
 package com.github.dakusui.pcond.forms;
 
-import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.TransformingPredicate;
+import com.github.dakusui.pcond.core.printable.Matcher;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 public enum Matchers {
   ;
 
-  public static <P> TransformingPredicate.Factory<P, String> matcherForString(Function<String, P> function) {
-    return Predicates.transform(function).castTo(String.class);
+
+  public static Matcher.Builder.Builder0<String> matcherForString() {
+    return matcher().forType(String.class);
   }
 
-  public static <IN, IM> TransformingPredicate.Builder<IN, IM> matcher(String name) {
-    return new TransformingPredicate.Builder<>(name);
+
+  public static <IN> Matcher.Builder.Builder0<IN> matcher() {
+    return new Matcher.Builder.Builder0<>();
   }
 
-  public static <IN, IM> TransformingPredicate.Builder<IN, IM> matcher() {
-    return new TransformingPredicate.Builder<>();
+
+  public static <IN> Matcher.Builder.Builder0<IN> matcherFor(Class<IN> inType) {
+    return Matchers.matcher().forType(inType);
   }
 
-  public static <IN, IM> TransformingPredicate.Builder<IN, IM> matcherFor(Class<IN> inType) {
-    return Matchers.<IN, IM>matcher().forValueOf(inType);
-  }
-
-  public static <E, IM> TransformingPredicate.Builder<E[], IM> matcherForArrayOf(Class<E> elementType) {
+  public static <E> Matcher.Builder.Builder0<E[]> matcherForArrayOf(Class<E> elementType) {
     return Matchers.matcher();
   }
 
-  public static <IM> TransformingPredicate.Builder<String, IM> matcherForString() {
-    return Matchers.<String, IM>matcher().forString();
+  public static <E> Matcher.Builder.Builder0<List<E>> matcherForListOf(Class<E> elementType) {
+    return Matchers.matcher();
   }
 
-  public static <E, IM> TransformingPredicate.Builder<List<E>, IM> matcherForListOf(Class<E> elementType) {
-    return Matchers.<List<E>, IM>matcher().forListOf(elementType);
-  }
-
-  public static <E, IM> TransformingPredicate.Builder<Collection<E>, IM> matcherForCollectionOf(
+  public static <E> Matcher.Builder.Builder0<Collection<E>> matcherForCollectionOf(
       @SuppressWarnings("unused") Class<E> elementType) {
     return Matchers.matcher();
   }
 
-  public static <K, V, IM> TransformingPredicate.Builder<Map<K, V>, IM> matcherForMapOf(Class<K> keyType, Class<V> valueType) {
+  public static <K, V> Matcher.Builder.Builder0<Map<K, V>> matcherForMapOf(Class<K> keyType, Class<V> valueType) {
     return Matchers.matcher();
   }
 }

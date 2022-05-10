@@ -119,9 +119,9 @@ public enum InternalUtils {
                 "It was '" + loadedClass.getCanonicalName() + "'.",
             e);
       } catch (NoSuchMethodException e) {
-        throw executionFailure("Public constructor without parameters was not found in " + requestedClassName, e);
+        throw executionFailure("Matching public constructor for " + Arrays.toString(args) + " was not found in " + requestedClassName, e);
       } catch (InvocationTargetException e) {
-        throw executionFailure("Public constructor without parameters was found in " + requestedClassName + " but threw an exception", e.getCause());
+        throw executionFailure("Matching public constructor was found in " + requestedClassName + " but threw an exception", e.getCause());
       }
     } catch (InstantiationException | IllegalAccessException |
              ClassNotFoundException e) {

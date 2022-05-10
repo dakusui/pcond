@@ -143,9 +143,19 @@ public interface Evaluator {
     @SuppressWarnings({ "unchecked" })
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      this.enter(Entry.Type.COMPOSITE, "transform", value, true);
+      this.enter(Entry.Type.COMPOSITE,
+          transformation.name()
+              .map(v -> "transform:" + v)
+              .orElse("transform"),
+          value,
+          true);
       transformation.mapper().accept(value, this);
-      this.enter(Entry.Type.COMPOSITE, "check", this.resultValue(), true);
+      this.enter(Entry.Type.COMPOSITE,
+          transformation.name()
+              .map(v -> "check:" + v)
+              .orElse("check"),
+          this.resultValue(),
+          true);
       transformation.checker().accept((R) this.currentResult, this);
       this.leave(this.resultValue());
       this.leave(this.resultValue());

@@ -30,7 +30,7 @@ public interface AssertionProvider<AE extends Throwable> {
   static AssertionProvider<?> createAssertionProvider(Properties properties) {
     String propertyKeyName = AssertionProvider.class.getCanonicalName();
     if (properties.containsKey(propertyKeyName)) {
-      return InternalUtils.createInstanceFromClassName(AssertionProvider.class, properties.getProperty(propertyKeyName));
+      return InternalUtils.createInstanceFromClassName(AssertionProvider.class, properties.getProperty(propertyKeyName), System.getProperties());
     }
     return new JUnit4AssertionProvider(properties);
   }

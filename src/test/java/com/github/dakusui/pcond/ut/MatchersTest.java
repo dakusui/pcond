@@ -17,6 +17,10 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
 
 public class MatchersTest extends TestBase {
+  {
+    //    Pcond.initializeWith(Opentest4jAssertionProvider.class);
+  }
+
   @Test
   public void whenPassingValidation_thenPasses$1() {
     validate(
@@ -39,9 +43,10 @@ public class MatchersTest extends TestBase {
                   .thenVerifyWith(isEqualTo("returnValueFromParentMethod")),
               matcherFor(Parent.class).name("parentMethod2")
                   .transformBy(Parent::parentMethod2)
+                  .into(Child.class)
                   .thenVerifyWith(
                       matcherFor(Child.class)
-                          .transformBy(function("lambda:Child::childMethod--by Printables.function() method", Child::childMethod))
+                          .transformBy(function("lambda:Child::childMethod--by Printables.function()", Child::childMethod))
                           // 'not(...)' is added to make the matcher fail.
                           .thenVerifyWith(not(isEqualTo("returnedStringFromChildMethod")))
                   )),
@@ -51,29 +56,44 @@ public class MatchersTest extends TestBase {
       MatcherAssert.assertThat(
           e.getMessage(),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("lambda:Parent::parentMethod1--by name() method"),
-              CoreMatchers.containsString("lambda:Child::childMethod--by Printables.function() method")));
+              CoreMatchers.containsString("lambda:Parent::parentMethod1--by name()"),
+              CoreMatchers.containsString("lambda:Child::childMethod--by Printables.function()")));
       throw e;
     }
   }
 
   @Test(expected = ComparisonFailure.class)
-  public void exemple() {
+  public void example() {
+    try {
+      assertThat(
+          new Parent(),
+          allOf(
+              matcherFor(Parent.class)
+                  .transformBy(function("lambda:Parent::parentMethod1--by name() method", Parent::parentMethod1))
+                  .thenVerifyWith(isEqualTo("returnValueFromParentMethod")),
+              matcherFor(Parent.class).name("parentMethod2")
+                  .transformBy(function("Parent::parentMethod2", Parent::parentMethod2))
+                  .into(Child.class)
+                  .thenVerifyWith(
+                      matcherFor(Child.class)
+                          .transformBy(function("lambda:Child::childMethod--by Printables.function() method", Child::childMethod))
+                          // 'not(...)' is added to make the matcher fail.
+                          .thenVerifyWith(not(isEqualTo("returnedStringFromChildMethod")))
+                  )));
+    } catch (ComparisonFailure e) {
+      e.printStackTrace();
+      throw e;
+    }
+  }
+
+  @Test(expected = ComparisonFailure.class)
+  public void givenRawLambdas$whenFailingAssertionPerformed$thenComparisonFailureThrown() {
     assertThat(
         new Parent(),
-        allOf(
-            matcherFor(Parent.class)
-                .name("lambda:Parent::parentMethod1--by name() method")
-                .transformBy(Parent::parentMethod1)
-                .thenVerifyWith(isEqualTo("returnValueFromParentMethod")),
-            matcherFor(Parent.class).name("parentMethod2")
-                .transformBy(Parent::parentMethod2)
-                .thenVerifyWith(
-                    matcherFor(Child.class)
-                        .transformBy(function("lambda:Child::childMethod--by Printables.function() method", Child::childMethod))
-                        // 'not(...)' is added to make the matcher fail.
-                        .thenVerifyWith(not(isEqualTo("returnedStringFromChildMethod")))
-                )));
+        matcherFor(Parent.class)
+            .transformBy(Parent::parentMethod2).into(Child.class)
+            .andThen(Child::childMethod)
+            .thenVerifyWith(equalTo("hello")));
   }
 
   @Test
@@ -81,7 +101,7 @@ public class MatchersTest extends TestBase {
     validate(
         asList("Hello", "World"),
         and(matcherForListOf(String.class).transformBy(elementAt(0)).thenVerifyWith(isEqualTo("Hello")),
-            matcherForListOf(String.class).transformBy(elementAt(1)).thenVerifyWith(isEqualTo("World"))
+            matcherForListOf(String.class).transformBy(l -> l.get(1).toLowerCase()).thenVerifyWith(isEqualTo("world"))
         ));
   }
 
@@ -97,8 +117,8 @@ public class MatchersTest extends TestBase {
   public void givenArray_whenPassingMatcher_thenPasses() {
     validate(new String[] { "Hello", "World" },
         allOf(
-            matcherForArrayOf(String.class).transformBy(v -> v[0]).thenVerifyWith(equalTo("Hello")),
-            matcherForArrayOf(String.class).transformBy(v -> v[1]).thenVerifyWith(equalTo("World"))
+            matcherForArrayOf(String.class).transformBy(v -> v[0]).into(String.class).thenVerifyWith(equalTo("Hello")),
+            matcherForArrayOf(String.class).transformBy(v -> v[1]).into(String.class).thenVerifyWith(equalTo("World"))
         ));
   }
 
@@ -108,36 +128,10 @@ public class MatchersTest extends TestBase {
         matcherForString().transformBy(v -> v).thenVerifyWith(equalTo("Hello, world")));
   }
 
-  @Test(expected = IllegalStateException.class)
-  public void givenString_whenTransformingFunctionMissing_thenIllegalStateException() {
-    try {
-      validate("Hello, world",
-          matcherForString().into(String.class).thenVerifyWith(equalTo("Hello, world")));
-    } catch (IllegalStateException e) {
-      e.printStackTrace();
-      MatcherAssert.assertThat(e.getMessage(),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("function"),
-              CoreMatchers.containsString("transformBy")
-          ));
-      throw e;
-    }
-  }
 
-  @Test(expected = IllegalStateException.class)
-  public void givenString_whenCheckingPredicateMissing_thenIllegalStateException() {
-    try {
-      validate("Hello, world",
-          matcherForString().transformBy(v -> v).build());
-    } catch (IllegalStateException e) {
-      e.printStackTrace();
-      MatcherAssert.assertThat(e.getMessage(),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("predicate"),
-              CoreMatchers.containsString("thenVerifyWith")
-          ));
-      throw e;
-    }
+  @Test
+  public void example2() {
+
   }
 
   static class Parent {

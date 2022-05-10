@@ -98,11 +98,11 @@ public enum Predicates {
     return ParameterizedLeafFactory.create(ParameterizedLeafFactory.LESS_THAN_OR_EQUAL_TO, singletonList(value));
   }
 
-  public static <T extends Comparable<? super T>> Predicate<T> eq(T value) {
+  public static <T extends Comparable<T>> Predicate<T> eq(T value) {
     return equalTo(value);
   }
 
-  public static <T extends Comparable<? super T>> Predicate<T> equalTo(T value) {
+  public static <T extends Comparable<T>> Predicate<T> equalTo(T value) {
     return ParameterizedLeafFactory.create(ParameterizedLeafFactory.EQUAL_TO, singletonList(value));
   }
 

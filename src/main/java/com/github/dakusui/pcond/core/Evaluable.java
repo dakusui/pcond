@@ -95,6 +95,8 @@ public interface Evaluable<T> {
     Evaluable<? super T> mapper();
 
     Evaluable<? super R> checker();
+
+    Optional<String> name();
   }
 
   interface Func<T> extends Evaluable<T> {
