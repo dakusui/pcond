@@ -21,10 +21,10 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public class DefaultAssertionProvider implements AssertionProviderBase<ApplicationException> {
+public abstract class BaseAssertionProvider implements AssertionProviderBase<ApplicationException> {
   private final boolean useEvaluator;
 
-  public DefaultAssertionProvider(Properties properties) {
+  public BaseAssertionProvider(Properties properties) {
     this.useEvaluator = useEvaluator(this.getClass(), properties);
   }
 
@@ -53,66 +53,34 @@ public class DefaultAssertionProvider implements AssertionProviderBase<Applicati
     return new ApplicationException(message);
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T extends RuntimeException> T testSkippedException(String message) {
-    throw (T) createException("org.opentest4j.TestSkippedException", Explanation.fromMessage(message), c -> new ExceptionComposer<T>() {
-      @Override
-      public T apply(Explanation explanation) {
-        try {
-          return crete(explanation);
-        } catch (InstantiationException | IllegalAccessException |
-                 InvocationTargetException | NoSuchMethodException e) {
-          throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + c.getCanonicalName() + "'", e);
-        }
-      }
-
-      private T crete(Explanation explanation) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        return (T) c.getConstructor(String.class).newInstance(explanation.toString());
-      }
-    });
-  }
-
   @Override
   public <T extends Error> T testFailedException(String message) {
     throw testFailedException(Explanation.fromMessage(message));
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
-  public <T extends Error> T testFailedException(Explanation explanation) {
-    throw (T) createException("org.opentest4j.AssertionFailedError", explanation, c -> new ExceptionComposer<T>() {
-      @Override
-      public T apply(Explanation explanation) {
-        try {
-          return crete(explanation);
-        } catch (InstantiationException | IllegalAccessException |
-                 InvocationTargetException | NoSuchMethodException e) {
-          throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + c.getCanonicalName() + "'", e);
-        }
-      }
+  @FunctionalInterface
+  interface ReflectiveExceptionFactory<T extends Throwable> {
+    T create(Class<T> c, Explanation explanation) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException;
 
-      private T crete(Explanation explanation) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-        return (T) c.getConstructor(String.class, Object.class, Object.class).newInstance(explanation.message(), explanation.expected(), explanation.actual());
+    default T apply(Class<T> c, Explanation explanation) {
+      try {
+        return create(c, explanation);
+      } catch (InvocationTargetException | InstantiationException |
+               IllegalAccessException | NoSuchMethodException e) {
+        throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + c.getCanonicalName() + "'", e);
       }
-    });
-  }
-
-  private <T extends Throwable> T createException(String className, Explanation explanation, Function<Class<?>, ExceptionComposer<T>> exceptionComposerFactory) {
-    try {
-      return (T) exceptionComposerFactory.apply(Class.forName(className)).apply(explanation);
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + className + "'", e);
     }
   }
 
-
-  private Object newExceptionObject(Explanation explanation, Class<?> aClass) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
-    String message = explanation.message();
-    String expected = explanation.expected();
-    String actual = explanation.actual();
-    return aClass.getConstructor(String.class, Object.class, Object.class).newInstance(message, expected, actual);
+  @SuppressWarnings("unchecked")
+  <T extends Throwable> T createException(String className, Explanation explanation, ReflectiveExceptionFactory<T> reflectiveExceptionFactory) {
+    try {
+      return reflectiveExceptionFactory.apply((Class<T>) Class.forName(className), explanation);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + className + "' (NOT FOUND)", e);
+    }
   }
+
 
   @SuppressWarnings("unchecked")
   @Override

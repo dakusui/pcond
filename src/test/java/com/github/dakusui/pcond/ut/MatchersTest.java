@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.ut;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
@@ -56,7 +57,7 @@ public class MatchersTest extends TestBase {
     }
   }
 
-  @Test
+  @Test(expected = ComparisonFailure.class)
   public void exemple() {
     assertThat(
         new Parent(),

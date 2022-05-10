@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.provider;
 
 import com.github.dakusui.pcond.internals.InternalUtils;
-import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
+import com.github.dakusui.pcond.provider.impls.JUnit4AssertionProvider;
 
 import java.util.Properties;
 import java.util.function.Function;
@@ -13,6 +13,7 @@ import java.util.function.Predicate;
  * @param <AE> The type of exception that should be thrown on an application error.
  */
 public interface AssertionProvider<AE extends Throwable> {
+
   /**
    * A constant field that holds the default provider instance.
    */
@@ -31,7 +32,7 @@ public interface AssertionProvider<AE extends Throwable> {
     if (properties.containsKey(propertyKeyName)) {
       return InternalUtils.createInstanceFromClassName(AssertionProvider.class, properties.getProperty(propertyKeyName));
     }
-    return new DefaultAssertionProvider(properties);
+    return new JUnit4AssertionProvider(properties);
   }
 
   /**

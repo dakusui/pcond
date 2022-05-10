@@ -1,7 +1,9 @@
 package com.github.dakusui.pcond.ut.providers;
 
+import com.github.dakusui.pcond.Pcond;
 import com.github.dakusui.pcond.provider.AssertionProvider;
-import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
+import com.github.dakusui.pcond.provider.impls.JUnit4AssertionProvider;
+import com.github.dakusui.pcond.provider.impls.Opentest4jAssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
@@ -10,7 +12,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AssertionProviderTest extends TestBase {
   public static class TestAssertionProvider implements AssertionProvider<RuntimeException> {
@@ -93,10 +95,10 @@ public class AssertionProviderTest extends TestBase {
 
   @Test
   public void testAssertionEnabled() {
-    AssertionProvider<?> assertionProvider = AssertionProvider.createAssertionProvider(System.getProperties());
+    AssertionProvider<?> assertionProvider = AssertionProvider.createAssertionProvider(new Properties());
     assertThat(
         assertionProvider,
-        instanceOf(DefaultAssertionProvider.class));
+        instanceOf(JUnit4AssertionProvider.class));
   }
 
   @Test
@@ -108,5 +110,19 @@ public class AssertionProviderTest extends TestBase {
         assertionProvider,
         instanceOf(TestAssertionProvider.class)
     );
+  }
+
+  @Test
+  public void test2() {
+    System.out.println(TestAssertionProvider.class.getName());
+    System.setProperty("com.github.dakusui.pcond.provider.AssertionProvider", "com.github.dakusui.pcond.ut.providers.AssertionProviderTest$TestAssertionProvider");
+    System.out.println("-->" + AssertionProvider.INSTANCE.getClass().getCanonicalName());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void test3() {
+    Pcond.initializeWith(TestAssertionProvider.class);
+    System.out.println(AssertionProvider.INSTANCE.getClass().getCanonicalName());
+    Pcond.initializeWith(Opentest4jAssertionProvider.class);
   }
 }
