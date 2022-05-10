@@ -1,14 +1,11 @@
 package com.github.dakusui.pcond.forms;
 
-import com.github.dakusui.pcond.TestAssertions;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.TransformingPredicate;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
-import static com.github.dakusui.pcond.forms.Predicates.greaterThan;
 
 public enum Matchers {
   ;
@@ -41,19 +38,12 @@ public enum Matchers {
     return Matchers.<List<E>, IM>matcher().forListOf(elementType);
   }
 
-  public static <E, IM> TransformingPredicate.Builder<List<E>, IM> matcherForCollectionOf(Class<E> elementType) {
-    return Matchers.<Collection<E>, IM>matcher().forListOf(elementType);
+  public static <E, IM> TransformingPredicate.Builder<Collection<E>, IM> matcherForCollectionOf(
+      @SuppressWarnings("unused") Class<E> elementType) {
+    return Matchers.matcher();
   }
 
   public static <K, V, IM> TransformingPredicate.Builder<Map<K, V>, IM> matcherForMapOf(Class<K> keyType, Class<V> valueType) {
     return Matchers.matcher();
-  }
-
-  public static void main(String... args) {
-    String out = "hello, world";
-    TestAssertions.assertThat(out, matcherForString(Integer::parseInt).check(greaterThan(0)));
-    matcher("parseInt").forValueOf(String.class)
-        .transformBy(Integer::parseInt).into(int.class)
-        .thenVerifyWith(greaterThan(0));
   }
 }

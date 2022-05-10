@@ -151,17 +151,17 @@ public enum Predicates {
     return Leaf.IS_EMPTY_COLLECTION.instance();
   }
 
-  public static <E> Predicate<Stream<? extends E>> allMatch(Predicate<E> predicate) {
+  public static <E> Predicate<Stream<E>> allMatch(Predicate<E> predicate) {
     requireNonNull(predicate);
     return PrintablePredicateFactory.allMatch(predicate);
   }
 
-  public static <E> Predicate<Stream<? extends E>> noneMatch(Predicate<E> predicate) {
+  public static <E> Predicate<Stream<E>> noneMatch(Predicate<E> predicate) {
     requireNonNull(predicate);
     return PrintablePredicateFactory.noneMatch(predicate);
   }
 
-  public static <E> Predicate<Stream<? extends E>> anyMatch(Predicate<E> predicate) {
+  public static <E> Predicate<Stream<E>> anyMatch(Predicate<E> predicate) {
     requireNonNull(predicate);
     return PrintablePredicateFactory.anyMatch(predicate);
   }
@@ -172,17 +172,17 @@ public enum Predicates {
   }
 
   @SafeVarargs
-  public static <T> Predicate<T> or(Predicate<? super T>... predicates) {
+  public static <T> Predicate<T> or(Predicate<T>... predicates) {
     return PrintablePredicateFactory.or(asList(predicates));
   }
 
   @SafeVarargs
-  public static <T> Predicate<T> allOf(Predicate<? super T>... predicates) {
+  public static <T> Predicate<T> allOf(Predicate<T>... predicates) {
     return PrintablePredicateFactory.allOf(asList(predicates));
   }
 
   @SafeVarargs
-  public static <T> Predicate<T> anyOf(Predicate<? super T>... predicates) {
+  public static <T> Predicate<T> anyOf(Predicate<T>... predicates) {
     return PrintablePredicateFactory.anyOf(asList(predicates));
   }
 
@@ -190,12 +190,12 @@ public enum Predicates {
     return PrintablePredicateFactory.not(cond);
   }
 
-  public static <O, P> PrintablePredicateFactory.TransformingPredicate.Factory<P, O> transform(String funcName, Function<? super O, ? extends P> func) {
+  public static <O, P> PrintablePredicateFactory.TransformingPredicate.Factory<P, O> transform(String funcName, Function<O, P> func) {
     return transform(function(funcName, func));
   }
 
   @SuppressWarnings("unchecked")
-  public static <O, P> PrintablePredicateFactory.TransformingPredicate.Factory<P, O> transform(Function<? super O, ? extends P> function) {
+  public static <O, P> PrintablePredicateFactory.TransformingPredicate.Factory<P, O> transform(Function<O, P> function) {
     return PrintablePredicateFactory.transform((Function<O, P>) function);
   }
 

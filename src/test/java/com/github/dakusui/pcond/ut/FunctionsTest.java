@@ -20,8 +20,11 @@ import static com.github.dakusui.pcond.forms.Functions.stringify;
 import static com.github.dakusui.pcond.internals.InternalUtils.getMethod;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static junit.framework.TestCase.assertEquals;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(Enclosed.class)
 public class FunctionsTest {
@@ -43,7 +46,7 @@ public class FunctionsTest {
 
     @Test
     public void whenEqualityIsChecked$thenSameIsSameAndDifferentIsDifferent() {
-      Function<List<?>, ?> target = Functions.elementAt(100);
+      Function<List<Object>, Object> target = Functions.elementAt(100);
       assertThat(
           target,
           allOf(

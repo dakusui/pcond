@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.pcond.internals.InternalChecks;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.ArrayList;
@@ -103,15 +104,15 @@ public enum PrintablePredicateFactory {
     return new Negation<T>(toPrintablePredicate(predicate), singletonList(predicate));
   }
 
-  public static <E> Predicate<Stream<? extends E>> allMatch(Predicate<E> predicate) {
+  public static <E> Predicate<Stream<E>> allMatch(Predicate<E> predicate) {
     return AllMatch.create(predicate);
   }
 
-  public static <E> Predicate<Stream<? extends E>> noneMatch(Predicate<E> predicate) {
+  public static <E> Predicate<Stream<E>> noneMatch(Predicate<E> predicate) {
     return NoneMatch.create(predicate);
   }
 
-  public static <E> Predicate<Stream<? extends E>> anyMatch(Predicate<E> predicate) {
+  public static <E> Predicate<Stream<E>> anyMatch(Predicate<E> predicate) {
     return AnyMatch.create(predicate);
   }
 
@@ -389,7 +390,7 @@ public enum PrintablePredicateFactory {
       }
 
       @SuppressWarnings("unchecked")
-      default <OO> Factory<P, OO> castTo(Class<OO> ooClass) {
+      default <OO> Factory<P, OO> castTo(@SuppressWarnings("unused") Class<OO> ooClass) {
         return (Factory<P, OO>) this;
       }
 
@@ -419,7 +420,7 @@ public enum PrintablePredicateFactory {
 
 
       @SuppressWarnings("unchecked")
-      public <NIN> Builder<NIN, IM> forValueOf(Class<NIN> forClass) {
+      public <NIN> Builder<NIN, IM> forValueOf(@SuppressWarnings("unused") Class<NIN> forClass) {
         return (Builder<NIN, IM>) this;
       }
 
@@ -435,16 +436,27 @@ public enum PrintablePredicateFactory {
        * @return This object cast accordingly.
        */
       @SuppressWarnings("unchecked")
-      public <E> Builder<List<E>, IM> forListOf(Class<E> elementClass) {
+      public <E> Builder<List<E>, IM> forListOf(@SuppressWarnings("unused") Class<E> elementClass) {
         return (Builder<List<E>, IM>) this;
       }
 
       @SuppressWarnings("unchecked")
       public <NIM> Builder<IN, NIM> transformBy(Function<IN, NIM> func) {
-        this.function = (Function<IN, IM>) func;
+        return function((Function<IN, IM>) func);
+      }
+
+      @SuppressWarnings("unchecked")
+      public <NIM> Builder<IN, NIM> andThen(Function<IM, NIM> func) {
+        return function((Function<IN, IM>) this.function.andThen(func));
+      }
+
+      @SuppressWarnings("unchecked")
+      private <NIM> Builder<IN, NIM> function(Function<IN, IM> func) {
+        this.function = func;
         //return Factory.create(Printables.function(this.name, func));
         return (Builder<IN, NIM>) this;
       }
+
 
       /**
        * @param intoClass A placeholder parameter, not accessed in this method.
@@ -463,7 +475,11 @@ public enum PrintablePredicateFactory {
       }
 
       public Predicate<IN> build() {
-        return TransformingPredicate.Factory.create(makePrintableIfFormatterIsAvailable(this.function)).check(this.predicate);
+        InternalChecks.requireState(this.function, Objects::nonNull, () -> "'function' needs to be set first. Ensure 'transformBy' is called.");
+        InternalChecks.requireState(this.predicate, Objects::nonNull, () -> "'predicate' needs to be set first. Ensure 'thenVerifyWith' is called.");
+        return TransformingPredicate.Factory
+            .create(makePrintableIfFormatterIsAvailable(this.function))
+            .check(this.predicate);
       }
 
       private <I, O> Function<I, O> makePrintableIfFormatterIsAvailable(Function<I, O> func) {
@@ -512,7 +528,7 @@ public enum PrintablePredicateFactory {
           AllMatch.class,
           singletonList(predicate),
           () -> format("allMatch[%s]", predicate),
-          (Stream<? extends E> stream) -> stream.allMatch(predicate),
+          (Stream<E> stream) -> stream.allMatch(predicate),
           toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
           true,
           false);
@@ -532,7 +548,7 @@ public enum PrintablePredicateFactory {
           NoneMatch.class,
           singletonList(predicate),
           () -> format("noneMatch[%s]", predicate),
-          (Stream<? extends E> stream) -> stream.noneMatch(predicate),
+          (Stream<E> stream) -> stream.noneMatch(predicate),
           toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
           true,
           true);
@@ -552,7 +568,7 @@ public enum PrintablePredicateFactory {
           AnyMatch.class,
           singletonList(predicate),
           () -> format("anyMatch[%s]", predicate),
-          (Stream<? extends E> stream) -> stream.anyMatch(PrintablePredicate.<E>unwrap(predicate)),
+          (Stream<E> stream) -> stream.anyMatch(PrintablePredicate.unwrap(predicate)),
           toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
           false,
           true);
@@ -565,12 +581,12 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  public abstract static class StreamPredicate<E> extends PrintablePredicate<Stream<? extends E>> implements Evaluable.StreamPred<E> {
-    private final Evaluable<? super Stream<? extends E>> cut;
-    private final boolean                                defaultValue;
-    private final boolean                                cutOn;
+  public abstract static class StreamPredicate<E> extends PrintablePredicate<Stream<E>> implements Evaluable.StreamPred<E> {
+    private final Evaluable<Stream<E>> cut;
+    private final boolean              defaultValue;
+    private final boolean              cutOn;
 
-    private StreamPredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<? super Stream<? extends E>> predicate, Evaluable<? super Stream<? extends E>> cut, boolean defaultValue, boolean cutOn) {
+    private StreamPredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<Stream<E>> predicate, Evaluable<Stream<E>> cut, boolean defaultValue, boolean cutOn) {
       super(creator, args, formatter, predicate);
       this.cut = requireNonNull(cut);
       this.defaultValue = defaultValue;
@@ -584,8 +600,8 @@ public enum PrintablePredicateFactory {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Evaluable<? super E> cut() {
-      return (Evaluable<? super E>) this.cut;
+    public Evaluable<E> cut() {
+      return (Evaluable<E>) this.cut;
     }
 
     @Override

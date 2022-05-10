@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(Enclosed.class)
 public class AssertionsTest {
+  @SuppressWarnings("NewClassNamingConvention")
   public static class Passing {
     @Test
     public void testAssertThatValue$thenPass() {
@@ -34,6 +35,7 @@ public class AssertionsTest {
     }
   }
 
+  @SuppressWarnings("NewClassNamingConvention")
   public static class Failing extends TestBase.ForAssertionEnabledVM {
     @Test(expected = AssertionError.class)
     public void testAssertThat$thenFailing() {

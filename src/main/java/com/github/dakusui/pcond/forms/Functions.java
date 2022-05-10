@@ -43,7 +43,7 @@ public enum Functions {
    * @param <E> The type of the object
    * @return The function.
    */
-  public static <E> Function<? super E, String> stringify() {
+  public static <E> Function<E, String> stringify() {
     return PrintableFunctionFactory.Simple.STRINGIFY.instance();
   }
 
@@ -58,7 +58,7 @@ public enum Functions {
 
 
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
-  public static <E> Function<List<? extends E>, E> elementAt(int i) {
+  public static <E> Function<List<E>, E> elementAt(int i) {
     return Function.class.cast(PrintableFunctionFactory.Parameterized.ELEMENT_AT.create(singletonList(i)));
   }
 
@@ -67,7 +67,7 @@ public enum Functions {
    *
    * @return The function.
    */
-  public static Function<? super Collection<?>, Integer> size() {
+  public static <E> Function<Collection<E>, Integer> size() {
     return PrintableFunctionFactory.Simple.SIZE.instance();
   }
 
@@ -77,11 +77,7 @@ public enum Functions {
    * @param <E> Type of elements in the given collection.
    * @return The function.
    */
-  public static <E> Function<Collection<? extends E>, Stream<? extends E>> stream() {
-    return PrintableFunctionFactory.Simple.STREAM.instance();
-  }
-
-  public static <E> Function<Collection<?>, Stream<? extends E>> stream2() {
+  public static <E> Function<Collection<? extends E>, Stream<E>> stream() {
     return PrintableFunctionFactory.Simple.STREAM.instance();
   }
 
@@ -91,7 +87,7 @@ public enum Functions {
    * @param <E> Type of elements in the given collection.
    * @return The function.
    */
-  public static <E> Function<E, Stream<? extends E>> streamOf() {
+  public static <E> Function<E, Stream<E>> streamOf() {
     return PrintableFunctionFactory.Simple.STREAM_OF.instance();
   }
 
@@ -102,7 +98,7 @@ public enum Functions {
    * @param <E>  The type to which the object is case.
    * @return The function.
    */
-  public static <E> Function<? super Object, ? extends E> cast(Class<E> type) {
+  public static <E> Function<? super Object, E> cast(Class<E> type) {
     return PrintableFunctionFactory.Parameterized.CAST.create(singletonList(type));
   }
 
@@ -113,7 +109,7 @@ public enum Functions {
    * @param <E> Type of the elements in the collection
    * @return The function.
    */
-  public static <I extends Collection<? extends E>, E> Function<I, List<E>> collectionToList() {
+  public static <I extends Collection<E>, E> Function<I, List<E>> collectionToList() {
     return PrintableFunctionFactory.Simple.COLLECTION_TO_LIST.instance();
   }
 
@@ -139,12 +135,12 @@ public enum Functions {
   /**
    * The returned function tries to find a {@code substring} after a given string.
    * If found, it returns the result of the following statement.
-   *
+   * <p>
    * [source,java]
    * ----
    * s.substring(s.indexOf(substring) + substring.length())
    * ----
-   *
+   * <p>
    * If not found, a {@link StringIndexOutOfBoundsException} will be thrown.
    *
    * @param substring A substring to find in a given string.
@@ -212,34 +208,32 @@ public enum Functions {
    * The pcond library searches for the "best" matching method for you.
    * In case no matching method is found or more than one methods are found, a {@link RuntimeException}
    * will be thrown.
-   *
+   * <p>
    * In order to specify a parameter which should be passed to the returned function at applying,
    * you can use an object returned by {@link Functions#parameter} method.
    * This is useful to construct a function from an existing method.
-   *
+   * <p>
    * That is, in order to create a function which computes sin using query a method {@link Math#sin(double)},
    * you can do following
    * [source, java]
    * ----
    * public void buildSinFunction() {
-   *   MethodQuery mq = classMethod(Math.class, "sin", parameter());
-   *   Function<Double, Double> sin = call(mq);
-   *   System.out.println(sin(Math.PI/2));
+   * MethodQuery mq = classMethod(Math.class, "sin", parameter());
+   * Function<Double, Double> sin = call(mq);
+   * System.out.println(sin(Math.PI/2));
    * }
    * ----
    * This prints {@code 1.0}.
-   *
+   * <p>
    * In case your arguments do not contain any {@link Parameter} object, the input
    * argument passed to the built function will be simply ignored.
-   *
+   * <p>
    * // @formatter:on
-   *
    *
    * @param targetClass A class
    * @param methodName  A method name
    * @param arguments   Arguments
    * @return A method query for static methods specified by arguments.
-   *
    * @see com.github.dakusui.pcond.core.refl.ReflUtils#findMethod(Class, String, Object[])
    */
   public static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
@@ -250,29 +244,28 @@ public enum Functions {
    * // @formatter:off
    * Creates a {@link MethodQuery} object from given arguments to search for {@code static} methods.
    * Excepting that this method returns a query for instance methods, it is quite
-   * similar to {@link Functions#classMethod( Class, String, Object[])}.
-   *
+   * similar to {@link Functions#classMethod(Class, String, Object[])}.
+   * <p>
    * This method is useful to build a function from an instance method.
    * That is, you can create a function which returns the length of a given string
    * from a method {@link String#length()} with a following code snippet.
-   *
+   * <p>
    * [source, java]
    * ----
    * public void buildLengthFunction() {
-   *   Function<String, Integer> length = call(instanceMethod(parameter(), "length"));
+   * Function<String, Integer> length = call(instanceMethod(parameter(), "length"));
    * }
    * ----
-   *
+   * <p>
    * In case the {@code targetObject} is not an instance of {@link Parameter} and {@code arguments}
    * contain no {@code Parameter} object, the function will simply ignore the input passed to it.
-   *
+   * <p>
    * // @formatter:on
    *
    * @param targetObject An object on which methods matching returned query should be invoked.
-   * @param methodName A name of method.
-   * @param arguments Arguments passed to the method.
+   * @param methodName   A name of method.
+   * @param arguments    Arguments passed to the method.
    * @return A method query for instance methods specified by arguments.
-   *
    * @see Functions#classMethod(Class, String, Object[])
    */
   public static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
@@ -302,12 +295,11 @@ public enum Functions {
    * // @formatter:on
    *
    * @param targetObject An object on which methods matching returned query should be invoked.
-   * @param methodName A name of method.
-   * @param arguments Arguments passed to the method.
-   * @param <T> The type of the input to the returned function.
-   * @param <R> The type of the output from the returned function.
+   * @param methodName   A name of method.
+   * @param arguments    Arguments passed to the method.
+   * @param <T>          The type of the input to the returned function.
+   * @param <R>          The type of the output from the returned function.
    * @return The function that calls a method matching a query built from the given arguments.
-   *
    * @see Functions#call(MethodQuery)
    * @see Functions#instanceMethod(Object, String, Object[])
    */
