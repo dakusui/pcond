@@ -11,8 +11,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 public class TransformingPredicateTest extends TestBase {
   @Test
@@ -67,14 +67,14 @@ public class TransformingPredicateTest extends TestBase {
   @Test
   public void givenNullForName$whenToString$thenLooksGood() {
     PrintablePredicateFactory.TransformingPredicate<Object, Object> p = new PrintablePredicateFactory.TransformingPredicate<>(null, Predicates.alwaysTrue(), Functions.identity());
-    System.out.println(p.toString());
+    System.out.println(p);
     assertEquals("identity alwaysTrue", p.toString());
   }
 
   @Test
   public void givenNonNullName$whenToString$thenLooksGood() {
     PrintablePredicateFactory.TransformingPredicate<Object, Object> p = new PrintablePredicateFactory.TransformingPredicate<>("hello->", Predicates.alwaysTrue(), Functions.identity());
-    System.out.println(p.toString());
+    System.out.println(p);
     assertEquals("hello->identity alwaysTrue", p.toString());
   }
 }
