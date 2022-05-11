@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static java.util.Collections.unmodifiableList;
 
@@ -53,7 +54,7 @@ public interface Evaluator {
     }
 
     void enter(Entry.Type type, String name, Object input, boolean suppressPrintingOutput) {
-      Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, input, suppressPrintingOutput, this.currentlyExpectedBooleanValue);
+      Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, toSnapshotIfPossible(input), suppressPrintingOutput, this.currentlyExpectedBooleanValue);
       onGoingEntries.add(newEntry);
       entries.add(newEntry);
     }
@@ -61,7 +62,7 @@ public interface Evaluator {
     void leave(Object result) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       Entry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
-      entries.set(current.positionInEntries, current.result(result));
+      entries.set(current.positionInEntries, current.result(toSnapshotIfPossible(result)));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult = result;
     }
@@ -77,7 +78,7 @@ public interface Evaluator {
       boolean shortcut = conjunction.shortcut();
       for (Evaluable<? super T> each : conjunction.children()) {
         if (i == 0)
-          this.enter(Entry.Type.COMPOSITE, "&&", value);
+          this.enter(Entry.Type.AND, "&&", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (!cur)
@@ -97,7 +98,7 @@ public interface Evaluator {
       boolean shortcut = disjunction.shortcut();
       for (Evaluable<? super T> each : disjunction.children()) {
         if (i == 0)
-          this.enter(Entry.Type.COMPOSITE, "||", value);
+          this.enter(Entry.Type.OR, "||", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (cur)
@@ -112,7 +113,7 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.Negation<T> negation) {
-      this.enter(Entry.Type.COMPOSITE, "!", value);
+      this.enter(Entry.Type.NOT, "!", value);
       this.flipCurrentlyExpectedBooleanValue();
       negation.target().accept(value, this);
       this.flipCurrentlyExpectedBooleanValue();
@@ -128,7 +129,7 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.Messaged<T> messaged) {
-      this.enter(Entry.Type.COMPOSITE, messaged.message(), value, true);
+      this.enter(Entry.Type.MESSAGED, messaged.message(), value, true);
       messaged.target().accept(value, this);
       this.leave(this.<Boolean>resultValue());
     }
@@ -143,14 +144,14 @@ public interface Evaluator {
     @SuppressWarnings({ "unchecked" })
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      this.enter(Entry.Type.COMPOSITE,
+      this.enter(Entry.Type.TRANSFORM,
           transformation.name()
               .map(v -> "transform:" + v)
               .orElse("transform"),
           value,
           true);
       transformation.mapper().accept(value, this);
-      this.enter(Entry.Type.COMPOSITE,
+      this.enter(Entry.Type.CHECK,
           transformation.name()
               .map(v -> "check:" + v)
               .orElse("check"),
@@ -229,7 +230,7 @@ public interface Evaluator {
     }
 
     private Entry.Finalized createEntryForImport(Entry each, Object other) {
-      return new Entry.Finalized(each.type, this.onGoingEntries.size() + each.level, each.input, each.hasOutput() ? each.output() : other, each.name, each.suppressPrintingOutput, each.expectedBooleanValue);
+      return new Entry.Finalized(each.type, this.onGoingEntries.size() + each.level(), each.input(), each.hasOutput() ? each.output() : other, each.name(), each.suppressPrintingOutput(), each.expectedBooleanValue);
     }
   }
 
@@ -267,6 +268,10 @@ public interface Evaluator {
       return this.suppressPrintingOutput;
     }
 
+    public Type type() {
+      return this.type;
+    }
+
     public boolean expectedBooleanValue() {
       return this.expectedBooleanValue;
     }
@@ -275,13 +280,13 @@ public interface Evaluator {
 
     public abstract <T> T output();
 
-    public boolean isLeaf() {
-      return this.type == Type.LEAF;
-    }
-
-    enum Type {
-      COMPOSITE,
-      LEAF,
+    public enum Type {
+      TRANSFORM,
+      CHECK,
+      AND,
+      OR,
+      NOT,
+      LEAF, MESSAGED,
     }
 
     static class Finalized extends Entry {
@@ -325,6 +330,22 @@ public interface Evaluator {
       public <T> T output() {
         throw new UnsupportedOperationException();
       }
+    }
+  }
+
+  /**
+   * If an input or an output value object of a form implements this interface,
+   * The value returned by {@link this#snapshot()} method is stored in a {@link Evaluator.Entry}
+   * record, instead of the value itself.
+   */
+  interface Snapshottable {
+    Object snapshot();
+
+    static Object toSnapshotIfPossible(Object value) {
+      if (value instanceof Snapshottable)
+        return ((Snapshottable) value).snapshot();
+      else
+        return value;
     }
   }
 }

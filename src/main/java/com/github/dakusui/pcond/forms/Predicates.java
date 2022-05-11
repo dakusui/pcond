@@ -172,17 +172,17 @@ public enum Predicates {
   }
 
   @SafeVarargs
-  public static <T> Predicate<T> or(Predicate<T>... predicates) {
+  public static <T> Predicate<T> or(Predicate<? super T>... predicates) {
     return PrintablePredicateFactory.or(asList(predicates));
   }
 
   @SafeVarargs
-  public static <T> Predicate<T> allOf(Predicate<T>... predicates) {
+  public static <T> Predicate<T> allOf(Predicate<? super T>... predicates) {
     return PrintablePredicateFactory.allOf(asList(predicates));
   }
 
   @SafeVarargs
-  public static <T> Predicate<T> anyOf(Predicate<T>... predicates) {
+  public static <T> Predicate<T> anyOf(Predicate<? super T>... predicates) {
     return PrintablePredicateFactory.anyOf(asList(predicates));
   }
 

@@ -16,6 +16,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AssertionProviderTest extends TestBase {
   public static class TestAssertionProvider implements AssertionProvider<RuntimeException> {
+    public TestAssertionProvider(Properties properties) {
+    }
+
     @Override
     public <T> T requireNonNull(T value) {
       return null;
@@ -123,6 +126,6 @@ public class AssertionProviderTest extends TestBase {
   public void test3() {
     Pcond.initializeWith(TestAssertionProvider.class);
     System.out.println(AssertionProvider.INSTANCE.getClass().getCanonicalName());
-    Pcond.initializeWith(Opentest4jAssertionProvider.class);
+    Pcond.initializeWith(JUnit4AssertionProvider.class);
   }
 }

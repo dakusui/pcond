@@ -8,15 +8,19 @@ import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -66,7 +70,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
       try {
         return create(c, explanation);
       } catch (InvocationTargetException | InstantiationException |
-               IllegalAccessException | NoSuchMethodException e) {
+          IllegalAccessException | NoSuchMethodException e) {
         throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + c.getCanonicalName() + "'", e);
       }
     }
@@ -112,26 +116,24 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
   }
 
   private Explanation composeExplanation(String message, List<Evaluator.Entry> result, Throwable t) {
-    String actualResult = composeActualResult(result.stream()
+    String expectation = composeExplanation(result.stream()
+        .map(r -> evaluatorEntryToFormattedEntry(
+            r,
+            () -> (r.hasOutput() ?
+                InternalUtils.formatObject(r.output() instanceof Boolean ? r.expectedBooleanValue() : r.output()) :
+                InternalUtils.formatObject(t))))
+        .collect(toList()));
+    String actualResult = composeExplanation(result.stream()
         .map(r -> evaluatorEntryToFormattedEntry(
             r,
             () -> r.hasOutput() ?
                 InternalUtils.formatObject(r.output()) :
                 InternalUtils.formatObject(t)))
         .collect(toList()));
-    String expectation = composeActualResult(result.stream()
-        .map(r -> evaluatorEntryToFormattedEntry(
-            r,
-            () -> r.suppressPrintingOutput() ?
-                null :
-                r.hasOutput() ?
-                    InternalUtils.formatObject(r.output() instanceof Boolean ? r.expectedBooleanValue() : r.output()) :
-                    InternalUtils.formatObject(t)))
-        .collect(toList()));
     return new Explanation(message, expectation, actualResult);
   }
 
-  private static String composeActualResult(List<FormattedEntry> formattedEntries) {
+  private static String composeExplanation(List<FormattedEntry> formattedEntries) {
     return evaluatorEntriesToString(
         formattedEntries,
         columnLengths -> formattedEntryToStringForActualResult(columnLengths[0], columnLengths[1], columnLengths[2]));
@@ -144,15 +146,14 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
 
   private static FormattedEntry evaluatorEntryToFormattedEntry(Evaluator.Entry entry, Supplier<String> outputFormatter) {
     return new FormattedEntry(
-        entry.isLeaf() ?
-            null :
-            InternalUtils.formatObject(entry.input()),
+        InternalUtils.formatObject(entry.input()),
         entry.name(),
         entry.level() == 0 ?
             "" :
-            format("%" + (entry.level() * 2) + "s", ""), entry.suppressPrintingOutput() ?
-        null :
-        outputFormatter.get());
+            format("%" + (entry.level() * 2) + "s", ""),
+        !asList(LEAF, AND, OR).contains(entry.type()) ?
+            null :
+            outputFormatter.get());
   }
 
   private static Function<FormattedEntry, String> formattedEntryToStringForActualResult(int inputColumnWidth, int formNameColumnLength, int outputColumnLength) {
@@ -179,12 +180,20 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
         maxOutputLength = outputLength;
     }
     Function<FormattedEntry, String> formatter = formatterFactory.apply(new int[] { maxInputLength, maxIndentAndFormNameLength, maxOutputLength });
+    AtomicReference<FormattedEntry> lastFormattedEntry = new AtomicReference<>();
     return formattedEntries
         .stream()
+        .map((FormattedEntry eachEntry) -> {
+          FormattedEntry lastEntry = lastFormattedEntry.get();
+          lastFormattedEntry.set(eachEntry);
+          if (lastEntry == null)
+            return eachEntry;
+          if (Objects.equals(lastEntry.input, eachEntry.input))
+            return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output);
+          return eachEntry;
+        })
         .map(formatter)
-        .map(s -> "+" + s)
-        .map(String::trim)
-        .map(s -> s.substring(1))
+        .map(s -> ("+" + s).trim().substring(1))
         .collect(joining(format("%n")));
   }
 

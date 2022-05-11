@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.forms.Matchers;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
@@ -17,10 +18,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableCollection;
 
 public class MatchersTest extends TestBase {
-  {
-    //    Pcond.initializeWith(Opentest4jAssertionProvider.class);
-  }
-
   @Test
   public void whenPassingValidation_thenPasses$1() {
     validate(
@@ -132,6 +129,17 @@ public class MatchersTest extends TestBase {
   @Test
   public void example2() {
 
+  }
+
+  @Test//(expected = ComparisonFailure.class)
+  public void findTokensTest() {
+    String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
+    try {
+      assertThat(text, Matchers.findTokens("Gallia", "quarum", "Belgium", "nostra"));
+    } catch (ComparisonFailure e) {
+      e.printStackTrace();
+      throw e;
+    }
   }
 
   static class Parent {

@@ -20,7 +20,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(Enclosed.class)
 public class InternalUtilsTest {
-  @SuppressWarnings("NewClassNamingConvention")
   public static class FormatObject {
     static class InnerClass {
     }
@@ -211,7 +210,6 @@ public class InternalUtilsTest {
   }
 
   public static class ToEvaluableIfNecessary {
-
     @Test
     public void givenNonEvaluable$whenToEvaluableIfNecessary$thenConverted() {
       Predicate<Object> predicate = Predicate.isEqual("Hello");
@@ -219,5 +217,4 @@ public class InternalUtilsTest {
       assertNotNull(ev);
     }
   }
-
 }
