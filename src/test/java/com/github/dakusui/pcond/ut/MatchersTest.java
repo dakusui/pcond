@@ -7,6 +7,8 @@ import org.hamcrest.MatcherAssert;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
+import java.util.List;
+
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.Validations.validate;
 import static com.github.dakusui.pcond.forms.Functions.elementAt;
@@ -125,13 +127,7 @@ public class MatchersTest extends TestBase {
         matcherForString().transformBy(v -> v).thenVerifyWith(equalTo("Hello, world")));
   }
 
-
-  @Test
-  public void example2() {
-
-  }
-
-  @Test//(expected = ComparisonFailure.class)
+  @Test(expected = ComparisonFailure.class)
   public void findSubstringsTest() {
     String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
     try {
@@ -142,7 +138,7 @@ public class MatchersTest extends TestBase {
     }
   }
 
-  @Test//(expected = ComparisonFailure.class)
+  @Test(expected = ComparisonFailure.class)
   public void findRegexesTest() {
     String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
     try {
@@ -151,6 +147,15 @@ public class MatchersTest extends TestBase {
       e.printStackTrace();
       throw e;
     }
+  }
+
+
+  @Test(expected = ComparisonFailure.class)
+  public void findElementTest() {
+    List<String> list = asList("Hello", "world", "", "everyone", "quick", "brown", "fox", "runs", "forever");
+    assertThat(list, findElements(
+        isEqualTo("world"),
+        isEqualTo("cat"), isEqualTo("organization"), isNotNull(), isEqualTo("fox"), isEqualTo("world")));
   }
 
   static class Parent {

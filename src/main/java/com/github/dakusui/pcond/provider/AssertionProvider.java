@@ -19,6 +19,8 @@ public interface AssertionProvider<AE extends Throwable> {
    */
   AssertionProvider<?> INSTANCE = createAssertionProvider(System.getProperties());
 
+  Configuration configuration();
+
   /**
    * Returns a provider instance created from a given `Properties` object.
    * This method reads the value for the FQCN of this class (`com.github.dakusui.pcond.provider.AssertionProvider`) and creates an instance of a class specified by the value.
@@ -92,4 +94,10 @@ public interface AssertionProvider<AE extends Throwable> {
   <T> void assertThat(T value, Predicate<? super T> cond);
 
   <T> void assumeThat(T value, Predicate<? super T> cond);
+
+  interface Configuration {
+    default int summarizedStringLength() {
+      return 40;
+    }
+  }
 }

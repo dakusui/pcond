@@ -20,7 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(Enclosed.class)
 public class InternalUtilsTest {
-  public static class FormatObject {
+  public static class FormatObjectTest extends TestBase {
     static class InnerClass {
     }
 
@@ -64,7 +64,7 @@ public class InternalUtilsTest {
     public void testFormatObject$InnerClassObject() {
       assertThat(
           InternalUtils.formatObject(new InnerClass()),
-          startsWith("InternalUtilsTest$FormatObject$InnerClass@"));
+          startsWith("InternalUtilsTest$FormatObjectTest$InnerClass@"));
     }
 
     @Test
@@ -138,7 +138,7 @@ public class InternalUtilsTest {
     }
   }
 
-  public static class AssertFailsWith extends TestBase.ForAssertionEnabledVM {
+  public static class TestAssertFailsWith extends TestBase.ForAssertionEnabledVM {
     @Test
     public void givenTrue$whenAssertionFailsWith$thenFalse() {
       assertFalse(InternalUtils.assertFailsWith(true));
@@ -157,7 +157,7 @@ public class InternalUtilsTest {
     }
   }
 
-  public static class WrapperClassOf {
+  public static class TestWrapperClassOf extends TestBase {
     @Test
     public void testInteger() {
       assertEquals(Integer.class, InternalUtils.wrapperClassOf(int.class));
@@ -209,7 +209,7 @@ public class InternalUtilsTest {
     }
   }
 
-  public static class ToEvaluableIfNecessary {
+  public static class ToEvaluableIfNecessaryTest extends TestBase {
     @Test
     public void givenNonEvaluable$whenToEvaluableIfNecessary$thenConverted() {
       Predicate<Object> predicate = Predicate.isEqual("Hello");

@@ -27,9 +27,16 @@ import static java.util.stream.Collectors.toList;
 
 public abstract class BaseAssertionProvider implements AssertionProviderBase<ApplicationException> {
   private final boolean useEvaluator;
+  private final Configuration configuration ;
 
   public BaseAssertionProvider(Properties properties) {
     this.useEvaluator = useEvaluator(this.getClass(), properties);
+    this.configuration = new Configuration() {
+      @Override
+      public int summarizedStringLength() {
+        return Configuration.super.summarizedStringLength();
+      }
+    };
   }
 
   @Override
@@ -60,6 +67,11 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
   @Override
   public <T extends Error> T testFailedException(String message) {
     throw testFailedException(Explanation.fromMessage(message));
+  }
+
+  @Override
+  public Configuration configuration() {
+    return this.configuration;
   }
 
   @FunctionalInterface
@@ -151,7 +163,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
         entry.level() == 0 ?
             "" :
             format("%" + (entry.level() * 2) + "s", ""),
-        !asList(LEAF, AND, OR).contains(entry.type()) ?
+        !asList(LEAF, AND, OR, NOT).contains(entry.type()) ?
             null :
             outputFormatter.get());
   }

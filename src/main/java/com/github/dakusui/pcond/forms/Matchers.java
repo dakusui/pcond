@@ -3,16 +3,15 @@ package com.github.dakusui.pcond.forms;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.core.printable.Matcher;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
+import static com.github.dakusui.pcond.forms.Predicates.alwaysTrue;
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
 
@@ -103,10 +102,10 @@ public enum Matchers {
 
                               @Override
                               public String toString() {
-                                return "find[" + each + "]";
+                                return "findTokenBy[" + each + "]";
                               }
                             }),
-                        Stream.of(predicate("(leftover)", v -> true)))
+                        Stream.of(predicate("(end)", v -> true)))
                     .toArray(Predicate[]::new)
             ));
   }
@@ -128,5 +127,57 @@ public enum Matchers {
 
   public static Predicate<String> findRegexes(String... regexes) {
     return findRegexPatterns(Arrays.stream(regexes).map(Pattern::compile).toArray(Pattern[]::new));
+  }
+
+  @SuppressWarnings("unchecked")
+  @SafeVarargs
+  public static <E> Predicate<List<E>> findElements(Predicate<E>... predicates) {
+    class CursoredList<EE> implements Evaluator.Snapshottable {
+      int position;
+      final List<E> originalList;
+
+      CursoredList(List<E> originalList) {
+        this.originalList = originalList;
+      }
+
+      List<E> currentList() {
+        return this.originalList.subList(position, this.originalList.size());
+      }
+
+      @Override
+      public Object snapshot() {
+        return this.currentList();
+      }
+    }
+    Function<Predicate<E>, Predicate<CursoredList<E>>> predicatePredicateFunction = (Predicate<E> p) -> (Predicate<CursoredList<E>>) cursoredList -> {
+      AtomicInteger j = new AtomicInteger(0);
+      if (cursoredList.currentList().stream()
+          .peek((E each) -> j.getAndIncrement())
+          .anyMatch(p)) {
+        cursoredList.position += j.get();
+        return true;
+      }
+      return false;
+    };
+    return matcherForListOf(Matchers.<E>anyClassValue())
+        .transformBy(function("findElements", CursoredList<E>::new))
+        .thenVerifyWith(allOf(Stream.concat(
+                Arrays.stream(predicates)
+                    .map((Predicate<E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
+                Stream.of(predicate("(end)", eCursoredList -> true)))
+            .toArray(Predicate[]::new)));
+
+  }
+
+  /**
+   * Returns a value that can be cast to any class, even if it has a generic type parameters.
+   * Note that accessing any field or method of the returned value results in
+   * `NullPointerException`.
+   *
+   * @param <T> A parameter type of class that the returned value represents.
+   * @return A `null` value
+   */
+  public static <T> Class<T> anyClassValue() {
+    return null;
   }
 }

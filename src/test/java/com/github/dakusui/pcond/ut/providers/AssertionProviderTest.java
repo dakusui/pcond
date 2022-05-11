@@ -16,7 +16,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AssertionProviderTest extends TestBase {
   public static class TestAssertionProvider implements AssertionProvider<RuntimeException> {
+    private final Configuration configuration = new Configuration() {
+    };
+
     public TestAssertionProvider(Properties properties) {
+    }
+
+    @Override
+    public Configuration configuration() {
+      return this.configuration;
     }
 
     @Override
