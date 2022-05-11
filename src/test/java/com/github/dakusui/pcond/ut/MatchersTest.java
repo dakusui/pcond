@@ -132,10 +132,21 @@ public class MatchersTest extends TestBase {
   }
 
   @Test//(expected = ComparisonFailure.class)
-  public void findTokensTest() {
+  public void findSubstringsTest() {
     String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
     try {
-      assertThat(text, Matchers.findTokens("Gallia", "quarum", "Belgium", "nostra"));
+      assertThat(text, Matchers.findSubstrings("Gallia", "quarum", "Belgium", "nostra"));
+    } catch (ComparisonFailure e) {
+      e.printStackTrace();
+      throw e;
+    }
+  }
+
+  @Test//(expected = ComparisonFailure.class)
+  public void findRegexesTest() {
+    String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
+    try {
+      assertThat(text, Matchers.findRegexes("Gall.a", "quar.m", "Belgium", "nostr(um|a)"));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       throw e;

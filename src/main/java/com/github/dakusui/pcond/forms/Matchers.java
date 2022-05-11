@@ -2,17 +2,17 @@ package com.github.dakusui.pcond.forms;
 
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.core.printable.Matcher;
-import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
-import static com.github.dakusui.pcond.forms.Predicates.alwaysTrue;
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
 
@@ -51,26 +51,33 @@ public enum Matchers {
     return Matchers.matcher();
   }
 
+  static class Cursor {
+    final int position;
+    final int length;
+
+    Cursor(int position, int length) {
+      this.position = position;
+      this.length = length;
+    }
+  }
+
   @SuppressWarnings("unchecked")
-  public static Predicate<String> findTokens(String... tokens) {
+  public static <T> Predicate<String> findTokens(Function<T, Function<String, Cursor>> locatorFactory, T... tokens) {
     class CursoredString implements Evaluator.Snapshottable {
       final String originalString;
-      int cursor;
+      int position;
 
       CursoredString(String originalString) {
         this.originalString = originalString;
-        this.cursor = 0;
+        this.position = 0;
       }
 
-      CursoredString findToken(String token) {
-        int pos = originalString.indexOf(token, this.cursor);
-        if (pos >= 0)
-          this.cursor = pos + token.length();
+      CursoredString findNext(T token) {
+        Function<String, Cursor> locator = locatorFactory.apply(token);
+        Cursor cursor = locator.apply(originalString.substring(this.position));
+        if (cursor.position >= 0)
+          this.position += cursor.position + cursor.length;
         return this;
-      }
-
-      String currentContent() {
-        return this.originalString.substring(this.cursor);
       }
 
       public String toString() {
@@ -79,11 +86,10 @@ public enum Matchers {
 
       @Override
       public Object snapshot() {
-        return originalString.substring(cursor);
+        return originalString.substring(position);
       }
     }
 
-    //noinspection SuspiciousToArrayCall
     return matcherForString()
         .transformBy(function("findTokens", CursoredString::new)).thenVerifyWith(
             allOf(
@@ -92,7 +98,7 @@ public enum Matchers {
                             .map(each -> new Predicate<CursoredString>() {
                               @Override
                               public boolean test(CursoredString cursoredString) {
-                                return cursoredString.cursor != cursoredString.findToken(each).cursor;
+                                return cursoredString.position != cursoredString.findNext(each).position;
                               }
 
                               @Override
@@ -101,7 +107,26 @@ public enum Matchers {
                               }
                             }),
                         Stream.of(predicate("(leftover)", v -> true)))
-                    .toArray(i -> (Predicate<CursoredString>[]) new Predicate[tokens.length + 1])
+                    .toArray(Predicate[]::new)
             ));
+  }
+
+  public static Predicate<String> findSubstrings(String... tokens) {
+    return Matchers.findTokens(token -> string -> new Cursor(string.indexOf(token), token.length()), tokens);
+  }
+
+  public static Predicate<String> findRegexPatterns(Pattern... patterns) {
+    return Matchers.findTokens(token -> string -> {
+      java.util.regex.Matcher m = token.matcher(string);
+      if (m.find()) {
+        return new Cursor(m.start(), m.end() - m.start());
+      } else
+        return new Cursor(-1, 0);
+
+    }, patterns);
+  }
+
+  public static Predicate<String> findRegexes(String... regexes) {
+    return findRegexPatterns(Arrays.stream(regexes).map(Pattern::compile).toArray(Pattern[]::new));
   }
 }
