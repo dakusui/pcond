@@ -61,7 +61,7 @@ public enum Matchers {
   }
 
   @SuppressWarnings("unchecked")
-  public static <T> Predicate<String> findTokens(Function<T, Function<String, Cursor>> locatorFactory, T... tokens) {
+  static <T> Predicate<String> findTokens(Function<T, Function<String, Cursor>> locatorFactory, T... tokens) {
     class CursoredString implements Evaluator.Snapshottable {
       final String originalString;
       int position;

@@ -50,11 +50,7 @@ public interface Evaluator {
     boolean             currentlyExpectedBooleanValue = true;
 
     void enter(Entry.Type type, String name, Object input) {
-      this.enter(type, name, input, false);
-    }
-
-    void enter(Entry.Type type, String name, Object input, boolean suppressPrintingOutput) {
-      Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, toSnapshotIfPossible(input), suppressPrintingOutput, this.currentlyExpectedBooleanValue);
+      Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, toSnapshotIfPossible(input), this.currentlyExpectedBooleanValue);
       onGoingEntries.add(newEntry);
       entries.add(newEntry);
     }
@@ -71,6 +67,7 @@ public interface Evaluator {
       this.currentlyExpectedBooleanValue = !this.currentlyExpectedBooleanValue;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction) {
       int i = 0;
@@ -82,7 +79,7 @@ public interface Evaluator {
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (!cur)
-          finalValue = cur;
+          finalValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !finalValue) || i == conjunction.children().size() - 1) {
           this.leave(finalValue);
           return;
@@ -91,6 +88,7 @@ public interface Evaluator {
       }
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public <T> void evaluate(T value, Evaluable.Disjunction<T> disjunction) {
       int i = 0;
@@ -102,7 +100,7 @@ public interface Evaluator {
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (cur)
-          finalValue = cur;
+          finalValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && finalValue) || i == disjunction.children().size() - 1) {
           this.leave(finalValue);
           return;
@@ -129,7 +127,7 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.Messaged<T> messaged) {
-      this.enter(Entry.Type.MESSAGED, messaged.message(), value, true);
+      this.enter(Entry.Type.MESSAGED, messaged.message(), value);
       messaged.target().accept(value, this);
       this.leave(this.<Boolean>resultValue());
     }
@@ -148,15 +146,13 @@ public interface Evaluator {
           transformation.name()
               .map(v -> "transform:" + v)
               .orElse("transform"),
-          value,
-          true);
+          value);
       transformation.mapper().accept(value, this);
       this.enter(Entry.Type.CHECK,
           transformation.name()
               .map(v -> "check:" + v)
               .orElse("check"),
-          this.resultValue(),
-          true);
+          this.resultValue());
       transformation.checker().accept((R) this.currentResult, this);
       this.leave(this.resultValue());
       this.leave(this.resultValue());
@@ -230,7 +226,7 @@ public interface Evaluator {
     }
 
     private Entry.Finalized createEntryForImport(Entry each, Object other) {
-      return new Entry.Finalized(each.type, this.onGoingEntries.size() + each.level(), each.input(), each.hasOutput() ? each.output() : other, each.name(), each.suppressPrintingOutput(), each.expectedBooleanValue);
+      return new Entry.Finalized(each.type, this.onGoingEntries.size() + each.level(), each.input(), each.hasOutput() ? each.output() : other, each.name(), each.expectedBooleanValue);
     }
   }
 
@@ -239,15 +235,13 @@ public interface Evaluator {
     final         int     level;
     final         Object  input;
     final         String  name;
-    private final boolean suppressPrintingOutput;
     private final boolean expectedBooleanValue;
 
-    Entry(Type type, int level, Object input, String name, boolean suppressPrintingOutput, boolean expectedBooleanValue) {
+    Entry(Type type, int level, Object input, String name, boolean expectedBooleanValue) {
       this.type = type;
       this.level = level;
       this.input = input;
       this.name = name;
-      this.suppressPrintingOutput = suppressPrintingOutput;
       this.expectedBooleanValue = expectedBooleanValue;
     }
 
@@ -262,10 +256,6 @@ public interface Evaluator {
 
     public String name() {
       return name;
-    }
-
-    public boolean suppressPrintingOutput() {
-      return this.suppressPrintingOutput;
     }
 
     public Type type() {
@@ -292,8 +282,8 @@ public interface Evaluator {
     static class Finalized extends Entry {
       final Object output;
 
-      Finalized(Type type, int level, Object input, Object output, String name, boolean suppressPrintingOutput, boolean expectedBooleanValue) {
-        super(type, level, input, name, suppressPrintingOutput, expectedBooleanValue);
+      Finalized(Type type, int level, Object input, Object output, String name, boolean expectedBooleanValue) {
+        super(type, level, input, name, expectedBooleanValue);
         this.output = output;
       }
 
@@ -312,13 +302,13 @@ public interface Evaluator {
     static class OnGoing extends Entry {
       final int positionInEntries;
 
-      OnGoing(Type type, int level, int positionInEntries, String name, Object input, boolean suppressPrintingOutput, boolean expectedBooleanValue) {
-        super(type, level, input, name, suppressPrintingOutput, expectedBooleanValue);
+      OnGoing(Type type, int level, int positionInEntries, String name, Object input, boolean expectedBooleanValue) {
+        super(type, level, input, name, expectedBooleanValue);
         this.positionInEntries = positionInEntries;
       }
 
       Finalized result(Object result) {
-        return new Finalized(this.type, this.level, this.input, result, this.name, this.suppressPrintingOutput(), this.expectedBooleanValue());
+        return new Finalized(this.type, this.level, this.input, result, this.name, this.expectedBooleanValue());
       }
 
       @Override
