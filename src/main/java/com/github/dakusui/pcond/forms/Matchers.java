@@ -3,7 +3,8 @@ package com.github.dakusui.pcond.forms;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.core.printable.Matcher;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -11,7 +12,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
-import static com.github.dakusui.pcond.forms.Predicates.alwaysTrue;
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
 
@@ -19,36 +19,14 @@ public enum Matchers {
   ;
 
 
-  public static Matcher.Builder.Builder0<String> matcherForString() {
-    return matcher().forType(String.class);
+  public static <B extends Matcher.Builder.Builder0<B, OIN, OUT>, OIN, OUT> B when() {
+    return matcher();
   }
 
-
-  public static <IN> Matcher.Builder.Builder0<IN> matcher() {
-    return new Matcher.Builder.Builder0<>();
+  public static <B extends Matcher.Builder.Builder0<B, OIN, OUT>, OIN, OUT> B matcher() {
+    return (B) new Matcher.Builder.Builder0<B, OIN, OUT>(null);
   }
 
-
-  public static <IN> Matcher.Builder.Builder0<IN> matcherFor(Class<IN> inType) {
-    return Matchers.matcher().forType(inType);
-  }
-
-  public static <E> Matcher.Builder.Builder0<E[]> matcherForArrayOf(Class<E> elementType) {
-    return Matchers.matcher();
-  }
-
-  public static <E> Matcher.Builder.Builder0<List<E>> matcherForListOf(Class<E> elementType) {
-    return Matchers.matcher();
-  }
-
-  public static <E> Matcher.Builder.Builder0<Collection<E>> matcherForCollectionOf(
-      @SuppressWarnings("unused") Class<E> elementType) {
-    return Matchers.matcher();
-  }
-
-  public static <K, V> Matcher.Builder.Builder0<Map<K, V>> matcherForMapOf(Class<K> keyType, Class<V> valueType) {
-    return Matchers.matcher();
-  }
 
   static class Cursor {
     final int position;
@@ -89,25 +67,24 @@ public enum Matchers {
       }
     }
 
-    return matcherForString()
-        .transformBy(function("findTokens", CursoredString::new)).thenVerifyWith(
-            allOf(
-                Stream.concat(
-                        Arrays.stream(tokens)
-                            .map(each -> new Predicate<CursoredString>() {
-                              @Override
-                              public boolean test(CursoredString cursoredString) {
-                                return cursoredString.position != cursoredString.findNext(each).position;
-                              }
+    return matcher().valueIsString().chain(function("findTokens", CursoredString::new)).then()
+        .allOf(
+            Stream.concat(
+                    Arrays.stream(tokens)
+                        .map(each -> new Predicate<CursoredString>() {
+                          @Override
+                          public boolean test(CursoredString cursoredString) {
+                            return cursoredString.position != cursoredString.findNext(each).position;
+                          }
 
-                              @Override
-                              public String toString() {
-                                return "findTokenBy[" + each + "]";
-                              }
-                            }),
-                        Stream.of(predicate("(end)", v -> true)))
-                    .toArray(Predicate[]::new)
-            ));
+                          @Override
+                          public String toString() {
+                            return "findTokenBy[" + each + "]";
+                          }
+                        }),
+                    Stream.of(predicate("(end)", v -> true)))
+                .toArray(Predicate[]::new)
+        );
   }
 
   public static Predicate<String> findSubstrings(String... tokens) {
@@ -129,7 +106,6 @@ public enum Matchers {
     return findRegexPatterns(Arrays.stream(regexes).map(Pattern::compile).toArray(Pattern[]::new));
   }
 
-  @SuppressWarnings("unchecked")
   @SafeVarargs
   public static <E> Predicate<List<E>> findElements(Predicate<E>... predicates) {
     class CursoredList<EE> implements Evaluator.Snapshottable {
@@ -159,14 +135,23 @@ public enum Matchers {
       }
       return false;
     };
-    return matcherForListOf(Matchers.<E>anyClassValue())
-        .transformBy(function("findElements", CursoredList<E>::new))
-        .thenVerifyWith(allOf(Stream.concat(
+    /*
+    return when()
+        .chain(new Function<Object, List<E>>() {
+          @Override
+          public List<E> apply(Object o) {
+            return null;
+          }
+        })
+        .then()
+        .verifyWith(allOf(Stream.concat(
                 Arrays.stream(predicates)
                     .map((Predicate<E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
                 Stream.of(predicate("(end)", eCursoredList -> true)))
             .toArray(Predicate[]::new)));
 
+     */
+    return null;
   }
 
   /**

@@ -266,6 +266,7 @@ public enum PrintablePredicateFactory {
   static class Messaged<T> extends PrintablePredicate<T> implements Evaluable.Messaged<T> {
     //private final String               message;
     private final Evaluable<? super T> target;
+    private final Predicate<T>         rawPredicate;
 
     @SuppressWarnings("unchecked")
     protected Messaged(Supplier<String> messageSupplier, Predicate<T> predicate, List<Object> args) {
@@ -276,6 +277,7 @@ public enum PrintablePredicateFactory {
           (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).test(t));
       //this.message = requireNonNull(message);
       this.target = toEvaluableIfNecessary(predicate);
+      this.rawPredicate = predicate;
     }
 
     @Override
@@ -286,6 +288,10 @@ public enum PrintablePredicateFactory {
     @Override
     public String message() {
       return this.formatter.get();
+    }
+
+    protected Predicate<T> rawPredicate() {
+      return this.rawPredicate;
     }
   }
 
