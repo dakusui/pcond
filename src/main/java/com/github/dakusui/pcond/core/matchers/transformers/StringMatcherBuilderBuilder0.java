@@ -9,7 +9,7 @@ public class StringMatcherBuilderBuilder0<IN> extends Matcher.Builder.Builder0<S
   /**
    * @param chain
    */
-  public StringMatcherBuilderBuilder0(Function<? super IN, ? extends String> chain) {
+  public StringMatcherBuilderBuilder0(Function<?, ? extends String> chain) {
     super(chain);
   }
 

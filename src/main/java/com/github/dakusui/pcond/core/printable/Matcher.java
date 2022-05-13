@@ -1,16 +1,14 @@
 package com.github.dakusui.pcond.core.printable;
 
+import com.github.dakusui.pcond.core.matchers.transformers.ObjectMatcherBuilderBuilder0;
 import com.github.dakusui.pcond.core.matchers.transformers.StringMatcherBuilderBuilder0;
-import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 
 public class Matcher<IN, IM> extends PrintablePredicateFactory.TransformingPredicate<IN, IM> {
@@ -18,20 +16,13 @@ public class Matcher<IN, IM> extends PrintablePredicateFactory.TransformingPredi
     super(name, predicate, function);
   }
 
-  public static class Builder<IN, IM> extends PrintablePredicateFactory.Messaged<IN> {
-    private       String                             name;
+  public static class Builder<IN, IM> {
     private final Function<? super IN, ? extends IM> function;
-    private final PredicateHolder<IM>                predicate;
+    private       Predicate<IM>                      predicate;
 
     public Builder(Function<? super IN, ? extends IM> function) {
-      super(() -> "", new PredicateHolder<>(), singletonList(new Object()));
-      this.name = name;
       this.function = function;
-      this.predicate = (PredicateHolder<IM>) this.rawPredicate();
-    }
-
-    public String name() {
-      return this.name;
+      this.predicate = null;
     }
 
     /**
@@ -67,17 +58,22 @@ public class Matcher<IN, IM> extends PrintablePredicateFactory.TransformingPredi
 
     @SuppressWarnings("unchecked")
     public Builder<IN, IM> verifyWith(Predicate<? super IM> predicate) {
-      if (this.predicate.predicate == null)
-        this.predicate.predicate = (Predicate<IM>) predicate;
+      if (this.predicate == null)
+        this.predicate = (Predicate<IM>) predicate;
       else
-        this.predicate.predicate = this.predicate.predicate.and(predicate);
+        this.predicate = this.predicate.and(predicate);
       return this;
     }
 
     @SuppressWarnings("unchecked")
-    public Predicate<IN> build() {
-      return (Predicate<IN>) PrintablePredicateFactory.TransformingPredicate.Factory.create(this.name, this.function).check(this.predicate);
+    public <AS> Predicate<AS> build() {
+      return (Predicate<AS>) PrintablePredicateFactory.TransformingPredicate.Factory.create(this.function).check(this.predicate);
     }
+
+    public <AS> Predicate<AS> as() {
+      return build();
+    }
+
 
     static class PredicateHolder<T> implements Predicate<T> {
       Predicate<T> predicate = null;
@@ -105,6 +101,10 @@ public class Matcher<IN, IM> extends PrintablePredicateFactory.TransformingPredi
         this.chain = (Function<OIN, OUT>) chain;
       }
 
+      public static <B extends Builder0<B, OIN,OUT>, OIN, OUT, POUT, NEWIN> B create(Builder0<?, OIN, POUT> parent, Function<POUT, NEWIN> func) {
+        return (B) new ObjectMatcherBuilderBuilder0<>(parent.chain.andThen(func));
+      }
+
       /**
        * This constructor is only called by {@link Builder0#create()} method, which
        * makes `OIN` equal to `OUT`.
@@ -117,7 +117,7 @@ public class Matcher<IN, IM> extends PrintablePredicateFactory.TransformingPredi
 
       @SuppressWarnings("unchecked")
       public <BB extends Matcher.Builder.Builder0<BB, OIN, NOUT>, NOUT> BB chain(Function<OUT, NOUT> function) {
-        return (BB) chain(function, f -> (BB) new Builder0<BB, OIN, NOUT>(this.chain.andThen(function)));
+        return (BB) chain(function, f -> (BB) new Builder0.Builder1<OIN>(this.chain.andThen(function)).forGeneralObject());
       }
 
       /**
@@ -132,29 +132,40 @@ public class Matcher<IN, IM> extends PrintablePredicateFactory.TransformingPredi
       @SuppressWarnings({ "unchecked", "rawtypes" })
       public <BB extends Matcher.Builder.Builder0<BB, OIN, NOUT>, NOUT> BB chain(Function<OUT, NOUT> function, Function<Function<OIN, NOUT>, BB> constructor) {
         if (this.chain == null)
-          return (BB) constructor.apply((Function)function);
+          return (BB) constructor.apply((Function) function);
         return constructor.apply(this.chain.andThen(function));
       }
 
-      public StringMatcherBuilderBuilder0<OIN> valueIsString() {
-        return new StringMatcherBuilderBuilder0<>(Functions.cast(String.class));
-      }
-
-
-      public <BB extends Matcher.Builder.Builder0<BB, NOIN, OUT>, NOIN> BB valueIs(Class<NOIN> inputClass) {
-        return (BB)this;
-      }
-      public <BB extends Matcher.Builder.Builder0<BB, List<E>, OUT>, E> BB listOf(E elementClass) {
-        return (BB)this;
-      }
 
       public Builder<OIN, OUT> then() {
         return new Builder<>(requireNonNull(this.chain));
       }
 
-      @SuppressWarnings("unchecked")
-      public static <B extends Builder0<B, OIN, OIN>, OIN> B create() {
-        return (B)new Builder0<B, OIN, OIN>();
+      public static class Builder1<OIN, OUT> {
+        private final Function<? super OUT, ?> function;
+
+        public Builder1(Function<? super OUT, ?> function) {
+          this.function = function;
+        }
+
+        public Builder1() {
+          this(null);
+        }
+
+
+        @SuppressWarnings("unchecked")
+        public StringMatcherBuilderBuilder0<OIN> stringValue() {
+          return new StringMatcherBuilderBuilder0<OIN>((Function<? super OUT, String>) this.function);
+        }
+
+        @SuppressWarnings("unchecked")
+        public ObjectMatcherBuilderBuilder0<OIN> forGeneralObject() {
+          return new ObjectMatcherBuilderBuilder0<>((Function<? super OIN, Object>) this.function);
+        }
+
+        public ObjectMatcherBuilderBuilder0<OIN> listValueOf(OIN value) {
+          return new ObjectMatcherBuilderBuilder0<>((Function<? super OIN, Object>) this.function);
+        }
       }
     }
   }

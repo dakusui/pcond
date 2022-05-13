@@ -1,10 +1,15 @@
 package com.github.dakusui.pcond.provider;
 
 import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.provider.impls.BaseAssertionProvider;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 
 public interface AssertionProviderBase<AE extends Exception> extends AssertionProvider<AE> {
   @Override
@@ -116,6 +121,7 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
   }
 
   <T extends Error> T testFailedException(String message);
+
   default <T extends Error> T testFailedException(Explanation explanation) {
     return testFailedException(explanation.toString());
   }
@@ -158,12 +164,12 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
     public String toString() {
       // Did not include "expected" because it is too much overlapping "actual" in most cases.
       return actual != null ?
-          String.format("%s%n%s", message, actual) :
+          format("%s%n%s", message, actual) :
           message;
     }
 
     public static Explanation fromMessage(String msg) {
-      return new Explanation(msg, null, null);
+      return new Explanation(msg, BaseAssertionProvider.composeReport(null, null, new AtomicInteger(0)), BaseAssertionProvider.composeReport(null, null, new AtomicInteger(0)));
     }
   }
 }

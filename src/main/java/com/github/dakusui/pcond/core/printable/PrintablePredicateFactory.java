@@ -264,7 +264,6 @@ public enum PrintablePredicateFactory {
   }
 
   static class Messaged<T> extends PrintablePredicate<T> implements Evaluable.Messaged<T> {
-    //private final String               message;
     private final Evaluable<? super T> target;
     private final Predicate<T>         rawPredicate;
 
