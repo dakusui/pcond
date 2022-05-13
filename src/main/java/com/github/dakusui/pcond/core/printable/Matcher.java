@@ -75,8 +75,8 @@ public class Matcher<IN, IM> extends PrintablePredicateFactory.TransformingPredi
     }
 
     @SuppressWarnings("unchecked")
-    private Predicate<IN> build(Predicate<? super IM> predicate) {
-      return (Predicate<IN>) PrintablePredicateFactory.TransformingPredicate.Factory.create(this.name, this.function).check(predicate);
+    public Predicate<IN> build() {
+      return (Predicate<IN>) PrintablePredicateFactory.TransformingPredicate.Factory.create(this.name, this.function).check(this.predicate);
     }
 
     static class PredicateHolder<T> implements Predicate<T> {
@@ -89,53 +89,72 @@ public class Matcher<IN, IM> extends PrintablePredicateFactory.TransformingPredi
       }
     }
 
-    public static class Builder0<B extends Builder0<B, IN, OUT>, IN, OUT> {
-      private Function<IN, OUT> chain = null;
-      private String            name;
+    /**
+     * @param <B>   The type of this object.
+     * @param <OIN> Original input type.
+     * @param <OUT> (Current) Output type.
+     */
+    public static class Builder0<B extends Builder0<B, OIN, OUT>, OIN, OUT> {
+      private Function<OIN, OUT> chain = null;
 
       /**
        *
        */
       @SuppressWarnings("unchecked")
-      public Builder0(Function<? super IN, ? extends OUT> chain) {
-        this.chain = (Function<IN, OUT>) chain;
+      public Builder0(Function<? super OIN, ? extends OUT> chain) {
+        this.chain = (Function<OIN, OUT>) chain;
+      }
+
+      /**
+       * This constructor is only called by {@link Builder0#create()} method, which
+       * makes `OIN` equal to `OUT`.
+       * This is the only situation where the field `chain` becomes `null`.
+       */
+      private Builder0() {
+        this.chain = null;
       }
 
 
       @SuppressWarnings("unchecked")
-      public <BB extends Matcher.Builder.Builder0<BB, IN, NOUT>, NOUT> BB chain(Function<OUT, NOUT> function) {
-        return (BB) chain(function, f -> (BB) new Builder0<BB, IN, NOUT>(this.chain.andThen(function)));
+      public <BB extends Matcher.Builder.Builder0<BB, OIN, NOUT>, NOUT> BB chain(Function<OUT, NOUT> function) {
+        return (BB) chain(function, f -> (BB) new Builder0<BB, OIN, NOUT>(this.chain.andThen(function)));
       }
 
-      public <BB extends Matcher.Builder.Builder0<BB, IN, NOUT>, NOUT> BB chain(Function<OUT, NOUT> function, Function<Function<IN, NOUT>, BB> constructor) {
-        return constructor.apply(chainFunction(this.chain, function));
+      /**
+       * **NOTE:** unless the parameter-less private constructor is called
+       * through the {@link this#create()} method, the {@link this#chain} field will not
+       * become `null`.
+       * The method makes the same `OIN` and `OUT`.
+       * Thus, the rawtype casting exercised in the `if` statement is safe.
+       *
+       * @see this#Builder0()
+       */
+      @SuppressWarnings({ "unchecked", "rawtypes" })
+      public <BB extends Matcher.Builder.Builder0<BB, OIN, NOUT>, NOUT> BB chain(Function<OUT, NOUT> function, Function<Function<OIN, NOUT>, BB> constructor) {
+        if (this.chain == null)
+          return (BB) constructor.apply((Function)function);
+        return constructor.apply(this.chain.andThen(function));
       }
 
-      private static <IN, OUT, NOUT> Function<IN, NOUT> chainFunction(Function<IN, OUT> function, Function<OUT, NOUT> after) {
-        return function.andThen(after);
-      }
-
-      private static <IN> Builder0<?, IN, IN> create() {
-        return new Builder0<>(Functions.identity());
-      }
-
-      public StringMatcherBuilderBuilder0<IN> valueIsString() {
+      public StringMatcherBuilderBuilder0<OIN> valueIsString() {
         return new StringMatcherBuilderBuilder0<>(Functions.cast(String.class));
       }
 
 
-      public Builder<IN, OUT> then() {
+      public <BB extends Matcher.Builder.Builder0<BB, NOIN, OUT>, NOIN> BB valueIs(Class<NOIN> inputClass) {
+        return (BB)this;
+      }
+      public <BB extends Matcher.Builder.Builder0<BB, List<E>, OUT>, E> BB listOf(E elementClass) {
+        return (BB)this;
+      }
+
+      public Builder<OIN, OUT> then() {
         return new Builder<>(requireNonNull(this.chain));
       }
 
-      public B name(String name) {
-        this.name = name;
-        //noinspection unchecked
-        return (B) this;
-      }
-
-      public <BB extends Builder0<BB, OIN, List<E>>, OIN, E> BB valueIsListOf(E e) {
-        return (BB) this.chain(v -> (List<E>) v);
+      @SuppressWarnings("unchecked")
+      public static <B extends Builder0<B, OIN, OIN>, OIN> B create() {
+        return (B)new Builder0<B, OIN, OIN>();
       }
     }
   }
