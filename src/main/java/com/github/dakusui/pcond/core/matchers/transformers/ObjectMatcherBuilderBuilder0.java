@@ -4,11 +4,11 @@ import com.github.dakusui.pcond.core.printable.Matcher;
 
 import java.util.function.Function;
 
-public class ObjectMatcherBuilderBuilder0<OIN> extends Matcher.Builder.Builder0<ObjectMatcherBuilderBuilder0<OIN>, OIN, Object> {
+public class ObjectMatcherBuilderBuilder0<OIN, COUT> extends Matcher.Builder.Builder0<ObjectMatcherBuilderBuilder0<OIN, COUT>, OIN, COUT> {
 
   /**
    */
-  public ObjectMatcherBuilderBuilder0(Function<? super OIN, Object> function) {
+  public <P> ObjectMatcherBuilderBuilder0(Function<? super P, COUT> function) {
     super(function);
   }
 }

@@ -4,7 +4,9 @@ import com.github.dakusui.pcond.core.matchers.transformers.ObjectMatcherBuilderB
 import com.github.dakusui.pcond.core.matchers.transformers.StringMatcherBuilderBuilder0;
 import com.github.dakusui.pcond.forms.Predicates;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -75,16 +77,6 @@ public class Matcher<IN, IM> extends PrintablePredicateFactory.TransformingPredi
     }
 
 
-    static class PredicateHolder<T> implements Predicate<T> {
-      Predicate<T> predicate = null;
-
-      @Override
-      public boolean test(T t) {
-        requireState(this.predicate, Objects::nonNull, () -> "A predicate is not set to this object.");
-        return this.predicate.test(t);
-      }
-    }
-
     /**
      * @param <B>   The type of this object.
      * @param <OIN> Original input type.
@@ -97,43 +89,69 @@ public class Matcher<IN, IM> extends PrintablePredicateFactory.TransformingPredi
        *
        */
       @SuppressWarnings("unchecked")
-      public Builder0(Function<? super OIN, ? extends OUT> chain) {
+      public <COUT> Builder0(Function<? super COUT, ? extends OUT> chain) {
         this.chain = (Function<OIN, OUT>) chain;
       }
 
-      public static <B extends Builder0<B, OIN,OUT>, OIN, OUT, POUT, NEWIN> B create(Builder0<?, OIN, POUT> parent, Function<POUT, NEWIN> func) {
-        return (B) new ObjectMatcherBuilderBuilder0<>(parent.chain.andThen(func));
+      private static <
+          OIN,
+          COUT,
+          B extends Builder0<B, OIN, COUT>,
+          NOUT,
+          C extends BiFunction<
+              B,
+              Function<COUT, NOUT>,
+              BB>,
+          BB extends Builder0<BB, OIN, NOUT>>
+      BB chainVerifier(B parent, Function<COUT, NOUT> f, C constructor) {
+        return constructor.apply(parent, f);
       }
-
-      /**
-       * This constructor is only called by {@link Builder0#create()} method, which
-       * makes `OIN` equal to `OUT`.
-       * This is the only situation where the field `chain` becomes `null`.
-       */
-      private Builder0() {
-        this.chain = null;
-      }
-
 
       @SuppressWarnings("unchecked")
-      public <BB extends Matcher.Builder.Builder0<BB, OIN, NOUT>, NOUT> BB chain(Function<OUT, NOUT> function) {
-        return (BB) chain(function, f -> (BB) new Builder0.Builder1<OIN>(this.chain.andThen(function)).forGeneralObject());
+      public <
+          NOUT,
+          C extends BiFunction<B, Function<OUT, NOUT>, BB>,
+          BB extends Builder0<BB, OIN, NOUT>>
+      BB chain(Function<OUT, NOUT> f, C constructor) {
+        return Builder0.chainVerifier((B) this, f, constructor);
       }
 
-      /**
-       * **NOTE:** unless the parameter-less private constructor is called
-       * through the {@link this#create()} method, the {@link this#chain} field will not
-       * become `null`.
-       * The method makes the same `OIN` and `OUT`.
-       * Thus, the rawtype casting exercised in the `if` statement is safe.
-       *
-       * @see this#Builder0()
-       */
-      @SuppressWarnings({ "unchecked", "rawtypes" })
-      public <BB extends Matcher.Builder.Builder0<BB, OIN, NOUT>, NOUT> BB chain(Function<OUT, NOUT> function, Function<Function<OIN, NOUT>, BB> constructor) {
-        if (this.chain == null)
-          return (BB) constructor.apply((Function) function);
-        return constructor.apply(this.chain.andThen(function));
+      @SuppressWarnings("unchecked")
+      public <
+          NOUT,
+          BB extends Builder0<BB, OIN, NOUT>>
+      BB chain(Function<OUT, NOUT> f) {
+        return Builder0.chainVerifier((B) this, f, new BiFunction<B, Function<OUT, NOUT>, BB>() {
+          @SuppressWarnings("unchecked")
+          @Override
+          public BB apply(B b, Function<OUT, NOUT> outnoutFunction) {
+            return (BB) new ObjectMatcherBuilderBuilder0<OIN, NOUT>(outnoutFunction);
+          }
+        });
+      }
+
+      public StringMatcherBuilderBuilder0<OIN> chainToString(Function<OUT, String> f) {
+        return Builder0.chainVerifier((B) this,
+            f,
+            (b, outnoutFunction) -> new StringMatcherBuilderBuilder0<OIN>(outnoutFunction));
+      }
+
+      public <E>
+      ObjectMatcherBuilderBuilder0<OIN, List<E>> chainToList(Function<OUT, List<E>> f) {
+        return Builder0.<
+            OIN,
+            OUT,
+            B,
+            List<E>,
+            BiFunction<
+                B,
+                Function<OUT, List<E>>,
+                ObjectMatcherBuilderBuilder0<OIN, List<E>>>,
+            ObjectMatcherBuilderBuilder0<OIN, List<E>>
+            >chainVerifier(
+            (B) this,
+            f,
+            (B b, Function<OUT, List<E>> function) -> new ObjectMatcherBuilderBuilder0<>(function));
       }
 
 
@@ -142,29 +160,20 @@ public class Matcher<IN, IM> extends PrintablePredicateFactory.TransformingPredi
       }
 
       public static class Builder1<OIN, OUT> {
-        private final Function<? super OUT, ?> function;
-
-        public Builder1(Function<? super OUT, ?> function) {
-          this.function = function;
-        }
-
         public Builder1() {
-          this(null);
         }
 
 
-        @SuppressWarnings("unchecked")
         public StringMatcherBuilderBuilder0<OIN> stringValue() {
-          return new StringMatcherBuilderBuilder0<OIN>((Function<? super OUT, String>) this.function);
+          return new StringMatcherBuilderBuilder0<OIN>(null);
         }
 
-        @SuppressWarnings("unchecked")
-        public ObjectMatcherBuilderBuilder0<OIN> forGeneralObject() {
-          return new ObjectMatcherBuilderBuilder0<>((Function<? super OIN, Object>) this.function);
+        public ObjectMatcherBuilderBuilder0<OIN, OUT> forGeneralObject() {
+          return new ObjectMatcherBuilderBuilder0<>(null);
         }
 
-        public ObjectMatcherBuilderBuilder0<OIN> listValueOf(OIN value) {
-          return new ObjectMatcherBuilderBuilder0<>((Function<? super OIN, Object>) this.function);
+        public <E> ObjectMatcherBuilderBuilder0<OIN, List<E>> listValueOf(E value) {
+          return new ObjectMatcherBuilderBuilder0<>(null);
         }
       }
     }

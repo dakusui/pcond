@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.forms;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
+import com.github.dakusui.pcond.core.matchers.transformers.ObjectMatcherBuilderBuilder0;
 import com.github.dakusui.pcond.core.printable.Matcher;
 import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 
@@ -22,11 +23,11 @@ public enum Matchers {
   ;
 
 
-  private static <IN> Matcher.Builder.Builder0.Builder1<IN> when() {
+  private static <IN, OUT> Matcher.Builder.Builder0.Builder1<IN, OUT> when() {
     return new Matcher.Builder.Builder0.Builder1<>();
   }
 
-  public static <IN> Matcher.Builder.Builder0.Builder1<IN> matcher() {
+  public static <IN, OUT> Matcher.Builder.Builder0.Builder1<IN, OUT> matcher() {
     return new Matcher.Builder.Builder0.Builder1<>();
   }
 
@@ -115,7 +116,7 @@ public enum Matchers {
             cursoredStringForSnapshotting.originalString.substring(cursoredStringForSnapshotting.position);
       }
     }
-    return when_().stringValue()
+    return when().stringValue()
         .chain(function("findTokens", CursoredString::new)).then()
         .allOf(
             Stream.concat(
@@ -175,8 +176,8 @@ public enum Matchers {
       return false;
     };
 
-    return Matchers.when().listValueOf((Class<E>)value())
-        .chain(CursoredList::new)
+    return Matchers.when().listValueOf((E)value())
+        .chain(function("toCursoredList", CursoredList::new))
         .then()
         .verifyWith(allOf(Stream.concat(
                 Arrays.stream(predicates)
@@ -197,5 +198,4 @@ public enum Matchers {
   public static <T> T value() {
     return null;
   }
-
 }

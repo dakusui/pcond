@@ -145,7 +145,7 @@ public class MatchersTest extends TestBase {
     }
   }
 
-  @Test(expected = ComparisonFailure.class)
+  @Test//(expected = ComparisonFailure.class)
   public void findElementTest() {
     List<String> list = asList("Hello", "world", "", "everyone", "quick", "brown", "fox", "runs", "forever");
     assertThat(list, findElements(
