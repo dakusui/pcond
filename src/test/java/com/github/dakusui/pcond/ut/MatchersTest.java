@@ -2,27 +2,29 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.forms.Matchers;
 import com.github.dakusui.pcond.utils.ut.TestBase;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import java.util.List;
 
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
-import static com.github.dakusui.pcond.forms.Matchers.findElements;
-import static com.github.dakusui.pcond.forms.Predicates.isEqualTo;
-import static com.github.dakusui.pcond.forms.Predicates.isNotNull;
+import static com.github.dakusui.pcond.Validations.validate;
+import static com.github.dakusui.pcond.forms.Matchers.*;
+import static com.github.dakusui.pcond.forms.Predicates.*;
+import static com.github.dakusui.pcond.forms.Printables.function;
 import static java.util.Arrays.asList;
 
 public class MatchersTest extends TestBase {
-  /*
   @Test
   public void whenPassingValidation_thenPasses$1() {
-    validate(
+    assertThat(
         new Parent(),
-        matcherFor(Parent.class)
-            .transformBy(Parent::parentMethod1)
-            .verifyWith(isEqualTo("returnValueFromParentMethod")),
-        TestException::new);
+        when(Parent.class).objectValue()
+            .chainToObject(Parent::parentMethod1)
+            .then()
+            .verifyWith(isEqualTo("returnValueFromParentMethod")).build());
   }
 
   @Test(expected = TestException.class)
@@ -31,19 +33,20 @@ public class MatchersTest extends TestBase {
       validate(
           new Parent(),
           allOf(
-              matcherFor(Parent.class)
-                  .name("lambda:Parent::parentMethod1--by name() method")
-                  .transformBy(Parent::parentMethod1)
-                  .verifyWith(isEqualTo("returnValueFromParentMethod")),
-              matcherFor(Parent.class).name("parentMethod2")
-                  .transformBy(Parent::parentMethod2)
-                  .into(Child.class)
+              when(Parent.class).objectValue()
+                  .chainToObject(function("lambda:Parent::parentMethod1--by name() method", Parent::parentMethod1))
+                  .then()
+                  .verifyWith(isEqualTo("returnValueFromParentMethod")).build(),
+              when(Parent.class).objectValue()
+                  .chainToObject(function("parentMethod2", Parent::parentMethod2))
+                  .then()
                   .verifyWith(
-                      matcherFor(Child.class)
-                          .transformBy(function("lambda:Child::childMethod--by Printables.function()", Child::childMethod))
-                          // 'not(...)' is added to make the matcher fail.
-                          .verifyWith(not(isEqualTo("returnedStringFromChildMethod")))
-                  )),
+                      when(Child.class).objectValue()
+                          .chainToString(function("lambda:Child::childMethod--by Printables.function()", Child::childMethod))
+                          .then()
+                          //         'not(...)' is added to make the matcher fail.
+                          .verifyWith(not(isEqualTo("returnedStringFromChildMethod"))).build())
+                  .build()),
           TestException::new);
     } catch (TestException e) {
       e.printStackTrace();
@@ -56,6 +59,7 @@ public class MatchersTest extends TestBase {
     }
   }
 
+  /*
   @Test(expected = ComparisonFailure.class)
   public void example() {
     try {
@@ -123,45 +127,15 @@ public class MatchersTest extends TestBase {
         matcherForString().transformBy(v -> v).verifyWith(equalTo("Hello, world")));
   }
 */
-  @Test//(expected = ComparisonFailure.class)
-  public void findSubstringsTest() {
-    String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
-    try {
-      assertThat(text, Matchers.findSubstrings("Gallia", "quarum", "Belgium", "nostra"));
-    } catch (ComparisonFailure e) {
-      e.printStackTrace();
-      throw e;
-    }
-  }
 
-  @Test//(expected = ComparisonFailure.class)
-  public void findRegexesTest() {
-    String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
-    try {
-      assertThat(text, Matchers.findRegexes("Gall.a", "quar.m", "Belgium", "nostr(um|a)"));
-    } catch (ComparisonFailure e) {
-      e.printStackTrace();
-      throw e;
-    }
-  }
-
-  @Test//(expected = ComparisonFailure.class)
-  public void findElementTest() {
-    List<String> list = asList("Hello", "world", "", "everyone", "quick", "brown", "fox", "runs", "forever");
-    assertThat(list, findElements(
-        isEqualTo("world"),
-        isEqualTo("cat"), isEqualTo("organization"), isNotNull(), isEqualTo("fox"), isEqualTo("world")));
-  }
-
-/*
   @Test
   public void matcherForStringWorksFine() {
-    assertThat("Hello, world", matcherForString().substring(2).toUpperCase().then().verifyWith(containsString("Hello")));
+    assertThat("Hello, world", Matchers.matcher().stringValue().substring(2).toUpperCase().then().verifyWith(containsString("Hello")).build());
   }
 
   @Test
   public void matcherForStringWorksFine2() {
-    assertThat("Hello, world", when().valueIsString().substring(2).toUpperCase().then().verifyWith(containsString("Hello")));
+    assertThat("Hello, world", when().stringValue().substring(2).toUpperCase().then().verifyWith(containsString("Hello")).build());
   }
 
   static class Parent {
@@ -185,6 +159,4 @@ public class MatchersTest extends TestBase {
       super(message);
     }
   }
-  */
-
 }

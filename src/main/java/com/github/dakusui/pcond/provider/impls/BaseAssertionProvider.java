@@ -157,7 +157,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
   private static String composeExplanationForActualResults(List<Evaluator.Entry> result, Throwable t, List<Object> actualInputDetails) {
     return composeExplanation(result.stream()
         .peek((Evaluator.Entry each) -> {
-          if (each.actualInputDetail() != null)
+          if (each.hasActualInputDetail())
             actualInputDetails.add(each.actualInputDetail());
         })
         .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
@@ -204,7 +204,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
         !asList(LEAF, AND, OR, NOT).contains(entry.type()) ?
             null :
             outputFormatter.get(),
-        entry.expectationDetail());
+        entry.hasExpectationDetail() ?entry.expectationDetail() : null);
   }
 
   private static Function<FormattedEntry, String> formattedEntryToString(int inputColumnWidth, int formNameColumnLength, int outputColumnLength, AtomicInteger i) {

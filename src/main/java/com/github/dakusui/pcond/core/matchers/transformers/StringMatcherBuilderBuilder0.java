@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.matchers.transformers;
 
+import com.github.dakusui.pcond.core.matchers.chckers.StringMatcherBuilder;
 import com.github.dakusui.pcond.core.printable.Matcher;
 import com.github.dakusui.pcond.forms.Printables;
 
@@ -14,10 +15,10 @@ public class StringMatcherBuilderBuilder0<OIN> extends Matcher.Builder.Builder0<
   }
 
   public StringMatcherBuilderBuilder0<OIN> substring(int begin) {
-    return this.chain(Printables.function(() -> "substring[" + begin + "]", s -> s.substring(begin)));
+    return this.chainToString(Printables.function(() -> "substring[" + begin + "]", s -> s.substring(begin)));
   }
 
   public StringMatcherBuilderBuilder0<OIN> toUpperCase() {
-    return this.chain(Printables.function("toUpperCase", String::toUpperCase));
+    return this.chainToString(Printables.function("toUpperCase", String::toUpperCase));
   }
 }

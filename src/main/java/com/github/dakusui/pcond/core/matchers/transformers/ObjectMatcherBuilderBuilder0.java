@@ -8,7 +8,7 @@ public class ObjectMatcherBuilderBuilder0<OIN, COUT> extends Matcher.Builder.Bui
 
   /**
    */
-  public <P> ObjectMatcherBuilderBuilder0(Function<? super P, COUT> function) {
+  public <P> ObjectMatcherBuilderBuilder0(Function<P, COUT> function) {
     super(function);
   }
 }
