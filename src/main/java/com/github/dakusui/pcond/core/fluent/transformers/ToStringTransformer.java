@@ -14,10 +14,10 @@ public class ToStringTransformer<OIN> extends Transformer<ToStringTransformer<OI
   }
 
   public ToStringTransformer<OIN> substring(int begin) {
-    return this.chainToString(Printables.function(() -> "substring[" + begin + "]", s -> s.substring(begin)));
+    return this.transformToString(Printables.function(() -> "substring[" + begin + "]", s -> s.substring(begin)));
   }
 
   public ToStringTransformer<OIN> toUpperCase() {
-    return this.chainToString(Printables.function("toUpperCase", String::toUpperCase));
+    return this.transformToString(Printables.function("toUpperCase", String::toUpperCase));
   }
 }

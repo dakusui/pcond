@@ -1,6 +1,10 @@
 package com.github.dakusui.pcond;
 
 import com.github.dakusui.pcond.core.fluent.Fluent;
+import com.github.dakusui.pcond.core.fluent.transformers.ToListTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.ToObjectTransformer;
+
+import java.util.List;
 
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
@@ -9,7 +13,7 @@ public enum Fluents {
   ;
 
 
-  public static <IN> Fluent<IN, IN> when(Class<IN> klass) {
+  public static <IN> Fluent<IN, IN> when(IN value) {
     return new Fluent<>();
   }
 
@@ -32,4 +36,14 @@ public enum Fluents {
   public static <T> T value() {
     return null;
   }
+
+  public static <T> ToObjectTransformer<T, T> whenObjectOf(T value) {
+    return when(value).object();
+  }
+
+  public static <E> ToListTransformer<List<E>, E> whenListOf(E element) {
+    return null;
+  }
+
+
 }

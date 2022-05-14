@@ -23,7 +23,12 @@ public class StringVerifier<OIN> extends Verifier<StringVerifier<OIN>, OIN, Stri
     return this.predicate(Predicates.isEmptyString());
   }
 
-  public StringVerifier<OIN> isNullOrEmpty() {
+  public StringVerifier<OIN> isNullOrEmpty()
+
+
+
+
+  {
     return this.predicate(Predicates.isNullOrEmptyString());
   }
 

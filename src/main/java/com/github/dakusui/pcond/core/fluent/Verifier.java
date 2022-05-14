@@ -90,9 +90,17 @@ public class Verifier<B extends Verifier<B, OIN, IM>, OIN, IM> {
     return new ListVerifier<>(this.function.andThen(converter));
   }
 
-  @SuppressWarnings("unchecked")
-  public <AS> Predicate<AS> build() {
-    return (Predicate<AS>) PrintablePredicateFactory.TransformingPredicate.Factory.create(this.function).check(this.predicate);
+  public Predicate<? super OIN> build() {
+    return PrintablePredicateFactory.TransformingPredicate.Factory.create(this.function).check(this.predicate);
   }
 
+  /**
+   * A synonym of {@link this#build()} method.
+   *
+   * @return A predicate of `AS` built from this object.
+   */
+  @SuppressWarnings("unchecked")
+  public <AS> Predicate<AS> done() {
+    return (Predicate<AS>) build();
+  }
 }

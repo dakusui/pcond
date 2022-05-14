@@ -345,7 +345,7 @@ public enum Predicates {
       }
     }
     return Fluents.when().string()
-        .chainToObject(function("findTokens", CursoredString::new)).then()
+        .transformToObject(function("findTokens", CursoredString::new)).then()
         .allOf(
             Stream.concat(
                     Arrays.stream(tokens).map(CursoredStringPredicate::new),
@@ -405,14 +405,14 @@ public enum Predicates {
     };
 
     return Fluents.when().listOf((E) Fluents.value())
-        .chainToObject(function("toCursoredList", CursoredList::new))
+        .transformToObject(function("toCursoredList", CursoredList::new))
         .then()
         .verifyWith(allOf(Stream.concat(
                 Arrays.stream(predicates)
                     .map((Predicate<E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
                 Stream.of(predicate("(end)", eCursoredList -> true)))
             .toArray(Predicate[]::new)))
-        .build();
+        .done();
   }
 
   enum Def {

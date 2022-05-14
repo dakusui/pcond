@@ -11,14 +11,15 @@ import static com.github.dakusui.pcond.Validations.validate;
 import static com.github.dakusui.pcond.Fluents.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.function;
+import static java.util.Arrays.asList;
 
 public class FluentsTest extends TestBase {
   @Test
   public void whenPassingValidation_thenPasses$1() {
     assertThat(
         new Parent(),
-        when(Parent.class).object()
-            .chainToObject(Parent::parentMethod1)
+        whenObjectOf((Parent) value())
+            .transformToObject(Parent::parentMethod1)
             .then()
             .verifyWith(isEqualTo("returnValueFromParentMethod")).build());
   }
@@ -29,19 +30,19 @@ public class FluentsTest extends TestBase {
       validate(
           new Parent(),
           allOf(
-              when(Parent.class).object()
-                  .chainToObject(function("lambda:Parent::parentMethod1--by name() method", Parent::parentMethod1))
+              whenObjectOf((Parent) value())
+                  .transformToObject(function("lambda:Parent::parentMethod1--by name() method", Parent::parentMethod1))
                   .then()
-                  .verifyWith(isEqualTo("returnValueFromParentMethod")).build(),
-              when(Parent.class).object()
-                  .chainToObject(function("parentMethod2", Parent::parentMethod2))
+                  .verifyWith(isEqualTo("returnValueFromParentMethod")).done(),
+              whenObjectOf((Parent) value())
+                  .transformToObject(function("parentMethod2", Parent::parentMethod2))
                   .then()
                   .verifyWith(
-                      when(Child.class).object()
-                          .chainToString(function("lambda:Child::childMethod--by Printables.function()", Child::childMethod))
+                      whenObjectOf((Child) value())
+                          .transformToString(function("lambda:Child::childMethod--by Printables.function()", Child::childMethod))
                           .then()
                           //         'not(...)' is added to make the matcher fail.
-                          .verifyWith(not(isEqualTo("returnedStringFromChildMethod"))).build())
+                          .verifyWith(not(isEqualTo("returnedStringFromChildMethod"))).done())
                   .build()),
           TestException::new);
     } catch (TestException e) {
@@ -53,6 +54,10 @@ public class FluentsTest extends TestBase {
               CoreMatchers.containsString("lambda:Child::childMethod--by Printables.function()")));
       throw e;
     }
+  }
+
+  @Test
+  public void example() {
   }
 
   /*

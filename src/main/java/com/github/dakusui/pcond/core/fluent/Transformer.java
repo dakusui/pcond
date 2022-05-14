@@ -16,14 +16,14 @@ import static java.util.Objects.requireNonNull;
  * @param <OUT> (Current) Output type.
  */
 public abstract class Transformer<B extends Transformer<B, OIN, OUT>, OIN, OUT> {
-  private Function<OIN, OUT> chain;
+  private final Function<OIN, OUT> function;
 
   /**
    *
    */
   @SuppressWarnings("unchecked")
-  public <COUT> Transformer(Function<? super COUT, ? extends OUT> chain) {
-    this.chain = (Function<OIN, OUT>) chain;
+  public <COUT> Transformer(Function<? super COUT, ? extends OUT> function) {
+    this.function = (Function<OIN, OUT>) function;
   }
 
   private static <
@@ -36,60 +36,40 @@ public abstract class Transformer<B extends Transformer<B, OIN, OUT>, OIN, OUT> 
           Function<COUT, NOUT>,
           BB>,
       BB extends Transformer<BB, OIN, NOUT>>
-  BB chainTransformer(B parent, Function<COUT, NOUT> f, C constructor) {
+  BB transformToList(B parent, Function<COUT, NOUT> f, C constructor) {
     return constructor.apply(parent, f);
   }
 
-  private static <
-      OIN,
-      OUT,
-      IM,
-      T extends Transformer<T, OIN, OUT>,
-      C extends Function<OUT, IM>
-      > ObjectVerifier<OIN, IM> chainToVerifier(T transformer, C converter) {
-    return chainToVerifier(transformer, converter, (t, c) -> new ObjectVerifier<>(transformer.chain().andThen(converter)));
-  }
-
-  private static <
-      OIN,
-      OUT,
-      IM,
-      T extends Transformer<T, OIN, OUT>,
-      V extends Verifier<V, OIN, IM>,
-      C extends Function<OUT, IM>,
-      F extends BiFunction<T, C, ? extends V>
-      > V chainToVerifier(T transformer, C converter, F factory) {
-    return factory.apply(transformer, converter);
-  }
-
-  Function<? super OIN, ? extends OUT> chain() {
-    return this.chain;
+  Function<? super OIN, ? extends OUT> function() {
+    return this.function;
   }
 
 
   @SuppressWarnings("unchecked")
-  public ToStringTransformer<OIN> chainToString(Function<OUT, String> f) {
-    return Transformer.chainTransformer((B) this,
+  public ToStringTransformer<OIN> transformToString(Function<OUT, String> f) {
+    return Transformer.transformToList((B) this,
         f,
-        (b, outnoutFunction) -> new ToStringTransformer<OIN>(outnoutFunction));
+        (b, outnoutFunction) -> new ToStringTransformer<>(outnoutFunction));
   }
 
-  public <O> ToObjectTransformer<OIN, O> chainToObject(Function<OUT, O> f) {
-    return Transformer.chainTransformer((B) this,
+  @SuppressWarnings("unchecked")
+  public <O> ToObjectTransformer<OIN, O> transformToObject(Function<OUT, O> f) {
+    return Transformer.transformToList((B) this,
         f,
         (b, outnoutFunction) -> new ToObjectTransformer<>(outnoutFunction));
   }
 
+  @SuppressWarnings("unchecked")
   public <E>
-  ToObjectTransformer<OIN, List<E>> chainToList(Function<OUT, List<E>> f) {
-    return Transformer.chainTransformer(
+  ToObjectTransformer<OIN, List<E>> transformToList(Function<OUT, List<E>> f) {
+    return Transformer.transformToList(
         (B) this,
         f,
         (B b, Function<OUT, List<E>> function) -> new ToObjectTransformer<>(function));
   }
 
-  public <B extends Verifier<B, OIN, OUT>> ObjectVerifier<OIN, OUT> then() {
-    return new ObjectVerifier<>(requireNonNull(this.chain));
+  public ObjectVerifier<OIN, OUT> then() {
+    return new ObjectVerifier<>(requireNonNull(this.function));
   }
 
 }
