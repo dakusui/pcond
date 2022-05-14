@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.core.fluent.verifiers.ObjectKVerifier;
+import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
 import com.github.dakusui.pcond.core.fluent.transformers.ToObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.transformers.ToStringTransformer;
 
@@ -46,8 +46,8 @@ public abstract class Transformer<B extends Transformer<B, OIN, OUT>, OIN, OUT> 
       IM,
       T extends Transformer<T, OIN, OUT>,
       C extends Function<OUT, IM>
-      > ObjectKVerifier<OIN, IM> chainToVerifier(T transformer, C converter) {
-    return chainToVerifier(transformer, converter, (t, c) -> new ObjectKVerifier<>(transformer.chain().andThen(converter)));
+      > ObjectVerifier<OIN, IM> chainToVerifier(T transformer, C converter) {
+    return chainToVerifier(transformer, converter, (t, c) -> new ObjectVerifier<>(transformer.chain().andThen(converter)));
   }
 
   private static <
@@ -88,8 +88,8 @@ public abstract class Transformer<B extends Transformer<B, OIN, OUT>, OIN, OUT> 
         (B b, Function<OUT, List<E>> function) -> new ToObjectTransformer<>(function));
   }
 
-  public <B extends Verifier<B, OIN, OUT>> ObjectKVerifier<OIN, OUT> then() {
-    return new ObjectKVerifier<>(requireNonNull(this.chain));
+  public <B extends Verifier<B, OIN, OUT>> ObjectVerifier<OIN, OUT> then() {
+    return new ObjectVerifier<>(requireNonNull(this.chain));
   }
 
 }

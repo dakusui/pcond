@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.ObjectKVerifier;
+import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.forms.Functions;
@@ -74,8 +74,8 @@ public class Verifier<B extends Verifier<B, OIN, IM>, OIN, IM> {
    * @return This object
    */
   public <AS>
-  ObjectKVerifier<OIN, AS> asObjectOf(Class<AS> valueType) {
-    return new ObjectKVerifier<>(Functions.cast(valueType));
+  ObjectVerifier<OIN, AS> asObjectOf(Class<AS> valueType) {
+    return new ObjectVerifier<>(Functions.cast(valueType));
   }
 
   public StringVerifier<OIN> asString() {
