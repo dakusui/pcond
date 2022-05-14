@@ -6,17 +6,21 @@ import com.github.dakusui.pcond.forms.Functions;
 import java.util.List;
 import java.util.function.Function;
 
-public class ToListTransformer<OIN, E> extends Transformer<ToListTransformer<OIN, E>, OIN, List<E>> {
+public class ListTransformer<OIN, E> extends Transformer<ListTransformer<OIN, E>, OIN, List<E>> {
 
   /**
    * @param function A function that transforms
    */
-  public <COUT> ToListTransformer(Function<? super COUT, ? extends List<E>> function) {
+  public ListTransformer(Function<? super OIN, ? extends List<E>> function) {
     super(function);
   }
 
-  public ToObjectTransformer<OIN, E> elementAt(int i) {
+  public ObjectTransformer<OIN, E> elementAt(int i) {
     return this.transformToObject(Functions.elementAt(i));
+  }
+
+  public IntegerTransformer<OIN> size() {
+    return this.transformToInteger(Functions.size());
   }
 
 

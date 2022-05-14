@@ -1,9 +1,13 @@
 package com.github.dakusui.pcond.core.fluent;
 
+import com.github.dakusui.pcond.core.fluent.transformers.IntegerTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.ListTransformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
-import com.github.dakusui.pcond.core.fluent.transformers.ToObjectTransformer;
-import com.github.dakusui.pcond.core.fluent.transformers.ToStringTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
+import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -22,10 +26,11 @@ public abstract class Transformer<B extends Transformer<B, OIN, OUT>, OIN, OUT> 
    *
    */
   @SuppressWarnings("unchecked")
-  public <COUT> Transformer(Function<? super COUT, ? extends OUT> function) {
+  public Transformer(Function<? super OIN, ? extends OUT> function) {
     this.function = (Function<OIN, OUT>) function;
   }
 
+  @SuppressWarnings("unchecked")
   private static <
       OIN,
       COUT,
@@ -36,40 +41,61 @@ public abstract class Transformer<B extends Transformer<B, OIN, OUT>, OIN, OUT> 
           Function<COUT, NOUT>,
           BB>,
       BB extends Transformer<BB, OIN, NOUT>>
-  BB transformToList(B parent, Function<COUT, NOUT> f, C constructor) {
-    return constructor.apply(parent, f);
+  BB transform(B parent, Function<? super COUT, NOUT> f, C constructor) {
+    return constructor.apply(parent, (Function<COUT, NOUT>) f);
   }
 
-  Function<? super OIN, ? extends OUT> function() {
+  Function<OIN, ? extends OUT> function() {
     return this.function;
   }
 
 
   @SuppressWarnings("unchecked")
-  public ToStringTransformer<OIN> transformToString(Function<OUT, String> f) {
-    return Transformer.transformToList((B) this,
+  public StringTransformer<OIN> transformToString(Function<OUT, String> f) {
+    return Transformer.transform((B) this,
         f,
-        (b, outnoutFunction) -> new ToStringTransformer<>(outnoutFunction));
+        (b, func) -> new StringTransformer<>(chainFunctions(this.function(), func)));
   }
 
   @SuppressWarnings("unchecked")
-  public <O> ToObjectTransformer<OIN, O> transformToObject(Function<OUT, O> f) {
-    return Transformer.transformToList((B) this,
+  public <O> ObjectTransformer<OIN, O> transformToObject(Function<OUT, O> f) {
+    return Transformer.transform(
+        (B) this,
         f,
-        (b, outnoutFunction) -> new ToObjectTransformer<>(outnoutFunction));
+        (b, func) -> new ObjectTransformer<>(chainFunctions(this.function(), func)));
   }
 
   @SuppressWarnings("unchecked")
   public <E>
-  ToObjectTransformer<OIN, List<E>> transformToList(Function<OUT, List<E>> f) {
-    return Transformer.transformToList(
+  ListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
+    return Transformer.transform(
         (B) this,
         f,
-        (B b, Function<OUT, List<E>> function) -> new ToObjectTransformer<>(function));
+        (b, func) -> new ListTransformer<>(chainFunctions(this.function(), func)));
+  }
+
+  @SuppressWarnings("unchecked")
+  protected IntegerTransformer<OIN> transformToInteger(Function<? super OUT, Integer> f) {
+    return Transformer.transform(
+        (B) this,
+        f,
+        (b, func) -> new IntegerTransformer<>(chainFunctions(this.function(), func)));
+    }
+
+  @SuppressWarnings("unchecked")
+  private static <I, M, O> Function<I, O> chainFunctions(Function<I, ? extends M> func, Function<? super M, O> after) {
+    if (func == null)
+      // In case, func == null, I will become the same as M.
+      // So, this cast is safe.
+      return (Function<I, O>) after;
+    return func.andThen(after);
   }
 
   public ObjectVerifier<OIN, OUT> then() {
     return new ObjectVerifier<>(requireNonNull(this.function));
   }
 
+  public StringVerifier<OIN> thenAsString() {
+    return then().asString();
+  }
 }

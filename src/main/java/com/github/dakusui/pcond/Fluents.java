@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond;
 
 import com.github.dakusui.pcond.core.fluent.Fluent;
-import com.github.dakusui.pcond.core.fluent.transformers.ToListTransformer;
-import com.github.dakusui.pcond.core.fluent.transformers.ToObjectTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.ListTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
 
 import java.util.List;
 
@@ -37,12 +37,13 @@ public enum Fluents {
     return null;
   }
 
-  public static <T> ToObjectTransformer<T, T> whenObjectOf(T value) {
+  public static <T> ObjectTransformer<T, T> whenObjectOf(T value) {
     return when(value).object();
   }
 
-  public static <E> ToListTransformer<List<E>, E> whenListOf(E element) {
-    return null;
+  @SuppressWarnings("unchecked")
+  public static <E> ListTransformer<List<E>, E> whenListOf(E element) {
+    return when((List<E>)value()).listOf(element);
   }
 
 

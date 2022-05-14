@@ -1,23 +1,29 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.function.Function;
 
-public class ToStringTransformer<OIN> extends Transformer<ToStringTransformer<OIN>, OIN, String> {
+public class StringTransformer<OIN> extends Transformer<StringTransformer<OIN>, OIN, String> {
   /**
    * @param chain
    */
-  public <COUT> ToStringTransformer(Function<? super COUT, ? extends String> chain) {
+  public StringTransformer(Function<OIN, ? extends String> chain) {
     super(chain);
   }
 
-  public ToStringTransformer<OIN> substring(int begin) {
+  public StringTransformer<OIN> substring(int begin) {
     return this.transformToString(Printables.function(() -> "substring[" + begin + "]", s -> s.substring(begin)));
   }
 
-  public ToStringTransformer<OIN> toUpperCase() {
+  public StringTransformer<OIN> toUpperCase() {
     return this.transformToString(Printables.function("toUpperCase", String::toUpperCase));
+  }
+
+  public void method() {
+    Functions.length();
+    Functions.countLines();
   }
 }

@@ -4,11 +4,11 @@ import com.github.dakusui.pcond.core.fluent.Transformer;
 
 import java.util.function.Function;
 
-public class ToObjectTransformer<OIN, COUT> extends Transformer<ToObjectTransformer<OIN, COUT>, OIN, COUT> {
+public class ObjectTransformer<OIN, COUT> extends Transformer<ObjectTransformer<OIN, COUT>, OIN, COUT> {
 
   /**
    */
-  public <P> ToObjectTransformer(Function<P, COUT> function) {
+  public ObjectTransformer(Function<? super OIN, COUT> function) {
     super(function);
   }
 }

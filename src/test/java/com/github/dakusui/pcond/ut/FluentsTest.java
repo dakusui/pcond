@@ -58,6 +58,15 @@ public class FluentsTest extends TestBase {
 
   @Test
   public void example() {
+    assertThat(
+        asList("Hello", "world"),
+        whenListOf((String) value())
+            .elementAt(0)
+            .thenAsString()
+            .findSubstrings("hello")
+            .contains("hello")
+            .done()
+    );
   }
 
   /*
@@ -136,7 +145,7 @@ public class FluentsTest extends TestBase {
 
   @Test
   public void matcherForStringWorksFine2() {
-    assertThat("Hello, world", when().string().substring(2).toUpperCase().then().verifyWith(containsString("Hello")).build());
+    assertThat("Hello, world", when().string().substring(2).toUpperCase().then().verifyWith(containsString("Hello")).done());
   }
 
   static class Parent {

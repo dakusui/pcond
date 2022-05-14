@@ -1,32 +1,32 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.core.fluent.transformers.ToObjectTransformer;
-import com.github.dakusui.pcond.core.fluent.transformers.ToStringTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.ListTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
 
-import java.util.List;
 import java.util.Map;
 
 public class Fluent<OIN, OUT> {
   public Fluent() {
   }
 
-  public ToStringTransformer<OIN> string() {
-    return new ToStringTransformer<>(null);
+  public StringTransformer<OIN> string() {
+    return new StringTransformer<>(null);
   }
 
-  public ToObjectTransformer<OIN, OUT> object() {
-    return new ToObjectTransformer<>(null);
+  public ObjectTransformer<OIN, OUT> object() {
+    return new ObjectTransformer<>(null);
   }
 
-  public ToObjectTransformer<OIN, OUT> objectOf(OUT value) {
-    return new ToObjectTransformer<>(null);
+  public ObjectTransformer<OIN, OUT> objectOf(OUT value) {
+    return new ObjectTransformer<>(null);
   }
 
-  public <E> ToObjectTransformer<OIN, List<E>> listOf(E value) {
-    return new ToObjectTransformer<>(null);
+  public <E> ListTransformer<OIN, E> listOf(E value) {
+    return new ListTransformer(null);
   }
 
-  public <K, V> ToObjectTransformer<OIN, Map<K, V>> mapOf(K key, V value) {
-    return new ToObjectTransformer<>(null);
+  public <K, V> ObjectTransformer<OIN, Map<K, V>> mapOf(K key, V value) {
+    return new ObjectTransformer<>(null);
   }
 }
