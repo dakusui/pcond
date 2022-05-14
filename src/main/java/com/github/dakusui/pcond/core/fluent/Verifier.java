@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.fluent;
 
+import com.github.dakusui.pcond.core.fluent.verifiers.IntegerVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
@@ -13,11 +14,11 @@ import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
-public class Verifier<B extends Verifier<B, OIN, IM>, OIN, IM> {
-  private final Function<? super OIN, ? extends IM> function;
-  private       Predicate<IM>                       predicate;
+public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
+  private final Function<? super OIN, ? extends T> function;
+  private       Predicate<T>                       predicate;
 
-  public Verifier(Function<? super OIN, ? extends IM> function) {
+  public Verifier(Function<? super OIN, ? extends T> function) {
     this.function = function;
     this.predicate = null;
   }
@@ -34,36 +35,36 @@ public class Verifier<B extends Verifier<B, OIN, IM>, OIN, IM> {
   }
 
   @SafeVarargs
-  public final B allOf(Predicate<? super IM>... predicates) {
-    return (B) verifyWith(Predicates.allOf(predicates));
+  public final V allOf(Predicate<? super T>... predicates) {
+    return (V) with(Predicates.allOf(predicates));
   }
 
   @SafeVarargs
-  public final B anyOf(Predicate<? super IM>... predicates) {
-    return (B) verifyWith(Predicates.anyOf(predicates));
+  public final V anyOf(Predicate<? super T>... predicates) {
+    return (V) with(Predicates.anyOf(predicates));
   }
 
   @SafeVarargs
-  public final B and(Predicate<? super IM>... predicates) {
-    return (B) verifyWith(Predicates.and(predicates));
+  public final V and(Predicate<? super T>... predicates) {
+    return (V) with(Predicates.and(predicates));
   }
 
   @SafeVarargs
-  public final B or(Predicate<? super IM>... predicates) {
-    return verifyWith(Predicates.or(predicates));
+  public final V or(Predicate<? super T>... predicates) {
+    return with(Predicates.or(predicates));
   }
 
-  public B verifyWith(Predicate<? super IM> predicate) {
+  public V with(Predicate<? super T> predicate) {
     return predicate(predicate);
   }
 
   @SuppressWarnings("unchecked")
-  protected B predicate(Predicate<? super IM> predicate) {
+  protected V predicate(Predicate<? super T> predicate) {
     if (this.predicate == null)
-      this.predicate = (Predicate<IM>) predicate;
+      this.predicate = (Predicate<T>) predicate;
     else
       this.predicate = this.predicate.and(predicate);
-    return (B) this;
+    return (V) this;
   }
 
   /**
@@ -82,11 +83,15 @@ public class Verifier<B extends Verifier<B, OIN, IM>, OIN, IM> {
     return new StringVerifier<>(this.function.andThen(Functions.stringify()));
   }
 
-  public StringVerifier<OIN> asString(Function<IM, String> converter) {
+  public IntegerVerifier<OIN> asInteger() {
+    return new IntegerVerifier<>(this.function.andThen(Functions.cast(Integer.class)));
+  }
+
+  public StringVerifier<OIN> asString(Function<T, String> converter) {
     return new StringVerifier<>(this.function.andThen(converter));
   }
 
-  public <E> ListVerifier<OIN, E> asListOf(Function<IM, List<E>> converter) {
+  public <E> ListVerifier<OIN, E> asListOf(Function<T, List<E>> converter) {
     return new ListVerifier<>(this.function.andThen(converter));
   }
 
@@ -100,7 +105,7 @@ public class Verifier<B extends Verifier<B, OIN, IM>, OIN, IM> {
    * @return A predicate of `AS` built from this object.
    */
   @SuppressWarnings("unchecked")
-  public <AS> Predicate<AS> done() {
+  public <AS> Predicate<AS> verify() {
     return (Predicate<AS>) build();
   }
 }

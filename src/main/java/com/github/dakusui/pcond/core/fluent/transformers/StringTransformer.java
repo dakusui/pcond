@@ -1,6 +1,8 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
+import com.github.dakusui.pcond.core.fluent.Verifier;
+import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 
@@ -25,5 +27,15 @@ public class StringTransformer<OIN> extends Transformer<StringTransformer<OIN>, 
   public void method() {
     Functions.length();
     Functions.countLines();
+  }
+
+  @Override
+  public StringVerifier<OIN> then() {
+    return then(Functions.stringify());
+  }
+
+  @Override
+  public StringVerifier<OIN> then(Function<String, String> converter) {
+    return thenAsString(converter);
   }
 }

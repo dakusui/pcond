@@ -415,94 +415,6 @@ public enum PrintablePredicateFactory {
         return cond -> new TransformingPredicate<>(name, toPrintablePredicate(cond), function);
       }
     }
-
-    public static class Builder<IN, IM> {
-      private String           name;
-      private Function<IN, IM> function;
-      private Predicate<IM>    predicate;
-
-      public Builder() {
-      }
-
-      public Builder(String name) {
-        this.name(name);
-      }
-
-      public Builder<IN, IM> name(String name) {
-        this.name = name;
-        return this;
-      }
-
-
-      @SuppressWarnings("unchecked")
-      public <NIN> Builder<NIN, IM> forValueOf(@SuppressWarnings("unused") Class<NIN> forClass) {
-        return (Builder<NIN, IM>) this;
-      }
-
-      @SuppressWarnings("unchecked")
-      public Builder<String, IM> forString() {
-        return (Builder<String, IM>) this;
-      }
-
-      /**
-       * @param elementClass A placeholder parameter, not accessed in this method.
-       *                     Do not remove.
-       * @param <E>          A type of element in a list.
-       * @return This object cast accordingly.
-       */
-      @SuppressWarnings("unchecked")
-      public <E> Builder<List<E>, IM> forListOf(@SuppressWarnings("unused") Class<E> elementClass) {
-        return (Builder<List<E>, IM>) this;
-      }
-
-      @SuppressWarnings("unchecked")
-      public <NIM> Builder<IN, NIM> transformBy(Function<IN, NIM> func) {
-        return function((Function<IN, IM>) func);
-      }
-
-      @SuppressWarnings("unchecked")
-      public <NIM> Builder<IN, NIM> andThen(Function<IM, NIM> func) {
-        return function((Function<IN, IM>) this.function.andThen(func));
-      }
-
-      @SuppressWarnings("unchecked")
-      private <NIM> Builder<IN, NIM> function(Function<IN, IM> func) {
-        this.function = func;
-        //return Factory.create(Printables.function(this.name, func));
-        return (Builder<IN, NIM>) this;
-      }
-
-
-      /**
-       * @param intoClass A placeholder parameter, not accessed in this method.
-       *                  Do not remove.
-       * @param <NIM>     An intermediate type evaluated by the predicate part.
-       * @return This object cast.
-       */
-      @SuppressWarnings("unchecked")
-      public <NIM> Builder<IN, NIM> into(@SuppressWarnings("unused") Class<NIM> intoClass) {
-        return (Builder<IN, NIM>) this;
-      }
-
-      public Predicate<IN> thenVerifyWith(Predicate<IM> predicate) {
-        this.predicate = predicate;
-        return build();
-      }
-
-      public Predicate<IN> build() {
-        InternalChecks.requireState(this.function, Objects::nonNull, () -> "'function' needs to be set first. Ensure 'transformBy' is called.");
-        InternalChecks.requireState(this.predicate, Objects::nonNull, () -> "'predicate' needs to be set first. Ensure 'thenVerifyWith' is called.");
-        return TransformingPredicate.Factory
-            .create(makePrintableIfFormatterIsAvailable(this.function))
-            .check(this.predicate);
-      }
-
-      private <I, O> Function<I, O> makePrintableIfFormatterIsAvailable(Function<I, O> func) {
-        return this.name != null ?
-            Printables.function(name, func) :
-            func;
-      }
-    }
   }
 
   static class ContextPredicate extends PrintablePredicate<Context> implements Evaluable.ContextPred {
@@ -564,12 +476,12 @@ public enum PrintablePredicateFactory {
           singletonList(predicate),
           () -> format("noneMatch[%s]", predicate),
           (Stream<E> stream) -> stream.noneMatch(predicate),
-          toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
+          toEvaluableIfNecessary((Predicate<? super Stream<E>>) predicate),
           true,
           true);
     }
 
-    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
+    public static <E> StreamPredicate<E> create(Predicate<E> predicate) {
       return new NoneMatch<>(
           predicate
       );
@@ -584,7 +496,7 @@ public enum PrintablePredicateFactory {
           singletonList(predicate),
           () -> format("anyMatch[%s]", predicate),
           (Stream<E> stream) -> stream.anyMatch(PrintablePredicate.unwrap(predicate)),
-          toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
+          toEvaluableIfNecessary((Predicate<? super Stream<E>>) predicate),
           false,
           true);
     }

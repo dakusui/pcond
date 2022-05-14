@@ -344,8 +344,9 @@ public enum Predicates {
             cursoredStringForSnapshotting.originalString.substring(cursoredStringForSnapshotting.position);
       }
     }
-    return Fluents.when().string()
-        .transformToObject(function("findTokens", CursoredString::new)).then()
+    return Fluents.fluent().string()
+        .transformToObject(function("findTokens", CursoredString::new))
+        .then()
         .allOf(
             Stream.concat(
                     Arrays.stream(tokens).map(CursoredStringPredicate::new),
@@ -404,15 +405,15 @@ public enum Predicates {
       return false;
     };
 
-    return Fluents.when().listOf((E) Fluents.value())
+    return Fluents.fluent().listOf((E) Fluents.value())
         .transformToObject(function("toCursoredList", CursoredList::new))
         .then()
-        .verifyWith(allOf(Stream.concat(
+        .with(allOf(Stream.concat(
                 Arrays.stream(predicates)
                     .map((Predicate<E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
                 Stream.of(predicate("(end)", eCursoredList -> true)))
             .toArray(Predicate[]::new)))
-        .done();
+        .verify();
   }
 
   enum Def {

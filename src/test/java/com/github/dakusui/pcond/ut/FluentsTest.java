@@ -18,10 +18,10 @@ public class FluentsTest extends TestBase {
   public void whenPassingValidation_thenPasses$1() {
     assertThat(
         new Parent(),
-        whenObjectOf((Parent) value())
+        when((Parent) value())
             .transformToObject(Parent::parentMethod1)
             .then()
-            .verifyWith(isEqualTo("returnValueFromParentMethod")).build());
+            .with(isEqualTo("returnValueFromParentMethod")).build());
   }
 
   @Test(expected = TestException.class)
@@ -30,20 +30,20 @@ public class FluentsTest extends TestBase {
       validate(
           new Parent(),
           allOf(
-              whenObjectOf((Parent) value())
-                  .transformToObject(function("lambda:Parent::parentMethod1--by name() method", Parent::parentMethod1))
-                  .then()
-                  .verifyWith(isEqualTo("returnValueFromParentMethod")).done(),
-              whenObjectOf((Parent) value())
-                  .transformToObject(function("parentMethod2", Parent::parentMethod2))
-                  .then()
-                  .verifyWith(
-                      whenObjectOf((Child) value())
+              when((Parent) value())
+                  .thenAsObject(function("lambda:Parent::parentMethod1--by name() method", Parent::parentMethod1))
+                  .with(isEqualTo("returnValueFromParentMethod"))
+                  .verify(),
+              when((Parent) value())
+                  .thenAsObject(function("parentMethod2", Parent::parentMethod2))
+                  .with(
+                      when((Child) value())
                           .transformToString(function("lambda:Child::childMethod--by Printables.function()", Child::childMethod))
                           .then()
                           //         'not(...)' is added to make the matcher fail.
-                          .verifyWith(not(isEqualTo("returnedStringFromChildMethod"))).done())
-                  .build()),
+                          .equalsIgnoreCase("hello")
+                          .with(not(isEqualTo("returnedStringFromChildMethod"))).verify())
+                  .verify()),
           TestException::new);
     } catch (TestException e) {
       e.printStackTrace();
@@ -63,9 +63,9 @@ public class FluentsTest extends TestBase {
         whenListOf((String) value())
             .elementAt(0)
             .thenAsString()
-            .findSubstrings("hello")
+            .findSubstrings("hello", "world")
             .contains("hello")
-            .done()
+            .verify()
     );
   }
 
@@ -140,12 +140,12 @@ public class FluentsTest extends TestBase {
 
   @Test
   public void matcherForStringWorksFine() {
-    assertThat("Hello, world", Fluents.fluent().string().substring(2).toUpperCase().then().verifyWith(containsString("Hello")).build());
+    assertThat("Hello, world", Fluents.fluent().string().substring(2).toUpperCase().then().with(containsString("Hello")).build());
   }
 
   @Test
   public void matcherForStringWorksFine2() {
-    assertThat("Hello, world", when().string().substring(2).toUpperCase().then().verifyWith(containsString("Hello")).done());
+    assertThat("Hello, world", fluent().string().substring(2).toUpperCase().then().with(containsString("Hello")).verify());
   }
 
   static class Parent {
