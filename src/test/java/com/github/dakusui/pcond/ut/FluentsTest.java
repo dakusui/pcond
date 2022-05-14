@@ -1,27 +1,23 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.forms.Matchers;
+import com.github.dakusui.pcond.Fluents;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
-import org.junit.ComparisonFailure;
 import org.junit.Test;
-
-import java.util.List;
 
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.Validations.validate;
-import static com.github.dakusui.pcond.forms.Matchers.*;
+import static com.github.dakusui.pcond.Fluents.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.function;
-import static java.util.Arrays.asList;
 
-public class MatchersTest extends TestBase {
+public class FluentsTest extends TestBase {
   @Test
   public void whenPassingValidation_thenPasses$1() {
     assertThat(
         new Parent(),
-        when(Parent.class).objectValue()
+        when(Parent.class).object()
             .chainToObject(Parent::parentMethod1)
             .then()
             .verifyWith(isEqualTo("returnValueFromParentMethod")).build());
@@ -33,15 +29,15 @@ public class MatchersTest extends TestBase {
       validate(
           new Parent(),
           allOf(
-              when(Parent.class).objectValue()
+              when(Parent.class).object()
                   .chainToObject(function("lambda:Parent::parentMethod1--by name() method", Parent::parentMethod1))
                   .then()
                   .verifyWith(isEqualTo("returnValueFromParentMethod")).build(),
-              when(Parent.class).objectValue()
+              when(Parent.class).object()
                   .chainToObject(function("parentMethod2", Parent::parentMethod2))
                   .then()
                   .verifyWith(
-                      when(Child.class).objectValue()
+                      when(Child.class).object()
                           .chainToString(function("lambda:Child::childMethod--by Printables.function()", Child::childMethod))
                           .then()
                           //         'not(...)' is added to make the matcher fail.
@@ -130,12 +126,12 @@ public class MatchersTest extends TestBase {
 
   @Test
   public void matcherForStringWorksFine() {
-    assertThat("Hello, world", Matchers.matcher().stringValue().substring(2).toUpperCase().then().verifyWith(containsString("Hello")).build());
+    assertThat("Hello, world", Fluents.fluent().string().substring(2).toUpperCase().then().verifyWith(containsString("Hello")).build());
   }
 
   @Test
   public void matcherForStringWorksFine2() {
-    assertThat("Hello, world", when().stringValue().substring(2).toUpperCase().then().verifyWith(containsString("Hello")).build());
+    assertThat("Hello, world", when().string().substring(2).toUpperCase().then().verifyWith(containsString("Hello")).build());
   }
 
   static class Parent {

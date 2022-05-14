@@ -1,24 +1,24 @@
-package com.github.dakusui.pcond.forms;
+package com.github.dakusui.pcond;
 
-import com.github.dakusui.pcond.core.printable.Matcher;
+import com.github.dakusui.pcond.core.fluent.Fluent;
 
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
 
-public enum Matchers {
+public enum Fluents {
   ;
 
 
-  public static <IN> Matcher.Builder.Builder0.Builder1<IN, IN> when(Class<IN> klass) {
-    return new Matcher.Builder.Builder0.Builder1<>();
+  public static <IN> Fluent<IN, IN> when(Class<IN> klass) {
+    return new Fluent<>();
   }
 
-  public static <IN> Matcher.Builder.Builder0.Builder1<IN, IN> when() {
-    return new Matcher.Builder.Builder0.Builder1<>();
+  public static <IN> Fluent<IN, IN> when() {
+    return new Fluent<>();
   }
 
-  public static <IN, OUT> Matcher.Builder.Builder0.Builder1<IN, OUT> matcher() {
-    return new Matcher.Builder.Builder0.Builder1<>();
+  public static <IN, OUT> Fluent<IN, OUT> fluent() {
+    return new Fluent<>();
   }
 
   /**

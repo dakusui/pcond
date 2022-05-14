@@ -1,11 +1,11 @@
-package com.github.dakusui.pcond.core.matchers.chckers;
+package com.github.dakusui.pcond.core.fluent.verifiers;
 
-import com.github.dakusui.pcond.core.printable.Matcher;
+import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
 
-public class StringMatcherBuilder<OIN> extends Matcher.Builder<StringMatcherBuilder<OIN>, OIN, String> {
+public class StringMatcherBuilder<OIN> extends Verifier<StringMatcherBuilder<OIN>, OIN, String> {
   public StringMatcherBuilder(Function<? super OIN, ? extends String> function) {
     super(function);
   }

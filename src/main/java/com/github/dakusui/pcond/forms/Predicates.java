@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.forms;
 
+import com.github.dakusui.pcond.Fluents;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.core.printable.PrintablePredicate;
@@ -343,7 +344,7 @@ public enum Predicates {
             cursoredStringForSnapshotting.originalString.substring(cursoredStringForSnapshotting.position);
       }
     }
-    return Matchers.when().stringValue()
+    return Fluents.when().string()
         .chainToObject(function("findTokens", CursoredString::new)).then()
         .allOf(
             Stream.concat(
@@ -403,7 +404,7 @@ public enum Predicates {
       return false;
     };
 
-    return Matchers.when().listValueOf((E) Matchers.value())
+    return Fluents.when().listOf((E) Fluents.value())
         .chainToObject(function("toCursoredList", CursoredList::new))
         .then()
         .verifyWith(allOf(Stream.concat(

@@ -1,12 +1,11 @@
-package com.github.dakusui.pcond.core.matchers.transformers;
+package com.github.dakusui.pcond.core.fluent.transformers;
 
-import com.github.dakusui.pcond.core.matchers.chckers.StringMatcherBuilder;
-import com.github.dakusui.pcond.core.printable.Matcher;
+import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.function.Function;
 
-public class StringMatcherBuilderBuilder0<OIN> extends Matcher.Builder.Builder0<StringMatcherBuilderBuilder0<OIN>, OIN, String> {
+public class StringMatcherBuilderBuilder0<OIN> extends Transformer<StringMatcherBuilderBuilder0<OIN>, OIN, String> {
   /**
    * @param chain
    */
