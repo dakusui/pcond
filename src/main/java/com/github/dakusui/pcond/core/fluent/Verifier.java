@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.core.fluent.verifiers.ListMatcherBuilder;
-import com.github.dakusui.pcond.core.fluent.verifiers.ObjectMatcherBuilder;
-import com.github.dakusui.pcond.core.fluent.verifiers.StringMatcherBuilder;
+import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
+import com.github.dakusui.pcond.core.fluent.verifiers.ObjectKVerifier;
+import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
@@ -74,20 +74,20 @@ public class Verifier<B extends Verifier<B, OIN, IM>, OIN, IM> {
    * @return This object
    */
   public <AS>
-  ObjectMatcherBuilder<OIN, AS> asObjectOf(Class<AS> valueType) {
-    return new ObjectMatcherBuilder<>(Functions.cast(valueType));
+  ObjectKVerifier<OIN, AS> asObjectOf(Class<AS> valueType) {
+    return new ObjectKVerifier<>(Functions.cast(valueType));
   }
 
-  public StringMatcherBuilder<OIN> asString() {
-    return new StringMatcherBuilder<>(this.function.andThen(Functions.stringify()));
+  public StringVerifier<OIN> asString() {
+    return new StringVerifier<>(this.function.andThen(Functions.stringify()));
   }
 
-  public StringMatcherBuilder<OIN> asString(Function<IM, String> converter) {
-    return new StringMatcherBuilder<>(this.function.andThen(converter));
+  public StringVerifier<OIN> asString(Function<IM, String> converter) {
+    return new StringVerifier<>(this.function.andThen(converter));
   }
 
-  public <E> ListMatcherBuilder<OIN, E> asListOf(Function<IM, List<E>> converter) {
-    return new ListMatcherBuilder<>(this.function.andThen(converter));
+  public <E> ListVerifier<OIN, E> asListOf(Function<IM, List<E>> converter) {
+    return new ListVerifier<>(this.function.andThen(converter));
   }
 
   @SuppressWarnings("unchecked")

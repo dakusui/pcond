@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.core.fluent.verifiers.ObjectMatcherBuilder;
-import com.github.dakusui.pcond.core.fluent.transformers.ObjectMatcherBuilderBuilder0;
-import com.github.dakusui.pcond.core.fluent.transformers.StringMatcherBuilderBuilder0;
+import com.github.dakusui.pcond.core.fluent.verifiers.ObjectKVerifier;
+import com.github.dakusui.pcond.core.fluent.transformers.ToObjectTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.ToStringTransformer;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -46,8 +46,8 @@ public abstract class Transformer<B extends Transformer<B, OIN, OUT>, OIN, OUT> 
       IM,
       T extends Transformer<T, OIN, OUT>,
       C extends Function<OUT, IM>
-      > ObjectMatcherBuilder<OIN, IM> chainToVerifier(T transformer, C converter) {
-    return chainToVerifier(transformer, converter, (t, c) -> new ObjectMatcherBuilder<>(transformer.chain().andThen(converter)));
+      > ObjectKVerifier<OIN, IM> chainToVerifier(T transformer, C converter) {
+    return chainToVerifier(transformer, converter, (t, c) -> new ObjectKVerifier<>(transformer.chain().andThen(converter)));
   }
 
   private static <
@@ -68,28 +68,28 @@ public abstract class Transformer<B extends Transformer<B, OIN, OUT>, OIN, OUT> 
 
 
   @SuppressWarnings("unchecked")
-  public StringMatcherBuilderBuilder0<OIN> chainToString(Function<OUT, String> f) {
+  public ToStringTransformer<OIN> chainToString(Function<OUT, String> f) {
     return Transformer.chainTransformer((B) this,
         f,
-        (b, outnoutFunction) -> new StringMatcherBuilderBuilder0<OIN>(outnoutFunction));
+        (b, outnoutFunction) -> new ToStringTransformer<OIN>(outnoutFunction));
   }
 
-  public <O> ObjectMatcherBuilderBuilder0<OIN, O> chainToObject(Function<OUT, O> f) {
+  public <O> ToObjectTransformer<OIN, O> chainToObject(Function<OUT, O> f) {
     return Transformer.chainTransformer((B) this,
         f,
-        (b, outnoutFunction) -> new ObjectMatcherBuilderBuilder0<>(outnoutFunction));
+        (b, outnoutFunction) -> new ToObjectTransformer<>(outnoutFunction));
   }
 
   public <E>
-  ObjectMatcherBuilderBuilder0<OIN, List<E>> chainToList(Function<OUT, List<E>> f) {
+  ToObjectTransformer<OIN, List<E>> chainToList(Function<OUT, List<E>> f) {
     return Transformer.chainTransformer(
         (B) this,
         f,
-        (B b, Function<OUT, List<E>> function) -> new ObjectMatcherBuilderBuilder0<>(function));
+        (B b, Function<OUT, List<E>> function) -> new ToObjectTransformer<>(function));
   }
 
-  public <B extends Verifier<B, OIN, OUT>> ObjectMatcherBuilder<OIN, OUT> then() {
-    return new ObjectMatcherBuilder<>(requireNonNull(this.chain));
+  public <B extends Verifier<B, OIN, OUT>> ObjectKVerifier<OIN, OUT> then() {
+    return new ObjectKVerifier<>(requireNonNull(this.chain));
   }
 
 }
