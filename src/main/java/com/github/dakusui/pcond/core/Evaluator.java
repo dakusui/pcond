@@ -58,12 +58,11 @@ public interface Evaluator {
     }
 
     void enter(Entry.Type type, Evaluable<?> evaluable, String name, Object input) {
-      if (evaluable.requestExpectationFlip())
-        this.flipCurrentlyExpectedBooleanValue();
-
       Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, toSnapshotIfPossible(input), this.currentlyExpectedBooleanValue);
       onGoingEntries.add(newEntry);
       entries.add(newEntry);
+      if (evaluable.requestExpectationFlip())
+        this.flipCurrentlyExpectedBooleanValue();
     }
 
     void leave(Object result, Evaluable<?> evaluable, boolean unexpected) {

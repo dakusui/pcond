@@ -10,6 +10,7 @@ import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
+import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import java.util.List;
@@ -48,7 +49,7 @@ public class ExperimentalsTest extends TestBase {
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(toContextPredicate(stringEndsWith()))));
   }
 
-  @Test
+  @Test(expected = ComparisonFailure.class)
   public void helloError() {
     TestAssertions.assertThat(
         singletonList("hello"),
