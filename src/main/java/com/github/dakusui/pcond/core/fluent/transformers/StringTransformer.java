@@ -1,7 +1,6 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
@@ -12,11 +11,12 @@ public class StringTransformer<OIN> extends Transformer<StringTransformer<OIN>, 
 
 
   /**
+   * @param transformerName
    * @param parent
    * @param function
    */
-  public <IN> StringTransformer(Transformer<?, OIN, IN> parent, Function<? super IN, ? extends String> function) {
-    super(parent, function);
+  public <IN> StringTransformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends String> function) {
+    super(transformerName, parent, function);
   }
 
   public StringTransformer<OIN> substring(int begin) {

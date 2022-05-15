@@ -1,22 +1,24 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.Fluents;
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
 import com.github.dakusui.pcond.core.fluent.transformers.extendable.AbstractObjectTransformer;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.Fluents.*;
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.Validations.validate;
-import static com.github.dakusui.pcond.Fluents.*;
+import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static java.util.Arrays.asList;
@@ -32,21 +34,18 @@ public class FluentsTest extends TestBase {
             .with(isEqualTo("returnValueFromParentMethod")).build());
   }
 
-  class ChildTransformer<OIN> extends AbstractObjectTransformer<ChildTransformer<OIN>, OIN, Child> {
+  static class ChildTransformer<OIN> extends AbstractObjectTransformer<ChildTransformer<OIN>, OIN, Child> {
 
-    /**
-     * @param parent
-     * @param function
-     */
     public <IN> ChildTransformer(Transformer<?, OIN, IN> parent, Function<? super IN, ? extends Child> function) {
-      super(parent, function);
+      super(null, parent, function);
     }
 
     public StringTransformer<OIN> childMethod() {
       return this.transformToString(Printables.function("childMethod", Child::childMethod));
     }
   }
-  @Test
+
+  @Test(expected = ComparisonFailure.class)
   public void whenPassingValidation_thenPasses$2() {
     assertThat(
         new Parent(),
@@ -57,7 +56,7 @@ public class FluentsTest extends TestBase {
             .with(isEqualTo("returnValueFromParentMethod")).build());
   }
 
-  @Test
+  @Test(expected = ComparisonFailure.class)
   public void test4() {
     assertThat(
         "hello",
@@ -65,7 +64,7 @@ public class FluentsTest extends TestBase {
     );
   }
 
-  @Test
+  @Test(expected = ComparisonFailure.class)
   public void expectationFlipping() {
     assertThat(
         Stream.of("hello"),
@@ -73,21 +72,23 @@ public class FluentsTest extends TestBase {
     );
   }
 
-    @Test(expected = TestException.class)
+  @Test(expected = TestException.class)
   public void whenValidationWithIntentionallyFailingPredicate_thenExceptionThrown$2() {
     try {
       validate(
           new Parent(),
           allOf(
               when((Parent) value())
-                  .thenAsObject(function("lambda:Parent::parentMethod1--by name() method", Parent::parentMethod1))
+                  .transformToObject(Functions.identity())
+                  .thenAsObject(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                   .with(isEqualTo("returnValueFromParentMethod"))
                   .verify(),
               when((Parent) value())
+                  .transformToObject(Functions.identity())
                   .thenAsObject(function("parentMethod2", Parent::parentMethod2))
                   .with(
-                      when((Child) value())
-                          .transformToString(function("lambda:Child::childMethod--by Printables.function()", Child::childMethod))
+                      as((Child) value())
+                          .transformToString(function("lambda:Child::childMethod", Child::childMethod))
                           .then()
                           //         'not(...)' is added to make the matcher fail.
                           .equalsIgnoreCase("hello")
@@ -99,13 +100,13 @@ public class FluentsTest extends TestBase {
       MatcherAssert.assertThat(
           e.getMessage(),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("lambda:Parent::parentMethod1--by name()"),
-              CoreMatchers.containsString("lambda:Child::childMethod--by Printables.function()")));
+              CoreMatchers.containsString("lambda:Parent::parentMethod1"),
+              CoreMatchers.containsString("lambda:Child::childMethod")));
       throw e;
     }
   }
 
-  @Test
+  @Test(expected = ComparisonFailure.class)
   public void example() {
     assertThat(
         asList("Hello", "world"),
@@ -118,30 +119,71 @@ public class FluentsTest extends TestBase {
     );
   }
 
-  /*
   @Test(expected = ComparisonFailure.class)
-  public void example() {
+  public void example2() {
+    assertThat(
+        "stringHelloworlD!",
+        explainableStringIsEqualTo("Hello")
+    );
+  }
+
+  @Test(expected = ComparisonFailure.class)
+  public void example3() {
     try {
       assertThat(
           new Parent(),
           allOf(
-              matcherFor(Parent.class)
-                  .transformBy(function("lambda:Parent::parentMethod1--by name() method", Parent::parentMethod1))
-                  .verifyWith(isEqualTo("returnValueFromParentMethod")),
-              matcherFor(Parent.class).name("parentMethod2")
-                  .transformBy(function("Parent::parentMethod2", Parent::parentMethod2))
-                  .into(Child.class)
-                  .verifyWith(
-                      matcherFor(Child.class)
-                          .transformBy(function("lambda:Child::childMethod--by Printables.function() method", Child::childMethod))
-                          // 'not(...)' is added to make the matcher fail.
-                          .verifyWith(not(isEqualTo("returnedStringFromChildMethod")))
-                  )));
+              whenInstanceOf(Parent.class)
+                  .applyFunction("lambda:Parent::parentMethod1", Parent::parentMethod1)
+                  .thenAsString()
+                  .isEqualTo("returnValueFromParentMethod")
+                  .verify(),
+              whenInstanceOf(Parent.class)
+                  .applyFunction("Parent::parentMethod2", Parent::parentMethod2)
+                  .applyFunction("lambda:Child::childMethod", Child::childMethod)
+                  .then().asString()
+                  // 'not(...)' is added to make the matcher fail.
+                  .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))
+                  .verify()
+          ));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       throw e;
     }
   }
+
+  @Test(expected = ComparisonFailure.class)
+  public void example4() {
+    try {
+      assertThat(
+          (Supplier<Parent>) Parent::new,
+          whenInstanceOf(Supplier.class)
+              .applyFunction(Supplier::get)
+              .tee(
+                  as((Parent) value())
+                      .applyFunction(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
+                      .thenAsString()
+                      .isEqualTo("returnValueFromParentMethod")
+                      .verify(),
+                  asInstanceOf(Parent.class)
+                      .applyFunction(function("Parent::parentMethod2", Parent::parentMethod2))
+                      .applyFunction(function("lambda:Child::childMethod", Child::childMethod))
+                      .thenAsString()
+                      // 'not(...)' is added to make the matcher fail.
+                      .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))
+                      .verify()).verify());
+    } catch (ComparisonFailure e) {
+      e.printStackTrace();
+      throw e;
+    }
+  }
+
+  <T> T print(T value) {
+    System.out.println(value);
+    return value;
+  }
+
+  /*
 
   @Test(expected = ComparisonFailure.class)
   public void givenRawLambdas$whenFailingAssertionPerformed$thenComparisonFailureThrown() {
@@ -185,7 +227,6 @@ public class FluentsTest extends TestBase {
     validate("Hello, world",
         matcherForString().transformBy(v -> v).verifyWith(equalTo("Hello, world")));
   }
-*/
 
   @Test
   public void matcherForStringWorksFine() {
@@ -196,6 +237,7 @@ public class FluentsTest extends TestBase {
   public void matcherForStringWorksFine2() {
     assertThat("Hello, world", fluent().string().substring(2).toUpperCase().then().with(containsString("Hello")).verify());
   }
+  */
 
   static class Parent {
     public String parentMethod1() {

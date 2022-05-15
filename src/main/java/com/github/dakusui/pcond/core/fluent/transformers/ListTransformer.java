@@ -1,7 +1,6 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
 import com.github.dakusui.pcond.forms.Functions;
 
@@ -12,11 +11,12 @@ import static java.util.Objects.requireNonNull;
 
 public class ListTransformer<OIN, E> extends Transformer<ListTransformer<OIN, E>, OIN, List<E>> {
   /**
+   * @param transformerName
    * @param parent
    * @param function
    */
-  public <IN> ListTransformer(Transformer<?, OIN, IN> parent, Function<? super IN, ? extends List<E>> function) {
-    super(parent, function);
+  public <IN> ListTransformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends List<E>> function) {
+    super(transformerName, parent, function);
   }
 
   @Override

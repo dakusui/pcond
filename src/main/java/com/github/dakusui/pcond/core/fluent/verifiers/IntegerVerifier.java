@@ -6,8 +6,8 @@ import com.github.dakusui.pcond.forms.Predicates;
 import java.util.function.Function;
 
 public class IntegerVerifier<OIN> extends Verifier<IntegerVerifier<OIN>, OIN, Integer> {
-  public IntegerVerifier(Function<? super OIN, ? extends Integer> function) {
-    super(function);
+  public IntegerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function) {
+    super(transformerName, function);
   }
 
   public IntegerVerifier<OIN> equalTo(int v) {

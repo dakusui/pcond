@@ -9,11 +9,12 @@ import java.util.stream.Stream;
 
 public class StreamTransformer<OIN, E> extends Transformer<StreamTransformer<OIN, E>, OIN, Stream<E>> {
   /**
+   * @param transformerName
    * @param parent
    * @param function
    */
-  public <IN> StreamTransformer(Transformer<?, OIN, IN> parent, Function<? super IN, ? extends Stream<E>> function) {
-    super(parent, function);
+  public <IN> StreamTransformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends Stream<E>> function) {
+    super(transformerName, parent, function);
   }
 
   @Override

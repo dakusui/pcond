@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core.fluent.transformers.extendable;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
+import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.function.Function;
 
@@ -9,16 +10,17 @@ public class AbstractObjectTransformer<TX extends AbstractObjectTransformer<TX, 
     extends Transformer<TX, OIN, OUT> {
 
   /**
+   * @param transformerName
    * @param parent
    * @param function
    */
-  public <IN> AbstractObjectTransformer(Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
-    super(parent, function);
+  public <IN> AbstractObjectTransformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
+    super(transformerName, parent, function);
   }
 
   @Override
   public ObjectVerifier<OIN, OUT> then() {
-    return then(Function.identity());
+    return then(Functions.identity());
   }
 
   @Override

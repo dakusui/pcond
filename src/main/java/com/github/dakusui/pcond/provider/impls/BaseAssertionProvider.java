@@ -25,15 +25,20 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public abstract class BaseAssertionProvider implements AssertionProviderBase<ApplicationException> {
-  private final boolean       useEvaluator;
-  private final Configuration configuration;
+  private final boolean                             useEvaluator;
+  private final Configuration<ApplicationException> configuration;
 
   public BaseAssertionProvider(Properties properties) {
     this.useEvaluator = useEvaluator(this.getClass(), properties);
-    this.configuration = new Configuration() {
+    this.configuration = new Configuration<ApplicationException>() {
       @Override
       public int summarizedStringLength() {
         return Configuration.super.summarizedStringLength();
+      }
+
+      @Override
+      public ApplicationException throwApplicationException(String message) {
+        return new ApplicationException(message);
       }
     };
   }
@@ -69,7 +74,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
   }
 
   @Override
-  public Configuration configuration() {
+  public Configuration<ApplicationException> configuration() {
     return this.configuration;
   }
 
@@ -81,7 +86,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
       try {
         return create(c, explanation);
       } catch (InvocationTargetException | InstantiationException |
-          IllegalAccessException | NoSuchMethodException e) {
+               IllegalAccessException | NoSuchMethodException e) {
         throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + c.getCanonicalName() + "'", e);
       }
     }
@@ -131,7 +136,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
     List<Object> actualResultDetails = new LinkedList<>();
     String expectation = composeExplanationForExpectations(result, t, expectationDetails);
     String actualResult = composeExplanationForActualResults(result, t, actualResultDetails);
-    assert expectationDetails.size() == actualResultDetails.size();
+//    assert expectationDetails.size() == actualResultDetails.size();
     return new Explanation(message, composeReport(expectation, expectationDetails, new AtomicInteger(0)), composeReport(actualResult, actualResultDetails, new AtomicInteger(0)));
   }
 
@@ -176,17 +181,22 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
                 InternalUtils.formatObject(each.output() instanceof Boolean ? each.expectedBooleanValue() : each.output()) :
                 InternalUtils.formatObject(t))))
         .peek((FormattedEntry each) -> {
-          Optional<Object> formSnapshot = each.formSnapshot();
+          Optional<Object> formSnapshot = each.mismatchExplanation();
           formSnapshot.ifPresent(expectationDetails::add);
         })
         .collect(toList()));
   }
 
   private static String composeExplanation(List<FormattedEntry> formattedEntries) {
-    AtomicInteger formSnapshotCount = new AtomicInteger(0);
+    AtomicInteger mismatchExplanationCount = new AtomicInteger(0);
+    boolean mismatchExplanationFound = formattedEntries
+        .stream()
+        .anyMatch(e -> e.mismatchExplanation().isPresent());
     return evaluatorEntriesToString(
         formattedEntries,
-        columnLengths -> formattedEntryToString(columnLengths[0], columnLengths[1], columnLengths[2], formSnapshotCount));
+        columnLengths -> formattedEntryToString(
+            columnLengths[0], columnLengths[1], columnLengths[2],
+            mismatchExplanationCount, mismatchExplanationFound));
   }
 
   private static boolean useEvaluator(Class<?> myClass, Properties properties) {
@@ -204,18 +214,23 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
         !asList(LEAF, AND, OR, NOT, FUNCTION).contains(entry.type()) ?
             null :
             outputFormatter.get(),
-        entry.hasExpectationDetail() ?entry.expectationDetail() : null);
+        entry.hasExpectationDetail() ? entry.expectationDetail() : null);
   }
 
-  private static Function<FormattedEntry, String> formattedEntryToString(int inputColumnWidth, int formNameColumnLength, int outputColumnLength, AtomicInteger i) {
-    return (FormattedEntry formattedEntry) -> format("%-4s%-" +
-            Math.max(2, inputColumnWidth) + "s%-" +
-            (formNameColumnLength + 2) + "s%-" +
-            Math.max(2, outputColumnLength) + "s",
-        formattedEntry.formSnapshot().isPresent() ? "[" + i.getAndIncrement() + "]" : "",
-        formattedEntry.input().orElse(""),
-        formattedEntry.input().map(v -> "->").orElse("  ") + formattedEntry.indent() + formattedEntry.formName(),
-        formattedEntry.output().map(v -> "->" + v).orElse(""));
+  private static Function<FormattedEntry, String> formattedEntryToString(
+      int inputColumnWidth, int formNameColumnLength, int outputColumnLength,
+      AtomicInteger i, boolean mismatchExplanationFound) {
+    return (FormattedEntry formattedEntry) ->
+        (mismatchExplanationFound ?
+            format("%-4s", formattedEntry.mismatchExplanation().isPresent() ?
+                "[" + i.getAndIncrement() + "]" : "") :
+            "") +
+            format("%-" + Math.max(2, inputColumnWidth) + "s" +
+                    "%-" + (formNameColumnLength + 2) + "s" +
+                    "%-" + Math.max(2, outputColumnLength) + "s",
+                formattedEntry.input().orElse(""),
+                formattedEntry.input().map(v -> "->").orElse("  ") + formattedEntry.indent() + formattedEntry.formName(),
+                formattedEntry.output().map(v -> "->" + v).orElse(""));
   }
 
   private static String evaluatorEntriesToString(List<FormattedEntry> formattedEntries, Function<int[], Function<FormattedEntry, String>> formatterFactory) {
@@ -241,7 +256,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
           if (lastEntry == null)
             return eachEntry;
           if (Objects.equals(lastEntry.input, eachEntry.input))
-            return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.formSnapshot);
+            return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.mismatchExplanation);
           return eachEntry;
         })
         .map(formatter)
@@ -254,14 +269,14 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
     private final String formName;
     private final String indent;
     private final String output;
-    private final Object formSnapshot;
+    private final Object mismatchExplanation;
 
-    FormattedEntry(String input, String formName, String indent, String output, Object formSnapshot) {
+    FormattedEntry(String input, String formName, String indent, String output, Object mismatchExplanation) {
       this.input = input;
       this.formName = formName;
       this.indent = indent;
       this.output = output;
-      this.formSnapshot = formSnapshot;
+      this.mismatchExplanation = mismatchExplanation;
     }
 
     Optional<String> input() {
@@ -276,8 +291,8 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
       return this.formName;
     }
 
-    Optional<Object> formSnapshot() {
-      return Optional.ofNullable(this.formSnapshot);
+    Optional<Object> mismatchExplanation() {
+      return Optional.ofNullable(this.mismatchExplanation);
     }
 
     Optional<String> output() {

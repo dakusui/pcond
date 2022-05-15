@@ -161,16 +161,15 @@ public interface Evaluator {
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
       this.enter(Entry.Type.TRANSFORM,
           transformation.mapper(),
-          transformation.name()
-              .map(v -> "transform:" + v)
+          transformation.mapperName()
               .orElse("transform"), value);
       transformation.mapper().accept(value, this);
       this.leave(this.resultValue(), transformation.checker(), false);
       this.enter(Entry.Type.CHECK,
           transformation.checker(),
-          transformation.name()
-              .map(v -> "check:" + v)
-              .orElse("check"), this.resultValue());
+          transformation.checkerName()
+              .orElse("check"),
+          this.resultValue());
       transformation.checker().accept((R) this.currentResult, this);
       this.leave(this.resultValue(), transformation.mapper(), false);
     }

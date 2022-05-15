@@ -6,9 +6,11 @@ import com.github.dakusui.pcond.forms.Predicates;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
+
 public class StringVerifier<OIN> extends Verifier<StringVerifier<OIN>, OIN, String> {
-  public StringVerifier(Function<? super OIN, ? extends String> function) {
-    super(function);
+  public StringVerifier(String transformerName, Function<? super OIN, ? extends String> function) {
+    super(transformerName, function);
   }
 
   public StringVerifier<OIN> contains(String token) {
@@ -23,12 +25,11 @@ public class StringVerifier<OIN> extends Verifier<StringVerifier<OIN>, OIN, Stri
     return this.predicate(Predicates.isEmptyString());
   }
 
-  public StringVerifier<OIN> isNullOrEmpty()
+  public StringVerifier<OIN> isEqualTo(String string) {
+    return this.predicate(explainableStringIsEqualTo(string));
+  }
 
-
-
-
-  {
+  public StringVerifier<OIN> isNullOrEmpty() {
     return this.predicate(Predicates.isNullOrEmptyString());
   }
 

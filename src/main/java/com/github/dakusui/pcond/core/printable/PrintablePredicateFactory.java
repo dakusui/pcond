@@ -3,8 +3,6 @@ package com.github.dakusui.pcond.core.printable;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
-import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.pcond.internals.InternalChecks;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.*;
@@ -361,19 +359,21 @@ public enum PrintablePredicateFactory {
   public static class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Evaluable.Transformation<O, P> {
     private final Evaluable<? super P> checker;
     private final Evaluable<? super O> mapper;
-    private final String               name;
+    private final String               mapperName;
+    private final String               checkerName;
 
-    public TransformingPredicate(String name, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
+    public TransformingPredicate(String mapperName, String checkerName, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
       super(
           TransformingPredicate.class,
           asList(predicate, function),
-          () -> name == null ?
+          () -> mapperName == null ?
               format("%s %s", function, predicate) :
-              format("%s(%s %s)", name, function, predicate),
+              format("%s(%s %s)", mapperName, function, predicate),
           v -> predicate.test(function.apply(v)));
-      this.name = name;
-      this.checker = toEvaluableIfNecessary(predicate);
       this.mapper = toEvaluableIfNecessary(function);
+      this.mapperName = mapperName;
+      this.checker = toEvaluableIfNecessary(predicate);
+      this.checkerName = checkerName;
     }
 
     @Override
@@ -387,8 +387,13 @@ public enum PrintablePredicateFactory {
     }
 
     @Override
-    public Optional<String> name() {
-      return Optional.ofNullable(this.name);
+    public Optional<String> mapperName() {
+      return Optional.ofNullable(this.mapperName);
+    }
+
+    @Override
+    public Optional<String> checkerName() {
+      return Optional.ofNullable(this.checkerName);
     }
 
     /**
@@ -411,11 +416,11 @@ public enum PrintablePredicateFactory {
       TransformingPredicate<P, O> check(Predicate<? super P> cond);
 
       static <P, O> Factory<P, O> create(Function<O, P> function) {
-        return create(null, function);
+        return create(null, null, function);
       }
 
-      static <P, O> Factory<P, O> create(String name, Function<O, P> function) {
-        return cond -> new TransformingPredicate<>(name, toPrintablePredicate(cond), function);
+      static <P, O> Factory<P, O> create(String mapperName, String checkerName, Function<O, P> function) {
+        return cond -> new TransformingPredicate<>(mapperName, checkerName, toPrintablePredicate(cond), function);
       }
     }
   }

@@ -16,10 +16,12 @@ import java.util.function.Predicate;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 
 public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
+  private final String                             transformerName;
   private final Function<? super OIN, ? extends T> function;
   private       Predicate<T>                       predicate;
 
-  public Verifier(Function<? super OIN, ? extends T> function) {
+  public Verifier(String transformerName, Function<? super OIN, ? extends T> function) {
+    this.transformerName = transformerName;
     this.function = function;
     this.predicate = null;
   }
@@ -44,6 +46,10 @@ public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
     return with(Predicates.or(predicates));
   }
 
+  public V testPredicate(Predicate<? super T> predicate) {
+    return predicate(predicate);
+  }
+
   public V with(Predicate<? super T> predicate) {
     return predicate(predicate);
   }
@@ -65,28 +71,35 @@ public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
    * @return This object
    */
   public <AS>
-  ObjectVerifier<OIN, AS> asObjectOf(Class<AS> valueType) {
-    return new ObjectVerifier<>(Functions.cast(valueType));
+  ObjectVerifier<OIN, AS> asInstanceOf(Class<AS> valueType) {
+    return new ObjectVerifier<OIN, AS>(transformerName, Functions.cast(valueType));
   }
 
   public StringVerifier<OIN> asString() {
-    return new StringVerifier<>(this.function.andThen(Functions.stringify()));
+    return new StringVerifier<>(transformerName, this.function.andThen(Functions.stringify()));
   }
 
   public IntegerVerifier<OIN> asInteger() {
-    return new IntegerVerifier<>(this.function.andThen(Functions.cast(Integer.class)));
+    return new IntegerVerifier<>(transformerName, this.function.andThen(Functions.cast(Integer.class)));
   }
 
   public StringVerifier<OIN> asString(Function<T, String> converter) {
-    return new StringVerifier<>(this.function.andThen(converter));
+    return new StringVerifier<>(transformerName, this.function.andThen(converter));
   }
 
   public <E> ListVerifier<OIN, E> asListOf(Function<T, List<E>> converter) {
-    return new ListVerifier<>(this.function.andThen(converter));
+    return new ListVerifier<>(transformerName, this.function.andThen(converter));
   }
 
   public Predicate<? super OIN> build() {
-    return PrintablePredicateFactory.TransformingPredicate.Factory.create(this.function).check(this.predicate);
+    return PrintablePredicateFactory.TransformingPredicate.Factory
+        .create(
+            this.transformerName,
+            this.transformerName != null ?
+                "THEN" :
+                "VERIFY",
+            this.function)
+        .check(this.predicate);
   }
 
   /**
@@ -102,13 +115,16 @@ public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
   ////
   // BEGIN: Methods for java.lang.Object come here.
   void method() {
+    /*
     Predicates.isNotNull();
     Predicates.alwaysTrue();
     Predicates.isNull();
     Predicates.isEqualTo(null);
     Predicates.isSameReferenceAs(null);
-    Predicates.isInstanceOf(null);
+    //Predicates.isInstanceOf(null);
     Predicates.callp(null);
+
+     */
   }
 
   public V isNotNull() {

@@ -14,6 +14,7 @@ import com.github.dakusui.pcond.internals.InternalChecks;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -182,12 +183,12 @@ public enum Predicates {
 
   @SafeVarargs
   public static <T> Predicate<T> or(Predicate<? super T>... predicates) {
-    return PrintablePredicateFactory.or((List<Predicate<? super T>>)asList(predicates));
+    return PrintablePredicateFactory.or(asList(predicates));
   }
 
   @SafeVarargs
   public static <T> Predicate<T> allOf(Predicate<? super T>... predicates) {
-    return PrintablePredicateFactory.allOf((List<Predicate<? super T>>)asList(predicates));
+    return PrintablePredicateFactory.allOf(asList(predicates));
   }
 
   @SafeVarargs
@@ -298,6 +299,7 @@ public enum Predicates {
       }
     }
     CursoredString cursoredStringForSnapshotting = new CursoredString(null);
+    AtomicBoolean result = new AtomicBoolean(true);
     class CursoredStringPredicate
         extends PrintablePredicate<CursoredString>
         implements Predicate<CursoredString>, Evaluable.LeafPred<CursoredString>, Evaluator.Explainable {
@@ -313,6 +315,13 @@ public enum Predicates {
       }
 
       @Override
+      public boolean test(CursoredString v) {
+        boolean ret = super.test(v);
+        result.set(ret && result.get());
+        return ret;
+      }
+
+      @Override
       public String toString() {
         return "findTokenBy[" + locatorFactoryName() + "]";
       }
@@ -325,6 +334,7 @@ public enum Predicates {
       public Predicate<? super CursoredString> predicate() {
         return this;
       }
+
 
       @Override
       public Object explainExpectation() {
@@ -344,13 +354,13 @@ public enum Predicates {
             cursoredStringForSnapshotting.originalString.substring(cursoredStringForSnapshotting.position);
       }
     }
-    return Fluents.fluent().string()
+    return Fluents.fluent().string(null)
         .transformToObject(function("findTokens", CursoredString::new))
         .then()
         .allOf(
             Stream.concat(
                     Arrays.stream(tokens).map(CursoredStringPredicate::new),
-                    Stream.of(predicate("(end)", v -> true)))
+                    Stream.of(predicate("(end)", v -> result.get())))
                 .toArray(Predicate[]::new))
         .build();
   }
@@ -405,7 +415,7 @@ public enum Predicates {
       return false;
     };
 
-    return Fluents.fluent().listOf((E) Fluents.value())
+    return Fluents.fluent().listOf(null, (E) Fluents.value())
         .transformToObject(function("toCursoredList", CursoredList::new))
         .then()
         .with(allOf(Stream.concat(

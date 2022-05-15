@@ -10,28 +10,20 @@ public class Fluent<OIN, OUT> {
   public Fluent() {
   }
 
-  public StringTransformer<OIN> string() {
-    return new StringTransformer<>(null, value());
+  public StringTransformer<OIN> string(String transformerName) {
+    return new StringTransformer<>(transformerName, null, value());
   }
 
-  public ObjectTransformer<OIN, OUT> object() {
-    return new ObjectTransformer<>(null, value());
+  public ObjectTransformer<OIN, OUT> object(String transformerName) {
+    return new ObjectTransformer<>(transformerName, null, value());
   }
 
-  public ObjectTransformer<OIN, OUT> objectOf(OUT value) {
-    return new ObjectTransformer<>(null, value());
+  public ObjectTransformer<OIN, OUT> objectOf(String transformerName, OUT value) {
+    return new ObjectTransformer<>(transformerName, null, value());
   }
 
-  public <E> ListTransformer<OIN, E> listOf(E value) {
-    return new ListTransformer<>(null, value());
-  }
-
-  public <K, V> ObjectTransformer<OIN, Map<K, V>> mapOf(K key, V value) {
-    return new ObjectTransformer<>(null, value());
-  }
-
-  public <T> ObjectTransformer<OIN, OUT> instance() {
-    return this.objectOf(value());
+  public <E> ListTransformer<OIN, E> listOf(String transformerName, E value) {
+    return new ListTransformer<>(transformerName, null, value());
   }
 
   public static <T> T value() {

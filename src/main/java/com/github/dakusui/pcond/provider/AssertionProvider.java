@@ -95,9 +95,11 @@ public interface AssertionProvider<AE extends Throwable> {
 
   <T> void assumeThat(T value, Predicate<? super T> cond);
 
-  interface Configuration {
+  interface Configuration<AE extends Throwable> {
     default int summarizedStringLength() {
       return 40;
     }
+
+    AE throwApplicationException(String message);
   }
 }

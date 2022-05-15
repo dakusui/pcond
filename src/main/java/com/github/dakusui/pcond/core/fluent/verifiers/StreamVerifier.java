@@ -8,8 +8,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class StreamVerifier<OIN, E> extends Verifier<StreamVerifier<OIN, E>, OIN, Stream<E>> {
-  public StreamVerifier(Function<? super OIN, ? extends Stream<E>> function) {
-    super(function);
+  public StreamVerifier(String transformerName, Function<? super OIN, ? extends Stream<E>> function) {
+    super(transformerName, function);
   }
 
   public StreamVerifier<OIN, E> noneMatch(Predicate<E> p) {
