@@ -10,7 +10,7 @@ import org.junit.runners.MethodSorters;
 import java.util.Objects;
 
 import static com.github.dakusui.pcond.Assertions.that;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 
 /**
  * -ea; evaluator mode

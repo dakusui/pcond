@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.functions;
+package com.github.dakusui.pcond.forms;
 
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
@@ -10,12 +10,14 @@ import com.github.dakusui.pcond.core.refl.Parameter;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 
 /**
@@ -37,11 +39,12 @@ public enum Functions {
 
   /**
    * Returns a function that gives a string representation of a object given to it.
+   * Internally, the returned function calls `toString` method on a given object.
    *
    * @param <E> The type of the object
    * @return The function.
    */
-  public static <E> Function<? super E, String> stringify() {
+  public static <E> Function<E, String> stringify() {
     return PrintableFunctionFactory.Simple.STRINGIFY.instance();
   }
 
@@ -56,7 +59,7 @@ public enum Functions {
 
 
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
-  public static <E> Function<List<? extends E>, ? extends E> elementAt(int i) {
+  public static <E> Function<List<E>, E> elementAt(int i) {
     return Function.class.cast(PrintableFunctionFactory.Parameterized.ELEMENT_AT.create(singletonList(i)));
   }
 
@@ -65,7 +68,7 @@ public enum Functions {
    *
    * @return The function.
    */
-  public static Function<? super Collection<?>, Integer> size() {
+  public static <E> Function<Collection<E>, Integer> size() {
     return PrintableFunctionFactory.Simple.SIZE.instance();
   }
 
@@ -75,7 +78,7 @@ public enum Functions {
    * @param <E> Type of elements in the given collection.
    * @return The function.
    */
-  public static <E> Function<Collection<? extends E>, Stream<? extends E>> stream() {
+  public static <E> Function<Collection<? extends E>, Stream<E>> stream() {
     return PrintableFunctionFactory.Simple.STREAM.instance();
   }
 
@@ -85,7 +88,7 @@ public enum Functions {
    * @param <E> Type of elements in the given collection.
    * @return The function.
    */
-  public static <E> Function<E, Stream<? extends E>> streamOf() {
+  public static <E> Function<E, Stream<E>> streamOf() {
     return PrintableFunctionFactory.Simple.STREAM_OF.instance();
   }
 
@@ -96,7 +99,7 @@ public enum Functions {
    * @param <E>  The type to which the object is case.
    * @return The function.
    */
-  public static <E> Function<? super Object, ? extends E> cast(Class<E> type) {
+  public static <E> Function<? super Object, E> cast(Class<E> type) {
     return PrintableFunctionFactory.Parameterized.CAST.create(singletonList(type));
   }
 
@@ -107,7 +110,7 @@ public enum Functions {
    * @param <E> Type of the elements in the collection
    * @return The function.
    */
-  public static <I extends Collection<? extends E>, E> Function<I, List<E>> collectionToList() {
+  public static <I extends Collection<E>, E> Function<I, List<E>> collectionToList() {
     return PrintableFunctionFactory.Simple.COLLECTION_TO_LIST.instance();
   }
 
@@ -131,6 +134,32 @@ public enum Functions {
   }
 
   /**
+   * The returned function tries to find a {@code substring} after a given string.
+   * If found, it returns the result of the following statement.
+   * <p>
+   * [source,java]
+   * ----
+   * s.substring(s.indexOf(substring) + substring.length())
+   * ----
+   * <p>
+   * If not found, a {@link StringIndexOutOfBoundsException} will be thrown.
+   *
+   * @param substring A substring to find in a given string.
+   * @return The string after the {@code substring}.
+   */
+  public static Function<String, String> findString(String substring) {
+    Objects.requireNonNull(substring);
+    return PrintableFunctionFactory.function(
+        () -> format("findString[%s]", substring),
+        s -> {
+          int index = s.indexOf(substring);
+          if (index >= 0)
+            return s.substring(s.indexOf(substring) + substring.length());
+          throw new NoSuchElementException(format("'%s' was not found in '%s'", substring, s));
+        });
+  }
+
+  /**
    * https://en.wikipedia.org/wiki/Currying[Curries] a static method specified by the given arguments.
    *
    * @param aClass         A class to which the method to be curried belongs to.
@@ -138,6 +167,7 @@ public enum Functions {
    * @param parameterTypes Parameters types of the method.
    * @return A printable and curried function of the target method.
    */
+  @SuppressWarnings("JavadocLinkAsPlainText")
   public static CurriedFunction<Object, Object> curry(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
     return curry(multifunction(aClass, methodName, parameterTypes));
   }
@@ -179,34 +209,32 @@ public enum Functions {
    * The pcond library searches for the "best" matching method for you.
    * In case no matching method is found or more than one methods are found, a {@link RuntimeException}
    * will be thrown.
-   *
+   * <p>
    * In order to specify a parameter which should be passed to the returned function at applying,
    * you can use an object returned by {@link Functions#parameter} method.
    * This is useful to construct a function from an existing method.
-   *
+   * <p>
    * That is, in order to create a function which computes sin using query a method {@link Math#sin(double)},
    * you can do following
    * [source, java]
    * ----
    * public void buildSinFunction() {
-   *   MethodQuery mq = classMethod(Math.class, "sin", parameter());
-   *   Function<Double, Double> sin = call(mq);
-   *   System.out.println(sin(Math.PI/2));
+   * MethodQuery mq = classMethod(Math.class, "sin", parameter());
+   * Function<Double, Double> sin = call(mq);
+   * System.out.println(sin(Math.PI/2));
    * }
    * ----
    * This prints {@code 1.0}.
-   *
+   * <p>
    * In case your arguments do not contain any {@link Parameter} object, the input
    * argument passed to the built function will be simply ignored.
-   *
+   * <p>
    * // @formatter:on
-   *
    *
    * @param targetClass A class
    * @param methodName  A method name
    * @param arguments   Arguments
    * @return A method query for static methods specified by arguments.
-   *
    * @see com.github.dakusui.pcond.core.refl.ReflUtils#findMethod(Class, String, Object[])
    */
   public static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
@@ -217,29 +245,28 @@ public enum Functions {
    * // @formatter:off
    * Creates a {@link MethodQuery} object from given arguments to search for {@code static} methods.
    * Excepting that this method returns a query for instance methods, it is quite
-   * similar to {@link Functions#classMethod( Class, String, Object[])}.
-   *
+   * similar to {@link Functions#classMethod(Class, String, Object[])}.
+   * <p>
    * This method is useful to build a function from an instance method.
    * That is, you can create a function which returns the length of a given string
    * from a method {@link String#length()} with a following code snippet.
-   *
+   * <p>
    * [source, java]
    * ----
    * public void buildLengthFunction() {
-   *   Function<String, Integer> length = call(instanceMethod(parameter(), "length"));
+   * Function<String, Integer> length = call(instanceMethod(parameter(), "length"));
    * }
    * ----
-   *
+   * <p>
    * In case the {@code targetObject} is not an instance of {@link Parameter} and {@code arguments}
    * contain no {@code Parameter} object, the function will simply ignore the input passed to it.
-   *
+   * <p>
    * // @formatter:on
    *
    * @param targetObject An object on which methods matching returned query should be invoked.
-   * @param methodName A name of method.
-   * @param arguments Arguments passed to the method.
+   * @param methodName   A name of method.
+   * @param arguments    Arguments passed to the method.
    * @return A method query for instance methods specified by arguments.
-   *
    * @see Functions#classMethod(Class, String, Object[])
    */
   public static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
@@ -269,12 +296,11 @@ public enum Functions {
    * // @formatter:on
    *
    * @param targetObject An object on which methods matching returned query should be invoked.
-   * @param methodName A name of method.
-   * @param arguments Arguments passed to the method.
-   * @param <T> The type of the input to the returned function.
-   * @param <R> The type of the output from the returned function.
+   * @param methodName   A name of method.
+   * @param arguments    Arguments passed to the method.
+   * @param <T>          The type of the input to the returned function.
+   * @param <R>          The type of the output from the returned function.
    * @return The function that calls a method matching a query built from the given arguments.
-   *
    * @see Functions#call(MethodQuery)
    * @see Functions#instanceMethod(Object, String, Object[])
    */
@@ -285,8 +311,6 @@ public enum Functions {
   /**
    * Returns a function that calls a method which matches the given {@code methodName}
    * and {@code args} on the object given as input to it.
-   * <p>
-   * Note that method look up is done when the function is applied.
    * <p>
    * Note that method look up is done when the predicate is applied.
    * This means this method does not throw any exception by itself and in case
@@ -299,25 +323,7 @@ public enum Functions {
    * @param <R>        The type of output from the returned function
    * @return A function that invokes the method matching the {@code methodName} and {@code args}
    */
-  public static <T, R> Function<T, R> chain(String methodName, Object... arguments) {
+  public static <T, R> Function<T, R> call(String methodName, Object... arguments) {
     return callInstanceMethod(parameter(), methodName, arguments);
-  }
-
-  /**
-   * Returns a predicate that calls a method which matches the given {@code methodName}
-   * and {@code args} on the object given as input to it.
-   * <p>
-   * Note that method look up is done when the predicate is applied.
-   * This means this method does not throw any exception by itself and in case
-   * you give wrong {@code methodName} or {@code arguments}, an exception will be
-   * thrown when the returned function is applied.
-   *
-   * @param methodName The method name
-   * @param arguments  Arguments passed to the method.
-   * @param <T>        The type of input to the returned predicate
-   * @return A predicate that invokes the method matching the {@code methodName} and {@code args}
-   */
-  public static <T> Predicate<T> chainp(String methodName, Object... arguments) {
-    return Predicates.callp(instanceMethod(parameter(), methodName, arguments));
   }
 }

@@ -2,8 +2,8 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
-import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
@@ -11,8 +11,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 public class TransformingPredicateTest extends TestBase {
   @Test
@@ -66,15 +66,15 @@ public class TransformingPredicateTest extends TestBase {
 
   @Test
   public void givenNullForName$whenToString$thenLooksGood() {
-    PrintablePredicateFactory.TransformingPredicate<Object, Object> p = new PrintablePredicateFactory.TransformingPredicate<>(null, Predicates.alwaysTrue(), Functions.identity());
-    System.out.println(p.toString());
+    PrintablePredicateFactory.TransformingPredicate<Object, Object> p = new PrintablePredicateFactory.TransformingPredicate<>(null, null, Predicates.alwaysTrue(), Functions.identity());
+    System.out.println(p);
     assertEquals("identity alwaysTrue", p.toString());
   }
 
   @Test
   public void givenNonNullName$whenToString$thenLooksGood() {
-    PrintablePredicateFactory.TransformingPredicate<Object, Object> p = new PrintablePredicateFactory.TransformingPredicate<>("hello->", Predicates.alwaysTrue(), Functions.identity());
-    System.out.println(p.toString());
-    assertEquals("hello->identity alwaysTrue", p.toString());
+    PrintablePredicateFactory.TransformingPredicate<Object, Object> p = new PrintablePredicateFactory.TransformingPredicate<>("hello->", null, Predicates.alwaysTrue(), Functions.identity());
+    System.out.println(p);
+    assertEquals("hello->(identity alwaysTrue)", p.toString());
   }
 }

@@ -14,55 +14,57 @@ import org.junit.runner.RunWith;
 import java.util.function.Predicate;
 
 import static java.util.Arrays.asList;
+import static junit.framework.TestCase.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(Enclosed.class)
 public class InternalUtilsTest {
-  public static class FormatObject {
+  public static class FormatObjectTest extends TestBase {
     static class InnerClass {
     }
 
     @Test
     public void testFormatObject$collection3() {
       assertEquals(
-          InternalUtils.formatObject(asList("a", "b", "c")),
-          "[\"a\",\"b\",\"c\"]");
+          "[\"a\",\"b\",\"c\"]",
+          InternalUtils.formatObject(asList("a", "b", "c")));
     }
 
     @Test
     public void testFormatObject$collection4() {
       assertEquals(
-          InternalUtils.formatObject(asList("a", "b", "c", "d")),
-          "[\"a\",\"b\",\"c\"...;4]");
+          "[\"a\",\"b\",\"c\"...;4]",
+          InternalUtils.formatObject(asList("a", "b", "c", "d")));
     }
 
     @Test
     public void testFormatObject$array4() {
       assertEquals(
-          InternalUtils.formatObject(new String[]{"a", "b", "c", "d"}),
-          "[\"a\",\"b\",\"c\"...;4]");
+          "[\"a\",\"b\",\"c\"...;4]",
+          InternalUtils.formatObject(new String[] { "a", "b", "c", "d" }));
     }
 
     @Test
     public void testFormatObject$longString() {
       assertEquals(
-          InternalUtils.formatObject("HelloWorldHelloWorldHelloWorldHelloWorldHelloWorld"),
-          "\"HelloWorldHe...World\"");
+          "\"HelloWorldHelloWorldHe...WorldHelloWorld\"",
+          InternalUtils.formatObject("HelloWorldHelloWorldHelloWorldHelloWorldHelloWorld")
+      );
     }
 
     @Test
     public void testFormatObject$boundaryLengthString() {
       assertEquals(
-          InternalUtils.formatObject("HelloHelloHelloHello"),
-          "\"HelloHelloHelloHello\"");
+          "\"HelloHelloHelloHelloHelloHelloHelloHello\"",
+          InternalUtils.formatObject("HelloHelloHelloHelloHelloHelloHelloHello"));
     }
 
     @Test
     public void testFormatObject$InnerClassObject() {
       assertThat(
           InternalUtils.formatObject(new InnerClass()),
-          startsWith("InternalUtilsTest$FormatObject$InnerClass@"));
+          startsWith("InternalUtilsTest$FormatObjectTest$InnerClass@"));
     }
 
     @Test
@@ -108,9 +110,10 @@ public class InternalUtilsTest {
       try {
         InternalUtils.createInstanceFromClassName(Object.class, requestedClassName);
       } catch (InternalException e) {
+        e.printStackTrace();
         assertThat(e.getMessage(),
             allOf(
-                containsString("Public constructor"),
+                containsString("public constructor"),
                 containsString(requestedClassName),
                 containsString("not found")
             ));
@@ -126,7 +129,7 @@ public class InternalUtilsTest {
       } catch (InternalException e) {
         assertThat(e.getMessage(),
             allOf(
-                containsString("Public constructor"),
+                containsString("public constructor"),
                 containsString(requestedClassName),
                 containsString("but threw an exception")
             ));
@@ -135,7 +138,7 @@ public class InternalUtilsTest {
     }
   }
 
-  public static class AssertFailsWith extends TestBase.ForAssertionEnabledVM {
+  public static class TestAssertFailsWith extends TestBase.ForAssertionEnabledVM {
     @Test
     public void givenTrue$whenAssertionFailsWith$thenFalse() {
       assertFalse(InternalUtils.assertFailsWith(true));
@@ -154,11 +157,12 @@ public class InternalUtilsTest {
     }
   }
 
-  public static class WrapperClassOf {
+  public static class TestWrapperClassOf extends TestBase {
     @Test
     public void testInteger() {
       assertEquals(Integer.class, InternalUtils.wrapperClassOf(int.class));
     }
+
     @Test
     public void testLong() {
       assertEquals(Long.class, InternalUtils.wrapperClassOf(long.class));
@@ -205,8 +209,7 @@ public class InternalUtilsTest {
     }
   }
 
-  public static class ToEvaluableIfNecessary {
-
+  public static class ToEvaluableIfNecessaryTest extends TestBase {
     @Test
     public void givenNonEvaluable$whenToEvaluableIfNecessary$thenConverted() {
       Predicate<Object> predicate = Predicate.isEqual("Hello");
@@ -214,5 +217,4 @@ public class InternalUtilsTest {
       assertNotNull(ev);
     }
   }
-
 }

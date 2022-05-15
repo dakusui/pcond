@@ -1,7 +1,9 @@
 package com.github.dakusui.pcond.internals;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.pcond.provider.AssertionProvider;
+import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -19,6 +21,10 @@ public enum InternalUtils {
   ;
 
   public static String formatObject(Object value) {
+    return formatObject(value, summarizedStringLength());
+  }
+
+  public static String formatObject(Object value, int maxLength) {
     if (value == null)
       return "null";
     if (value instanceof Collection) {
@@ -40,13 +46,46 @@ public enum InternalUtils {
       return String.format("%s", value);
     if (value instanceof String) {
       String s = (String) value;
-      if (s.length() > 20)
-        s = s.substring(0, 12) + "..." + s.substring(s.length() - 5);
+      s = summarizeString(s, maxLength);
       return format("\"%s\"", s);
     }
+    if (value instanceof Throwable) {
+      Throwable throwable = (Throwable) value;
+      String simpleName = summarizeString(throwable.getClass().getSimpleName() + ":", maxLength);
+      return simpleName +
+          (simpleName.length() < Math.max(12, maxLength) ?
+              formatObject(throwable.getMessage(), toNextEven(Math.max(12, maxLength - simpleName.length()))) :
+              "");
+    }
     if (isToStringOverridden(value))
-      return value.toString();
+      return summarizeString(
+          value.toString(),
+          maxLength + 2 /* 2 for margin for single quotes not necessary for non-strings */
+      );
     return value.toString().substring(value.getClass().getPackage().getName().length() + 1);
+  }
+
+  private static int toNextEven(int value) {
+    if ((value & 1) == 0)
+      return value;
+    return value + 1;
+  }
+
+  private static String summarizeString(String s, int length) {
+    assert (length & 1) == 0 : "The length must be an even int, but was <" + length + ">";
+    assert length >= 12 : "The length must be greater than or equal to 12. Less than 20 is not recommended. But was <" + length + ">";
+    if (s.length() > length) {
+      int pre = length / 2 - 2;
+      int post = length / 2 - 5;
+      s = s.substring(0, length - pre) + "..." + s.substring(s.length() - post);
+    } else {
+      s = s;
+    }
+    return s;
+  }
+
+  private static int summarizedStringLength() {
+    return AssertionProvider.INSTANCE.configuration().summarizedStringLength();
   }
 
   private static boolean isToStringOverridden(Object object) {
@@ -76,22 +115,27 @@ public enum InternalUtils {
       try {
         return (T) expectedClass.cast(loadedClass.getDeclaredConstructor(Arrays.stream(args).map(Object::getClass).toArray(Class<?>[]::new)).newInstance(args));
       } catch (ClassCastException e) {
-        throw wrap("The requested class:'" + requestedClassName +
+        throw executionFailure("The requested class:'" + requestedClassName +
                 "' was found but not an instance of " + expectedClass.getCanonicalName() + ".: " +
                 "It was '" + loadedClass.getCanonicalName() + "'.",
             e);
       } catch (NoSuchMethodException e) {
-        throw wrap("Public constructor without parameters was not found in " + requestedClassName, e);
+        throw executionFailure("Matching public constructor for " + Arrays.toString(args) + " was not found in " + requestedClassName, e);
       } catch (InvocationTargetException e) {
-        throw wrap("Public constructor without parameters was found in " + requestedClassName + " but threw an exception", e.getCause());
+        throw executionFailure("Matching public constructor was found in " + requestedClassName + " but threw an exception", e.getCause());
       }
-    } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-      throw wrap("The requested class was not found or not accessible.: " + requestedClassName, e);
+    } catch (InstantiationException | IllegalAccessException |
+             ClassNotFoundException e) {
+      throw executionFailure("The requested class was not found or not accessible.: " + requestedClassName, e);
     }
   }
 
-  public static InternalException wrap(String message, Throwable cause) {
-    throw new InternalException(message, cause);
+  public static InternalException executionFailure(String message, Throwable cause) {
+    throw executionFailure(AssertionProviderBase.Explanation.fromMessage(message), cause);
+  }
+
+  public static InternalException executionFailure(AssertionProviderBase.Explanation explanation, Throwable cause) {
+    throw new InternalException(explanation.toString(), cause);
   }
 
   public static InternalException wrapIfNecessary(Throwable cause) {
@@ -99,7 +143,7 @@ public enum InternalUtils {
       throw (Error) cause;
     if (cause instanceof RuntimeException)
       throw (RuntimeException) cause;
-    throw wrap(cause.getMessage(), cause);
+    throw executionFailure(cause.getMessage(), cause);
   }
 
   public static List<? super Object> append(List<? super Object> list, Object p) {
@@ -159,7 +203,7 @@ public enum InternalUtils {
     try {
       return aClass.getMethod(methodName, parameterTypes);
     } catch (NoSuchMethodException e) {
-      throw wrap(format("Requested method: %s(%s) was not found in %s", methodName, Arrays.stream(parameterTypes).map(Class::getName).collect(joining(",")), aClass.getName()), e);
+      throw executionFailure(format("Requested method: %s(%s) was not found in %s", methodName, Arrays.stream(parameterTypes).map(Class::getName).collect(joining(",")), aClass.getName()), e);
     }
   }
 }

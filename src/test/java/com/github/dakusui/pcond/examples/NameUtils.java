@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.examples;
 
 import static com.github.dakusui.pcond.Assertions.precondition;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 
 public enum NameUtils {
   ;

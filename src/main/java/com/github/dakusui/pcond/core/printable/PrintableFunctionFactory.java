@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.core.printable;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
+import com.github.dakusui.pcond.internals.InternalChecks;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -101,15 +102,18 @@ public enum PrintableFunctionFactory {
     return function("noname:" + function.toString(), function);
   }
 
-  public static <T, R> Function<T, R> function(String name, Function<T, R> function) {
+  public static <
+      T, R> Function<T, R> function(String name, Function<T, R> function) {
     return function(() -> name, function);
   }
 
-  public static <T, R> Function<T, R> function(Supplier<String> formatter, Function<T, R> function) {
+  public static <
+      T, R> Function<T, R> function(Supplier<String> formatter, Function<T, R> function) {
     return function(formatter, function, PrintableFunctionFactory.class);
   }
 
-  public static <T, R> Function<T, R> function(Supplier<String> formatter, Function<T, R> function, Object fallbackCreator) {
+  public static <
+      T, R> Function<T, R> function(Supplier<String> formatter, Function<T, R> function, Object fallbackCreator) {
     return create(
         (args) -> formatter,
         (args) -> function,
@@ -127,7 +131,8 @@ public enum PrintableFunctionFactory {
         .orElse(new PrintableFunction<>(fallbackCreator, args, formatter, function));
   }
 
-  private static <T, R> PrintableFunction<T, R> toPrintableFunction(Function<T, R> function) {
+  private static <
+      T, R> PrintableFunction<T, R> toPrintableFunction(Function<T, R> function) {
     return (PrintableFunction<T, R>) function(function);
   }
 }

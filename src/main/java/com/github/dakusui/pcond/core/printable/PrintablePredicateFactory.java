@@ -5,10 +5,7 @@ import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -31,100 +28,9 @@ public enum PrintablePredicateFactory {
   NEGATION,
   CONJUNCTION,
   DISJUNCTION,
+  MESSAGE,
   LEAF,
   ;
-
-  /*
-      Expected: "100 -> &&                                     ->   false"
-       but: was "100 -> &&                                            ->   false"
-   */
-  public enum Leaf {
-    ALWAYS_TRUE("alwaysTrue", v -> true),
-    IS_TRUE("isTrue", (Boolean v) -> v),
-    IS_FALSE("isFalse", (Boolean v) -> !v),
-    IS_NULL("isNull", Objects::isNull),
-    IS_NOT_NULL("isNotNull", Objects::nonNull),
-    IS_EMPTY_STRING("isEmpty", v -> ((String) v).isEmpty()),
-    IS_NULL_OR_EMPTY_STRING("isNullOrEmptyString", v -> v == null || ((String) v).isEmpty()),
-    IS_EMPTY_ARRAY("isEmptyArray", objects -> ((Object[]) objects).length == 0),
-    IS_EMPTY_COLLECTION("isEmpty", v -> ((Collection<?>) v).isEmpty()),
-    ;
-    final Predicate<?> instance;
-
-    @SuppressWarnings("unchecked")
-    Leaf(String s, Predicate<?> predicate) {
-      this.instance = leaf(() -> s, (Predicate<? super Object>) predicate, this);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> Predicate<T> instance() {
-      return (Predicate<T>) this.instance;
-    }
-  }
-
-  public enum ParameterizedLeafFactory {
-    IS_EQUAL_TO(
-        (args) -> () -> format("isEqualTo[%s]", formatObject(args.get(0))),
-        (args) -> v -> Objects.equals(v, args.get(0))),
-    @SuppressWarnings("unchecked") GREATER_THAN(
-        (args) -> () -> format(">[%s]", formatObject(args.get(0))),
-        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) > 0),
-    @SuppressWarnings("unchecked") GREATER_THAN_OR_EQUAL_TO(
-        (args) -> () -> format(">=[%s]", formatObject(args.get(0))),
-        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) >= 0),
-    @SuppressWarnings("unchecked") LESS_THAN_OR_EQUAL_TO(
-        (args) -> () -> format("<=[%s]", formatObject(args.get(0))),
-        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) <= 0),
-    @SuppressWarnings("unchecked") LESS_THAN(
-        (args) -> () -> format("<[%s]", formatObject(args.get(0))),
-        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) < 0),
-    @SuppressWarnings("unchecked") EQUAL_TO(
-        (args) -> () -> format("=[%s]", formatObject(args.get(0))),
-        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) == 0),
-    MATCHES_REGEX(
-        (args) -> () -> String.format("matchesRegex[%s]", formatObject(args.get(0))),
-        (args) -> (s) -> ((String) s).matches((String) args.get(0))),
-    CONTAINS_STRING(
-        (args) -> () -> format("containsString[%s]", formatObject(args.get(0))),
-        (args) -> (s) -> ((String) s).contains((String) args.get(0))),
-    STARTS_WITH(
-        (args) -> () -> format("startsWith[%s]", formatObject(args.get(0))),
-        (args) -> (s) -> ((String) s).startsWith((String) args.get(0))),
-    ENDS_WITH(
-        (args) -> () -> format("endsWith[%s]", formatObject(args.get(0))),
-        (args) -> (s) -> ((String) s).endsWith((String) args.get(0))),
-    EQUALS_IGNORE_CASE(
-        (args) -> () -> format("equalsIgnoreCase[%s]", formatObject(args.get(0))),
-        (args) -> (s) -> ((String) s).equalsIgnoreCase((String) args.get(0))),
-    OBJECT_IS_SAME_AS(
-        arg -> () -> format("==[%s]", formatObject(arg.get(0))),
-        args -> v -> v == args.get(0)),
-    CONTAINS(
-        (args) -> () -> format("contains[%s]", formatObject(args.get(0))),
-        (args) -> (c) -> ((Collection<?>) c).contains(args.get(0)));
-    private final Function<List<Object>, Predicate<Object>> predicateFactory;
-    private final Function<List<Object>, Supplier<String>>  formatterFactory;
-
-    ParameterizedLeafFactory(Function<List<Object>, Supplier<String>> formatterFactory, Function<List<Object>, Predicate<Object>> predicateFactory) {
-      this.predicateFactory = predicateFactory;
-      this.formatterFactory = formatterFactory;
-    }
-
-    Function<List<Object>, Supplier<String>> formatterFactory() {
-      return this.formatterFactory;
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    <T> Function<List<Object>, Predicate<T>> functionFactory() {
-      return (Function) this.predicateFactory;
-    }
-
-    public static <T> Predicate<T> create(ParameterizedLeafFactory parameterizedLeafFactory, List<Object> args) {
-      return parameterizedLeaf(
-          parameterizedLeafFactory.formatterFactory(), parameterizedLeafFactory.functionFactory(), args, parameterizedLeafFactory
-      );
-    }
-  }
 
   private static <T> PrintablePredicate<T> toPrintablePredicate(Predicate<T> predicate) {
     return (PrintablePredicate<T>) leaf(predicate);
@@ -193,20 +99,123 @@ public enum PrintablePredicateFactory {
     return new Negation<T>(toPrintablePredicate(predicate), singletonList(predicate));
   }
 
-  public static <E> Predicate<Stream<? extends E>> allMatch(Predicate<E> predicate) {
+  public static <E> Predicate<Stream<E>> allMatch(Predicate<E> predicate) {
     return AllMatch.create(predicate);
   }
 
-  public static <E> Predicate<Stream<? extends E>> noneMatch(Predicate<E> predicate) {
+  public static <E> Predicate<Stream<E>> noneMatch(Predicate<E> predicate) {
     return NoneMatch.create(predicate);
   }
 
-  public static <E> Predicate<Stream<? extends E>> anyMatch(Predicate<E> predicate) {
+  public static <E> Predicate<Stream<E>> anyMatch(Predicate<E> predicate) {
     return AnyMatch.create(predicate);
   }
 
   public static <T> Predicate<Context> contextPredicate(Predicate<T> predicate, int argIndex) {
     return ContextPredicate.create(toPrintablePredicate(predicate), argIndex);
+  }
+
+  private static RuntimeException noPredicateGiven() {
+    throw new IllegalArgumentException("No predicate was given");
+  }
+
+  public static <T> Predicate<T> withMessage(Supplier<String> messageSupplier, Predicate<T> predicate) {
+    return new Messaged<T>(messageSupplier, toPrintablePredicate(predicate), singletonList(predicate));
+  }
+
+  /*
+      Expected: "100 -> &&                                     ->   false"
+       but: was "100 -> &&                                            ->   false"
+   */
+  public enum Leaf {
+    ALWAYS_TRUE("alwaysTrue", v -> true),
+    IS_TRUE("isTrue", (Boolean v) -> v),
+    IS_FALSE("isFalse", (Boolean v) -> !v),
+    IS_NULL("isNull", Objects::isNull),
+    IS_NOT_NULL("isNotNull", Objects::nonNull),
+    IS_EMPTY_STRING("isEmpty", v -> ((String) v).isEmpty()),
+    IS_NULL_OR_EMPTY_STRING("isNullOrEmptyString", v -> v == null || ((String) v).isEmpty()),
+    IS_EMPTY_ARRAY("isEmptyArray", objects -> ((Object[]) objects).length == 0),
+    IS_EMPTY_COLLECTION("isEmpty", v -> ((Collection<?>) v).isEmpty()),
+    ;
+    final Predicate<?> instance;
+
+    @SuppressWarnings("unchecked")
+    Leaf(String s, Predicate<?> predicate) {
+      this.instance = leaf(() -> s, (Predicate<? super Object>) predicate, this);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> Predicate<T> instance() {
+      return (Predicate<T>) this.instance;
+    }
+  }
+
+  public enum ParameterizedLeafFactory {
+    IS_EQUAL_TO(
+        (args) -> () -> format("isEqualTo[%s]", formatObject(args.get(0))),
+        (args) -> v -> Objects.equals(v, args.get(0))),
+    @SuppressWarnings("unchecked") GREATER_THAN(
+        (args) -> () -> format(">[%s]", formatObject(args.get(0))),
+        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) > 0),
+    @SuppressWarnings("unchecked") GREATER_THAN_OR_EQUAL_TO(
+        (args) -> () -> format(">=[%s]", formatObject(args.get(0))),
+        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) >= 0),
+    @SuppressWarnings("unchecked") LESS_THAN_OR_EQUAL_TO(
+        (args) -> () -> format("<=[%s]", formatObject(args.get(0))),
+        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) <= 0),
+    @SuppressWarnings("unchecked") LESS_THAN(
+        (args) -> () -> format("<[%s]", formatObject(args.get(0))),
+        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) < 0),
+    @SuppressWarnings("unchecked") EQUAL_TO(
+        (args) -> () -> format("=[%s]", formatObject(args.get(0))),
+        (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) == 0),
+    MATCHES_REGEX(
+        (args) -> () -> String.format("matchesRegex[%s]", formatObject(args.get(0))),
+        (args) -> (s) -> ((String) s).matches((String) args.get(0))),
+    CONTAINS_STRING(
+        (args) -> () -> format("containsString[%s]", formatObject(args.get(0))),
+        (args) -> (s) -> ((String) s).contains((String) args.get(0))),
+    STARTS_WITH(
+        (args) -> () -> format("startsWith[%s]", formatObject(args.get(0))),
+        (args) -> (s) -> ((String) s).startsWith((String) args.get(0))),
+    ENDS_WITH(
+        (args) -> () -> format("endsWith[%s]", formatObject(args.get(0))),
+        (args) -> (s) -> ((String) s).endsWith((String) args.get(0))),
+    EQUALS_IGNORE_CASE(
+        (args) -> () -> format("equalsIgnoreCase[%s]", formatObject(args.get(0))),
+        (args) -> (s) -> {
+          System.out.println("equalsIgnoreCase");
+          return ((String) s).equalsIgnoreCase((String) args.get(0));
+        }),
+    OBJECT_IS_SAME_AS(
+        arg -> () -> format("==[%s]", formatObject(arg.get(0))),
+        args -> v -> v == args.get(0)),
+    CONTAINS(
+        (args) -> () -> format("contains[%s]", formatObject(args.get(0))),
+        (args) -> (c) -> ((Collection<?>) c).contains(args.get(0)));
+    private final Function<List<Object>, Predicate<Object>> predicateFactory;
+    private final Function<List<Object>, Supplier<String>>  formatterFactory;
+
+    ParameterizedLeafFactory(Function<List<Object>, Supplier<String>> formatterFactory, Function<List<Object>, Predicate<Object>> predicateFactory) {
+      this.predicateFactory = predicateFactory;
+      this.formatterFactory = formatterFactory;
+    }
+
+    Function<List<Object>, Supplier<String>> formatterFactory() {
+      return this.formatterFactory;
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    <T> Function<List<Object>, Predicate<T>> functionFactory() {
+      return (Function) this.predicateFactory;
+    }
+
+    public static <T> Predicate<T> create(ParameterizedLeafFactory parameterizedLeafFactory, List<Object> args) {
+      return parameterizedLeaf(
+          parameterizedLeafFactory.formatterFactory(), parameterizedLeafFactory.functionFactory(), args, parameterizedLeafFactory
+      );
+    }
   }
 
   private static class LeafPredicate<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T> {
@@ -255,8 +264,35 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  private static RuntimeException noPredicateGiven() {
-    throw new IllegalArgumentException("No predicate was given");
+  static class Messaged<T> extends PrintablePredicate<T> implements Evaluable.Messaged<T> {
+    private final Evaluable<? super T> target;
+    private final Predicate<T>         rawPredicate;
+
+    @SuppressWarnings("unchecked")
+    protected Messaged(Supplier<String> messageSupplier, Predicate<T> predicate, List<Object> args) {
+      super(
+          MESSAGE,
+          args,
+          requireNonNull(messageSupplier),
+          (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).test(t));
+      //this.message = requireNonNull(message);
+      this.target = toEvaluableIfNecessary(predicate);
+      this.rawPredicate = predicate;
+    }
+
+    @Override
+    public Evaluable<? super T> target() {
+      return this.target;
+    }
+
+    @Override
+    public String message() {
+      return this.formatter.get();
+    }
+
+    protected Predicate<T> rawPredicate() {
+      return this.rawPredicate;
+    }
   }
 
   private static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
@@ -316,30 +352,28 @@ public enum PrintablePredicateFactory {
     }
   }
 
+  /**
+   * This is an interface that corresponds to a "matcher" in other assertion
+   * libraries.
+   */
   public static class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Evaluable.Transformation<O, P> {
-    public interface Factory<P, O> {
-      static <P, O> Factory<P, O> create(Function<O, P> function) {
-        return cond -> new TransformingPredicate<>(null, toPrintablePredicate(cond), function);
-      }
-
-      default TransformingPredicate<P, O> check(String condName, Predicate<? super P> cond) {
-        return check(leaf(condName, cond));
-      }
-
-      TransformingPredicate<P, O> check(Predicate<? super P> cond);
-    }
-
     private final Evaluable<? super P> checker;
     private final Evaluable<? super O> mapper;
+    private final String               mapperName;
+    private final String               checkerName;
 
-    public TransformingPredicate(String name, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
+    public TransformingPredicate(String mapperName, String checkerName, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
       super(
           TransformingPredicate.class,
           asList(predicate, function),
-          () -> format("%s%s %s", name == null ? "" : name, function, predicate),
+          () -> mapperName == null ?
+              format("%s %s", function, predicate) :
+              format("%s(%s %s)", mapperName, function, predicate),
           v -> predicate.test(function.apply(v)));
-      this.checker = toEvaluableIfNecessary(predicate);
       this.mapper = toEvaluableIfNecessary(function);
+      this.mapperName = mapperName;
+      this.checker = toEvaluableIfNecessary(predicate);
+      this.checkerName = checkerName;
     }
 
     @Override
@@ -351,13 +385,47 @@ public enum PrintablePredicateFactory {
     public Evaluable<? super P> checker() {
       return this.checker;
     }
+
+    @Override
+    public Optional<String> mapperName() {
+      return Optional.ofNullable(this.mapperName);
+    }
+
+    @Override
+    public Optional<String> checkerName() {
+      return Optional.ofNullable(this.checkerName);
+    }
+
+    /**
+     * This is an interface that corresponds to a "matcher" in other assertion
+     * libraries.
+     *
+     * @param <P> Intermediate parameter type tested by a predicated.
+     * @param <O> Input parameter type.
+     */
+    public interface Factory<P, O> {
+      default TransformingPredicate<P, O> check(String condName, Predicate<? super P> cond) {
+        return check(leaf(condName, cond));
+      }
+
+      @SuppressWarnings("unchecked")
+      default <OO> Factory<P, OO> castTo(@SuppressWarnings("unused") Class<OO> ooClass) {
+        return (Factory<P, OO>) this;
+      }
+
+      TransformingPredicate<P, O> check(Predicate<? super P> cond);
+
+      static <P, O> Factory<P, O> create(Function<O, P> function) {
+        return create(null, null, function);
+      }
+
+      static <P, O> Factory<P, O> create(String mapperName, String checkerName, Function<O, P> function) {
+        return cond -> new TransformingPredicate<>(mapperName, checkerName, toPrintablePredicate(cond), function);
+      }
+    }
   }
 
   static class ContextPredicate extends PrintablePredicate<Context> implements Evaluable.ContextPred {
-    public static <T> ContextPredicate create(Predicate<T> predicate, int argIndex) {
-      return new ContextPredicate(ContextPredicate.class, asList(predicate, argIndex), predicate, argIndex);
-    }
-
     private final Evaluable<?> enclosed;
     private final int          argIndex;
 
@@ -382,74 +450,84 @@ public enum PrintablePredicateFactory {
     public int argIndex() {
       return argIndex;
     }
+
+    public static <T> ContextPredicate create(Predicate<T> predicate, int argIndex) {
+      return new ContextPredicate(ContextPredicate.class, asList(predicate, argIndex), predicate, argIndex);
+    }
   }
 
   static class AllMatch<E> extends StreamPredicate<E> {
-    static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
-      return new AllMatch<>(
-          predicate
-      );
-    }
-
     @SuppressWarnings("unchecked")
     private AllMatch(Predicate<? super E> predicate) {
       super(
           AllMatch.class,
           singletonList(predicate),
           () -> format("allMatch[%s]", predicate),
-          (Stream<? extends E> stream) -> stream.allMatch(predicate),
+          (Stream<E> stream) -> stream.allMatch(predicate),
           toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
           true,
           false);
     }
-  }
 
-  static class NoneMatch<E> extends StreamPredicate<E> {
-    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
-      return new NoneMatch<>(
+    static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
+      return new AllMatch<>(
           predicate
       );
     }
+  }
 
+  static class NoneMatch<E> extends StreamPredicate<E> {
     @SuppressWarnings("unchecked")
     private NoneMatch(Predicate<? super E> predicate) {
       super(
           NoneMatch.class,
           singletonList(predicate),
           () -> format("noneMatch[%s]", predicate),
-          (Stream<? extends E> stream) -> stream.noneMatch(predicate),
-          toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
+          (Stream<E> stream) -> stream.noneMatch(predicate),
+          toEvaluableIfNecessary((Predicate<? super Stream<E>>) predicate),
           true,
           true);
+    }
+
+    @Override
+    public boolean requestExpectationFlip() {
+      return true;
+    }
+
+    public static <E> StreamPredicate<E> create(Predicate<E> predicate) {
+      return new NoneMatch<E>(
+          predicate
+      ) {
+      };
     }
   }
 
   static class AnyMatch<E> extends StreamPredicate<E> {
-    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
-      return new AnyMatch<>(
-          predicate
-      );
-    }
-
     @SuppressWarnings("unchecked")
     private AnyMatch(Predicate<? super E> predicate) {
       super(
           AnyMatch.class,
           singletonList(predicate),
           () -> format("anyMatch[%s]", predicate),
-          (Stream<? extends E> stream) -> stream.anyMatch(PrintablePredicate.<E>unwrap(predicate)),
-          toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
+          (Stream<E> stream) -> stream.anyMatch(PrintablePredicate.unwrap(predicate)),
+          toEvaluableIfNecessary((Predicate<? super Stream<E>>) predicate),
           false,
           true);
     }
+
+    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
+      return new AnyMatch<>(
+          predicate
+      );
+    }
   }
 
-  public abstract static class StreamPredicate<E> extends PrintablePredicate<Stream<? extends E>> implements Evaluable.StreamPred<E> {
-    private final Evaluable<? super Stream<? extends E>> cut;
-    private final boolean                                defaultValue;
-    private final boolean                                cutOn;
+  public abstract static class StreamPredicate<E> extends PrintablePredicate<Stream<E>> implements Evaluable.StreamPred<E> {
+    private final Evaluable<Stream<E>> cut;
+    private final boolean              defaultValue;
+    private final boolean              cutOn;
 
-    private StreamPredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<? super Stream<? extends E>> predicate, Evaluable<? super Stream<? extends E>> cut, boolean defaultValue, boolean cutOn) {
+    private StreamPredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<Stream<E>> predicate, Evaluable<Stream<E>> cut, boolean defaultValue, boolean cutOn) {
       super(creator, args, formatter, predicate);
       this.cut = requireNonNull(cut);
       this.defaultValue = defaultValue;
@@ -463,8 +541,8 @@ public enum PrintablePredicateFactory {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Evaluable<? super E> cut() {
-      return (Evaluable<? super E>) this.cut;
+    public Evaluable<E> cut() {
+      return (Evaluable<E>) this.cut;
     }
 
     @Override

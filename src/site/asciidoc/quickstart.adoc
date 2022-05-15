@@ -35,8 +35,8 @@ package com.github.dakusui.pcond.examples;
 import static com.github.dakusui.pcond.Assertions.precondition;
 import static com.github.dakusui.pcond.Postconditions.ensureNonNull;
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
-import static com.github.dakusui.pcond.functions.Functions.*;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Functions.*;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 
 public class Example {
   public static String hello(String yourName) {

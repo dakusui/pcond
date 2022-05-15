@@ -1,14 +1,14 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Preconditions;
-import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.functions.Predicates.isNotNull;
+import static com.github.dakusui.pcond.forms.Predicates.isNotNull;
 import static com.github.dakusui.pcond.utils.TestUtils.firstLineOf;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertNotNull;
@@ -24,7 +24,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       assertThat(firstLineOf(e.getMessage()),
           allOf(
               notNullValue(),
-              is("value:null violated precondition:value isNotNull")));
+              is("value:<null> violated precondition:value isNotNull")));
       throw e;
     }
   }
@@ -38,7 +38,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       assertThat(firstLineOf(e.getMessage()),
           allOf(
               notNullValue(),
-              is("value:null violated precondition:value isNotNull")));
+              is("value:<null> violated precondition:value isNotNull")));
       throw e;
     }
   }
@@ -52,7 +52,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       assertThat(firstLineOf(e.getMessage()),
           allOf(
               notNullValue(),
-              is("value:null violated precondition:value isNotNull")));
+              is("value:<null> violated precondition:value isNotNull")));
       throw e;
     }
   }
@@ -83,7 +83,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
       e.printStackTrace();
       assertThat(
           firstLineOf(e.getMessage()),
-          CoreMatchers.is("value:\"hello\" violated precondition:value LENGTH GT[100]"));
+          CoreMatchers.is("value:<\"hello\"> violated precondition:value LENGTH GT[100]"));
       throw e;
     }
   }

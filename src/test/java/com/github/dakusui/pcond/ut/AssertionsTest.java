@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Assertions;
-import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
+import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.provider.impls.JUnit4AssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -14,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(Enclosed.class)
 public class AssertionsTest {
+  @SuppressWarnings("NewClassNamingConvention")
   public static class Passing {
     @Test
     public void testAssertThatValue$thenPass() {
@@ -34,6 +35,7 @@ public class AssertionsTest {
     }
   }
 
+  @SuppressWarnings("NewClassNamingConvention")
   public static class Failing extends TestBase.ForAssertionEnabledVM {
     @Test(expected = AssertionError.class)
     public void testAssertThat$thenFailing() {
@@ -57,7 +59,7 @@ public class AssertionsTest {
   public static class MessageTest {
     @Test
     public void composeMessage$thenComposed() {
-      assertEquals("Value:\"hello\" violated: isNull", new DefaultAssertionProvider(new Properties()).composeMessageForAssertion("hello", Predicates.isNull()));
+      assertEquals("Value:\"hello\" violated: isNull", new JUnit4AssertionProvider(new Properties()).composeMessageForAssertion("hello", Predicates.isNull()));
     }
   }
 }

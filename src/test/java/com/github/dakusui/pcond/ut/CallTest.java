@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.Functions;
+import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.MethodInvocationException;
 import com.github.dakusui.pcond.internals.MethodNotFound;
@@ -11,9 +12,9 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
-import static com.github.dakusui.pcond.functions.Functions.*;
+import static com.github.dakusui.pcond.forms.Functions.*;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CallTest extends TestBase {
   @Test
@@ -29,7 +30,7 @@ public class CallTest extends TestBase {
     System.out.println(length.apply("hello"));
 
     assertThat(length.apply("hello"), equalTo(5));
-    assertThat(length.toString(), equalTo("p[0].length()"));
+    assertThat(length.toString(), equalTo("<>.length()"));
   }
 
   @Test
@@ -40,7 +41,7 @@ public class CallTest extends TestBase {
 
     assertThat(contains.apply("Hello"), equalTo(true));
     assertThat(contains.apply("HELLO"), equalTo(false));
-    assertThat(contains.toString(), equalTo("<Hello, world>.contains(p[0])"));
+    assertThat(contains.toString(), equalTo("<Hello, world>.contains(<>)"));
   }
 
   @Test
@@ -56,7 +57,7 @@ public class CallTest extends TestBase {
   public void functionsCanBeChained() {
     String var = "hello, world";
 
-    Function<String, String> chained = Functions.<String, String>chain("substring", 7).andThen(chain("toUpperCase"));
+    Function<String, String> chained = Functions.<String, String>call("substring", 7).andThen(Functions.call("toUpperCase"));
 
     assertThat(chained.apply(var), is("WORLD"));
   }
@@ -64,7 +65,7 @@ public class CallTest extends TestBase {
   @Test(expected = InternalException.class)
   public void methodNotFound() {
     try {
-      requireArgument("hello", chainp("undefined", "H"));
+      requireArgument("hello", Predicates.callp("undefined", "H"));
     } catch (InternalException e) {
       e.printStackTrace();
       assertThat(
@@ -83,7 +84,7 @@ public class CallTest extends TestBase {
   @Test(expected = InternalException.class)
   public void methodIncompatible() {
     try {
-      chainp("startsWith", parameter()).test(123);
+      Predicates.callp("startsWith", parameter()).test(123);
     } catch (InternalException e) {
       e.printStackTrace();
       assertThat(
@@ -98,18 +99,18 @@ public class CallTest extends TestBase {
 
   @Test
   public void nullCanMatch() {
-    requireArgument(new AcceptsNull(), chainp("method", "hello", null));
+    requireArgument(new AcceptsNull(), Predicates.callp("method", "hello", null));
   }
 
   @Test(expected = InternalException.class)
   public void nullReturningFunctionAsPredicate() {
-    requireArgument(new ReturnsNull(), chainp("method", "hello"));
+    requireArgument(new ReturnsNull(), Predicates.callp("method", "hello"));
   }
 
   @Test(expected = InternalException.class)
   public void methodAmbiguous() {
     try {
-      System.out.println(chainp("method", "hello", "world").test(new Ambiguous()));
+      System.out.println(Predicates.callp("method", "hello", "world").test(new Ambiguous()));
     } catch (InternalException e) {
       e.printStackTrace();
       assertThat(
@@ -127,7 +128,7 @@ public class CallTest extends TestBase {
   @Test(expected = InternalException.class)
   public void methodAmbiguous_primitiveBoxed() {
     try {
-      requireArgument(new Ambiguous2(), chainp("method", 1));
+      requireArgument(new Ambiguous2(), Predicates.callp("method", 1));
     } catch (InternalException e) {
       e.printStackTrace();
       assertThat(
@@ -143,19 +144,19 @@ public class CallTest extends TestBase {
   @Test
   public void narrowerMethodIsChosen() {
     assertThat(
-        chainp("narrowerMethod", "Hello").test(new Narrower()),
+        Predicates.callp("narrowerMethod", "Hello").test(new Narrower()),
         is(true));
   }
 
   @Test(expected = InternalException.class)
   public void cannotCallPrimitiveParameterMethodWithNull() {
-    chainp("method", new Object[] { null }).test(new Primitive());
+    Predicates.callp("method", new Object[] { null }).test(new Primitive());
   }
 
   @Test(expected = MethodInvocationException.class)
   public void exceptionThrowingMethod() {
     try {
-      chainp("throwException").test(new ExceptionThrowing());
+      Predicates.callp("throwException").test(new ExceptionThrowing());
     } catch (MethodInvocationException e) {
       e.printStackTrace();
       assertThat(
@@ -170,7 +171,7 @@ public class CallTest extends TestBase {
 
   @Test
   public void covariantOverridingMethodCanBeInvokedCorrectly() {
-    Object r = chain("method", "Hello").apply(new ExtendsBase());
+    Object r = Functions.call("method", "Hello").apply(new ExtendsBase());
 
     assertThat(
         Objects.toString(r),
@@ -180,7 +181,7 @@ public class CallTest extends TestBase {
   @Test(expected = MethodNotFound.class)
   public void parameterUnmatchedWhileNameMatching() {
     try {
-      chain("method", 123).apply(new Base());
+      Functions.call("method", 123).apply(new Base());
     } catch (MethodNotFound e) {
       assertThat(e.getMessage(), allOf(
           containsString("method[123]"),

@@ -12,14 +12,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 public interface MethodQuery {
-  static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
-    return create(false, requireNonNull(targetObject), ReflUtils.targetTypeOf(targetObject), methodName, arguments);
-  }
-
-  static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
-    return create(true, null, targetClass, methodName, arguments);
-  }
-
   boolean isStatic();
 
   Object targetObject();
@@ -46,6 +38,14 @@ public interface MethodQuery {
         this.isStatic() ? this.targetClass() : targetObject.getClass(),
         this.methodName(),
         Arrays.stream(this.arguments()).map(argReplacer).toArray());
+  }
+
+  static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
+    return create(false, requireNonNull(targetObject), ReflUtils.targetTypeOf(targetObject), methodName, arguments);
+  }
+
+  static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
+    return create(true, null, targetClass, methodName, arguments);
   }
 
   static MethodQuery create(boolean isStatic, Object targetObject, Class<?> targetClass, String methodName, Object[] arguments) {
@@ -87,10 +87,7 @@ public interface MethodQuery {
 
       @Override
       public String describe() {
-        Function<Object, String> parameterFormatter =
-            o -> o instanceof Parameter ?
-                Objects.toString(o) :
-                "<" + o + ">";
+        Function<Object, String> parameterFormatter = s -> "<" + s + ">";
         return format("%s.%s(%s)",
             isStatic ?
                 targetClass.getName() :

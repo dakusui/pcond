@@ -8,8 +8,8 @@ import java.util.List;
 import static com.github.dakusui.pcond.Assertions.that;
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
 import static com.github.dakusui.pcond.Preconditions.requireState;
-import static com.github.dakusui.pcond.functions.Functions.size;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Functions.size;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 
 public class Sandbox {
   @Test(expected = IllegalArgumentException.class)

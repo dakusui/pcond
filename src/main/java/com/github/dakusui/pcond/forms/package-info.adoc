@@ -1,0 +1,3 @@
+= The `functions` package
+
+This package stores classes to `static import` for your conveniences.

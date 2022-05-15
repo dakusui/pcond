@@ -1,9 +1,7 @@
 package com.github.dakusui.pcond.core.multi;
 
-import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.printable.PrintableFunction;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,19 +9,13 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.core.currying.Checks.validateParamOrderList;
-import static com.github.dakusui.pcond.core.refl.ReflUtils.formatMethodName;
-import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeStaticMethod;
 import static com.github.dakusui.pcond.internals.InternalChecks.requireArgumentListSize;
-import static com.github.dakusui.pcond.internals.InternalChecks.requireStaticMethod;
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 /**
  * An interface that represents a function that can have more than one parameters.
- * This interface is often used in combination with {@link com.github.dakusui.pcond.functions.Functions#curry(MultiFunction)} method.
+ * This interface is often used in combination with {@link com.github.dakusui.pcond.forms.Functions#curry(MultiFunction)} method.
  *
  * @param <R>
  */

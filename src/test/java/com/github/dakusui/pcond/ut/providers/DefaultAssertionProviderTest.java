@@ -1,8 +1,9 @@
 package com.github.dakusui.pcond.ut.providers;
 
-import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
+import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.provider.impls.BaseAssertionProvider;
+import com.github.dakusui.pcond.provider.impls.JUnit4AssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -10,14 +11,14 @@ import org.junit.Test;
 import java.util.Objects;
 import java.util.Properties;
 
-import static com.github.dakusui.pcond.functions.Functions.length;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Functions.length;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static com.github.dakusui.pcond.utils.TestUtils.numLines;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class DefaultAssertionProviderTest extends TestBase {
   @Test(expected = IllegalArgumentException.class)
@@ -27,7 +28,7 @@ public class DefaultAssertionProviderTest extends TestBase {
           .requireArgument("Hello", and(isNotNull(), isEmptyString().negate(), transform(length()).check(gt(10))));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
-      assertEquals(1, numLines(e.getMessage()));
+      assertEquals(9, numLines(e.getMessage()));
       throw e;
     }
   }
@@ -70,7 +71,6 @@ public class DefaultAssertionProviderTest extends TestBase {
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.containsString("Hello"),
           CoreMatchers.containsString("isEqualTo[\"hello\"]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
@@ -93,20 +93,19 @@ public class DefaultAssertionProviderTest extends TestBase {
           .requireArgument("Hello", transform(Functions.length()).check(Predicates.gt(10)));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
-      assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.containsString("transformAndCheck"),
-          CoreMatchers.containsString("->"),
-          CoreMatchers.containsString("false")
-
-      ));
+      assertThat(lineAt(e.getMessage(), 1),
+          CoreMatchers.containsString("transform")
+      );
       assertThat(lineAt(e.getMessage(), 2), allOf(
           CoreMatchers.containsString("length"),
-          CoreMatchers.containsString("Hello"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("5")
 
       ));
-      assertThat(lineAt(e.getMessage(), 3), allOf(
+      assertThat(lineAt(e.getMessage(), 3),
+          CoreMatchers.containsString("check")
+      );
+      assertThat(lineAt(e.getMessage(), 4), allOf(
           CoreMatchers.containsString(">[10]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
@@ -202,19 +201,19 @@ public class DefaultAssertionProviderTest extends TestBase {
           CoreMatchers.containsString("false")
 
       ));
-      assertThat(lineAt(e.getMessage(), 5), allOf(
-          CoreMatchers.containsString("  transformAndCheck"),
-          CoreMatchers.containsString("->"),
-          CoreMatchers.containsString("false")
-
-      ));
+      assertThat(lineAt(e.getMessage(), 5),
+          CoreMatchers.containsString("  transform")
+      );
       assertThat(lineAt(e.getMessage(), 6), allOf(
           CoreMatchers.containsString("  length"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("5")
 
       ));
-      assertThat(lineAt(e.getMessage(), 7), allOf(
+      assertThat(lineAt(e.getMessage(), 7),
+          CoreMatchers.containsString("  check")
+      );
+      assertThat(lineAt(e.getMessage(), 8), allOf(
           CoreMatchers.containsString("  >[10]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
@@ -224,17 +223,17 @@ public class DefaultAssertionProviderTest extends TestBase {
     }
   }
 
-  public DefaultAssertionProvider createAssertionProvider(Properties properties) {
-    return new DefaultAssertionProvider(properties);
+  public BaseAssertionProvider createAssertionProvider(Properties properties) {
+    return new JUnit4AssertionProvider(properties);
   }
 
   public static Properties useEvaluator(Properties properties, boolean useEvaluator) {
-    properties.setProperty(DefaultAssertionProvider.class.getName() + ".useEvaluator", Objects.toString(useEvaluator));
+    properties.setProperty(BaseAssertionProvider.class.getName() + ".useEvaluator", Objects.toString(useEvaluator));
     return properties;
   }
 
   public static Properties nameWidth(Properties properties, int columns) {
-    properties.setProperty(DefaultAssertionProvider.class.getName() + ".evaluableNameWidth", Objects.toString(columns));
+    properties.setProperty(BaseAssertionProvider.class.getName() + ".evaluableNameWidth", Objects.toString(columns));
     return properties;
   }
 

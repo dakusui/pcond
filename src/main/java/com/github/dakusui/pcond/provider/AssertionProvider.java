@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.provider;
 
 import com.github.dakusui.pcond.internals.InternalUtils;
-import com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider;
+import com.github.dakusui.pcond.provider.impls.JUnit4AssertionProvider;
 
 import java.util.Properties;
 import java.util.function.Function;
@@ -13,10 +13,13 @@ import java.util.function.Predicate;
  * @param <AE> The type of exception that should be thrown on an application error.
  */
 public interface AssertionProvider<AE extends Throwable> {
+
   /**
    * A constant field that holds the default provider instance.
    */
   AssertionProvider<?> INSTANCE = createAssertionProvider(System.getProperties());
+
+  Configuration configuration();
 
   /**
    * Returns a provider instance created from a given `Properties` object.
@@ -29,9 +32,9 @@ public interface AssertionProvider<AE extends Throwable> {
   static AssertionProvider<?> createAssertionProvider(Properties properties) {
     String propertyKeyName = AssertionProvider.class.getCanonicalName();
     if (properties.containsKey(propertyKeyName)) {
-      return InternalUtils.createInstanceFromClassName(AssertionProvider.class, properties.getProperty(propertyKeyName));
+      return InternalUtils.createInstanceFromClassName(AssertionProvider.class, properties.getProperty(propertyKeyName), System.getProperties());
     }
-    return new DefaultAssertionProvider(properties);
+    return new JUnit4AssertionProvider(properties);
   }
 
   /**
@@ -91,4 +94,12 @@ public interface AssertionProvider<AE extends Throwable> {
   <T> void assertThat(T value, Predicate<? super T> cond);
 
   <T> void assumeThat(T value, Predicate<? super T> cond);
+
+  interface Configuration<AE extends Throwable> {
+    default int summarizedStringLength() {
+      return 40;
+    }
+
+    AE throwApplicationException(String message);
+  }
 }

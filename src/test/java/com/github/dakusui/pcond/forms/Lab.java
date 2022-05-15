@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.functions;
+package com.github.dakusui.pcond.forms;
 
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;

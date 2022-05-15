@@ -10,7 +10,7 @@ import org.junit.Test;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-import static com.github.dakusui.pcond.functions.Functions.curry;
+import static com.github.dakusui.pcond.forms.Functions.curry;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.junit.Assert.*;
 

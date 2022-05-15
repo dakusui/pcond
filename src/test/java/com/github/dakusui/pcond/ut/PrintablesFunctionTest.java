@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -12,8 +12,8 @@ import java.util.function.Function;
 
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 @RunWith(Enclosed.class)
 public class PrintablesFunctionTest {

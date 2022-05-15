@@ -10,6 +10,9 @@ import java.util.stream.Stream;
 
 public interface Evaluable<T> {
   void accept(T value, Evaluator evaluator);
+  default boolean requestExpectationFlip() {
+    return false;
+  }
 
   interface Pred<T> extends Evaluable<T> {
   }
@@ -40,6 +43,11 @@ public interface Evaluable<T> {
     }
 
     Evaluable<? super T> target();
+
+    @Override
+    default boolean requestExpectationFlip() {
+      return true;
+    }
   }
 
   interface LeafPred<T> extends Pred<T> {
@@ -49,6 +57,17 @@ public interface Evaluable<T> {
     }
 
     Predicate<? super T> predicate();
+  }
+
+  interface Messaged<T> extends Pred<T> {
+    @Override
+    default void accept(T value, Evaluator evaluator) {
+      evaluator.evaluate(value, this);
+    }
+
+    Evaluable<? super T> target();
+
+    String message();
   }
 
   interface ContextPred extends Pred<Context> {
@@ -62,9 +81,9 @@ public interface Evaluable<T> {
     int argIndex();
   }
 
-  interface StreamPred<E> extends Pred<Stream<? extends E>> {
+  interface StreamPred<E> extends Pred<Stream<E>> {
     @Override
-    default void accept(Stream<? extends E> value, Evaluator evaluator) {
+    default void accept(Stream<E> value, Evaluator evaluator) {
       evaluator.evaluate(value, this);
     }
 
@@ -84,6 +103,9 @@ public interface Evaluable<T> {
     Evaluable<? super T> mapper();
 
     Evaluable<? super R> checker();
+
+    Optional<String> mapperName();
+    Optional<String> checkerName();
   }
 
   interface Func<T> extends Evaluable<T> {

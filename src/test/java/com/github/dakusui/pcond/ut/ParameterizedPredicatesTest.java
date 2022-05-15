@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.TestUtils;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.After;

@@ -1,9 +1,9 @@
 package com.github.dakusui.pcond.ut.equalness;
 
-import com.github.dakusui.pcond.functions.Experimentals;
-import com.github.dakusui.pcond.functions.Functions;
-import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.forms.Experimentals;
+import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.ut.FunctionsTest.MultiFunctionTest.TargetMethodHolder;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.FixMethodOrder;

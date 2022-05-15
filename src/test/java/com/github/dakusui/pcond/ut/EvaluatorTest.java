@@ -2,13 +2,13 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
-import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 import static org.junit.Assert.*;
 
 public class EvaluatorTest extends TestBase {

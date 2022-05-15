@@ -7,7 +7,7 @@ public interface Parameter {
     return new Parameter() {
       @Override
       public String toString() {
-        return "p[0]";
+        return "";
       }
     };
   }

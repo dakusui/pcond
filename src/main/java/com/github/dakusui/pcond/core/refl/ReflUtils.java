@@ -77,12 +77,20 @@ public enum ReflUtils {
    */
   @SuppressWarnings("unchecked")
   public static <R> R invokeMethod(Method method, Object obj, Object[] arguments) {
+    boolean wasAccessible = method.isAccessible();
     try {
+      ////
+      // Issue-42
+      // Without setting accessible, a public method defined in a private class
+      // overriding a public method cannot be invoked.
+      method.setAccessible(true);
       return (R) method.invoke(obj, arguments);
     } catch (IllegalAccessException e) {
       throw new MethodAccessException(format("Method access to '%s' was failed", method), e);
     } catch (InvocationTargetException e) {
       throw new MethodInvocationException(format("Method invocation of '%s' was failed", method), e.getCause());
+    } finally {
+      method.setAccessible(wasAccessible);
     }
   }
 
@@ -234,7 +242,7 @@ public enum ReflUtils {
     try {
       return (R) method.invoke(null, args);
     } catch (IllegalAccessException | InvocationTargetException e) {
-      throw InternalUtils.wrap(
+      throw InternalUtils.executionFailure(
           format("Invoked method:%s threw an exception", formatMethodName(method)),
           e instanceof InvocationTargetException ? e.getCause() : e);
     }

@@ -1,15 +1,15 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.utils.ut.TestBase;
-import junit.framework.AssertionFailedError;
+import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.TestAssertions.assumeThat;
-import static com.github.dakusui.pcond.functions.Predicates.*;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 
 public class TestAssertionsTest extends TestBase {
-  @Test(expected = AssertionFailedError.class)
+  @Test(expected = ComparisonFailure.class)
   public void testAllOf() {
     try {
       assertThat("hello", allOf(startsWith("H"), endsWith("o")));
@@ -19,7 +19,7 @@ public class TestAssertionsTest extends TestBase {
     }
   }
 
-  @Test(expected = AssertionFailedError.class)
+  @Test(expected = ComparisonFailure.class)
   public void testAnyOf() {
     try {
       assertThat("hello", anyOf(startsWith("H"), endsWith("!")));

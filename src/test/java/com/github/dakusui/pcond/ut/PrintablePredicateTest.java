@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.functions.Predicates;
-import com.github.dakusui.pcond.functions.Printables;
+import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -9,11 +9,14 @@ import org.junit.runner.RunWith;
 
 import java.util.function.Predicate;
 
+import static junit.framework.TestCase.assertEquals;
+import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(Enclosed.class)
 public class PrintablePredicateTest {
+  @SuppressWarnings("NewClassNamingConvention")
   public static class LeafPred {
     @Test
     public void test() {
@@ -42,7 +45,7 @@ public class PrintablePredicateTest {
 
   private abstract static class Conj extends TestBase.ForAssertionEnabledVM {
     @Test
-    public void test() {
+    public void examineAllOfWorks() {
       Predicate<?> p1 = create("P", Predicates.isNotNull(), Predicates.isNotNull());
       Predicate<?> p2 = create("P", Predicates.isNotNull(), Predicates.isNotNull());
       Predicate<?> q = create("Q", Predicates.isNotNull(), Predicates.isNotNull());
@@ -75,6 +78,7 @@ public class PrintablePredicateTest {
     abstract <T> Predicate<T> create(Predicate<T> predicate, Predicate<T> predicate1);
   }
 
+  @SuppressWarnings("NewClassNamingConvention")
   public static class And extends Conj {
     @Override
     <T> Predicate<T> create(Predicate<T> predicate1, Predicate<T> predicate2) {
@@ -91,6 +95,7 @@ public class PrintablePredicateTest {
     }
   }
 
+  @SuppressWarnings("NewClassNamingConvention")
   public static class Or extends Conj {
     @Override
     <T> Predicate<T> create(Predicate<T> predicate1, Predicate<T> predicate2) {
@@ -98,6 +103,7 @@ public class PrintablePredicateTest {
     }
   }
 
+  @SuppressWarnings("NewClassNamingConvention")
   public static class Negate extends TestBase.ForAssertionEnabledVM {
     @Test
     public void test() {

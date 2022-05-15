@@ -3,7 +3,7 @@ package com.github.dakusui.pcond.core.context;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
-import com.github.dakusui.pcond.functions.Predicates;
+import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.Arrays;
 import java.util.Collection;
