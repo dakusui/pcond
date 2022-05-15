@@ -29,16 +29,14 @@ public abstract class PrintablePredicate<T> extends Identifiable.Base implements
     return formatter.get();
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public Predicate<T> and(Predicate<? super T> other) {
-    return Predicates.and(this, (Predicate<T>) other);
+    return Predicates.and(this, other);
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public Predicate<T> or(Predicate<? super T> other) {
-    return Predicates.or(this, (Predicate<T>) other);
+    return Predicates.or(this, other);
   }
 
   @Override
@@ -60,5 +58,4 @@ public abstract class PrintablePredicate<T> extends Identifiable.Base implements
     assert !(predicate instanceof PrintablePredicate);
     return predicate;
   }
-
 }

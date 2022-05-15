@@ -40,6 +40,9 @@ public interface Evaluator {
 
   List<Entry> resultEntries();
 
+
+  Evaluator copyEvaluator();
+
   static Evaluator create() {
     return new Impl();
   }
@@ -51,23 +54,32 @@ public interface Evaluator {
     Object              currentResult;
     boolean             currentlyExpectedBooleanValue = true;
 
-    void enter(Entry.Type type, String name, Object input) {
+    public Impl() {
+    }
+
+    void enter(Entry.Type type, Evaluable<?> evaluable, String name, Object input) {
+      if (evaluable.requestExpectationFlip())
+        this.flipCurrentlyExpectedBooleanValue();
+
       Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, toSnapshotIfPossible(input), this.currentlyExpectedBooleanValue);
       onGoingEntries.add(newEntry);
       entries.add(newEntry);
     }
 
-    void leave(Object result, Object form, boolean unexpected) {
+    void leave(Object result, Evaluable<?> evaluable, boolean unexpected) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       Entry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
           current.positionInEntries,
           current.result(
               toSnapshotIfPossible(result),
-              unexpected ? explainExpectationIfPossibleOrNull(form) : null,
-              unexpected ? explainActualInputIfPossibleOrNull(form) : null));
+              unexpected ? explainExpectationIfPossibleOrNull(evaluable) : null,
+              unexpected ? explainActualInputIfPossibleOrNull(evaluable) : null));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult = result;
+      if (evaluable.requestExpectationFlip())
+        this.flipCurrentlyExpectedBooleanValue();
+
     }
 
     void flipCurrentlyExpectedBooleanValue() {
@@ -82,7 +94,7 @@ public interface Evaluator {
       boolean shortcut = conjunction.shortcut();
       for (Evaluable<? super T> each : conjunction.children()) {
         if (i == 0)
-          this.enter(Entry.Type.AND, "&&", value);
+          this.enter(Entry.Type.AND, conjunction, "&&", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (!cur)
@@ -103,7 +115,7 @@ public interface Evaluator {
       boolean shortcut = disjunction.shortcut();
       for (Evaluable<? super T> each : disjunction.children()) {
         if (i == 0)
-          this.enter(Entry.Type.OR, "||", value);
+          this.enter(Entry.Type.OR, disjunction, "||", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (cur)
@@ -118,57 +130,55 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.Negation<T> negation) {
-      this.enter(Entry.Type.NOT, "!", value);
-      this.flipCurrentlyExpectedBooleanValue();
+      this.enter(Entry.Type.NOT, negation, "!", value);
       negation.target().accept(value, this);
-      this.flipCurrentlyExpectedBooleanValue();
       this.leave(!this.<Boolean>resultValue(), negation, false);
     }
 
     @Override
     public <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred) {
-      this.enter(Entry.Type.LEAF, String.format("%s", leafPred), value);
+      this.enter(Entry.Type.LEAF, leafPred, String.format("%s", leafPred), value);
       boolean result = leafPred.predicate().test(value);
       this.leave(result, leafPred, this.currentlyExpectedBooleanValue != result);
     }
 
     @Override
     public <T> void evaluate(T value, Evaluable.Messaged<T> messaged) {
-      this.enter(Entry.Type.MESSAGED, messaged.message(), value);
+      this.enter(Entry.Type.MESSAGED, messaged, messaged.message(), value);
       messaged.target().accept(value, this);
       this.leave(this.<Boolean>resultValue(), messaged, false);
     }
 
     @Override
     public void evaluate(Context context, Evaluable.ContextPred contextPred) {
-      this.enter(Entry.Type.LEAF, String.format("%s", contextPred), context);
+      this.enter(Entry.Type.LEAF, contextPred, String.format("%s", contextPred), context);
       contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
-      this.leave(this.resultValue(), context, false);
+      this.leave(this.resultValue(), contextPred, false);
     }
 
     @SuppressWarnings({ "unchecked" })
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
       this.enter(Entry.Type.TRANSFORM,
+          transformation.mapper(),
           transformation.name()
               .map(v -> "transform:" + v)
-              .orElse("transform"),
-          value);
+              .orElse("transform"), value);
       transformation.mapper().accept(value, this);
+      this.leave(this.resultValue(), transformation.checker(), false);
       this.enter(Entry.Type.CHECK,
+          transformation.checker(),
           transformation.name()
               .map(v -> "check:" + v)
-              .orElse("check"),
-          this.resultValue());
+              .orElse("check"), this.resultValue());
       transformation.checker().accept((R) this.currentResult, this);
-      this.leave(this.resultValue(), transformation.checker(), false);
       this.leave(this.resultValue(), transformation.mapper(), false);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> void evaluate(T value, Evaluable.Func<T> func) {
-      this.enter(Entry.Type.LEAF, String.format("%s", func.head()), value);
+      this.enter(Entry.Type.FUNCTION, func, String.format("%s", func.head()), value);
       Object resultValue = func.head().apply(value);
       this.leave(resultValue, func, false);
       func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(resultValue, this));
@@ -177,7 +187,7 @@ public interface Evaluator {
     @Override
     public <E> void evaluate(Stream<? extends E> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
-      this.enter(Entry.Type.LEAF, String.format("%s", streamPred), value);
+      this.enter(Entry.Type.LEAF, streamPred, String.format("%s", streamPred), value);
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
       // on 'findFirst()'.
       // Although NULL_VALUE is an ordinary Object, not a value of E, this works
@@ -193,7 +203,8 @@ public interface Evaluator {
 
     private <E> Predicate<E> valueChecker(Evaluable.StreamPred<E> streamPred) {
       return e -> {
-        Evaluator evaluator = Evaluator.create();
+        Evaluator evaluator = this.copyEvaluator();
+
         boolean succeeded = false;
         boolean ret = false;
         Object throwable = "<<OUTPUT MISSING>>";
@@ -224,6 +235,14 @@ public interface Evaluator {
     @Override
     public List<Entry> resultEntries() {
       return unmodifiableList(this.entries);
+    }
+
+    @Override
+    public Evaluator copyEvaluator() {
+
+      Impl impl = new Impl();
+      impl.currentlyExpectedBooleanValue = this.currentlyExpectedBooleanValue;
+      return impl;
     }
 
     public void importResultEntries(List<Entry> resultEntries, Object other) {
@@ -298,7 +317,9 @@ public interface Evaluator {
       AND,
       OR,
       NOT,
-      LEAF, MESSAGED,
+      LEAF,
+      FUNCTION,
+      MESSAGED,
     }
 
     static class Finalized extends Entry {

@@ -201,7 +201,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
         entry.level() == 0 ?
             "" :
             format("%" + (entry.level() * 2) + "s", ""),
-        !asList(LEAF, AND, OR, NOT).contains(entry.type()) ?
+        !asList(LEAF, AND, OR, NOT, FUNCTION).contains(entry.type()) ?
             null :
             outputFormatter.get(),
         entry.hasExpectationDetail() ?entry.expectationDetail() : null);

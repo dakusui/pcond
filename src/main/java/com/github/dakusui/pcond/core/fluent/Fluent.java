@@ -11,23 +11,23 @@ public class Fluent<OIN, OUT> {
   }
 
   public StringTransformer<OIN> string() {
-    return new StringTransformer<>(value());
+    return new StringTransformer<>(null, value());
   }
 
   public ObjectTransformer<OIN, OUT> object() {
-    return new ObjectTransformer<>(value());
+    return new ObjectTransformer<>(null, value());
   }
 
   public ObjectTransformer<OIN, OUT> objectOf(OUT value) {
-    return new ObjectTransformer<>(value());
+    return new ObjectTransformer<>(null, value());
   }
 
   public <E> ListTransformer<OIN, E> listOf(E value) {
-    return new ListTransformer<>(value());
+    return new ListTransformer<>(null, value());
   }
 
   public <K, V> ObjectTransformer<OIN, Map<K, V>> mapOf(K key, V value) {
-    return new ObjectTransformer<>(value());
+    return new ObjectTransformer<>(null, value());
   }
 
   public <T> ObjectTransformer<OIN, OUT> instance() {

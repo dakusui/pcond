@@ -1,29 +1,18 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.Verifier;
+import com.github.dakusui.pcond.core.fluent.transformers.extendable.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
 
 import java.util.function.Function;
 
-import static java.util.Objects.requireNonNull;
-
-public class ObjectTransformer<OIN, COUT> extends Transformer<ObjectTransformer<OIN, COUT>, OIN, COUT> {
+public class ObjectTransformer<OIN, OUT> extends AbstractObjectTransformer<ObjectTransformer<OIN, OUT>, OIN, OUT> {
 
   /**
-   *
+   * @param parent
+   * @param function
    */
-  public ObjectTransformer(Function<? super OIN, COUT> function) {
-    super(function);
-  }
-
-  @Override
-  public ObjectVerifier<OIN, COUT> then() {
-    return then(Function.identity());
-  }
-
-  @Override
-  public ObjectVerifier<OIN, COUT> then(Function<COUT, COUT> converter) {
-    return thenAsObject(converter);
+  public <IN> ObjectTransformer(Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
+    super(parent, function);
   }
 }

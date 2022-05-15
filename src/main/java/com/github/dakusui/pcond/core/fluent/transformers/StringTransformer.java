@@ -9,11 +9,14 @@ import com.github.dakusui.pcond.forms.Printables;
 import java.util.function.Function;
 
 public class StringTransformer<OIN> extends Transformer<StringTransformer<OIN>, OIN, String> {
+
+
   /**
-   * @param chain
+   * @param parent
+   * @param function
    */
-  public StringTransformer(Function<OIN, ? extends String> chain) {
-    super(chain);
+  public <IN> StringTransformer(Transformer<?, OIN, IN> parent, Function<? super IN, ? extends String> function) {
+    super(parent, function);
   }
 
   public StringTransformer<OIN> substring(int begin) {

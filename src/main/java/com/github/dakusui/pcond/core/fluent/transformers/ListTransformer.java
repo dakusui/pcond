@@ -11,12 +11,12 @@ import java.util.function.Function;
 import static java.util.Objects.requireNonNull;
 
 public class ListTransformer<OIN, E> extends Transformer<ListTransformer<OIN, E>, OIN, List<E>> {
-
   /**
-   * @param function A function that transforms
+   * @param parent
+   * @param function
    */
-  public ListTransformer(Function<? super OIN, ? extends List<E>> function) {
-    super(function);
+  public <IN> ListTransformer(Transformer<?, OIN, IN> parent, Function<? super IN, ? extends List<E>> function) {
+    super(parent, function);
   }
 
   @Override

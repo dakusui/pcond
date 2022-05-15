@@ -15,6 +15,7 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
   private final Function<? super T, ?>           head;
   private final Evaluable<?>                     tail;
   private final Supplier<String>                 formatter;
+  private final Function<?, R>                   tailAsFunction;
 
   protected PrintableFunction(Object creator, List<Object> args, Supplier<String> s, Function<? super T, ? extends R> function, Function<? super T, ?> head, Evaluable<?> tail) {
     super(creator, args);
@@ -22,6 +23,7 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
     this.function = requireNonPrintableFunction(unwrap(Objects.requireNonNull(function)));
     this.head = head != null ? head : this;
     this.tail = tail;
+    this.tailAsFunction = (Function<?, R>) tail;
   }
 
   protected PrintableFunction(Object creator, List<Object> args, Supplier<String> s, Function<? super T, ? extends R> function) {
@@ -42,7 +44,8 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
   @Override
   public <V> Function<T, V> andThen(Function<? super R, ? extends V> after) {
     Objects.requireNonNull(after);
-    return PrintableFunctionFactory.<T, R, V>compose(this, after);
+    Function f = this.tailAsFunction == null ? after : PrintableFunctionFactory.compose((Function)this.tailAsFunction, after);
+    return PrintableFunctionFactory.compose(this.head, f);
   }
 
   @Override

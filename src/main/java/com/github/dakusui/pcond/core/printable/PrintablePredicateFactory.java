@@ -186,7 +186,10 @@ public enum PrintablePredicateFactory {
         (args) -> (s) -> ((String) s).endsWith((String) args.get(0))),
     EQUALS_IGNORE_CASE(
         (args) -> () -> format("equalsIgnoreCase[%s]", formatObject(args.get(0))),
-        (args) -> (s) -> ((String) s).equalsIgnoreCase((String) args.get(0))),
+        (args) -> (s) -> {
+          System.out.println("equalsIgnoreCase");
+          return ((String) s).equalsIgnoreCase((String) args.get(0));
+        }),
     OBJECT_IS_SAME_AS(
         arg -> () -> format("==[%s]", formatObject(arg.get(0))),
         args -> v -> v == args.get(0)),
@@ -481,10 +484,16 @@ public enum PrintablePredicateFactory {
           true);
     }
 
+    @Override
+    public boolean requestExpectationFlip() {
+      return true;
+    }
+
     public static <E> StreamPredicate<E> create(Predicate<E> predicate) {
-      return new NoneMatch<>(
+      return new NoneMatch<E>(
           predicate
-      );
+      ) {
+      };
     }
   }
 

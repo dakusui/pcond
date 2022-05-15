@@ -5,6 +5,7 @@ import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
+import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static java.util.Objects.requireNonNull;
+import static com.github.dakusui.pcond.forms.Functions.parameter;
 
 public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
   private final Function<? super OIN, ? extends T> function;
@@ -21,17 +22,6 @@ public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
   public Verifier(Function<? super OIN, ? extends T> function) {
     this.function = function;
     this.predicate = null;
-  }
-
-  /**
-   * Use this method, when compiler is not able to figure out intended intermediate type.
-   *
-   * @param <NEW_IM> An intermediate type explicitly specified.
-   * @return This object cast by the intermediate type
-   */
-  @SuppressWarnings("unchecked")
-  public <NEW_IM, BB extends Verifier<BB, OIN, NEW_IM>> BB into(Class<NEW_IM> klass) {
-    return (BB) this;
   }
 
   @SafeVarargs
@@ -108,4 +98,52 @@ public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
   public <AS> Predicate<AS> verify() {
     return (Predicate<AS>) build();
   }
+
+  ////
+  // BEGIN: Methods for java.lang.Object come here.
+  void method() {
+    Predicates.isNotNull();
+    Predicates.alwaysTrue();
+    Predicates.isNull();
+    Predicates.isEqualTo(null);
+    Predicates.isSameReferenceAs(null);
+    Predicates.isInstanceOf(null);
+    Predicates.callp(null);
+  }
+
+  public V isNotNull() {
+    return this.predicate(Predicates.isNotNull());
+  }
+
+  public V isNull() {
+    return this.predicate(Predicates.isNull());
+  }
+
+  /**
+   * Checks the object with an argument if they are "equal", using `equalTo` method.
+   *
+   * @return the updated object.
+   */
+  public V isEqualTo(Object anotherObject) {
+    return this.predicate(Predicates.isEqualTo(anotherObject));
+  }
+
+  public V isSameReferenceAs(Object anotherObject) {
+    return this.predicate(Predicates.isSameReferenceAs(anotherObject));
+  }
+
+  public V isInstanceOf(Class<?> klass) {
+    return this.predicate(Predicates.isInstanceOf(klass));
+  }
+
+  public V invoke(String methodName, Object... args) {
+    return this.predicate(Predicates.callp(MethodQuery.instanceMethod(parameter(), methodName, args)));
+  }
+
+  public V invokeStatic(Class<?> klass, String methodName, Object... args) {
+    return this.predicate(Predicates.callp(MethodQuery.classMethod(klass, methodName, args)));
+  }
+
+  // END: Methods for java.lang.Object come here.
+  ////
 }

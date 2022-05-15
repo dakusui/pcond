@@ -1,10 +1,18 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Fluents;
+import com.github.dakusui.pcond.core.fluent.Transformer;
+import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.extendable.AbstractObjectTransformer;
+import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
+
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.Validations.validate;
@@ -24,7 +32,48 @@ public class FluentsTest extends TestBase {
             .with(isEqualTo("returnValueFromParentMethod")).build());
   }
 
-  @Test(expected = TestException.class)
+  class ChildTransformer<OIN> extends AbstractObjectTransformer<ChildTransformer<OIN>, OIN, Child> {
+
+    /**
+     * @param parent
+     * @param function
+     */
+    public <IN> ChildTransformer(Transformer<?, OIN, IN> parent, Function<? super IN, ? extends Child> function) {
+      super(parent, function);
+    }
+
+    public StringTransformer<OIN> childMethod() {
+      return this.transformToString(Printables.function("childMethod", Child::childMethod));
+    }
+  }
+  @Test
+  public void whenPassingValidation_thenPasses$2() {
+    assertThat(
+        new Parent(),
+        when((Parent) value())
+            .<Child, ChildTransformer<Parent>>transform(Printables.function("parentMethod2", Parent::parentMethod2), ChildTransformer::new)
+            .childMethod()
+            .then()
+            .with(isEqualTo("returnValueFromParentMethod")).build());
+  }
+
+  @Test
+  public void test4() {
+    assertThat(
+        "hello",
+        not(equalsIgnoreCase("HELLO"))
+    );
+  }
+
+  @Test
+  public void expectationFlipping() {
+    assertThat(
+        Stream.of("hello"),
+        noneMatch(equalsIgnoreCase("HELLO"))
+    );
+  }
+
+    @Test(expected = TestException.class)
   public void whenValidationWithIntentionallyFailingPredicate_thenExceptionThrown$2() {
     try {
       validate(
