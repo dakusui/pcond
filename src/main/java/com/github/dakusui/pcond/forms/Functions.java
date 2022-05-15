@@ -39,6 +39,7 @@ public enum Functions {
 
   /**
    * Returns a function that gives a string representation of a object given to it.
+   * Internally, the returned function calls `toString` method on a given object.
    *
    * @param <E> The type of the object
    * @return The function.

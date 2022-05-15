@@ -4,15 +4,18 @@ import com.github.dakusui.pcond.TestAssertions;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
+import org.junit.ComparisonFailure;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
@@ -329,6 +332,39 @@ public class PredicatesTest {
                               .andThen(Functions.findString("-"))))
                       .check(Predicates.isNotNull()))
               .test("hello aPattern, world, gallia est omnis divisa, quarum unum incolunt Belgae,  nextPattern!!!!!"));
+    }
+  }
+
+  public static class FindStringsTest extends TestBase {
+    @Test(expected = ComparisonFailure.class)
+    public void findSubstringsTest() {
+      String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
+      try {
+        TestAssertions.assertThat(text, Predicates.findSubstrings("Gallia", "quarum", "Belgium", "nostra"));
+      } catch (ComparisonFailure e) {
+        e.printStackTrace();
+        throw e;
+      }
+    }
+
+    @Test(expected = ComparisonFailure.class)
+    public void findRegexesTest() {
+      String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
+      try {
+        TestAssertions.assertThat(text, Predicates.findRegexes("Gall.a", "quar.m", "Belgium", "nostr(um|a)"));
+      } catch (ComparisonFailure e) {
+        e.printStackTrace();
+        throw e;
+      }
+    }
+
+    @Test(expected = ComparisonFailure.class)
+    public void findElementTest() {
+      List<String> list = asList("Hello", "world", "", "everyone", "quick", "brown", "fox", "runs", "forever");
+      TestAssertions.assertThat(list,
+          Predicates.findElements(
+              Predicates.isEqualTo("world"),
+              Predicates.isEqualTo("cat"), Predicates.isEqualTo("organization"), Predicates.isNotNull(), Predicates.isEqualTo("fox"), Predicates.isEqualTo("world")));
     }
   }
 }

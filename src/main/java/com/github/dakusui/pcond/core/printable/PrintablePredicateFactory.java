@@ -3,8 +3,6 @@ package com.github.dakusui.pcond.core.printable;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
-import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.pcond.internals.InternalChecks;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.*;
@@ -186,7 +184,10 @@ public enum PrintablePredicateFactory {
         (args) -> (s) -> ((String) s).endsWith((String) args.get(0))),
     EQUALS_IGNORE_CASE(
         (args) -> () -> format("equalsIgnoreCase[%s]", formatObject(args.get(0))),
-        (args) -> (s) -> ((String) s).equalsIgnoreCase((String) args.get(0))),
+        (args) -> (s) -> {
+          System.out.println("equalsIgnoreCase");
+          return ((String) s).equalsIgnoreCase((String) args.get(0));
+        }),
     OBJECT_IS_SAME_AS(
         arg -> () -> format("==[%s]", formatObject(arg.get(0))),
         args -> v -> v == args.get(0)),
@@ -264,7 +265,6 @@ public enum PrintablePredicateFactory {
   }
 
   static class Messaged<T> extends PrintablePredicate<T> implements Evaluable.Messaged<T> {
-    //private final String               message;
     private final Evaluable<? super T> target;
     private final Predicate<T>         rawPredicate;
 
@@ -359,19 +359,21 @@ public enum PrintablePredicateFactory {
   public static class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Evaluable.Transformation<O, P> {
     private final Evaluable<? super P> checker;
     private final Evaluable<? super O> mapper;
-    private final String               name;
+    private final String               mapperName;
+    private final String               checkerName;
 
-    public TransformingPredicate(String name, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
+    public TransformingPredicate(String mapperName, String checkerName, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
       super(
           TransformingPredicate.class,
           asList(predicate, function),
-          () -> name == null ?
+          () -> mapperName == null ?
               format("%s %s", function, predicate) :
-              format("%s(%s %s)", name, function, predicate),
+              format("%s(%s %s)", mapperName, function, predicate),
           v -> predicate.test(function.apply(v)));
-      this.name = name;
-      this.checker = toEvaluableIfNecessary(predicate);
       this.mapper = toEvaluableIfNecessary(function);
+      this.mapperName = mapperName;
+      this.checker = toEvaluableIfNecessary(predicate);
+      this.checkerName = checkerName;
     }
 
     @Override
@@ -385,8 +387,13 @@ public enum PrintablePredicateFactory {
     }
 
     @Override
-    public Optional<String> name() {
-      return Optional.ofNullable(this.name);
+    public Optional<String> mapperName() {
+      return Optional.ofNullable(this.mapperName);
+    }
+
+    @Override
+    public Optional<String> checkerName() {
+      return Optional.ofNullable(this.checkerName);
     }
 
     /**
@@ -409,99 +416,11 @@ public enum PrintablePredicateFactory {
       TransformingPredicate<P, O> check(Predicate<? super P> cond);
 
       static <P, O> Factory<P, O> create(Function<O, P> function) {
-        return create(null, function);
+        return create(null, null, function);
       }
 
-      static <P, O> Factory<P, O> create(String name, Function<O, P> function) {
-        return cond -> new TransformingPredicate<>(name, toPrintablePredicate(cond), function);
-      }
-    }
-
-    public static class Builder<IN, IM> {
-      private String           name;
-      private Function<IN, IM> function;
-      private Predicate<IM>    predicate;
-
-      public Builder() {
-      }
-
-      public Builder(String name) {
-        this.name(name);
-      }
-
-      public Builder<IN, IM> name(String name) {
-        this.name = name;
-        return this;
-      }
-
-
-      @SuppressWarnings("unchecked")
-      public <NIN> Builder<NIN, IM> forValueOf(@SuppressWarnings("unused") Class<NIN> forClass) {
-        return (Builder<NIN, IM>) this;
-      }
-
-      @SuppressWarnings("unchecked")
-      public Builder<String, IM> forString() {
-        return (Builder<String, IM>) this;
-      }
-
-      /**
-       * @param elementClass A placeholder parameter, not accessed in this method.
-       *                     Do not remove.
-       * @param <E>          A type of element in a list.
-       * @return This object cast accordingly.
-       */
-      @SuppressWarnings("unchecked")
-      public <E> Builder<List<E>, IM> forListOf(@SuppressWarnings("unused") Class<E> elementClass) {
-        return (Builder<List<E>, IM>) this;
-      }
-
-      @SuppressWarnings("unchecked")
-      public <NIM> Builder<IN, NIM> transformBy(Function<IN, NIM> func) {
-        return function((Function<IN, IM>) func);
-      }
-
-      @SuppressWarnings("unchecked")
-      public <NIM> Builder<IN, NIM> andThen(Function<IM, NIM> func) {
-        return function((Function<IN, IM>) this.function.andThen(func));
-      }
-
-      @SuppressWarnings("unchecked")
-      private <NIM> Builder<IN, NIM> function(Function<IN, IM> func) {
-        this.function = func;
-        //return Factory.create(Printables.function(this.name, func));
-        return (Builder<IN, NIM>) this;
-      }
-
-
-      /**
-       * @param intoClass A placeholder parameter, not accessed in this method.
-       *                  Do not remove.
-       * @param <NIM>     An intermediate type evaluated by the predicate part.
-       * @return This object cast.
-       */
-      @SuppressWarnings("unchecked")
-      public <NIM> Builder<IN, NIM> into(@SuppressWarnings("unused") Class<NIM> intoClass) {
-        return (Builder<IN, NIM>) this;
-      }
-
-      public Predicate<IN> thenVerifyWith(Predicate<IM> predicate) {
-        this.predicate = predicate;
-        return build();
-      }
-
-      public Predicate<IN> build() {
-        InternalChecks.requireState(this.function, Objects::nonNull, () -> "'function' needs to be set first. Ensure 'transformBy' is called.");
-        InternalChecks.requireState(this.predicate, Objects::nonNull, () -> "'predicate' needs to be set first. Ensure 'thenVerifyWith' is called.");
-        return TransformingPredicate.Factory
-            .create(makePrintableIfFormatterIsAvailable(this.function))
-            .check(this.predicate);
-      }
-
-      private <I, O> Function<I, O> makePrintableIfFormatterIsAvailable(Function<I, O> func) {
-        return this.name != null ?
-            Printables.function(name, func) :
-            func;
+      static <P, O> Factory<P, O> create(String mapperName, String checkerName, Function<O, P> function) {
+        return cond -> new TransformingPredicate<>(mapperName, checkerName, toPrintablePredicate(cond), function);
       }
     }
   }
@@ -565,15 +484,21 @@ public enum PrintablePredicateFactory {
           singletonList(predicate),
           () -> format("noneMatch[%s]", predicate),
           (Stream<E> stream) -> stream.noneMatch(predicate),
-          toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
+          toEvaluableIfNecessary((Predicate<? super Stream<E>>) predicate),
           true,
           true);
     }
 
-    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
-      return new NoneMatch<>(
+    @Override
+    public boolean requestExpectationFlip() {
+      return true;
+    }
+
+    public static <E> StreamPredicate<E> create(Predicate<E> predicate) {
+      return new NoneMatch<E>(
           predicate
-      );
+      ) {
+      };
     }
   }
 
@@ -585,7 +510,7 @@ public enum PrintablePredicateFactory {
           singletonList(predicate),
           () -> format("anyMatch[%s]", predicate),
           (Stream<E> stream) -> stream.anyMatch(PrintablePredicate.unwrap(predicate)),
-          toEvaluableIfNecessary((Predicate<? super Stream<? extends E>>) predicate),
+          toEvaluableIfNecessary((Predicate<? super Stream<E>>) predicate),
           false,
           true);
     }

@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.ut.providers;
 import com.github.dakusui.pcond.Pcond;
 import com.github.dakusui.pcond.provider.AssertionProvider;
 import com.github.dakusui.pcond.provider.impls.JUnit4AssertionProvider;
-import com.github.dakusui.pcond.provider.impls.Opentest4jAssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
@@ -16,14 +15,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AssertionProviderTest extends TestBase {
   public static class TestAssertionProvider implements AssertionProvider<RuntimeException> {
-    private final Configuration configuration = new Configuration() {
-    };
+    private final Configuration<RuntimeException> configuration = message -> new RuntimeException();
 
     public TestAssertionProvider(Properties properties) {
     }
 
     @Override
-    public Configuration configuration() {
+    public Configuration<RuntimeException> configuration() {
       return this.configuration;
     }
 

@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.TestAssertions;
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
@@ -9,6 +10,7 @@ import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
+import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import java.util.List;
@@ -25,6 +27,7 @@ import static com.github.dakusui.pcond.ut.ExperimentalsTest.Utils.areEqual;
 import static com.github.dakusui.pcond.ut.ExperimentalsTest.Utils.stringEndsWith;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
@@ -44,6 +47,14 @@ public class ExperimentalsTest extends TestBase {
     require(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(toContextPredicate(stringEndsWith()))));
+  }
+
+  @Test(expected = ComparisonFailure.class)
+  public void helloError() {
+    TestAssertions.assertThat(
+        singletonList("hello"),
+        transform(stream().andThen(nest(singletonList("o"))))
+            .check(noneMatch(toContextPredicate(stringEndsWith()))));
   }
 
   @Test

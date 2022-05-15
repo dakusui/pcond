@@ -10,6 +10,9 @@ import java.util.stream.Stream;
 
 public interface Evaluable<T> {
   void accept(T value, Evaluator evaluator);
+  default boolean requestExpectationFlip() {
+    return false;
+  }
 
   interface Pred<T> extends Evaluable<T> {
   }
@@ -40,6 +43,11 @@ public interface Evaluable<T> {
     }
 
     Evaluable<? super T> target();
+
+    @Override
+    default boolean requestExpectationFlip() {
+      return true;
+    }
   }
 
   interface LeafPred<T> extends Pred<T> {
@@ -96,7 +104,8 @@ public interface Evaluable<T> {
 
     Evaluable<? super R> checker();
 
-    Optional<String> name();
+    Optional<String> mapperName();
+    Optional<String> checkerName();
   }
 
   interface Func<T> extends Evaluable<T> {
