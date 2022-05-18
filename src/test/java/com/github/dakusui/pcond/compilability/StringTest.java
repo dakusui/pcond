@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.compilability;
 
 import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -9,7 +10,7 @@ import java.util.Map;
 import static com.github.dakusui.pcond.Preconditions.requireArgument;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 
-public class StringTest {
+public class StringTest extends TestBase {
   @Test(expected = IllegalArgumentException.class)
   public void testMatchesRegex() {
     String var = "hello";
