@@ -410,7 +410,7 @@ public interface Evaluator {
 
   /**
    * If an input or an output value object of a form implements this interface,
-   * The value returned by {@link this#snapshot()} method is stored in a {@link Evaluator.Entry}
+   * The value returned by `snapshot` method is stored in a {@link Evaluator.Entry}
    * record, instead of the value itself.
    */
   interface Snapshottable {

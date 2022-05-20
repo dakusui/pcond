@@ -13,6 +13,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -85,7 +86,7 @@ public abstract class Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT
   @SuppressWarnings("unchecked")
   private static <I, M, O> Function<I, O> chainFunctions(Function<I, ? extends M> func, Function<? super M, O> after) {
     if (func == null)
-      // In case, func == null, I will become the same as M.
+      // In case, func == null, <I> will become the same as M.
       // So, this cast is safe.
       return (Function<I, O>) after;
     return func.andThen(after);
@@ -110,53 +111,107 @@ public abstract class Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT
 
   public abstract Verifier<?, OIN, OUT> then(Function<OUT, OUT> converter);
 
+  @SuppressWarnings("unchecked")
+  public <NOUT> ObjectVerifier<OIN, NOUT> thenAsObject() {
+    return this.thenAsObject(Printables.function("treatAsObject[NOUT]", v -> (NOUT) v));
+  }
+
   public <NOUT> ObjectVerifier<OIN, NOUT> thenAsObject(Function<OUT, NOUT> function) {
-    return new ObjectVerifier<>(transformerName, requireNonNull(this.function).andThen(requireNonNull(function)));
+    return new ObjectVerifier<>(transformerName, chainFunctions(this.function, requireNonNull(function)));
   }
 
   public StringVerifier<OIN> thenAsString() {
-    return this.thenAsString(Functions.stringify());
+    return this.thenAsString(Printables.function("treatAsString", v -> (String) v));
   }
 
   public StringVerifier<OIN> thenAsString(Function<OUT, String> toString) {
     requireFunctionIsSet("asString()");
-    return new StringVerifier<>(transformerName, this.function.andThen(toString));
+    return new StringVerifier<>(transformerName, chainFunctions(this.function, toString));
   }
 
   public <E> ListVerifier<OIN, E> thenAsList(Function<OUT, List<E>> converter) {
     requireFunctionIsSet("asList(Function<OUT, List<E>)");
-    return new ListVerifier<>(transformerName, this.function.andThen(converter));
+    return new ListVerifier<>(transformerName, chainFunctions(this.function, converter));
+  }
+
+  /**
+   * You should only use this method  when you know that the `OIN` is already an
+   * instance of {@link Integer}.
+   *
+   * @return An `IntegerVerifier` object.
+   */
+  public IntegerVerifier<OIN> thenAsInteger() {
+    return this.thenAsInteger(Printables.function("treatAsInteger", v -> (Integer) v));
   }
 
   public IntegerVerifier<OIN> thenAsInteger(Function<OUT, Integer> converter) {
     requireFunctionIsSet("asInteger(Function<OUT, Integer>)");
-    return new IntegerVerifier<>(transformerName, this.function.andThen(converter));
+    return new IntegerVerifier<>(transformerName, chainFunctions(this.function, converter));
+  }
+
+  /**
+   * You should only use this method  when you know that the `OIN` is already an
+   * instance of {@link Integer}.
+   *
+   * @return An `IntegerVerifier` object.
+   */
+  @SuppressWarnings("unchecked")
+  public <E> StreamVerifier<OIN, E> thenAsStream() {
+    return this.thenAsStream(Printables.function("treatAsStream", v -> (Stream<E>) v));
   }
 
   public <E> StreamVerifier<OIN, E> thenAsStream(Function<OUT, Stream<E>> converter) {
     requireFunctionIsSet("asStream(Function<OUT, Stream<E>)");
-    return new StreamVerifier<>(transformerName, this.function.andThen(converter));
+    return new StreamVerifier<>(transformerName, chainFunctions(this.function, converter));
   }
 
+  @SuppressWarnings("unchecked")
+  public <NOUT> ObjectTransformer<OIN, NOUT> asObject() {
+    return asObject(Printables.function("treatAs[NOUT]", v -> (NOUT) v));
+  }
 
   public <NOUT> ObjectTransformer<OIN, NOUT> asObject(Function<OUT, NOUT> function) {
     return new ObjectTransformer<>(null, this, function);
   }
 
   public StringTransformer<OIN> asString() {
-    return new StringTransformer<>(null, this, Functions.stringify());
+    return asString(Printables.function("treatAsString", v -> (String) v));
   }
 
   public StringTransformer<OIN> asString(Function<OUT, String> toString) {
-    return new StringTransformer<OIN>(null, this, toString);
+    return new StringTransformer<>(null, this, toString);
+  }
+
+  @SuppressWarnings({ "unchecked", "RedundantCast" })
+  public <E> ListTransformer<OIN, E> asList() {
+    return asListOf((E) value());
+  }
+
+  @SuppressWarnings("unchecked")
+  public <E> ListTransformer<OIN, E> asListOf(E value) {
+    return asList(Printables.function("treatAsList", v -> (List<E>) v));
+  }
+
+  @SuppressWarnings({ "unchecked", "RedundantCast" })
+  public <E> ListTransformer<OIN, E> asListOfClass(Class<E> klass) {
+    return asListOf((E) value());
   }
 
   public <E> ListTransformer<OIN, E> asList(Function<OUT, List<E>> converter) {
     return new ListTransformer<>(null, this, converter);
   }
 
+  public IntegerTransformer<OIN> asInteger() {
+    return asInteger(Printables.function("treatAsInteger", v -> (Integer) v));
+  }
+
   public IntegerTransformer<OIN> asInteger(Function<OUT, Integer> converter) {
     return new IntegerTransformer<>(null, this, converter);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <E> StreamTransformer<OIN, E> asStream() {
+    return asStream(Printables.function("treatAsStream", v -> (Stream<E>) v));
   }
 
   public <E> StreamTransformer<OIN, E> asStream(Function<OUT, Stream<E>> converter) {

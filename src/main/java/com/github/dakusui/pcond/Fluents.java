@@ -7,16 +7,21 @@ import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
 
 import java.util.List;
 
+import static java.util.Arrays.asList;
+
 public enum Fluents {
   ;
 
+  public static ObjectTransformer<Object, Object> when() {
+    return when(value());
+  }
 
   public static <T> ObjectTransformer<T, T> when(T value) {
     return whenValueOf(value);
   }
 
   /**
-   * Use the value returned from {@link this#value()} as the argument for this
+   * Use the value returned from `value()` as the argument for this
    * method as a place-holder for the sake of readability.
    *
    * @param value A value place-holder.
@@ -41,10 +46,26 @@ public enum Fluents {
     return fluent((E) value()).string("WHEN");
   }
 
+  public static <T> ObjectTransformer<T, T> whenValueAt(int index) {
+    return whenValueAt(index, value());
+  }
+  @SuppressWarnings("unchecked")
+  public static <T> ObjectTransformer<T, T> whenValueAt(int index, T value) {
+    return (ObjectTransformer<T, T>) whenListOf(value()).elementAt(index).castTo((T) value);
+  }
+
+  public static <T> ObjectTransformer<T, T> asValueAt(int index) {
+    return asValueAt(index, value());
+  }
+  @SuppressWarnings("unchecked")
+  public static <T> ObjectTransformer<T, T> asValueAt(int index, T value) {
+    return (ObjectTransformer<T, T>) asListOf(value()).elementAt(index).castTo((T) value);
+  }
+
   /**
    * Use this method inside "when" clause.
    *
-   * Use the value returned from {@link this#value()} as the argument for this
+   * Use the value returned from `value()` as the argument for this
    * method as a place-holder for the sake of readability.
    *
    * [source]
@@ -106,4 +127,9 @@ public enum Fluents {
   public static <IN, OUT> Fluent<IN, OUT> fluent() {
     return new Fluent<>();
   }
+
+  public static List<?> list(Object... args) {
+    return asList(args);
+  }
+
 }

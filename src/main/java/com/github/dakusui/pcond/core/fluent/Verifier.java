@@ -103,7 +103,7 @@ public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
   }
 
   /**
-   * A synonym of {@link this#build()} method.
+   * A synonym of `build()` method.
    *
    * @return A predicate of `AS` built from this object.
    */

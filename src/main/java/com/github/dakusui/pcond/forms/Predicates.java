@@ -386,7 +386,7 @@ public enum Predicates {
 
   @SuppressWarnings("unchecked")
   @SafeVarargs
-  public static <E> Predicate<List<E>> findElements(Predicate<E>... predicates) {
+  public static <E> Predicate<List<E>> findElements(Predicate<? super E>... predicates) {
     class CursoredList<EE> implements Evaluator.Snapshottable {
       int position;
       final List<EE> originalList;
@@ -404,7 +404,7 @@ public enum Predicates {
         return this.currentList();
       }
     }
-    Function<Predicate<E>, Predicate<CursoredList<E>>> predicatePredicateFunction = (Predicate<E> p) -> (Predicate<CursoredList<E>>) cursoredList -> {
+    Function<Predicate<? super E>, Predicate<CursoredList<E>>> predicatePredicateFunction = (Predicate<? super E> p) -> (Predicate<CursoredList<E>>) cursoredList -> {
       AtomicInteger j = new AtomicInteger(0);
       if (cursoredList.currentList().stream()
           .peek((E each) -> j.getAndIncrement())
@@ -420,7 +420,7 @@ public enum Predicates {
         .then()
         .with(allOf(Stream.concat(
                 Arrays.stream(predicates)
-                    .map((Predicate<E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
+                    .map((Predicate<? super E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
                 Stream.of(predicate("(end)", eCursoredList -> true)))
             .toArray(Predicate[]::new)))
         .verify();

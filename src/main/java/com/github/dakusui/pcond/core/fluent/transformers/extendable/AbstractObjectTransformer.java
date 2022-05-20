@@ -6,7 +6,7 @@ import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.function.Function;
 
-public class AbstractObjectTransformer<TX extends AbstractObjectTransformer<TX, OIN, OUT>, OIN, OUT>
+public abstract class AbstractObjectTransformer<TX extends AbstractObjectTransformer<TX, OIN, OUT>, OIN, OUT>
     extends Transformer<TX, OIN, OUT> {
 
   /**
@@ -26,5 +26,10 @@ public class AbstractObjectTransformer<TX extends AbstractObjectTransformer<TX, 
   @Override
   public ObjectVerifier<OIN, OUT> then(Function<OUT, OUT> converter) {
     return thenAsObject(converter);
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T, RTX extends AbstractObjectTransformer<RTX, OIN, T>> RTX castTo(T value) {
+    return (RTX) this;
   }
 }
