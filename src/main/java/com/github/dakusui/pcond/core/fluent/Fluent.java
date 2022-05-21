@@ -3,8 +3,7 @@ package com.github.dakusui.pcond.core.fluent;
 import com.github.dakusui.pcond.core.fluent.transformers.ListTransformer;
 import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
-
-import java.util.Map;
+import com.github.dakusui.pcond.forms.Functions;
 
 public class Fluent<OIN, OUT> {
   public Fluent() {
@@ -27,6 +26,6 @@ public class Fluent<OIN, OUT> {
   }
 
   public static <T> T value() {
-    return null;
+    return Functions.value();
   }
 }

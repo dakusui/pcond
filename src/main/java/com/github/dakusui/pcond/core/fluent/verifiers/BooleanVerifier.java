@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class BooleanVerifier<OIN> extends Verifier<BooleanVerifier<OIN>, OIN, Boolean> implements Matcher.ForBoolean<OIN> {
-  protected BooleanVerifier(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate) {
+  public BooleanVerifier(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate) {
     super(transformerName, function, predicate);
   }
 

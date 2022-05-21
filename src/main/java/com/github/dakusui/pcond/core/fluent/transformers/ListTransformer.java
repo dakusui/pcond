@@ -22,12 +22,7 @@ public class ListTransformer<OIN, E>
 
   @Override
   public ListVerifier<OIN, E> then() {
-    return then(Functions.identity());
-  }
-
-  @Override
-  public ListVerifier<OIN, E> then(Function<List<E>, List<E>> converter) {
-    return thenAsList(converter);
+    return new ListVerifier<>(this.transformerName(), this.function(), dummyPredicate());
   }
 
   public ObjectTransformer<OIN, E> elementAt(int i) {
@@ -36,12 +31,5 @@ public class ListTransformer<OIN, E>
 
   public IntegerTransformer<OIN> size() {
     return this.transformToInteger(Functions.size());
-  }
-
-
-  void method() {
-    Functions.stream();
-    Functions.elementAt(0);
-    Functions.size();
   }
 }

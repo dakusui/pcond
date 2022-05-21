@@ -1,15 +1,12 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.core.fluent.verifiers.IntegerVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
+import com.github.dakusui.pcond.core.fluent.verifiers.*;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.forms.Printables;
 
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -17,7 +14,9 @@ import static com.github.dakusui.pcond.core.fluent.Transformer.dummyPredicate;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 
 public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
-    extends PrintablePredicateFactory.TransformingPredicate<T, OIN> {
+    extends PrintablePredicateFactory.TransformingPredicate<T, OIN>
+    implements IntoPhraseFactory.ForVerifier<OIN, T>,
+    AsPhraseFactory.ForVerifier<OIN> {
   protected final String                             transformerName;
   private final   Function<? super OIN, ? extends T> function;
   private         Predicate<? super T>               predicate;
@@ -29,6 +28,38 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     this.predicate = predicate; // this field can be null, when the first verifier starts building.
   }
 
+  protected V predicate(Predicate<? super T> predicate) {
+    if (this.predicate == null)
+      this.predicate = predicate;
+    else
+      this.predicate = Predicates.and(this.predicate, predicate);
+    return this.create();
+  }
+
+  protected Function<? super OIN, ? extends T> function() {
+    return this.function;
+  }
+
+  protected Predicate<? super T> predicate() {
+    return this.predicate;
+  }
+
+
+  public V testPredicate(Predicate<? super T> predicate) {
+    return predicate(predicate);
+  }
+
+  public Predicate<? super OIN> build() {
+    return PrintablePredicateFactory.TransformingPredicate.Factory
+        .create(
+            this.transformerName,
+            this.transformerName != null ?
+                "THEN" :
+                "VERIFY",
+            this.function)
+        .check(this.predicate);
+  }
+  // BEGIN: ------------------------- High -level methods
   @SafeVarargs
   public final V allOf(Predicate<? super T>... predicates) {
     return (V) with(Predicates.allOf(predicates));
@@ -48,64 +79,6 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   public final V or(Predicate<? super T>... predicates) {
     return with(Predicates.or(predicates));
   }
-
-  public V testPredicate(Predicate<? super T> predicate) {
-    return predicate(predicate);
-  }
-
-  public V with(Predicate<? super T> predicate) {
-    return predicate(predicate);
-  }
-
-  protected V predicate(Predicate<? super T> predicate) {
-    if (this.predicate == null)
-      this.predicate = predicate;
-    else
-      this.predicate = Predicates.and(this.predicate, predicate);
-    return this.create();
-  }
-
-  abstract protected V create();
-
-  /**
-   * Use this method only when you are sure the type you are handling is of `AS`.
-   *
-   * @param valueType A class of the value you are verifying.
-   * @param <AS>      Type to check with your verifier.
-   * @return This object
-   */
-  public <AS>
-  ObjectVerifier<OIN, AS> asInstanceOf(Class<AS> valueType) {
-    return new ObjectVerifier<>(transformerName, Functions.cast(valueType), dummyPredicate());
-  }
-
-  public StringVerifier<OIN> asString() {
-    return new StringVerifier<>(transformerName, this.function.andThen(Functions.stringify()), dummyPredicate());
-  }
-
-  public IntegerVerifier<OIN> asInteger() {
-    return new IntegerVerifier<>(transformerName, this.function.andThen(Functions.cast(Integer.class)), dummyPredicate());
-  }
-
-  public StringVerifier<OIN> asString(Function<T, String> converter) {
-    return new StringVerifier<>(transformerName, this.function.andThen(converter), dummyPredicate());
-  }
-
-  public <E> ListVerifier<OIN, E> asListOf(Function<T, List<E>> converter) {
-    return new ListVerifier<>(transformerName, this.function.andThen(converter), dummyPredicate());
-  }
-
-  public Predicate<? super OIN> build() {
-    return PrintablePredicateFactory.TransformingPredicate.Factory
-        .create(
-            this.transformerName,
-            this.transformerName != null ?
-                "THEN" :
-                "VERIFY",
-            this.function)
-        .check(this.predicate);
-  }
-
   /**
    * A synonym of `build()` method.
    *
@@ -115,21 +88,68 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   public <AS> Predicate<AS> verify() {
     return (Predicate<AS>) build();
   }
+  abstract protected V create();
+
+  // BEGIN: ------------------------- High -level methods
+
+
+  public V with(Predicate<? super T> predicate) {
+    return predicate(predicate);
+  }
+
+  @Override
+  public StringVerifier<OIN> asString() {
+    return new StringVerifier<>(transformerName, this.function.andThen(Functions.cast(String.class)), dummyPredicate());
+  }
+
+  @Override
+  public IntegerVerifier<OIN> asInteger() {
+    return new IntegerVerifier<>(transformerName, this.function.andThen(Functions.cast(Integer.class)), dummyPredicate());
+  }
+
+  @Override
+  public BooleanVerifier<OIN> asBoolean() {
+    return new BooleanVerifier<>(transformerName, this.function.andThen(Functions.cast(Boolean.class)), dummyPredicate());
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <NOUT> ObjectVerifier<OIN, NOUT> asValueOf(NOUT value) {
+    return new ObjectVerifier<>(transformerName, this.function.andThen(Printables.function("treatAs[NOUT]", v -> (NOUT)v)), dummyPredicate());
+  }
+
+  @Override
+  public <E> ListVerifier<OIN, E> asListOf(E value) {
+    return new ListVerifier<>(transformerName, this.function.andThen(Functions.castTo(Functions.value())), dummyPredicate());
+  }
+
+  @Override
+  public <E> StreamVerifier<OIN, E> asStreamOf(E value) {
+    return new StreamVerifier<>(transformerName, this.function.andThen(Functions.castTo(Functions.value())), dummyPredicate());
+  }
+
+  @Override
+  public StringVerifier<OIN> intoStringWith(Function<T, String> function) {
+    return new StringVerifier<>(transformerName, this.function.andThen(function), dummyPredicate());
+  }
+
+  @Override
+  public IntegerVerifier<OIN> intoIntegerWith(Function<T, Integer> function) {
+    return new IntegerVerifier<>(transformerName, this.function.andThen(function), dummyPredicate());
+  }
+
+  @Override
+  public BooleanVerifier<OIN> intoBooleanWith(Function<T, Boolean> function) {
+    return new BooleanVerifier<>(transformerName, this.function.andThen(function), dummyPredicate());
+  }
+
+  @Override
+  public <OUT> ObjectVerifier<OIN, OUT> intoObjectWith(Function<T, OUT> function) {
+    return new ObjectVerifier<>(transformerName, this.function.andThen(function), dummyPredicate());
+  }
 
   ////
   // BEGIN: Methods for java.lang.Object come here.
-  void method() {
-    /*
-    Predicates.isNotNull();
-    Predicates.alwaysTrue();
-    Predicates.isNull();
-    Predicates.isEqualTo(null);
-    Predicates.isSameReferenceAs(null);
-    //Predicates.isInstanceOf(null);
-    Predicates.callp(null);
-
-     */
-  }
 
   public V isNotNull() {
     return this.predicate(Predicates.isNotNull());
@@ -163,15 +183,7 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   public V invokeStatic(Class<?> klass, String methodName, Object... args) {
     return this.predicate(Predicates.callp(MethodQuery.classMethod(klass, methodName, args)));
   }
-
-  protected Function<? super OIN, ? extends T> function() {
-    return this.function;
-  }
-
-  protected Predicate<? super T> predicate() {
-    return this.predicate;
-  }
-
   // END: Methods for java.lang.Object come here.
   ////
+//--------------------------------
 }

@@ -19,7 +19,8 @@ public class MultiValueAssertion {
     assertThat(
         givenValues,
         allOf(
-            whenValueAt(0).thenAsInteger()
+            whenValueAt(0)
+                .then().asInteger()
                 .equalTo(122)
                 .verify(),
             whenValueAt(1)

@@ -1,8 +1,10 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
+import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
 import com.github.dakusui.pcond.core.fluent.transformers.extendable.AbstractObjectTransformer;
+import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
@@ -43,6 +45,11 @@ public class FluentsTest extends TestBase {
     public StringTransformer<OIN> childMethod() {
       return this.transformToString(Printables.function("childMethod", Child::childMethod));
     }
+
+    @Override
+    public Verifier<?, OIN, Child> then() {
+      return new ObjectVerifier<>(this.transformerName(), this.function(), dummyPredicate());
+    }
   }
 
   @Test(expected = ComparisonFailure.class)
@@ -80,12 +87,12 @@ public class FluentsTest extends TestBase {
           allOf(
               when((Parent) value())
                   .transformToObject(Functions.identity())
-                  .thenAsObject(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
+                  .then().intoObjectWith(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                   .with(isEqualTo("returnValueFromParentMethod"))
                   .verify(),
               when((Parent) value())
                   .transformToObject(Functions.identity())
-                  .thenAsObject(function("parentMethod2", Parent::parentMethod2))
+                  .then().intoObjectWith(function("parentMethod2", Parent::parentMethod2))
                   .with(
                       as((Child) value())
                           .transformToString(function("lambda:Child::childMethod", Child::childMethod))
@@ -112,7 +119,7 @@ public class FluentsTest extends TestBase {
         asList("Hello", "world"),
         whenListOf((String) value())
             .elementAt(0)
-            .thenAsString()
+            .then().asString()
             .findSubstrings("hello", "world")
             .contains("hello")
             .verify()
@@ -134,13 +141,14 @@ public class FluentsTest extends TestBase {
           new Parent(),
           allOf(
               whenInstanceOf(Parent.class)
-                  .applyFunction("lambda:Parent::parentMethod1", Parent::parentMethod1)
-                  .thenAsString()
+                  .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
+                  .then()
+                  .asString()
                   .isEqualTo("returnValueFromParentMethod")
                   .verify(),
               whenInstanceOf(Parent.class)
-                  .applyFunction("Parent::parentMethod2", Parent::parentMethod2)
-                  .applyFunction("lambda:Child::childMethod", Child::childMethod)
+                  .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
+                  .exercise(function("lambda:Child::childMethod", Child::childMethod))
                   .then()
                   .asString()
                   // 'not(...)' is added to make the matcher fail.
@@ -159,17 +167,17 @@ public class FluentsTest extends TestBase {
       assertThat(
           (Supplier<Parent>) Parent::new,
           whenInstanceOf(Supplier.class)
-              .applyFunction(Supplier::get)
+              .exercise(Supplier::get)
               .tee(
                   as((Parent) value())
-                      .applyFunction(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
-                      .thenAsString()
+                      .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
+                      .then().asString()
                       .isEqualTo("returnValueFromParentMethod")
                       .verify(),
                   asInstanceOf(Parent.class)
-                      .applyFunction(function("Parent::parentMethod2", Parent::parentMethod2))
-                      .applyFunction(function("lambda:Child::childMethod", Child::childMethod))
-                      .thenAsString()
+                      .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
+                      .exercise(function("lambda:Child::childMethod", Child::childMethod))
+                      .then().asString()
                       // 'not(...)' is added to make the matcher fail.
                       .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))
                       .verify()).verify());

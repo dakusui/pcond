@@ -14,7 +14,7 @@ public class ListVerifier<OIN, E>
     extends Verifier<ListVerifier<OIN, E>, OIN, List<E>>
     implements Matcher.ForList<OIN, E> {
   public ListVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate) {
-    super(transformerName, function, null);
+    super(transformerName, function, predicate);
   }
 
   @Override

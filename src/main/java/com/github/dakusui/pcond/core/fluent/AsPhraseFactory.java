@@ -16,23 +16,23 @@ public interface AsPhraseFactory<
 
   MB asBoolean();
 
-  default <E> Matcher.ForObject<OIN, E> as(E value) {
-    return asValueOf(value);
-  }
-
   default <T> Matcher.ForObject<OIN, T> asObject() {
     return asValueOf(value());
   }
 
-  default <E> Matcher.ForObject<OIN, E> asValueOfClass() {
+  default <E> Matcher.ForObject<OIN, E> as(E value) {
+    return asValueOf(value);
+  }
+
+  default <E> Matcher.ForObject<OIN, E> asValueOfClass(Class<E> klass) {
     return asValueOf(value());
   }
 
-  default <E> Matcher.ForList<OIN, E> asListOfClass() {
+  default <E> Matcher.ForList<OIN, E> asListOfClass(Class<E> klass) {
     return asListOf(value());
   }
 
-  default <E> Matcher.ForStream<OIN, E> asStreamOfClass() {
+  default <E> Matcher.ForStream<OIN, E> asStreamOfClass(Class<E> klass) {
     return asStreamOf(value());
   }
 
@@ -42,7 +42,8 @@ public interface AsPhraseFactory<
 
   <E> Matcher.ForStream<OIN, E> asStreamOf(E value);
 
-  interface ForTransformer<OIN, OUT, TX extends Transformer<TX, OIN, OUT>> extends AsPhraseFactory<
+  interface ForTransformer<OIN, OUT, TX extends Transformer<TX, OIN, OUT>>
+      extends AsPhraseFactory<
       StringTransformer<OIN>,
       IntegerTransformer<OIN>,
       BooleanTransformer<OIN>,
@@ -59,17 +60,17 @@ public interface AsPhraseFactory<
     }
 
     @Override
-    default <E> ObjectTransformer<OIN, E> asValueOfClass() {
+    default <E> ObjectTransformer<OIN, E> asValueOfClass(Class<E> klass) {
       return asValueOf(value());
     }
 
     @Override
-    default <E> ListTransformer<OIN, E> asListOfClass() {
+    default <E> ListTransformer<OIN, E> asListOfClass(Class<E> klass) {
       return asListOf(value());
     }
 
     @Override
-    default <E> StreamTransformer<OIN, E> asStreamOfClass() {
+    default <E> StreamTransformer<OIN, E> asStreamOfClass(Class<E> klass) {
       return asStreamOf(value());
     }
 
@@ -101,17 +102,17 @@ public interface AsPhraseFactory<
     }
 
     @Override
-    default <E> ObjectVerifier<OIN, E> asValueOfClass() {
+    default <E> ObjectVerifier<OIN, E> asValueOfClass(Class<E> value) {
       return asValueOf(value());
     }
 
     @Override
-    default <E> ListVerifier<OIN, E> asListOfClass() {
+    default <E> ListVerifier<OIN, E> asListOfClass(Class<E> value) {
       return asListOf(value());
     }
 
     @Override
-    default <E> StreamVerifier<OIN, E> asStreamOfClass() {
+    default <E> StreamVerifier<OIN, E> asStreamOfClass(Class<E> value) {
       return asStreamOf(value());
     }
 
