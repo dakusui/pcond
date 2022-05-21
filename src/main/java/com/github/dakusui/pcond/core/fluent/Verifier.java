@@ -13,17 +13,20 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.core.fluent.Transformer.dummyPredicate;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 
-public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
-  private final String                             transformerName;
-  private final Function<? super OIN, ? extends T> function;
-  private       Predicate<T>                       predicate;
+public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
+    extends PrintablePredicateFactory.TransformingPredicate<T, OIN> {
+  protected final String                             transformerName;
+  private final   Function<? super OIN, ? extends T> function;
+  private         Predicate<? super T>               predicate;
 
-  public Verifier(String transformerName, Function<? super OIN, ? extends T> function) {
+  protected Verifier(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate) {
+    super(predicate, function);
     this.transformerName = transformerName;
     this.function = function;
-    this.predicate = null;
+    this.predicate = predicate; // this field can be null, when the first verifier starts building.
   }
 
   @SafeVarargs
@@ -54,14 +57,15 @@ public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
     return predicate(predicate);
   }
 
-  @SuppressWarnings("unchecked")
   protected V predicate(Predicate<? super T> predicate) {
     if (this.predicate == null)
-      this.predicate = (Predicate<T>) predicate;
+      this.predicate = predicate;
     else
-      this.predicate = this.predicate.and(predicate);
-    return (V) this;
+      this.predicate = Predicates.and(this.predicate, predicate);
+    return this.create();
   }
+
+  abstract protected V create();
 
   /**
    * Use this method only when you are sure the type you are handling is of `AS`.
@@ -72,23 +76,23 @@ public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
    */
   public <AS>
   ObjectVerifier<OIN, AS> asInstanceOf(Class<AS> valueType) {
-    return new ObjectVerifier<OIN, AS>(transformerName, Functions.cast(valueType));
+    return new ObjectVerifier<>(transformerName, Functions.cast(valueType), dummyPredicate());
   }
 
   public StringVerifier<OIN> asString() {
-    return new StringVerifier<>(transformerName, this.function.andThen(Functions.stringify()));
+    return new StringVerifier<>(transformerName, this.function.andThen(Functions.stringify()), dummyPredicate());
   }
 
   public IntegerVerifier<OIN> asInteger() {
-    return new IntegerVerifier<>(transformerName, this.function.andThen(Functions.cast(Integer.class)));
+    return new IntegerVerifier<>(transformerName, this.function.andThen(Functions.cast(Integer.class)), dummyPredicate());
   }
 
   public StringVerifier<OIN> asString(Function<T, String> converter) {
-    return new StringVerifier<>(transformerName, this.function.andThen(converter));
+    return new StringVerifier<>(transformerName, this.function.andThen(converter), dummyPredicate());
   }
 
   public <E> ListVerifier<OIN, E> asListOf(Function<T, List<E>> converter) {
-    return new ListVerifier<>(transformerName, this.function.andThen(converter));
+    return new ListVerifier<>(transformerName, this.function.andThen(converter), dummyPredicate());
   }
 
   public Predicate<? super OIN> build() {
@@ -158,6 +162,14 @@ public class Verifier<V extends Verifier<V, OIN, T>, OIN, T> {
 
   public V invokeStatic(Class<?> klass, String methodName, Object... args) {
     return this.predicate(Predicates.callp(MethodQuery.classMethod(klass, methodName, args)));
+  }
+
+  protected Function<? super OIN, ? extends T> function() {
+    return this.function;
+  }
+
+  protected Predicate<? super T> predicate() {
+    return this.predicate;
   }
 
   // END: Methods for java.lang.Object come here.

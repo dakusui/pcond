@@ -141,7 +141,8 @@ public class FluentsTest extends TestBase {
               whenInstanceOf(Parent.class)
                   .applyFunction("Parent::parentMethod2", Parent::parentMethod2)
                   .applyFunction("lambda:Child::childMethod", Child::childMethod)
-                  .then().asString()
+                  .then()
+                  .asString()
                   // 'not(...)' is added to make the matcher fail.
                   .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))
                   .verify()
@@ -259,5 +260,17 @@ public class FluentsTest extends TestBase {
     TestException(String message) {
       super(message);
     }
+  }
+
+  @Test
+  public void teeTest() {
+    String hello = "hello";
+    assertThat(
+        hello,
+        when().tee(
+            as((String) value())
+                .exercise(String::hashCode)
+                .then().isInstanceOf(Integer.class))
+    );
   }
 }

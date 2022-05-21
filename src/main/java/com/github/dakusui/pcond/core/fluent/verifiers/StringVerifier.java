@@ -4,13 +4,19 @@ import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
 
-public class StringVerifier<OIN> extends Verifier<StringVerifier<OIN>, OIN, String> {
-  public StringVerifier(String transformerName, Function<? super OIN, ? extends String> function) {
-    super(transformerName, function);
+public class StringVerifier<OIN> extends Verifier<StringVerifier<OIN>, OIN, String> implements Matcher.ForString<OIN> {
+  public StringVerifier(String transformerName, Function<? super OIN, ? extends String> function, Predicate<? super String> predicate) {
+    super(transformerName, function, predicate);
+  }
+
+  @Override
+  protected StringVerifier<OIN> create() {
+    return new StringVerifier<>(this.transformerName, this.function(), this.predicate());
   }
 
   public StringVerifier<OIN> contains(String token) {

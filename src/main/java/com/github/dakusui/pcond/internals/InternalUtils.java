@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 public enum InternalUtils {
   ;
-
   public static String formatObject(Object value) {
     return formatObject(value, summarizedStringLength());
   }
@@ -154,7 +154,7 @@ public enum InternalUtils {
 
   @SuppressWarnings("unchecked")
   public static <T> Evaluable<T> toEvaluableIfNecessary(Predicate<? super T> p) {
-    Objects.requireNonNull(p);
+    requireNonNull(p);
     if (p instanceof Evaluable)
       return (Evaluable<T>) p;
     // We know that Printable.predicate returns a PrintablePredicate object, which is an Evaluable.
@@ -163,7 +163,7 @@ public enum InternalUtils {
 
   @SuppressWarnings("unchecked")
   public static <T> Evaluable<T> toEvaluableIfNecessary(Function<? super T, ?> f) {
-    Objects.requireNonNull(f);
+    requireNonNull(f);
     if (f instanceof Evaluable)
       return (Evaluable<T>) f;
     // We know that Printable.predicate returns a PrintableFunction object, which is an Evaluable.

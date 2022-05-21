@@ -4,10 +4,16 @@ import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-public class IntegerVerifier<OIN> extends Verifier<IntegerVerifier<OIN>, OIN, Integer> {
-  public IntegerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function) {
-    super(transformerName, function);
+public class IntegerVerifier<OIN> extends Verifier<IntegerVerifier<OIN>, OIN, Integer> implements Matcher.ForInteger<OIN> {
+  public IntegerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate) {
+    super(transformerName, function, predicate);
+  }
+
+  @Override
+  protected IntegerVerifier<OIN> create() {
+    return new IntegerVerifier<>(this.transformerName, this.function(), this.predicate());
   }
 
   public IntegerVerifier<OIN> equalTo(int v) {

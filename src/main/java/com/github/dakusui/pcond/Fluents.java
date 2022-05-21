@@ -12,7 +12,7 @@ import static java.util.Arrays.asList;
 public enum Fluents {
   ;
 
-  public static ObjectTransformer<Object, Object> when() {
+  public static <T> ObjectTransformer<T, T> when() {
     return when(value());
   }
 
@@ -54,14 +54,6 @@ public enum Fluents {
     return (ObjectTransformer<T, T>) whenListOf(value()).elementAt(index).castTo((T) value);
   }
 
-  public static <T> ObjectTransformer<T, T> asValueAt(int index) {
-    return asValueAt(index, value());
-  }
-  @SuppressWarnings("unchecked")
-  public static <T> ObjectTransformer<T, T> asValueAt(int index, T value) {
-    return (ObjectTransformer<T, T>) asListOf(value()).elementAt(index).castTo((T) value);
-  }
-
   /**
    * Use this method inside "when" clause.
    *
@@ -79,6 +71,10 @@ public enum Fluents {
    */
   public static <T> ObjectTransformer<T, T> as(T value) {
     return asValueOf(value);
+  }
+
+  public static <T> ObjectTransformer<T, T> asObject() {
+    return as(value());
   }
 
   public static <T> ObjectTransformer<T, T> asValueOf(T value) {
@@ -99,6 +95,14 @@ public enum Fluents {
     return fluent((E) value()).string("WHEN");
   }
 
+  public static <T> ObjectTransformer<T, T> asValueAt(int index) {
+    return asValueAt(index, value());
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> ObjectTransformer<T, T> asValueAt(int index, T value) {
+    return (ObjectTransformer<T, T>) asListOf(value()).elementAt(index).castTo(value);
+  }
   /**
    * Returns a "type place-holder".
    * A type place-holder is a value that can be cast to any class, even if it has

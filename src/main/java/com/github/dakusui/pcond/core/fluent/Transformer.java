@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.core.fluent.transformers.*;
 import com.github.dakusui.pcond.core.fluent.verifiers.*;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.internals.InternalChecks;
 
@@ -17,11 +18,20 @@ import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 import static java.util.Objects.requireNonNull;
 
 /**
+ * Method names start with `as` or contain `As` suggests that the methods should be
+ * used when you know the type of the object you are treating at the line of your code.
+ * <p>
+ * One starts with `into` or contains `Into` should be used for objects you need to
+ * apply a function in order to convert it to treat it in the following lines.
+ *
  * @param <TX>  The type of this object.
  * @param <OIN> Original input type.
  * @param <OUT> (Current) Output type.
  */
-public abstract class Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> {
+public abstract class Transformer<
+    TX extends Transformer<TX, OIN, OUT>,
+    OIN, OUT>
+    implements Matcher<OIN, OUT> {
   private final Function<OIN, OUT> function;
   private final String             transformerName;
 
@@ -51,16 +61,24 @@ public abstract class Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT
   }
 
   @SafeVarargs
-  public final Verifier<?, OIN, OUT> tee(Predicate<? super OUT>... predicates) {
-    return this.then().allOf(predicates);
+  public final <NOUT> Verifier<?, OIN, NOUT> tee(Predicate<? super NOUT>... predicates) {
+    return this.<NOUT>thenAsObject().allOf(predicates);
   }
 
-  public <O> ObjectTransformer<OIN, O> applyFunction(String name, Function<? super OUT, O> f) {
-    return applyFunction(Printables.function(name, f));
+  public <O> ObjectTransformer<OIN, O> exercise(Function<? super OUT, O> f) {
+    return applyFunction(f);
+  }
+
+  public <O> ObjectTransformer<OIN, O> exercise(String name, Function<? super OUT, O> f) {
+    return exercise(Printables.function(name, f));
   }
 
   public <O> ObjectTransformer<OIN, O> applyFunction(Function<? super OUT, O> f) {
     return transformToObject(f);
+  }
+
+  public <O> ObjectTransformer<OIN, O> applyFunction(String name, Function<? super OUT, O> f) {
+    return applyFunction(Printables.function(name, f));
   }
 
   public <O> ObjectTransformer<OIN, O> transformToObject(Function<? super OUT, O> f) {
@@ -117,7 +135,7 @@ public abstract class Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT
   }
 
   public <NOUT> ObjectVerifier<OIN, NOUT> thenAsObject(Function<OUT, NOUT> function) {
-    return new ObjectVerifier<>(transformerName, chainFunctions(this.function, requireNonNull(function)));
+    return new ObjectVerifier<>(transformerName, chainFunctions(this.function, requireNonNull(function)), dummyPredicate());
   }
 
   public StringVerifier<OIN> thenAsString() {
@@ -126,12 +144,12 @@ public abstract class Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT
 
   public StringVerifier<OIN> thenAsString(Function<OUT, String> toString) {
     requireFunctionIsSet("asString()");
-    return new StringVerifier<>(transformerName, chainFunctions(this.function, toString));
+    return new StringVerifier<>(transformerName, chainFunctions(this.function, toString), dummyPredicate());
   }
 
   public <E> ListVerifier<OIN, E> thenAsList(Function<OUT, List<E>> converter) {
     requireFunctionIsSet("asList(Function<OUT, List<E>)");
-    return new ListVerifier<>(transformerName, chainFunctions(this.function, converter));
+    return new ListVerifier<>(transformerName, chainFunctions(this.function, converter), dummyPredicate());
   }
 
   /**
@@ -146,7 +164,7 @@ public abstract class Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT
 
   public IntegerVerifier<OIN> thenAsInteger(Function<OUT, Integer> converter) {
     requireFunctionIsSet("asInteger(Function<OUT, Integer>)");
-    return new IntegerVerifier<>(transformerName, chainFunctions(this.function, converter));
+    return new IntegerVerifier<>(transformerName, chainFunctions(this.function, converter), dummyPredicate());
   }
 
   /**
@@ -162,24 +180,24 @@ public abstract class Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT
 
   public <E> StreamVerifier<OIN, E> thenAsStream(Function<OUT, Stream<E>> converter) {
     requireFunctionIsSet("asStream(Function<OUT, Stream<E>)");
-    return new StreamVerifier<>(transformerName, chainFunctions(this.function, converter));
+    return new StreamVerifier<>(transformerName, chainFunctions(this.function, converter), dummyPredicate());
+  }
+
+  public <NOUT> ObjectTransformer<OIN, NOUT> as(NOUT value) {
+    return asValueOf(value);
+  }
+
+  public <NOUT> ObjectTransformer<OIN, NOUT> asValueOfClass(Class<NOUT> klass) {
+    return asValueOf(value());
   }
 
   @SuppressWarnings("unchecked")
-  public <NOUT> ObjectTransformer<OIN, NOUT> asObject() {
-    return asObject(Printables.function("treatAs[NOUT]", v -> (NOUT) v));
-  }
-
-  public <NOUT> ObjectTransformer<OIN, NOUT> asObject(Function<OUT, NOUT> function) {
-    return new ObjectTransformer<>(null, this, function);
+  public <NOUT> ObjectTransformer<OIN, NOUT> asValueOf(NOUT value) {
+    return toObjectWith(Printables.function("treatAs[NOUT]", v -> (NOUT) v));
   }
 
   public StringTransformer<OIN> asString() {
-    return asString(Printables.function("treatAsString", v -> (String) v));
-  }
-
-  public StringTransformer<OIN> asString(Function<OUT, String> toString) {
-    return new StringTransformer<>(null, this, toString);
+    return toStringWith(Printables.function("treatAsString", v -> (String) v));
   }
 
   @SuppressWarnings({ "unchecked", "RedundantCast" })
@@ -189,7 +207,7 @@ public abstract class Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT
 
   @SuppressWarnings("unchecked")
   public <E> ListTransformer<OIN, E> asListOf(E value) {
-    return asList(Printables.function("treatAsList", v -> (List<E>) v));
+    return toListWith(Printables.function("treatAsList", v -> (List<E>) v));
   }
 
   @SuppressWarnings({ "unchecked", "RedundantCast" })
@@ -197,24 +215,32 @@ public abstract class Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT
     return asListOf((E) value());
   }
 
-  public <E> ListTransformer<OIN, E> asList(Function<OUT, List<E>> converter) {
-    return new ListTransformer<>(null, this, converter);
-  }
-
   public IntegerTransformer<OIN> asInteger() {
-    return asInteger(Printables.function("treatAsInteger", v -> (Integer) v));
-  }
-
-  public IntegerTransformer<OIN> asInteger(Function<OUT, Integer> converter) {
-    return new IntegerTransformer<>(null, this, converter);
+    return toIntegerWith(Printables.function("treatAsInteger", v -> (Integer) v));
   }
 
   @SuppressWarnings("unchecked")
   public <E> StreamTransformer<OIN, E> asStream() {
-    return asStream(Printables.function("treatAsStream", v -> (Stream<E>) v));
+    return toStreamWith(Printables.function("treatAsStream", v -> (Stream<E>) v));
   }
 
-  public <E> StreamTransformer<OIN, E> asStream(Function<OUT, Stream<E>> converter) {
+  public <NOUT> ObjectTransformer<OIN, NOUT> toObjectWith(Function<OUT, NOUT> function) {
+    return new ObjectTransformer<>(null, this, function);
+  }
+
+  public StringTransformer<OIN> toStringWith(Function<OUT, String> toString) {
+    return new StringTransformer<>(null, this, toString);
+  }
+
+  public <E> ListTransformer<OIN, E> toListWith(Function<OUT, List<E>> converter) {
+    return new ListTransformer<>(null, this, converter);
+  }
+
+  public IntegerTransformer<OIN> toIntegerWith(Function<OUT, Integer> converter) {
+    return new IntegerTransformer<>(null, this, converter);
+  }
+
+  public <E> StreamTransformer<OIN, E> toStreamWith(Function<OUT, Stream<E>> converter) {
     return new StreamTransformer<>(null, this, converter);
   }
 
@@ -248,4 +274,8 @@ public abstract class Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT
   }
   // END: Methods for java.lang.Object come here.
   ////
+
+  public static <T> Predicate<? super T> dummyPredicate() {
+    return Printables.predicate("DUMMY:ALWAYSTRUE", Predicates.alwaysTrue());
+  }
 }

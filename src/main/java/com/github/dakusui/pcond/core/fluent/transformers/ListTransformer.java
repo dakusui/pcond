@@ -2,14 +2,15 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
+import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
 import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.List;
 import java.util.function.Function;
 
-import static java.util.Objects.requireNonNull;
-
-public class ListTransformer<OIN, E> extends Transformer<ListTransformer<OIN, E>, OIN, List<E>> {
+public class ListTransformer<OIN, E>
+    extends Transformer<ListTransformer<OIN, E>, OIN, List<E>>
+    implements Matcher.ForList<OIN, E> {
   /**
    * @param transformerName
    * @param parent

@@ -14,8 +14,7 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.identifieable.Identifiable.argsOf;
 import static com.github.dakusui.pcond.core.identifieable.Identifiable.creatorOf;
-import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
-import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
+import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -266,7 +265,6 @@ public enum PrintablePredicateFactory {
 
   static class Messaged<T> extends PrintablePredicate<T> implements Evaluable.Messaged<T> {
     private final Evaluable<? super T> target;
-    private final Predicate<T>         rawPredicate;
 
     @SuppressWarnings("unchecked")
     protected Messaged(Supplier<String> messageSupplier, Predicate<T> predicate, List<Object> args) {
@@ -277,7 +275,6 @@ public enum PrintablePredicateFactory {
           (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).test(t));
       //this.message = requireNonNull(message);
       this.target = toEvaluableIfNecessary(predicate);
-      this.rawPredicate = predicate;
     }
 
     @Override
@@ -288,10 +285,6 @@ public enum PrintablePredicateFactory {
     @Override
     public String message() {
       return this.formatter.get();
-    }
-
-    protected Predicate<T> rawPredicate() {
-      return this.rawPredicate;
     }
   }
 
@@ -374,6 +367,10 @@ public enum PrintablePredicateFactory {
       this.mapperName = mapperName;
       this.checker = toEvaluableIfNecessary(predicate);
       this.checkerName = checkerName;
+    }
+
+    protected TransformingPredicate(Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
+      this(null, null, predicate, function);
     }
 
     @Override

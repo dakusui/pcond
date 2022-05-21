@@ -7,9 +7,16 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class StreamVerifier<OIN, E> extends Verifier<StreamVerifier<OIN, E>, OIN, Stream<E>> {
-  public StreamVerifier(String transformerName, Function<? super OIN, ? extends Stream<E>> function) {
-    super(transformerName, function);
+public class StreamVerifier<OIN, E>
+    extends Verifier<StreamVerifier<OIN, E>, OIN, Stream<E>>
+    implements Matcher.ForStream<OIN, E> {
+  public StreamVerifier(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate) {
+    super(transformerName, function, predicate);
+  }
+
+  @Override
+  protected StreamVerifier<OIN, E> create() {
+    return new StreamVerifier<>(this.transformerName, this.function(), this.predicate());
   }
 
   public StreamVerifier<OIN, E> noneMatch(Predicate<E> p) {

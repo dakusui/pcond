@@ -1,13 +1,15 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
+import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
 import com.github.dakusui.pcond.core.fluent.verifiers.StreamVerifier;
 import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class StreamTransformer<OIN, E> extends Transformer<StreamTransformer<OIN, E>, OIN, Stream<E>> {
+public class StreamTransformer<OIN, E> extends Transformer<StreamTransformer<OIN, E>, OIN, Stream<E>>
+    implements Matcher.ForStream<OIN, E> {
   /**
    * @param transformerName
    * @param parent

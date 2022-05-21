@@ -10,9 +10,16 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public class ListVerifier<OIN, E> extends Verifier<ListVerifier<OIN, E>, OIN, List<E>> {
-  public ListVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function) {
-    super(transformerName, function);
+public class ListVerifier<OIN, E>
+    extends Verifier<ListVerifier<OIN, E>, OIN, List<E>>
+    implements Matcher.ForList<OIN, E> {
+  public ListVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate) {
+    super(transformerName, function, null);
+  }
+
+  @Override
+  protected ListVerifier<OIN, E> create() {
+    return new ListVerifier<>(this.transformerName, this.function(), this.predicate());
   }
 
   public ListVerifier<OIN, E> isEmpty() {

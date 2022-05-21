@@ -2,10 +2,11 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.Verifier;
+import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
 
 import java.util.function.Function;
 
-public class IntegerTransformer<OIN> extends Transformer<IntegerTransformer<OIN>, OIN, Integer> {
+public class IntegerTransformer<OIN> extends Transformer<IntegerTransformer<OIN>, OIN, Integer> implements Matcher.ForInteger<OIN> {
 
 
   /**
