@@ -16,7 +16,7 @@ public interface AsPhraseFactory<
 
   MB asBoolean();
 
-  default <T> Matcher.ForObject<OIN, T> asObject() {
+  default Matcher.ForObject<OIN, OIN> asObject() {
     return asValueOf(value());
   }
 
@@ -53,7 +53,7 @@ public interface AsPhraseFactory<
     }
 
     @Override
-    default <T> ObjectTransformer<OIN, T> asObject() {
+    default ObjectTransformer<OIN, OIN> asObject() {
       return asValueOf(value());
     }
 
@@ -98,7 +98,7 @@ public interface AsPhraseFactory<
     }
 
     @Override
-    default <T> ObjectVerifier<OIN, T> asObject() {
+    default ObjectVerifier<OIN, OIN> asObject() {
       return asValueOf(value());
     }
 
