@@ -11,6 +11,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
+import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
+import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 
 /**
  * Method names start with `as` or contain `As` suggests that the methods should be
@@ -34,7 +36,7 @@ public abstract class Transformer<
   @SuppressWarnings("unchecked")
   public <IN> Transformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
     this.transformerName = transformerName;
-    this.function = (Function<OIN, OUT>) chainFunctions(parent == null ? null : parent.function, function);
+    this.function = (Function<OIN, OUT>) chainFunctions(parent == null ? dummyFunction() : parent.function, function);
   }
 
   public Function<? super OIN, ? extends OUT> function() {
@@ -92,12 +94,22 @@ public abstract class Transformer<
   }
 
   @SuppressWarnings("unchecked")
-  private static <I, M, O> Function<I, O> chainFunctions(Function<I, ? extends M> func, Function<? super M, O> after) {
-    if (func == null)
+  static <I, M, O> Function<I, O> chainFunctions(Function<I, ? extends M> func, Function<? super M, O> after) {
+    /*
+    if (isDummyFunction(func))
       // In case, func == null, <I> will become the same as M.
       // So, this cast is safe.
-      return (Function<I, O>) after;
-    return func.andThen(after);
+      return (Function<I, O>) (isDummyFunction(after) ? dummyFunction() : after);
+    return isDummyFunction(after) ?
+        (Function<I, O>) func :
+        func.andThen(after);
+     */
+    if (isDummyFunction(func) && isDummyFunction(after))
+      return dummyFunction();
+    if (isDummyFunction(func))
+      return (isDummyFunction(after)) ? dummyFunction() : (Function<I, O>) after;
+    else
+      return isDummyFunction(after) ? (Function<I, O>) func : func.andThen(after);
   }
 
   @SuppressWarnings("unchecked")
@@ -147,12 +159,6 @@ public abstract class Transformer<
   @SuppressWarnings("unchecked")
   @Override
   public <E> StreamTransformer<OIN, E> asStreamOf(E value) {
-    return new StreamTransformer<OIN, E>(transformerName, this, Printables.function("treatAsStream[NOUT]", v -> (Stream<E>) v));
-  }
-
-  public static <T> Predicate<? super T> dummyPredicate() {
-    return Printables.predicate("DUMMY:ALWAYSTHROW", v -> {
-      throw new UnsupportedOperationException("Testing: '" + v + "' was failed, because this is a dummy predicate.");
-    });
+    return new StreamTransformer<>(transformerName, this, Printables.function("treatAsStream[NOUT]", v -> (Stream<E>) v));
   }
 }

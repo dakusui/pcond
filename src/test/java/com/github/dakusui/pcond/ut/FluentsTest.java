@@ -7,6 +7,7 @@ import com.github.dakusui.pcond.core.fluent.transformers.extendable.AbstractObje
 import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
@@ -23,6 +24,7 @@ import static com.github.dakusui.pcond.Validations.validate;
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.function;
+import static com.github.dakusui.pcond.utils.TestForms.objectHashCode;
 import static java.util.Arrays.asList;
 
 public class FluentsTest extends TestBase {
@@ -48,7 +50,7 @@ public class FluentsTest extends TestBase {
 
     @Override
     public Verifier<?, OIN, Child> then() {
-      return new ObjectVerifier<>(this.transformerName(), this.function(), dummyPredicate());
+      return new ObjectVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate());
     }
   }
 
@@ -277,7 +279,7 @@ public class FluentsTest extends TestBase {
         hello,
         when().tee(
             as((String) value())
-                .exercise(String::hashCode)
+                .exercise(objectHashCode())
                 .then().isInstanceOf(Integer.class))
     );
   }

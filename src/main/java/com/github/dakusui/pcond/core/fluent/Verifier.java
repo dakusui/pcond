@@ -10,8 +10,10 @@ import com.github.dakusui.pcond.forms.Printables;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.core.fluent.Transformer.dummyPredicate;
+import static com.github.dakusui.pcond.core.fluent.Transformer.chainFunctions;
+import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
+import static com.github.dakusui.pcond.internals.InternalUtils.isDummyPredicate;
 
 public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     extends PrintablePredicateFactory.TransformingPredicate<T, OIN>
@@ -29,7 +31,7 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   }
 
   protected V predicate(Predicate<? super T> predicate) {
-    if (this.predicate == null)
+    if (isDummyPredicate(this.predicate))
       this.predicate = predicate;
     else
       this.predicate = Predicates.and(this.predicate, predicate);
@@ -99,53 +101,53 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
 
   @Override
   public StringVerifier<OIN> asString() {
-    return new StringVerifier<>(transformerName, this.function.andThen(Functions.cast(String.class)), dummyPredicate());
+    return new StringVerifier<>(transformerName, chainFunctions(this.function, Functions.cast(String.class)), dummyPredicate());
   }
 
   @Override
   public IntegerVerifier<OIN> asInteger() {
-    return new IntegerVerifier<>(transformerName, this.function.andThen(Functions.cast(Integer.class)), dummyPredicate());
+    return new IntegerVerifier<>(transformerName, chainFunctions(this.function, Functions.cast(Integer.class)), dummyPredicate());
   }
 
   @Override
   public BooleanVerifier<OIN> asBoolean() {
-    return new BooleanVerifier<>(transformerName, this.function.andThen(Functions.cast(Boolean.class)), dummyPredicate());
+    return new BooleanVerifier<>(transformerName, chainFunctions(this.function, Functions.cast(Boolean.class)), dummyPredicate());
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <NOUT> ObjectVerifier<OIN, NOUT> asValueOf(NOUT value) {
-    return new ObjectVerifier<>(transformerName, this.function.andThen(Printables.function("treatAs[NOUT]", v -> (NOUT)v)), dummyPredicate());
+    return new ObjectVerifier<>(transformerName, chainFunctions(this.function, Printables.function("treatAs[NOUT]", v -> (NOUT)v)), dummyPredicate());
   }
 
   @Override
   public <E> ListVerifier<OIN, E> asListOf(E value) {
-    return new ListVerifier<>(transformerName, this.function.andThen(Functions.castTo(Functions.value())), dummyPredicate());
+    return new ListVerifier<>(transformerName, chainFunctions(this.function, Functions.castTo(Functions.value())), dummyPredicate());
   }
 
   @Override
   public <E> StreamVerifier<OIN, E> asStreamOf(E value) {
-    return new StreamVerifier<>(transformerName, this.function.andThen(Functions.castTo(Functions.value())), dummyPredicate());
+    return new StreamVerifier<>(transformerName, chainFunctions(this.function, Functions.castTo(Functions.value())), dummyPredicate());
   }
 
   @Override
   public StringVerifier<OIN> intoStringWith(Function<T, String> function) {
-    return new StringVerifier<>(transformerName, this.function.andThen(function), dummyPredicate());
+    return new StringVerifier<>(transformerName, chainFunctions(this.function, function), dummyPredicate());
   }
 
   @Override
   public IntegerVerifier<OIN> intoIntegerWith(Function<T, Integer> function) {
-    return new IntegerVerifier<>(transformerName, this.function.andThen(function), dummyPredicate());
+    return new IntegerVerifier<>(transformerName, chainFunctions(this.function, function), dummyPredicate());
   }
 
   @Override
   public BooleanVerifier<OIN> intoBooleanWith(Function<T, Boolean> function) {
-    return new BooleanVerifier<>(transformerName, this.function.andThen(function), dummyPredicate());
+    return new BooleanVerifier<>(transformerName, chainFunctions(this.function, function), dummyPredicate());
   }
 
   @Override
   public <OUT> ObjectVerifier<OIN, OUT> intoObjectWith(Function<T, OUT> function) {
-    return new ObjectVerifier<>(transformerName, this.function.andThen(function), dummyPredicate());
+    return new ObjectVerifier<>(transformerName, chainFunctions(this.function, function), dummyPredicate());
   }
 
   ////

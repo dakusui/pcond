@@ -20,6 +20,14 @@ import static java.util.stream.Collectors.joining;
 
 public enum InternalUtils {
   ;
+
+  private static final Predicate<?>   DUMMY_PREDICATE = Printables.predicate("DUMMY_PREDICATE:ALWAYSTHROW", v -> {
+    throw new UnsupportedOperationException("Testing: '" + v + "' was failed, because this is a dummy predicate.");
+  });
+  private static final Function<?, ?> DUMMY_FUNCTION  = Printables.function("DUMMY_FUNCTION:ALWAYSTHROW", v -> {
+    throw new UnsupportedOperationException("Applying: '" + v + "' was failed, because this is a dummy predicate.");
+  });
+
   public static String formatObject(Object value) {
     return formatObject(value, summarizedStringLength());
   }
@@ -205,5 +213,23 @@ public enum InternalUtils {
     } catch (NoSuchMethodException e) {
       throw executionFailure(format("Requested method: %s(%s) was not found in %s", methodName, Arrays.stream(parameterTypes).map(Class::getName).collect(joining(",")), aClass.getName()), e);
     }
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Predicate<? super T> dummyPredicate() {
+    return (Predicate<? super T>) DUMMY_PREDICATE;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T, R> Function<T, R> dummyFunction() {
+    return (Function<T, R>) DUMMY_FUNCTION;
+  }
+
+  public static boolean isDummyPredicate(Predicate<?> predicate) {
+    return predicate == DUMMY_PREDICATE;
+  }
+
+  public static boolean isDummyFunction(Function<?, ?> function) {
+    return function == DUMMY_FUNCTION;
   }
 }

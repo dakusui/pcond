@@ -5,12 +5,14 @@ import com.github.dakusui.pcond.core.context.Context;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActualInputIfPossibleOrNull;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainExpectationIfPossibleOrNull;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
+import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static java.util.Collections.unmodifiableList;
 
@@ -158,6 +160,10 @@ public interface Evaluator {
     @SuppressWarnings({ "unchecked" })
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
+      if (isDummyFunction((Function<?, ?>) transformation.mapper())) {
+        transformation.checker().accept((R) this.currentResult, this);
+        return;
+      }
       this.enter(Entry.Type.TRANSFORM,
           transformation.mapper(),
           transformation.mapperName()

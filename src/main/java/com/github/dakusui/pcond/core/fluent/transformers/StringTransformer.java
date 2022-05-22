@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
 import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
 import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.function.Function;
 
@@ -29,6 +30,6 @@ public class StringTransformer<OIN> extends Transformer<StringTransformer<OIN>, 
 
   @Override
   public StringVerifier<OIN> then() {
-    return new StringVerifier<>(this.transformerName(), this.function(), dummyPredicate());
+    return new StringVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate());
   }
 }
