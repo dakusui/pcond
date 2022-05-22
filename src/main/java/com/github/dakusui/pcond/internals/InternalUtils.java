@@ -86,8 +86,6 @@ public enum InternalUtils {
       int pre = length / 2 - 2;
       int post = length / 2 - 5;
       s = s.substring(0, length - pre) + "..." + s.substring(s.length() - post);
-    } else {
-      s = s;
     }
     return s;
   }

@@ -83,7 +83,8 @@
 
 
 <CONTAINER_TYPE>         ::= value | list | stream
-<ATOM_TYPE>              ::= string | number | boolean | object
+<ATOM_TYPE>              ::= string | <NUMBER> | boolean | object
+<NUMBER>                 ::= integer
 <ELEMETN_TYPE_SPECIFIER> ::= of (E) value() | ofClass E.class
 <ELEMENT_TYPE_ARGUMRNT>  ::= (E) value()
 ----
@@ -129,7 +130,7 @@ For `WHEN_CLAUSE`, 10 and for `THEN_CLAUSE` 7 methods.
 
 [cols="^,^,^,^"]
 |===
-|    |`Fluents` |`Transformer` |`Verifier`
+|    |`Fluent` |`Transformer` |`Verifier`
 
 |`WHEN_CLAUSE`
 |✓
@@ -162,11 +163,6 @@ Not like other assertion libraries, it has separated group of classes for each o
 "Transformers"
 
 In order to reduce the necessity of creating custom classes, it takes an approach, where
-
--
-- asdf
-
-
 
 
 They are `String`, `Number`(`Integer`), `Boolean`, `List<E>`, `Stream<E>`, and (general) `Object`.

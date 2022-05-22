@@ -1,33 +1,48 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.core.fluent.transformers.ListTransformer;
-import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
-import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.*;
 import com.github.dakusui.pcond.forms.Functions;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
 
-public class Fluent<OIN, OUT> {
-  public Fluent() {
-  }
+public class Fluent<OIN> implements AsPhraseFactory.ForFluent<OIN> {
+  final String transformerName;
 
-  public StringTransformer<OIN> string(String transformerName) {
-    return new StringTransformer<>(transformerName, null, dummyFunction());
-  }
-
-  public ObjectTransformer<OIN, OUT> object(String transformerName) {
-    return new ObjectTransformer<>(transformerName, null, dummyFunction());
-  }
-
-  public ObjectTransformer<OIN, OUT> objectOf(String transformerName, OUT value) {
-    return new ObjectTransformer<>(transformerName, null, dummyFunction());
-  }
-
-  public <E> ListTransformer<OIN, E> listOf(String transformerName, E value) {
-    return new ListTransformer<>(transformerName, null, dummyFunction());
+  public Fluent(String transformerName) {
+    this.transformerName = transformerName;
   }
 
   public static <T> T value() {
     return Functions.value();
+  }
+
+  @Override
+  public StringTransformer<OIN> asString() {
+    return new StringTransformer<>(this.transformerName, null, dummyFunction());
+  }
+
+  @Override
+  public IntegerTransformer<OIN> asInteger() {
+    return new IntegerTransformer<>(this.transformerName, null, dummyFunction());
+  }
+
+  @Override
+  public BooleanTransformer<OIN> asBoolean() {
+    return new BooleanTransformer<OIN>(this.transformerName, null, dummyFunction());
+  }
+
+  @Override
+  public <E> ObjectTransformer<OIN, E> asValueOf(E value) {
+    return new ObjectTransformer<>(this.transformerName, null, dummyFunction());
+  }
+
+  @Override
+  public <E> ListTransformer<OIN, E> asListOf(E value) {
+    return new ListTransformer<>(this.transformerName, null, dummyFunction());
+  }
+
+  @Override
+  public <E> StreamTransformer<OIN, E> asStreamOf(E value) {
+    return new StreamTransformer<>(this.transformerName, null, dummyFunction());
   }
 }

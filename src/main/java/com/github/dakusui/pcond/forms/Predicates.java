@@ -22,6 +22,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.Fluents.$;
 import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
@@ -228,11 +229,12 @@ public enum Predicates {
    * // @formatter:off
    * Returns a {@link Predicate} created from a method specified by a {@code methodQuery}.
    * If the {@code methodQuery} matches none or more than one methods, a {@code RuntimeException} will be thrown.
-   *
+   * <p>
    * The suffix {@code p} stands for "predicate" following the custom in LISP culture
-   * and it is necessary to avoid collision with {@link Functions#call( MethodQuery )} method.
-   *
+   * and it is necessary to avoid collision with {@link Functions#call(MethodQuery)} method.
+   * <p>
    * // @formatter:on
+   *
    * @param methodQuery A query object that specifies a method to be invoked by the returned predicate.
    * @param <T>         the type of the input to the returned predicate
    * @return Created predicate.
@@ -253,12 +255,12 @@ public enum Predicates {
    * // @formatter:off
    * Returns a predicate that calls a method which matches the given {@code methodName}
    * and {@code args} on the object given as input to it.
-   *
+   * <p>
    * Note that method look up is done when the predicate is applied.
    * This means this method does not throw any exception by itself and in case
    * you give wrong {@code methodName} or {@code arguments}, an exception will be
    * thrown when the returned function is applied.
-   *
+   * <p>
    * // @formatter:on
    *
    * @param methodName The method name
@@ -354,7 +356,7 @@ public enum Predicates {
             cursoredStringForSnapshotting.originalString.substring(cursoredStringForSnapshotting.position);
       }
     }
-    return Fluents.fluent().string(null)
+    return $().asString()
         .transformToObject(function("findTokens", CursoredString::new))
         .then()
         .allOf(
@@ -415,7 +417,7 @@ public enum Predicates {
       return false;
     };
 
-    return Fluents.fluent().listOf(null, (E) Fluents.value())
+    return $().asListOf((E) Fluents.value())
         .transformToObject(function("toCursoredList", CursoredList::new))
         .then()
         .with(allOf(Stream.concat(

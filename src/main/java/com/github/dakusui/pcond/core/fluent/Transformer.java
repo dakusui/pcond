@@ -29,7 +29,7 @@ public abstract class Transformer<
     TX extends Transformer<TX, OIN, OUT>,
     OIN, OUT>
     implements Matcher<OIN, OUT>,
-    AsPhraseFactory.ForTransformer<OIN, OUT, TX> {
+    AsPhraseFactory.ForTransformer<OIN> {
   private final Function<OIN, OUT> function;
   private final String             transformerName;
 

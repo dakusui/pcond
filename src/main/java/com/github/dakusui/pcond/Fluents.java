@@ -1,9 +1,6 @@
 package com.github.dakusui.pcond;
 
 import com.github.dakusui.pcond.core.fluent.Fluent;
-import com.github.dakusui.pcond.core.fluent.transformers.ListTransformer;
-import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
-import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
 
 import java.util.List;
 
@@ -12,12 +9,8 @@ import static java.util.Arrays.asList;
 public enum Fluents {
   ;
 
-  public static <T> ObjectTransformer<T, T> when() {
+  public static <T> Fluent<T> when() {
     return when(value());
-  }
-
-  public static <T> ObjectTransformer<T, T> when(T value) {
-    return whenValueOf(value);
   }
 
   /**
@@ -28,32 +21,17 @@ public enum Fluents {
    * @param <T>   The type of the object to be verified.
    * @return A new ObjectTransformer for type `T`.
    */
-  public static <T> ObjectTransformer<T, T> whenValueOf(T value) {
-    return fluent(value).object("WHEN");
+  public static <T> Fluent<T> when(T value) {
+    return fluent("WHEN");
   }
 
-  public static <T> ObjectTransformer<T, T> whenInstanceOf(Class<T> value) {
-    return whenValueOf(value());
+  public static <T> Fluent<T> whenValueOfClass(Class<T> klass) {
+    return when(value());
   }
 
-  @SuppressWarnings("unchecked")
-  public static <E> ListTransformer<List<E>, E> whenListOf(E element) {
-    return fluent((List<E>) value()).listOf("WHEN", element);
+  public static <T> Fluent<T> $() {
+    return $(value());
   }
-
-  @SuppressWarnings("unchecked")
-  public static <E> StringTransformer<E> whenString() {
-    return fluent((E) value()).string("WHEN");
-  }
-
-  public static <T> ObjectTransformer<T, T> whenValueAt(int index) {
-    return whenValueAt(index, value());
-  }
-  @SuppressWarnings("unchecked")
-  public static <T> ObjectTransformer<T, T> whenValueAt(int index, T value) {
-    return (ObjectTransformer<T, T>) whenListOf(value()).elementAt(index).castTo((T) value);
-  }
-
   /**
    * Use this method inside "when" clause.
    *
@@ -69,39 +47,12 @@ public enum Fluents {
    * @param <T>   The type of the object to be verified.
    * @return A new ObjectTransformer for type `T`.
    */
-  public static <T> ObjectTransformer<T, T> as(T value) {
-    return asValueOf(value);
+  public static <T> Fluent<T> $(T value) {
+    return fluent();
   }
 
-  public static <T> ObjectTransformer<T, T> asObject() {
-    return as(value());
-  }
-
-  public static <T> ObjectTransformer<T, T> asValueOf(T value) {
-    return fluent(value).object(null);
-  }
-
-  public static <T> ObjectTransformer<T, T> asInstanceOf(Class<T> value) {
-    return asValueOf(value());
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <E> ListTransformer<List<E>, E> asListOf(E element) {
-    return fluent((List<E>) value()).listOf(null, element);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <E> StringTransformer<E> asString() {
-    return fluent((E) value()).string("WHEN");
-  }
-
-  public static <T> ObjectTransformer<T, T> asValueAt(int index) {
-    return asValueAt(index, value());
-  }
-
-  @SuppressWarnings("unchecked")
-  public static <T> ObjectTransformer<T, T> asValueAt(int index, T value) {
-    return (ObjectTransformer<T, T>) asListOf(value()).elementAt(index).castTo(value);
+  public static <T> Fluent<T> $valueOfClass(Class<T> klass) {
+    return $(value());
   }
   /**
    * Returns a "type place-holder".
@@ -117,23 +68,15 @@ public enum Fluents {
     return Fluent.value();
   }
 
-  /**
-   * Explicitly cast the returned {@link Fluent} object.
-   *
-   * @param value A type place-holder.
-   * @param <IN>  A type for which a new `Fluent` object is created.
-   * @return A new `Fluent` object.
-   */
-  private static <IN> Fluent<IN, IN> fluent(IN value) {
-    return fluent();
+  public static <IN> Fluent<IN> fluent() {
+    return fluent(null);
   }
 
-  public static <IN, OUT> Fluent<IN, OUT> fluent() {
-    return new Fluent<>();
+  public static <IN> Fluent<IN> fluent(String transformerName) {
+    return new Fluent<>(transformerName);
   }
 
   public static List<?> list(Object... args) {
     return asList(args);
   }
-
 }

@@ -19,13 +19,13 @@ public class MultiValueAssertion {
     assertThat(
         givenValues,
         allOf(
-            whenValueAt(0)
+            when().asListOfClass(Object.class).elementAt(0)
                 .then().asInteger()
                 .equalTo(122)
                 .verify(),
-            whenValueAt(1)
+            when().asListOfClass(Object.class).elementAt(1)
                 .tee(
-                    asValueAt(0).asString().then().isEqualTo("hello").verify(),
-                    asValueAt(0).asString().then().isEqualTo("world").verify()).verify()));
+                    $().asListOfClass(Object.class).elementAt(0).asString().then().isEqualTo("hello").verify(),
+                    $().asListOfClass(Object.class).elementAt(0).asString().then().isEqualTo("world").verify()).verify()));
   }
 }

@@ -42,13 +42,11 @@ public interface AsPhraseFactory<
 
   <E> Matcher.ForStream<OIN, E> asStreamOf(E value);
 
-  interface ForTransformer<OIN, OUT, TX extends Transformer<TX, OIN, OUT>>
-      extends AsPhraseFactory<
+  interface ForTransformer<OIN> extends AsPhraseFactory<
       StringTransformer<OIN>,
       IntegerTransformer<OIN>,
       BooleanTransformer<OIN>,
-      OIN
-      > {
+      OIN> {
     @Override
     default <E> ObjectTransformer<OIN, E> as(E value) {
       return asValueOf(value);
@@ -82,6 +80,9 @@ public interface AsPhraseFactory<
 
     @Override
     <E> StreamTransformer<OIN, E> asStreamOf(E value);
+  }
+
+  interface ForFluent<OIN> extends ForTransformer<OIN> {
 
   }
 

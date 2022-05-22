@@ -32,8 +32,8 @@ public class FluentsTest extends TestBase {
   public void whenPassingValidation_thenPasses$1() {
     assertThat(
         new Parent(),
-        when((Parent) value())
-            .transformToObject(Parent::parentMethod1)
+        when((Parent) value()).as((Parent) value())
+            .exercise(Parent::parentMethod1)
             .then()
             .with(isEqualTo("returnValueFromParentMethod")).build());
   }
@@ -58,7 +58,7 @@ public class FluentsTest extends TestBase {
   public void whenPassingValidation_thenPasses$2() {
     assertThat(
         new Parent(),
-        when((Parent) value())
+        when((Parent) value()).<Parent>asObject()
             .<Child, ChildTransformer<Parent>>transform(Printables.function("parentMethod2", Parent::parentMethod2), ChildTransformer::new)
             .childMethod()
             .then()
@@ -87,16 +87,16 @@ public class FluentsTest extends TestBase {
       validate(
           new Parent(),
           allOf(
-              when((Parent) value())
+              when((Parent) value()).<Parent>asObject()
                   .transformToObject(Functions.identity())
                   .then().intoObjectWith(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                   .with(isEqualTo("returnValueFromParentMethod"))
                   .verify(),
-              when((Parent) value())
+              when((Parent) value()).<Parent>asObject()
                   .transformToObject(Functions.identity())
                   .then().intoObjectWith(function("parentMethod2", Parent::parentMethod2))
                   .with(
-                      as((Child) value())
+                      $().as((Child) value())
                           .transformToString(function("lambda:Child::childMethod", Child::childMethod))
                           .then()
                           //         'not(...)' is added to make the matcher fail.
@@ -119,7 +119,7 @@ public class FluentsTest extends TestBase {
   public void example() {
     assertThat(
         asList("Hello", "world"),
-        whenListOf((String) value())
+        when().asListOf((String) value())
             .elementAt(0)
             .then().asString()
             .findSubstrings("hello", "world")
@@ -142,13 +142,13 @@ public class FluentsTest extends TestBase {
       assertThat(
           new Parent(),
           allOf(
-              whenInstanceOf(Parent.class)
+              whenValueOfClass(Parent.class).<Parent>asObject()
                   .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                   .then()
                   .asString()
                   .isEqualTo("returnValueFromParentMethod")
                   .verify(),
-              whenInstanceOf(Parent.class)
+              whenValueOfClass(Parent.class).<Parent>asObject()
                   .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                   .exercise(function("lambda:Child::childMethod", Child::childMethod))
                   .then()
@@ -168,15 +168,15 @@ public class FluentsTest extends TestBase {
     try {
       assertThat(
           (Supplier<Parent>) Parent::new,
-          whenInstanceOf(Supplier.class)
+          whenValueOfClass(Supplier.class).<Supplier<?>>asObject()
               .exercise(Supplier::get)
               .tee(
-                  as((Parent) value())
+                  $().as((Parent) value())
                       .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                       .then().asString()
                       .isEqualTo("returnValueFromParentMethod")
                       .verify(),
-                  asInstanceOf(Parent.class)
+                  $().asValueOfClass(Parent.class)
                       .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                       .exercise(function("lambda:Child::childMethod", Child::childMethod))
                       .then().asString()
@@ -277,8 +277,8 @@ public class FluentsTest extends TestBase {
     String hello = "hello";
     assertThat(
         hello,
-        when().tee(
-            as((String) value())
+        when().asObject().tee(
+            $().as((String) value())
                 .exercise(objectHashCode())
                 .then().isInstanceOf(Integer.class))
     );
