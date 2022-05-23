@@ -33,6 +33,14 @@ public abstract class Transformer<
   private final Function<OIN, OUT> function;
   private final String             transformerName;
 
+  /**
+   * Constructs an instance of this class.
+   *
+   * @param transformerName THe name of transformer. This can be {@code null}.
+   * @param parent          The parent of the new transformer. {@code null} if it is a root.
+   * @param function        A function with which a given value is converted.
+   * @param <IN>            The type of the input.
+   */
   @SuppressWarnings("unchecked")
   public <IN> Transformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
     this.transformerName = transformerName;
@@ -57,8 +65,14 @@ public abstract class Transformer<
 
   @SuppressWarnings("unchecked")
   @SafeVarargs
-  public final <NOUT> Verifier<?, OIN, NOUT> tee(Predicate<? super NOUT>... predicates) {
+  public final <NOUT> Verifier<?, OIN, NOUT> allOf(Predicate<? super NOUT>... predicates) {
     return this.then().asValueOf((NOUT) value()).allOf(predicates);
+  }
+
+  @SuppressWarnings("unchecked")
+  @SafeVarargs
+  public final <NOUT> Verifier<?, OIN, NOUT> anyOf(Predicate<? super NOUT>... predicates) {
+    return this.then().asValueOf((NOUT) value()).anyOf(predicates);
   }
 
   public <O> ObjectTransformer<OIN, O> exercise(Function<? super OUT, O> f) {
@@ -95,15 +109,6 @@ public abstract class Transformer<
 
   @SuppressWarnings("unchecked")
   static <I, M, O> Function<I, O> chainFunctions(Function<I, ? extends M> func, Function<? super M, O> after) {
-    /*
-    if (isDummyFunction(func))
-      // In case, func == null, <I> will become the same as M.
-      // So, this cast is safe.
-      return (Function<I, O>) (isDummyFunction(after) ? dummyFunction() : after);
-    return isDummyFunction(after) ?
-        (Function<I, O>) func :
-        func.andThen(after);
-     */
     if (isDummyFunction(func) && isDummyFunction(after))
       return dummyFunction();
     if (isDummyFunction(func))

@@ -98,7 +98,7 @@ public class FluentsTest extends TestBase {
           (Supplier<Parent>) Parent::new,
           whenValueOfClass(Supplier.class).<Supplier<?>>asObject()
               .exercise(Supplier::get)
-              .tee(
+              .allOf(
                   $().as((Parent) value())
                       .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                       .then().asString()
@@ -138,7 +138,7 @@ public class FluentsTest extends TestBase {
     String hello = "hello";
     assertThat(
         hello,
-        when().asObject().tee(
+        when().asObject().allOf(
             $().as((String) value())
                 .exercise(objectHashCode())
                 .then().isInstanceOf(Integer.class))

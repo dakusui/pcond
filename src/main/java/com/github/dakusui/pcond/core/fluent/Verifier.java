@@ -64,17 +64,17 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   // BEGIN: ------------------------- High -level methods
   @SafeVarargs
   public final V allOf(Predicate<? super T>... predicates) {
-    return (V) with(Predicates.allOf(predicates));
+    return with(Predicates.allOf(predicates));
   }
 
   @SafeVarargs
   public final V anyOf(Predicate<? super T>... predicates) {
-    return (V) with(Predicates.anyOf(predicates));
+    return with(Predicates.anyOf(predicates));
   }
 
   @SafeVarargs
   public final V and(Predicate<? super T>... predicates) {
-    return (V) with(Predicates.and(predicates));
+    return with(Predicates.and(predicates));
   }
 
   @SafeVarargs
