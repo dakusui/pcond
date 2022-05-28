@@ -81,7 +81,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
     return this.transform(f, (TX, func) -> new ObjectTransformer<>(transformerName(), this, func));
   }
 
-  default StringTransformer<OIN> transformToString(Function<OUT, String> f) {
+  default IStringTransformer<OIN> transformToString(Function<OUT, String> f) {
     return this.transform(f, (TX, func) -> new StringTransformer<>(transformerName(), this, func));
   }
 
