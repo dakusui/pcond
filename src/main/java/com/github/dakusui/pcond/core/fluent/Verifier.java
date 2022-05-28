@@ -30,6 +30,10 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     this.predicate = predicate; // this field can be null, when the first verifier starts building.
   }
 
+  public String transformerName() {
+    return this.transformerName;
+  }
+
   protected V predicate(Predicate<? super T> predicate) {
     if (isDummyPredicate(this.predicate))
       this.predicate = predicate;
@@ -46,7 +50,6 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     return this.predicate;
   }
 
-
   public V testPredicate(Predicate<? super T> predicate) {
     return predicate(predicate);
   }
@@ -54,13 +57,14 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   public Predicate<? super OIN> build() {
     return PrintablePredicateFactory.TransformingPredicate.Factory
         .create(
-            this.transformerName,
-            this.transformerName != null ?
+            this.transformerName(),
+            this.transformerName() != null ?
                 "THEN" :
                 "VERIFY",
-            this.function)
-        .check(this.predicate);
+            this.function())
+        .check(this.predicate());
   }
+
   // BEGIN: ------------------------- High -level methods
   @SafeVarargs
   public final V allOf(Predicate<? super T>... predicates) {
@@ -81,6 +85,7 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   public final V or(Predicate<? super T>... predicates) {
     return with(Predicates.or(predicates));
   }
+
   /**
    * A synonym of `build()` method.
    *
@@ -90,6 +95,7 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   public <AS> Predicate<AS> verify() {
     return (Predicate<AS>) build();
   }
+
   abstract protected V create();
 
   // BEGIN: ------------------------- High -level methods
@@ -101,53 +107,53 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
 
   @Override
   public StringVerifier<OIN> asString() {
-    return new StringVerifier<>(transformerName, chainFunctions(this.function, Functions.cast(String.class)), dummyPredicate());
+    return new StringVerifier<>(transformerName(), chainFunctions(this.function(), Functions.cast(String.class)), dummyPredicate());
   }
 
   @Override
   public IntegerVerifier<OIN> asInteger() {
-    return new IntegerVerifier<>(transformerName, chainFunctions(this.function, Functions.cast(Integer.class)), dummyPredicate());
+    return new IntegerVerifier<>(transformerName(), chainFunctions(this.function(), Functions.cast(Integer.class)), dummyPredicate());
   }
 
   @Override
   public BooleanVerifier<OIN> asBoolean() {
-    return new BooleanVerifier<>(transformerName, chainFunctions(this.function, Functions.cast(Boolean.class)), dummyPredicate());
+    return new BooleanVerifier<>(transformerName(), chainFunctions(this.function(), Functions.cast(Boolean.class)), dummyPredicate());
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public <NOUT> ObjectVerifier<OIN, NOUT> asValueOf(NOUT value) {
-    return new ObjectVerifier<>(transformerName, chainFunctions(this.function, Printables.function("treatAs[NOUT]", v -> (NOUT)v)), dummyPredicate());
+    return new ObjectVerifier<>(transformerName(), chainFunctions(this.function(), Printables.function("treatAs[NOUT]", v -> (NOUT) v)), dummyPredicate());
   }
 
   @Override
   public <E> ListVerifier<OIN, E> asListOf(E value) {
-    return new ListVerifier<>(transformerName, chainFunctions(this.function, Functions.castTo(Functions.value())), dummyPredicate());
+    return new ListVerifier<>(transformerName(), chainFunctions(this.function(), Functions.castTo(Functions.value())), dummyPredicate());
   }
 
   @Override
   public <E> StreamVerifier<OIN, E> asStreamOf(E value) {
-    return new StreamVerifier<>(transformerName, chainFunctions(this.function, Functions.castTo(Functions.value())), dummyPredicate());
+    return new StreamVerifier<>(transformerName(), chainFunctions(this.function(), Functions.castTo(Functions.value())), dummyPredicate());
   }
 
   @Override
   public StringVerifier<OIN> intoStringWith(Function<T, String> function) {
-    return new StringVerifier<>(transformerName, chainFunctions(this.function, function), dummyPredicate());
+    return new StringVerifier<>(transformerName(), chainFunctions(this.function(), function), dummyPredicate());
   }
 
   @Override
   public IntegerVerifier<OIN> intoIntegerWith(Function<T, Integer> function) {
-    return new IntegerVerifier<>(transformerName, chainFunctions(this.function, function), dummyPredicate());
+    return new IntegerVerifier<>(transformerName(), chainFunctions(this.function(), function), dummyPredicate());
   }
 
   @Override
   public BooleanVerifier<OIN> intoBooleanWith(Function<T, Boolean> function) {
-    return new BooleanVerifier<>(transformerName, chainFunctions(this.function, function), dummyPredicate());
+    return new BooleanVerifier<>(transformerName(), chainFunctions(this.function(), function), dummyPredicate());
   }
 
   @Override
   public <OUT> ObjectVerifier<OIN, OUT> intoObjectWith(Function<T, OUT> function) {
-    return new ObjectVerifier<>(transformerName, chainFunctions(this.function, function), dummyPredicate());
+    return new ObjectVerifier<>(transformerName(), chainFunctions(this.function(), function), dummyPredicate());
   }
 
   ////
@@ -187,5 +193,5 @@ public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   }
   // END: Methods for java.lang.Object come here.
   ////
-//--------------------------------
+  //--------------------------------
 }
