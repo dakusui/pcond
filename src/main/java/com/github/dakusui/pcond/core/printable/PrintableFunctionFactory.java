@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.core.printable;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
-import com.github.dakusui.pcond.internals.InternalChecks;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -42,6 +41,7 @@ public enum PrintableFunctionFactory {
         addAll(c);
       }
     }),
+    CAST_TO("cast@compileTime", (v) -> v),
     ;
     private final Function<?, ?> instance;
 

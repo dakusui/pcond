@@ -10,10 +10,10 @@ public enum Fluents {
   ;
 
   public static <T> Fluent<T> when() {
-    return when(value());
+    return whenValueOf(value());
   }
 
-  /**
+    /**
    * Use the value returned from `value()` as the argument for this
    * method as a place-holder for the sake of readability.
    *
@@ -21,12 +21,12 @@ public enum Fluents {
    * @param <T>   The type of the object to be verified.
    * @return A new ObjectTransformer for type `T`.
    */
-  public static <T> Fluent<T> when(T value) {
+  public static <T> Fluent<T> whenValueOf(T value) {
     return fluent("WHEN");
   }
 
   public static <T> Fluent<T> whenValueOfClass(Class<T> klass) {
-    return when(value());
+    return whenValueOf(value());
   }
 
   public static <T> Fluent<T> $() {

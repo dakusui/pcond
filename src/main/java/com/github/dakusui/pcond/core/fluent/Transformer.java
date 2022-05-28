@@ -6,6 +6,7 @@ import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -134,6 +135,14 @@ public abstract class Transformer<
 
   public abstract Verifier<?, OIN, OUT> then();
 
+  @SuppressWarnings("unchecked")
+  public TX peek(Consumer<OUT> consumer) {
+    applyFunction(v -> {
+      consumer.accept(v);
+      return v;
+    });
+    return (TX) this;
+  }
   @Override
   public StringTransformer<OIN> asString() {
     return new StringTransformer<>(transformerName, this, Printables.function("treatAsString", v -> (String) v));

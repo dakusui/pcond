@@ -28,7 +28,7 @@ public class Fluent<OIN> implements AsPhraseFactory.ForFluent<OIN> {
 
   @Override
   public BooleanTransformer<OIN> asBoolean() {
-    return new BooleanTransformer<OIN>(this.transformerName, null, dummyFunction());
+    return new BooleanTransformer<>(this.transformerName, null, dummyFunction());
   }
 
   @Override

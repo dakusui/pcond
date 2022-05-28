@@ -106,21 +106,23 @@ public enum Functions {
   /**
    * Returns a function that casts an object into a given class.
    *
-   * @param value Always use a value returned from {@link Functions#value()} method.
-   * @param <E>  The type to which the object is case.
+   * @param value A type place-holder.
+   *              Always use a value returned from {@link Functions#value()} method.
+   * @param <E>   The type to which the object is case.
    * @return The function.
-   */  public static <E> Function<? super Object, E> castTo(E value) {
-    return PrintableFunctionFactory.Parameterized.CAST.create(singletonList(value));
+   */
+  public static <E> Function<? super Object, E> castTo(@SuppressWarnings("unused") E value) {
+    return PrintableFunctionFactory.Simple.CAST_TO.instance();
   }
 
   /**
    * A method to return a value for a "casting placeholder value".
    *
-   * @return Casting placeholder value
    * @param <E> Type to cast to.
+   * @return Casting placeholder value
    */
   public static <E> E value() {
-     return null;
+    return null;
   }
 
   /**

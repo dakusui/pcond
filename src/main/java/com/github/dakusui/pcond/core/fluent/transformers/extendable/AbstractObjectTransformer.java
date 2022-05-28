@@ -46,6 +46,6 @@ public abstract class AbstractObjectTransformer<TX extends AbstractObjectTransfo
 
   @SuppressWarnings("unchecked")
   public <T, RTX extends AbstractObjectTransformer<RTX, OIN, T>> RTX castTo(T value) {
-    return (RTX) this;
+    return (RTX) this.exercise(Functions.castTo(value));
   }
 }
