@@ -16,7 +16,7 @@ import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyPredicate;
 
 public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
-    extends PrintablePredicateFactory.TransformingPredicate<T, OIN>
+    extends PrintablePredicateFactory.TransformingPredicate<OIN, T>
     implements IntoPhraseFactory.ForVerifier<OIN, T>,
     AsPhraseFactory.ForVerifier<OIN> {
   protected final String                             transformerName;
