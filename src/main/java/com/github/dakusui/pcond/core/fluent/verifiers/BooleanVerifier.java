@@ -11,7 +11,7 @@ public class BooleanVerifier<OIN> extends Verifier<BooleanVerifier<OIN>, OIN, Bo
   }
 
   @Override
-  protected BooleanVerifier<OIN> create() {
+  public BooleanVerifier<OIN> create() {
     return new BooleanVerifier<>(this.transformerName, this.function(), this.predicate());
   }
 }

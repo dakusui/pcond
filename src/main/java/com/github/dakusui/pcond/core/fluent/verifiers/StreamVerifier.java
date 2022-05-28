@@ -15,7 +15,7 @@ public class StreamVerifier<OIN, E>
   }
 
   @Override
-  protected StreamVerifier<OIN, E> create() {
+  public StreamVerifier<OIN, E> create() {
     return new StreamVerifier<>(this.transformerName, this.function(), this.predicate());
   }
 

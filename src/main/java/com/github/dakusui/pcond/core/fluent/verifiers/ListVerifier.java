@@ -18,7 +18,7 @@ public class ListVerifier<OIN, E>
   }
 
   @Override
-  protected ListVerifier<OIN, E> create() {
+  public ListVerifier<OIN, E> create() {
     return new ListVerifier<>(this.transformerName, this.function(), this.predicate());
   }
 

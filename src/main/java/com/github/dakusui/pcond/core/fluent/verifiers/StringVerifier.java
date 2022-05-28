@@ -15,7 +15,7 @@ public class StringVerifier<OIN> extends Verifier<StringVerifier<OIN>, OIN, Stri
   }
 
   @Override
-  protected StringVerifier<OIN> create() {
+  public StringVerifier<OIN> create() {
     return new StringVerifier<>(this.transformerName, this.function(), this.predicate());
   }
 

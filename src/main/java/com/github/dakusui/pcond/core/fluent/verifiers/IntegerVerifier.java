@@ -12,7 +12,7 @@ public class IntegerVerifier<OIN> extends Verifier<IntegerVerifier<OIN>, OIN, In
   }
 
   @Override
-  protected IntegerVerifier<OIN> create() {
+  public IntegerVerifier<OIN> create() {
     return new IntegerVerifier<>(this.transformerName, this.function(), this.predicate());
   }
 

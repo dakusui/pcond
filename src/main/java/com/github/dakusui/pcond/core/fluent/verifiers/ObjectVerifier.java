@@ -13,7 +13,7 @@ public class ObjectVerifier<OIN, OUT>
   }
 
   @Override
-  protected ObjectVerifier<OIN, OUT> create() {
+  public ObjectVerifier<OIN, OUT> create() {
     return new ObjectVerifier<>(this.transformerName, this.function(), this.predicate());
   }
 }
