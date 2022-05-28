@@ -15,13 +15,13 @@ import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 
-public interface ITransformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> extends Matcher<OIN, OUT>, AsPhraseFactory.ForTransformer<OIN> {
+public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> extends Matcher<OIN, OUT>, AsPhraseFactory.ForTransformer<OIN> {
   @SuppressWarnings("unchecked")
   static <
       OIN,
       COUT,
       NOUT,
-      B extends Transformer<
+      B extends ITransformer<
           B,
           OIN,
           COUT>,
@@ -29,7 +29,10 @@ public interface ITransformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ex
           B,
           Function<COUT, NOUT>,
           BB>,
-      BB extends Transformer<BB, OIN, NOUT>>
+      BB extends ITransformer<
+          BB,
+          OIN,
+          NOUT>>
   BB transform(B parent, Function<? super COUT, NOUT> f, C constructor) {
     return constructor.apply(parent, (Function<COUT, NOUT>) f);
   }
@@ -51,7 +54,7 @@ public interface ITransformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ex
   @SuppressWarnings("unchecked")
   default <
       NOUT,
-      BB extends Transformer<BB, OIN, NOUT>>
+      BB extends ITransformer<BB, OIN, NOUT>>
   BB transform(Function<? super OUT, NOUT> f, BiFunction<TX, Function<OUT, NOUT>, BB> factory) {
     return transform((TX) this, f, factory);
   }
