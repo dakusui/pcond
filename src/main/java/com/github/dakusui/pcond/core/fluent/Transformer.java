@@ -16,7 +16,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
  * @param <OUT> (Current) Output type.
  */
 public abstract class Transformer<
-    TX extends Transformer<TX, OIN, OUT>,
+    TX extends ITransformer<TX, OIN, OUT>,
     OIN, OUT>
     implements
     ITransformer<TX, OIN, OUT> {
