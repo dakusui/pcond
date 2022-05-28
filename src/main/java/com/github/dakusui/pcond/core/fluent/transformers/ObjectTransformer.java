@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
-import com.github.dakusui.pcond.core.fluent.Transformer;
+import com.github.dakusui.pcond.core.fluent.ITransformer;
 import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.fluent.transformers.extendable.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
@@ -16,7 +16,7 @@ public class ObjectTransformer<OIN, OUT> extends AbstractObjectTransformer<Objec
    * @param parent
    * @param function
    */
-  public <IN> ObjectTransformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
+  public <IN> ObjectTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
     super(transformerName, parent, function);
   }
 

@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
+import com.github.dakusui.pcond.core.fluent.ITransformer;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
 import com.github.dakusui.pcond.core.fluent.verifiers.StreamVerifier;
@@ -14,7 +15,7 @@ public class StreamTransformer<OIN, E> extends Transformer<StreamTransformer<OIN
   /**
    *
    */
-  public <IN> StreamTransformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends Stream<E>> function) {
+  public <IN> StreamTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Stream<E>> function) {
     super(transformerName, parent, function);
   }
 

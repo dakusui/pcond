@@ -10,7 +10,7 @@ import com.github.dakusui.pcond.forms.Printables;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.core.fluent.Transformer.chainFunctions;
+import static com.github.dakusui.pcond.core.fluent.ITransformer.chainFunctions;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyPredicate;

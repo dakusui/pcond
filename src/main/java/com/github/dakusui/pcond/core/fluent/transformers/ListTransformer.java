@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
+import com.github.dakusui.pcond.core.fluent.ITransformer;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
@@ -21,7 +22,7 @@ public class ListTransformer<OIN, E>
    * @param parent          A parent transformer
    * @param function        A function that transforms an input value in to the target value of this transformer.
    */
-  public <IN> ListTransformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends List<E>> function) {
+  public <IN> ListTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends List<E>> function) {
     super(transformerName, parent, function);
   }
 

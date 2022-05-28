@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.fluent.transformers.extendable;
 
+import com.github.dakusui.pcond.core.fluent.ITransformer;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
@@ -11,7 +12,7 @@ import java.util.function.Function;
 public abstract class AbstractObjectTransformer<TX extends AbstractObjectTransformer<TX, OIN, OUT>, OIN, OUT>
     extends Transformer<TX, OIN, OUT> {
 
-  public <IN> AbstractObjectTransformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
+  public <IN> AbstractObjectTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
     super(transformerName, parent, function);
   }
 

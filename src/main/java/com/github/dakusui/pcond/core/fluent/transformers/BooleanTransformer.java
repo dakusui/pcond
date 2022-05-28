@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
+import com.github.dakusui.pcond.core.fluent.ITransformer;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.BooleanVerifier;
@@ -14,7 +15,7 @@ public class BooleanTransformer<OIN> extends Transformer<BooleanTransformer<OIN>
    * @param parent
    * @param function
    */
-  public <IN> BooleanTransformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends Boolean> function) {
+  public <IN> BooleanTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Boolean> function) {
     super(transformerName, parent, function);
   }
 
