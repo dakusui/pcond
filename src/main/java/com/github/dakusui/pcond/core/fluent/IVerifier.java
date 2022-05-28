@@ -16,7 +16,7 @@ import static com.github.dakusui.pcond.core.fluent.ITransformer.chainFunctions;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 
-public interface IVerifier<V extends Verifier<V, OIN, T>, OIN, T>
+public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
     extends
     Identifiable,
     Predicate<OIN>,

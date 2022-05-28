@@ -2,8 +2,8 @@ package com.github.dakusui.pcond.core.fluent.transformers.extendable;
 
 import com.github.dakusui.pcond.core.fluent.ITransformer;
 import com.github.dakusui.pcond.core.fluent.Transformer;
+import com.github.dakusui.pcond.core.fluent.transformers.IStringTransformer;
 import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
-import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.forms.Functions;
 
@@ -21,7 +21,7 @@ public abstract class AbstractObjectTransformer<TX extends AbstractObjectTransfo
    *
    * @return this object the method appended.
    */
-  public StringTransformer<OIN> stringify() {
+  public IStringTransformer<OIN> stringify() {
     return this.transformToString(Functions.stringify());
   }
 

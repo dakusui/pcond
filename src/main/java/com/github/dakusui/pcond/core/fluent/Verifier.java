@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyPredicate;
 
-public abstract class Verifier<V extends Verifier<V, OIN, T>, OIN, T>
+public abstract class Verifier<V extends IVerifier<V, OIN, T>, OIN, T>
     extends PrintablePredicateFactory.TransformingPredicate<OIN, T>
     implements
     IVerifier<V, OIN, T> {
