@@ -84,18 +84,14 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
   }
 
   default IStringTransformer<OIN> transformToString(Function<OUT, String> f) {
-    return this.transform(f, (TX, func) -> stringTransformer(this, func));
-  }
-
-  static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IStringTransformer<OIN> stringTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, String> func) {
-    return new StringTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    return this.transform(f, (TX, func) -> Factory.stringTransformer(this, func));
   }
 
   default <E> IListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
     return this.transform(f, (TX, func) -> new ListTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 
-  default <E> StreamTransformer<OIN, E> transformToStream(Function<OUT, Stream<E>> f) {
+  default <E> IStreamTransformer<OIN, E> transformToStream(Function<OUT, Stream<E>> f) {
     return this.transform(f, (TX, func) -> new StreamTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 
@@ -120,7 +116,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
 
   @Override
   default StringTransformer<OIN> asString() {
-    return (StringTransformer<OIN>) stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
+    return (StringTransformer<OIN>) Factory.stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
   }
 
   @Override
@@ -147,7 +143,15 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
 
   @SuppressWarnings("unchecked")
   @Override
-  default <E> StreamTransformer<OIN, E> asStreamOf(E value) {
+  default <E> IStreamTransformer<OIN, E> asStreamOf(E value) {
     return new StreamTransformer<>(transformerName(), this, Printables.function("treatAsStream[NOUT]", v -> (Stream<E>) v), originalInputValue());
+  }
+
+  enum Factory {
+    ;
+
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IStringTransformer<OIN> stringTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, String> func) {
+      return new StringTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
   }
 }

@@ -29,7 +29,7 @@ public interface IListTransformer<OIN, E> extends ITransformer<IListTransformer<
     return this.transformToList(Printables.function("subList", v -> v.subList(begin, v.size())));
   }
 
-  default StreamTransformer<OIN, E> stream() {
+  default IStreamTransformer<OIN, E> stream() {
     return this.transformToStream(Printables.function("listStream", Collection::stream));
   }
 

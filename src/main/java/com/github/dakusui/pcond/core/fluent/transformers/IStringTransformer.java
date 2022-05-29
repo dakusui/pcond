@@ -24,7 +24,7 @@ public interface IStringTransformer<OIN> extends
   @SuppressWarnings("unchecked")
   @Override
   default IStringVerifier<OIN> then() {
-    return IVerifier.stringVerifier(
+    return IVerifier.Factory.stringVerifier(
         this.transformerName(),
         (Function<? super OIN, String>) this.function(),
         dummyPredicate(),

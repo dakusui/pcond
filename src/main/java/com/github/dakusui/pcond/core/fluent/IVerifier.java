@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.TestAssertions;
 import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.*;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
@@ -14,6 +15,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.fluent.ITransformer.chainFunctions;
+import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.objectVerifier;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 
@@ -98,19 +100,7 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   @Override
   default IStringVerifier<OIN> asString() {
-    return stringVerifier(this, Function.class.cast(Functions.cast(String.class)));
-  }
-
-  static <V extends IVerifier<V, OIN, T>, OIN, T> IStringVerifier<OIN> stringVerifier(IVerifier<V, OIN, T> verifier, Function<T, String> function) {
-    return IVerifier.stringVerifier(verifier.transformerName(), chainFunctions(verifier.function(), function), dummyPredicate(), verifier.originalInputValue());
-  }
-
-  static <OIN> IStringVerifier<OIN> stringVerifier(
-      String transformerName,
-      Function<? super OIN, String> function,
-      Predicate<? super String> predicate,
-      OIN originalInputValue) {
-    return new StringVerifier<>(transformerName, function, predicate, originalInputValue);
+    return Factory.stringVerifier(this, Function.class.cast(Functions.cast(String.class)));
   }
 
   @Override
@@ -126,7 +116,7 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
   @SuppressWarnings("unchecked")
   @Override
   default <NOUT> IObjectVerifier<OIN, NOUT> asValueOf(NOUT value) {
-    return new ObjectVerifier<>(transformerName(), chainFunctions(this.function(), Printables.function("treatAs[NOUT]", v -> (NOUT) v)), dummyPredicate(), this.originalInputValue());
+    return objectVerifier(transformerName(), chainFunctions(this.function(), Printables.function("treatAs[NOUT]", v -> (NOUT) v)), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
@@ -141,7 +131,7 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
 
   @Override
   default IStringVerifier<OIN> intoStringWith(Function<T, String> function) {
-    return stringVerifier(this, function);
+    return Factory.stringVerifier(this, function);
   }
 
   @Override
@@ -156,7 +146,7 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
 
   @Override
   default <OUT> ObjectVerifier<OIN, OUT> intoObjectWith(Function<T, OUT> function) {
-    return new ObjectVerifier<>(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return objectVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   default V isNotNull() {
@@ -190,5 +180,29 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
 
   default V invokeStatic(Class<?> klass, String methodName, Object... args) {
     return this.predicate(Predicates.callp(MethodQuery.classMethod(klass, methodName, args)));
+  }
+
+  enum Factory {
+    ;
+
+    public static <V extends IVerifier<V, OIN, T>, OIN, T> IStringVerifier<OIN> stringVerifier(IVerifier<V, OIN, T> verifier, Function<T, String> function) {
+      return stringVerifier(verifier.transformerName(), chainFunctions(verifier.function(), function), dummyPredicate(), verifier.originalInputValue());
+    }
+
+    public static <OIN> IStringVerifier<OIN> stringVerifier(
+        String transformerName,
+        Function<? super OIN, String> function,
+        Predicate<? super String> predicate,
+        OIN originalInputValue) {
+      return new StringVerifier<>(transformerName, function, predicate, originalInputValue);
+    }
+
+    public static <OIN, OUT> ObjectVerifier<OIN, OUT> objectVerifier(ObjectTransformer<OIN, OUT> objectTransformer) {
+      return objectVerifier(objectTransformer.transformerName(), objectTransformer.function(), dummyPredicate(), objectTransformer.originalInputValue());
+    }
+
+    public static <OIN, OUT> ObjectVerifier<OIN, OUT> objectVerifier(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInptValue) {
+      return new ObjectVerifier<>(transformerName, function, predicate, originalInptValue);
+    }
   }
 }

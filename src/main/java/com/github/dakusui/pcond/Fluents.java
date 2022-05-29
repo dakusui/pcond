@@ -51,7 +51,7 @@ public enum Fluents {
     return new Fluent<>("WHEN", value).asListOf(value());
   }
 
-  public static <E> StreamTransformer<Stream<E>, E> when(Stream<E> value) {
+  public static <E> IStreamTransformer<Stream<E>, E> when(Stream<E> value) {
     return new Fluent<>("WHEN", value).asStreamOf(value());
   }
 

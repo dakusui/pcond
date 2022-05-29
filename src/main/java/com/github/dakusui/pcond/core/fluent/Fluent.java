@@ -48,7 +48,7 @@ public class Fluent<OIN> implements AsPhraseFactory.ForFluent<OIN> {
   }
 
   @Override
-  public <E> StreamTransformer<OIN, E> asStreamOf(E value) {
+  public <E> IStreamTransformer<OIN, E> asStreamOf(E value) {
     return new StreamTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 }

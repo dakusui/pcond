@@ -68,7 +68,7 @@ public interface AsPhraseFactory<
     }
 
     @Override
-    default <E> StreamTransformer<OIN, E> asStreamOfClass(Class<E> klass) {
+    default <E> IStreamTransformer<OIN, E> asStreamOfClass(Class<E> klass) {
       return asStreamOf(value());
     }
 
@@ -79,7 +79,7 @@ public interface AsPhraseFactory<
     <E> IListTransformer<OIN, E> asListOf(E value);
 
     @Override
-    <E> StreamTransformer<OIN, E> asStreamOf(E value);
+    <E> IStreamTransformer<OIN, E> asStreamOf(E value);
 
     default <E> IObjectTransformer<OIN, E> valueAt(int i, E value) {
       return asListOf(value).elementAt(i);
