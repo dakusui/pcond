@@ -32,7 +32,7 @@ public interface StringTransformer<OIN> extends
   }
 
   class Impl<OIN>
-      extends BaseTransformer<StringTransformer<OIN>, OIN, String>
+      extends Base<StringTransformer<OIN>, OIN, String>
       implements StringTransformer<OIN> {
     public <IN> Impl(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends String> function, OIN originalInputValue) {
       super(transformerName, parent, function, originalInputValue);

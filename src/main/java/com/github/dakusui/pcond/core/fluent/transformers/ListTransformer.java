@@ -41,7 +41,7 @@ public interface ListTransformer<OIN, E> extends Transformer<ListTransformer<OIN
   }
 
   class Impl<OIN, E>
-      extends BaseTransformer<ListTransformer<OIN, E>, OIN, List<E>>
+      extends Base<ListTransformer<OIN, E>, OIN, List<E>>
       implements ListTransformer<OIN, E> {
     /**
      * Constructs an object of this class.

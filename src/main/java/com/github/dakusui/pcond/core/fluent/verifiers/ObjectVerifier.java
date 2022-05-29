@@ -19,7 +19,7 @@ public interface ObjectVerifier<OIN, OUT> extends
   ObjectVerifier<OIN, OUT> create(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue);
 
   class Impl<OIN, OUT>
-      extends BaseVerifier<ObjectVerifier<OIN, OUT>, OIN, OUT>
+      extends Verifier.Base<ObjectVerifier<OIN, OUT>, OIN, OUT>
       implements ObjectVerifier<OIN, OUT> {
     public Impl(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);

@@ -43,7 +43,7 @@ public interface ListVerifier<OIN, E> extends
   }
 
   class Impl<OIN, E>
-      extends BaseVerifier<ListVerifier<OIN, E>, OIN, List<E>>
+      extends Verifier.Base<ListVerifier<OIN, E>, OIN, List<E>>
       implements ListVerifier<OIN, E> {
     public Impl(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);

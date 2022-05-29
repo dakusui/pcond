@@ -187,7 +187,7 @@ public interface Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ext
    * @param <OIN> Original input type.
    * @param <OUT> (Current) Output type.
    */
-  abstract class BaseTransformer<
+  abstract class Base<
       TX extends Transformer<TX, OIN, OUT>,
       OIN, OUT>
       implements
@@ -207,7 +207,7 @@ public interface Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ext
      * @param originalInputValue An original input value, if available. Otherwise {@code null}.
      */
     @SuppressWarnings("unchecked")
-    public <IN> BaseTransformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function, OIN originalInputValue) {
+    public <IN> Base(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function, OIN originalInputValue) {
       this.transformerName = transformerName;
       this.function = (Function<OIN, OUT>) Transformer.chainFunctions(parent == null ? dummyFunction() : parent.function(), function);
       this.originalInputValue = originalInputValue;

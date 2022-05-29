@@ -13,7 +13,7 @@ public interface BooleanVerifier<OIN> extends Identifiable, Predicate<OIN>, Eval
   @Override
   BooleanVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue);
 
-  class Impl<OIN> extends BaseVerifier<BooleanVerifier<OIN>, OIN, Boolean> implements BooleanVerifier<OIN> {
+  class Impl<OIN> extends Verifier.Base<BooleanVerifier<OIN>, OIN, Boolean> implements BooleanVerifier<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
     }

@@ -225,7 +225,7 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     }
   }
 
-  abstract class BaseVerifier<V extends Verifier<V, OIN, T>, OIN, T>
+  abstract class Base<V extends Verifier<V, OIN, T>, OIN, T>
       extends PrintablePredicateFactory.TransformingPredicate<OIN, T>
       implements Verifier<V, OIN, T> {
     protected final String                             transformerName;
@@ -233,7 +233,7 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     private final   OIN                                originalInputValue;
     private         Predicate<? super T>               predicate;
 
-    protected BaseVerifier(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue) {
+    protected Base(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue) {
       super(predicate, function);
       this.transformerName = transformerName;
       this.function = function;

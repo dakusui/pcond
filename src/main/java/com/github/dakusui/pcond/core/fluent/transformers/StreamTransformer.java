@@ -14,7 +14,7 @@ public interface StreamTransformer<OIN, E> extends Transformer<StreamTransformer
   @Override
   StreamVerifier<OIN, E> then();
 
-  class Impl<OIN, E> extends BaseTransformer<StreamTransformer<OIN, E>, OIN, Stream<E>>
+  class Impl<OIN, E> extends Base<StreamTransformer<OIN, E>, OIN, Stream<E>>
       implements StreamTransformer<OIN, E> {
 
     /**

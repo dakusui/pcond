@@ -13,7 +13,7 @@ public interface BooleanTransformer<OIN> extends Transformer<BooleanTransformer<
   @Override
   BooleanVerifier<OIN> then();
 
-  class Impl<OIN> extends BaseTransformer<BooleanTransformer<OIN>, OIN, Boolean> implements BooleanTransformer<OIN> {
+  class Impl<OIN> extends Base<BooleanTransformer<OIN>, OIN, Boolean> implements BooleanTransformer<OIN> {
 
     public <IN> Impl(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends Boolean> function, OIN originalInputValue) {
       super(transformerName, parent, function, originalInputValue);

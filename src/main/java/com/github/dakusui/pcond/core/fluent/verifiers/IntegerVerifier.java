@@ -39,7 +39,7 @@ public interface IntegerVerifier<OIN> extends
     return predicate(Predicates.lessThan(v));
   }
 
-  class Impl<OIN> extends BaseVerifier<IntegerVerifier<OIN>, OIN, Integer> implements IntegerVerifier<OIN> {
+  class Impl<OIN> extends Verifier.Base<IntegerVerifier<OIN>, OIN, Integer> implements IntegerVerifier<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
     }

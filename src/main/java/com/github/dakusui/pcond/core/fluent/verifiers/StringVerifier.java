@@ -58,7 +58,7 @@ public interface StringVerifier<OIN> extends
   }
 
   class Impl<OIN>
-      extends BaseVerifier<StringVerifier<OIN>, OIN, String>
+      extends Verifier.Base<StringVerifier<OIN>, OIN, String>
       implements StringVerifier<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends String> function, Predicate<? super String> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);

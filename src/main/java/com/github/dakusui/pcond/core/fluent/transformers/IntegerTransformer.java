@@ -13,7 +13,7 @@ public interface IntegerTransformer<OIN> extends Transformer<IntegerTransformer<
   @Override
   IntegerVerifier<OIN> then();
 
-  class Impl<OIN> extends BaseTransformer<IntegerTransformer<OIN>, OIN, Integer> implements IntegerTransformer<OIN> {
+  class Impl<OIN> extends Base<IntegerTransformer<OIN>, OIN, Integer> implements IntegerTransformer<OIN> {
     public <IN> Impl(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends Integer> function, OIN originalInputValue) {
       super(transformerName, parent, function, originalInputValue);
     }

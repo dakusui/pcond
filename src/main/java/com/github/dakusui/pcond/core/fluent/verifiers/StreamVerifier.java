@@ -33,7 +33,7 @@ public interface StreamVerifier<OIN, E> extends
   }
 
   class Impl<OIN, E>
-      extends BaseVerifier<StreamVerifier<OIN, E>, OIN, Stream<E>>
+      extends Verifier.Base<StreamVerifier<OIN, E>, OIN, Stream<E>>
       implements StreamVerifier<OIN, E> {
     public Impl(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
