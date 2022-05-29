@@ -1,11 +1,11 @@
-package com.github.dakusui.pcond;
+package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.internals.InternalChecks;
 import com.github.dakusui.pcond.provider.AssertionProvider;
 
 import java.util.Objects;
 
-public enum Pcond {
+public enum Configurations {
   ;
 
   /**

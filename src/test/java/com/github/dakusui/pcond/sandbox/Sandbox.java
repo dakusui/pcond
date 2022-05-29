@@ -1,11 +1,12 @@
 package com.github.dakusui.pcond.sandbox;
 
+import com.github.dakusui.pcond.MoreFluents;
 import org.junit.Test;
 
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.Fluents.when;
-import static com.github.dakusui.pcond.TestAssertions.assertStatement;
+import static com.github.dakusui.pcond.MoreFluents.valueOf;
+import static com.github.dakusui.pcond.MoreFluents.assertWhen;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 
 @SuppressWarnings("NewClassNamingConvention")
@@ -29,6 +30,6 @@ public class Sandbox {
 
   @Test
   public void hello3() {
-    assertStatement(when("hello").substring(2).then().isEqualTo("world"));
+    assertWhen(MoreFluents.valueOf("hello").substring(2).then().isEqualTo("world"));
   }
 }

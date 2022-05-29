@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut.providers;
 
-import com.github.dakusui.pcond.Pcond;
+import com.github.dakusui.pcond.core.Configurations;
 import com.github.dakusui.pcond.provider.AssertionProvider;
 import com.github.dakusui.pcond.provider.impls.JUnit4AssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
@@ -130,8 +130,8 @@ public class AssertionProviderTest extends TestBase {
 
   @Test(expected = IllegalStateException.class)
   public void test3() {
-    Pcond.initializeWith(TestAssertionProvider.class);
+    Configurations.initializeWith(TestAssertionProvider.class);
     System.out.println(AssertionProvider.INSTANCE.getClass().getCanonicalName());
-    Pcond.initializeWith(JUnit4AssertionProvider.class);
+    Configurations.initializeWith(JUnit4AssertionProvider.class);
   }
 }

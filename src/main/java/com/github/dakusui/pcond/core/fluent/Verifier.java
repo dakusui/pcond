@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.TestAssertions;
+import com.github.dakusui.pcond.MoreFluents;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.*;
@@ -19,13 +19,12 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.core.fluent.Transformer.chainFunctions;
 import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.*;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
-import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
-import static com.github.dakusui.pcond.internals.InternalUtils.isDummyPredicate;
+import static com.github.dakusui.pcond.internals.InternalUtils.*;
 
 public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     extends
     Identifiable,
-    TestAssertions.Statement<OIN>,
+    MoreFluents.Statement<OIN>,
     Evaluable.Transformation<OIN, T>,
     IntoPhraseFactory.ForVerifier<OIN, T>,
     AsPhraseFactory.ForVerifier<OIN> {
@@ -44,6 +43,10 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     return originalInputValue();
   }
 
+  default Predicate<OIN> statementPredicate() {
+    return toPredicate();
+  }
+
   default V testPredicate(Predicate<? super T> predicate) {
     return this.predicate(predicate);
   }
@@ -58,34 +61,13 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
         .check(this.predicate());
   }
 
-  // BEGIN: ------------------------- High -level methods
-  @SuppressWarnings("unchecked")
-  default V allOf(Predicate<? super T>... predicates) {
-    return with(Predicates.allOf(predicates));
-  }
-
-  @SuppressWarnings("unchecked")
-  default V anyOf(Predicate<? super T>... predicates) {
-    return with(Predicates.anyOf(predicates));
-  }
-
-  @SuppressWarnings("unchecked")
-  default V and(Predicate<? super T>... predicates) {
-    return with(Predicates.and(predicates));
-  }
-
-  @SuppressWarnings("unchecked")
-  default V or(Predicate<? super T>... predicates) {
-    return with(Predicates.or(predicates));
-  }
-
   /**
    * A synonym of `build()` method.
    *
    * @return A predicate of `AS` built from this object.
    */
   @SuppressWarnings("unchecked")
-  default <AS> Predicate<AS> verify() {
+  default <AS> Predicate<AS> toPredicate() {
     return (Predicate<AS>) build();
   }
 
@@ -93,11 +75,14 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     return create(this.transformerName(), this.function(), this.predicate(), this.originalInputValue());
   }
 
-
   V create(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue);
 
+  @SuppressWarnings("unchecked")
   default V with(Predicate<? super T> predicate) {
-    return predicate(predicate);
+    @SuppressWarnings("unchecked") V ret = (V) this;
+    if (isDummyFunction(this.function()))
+      ret = (V) ret.asObject();
+    return ret.predicate(predicate);
   }
 
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
@@ -107,12 +92,12 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   }
 
   @Override
-  default IntegerVerifier.Impl<OIN> asInteger() {
+  default IntegerVerifier<OIN> asInteger() {
     return integerVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Integer.class)), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default BooleanVerifier.Impl<OIN> asBoolean() {
+  default BooleanVerifier<OIN> asBoolean() {
     return booleanVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Boolean.class)), dummyPredicate(), this.originalInputValue());
   }
 
@@ -138,17 +123,17 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   }
 
   @Override
-  default IntegerVerifier.Impl<OIN> intoIntegerWith(Function<T, Integer> function) {
+  default IntegerVerifier<OIN> intoIntegerWith(Function<T, Integer> function) {
     return integerVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default BooleanVerifier.Impl<OIN> intoBooleanWith(Function<T, Boolean> function) {
+  default BooleanVerifier<OIN> intoBooleanWith(Function<T, Boolean> function) {
     return booleanVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default <OUT> ObjectVerifier.Impl<OIN, OUT> intoObjectWith(Function<T, OUT> function) {
+  default <OUT> ObjectVerifier<OIN, OUT> intoObjectWith(Function<T, OUT> function) {
     return objectVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
@@ -200,27 +185,27 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
       return new StringVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
-    public static <OIN, OUT> ObjectVerifier.Impl<OIN, OUT> objectVerifier(ObjectTransformer.Impl<OIN, OUT> objectTransformer) {
+    public static <OIN, OUT> ObjectVerifier<OIN, OUT> objectVerifier(ObjectTransformer.Impl<OIN, OUT> objectTransformer) {
       return objectVerifier(objectTransformer.transformerName(), objectTransformer.function(), dummyPredicate(), objectTransformer.originalInputValue());
     }
 
-    public static <OIN, OUT> ObjectVerifier.Impl<OIN, OUT> objectVerifier(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInptValue) {
+    public static <OIN, OUT> ObjectVerifier<OIN, OUT> objectVerifier(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInptValue) {
       return new ObjectVerifier.Impl<>(transformerName, function, predicate, originalInptValue);
     }
 
-    public static <OIN, E> ListVerifier.Impl<OIN, E> listVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
+    public static <OIN, E> ListVerifier<OIN, E> listVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
       return new ListVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
-    public static <OIN> IntegerVerifier.Impl<OIN> integerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
+    public static <OIN> IntegerVerifier<OIN> integerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
       return new IntegerVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
-    public static <OIN, E> StreamVerifier.Impl<OIN, E> streamVerifier(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
+    public static <OIN, E> StreamVerifier<OIN, E> streamVerifier(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
       return new StreamVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
-    public static <OIN> BooleanVerifier.Impl<OIN> booleanVerifier(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
+    public static <OIN> BooleanVerifier<OIN> booleanVerifier(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
       return new BooleanVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
   }

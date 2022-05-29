@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
 import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
+import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.List;
@@ -23,17 +24,17 @@ public interface Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ext
       COUT,
       NOUT,
       B extends Transformer<
-                B,
-                OIN,
-                COUT>,
+          B,
+          OIN,
+          COUT>,
       C extends BiFunction<
           B,
           Function<COUT, NOUT>,
           BB>,
       BB extends Transformer<
-                BB,
-                OIN,
-                NOUT>>
+          BB,
+          OIN,
+          NOUT>>
   BB transform(B parent, Function<? super COUT, NOUT> f, C constructor) {
     return constructor.apply(parent, (Function<COUT, NOUT>) f);
   }
@@ -63,14 +64,20 @@ public interface Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ext
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> Verifier<?, OIN, NOUT> allOf(Predicate<? super NOUT>... predicates) {
-    return this.then().asValueOf((NOUT) value()).allOf(predicates);
+  default <NOUT> Verifier<?, OIN, NOUT> thenWithAllOf(List<? extends Predicate<? super NOUT>> predicates) {
+    return this.thenWith(Predicates.allOf(predicates.toArray(new Predicate[0])));
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> Verifier<?, OIN, NOUT> anyOf(Predicate<? super NOUT>... predicates) {
-    return this.then().asValueOf((NOUT) value()).anyOf(predicates);
+  default <NOUT> Verifier<?, OIN, NOUT> thenWithAnyOf(List<? extends Predicate<? super NOUT>> predicates) {
+    return this.thenWith(Predicates.anyOf(predicates.toArray(new Predicate[0])));
   }
+
+  @SuppressWarnings("unchecked")
+  default <NOUT> Verifier<?, OIN, NOUT> thenWith(Predicate<? super NOUT> predicate) {
+    return this.then().asValueOf((NOUT) value()).with(predicate);
+  }
+
 
   default <O> ObjectTransformer<OIN, O> exercise(Function<? super OUT, O> f) {
     return applyFunction(f);

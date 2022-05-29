@@ -9,7 +9,12 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.booleanVerifier;
 
-public interface BooleanVerifier<OIN> extends Identifiable, Predicate<OIN>, Evaluable<OIN>, Evaluable.Transformation<OIN, Boolean>, Verifier<BooleanVerifier<OIN>, OIN, Boolean>, Matcher.ForBoolean<OIN> {
+public interface BooleanVerifier<OIN> extends
+    Identifiable,
+    Predicate<OIN>,
+    Evaluable.Transformation<OIN, Boolean>,
+    Verifier<BooleanVerifier<OIN>, OIN, Boolean>,
+    Matcher.ForBoolean<OIN> {
   @Override
   BooleanVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue);
 

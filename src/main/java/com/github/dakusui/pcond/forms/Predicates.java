@@ -22,7 +22,6 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.Fluents.$valueOf;
 import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
@@ -356,14 +355,14 @@ public enum Predicates {
             cursoredStringForSnapshotting.originalString.substring(cursoredStringForSnapshotting.position);
       }
     }
-    return $valueOf().asString()
+    //noinspection RedundantTypeArguments
+    return Fluents.value().asString()
         .transformToObject(function("findTokens", CursoredString::new))
-        .then()
-        .allOf(
+        .then().with(Predicates.<CursoredString>allOf(
             Stream.concat(
                     Arrays.stream(tokens).map(CursoredStringPredicate::new),
                     Stream.of(predicate("(end)", v -> result.get())))
-                .toArray(Predicate[]::new))
+                .toArray(Predicate[]::new)))
         .build();
   }
 
@@ -417,7 +416,7 @@ public enum Predicates {
       return false;
     };
 
-    return $valueOf().asListOf((E) Fluents.value())
+    return Fluents.value().asListOf((E) Fluents.$())
         .transformToObject(function("toCursoredList", CursoredList::new))
         .then()
         .with(allOf(Stream.concat(
@@ -425,7 +424,7 @@ public enum Predicates {
                     .map((Predicate<? super E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
                 Stream.of(predicate("(end)", eCursoredList -> true)))
             .toArray(Predicate[]::new)))
-        .verify();
+        .toPredicate();
   }
 
   enum Def {

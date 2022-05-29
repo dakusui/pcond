@@ -81,12 +81,12 @@ public interface AsPhraseFactory<
     @Override
     <E> StreamTransformer<OIN, E> asStreamOf(E value);
 
-    default <E> ObjectTransformer<OIN, E> valueAt(int i, E value) {
+    default <E> ObjectTransformer<OIN, E> at(int i, E value) {
       return asListOf(value).elementAt(i);
     }
 
     @SuppressWarnings("unchecked")
-    default <E> ObjectTransformer<OIN, E> valueAt(int i) {
+    default <E> ObjectTransformer<OIN, E> at(int i) {
       return asListOf((E)value()).elementAt(i);
     }
   }

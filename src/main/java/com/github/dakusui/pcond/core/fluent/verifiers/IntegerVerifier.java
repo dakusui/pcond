@@ -45,7 +45,7 @@ public interface IntegerVerifier<OIN> extends
     }
 
     @Override
-    public Impl<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
+    public IntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
       return integerVerifier(transformerName, function, predicate, originalInputValue);
     }
   }
