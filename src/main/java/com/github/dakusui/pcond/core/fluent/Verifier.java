@@ -16,13 +16,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.fluent.ITransformer.chainFunctions;
-import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.*;
+import static com.github.dakusui.pcond.core.fluent.Transformer.chainFunctions;
+import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.*;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyPredicate;
 
-public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
+public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     extends
     Identifiable,
     TestAssertions.Statement<OIN>,
@@ -188,7 +188,7 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
   enum Factory {
     ;
 
-    public static <V extends IVerifier<V, OIN, T>, OIN, T> StringVerifier<OIN> stringVerifier(IVerifier<V, OIN, T> verifier, Function<T, String> function) {
+    public static <V extends Verifier<V, OIN, T>, OIN, T> StringVerifier<OIN> stringVerifier(Verifier<V, OIN, T> verifier, Function<T, String> function) {
       return stringVerifier(verifier.transformerName(), chainFunctions(verifier.function(), function), dummyPredicate(), verifier.originalInputValue());
     }
 
@@ -225,15 +225,15 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
     }
   }
 
-  abstract class Verifier<V extends IVerifier<V, OIN, T>, OIN, T>
+  abstract class BaseVerifier<V extends Verifier<V, OIN, T>, OIN, T>
       extends PrintablePredicateFactory.TransformingPredicate<OIN, T>
-      implements IVerifier<V, OIN, T> {
+      implements Verifier<V, OIN, T> {
     protected final String                             transformerName;
     private final   Function<? super OIN, ? extends T> function;
     private final   OIN                                originalInputValue;
     private         Predicate<? super T>               predicate;
 
-    protected Verifier(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue) {
+    protected BaseVerifier(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue) {
       super(predicate, function);
       this.transformerName = transformerName;
       this.function = function;

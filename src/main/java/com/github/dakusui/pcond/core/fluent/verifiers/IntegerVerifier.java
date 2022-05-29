@@ -1,20 +1,20 @@
 package com.github.dakusui.pcond.core.fluent.verifiers;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.fluent.IVerifier;
+import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.integerVerifier;
+import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.integerVerifier;
 
 public interface IntegerVerifier<OIN> extends
     Identifiable,
     Predicate<OIN>,
     Evaluable.Transformation<OIN, Integer>,
-    IVerifier<IntegerVerifier<OIN>, OIN, Integer>,
+    Verifier<IntegerVerifier<OIN>, OIN, Integer>,
     Matcher.ForInteger<OIN> {
   @Override
   IntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue);
@@ -39,7 +39,7 @@ public interface IntegerVerifier<OIN> extends
     return predicate(Predicates.lessThan(v));
   }
 
-  class Impl<OIN> extends Verifier<IntegerVerifier<OIN>, OIN, Integer> implements IntegerVerifier<OIN> {
+  class Impl<OIN> extends BaseVerifier<IntegerVerifier<OIN>, OIN, Integer> implements IntegerVerifier<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
     }

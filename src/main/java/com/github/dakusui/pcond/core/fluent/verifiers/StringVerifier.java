@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core.fluent.verifiers;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.fluent.IVerifier;
+import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.forms.Predicates;
 
@@ -15,7 +15,7 @@ public interface StringVerifier<OIN> extends
     Identifiable,
     Predicate<OIN>,
     Evaluable.Transformation<OIN, String>,
-    IVerifier<StringVerifier<OIN>, OIN, String>,
+    Verifier<StringVerifier<OIN>, OIN, String>,
     Matcher.ForString<OIN> {
   default StringVerifier<OIN> contains(String token) {
     return this.predicate(Predicates.containsString(token));
@@ -58,7 +58,7 @@ public interface StringVerifier<OIN> extends
   }
 
   class Impl<OIN>
-      extends Verifier<StringVerifier<OIN>, OIN, String>
+      extends BaseVerifier<StringVerifier<OIN>, OIN, String>
       implements StringVerifier<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends String> function, Predicate<? super String> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
@@ -67,7 +67,7 @@ public interface StringVerifier<OIN> extends
     @SuppressWarnings("unchecked")
     @Override
     public StringVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends String> function, Predicate<? super String> predicate, OIN originalInputValue) {
-      return IVerifier.Factory.stringVerifier(transformerName, (Function<? super OIN, String>) function, predicate, originalInputValue);
+      return Verifier.Factory.stringVerifier(transformerName, (Function<? super OIN, String>) function, predicate, originalInputValue);
     }
   }
 }

@@ -1,8 +1,7 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
-import com.github.dakusui.pcond.core.fluent.ITransformer;
-import com.github.dakusui.pcond.core.fluent.IVerifier;
 import com.github.dakusui.pcond.core.fluent.Transformer;
+import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
 import com.github.dakusui.pcond.forms.Functions;
@@ -13,7 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-public interface ListTransformer<OIN, E> extends ITransformer<ListTransformer<OIN, E>, OIN, List<E>>, Matcher.ForList<OIN, E> {
+public interface ListTransformer<OIN, E> extends Transformer<ListTransformer<OIN, E>, OIN, List<E>>, Matcher.ForList<OIN, E> {
   @Override
   ListVerifier<OIN, E> then();
 
@@ -42,7 +41,7 @@ public interface ListTransformer<OIN, E> extends ITransformer<ListTransformer<OI
   }
 
   class Impl<OIN, E>
-      extends Transformer<ListTransformer<OIN, E>, OIN, List<E>>
+      extends BaseTransformer<ListTransformer<OIN, E>, OIN, List<E>>
       implements ListTransformer<OIN, E> {
     /**
      * Constructs an object of this class.
@@ -52,13 +51,13 @@ public interface ListTransformer<OIN, E> extends ITransformer<ListTransformer<OI
      * @param function           A function that transforms an input value in to the target value of this transformer.
      * @param originalInputValue An original input value.
      */
-    public <IN> Impl(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends List<E>> function, OIN originalInputValue) {
+    public <IN> Impl(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends List<E>> function, OIN originalInputValue) {
       super(transformerName, parent, function, originalInputValue);
     }
 
     @Override
     public ListVerifier<OIN, E> then() {
-      return IVerifier.Factory.listVerifier(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+      return Verifier.Factory.listVerifier(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
     }
   }
 }

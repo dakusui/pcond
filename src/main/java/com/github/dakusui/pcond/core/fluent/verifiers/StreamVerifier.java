@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core.fluent.verifiers;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.fluent.IVerifier;
+import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.forms.Predicates;
 
@@ -9,13 +9,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.streamVerifier;
+import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.streamVerifier;
 
 public interface StreamVerifier<OIN, E> extends
     Identifiable,
     Predicate<OIN>,
     Evaluable.Transformation<OIN, Stream<E>>,
-    IVerifier<StreamVerifier<OIN, E>, OIN, Stream<E>>,
+    Verifier<StreamVerifier<OIN, E>, OIN, Stream<E>>,
     Matcher.ForStream<OIN, E> {
   @Override
   StreamVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue);
@@ -33,7 +33,7 @@ public interface StreamVerifier<OIN, E> extends
   }
 
   class Impl<OIN, E>
-      extends Verifier<StreamVerifier<OIN, E>, OIN, Stream<E>>
+      extends BaseVerifier<StreamVerifier<OIN, E>, OIN, Stream<E>>
       implements StreamVerifier<OIN, E> {
     public Impl(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);

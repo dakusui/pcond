@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core.fluent.verifiers;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.fluent.IVerifier;
+import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
@@ -16,7 +16,7 @@ public interface ListVerifier<OIN, E> extends
     Identifiable,
     Predicate<OIN>,
     Evaluable.Transformation<OIN, List<E>>,
-    IVerifier<ListVerifier<OIN, E>, OIN, List<E>>,
+    Verifier<ListVerifier<OIN, E>, OIN, List<E>>,
     Matcher.ForList<OIN, E> {
   @Override
   ListVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue);
@@ -43,7 +43,7 @@ public interface ListVerifier<OIN, E> extends
   }
 
   class Impl<OIN, E>
-      extends Verifier<ListVerifier<OIN, E>, OIN, List<E>>
+      extends BaseVerifier<ListVerifier<OIN, E>, OIN, List<E>>
       implements ListVerifier<OIN, E> {
     public Impl(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
@@ -51,7 +51,7 @@ public interface ListVerifier<OIN, E> extends
 
     @Override
     public ListVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
-      return IVerifier.Factory.listVerifier(transformerName, function, predicate, originalInputValue);
+      return Verifier.Factory.listVerifier(transformerName, function, predicate, originalInputValue);
     }
   }
 }

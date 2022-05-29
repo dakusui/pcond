@@ -1,12 +1,12 @@
 package com.github.dakusui.pcond.core.fluent.transformers.extendable;
 
-import com.github.dakusui.pcond.core.fluent.ITransformer;
+import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.forms.Functions;
 
-public interface IAbstractObjectTransformer<TX extends IAbstractObjectTransformer<TX, OIN, OUT>, OIN, OUT> extends ITransformer<TX, OIN, OUT> {
+public interface IAbstractObjectTransformer<TX extends IAbstractObjectTransformer<TX, OIN, OUT>, OIN, OUT> extends Transformer<TX, OIN, OUT> {
   /**
    * Corresponds to {@code toString()} method.
    *
