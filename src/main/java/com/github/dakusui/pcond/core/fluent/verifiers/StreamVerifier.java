@@ -1,11 +1,12 @@
 package com.github.dakusui.pcond.core.fluent.verifiers;
 
 import com.github.dakusui.pcond.core.fluent.Verifier;
-import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.streamVerifier;
 
 public class StreamVerifier<OIN, E>
     extends Verifier<IStreamVerifier<OIN, E>, OIN, Stream<E>>
@@ -16,12 +17,6 @@ public class StreamVerifier<OIN, E>
 
   @Override
   public IStreamVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
-    return new StreamVerifier<>(transformerName, function, predicate, originalInputValue);
-  }
-
-  void method() {
-    Predicates.noneMatch(Predicate.isEqual(""));
-    Predicates.allMatch(Predicate.isEqual(""));
-    Predicates.anyMatch(Predicate.isEqual(""));
+    return streamVerifier(transformerName, function, predicate, originalInputValue);
   }
 }

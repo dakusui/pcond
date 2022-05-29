@@ -5,6 +5,8 @@ import com.github.dakusui.pcond.core.fluent.Verifier;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.integerVerifier;
+
 public class IntegerVerifier<OIN> extends Verifier<IIntegerVerifier<OIN>, OIN, Integer> implements IIntegerVerifier<OIN> {
   public IntegerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
     super(transformerName, function, predicate, originalInputValue);
@@ -12,6 +14,6 @@ public class IntegerVerifier<OIN> extends Verifier<IIntegerVerifier<OIN>, OIN, I
 
   @Override
   public IntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
-    return new IntegerVerifier<>(transformerName, function, predicate, originalInputValue);
+    return integerVerifier(transformerName, function, predicate, originalInputValue);
   }
 }

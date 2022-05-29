@@ -11,11 +11,13 @@ import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.fluent.ITransformer.chainFunctions;
-import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.objectVerifier;
+import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.*;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 
@@ -100,17 +102,17 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   @Override
   default IStringVerifier<OIN> asString() {
-    return Factory.stringVerifier(this, Function.class.cast(Functions.cast(String.class)));
+    return stringVerifier(this, Function.class.cast(Functions.cast(String.class)));
   }
 
   @Override
   default IntegerVerifier<OIN> asInteger() {
-    return new IntegerVerifier<>(transformerName(), chainFunctions(this.function(), Functions.cast(Integer.class)), dummyPredicate(), this.originalInputValue());
+    return integerVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Integer.class)), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
   default BooleanVerifier<OIN> asBoolean() {
-    return new BooleanVerifier<>(transformerName(), chainFunctions(this.function(), Functions.cast(Boolean.class)), dummyPredicate(), this.originalInputValue());
+    return booleanVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Boolean.class)), dummyPredicate(), this.originalInputValue());
   }
 
   @SuppressWarnings("unchecked")
@@ -121,27 +123,27 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
 
   @Override
   default <E> IListVerifier<OIN, E> asListOf(E value) {
-    return new ListVerifier<>(transformerName(), chainFunctions(this.function(), Functions.castTo(Functions.value())), dummyPredicate(), this.originalInputValue());
+    return listVerifier(transformerName(), chainFunctions(this.function(), Functions.castTo(Functions.value())), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
   default <E> IStreamVerifier<OIN, E> asStreamOf(E value) {
-    return new StreamVerifier<>(transformerName(), chainFunctions(this.function(), Functions.castTo(Functions.value())), dummyPredicate(), this.originalInputValue());
+    return streamVerifier(transformerName(), chainFunctions(this.function(), Functions.castTo(Functions.value())), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
   default IStringVerifier<OIN> intoStringWith(Function<T, String> function) {
-    return Factory.stringVerifier(this, function);
+    return stringVerifier(this, function);
   }
 
   @Override
   default IntegerVerifier<OIN> intoIntegerWith(Function<T, Integer> function) {
-    return new IntegerVerifier<>(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return integerVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
   default BooleanVerifier<OIN> intoBooleanWith(Function<T, Boolean> function) {
-    return new BooleanVerifier<>(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return booleanVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
@@ -203,6 +205,22 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
 
     public static <OIN, OUT> ObjectVerifier<OIN, OUT> objectVerifier(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInptValue) {
       return new ObjectVerifier<>(transformerName, function, predicate, originalInptValue);
+    }
+
+    public static <OIN, E> ListVerifier<OIN, E> listVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
+      return new ListVerifier<>(transformerName, function, predicate, originalInputValue);
+    }
+
+    public static <OIN> IntegerVerifier<OIN> integerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
+      return new IntegerVerifier<>(transformerName, function, predicate, originalInputValue);
+    }
+
+    public static <OIN, E> StreamVerifier<OIN, E> streamVerifier(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
+      return new StreamVerifier<>(transformerName, function, predicate, originalInputValue);
+    }
+
+    public static <OIN> BooleanVerifier<OIN> booleanVerifier(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
+      return new BooleanVerifier<>(transformerName, function, predicate, originalInputValue);
     }
   }
 }

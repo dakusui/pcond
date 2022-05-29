@@ -1,11 +1,12 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.ITransformer;
-import com.github.dakusui.pcond.core.fluent.IVerifier;
 import com.github.dakusui.pcond.core.fluent.transformers.extendable.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.IObjectVerifier;
 
 import java.util.function.Function;
+
+import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.objectVerifier;
 
 public class ObjectTransformer<OIN, OUT> extends AbstractObjectTransformer<IObjectTransformer<OIN, OUT>, OIN, OUT> implements IObjectTransformer<OIN, OUT> {
 
@@ -15,6 +16,6 @@ public class ObjectTransformer<OIN, OUT> extends AbstractObjectTransformer<IObje
 
   @Override
   public IObjectVerifier<OIN, OUT> then() {
-    return IVerifier.Factory.objectVerifier(this);
+    return objectVerifier(this);
   }
 }

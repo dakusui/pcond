@@ -1,9 +1,9 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.ITransformer;
+import com.github.dakusui.pcond.core.fluent.IVerifier;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.IListVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.List;
@@ -26,6 +26,6 @@ public class ListTransformer<OIN, E>
 
   @Override
   public IListVerifier<OIN, E> then() {
-    return new ListVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+    return IVerifier.Factory.listVerifier(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
   }
 }

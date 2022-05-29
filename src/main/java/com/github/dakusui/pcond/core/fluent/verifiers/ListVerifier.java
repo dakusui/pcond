@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.fluent.verifiers;
 
+import com.github.dakusui.pcond.core.fluent.IVerifier;
 import com.github.dakusui.pcond.core.fluent.Verifier;
 
 import java.util.List;
@@ -15,6 +16,6 @@ public class ListVerifier<OIN, E>
 
   @Override
   public IListVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
-    return new ListVerifier<>(transformerName, function, predicate, originalInputValue);
+    return IVerifier.Factory.listVerifier(transformerName, function, predicate, originalInputValue);
   }
 }
