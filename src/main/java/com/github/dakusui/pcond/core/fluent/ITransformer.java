@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
+import static com.github.dakusui.pcond.core.fluent.ITransformer.Factory.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 
@@ -80,27 +81,27 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
   }
 
   default <O> IObjectTransformer<OIN, O> transformToObject(Function<? super OUT, O> f) {
-    return this.transform(f, (TX, func) -> new ObjectTransformer<>(transformerName(), this, func, originalInputValue()));
+    return this.transform(f, (TX, func) -> objectTransformer(this, func));
   }
 
   default IStringTransformer<OIN> transformToString(Function<OUT, String> f) {
-    return this.transform(f, (TX, func) -> Factory.stringTransformer(this, func));
+    return this.transform(f, (TX, func) -> stringTransformer(this, func));
   }
 
   default <E> IListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
-    return this.transform(f, (TX, func) -> new ListTransformer<>(transformerName(), this, func, originalInputValue()));
+    return this.transform(f, (TX, func) -> listTransformer(this, func));
   }
 
   default <E> IStreamTransformer<OIN, E> transformToStream(Function<OUT, Stream<E>> f) {
-    return this.transform(f, (TX, func) -> new StreamTransformer<>(transformerName(), this, func, originalInputValue()));
+    return this.transform(f, (TX, func) -> streamTransformer(this, func));
   }
 
   default IIntegerTransformer<OIN> transformToInteger(Function<? super OUT, Integer> f) {
-    return this.transform(f, (TX, func) -> new IntegerTransformer<>(transformerName(), this, func, originalInputValue()));
+    return this.transform(f, (TX, func) -> integerTransformer(this, func));
   }
 
   default IBooleanTransformer<OIN> transformToInBoolean(Function<? super OUT, Boolean> f) {
-    return this.transform(f, (TX, func) -> new BooleanTransformer<>(transformerName(), this, func, originalInputValue()));
+    return this.transform(f, (TX, func) -> booleanTransformer(this, func));
   }
 
   IVerifier<?, OIN, OUT> then();
@@ -116,7 +117,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
 
   @Override
   default StringTransformer<OIN> asString() {
-    return (StringTransformer<OIN>) Factory.stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
+    return (StringTransformer<OIN>) stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
   }
 
   @Override
@@ -125,26 +126,26 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
   }
 
   @Override
-  default BooleanTransformer<OIN> asBoolean() {
-    return new BooleanTransformer<>(transformerName(), this, Printables.function("tratAsBoolean", v -> (Boolean) v), originalInputValue());
+  default IBooleanTransformer<OIN> asBoolean() {
+    return booleanTransformer(this, Printables.function("treatAsBoolean", v -> (Boolean) v));
   }
 
   @Override
   @SuppressWarnings("unchecked")
   default <NOUT> IObjectTransformer<OIN, NOUT> asValueOf(NOUT value) {
-    return new ObjectTransformer<>(transformerName(), this, Printables.function("treatAs[NOUT]", v -> (NOUT) v), originalInputValue());
+    return objectTransformer(this, Printables.function("treatAs[NOUT]", v -> (NOUT) v));
   }
 
   @Override
   @SuppressWarnings("unchecked")
   default <E> IListTransformer<OIN, E> asListOf(E value) {
-    return new ListTransformer<>(transformerName(), this, Printables.function("treatAsList", v -> (List<E>) v), originalInputValue());
+    return listTransformer(this, Printables.function("treatAsList", v -> (List<E>) v));
   }
 
   @SuppressWarnings("unchecked")
   @Override
   default <E> IStreamTransformer<OIN, E> asStreamOf(E value) {
-    return new StreamTransformer<>(transformerName(), this, Printables.function("treatAsStream[NOUT]", v -> (Stream<E>) v), originalInputValue());
+    return streamTransformer(this, Printables.function("treatAsStream[NOUT]", v -> (Stream<E>) v));
   }
 
   enum Factory {
@@ -152,6 +153,26 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
 
     public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IStringTransformer<OIN> stringTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, String> func) {
       return new StringTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IBooleanTransformer<OIN> booleanTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Boolean> function) {
+      return new BooleanTransformer<>(transformer.transformerName(), transformer, function, transformer.originalInputValue());
+    }
+
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IntegerTransformer<OIN> integerTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Integer> func) {
+      return new IntegerTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, E> StreamTransformer<OIN, E> streamTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Stream<E>> func) {
+      return new StreamTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, E> ListTransformer<OIN, E> listTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, List<E>> func) {
+      return new ListTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, O> IObjectTransformer<OIN, O> objectTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, O> func) {
+      return new ObjectTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
   }
 }
