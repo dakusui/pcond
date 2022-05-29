@@ -1,14 +1,14 @@
 package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.verifiers.BooleanVerifier;
+import com.github.dakusui.pcond.core.fluent.verifiers.IStringVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.IntegerVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
 
 import java.util.function.Function;
 
 public interface IntoPhraseFactory<OIN, IN> {
-  default StringVerifier<OIN> intoString() {
+  default IStringVerifier<OIN> intoString() {
     return intoStringWith((IN v) -> (String)v);
   }
 
@@ -25,7 +25,7 @@ public interface IntoPhraseFactory<OIN, IN> {
     return intoObjectWith((IN v) -> (NOUT)v);
   }
 
-  StringVerifier<OIN> intoStringWith(Function<IN, String> function);
+  IStringVerifier<OIN> intoStringWith(Function<IN, String> function);
 
   IntegerVerifier<OIN> intoIntegerWith(Function<IN, Integer> function);
 

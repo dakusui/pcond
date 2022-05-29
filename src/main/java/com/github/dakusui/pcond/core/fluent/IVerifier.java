@@ -78,15 +78,31 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
     return (Predicate<AS>) build();
   }
 
-  V create();
+  default V create() {
+    return create(this.transformerName(), this.function(), this.predicate());
+  }
+
+  V create(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate);
 
   default V with(Predicate<? super T> predicate) {
     return predicate(predicate);
   }
 
+  @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   @Override
-  default StringVerifier<OIN> asString() {
-    return new StringVerifier<>(transformerName(), chainFunctions(this.function(), Functions.cast(String.class)), dummyPredicate());
+  default IStringVerifier<OIN> asString() {
+    return stringVerifier(this, Function.class.cast(Functions.cast(String.class)));
+  }
+
+  static <V extends IVerifier<V, OIN, T>, OIN, T> IStringVerifier<OIN> stringVerifier(IVerifier<V, OIN, T> verifier, Function<T, String> function) {
+    return IVerifier.stringVerifier(verifier.transformerName(), chainFunctions(verifier.function(), function), dummyPredicate());
+  }
+
+  static <OIN> IStringVerifier<OIN> stringVerifier(
+      String transformerName,
+      Function<? super OIN, String> function,
+      Predicate<? super String> predicate) {
+    return new StringVerifier<>(transformerName, function, predicate);
   }
 
   @Override
@@ -116,8 +132,8 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
   }
 
   @Override
-  default StringVerifier<OIN> intoStringWith(Function<T, String> function) {
-    return new StringVerifier<>(transformerName(), chainFunctions(this.function(), function), dummyPredicate());
+  default IStringVerifier<OIN> intoStringWith(Function<T, String> function) {
+    return stringVerifier(this, function);
   }
 
   @Override

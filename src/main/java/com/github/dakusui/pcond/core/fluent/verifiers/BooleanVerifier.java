@@ -11,7 +11,7 @@ public class BooleanVerifier<OIN> extends Verifier<BooleanVerifier<OIN>, OIN, Bo
   }
 
   @Override
-  public BooleanVerifier<OIN> create() {
-    return new BooleanVerifier<>(this.transformerName, this.function(), this.predicate());
+  public BooleanVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate) {
+    return new BooleanVerifier<>(transformerName, function, predicate);
   }
 }

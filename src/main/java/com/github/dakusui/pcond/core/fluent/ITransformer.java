@@ -82,7 +82,11 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
   }
 
   default IStringTransformer<OIN> transformToString(Function<OUT, String> f) {
-    return this.transform(f, (TX, func) -> new StringTransformer<>(transformerName(), this, func));
+    return this.transform(f, (TX, func) -> stringTransformer(this, func));
+  }
+
+  static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IStringTransformer<OIN> stringTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, String> func) {
+    return new StringTransformer<>(transformer.transformerName(), transformer, func);
   }
 
   default <E> ListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
@@ -101,7 +105,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
     return this.transform(f, (TX, func) -> new BooleanTransformer<>(transformerName(), this, func));
   }
 
-  Verifier<?, OIN, OUT> then();
+  IVerifier<?, OIN, OUT> then();
 
   @SuppressWarnings("unchecked")
   default TX peek(Consumer<OUT> consumer) {
@@ -114,7 +118,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
 
   @Override
   default StringTransformer<OIN> asString() {
-    return new StringTransformer<>(transformerName(), this, Printables.function("treatAsString", v -> (String) v));
+    return (StringTransformer<OIN>) stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
   }
 
   @Override

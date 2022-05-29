@@ -43,7 +43,7 @@ public interface AsPhraseFactory<
   <E> Matcher.ForStream<OIN, E> asStreamOf(E value);
 
   interface ForTransformer<OIN> extends AsPhraseFactory<
-      StringTransformer<OIN>,
+      IStringTransformer<OIN>,
       IntegerTransformer<OIN>,
       BooleanTransformer<OIN>,
       OIN> {
@@ -96,7 +96,7 @@ public interface AsPhraseFactory<
   }
 
   interface ForVerifier<OIN> extends AsPhraseFactory<
-      StringVerifier<OIN>,
+      IStringVerifier<OIN>,
       IntegerVerifier<OIN>,
       BooleanVerifier<OIN>,
       OIN

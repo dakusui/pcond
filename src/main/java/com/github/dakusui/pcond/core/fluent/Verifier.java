@@ -10,8 +10,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.isDummyPredicate;
 
 public abstract class Verifier<V extends IVerifier<V, OIN, T>, OIN, T>
     extends PrintablePredicateFactory.TransformingPredicate<OIN, T>
-    implements
-    IVerifier<V, OIN, T> {
+    implements IVerifier<V, OIN, T> {
   protected final String                             transformerName;
   private final   Function<? super OIN, ? extends T> function;
   private         Predicate<? super T>               predicate;

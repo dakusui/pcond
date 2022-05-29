@@ -15,8 +15,8 @@ public class StreamVerifier<OIN, E>
   }
 
   @Override
-  public StreamVerifier<OIN, E> create() {
-    return new StreamVerifier<>(this.transformerName, this.function(), this.predicate());
+  public StreamVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate) {
+    return new StreamVerifier<>(transformerName, function, predicate);
   }
 
   public StreamVerifier<OIN, E> noneMatch(Predicate<E> p) {

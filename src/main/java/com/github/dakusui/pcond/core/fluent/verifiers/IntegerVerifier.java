@@ -12,8 +12,8 @@ public class IntegerVerifier<OIN> extends Verifier<IntegerVerifier<OIN>, OIN, In
   }
 
   @Override
-  public IntegerVerifier<OIN> create() {
-    return new IntegerVerifier<>(this.transformerName, this.function(), this.predicate());
+  public IntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate) {
+    return new IntegerVerifier<>(transformerName, function, predicate);
   }
 
   public IntegerVerifier<OIN> equalTo(int v) {

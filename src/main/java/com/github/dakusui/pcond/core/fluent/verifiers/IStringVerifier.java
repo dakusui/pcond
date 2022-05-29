@@ -10,10 +10,12 @@ import java.util.regex.Pattern;
 
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
 
-public interface IStringVerifier<OIN> extends Identifiable, Predicate<OIN>, Evaluable<OIN>, Evaluable.Transformation<OIN, String>, IVerifier<IStringVerifier<OIN>, OIN, String>, Matcher.ForString<OIN> {
-  @Override
-  IStringVerifier<OIN> create();
-
+public interface IStringVerifier<OIN> extends
+    Identifiable,
+    Predicate<OIN>,
+    Evaluable.Transformation<OIN, String>,
+    IVerifier<IStringVerifier<OIN>, OIN, String>,
+    Matcher.ForString<OIN> {
   default IStringVerifier<OIN> contains(String token) {
     return this.predicate(Predicates.containsString(token));
   }

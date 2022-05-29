@@ -18,8 +18,8 @@ public class ListVerifier<OIN, E>
   }
 
   @Override
-  public ListVerifier<OIN, E> create() {
-    return new ListVerifier<>(this.transformerName, this.function(), this.predicate());
+  public ListVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate) {
+    return new ListVerifier<>(transformerName, function, predicate);
   }
 
   public ListVerifier<OIN, E> isEmpty() {
