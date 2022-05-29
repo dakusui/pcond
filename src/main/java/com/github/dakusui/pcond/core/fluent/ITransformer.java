@@ -99,7 +99,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
     return this.transform(f, (TX, func) -> new StreamTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 
-  default IntegerTransformer<OIN> transformToInteger(Function<? super OUT, Integer> f) {
+  default IIntegerTransformer<OIN> transformToInteger(Function<? super OUT, Integer> f) {
     return this.transform(f, (TX, func) -> new IntegerTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 

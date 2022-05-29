@@ -36,7 +36,7 @@ public class ListTransformer<OIN, E>
     return this.transformToObject(Functions.elementAt(i));
   }
 
-  public IntegerTransformer<OIN> size() {
+  public IIntegerTransformer<OIN> size() {
     return this.transformToInteger(Functions.size());
   }
 
