@@ -38,7 +38,7 @@ public class Fluent<OIN> implements AsPhraseFactory.ForFluent<OIN> {
   }
 
   @Override
-  public <E> ObjectTransformer<OIN, E> asValueOf(E value) {
+  public <E> IObjectTransformer<OIN, E> asValueOf(E value) {
     return new ObjectTransformer<>(this.transformerName, null, dummyFunction(), originalInputValue);
   }
 

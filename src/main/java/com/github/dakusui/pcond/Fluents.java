@@ -43,7 +43,7 @@ public enum Fluents {
     return new Fluent<>("WHEN", value).asBoolean();
   }
 
-  public static <T> ObjectTransformer<T, T> when(T value) {
+  public static <T> IObjectTransformer<T, T> when(T value) {
     return new Fluent<>("WHEN", value).asObject();
   }
 

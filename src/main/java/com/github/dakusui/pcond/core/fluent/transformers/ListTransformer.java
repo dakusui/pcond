@@ -32,7 +32,7 @@ public class ListTransformer<OIN, E>
     return new ListVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
   }
 
-  public ObjectTransformer<OIN, E> elementAt(int i) {
+  public IObjectTransformer<OIN, E> elementAt(int i) {
     return this.transformToObject(Functions.elementAt(i));
   }
 

@@ -71,15 +71,15 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
     return this.then().asValueOf((NOUT) value()).anyOf(predicates);
   }
 
-  default <O> ObjectTransformer<OIN, O> exercise(Function<? super OUT, O> f) {
+  default <O> IObjectTransformer<OIN, O> exercise(Function<? super OUT, O> f) {
     return applyFunction(f);
   }
 
-  default <O> ObjectTransformer<OIN, O> applyFunction(Function<? super OUT, O> f) {
+  default <O> IObjectTransformer<OIN, O> applyFunction(Function<? super OUT, O> f) {
     return transformToObject(f);
   }
 
-  default <O> ObjectTransformer<OIN, O> transformToObject(Function<? super OUT, O> f) {
+  default <O> IObjectTransformer<OIN, O> transformToObject(Function<? super OUT, O> f) {
     return this.transform(f, (TX, func) -> new ObjectTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 
@@ -135,7 +135,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
 
   @Override
   @SuppressWarnings("unchecked")
-  default <NOUT> ObjectTransformer<OIN, NOUT> asValueOf(NOUT value) {
+  default <NOUT> IObjectTransformer<OIN, NOUT> asValueOf(NOUT value) {
     return new ObjectTransformer<>(transformerName(), this, Printables.function("treatAs[NOUT]", v -> (NOUT) v), originalInputValue());
   }
 

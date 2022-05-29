@@ -48,17 +48,17 @@ public interface AsPhraseFactory<
       IBooleanTransformer<OIN>,
       OIN> {
     @Override
-    default <E> ObjectTransformer<OIN, E> as(E value) {
+    default <E> IObjectTransformer<OIN, E> as(E value) {
       return asValueOf(value);
     }
 
     @Override
-    default ObjectTransformer<OIN, OIN> asObject() {
+    default IObjectTransformer<OIN, OIN> asObject() {
       return asValueOf(value());
     }
 
     @Override
-    default <E> ObjectTransformer<OIN, E> asValueOfClass(Class<E> klass) {
+    default <E> IObjectTransformer<OIN, E> asValueOfClass(Class<E> klass) {
       return asValueOf(value());
     }
 
@@ -73,7 +73,7 @@ public interface AsPhraseFactory<
     }
 
     @Override
-    <E> ObjectTransformer<OIN, E> asValueOf(E value);
+    <E> IObjectTransformer<OIN, E> asValueOf(E value);
 
     @Override
     <E> ListTransformer<OIN, E> asListOf(E value);
@@ -81,12 +81,12 @@ public interface AsPhraseFactory<
     @Override
     <E> StreamTransformer<OIN, E> asStreamOf(E value);
 
-    default <E> ObjectTransformer<OIN, E> valueAt(int i, E value) {
+    default <E> IObjectTransformer<OIN, E> valueAt(int i, E value) {
       return asListOf(value).elementAt(i);
     }
 
     @SuppressWarnings("unchecked")
-    default <E> ObjectTransformer<OIN, E> valueAt(int i) {
+    default <E> IObjectTransformer<OIN, E> valueAt(int i) {
       return asListOf((E)value()).elementAt(i);
     }
   }
