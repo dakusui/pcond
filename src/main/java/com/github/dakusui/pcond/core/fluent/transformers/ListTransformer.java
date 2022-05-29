@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.function.Function;
 
 public class ListTransformer<OIN, E>
-    extends Transformer<ListTransformer<OIN, E>, OIN, List<E>>
-    implements Matcher.ForList<OIN, E> {
+    extends Transformer<IListTransformer<OIN, E>, OIN, List<E>>
+    implements IListTransformer<OIN, E> {
   /**
    * Constructs an object of this class.
    *
@@ -33,27 +33,4 @@ public class ListTransformer<OIN, E>
     return new ListVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
   }
 
-  public IObjectTransformer<OIN, E> elementAt(int i) {
-    return this.transformToObject(Functions.elementAt(i));
-  }
-
-  public IIntegerTransformer<OIN> size() {
-    return this.transformToInteger(Functions.size());
-  }
-
-  public ListTransformer<OIN, E> subList(int begin, int end) {
-    return this.transformToList(Printables.function("subList", v -> v.subList(begin, end)));
-  }
-
-  public ListTransformer<OIN, E> subList(int begin) {
-    return this.transformToList(Printables.function("subList", v -> v.subList(begin, v.size())));
-  }
-
-  public StreamTransformer<OIN, E> stream() {
-    return this.transformToStream(Printables.function("listStream", Collection::stream));
-  }
-
-  public IBooleanTransformer<OIN> isEmpty() {
-    return this.transformToInBoolean(Printables.function("listIsEmpty", List::isEmpty));
-  }
 }

@@ -91,7 +91,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
     return new StringTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
   }
 
-  default <E> ListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
+  default <E> IListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
     return this.transform(f, (TX, func) -> new ListTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 
