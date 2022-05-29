@@ -116,13 +116,13 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
   }
 
   @Override
-  default StringTransformer<OIN> asString() {
-    return (StringTransformer<OIN>) stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
+  default IStringTransformer.StringTransformer<OIN> asString() {
+    return (IStringTransformer.StringTransformer<OIN>) stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
   }
 
   @Override
   default IIntegerTransformer<OIN> asInteger() {
-    return new IntegerTransformer<>(transformerName(), this, Printables.function("treatAsInteger", v -> (Integer) v), originalInputValue());
+    return new IIntegerTransformer.IntegerTransformer<>(transformerName(), this, Printables.function("treatAsInteger", v -> (Integer) v), originalInputValue());
   }
 
   @Override
@@ -152,27 +152,27 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
     ;
 
     public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IStringTransformer<OIN> stringTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, String> func) {
-      return new StringTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+      return new IStringTransformer.StringTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
 
     public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IBooleanTransformer<OIN> booleanTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Boolean> function) {
-      return new BooleanTransformer<>(transformer.transformerName(), transformer, function, transformer.originalInputValue());
+      return new IBooleanTransformer.BooleanTransformer<>(transformer.transformerName(), transformer, function, transformer.originalInputValue());
     }
 
-    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IntegerTransformer<OIN> integerTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Integer> func) {
-      return new IntegerTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IIntegerTransformer.IntegerTransformer<OIN> integerTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Integer> func) {
+      return new IIntegerTransformer.IntegerTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
 
-    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, E> StreamTransformer<OIN, E> streamTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Stream<E>> func) {
-      return new StreamTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, E> IStreamTransformer.StreamTransformer<OIN, E> streamTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Stream<E>> func) {
+      return new IStreamTransformer.StreamTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
 
-    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, E> ListTransformer<OIN, E> listTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, List<E>> func) {
-      return new ListTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, E> IListTransformer.ListTransformer<OIN, E> listTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, List<E>> func) {
+      return new IListTransformer.ListTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
 
     public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, O> IObjectTransformer<OIN, O> objectTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, O> func) {
-      return new ObjectTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+      return new IObjectTransformer.ObjectTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
   }
 }

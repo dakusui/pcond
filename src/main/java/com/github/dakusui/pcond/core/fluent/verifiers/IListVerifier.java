@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core.fluent.verifiers;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.fluent.IVerifier;
+import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
@@ -40,5 +41,18 @@ public interface IListVerifier<OIN, E> extends
         Arrays.stream(elements)
             .map(v -> Printables.predicate("[" + v + "]s", e -> Objects.equals(v, e)))
             .toArray(Predicate[]::new));
+  }
+
+  class ListVerifier<OIN, E>
+      extends Verifier<IListVerifier<OIN, E>, OIN, List<E>>
+      implements IListVerifier<OIN, E> {
+    public ListVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
+      super(transformerName, function, predicate, originalInputValue);
+    }
+
+    @Override
+    public IListVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
+      return IVerifier.Factory.listVerifier(transformerName, function, predicate, originalInputValue);
+    }
   }
 }

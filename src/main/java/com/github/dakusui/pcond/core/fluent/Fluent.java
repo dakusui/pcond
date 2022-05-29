@@ -24,31 +24,31 @@ public class Fluent<OIN> implements AsPhraseFactory.ForFluent<OIN> {
 
   @Override
   public IStringTransformer<OIN> asString() {
-    return new StringTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+    return new IStringTransformer.StringTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 
   @Override
   public IIntegerTransformer<OIN> asInteger() {
-    return new IntegerTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+    return new IIntegerTransformer.IntegerTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 
   @Override
-  public BooleanTransformer<OIN> asBoolean() {
-    return new BooleanTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+  public IBooleanTransformer.BooleanTransformer<OIN> asBoolean() {
+    return new IBooleanTransformer.BooleanTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 
   @Override
   public <E> IObjectTransformer<OIN, E> asValueOf(E value) {
-    return new ObjectTransformer<>(this.transformerName, null, dummyFunction(), originalInputValue);
+    return new IObjectTransformer.ObjectTransformer<>(this.transformerName, null, dummyFunction(), originalInputValue);
   }
 
   @Override
   public <E> IListTransformer<OIN, E> asListOf(E value) {
-    return new ListTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+    return new IListTransformer.ListTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 
   @Override
   public <E> IStreamTransformer<OIN, E> asStreamOf(E value) {
-    return new StreamTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+    return new IStreamTransformer.StreamTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 }

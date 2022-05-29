@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.ITransformer;
 import com.github.dakusui.pcond.core.fluent.IVerifier;
+import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.IStringVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
 import com.github.dakusui.pcond.forms.Printables;
@@ -29,5 +30,13 @@ public interface IStringTransformer<OIN> extends
         (Function<? super OIN, String>) this.function(),
         dummyPredicate(),
         this.originalInputValue());
+  }
+
+  class StringTransformer<OIN>
+      extends Transformer<IStringTransformer<OIN>, OIN, String>
+      implements IStringTransformer<OIN> {
+    public <IN> StringTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends String> function, OIN originalInputValue) {
+      super(transformerName, parent, function, originalInputValue);
+    }
   }
 }
