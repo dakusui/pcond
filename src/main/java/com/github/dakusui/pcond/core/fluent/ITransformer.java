@@ -51,6 +51,8 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
 
   String transformerName();
 
+  OIN originalInputValue();
+
   @SuppressWarnings("unchecked")
   default <
       NOUT,
@@ -78,7 +80,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
   }
 
   default <O> ObjectTransformer<OIN, O> transformToObject(Function<? super OUT, O> f) {
-    return this.transform(f, (TX, func) -> new ObjectTransformer<>(transformerName(), this, func));
+    return this.transform(f, (TX, func) -> new ObjectTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 
   default IStringTransformer<OIN> transformToString(Function<OUT, String> f) {
@@ -86,23 +88,23 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
   }
 
   static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IStringTransformer<OIN> stringTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, String> func) {
-    return new StringTransformer<>(transformer.transformerName(), transformer, func);
+    return new StringTransformer<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
   }
 
   default <E> ListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
-    return this.transform(f, (TX, func) -> new ListTransformer<>(transformerName(), this, func));
+    return this.transform(f, (TX, func) -> new ListTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 
   default <E> StreamTransformer<OIN, E> transformToStream(Function<OUT, Stream<E>> f) {
-    return this.transform(f, (TX, func) -> new StreamTransformer<>(transformerName(), this, func));
+    return this.transform(f, (TX, func) -> new StreamTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 
   default IntegerTransformer<OIN> transformToInteger(Function<? super OUT, Integer> f) {
-    return this.transform(f, (TX, func) -> new IntegerTransformer<>(transformerName(), this, func));
+    return this.transform(f, (TX, func) -> new IntegerTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 
   default BooleanTransformer<OIN> transformToInBoolean(Function<? super OUT, Boolean> f) {
-    return this.transform(f, (TX, func) -> new BooleanTransformer<>(transformerName(), this, func));
+    return this.transform(f, (TX, func) -> new BooleanTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 
   IVerifier<?, OIN, OUT> then();
@@ -123,29 +125,29 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
 
   @Override
   default IntegerTransformer<OIN> asInteger() {
-    return new IntegerTransformer<>(transformerName(), this, Printables.function("treatAsInteger", v -> (Integer) v));
+    return new IntegerTransformer<>(transformerName(), this, Printables.function("treatAsInteger", v -> (Integer) v), originalInputValue());
   }
 
   @Override
   default BooleanTransformer<OIN> asBoolean() {
-    return new BooleanTransformer<>(transformerName(), this, Printables.function("tratAsBoolean", v -> (Boolean) v));
+    return new BooleanTransformer<>(transformerName(), this, Printables.function("tratAsBoolean", v -> (Boolean) v), originalInputValue());
   }
 
   @Override
   @SuppressWarnings("unchecked")
   default <NOUT> ObjectTransformer<OIN, NOUT> asValueOf(NOUT value) {
-    return new ObjectTransformer<>(transformerName(), this, Printables.function("treatAs[NOUT]", v -> (NOUT) v));
+    return new ObjectTransformer<>(transformerName(), this, Printables.function("treatAs[NOUT]", v -> (NOUT) v), originalInputValue());
   }
 
   @Override
   @SuppressWarnings("unchecked")
   default <E> ListTransformer<OIN, E> asListOf(E value) {
-    return new ListTransformer<>(transformerName(), this, Printables.function("treatAsList", v -> (List<E>) v));
+    return new ListTransformer<>(transformerName(), this, Printables.function("treatAsList", v -> (List<E>) v), originalInputValue());
   }
 
   @SuppressWarnings("unchecked")
   @Override
   default <E> StreamTransformer<OIN, E> asStreamOf(E value) {
-    return new StreamTransformer<>(transformerName(), this, Printables.function("treatAsStream[NOUT]", v -> (Stream<E>) v));
+    return new StreamTransformer<>(transformerName(), this, Printables.function("treatAsStream[NOUT]", v -> (Stream<E>) v), originalInputValue());
   }
 }

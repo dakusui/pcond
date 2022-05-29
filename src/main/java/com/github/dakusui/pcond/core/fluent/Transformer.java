@@ -23,18 +23,22 @@ public abstract class Transformer<
   private final Function<OIN, OUT> function;
   private final String             transformerName;
 
+  private final OIN originalInputValue;
+
   /**
    * Constructs an instance of this class.
    *
-   * @param transformerName THe name of transformer. This can be {@code null}.
-   * @param parent          The parent of the new transformer. {@code null} if it is a root.
-   * @param function        A function with which a given value is converted.
-   * @param <IN>            The type of the input.
+   * @param <IN>               The type of the input.
+   * @param transformerName    THe name of transformer. This can be {@code null}.
+   * @param parent             The parent of the new transformer. {@code null} if it is a root.
+   * @param function           A function with which a given value is converted.
+   * @param originalInputValue An original input value, if available. Otherwise {@code null}.
    */
   @SuppressWarnings("unchecked")
-  public <IN> Transformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
+  public <IN> Transformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function, OIN originalInputValue) {
     this.transformerName = transformerName;
     this.function = (Function<OIN, OUT>) ITransformer.chainFunctions(parent == null ? dummyFunction() : parent.function(), function);
+    this.originalInputValue = originalInputValue;
   }
 
   @Override
@@ -45,5 +49,10 @@ public abstract class Transformer<
   @Override
   public String transformerName() {
     return this.transformerName;
+  }
+
+  @Override
+  public OIN originalInputValue() {
+    return this.originalInputValue;
   }
 }

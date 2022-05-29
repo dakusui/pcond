@@ -12,8 +12,8 @@ import java.util.function.Function;
 public abstract class AbstractObjectTransformer<TX extends AbstractObjectTransformer<TX, OIN, OUT>, OIN, OUT>
     extends Transformer<TX, OIN, OUT> {
 
-  public <IN> AbstractObjectTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
-    super(transformerName, parent, function);
+  public <IN> AbstractObjectTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function, OIN originalInputValue) {
+    super(transformerName, parent, function, originalInputValue);
   }
 
   /**

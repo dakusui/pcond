@@ -8,7 +8,7 @@ import java.util.function.Function;
 public class StringTransformer<OIN>
     extends Transformer<IStringTransformer<OIN>, OIN, String>
     implements IStringTransformer<OIN> {
-  public <IN> StringTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends String> function) {
-    super(transformerName, parent, function);
+  public <IN> StringTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends String> function, OIN originalInputValue) {
+    super(transformerName, parent, function, originalInputValue);
   }
 }

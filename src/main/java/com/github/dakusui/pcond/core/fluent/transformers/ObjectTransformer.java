@@ -15,9 +15,10 @@ public class ObjectTransformer<OIN, OUT> extends AbstractObjectTransformer<Objec
    * @param transformerName
    * @param parent
    * @param function
+   * @param originalInputValue
    */
-  public <IN> ObjectTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
-    super(transformerName, parent, function);
+  public <IN> ObjectTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function, OIN originalInputValue) {
+    super(transformerName, parent, function, originalInputValue);
   }
 
   @Override

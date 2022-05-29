@@ -10,8 +10,9 @@ import com.github.dakusui.pcond.internals.InternalUtils;
 import java.util.function.Function;
 
 public class BooleanTransformer<OIN> extends Transformer<BooleanTransformer<OIN>, OIN, Boolean> implements Matcher.ForBoolean<OIN> {
-  public <IN> BooleanTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Boolean> function) {
-    super(transformerName, parent, function);
+
+  public <IN> BooleanTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Boolean> function, OIN originalInputValue) {
+    super(transformerName, parent, function, originalInputValue);
   }
 
   @Override

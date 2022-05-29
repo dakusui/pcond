@@ -12,8 +12,8 @@ import java.util.function.Function;
 public class IntegerTransformer<OIN> extends Transformer<IntegerTransformer<OIN>, OIN, Integer> implements Matcher.ForInteger<OIN> {
 
 
-  public <IN> IntegerTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Integer> function) {
-    super(transformerName, parent, function);
+  public <IN> IntegerTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Integer> function, OIN originalInputValue) {
+    super(transformerName, parent, function, originalInputValue);
   }
 
   @Override

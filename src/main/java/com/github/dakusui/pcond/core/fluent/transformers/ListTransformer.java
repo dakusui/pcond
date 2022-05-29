@@ -18,12 +18,13 @@ public class ListTransformer<OIN, E>
   /**
    * Constructs an object of this class.
    *
-   * @param transformerName A name of transformer printed in a failure report.
-   * @param parent          A parent transformer
-   * @param function        A function that transforms an input value in to the target value of this transformer.
+   * @param transformerName    A name of transformer printed in a failure report.
+   * @param parent             A parent transformer
+   * @param function           A function that transforms an input value in to the target value of this transformer.
+   * @param originalInputValue An original input value.
    */
-  public <IN> ListTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends List<E>> function) {
-    super(transformerName, parent, function);
+  public <IN> ListTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends List<E>> function, OIN originalInputValue) {
+    super(transformerName, parent, function, originalInputValue);
   }
 
   @Override

@@ -15,8 +15,8 @@ public class StreamTransformer<OIN, E> extends Transformer<StreamTransformer<OIN
   /**
    *
    */
-  public <IN> StreamTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Stream<E>> function) {
-    super(transformerName, parent, function);
+  public <IN> StreamTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Stream<E>> function, OIN originalInputValue) {
+    super(transformerName, parent, function, originalInputValue);
   }
 
   @Override
