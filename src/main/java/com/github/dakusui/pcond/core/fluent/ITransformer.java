@@ -72,35 +72,35 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
     return this.then().asValueOf((NOUT) value()).anyOf(predicates);
   }
 
-  default <O> IObjectTransformer<OIN, O> exercise(Function<? super OUT, O> f) {
+  default <O> ObjectTransformer<OIN, O> exercise(Function<? super OUT, O> f) {
     return applyFunction(f);
   }
 
-  default <O> IObjectTransformer<OIN, O> applyFunction(Function<? super OUT, O> f) {
+  default <O> ObjectTransformer<OIN, O> applyFunction(Function<? super OUT, O> f) {
     return transformToObject(f);
   }
 
-  default <O> IObjectTransformer<OIN, O> transformToObject(Function<? super OUT, O> f) {
+  default <O> ObjectTransformer<OIN, O> transformToObject(Function<? super OUT, O> f) {
     return this.transform(f, (TX, func) -> objectTransformer(this, func));
   }
 
-  default IStringTransformer<OIN> transformToString(Function<OUT, String> f) {
+  default StringTransformer<OIN> transformToString(Function<OUT, String> f) {
     return this.transform(f, (TX, func) -> stringTransformer(this, func));
   }
 
-  default <E> IListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
+  default <E> ListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
     return this.transform(f, (TX, func) -> listTransformer(this, func));
   }
 
-  default <E> IStreamTransformer<OIN, E> transformToStream(Function<OUT, Stream<E>> f) {
+  default <E> StreamTransformer<OIN, E> transformToStream(Function<OUT, Stream<E>> f) {
     return this.transform(f, (TX, func) -> streamTransformer(this, func));
   }
 
-  default IIntegerTransformer<OIN> transformToInteger(Function<? super OUT, Integer> f) {
+  default IntegerTransformer<OIN> transformToInteger(Function<? super OUT, Integer> f) {
     return this.transform(f, (TX, func) -> integerTransformer(this, func));
   }
 
-  default IBooleanTransformer<OIN> transformToInBoolean(Function<? super OUT, Boolean> f) {
+  default BooleanTransformer<OIN> transformToInBoolean(Function<? super OUT, Boolean> f) {
     return this.transform(f, (TX, func) -> booleanTransformer(this, func));
   }
 
@@ -116,63 +116,63 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
   }
 
   @Override
-  default IStringTransformer.Impl<OIN> asString() {
-    return (IStringTransformer.Impl<OIN>) stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
+  default StringTransformer.Impl<OIN> asString() {
+    return (StringTransformer.Impl<OIN>) stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
   }
 
   @Override
-  default IIntegerTransformer<OIN> asInteger() {
-    return new IIntegerTransformer.Impl<>(transformerName(), this, Printables.function("treatAsInteger", v -> (Integer) v), originalInputValue());
+  default IntegerTransformer<OIN> asInteger() {
+    return new IntegerTransformer.Impl<>(transformerName(), this, Printables.function("treatAsInteger", v -> (Integer) v), originalInputValue());
   }
 
   @Override
-  default IBooleanTransformer<OIN> asBoolean() {
+  default BooleanTransformer<OIN> asBoolean() {
     return booleanTransformer(this, Printables.function("treatAsBoolean", v -> (Boolean) v));
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  default <NOUT> IObjectTransformer<OIN, NOUT> asValueOf(NOUT value) {
+  default <NOUT> ObjectTransformer<OIN, NOUT> asValueOf(NOUT value) {
     return objectTransformer(this, Printables.function("treatAs[NOUT]", v -> (NOUT) v));
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  default <E> IListTransformer<OIN, E> asListOf(E value) {
+  default <E> ListTransformer<OIN, E> asListOf(E value) {
     return listTransformer(this, Printables.function("treatAsList", v -> (List<E>) v));
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  default <E> IStreamTransformer<OIN, E> asStreamOf(E value) {
+  default <E> StreamTransformer<OIN, E> asStreamOf(E value) {
     return streamTransformer(this, Printables.function("treatAsStream[NOUT]", v -> (Stream<E>) v));
   }
 
   enum Factory {
     ;
 
-    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IStringTransformer<OIN> stringTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, String> func) {
-      return new IStringTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> StringTransformer<OIN> stringTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, String> func) {
+      return new StringTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
 
-    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IBooleanTransformer<OIN> booleanTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Boolean> function) {
-      return new IBooleanTransformer.Impl<>(transformer.transformerName(), transformer, function, transformer.originalInputValue());
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> BooleanTransformer<OIN> booleanTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Boolean> function) {
+      return new BooleanTransformer.Impl<>(transformer.transformerName(), transformer, function, transformer.originalInputValue());
     }
 
-    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IIntegerTransformer.Impl<OIN> integerTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Integer> func) {
-      return new IIntegerTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IntegerTransformer.Impl<OIN> integerTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Integer> func) {
+      return new IntegerTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
 
-    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, E> IStreamTransformer.Impl<OIN, E> streamTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Stream<E>> func) {
-      return new IStreamTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, E> StreamTransformer.Impl<OIN, E> streamTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Stream<E>> func) {
+      return new StreamTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
 
-    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, E> IListTransformer.Impl<OIN, E> listTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, List<E>> func) {
-      return new IListTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, E> ListTransformer.Impl<OIN, E> listTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, List<E>> func) {
+      return new ListTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
 
-    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, O> IObjectTransformer<OIN, O> objectTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, O> func) {
-      return new IObjectTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT, O> ObjectTransformer<OIN, O> objectTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, O> func) {
+      return new ObjectTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
   }
 }

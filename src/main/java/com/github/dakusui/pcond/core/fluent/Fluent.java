@@ -23,32 +23,32 @@ public class Fluent<OIN> implements AsPhraseFactory.ForFluent<OIN> {
   }
 
   @Override
-  public IStringTransformer<OIN> asString() {
-    return new IStringTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+  public StringTransformer<OIN> asString() {
+    return new StringTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 
   @Override
-  public IIntegerTransformer<OIN> asInteger() {
-    return new IIntegerTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+  public IntegerTransformer<OIN> asInteger() {
+    return new IntegerTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 
   @Override
-  public IBooleanTransformer.Impl<OIN> asBoolean() {
-    return new IBooleanTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+  public BooleanTransformer.Impl<OIN> asBoolean() {
+    return new BooleanTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 
   @Override
-  public <E> IObjectTransformer<OIN, E> asValueOf(E value) {
-    return new IObjectTransformer.Impl<>(this.transformerName, null, dummyFunction(), originalInputValue);
+  public <E> ObjectTransformer<OIN, E> asValueOf(E value) {
+    return new ObjectTransformer.Impl<>(this.transformerName, null, dummyFunction(), originalInputValue);
   }
 
   @Override
-  public <E> IListTransformer<OIN, E> asListOf(E value) {
-    return new IListTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+  public <E> ListTransformer<OIN, E> asListOf(E value) {
+    return new ListTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 
   @Override
-  public <E> IStreamTransformer<OIN, E> asStreamOf(E value) {
-    return new IStreamTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+  public <E> StreamTransformer<OIN, E> asStreamOf(E value) {
+    return new StreamTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 }

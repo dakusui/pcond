@@ -43,50 +43,50 @@ public interface AsPhraseFactory<
   <E> Matcher.ForStream<OIN, E> asStreamOf(E value);
 
   interface ForTransformer<OIN> extends AsPhraseFactory<
-      IStringTransformer<OIN>,
-      IIntegerTransformer<OIN>,
-      IBooleanTransformer<OIN>,
+      StringTransformer<OIN>,
+      IntegerTransformer<OIN>,
+      BooleanTransformer<OIN>,
       OIN> {
     @Override
-    default <E> IObjectTransformer<OIN, E> as(E value) {
+    default <E> ObjectTransformer<OIN, E> as(E value) {
       return asValueOf(value);
     }
 
     @Override
-    default IObjectTransformer<OIN, OIN> asObject() {
+    default ObjectTransformer<OIN, OIN> asObject() {
       return asValueOf(value());
     }
 
     @Override
-    default <E> IObjectTransformer<OIN, E> asValueOfClass(Class<E> klass) {
+    default <E> ObjectTransformer<OIN, E> asValueOfClass(Class<E> klass) {
       return asValueOf(value());
     }
 
     @Override
-    default <E> IListTransformer<OIN, E> asListOfClass(Class<E> klass) {
+    default <E> ListTransformer<OIN, E> asListOfClass(Class<E> klass) {
       return asListOf(value());
     }
 
     @Override
-    default <E> IStreamTransformer<OIN, E> asStreamOfClass(Class<E> klass) {
+    default <E> StreamTransformer<OIN, E> asStreamOfClass(Class<E> klass) {
       return asStreamOf(value());
     }
 
     @Override
-    <E> IObjectTransformer<OIN, E> asValueOf(E value);
+    <E> ObjectTransformer<OIN, E> asValueOf(E value);
 
     @Override
-    <E> IListTransformer<OIN, E> asListOf(E value);
+    <E> ListTransformer<OIN, E> asListOf(E value);
 
     @Override
-    <E> IStreamTransformer<OIN, E> asStreamOf(E value);
+    <E> StreamTransformer<OIN, E> asStreamOf(E value);
 
-    default <E> IObjectTransformer<OIN, E> valueAt(int i, E value) {
+    default <E> ObjectTransformer<OIN, E> valueAt(int i, E value) {
       return asListOf(value).elementAt(i);
     }
 
     @SuppressWarnings("unchecked")
-    default <E> IObjectTransformer<OIN, E> valueAt(int i) {
+    default <E> ObjectTransformer<OIN, E> valueAt(int i) {
       return asListOf((E)value()).elementAt(i);
     }
   }
@@ -96,44 +96,44 @@ public interface AsPhraseFactory<
   }
 
   interface ForVerifier<OIN> extends AsPhraseFactory<
-      IStringVerifier<OIN>,
-      IIntegerVerifier<OIN>,
-      IBooleanVerifier<OIN>,
+      StringVerifier<OIN>,
+      IntegerVerifier<OIN>,
+      BooleanVerifier<OIN>,
       OIN
       > {
     @Override
-    default <E> IObjectVerifier<OIN, E> as(E value) {
+    default <E> ObjectVerifier<OIN, E> as(E value) {
       return asValueOf(value);
     }
 
     @Override
-    default IObjectVerifier<OIN, OIN> asObject() {
+    default ObjectVerifier<OIN, OIN> asObject() {
       return asValueOf(value());
     }
 
     @Override
-    default <E> IObjectVerifier<OIN, E> asValueOfClass(Class<E> value) {
+    default <E> ObjectVerifier<OIN, E> asValueOfClass(Class<E> value) {
       return asValueOf(value());
     }
 
     @Override
-    default <E> IListVerifier<OIN, E> asListOfClass(Class<E> value) {
+    default <E> ListVerifier<OIN, E> asListOfClass(Class<E> value) {
       return asListOf(value());
     }
 
     @Override
-    default <E> IStreamVerifier<OIN, E> asStreamOfClass(Class<E> value) {
+    default <E> StreamVerifier<OIN, E> asStreamOfClass(Class<E> value) {
       return asStreamOf(value());
     }
 
     @Override
-    <E> IObjectVerifier<OIN, E> asValueOf(E value);
+    <E> ObjectVerifier<OIN, E> asValueOf(E value);
 
     @Override
-    <E> IListVerifier<OIN, E> asListOf(E value);
+    <E> ListVerifier<OIN, E> asListOf(E value);
 
     @Override
-    <E> IStreamVerifier<OIN, E> asStreamOf(E value);
+    <E> StreamVerifier<OIN, E> asStreamOf(E value);
 
   }
 }

@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.ITransformer;
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.verifiers.IStreamVerifier;
+import com.github.dakusui.pcond.core.fluent.verifiers.StreamVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
@@ -11,12 +11,12 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.streamVerifier;
 
-public interface IStreamTransformer<OIN, E> extends ITransformer<IStreamTransformer<OIN, E>, OIN, Stream<E>>, Matcher.ForStream<OIN, E> {
+public interface StreamTransformer<OIN, E> extends ITransformer<StreamTransformer<OIN, E>, OIN, Stream<E>>, Matcher.ForStream<OIN, E> {
   @Override
-  IStreamVerifier<OIN, E> then();
+  StreamVerifier<OIN, E> then();
 
-  class Impl<OIN, E> extends Transformer<IStreamTransformer<OIN, E>, OIN, Stream<E>>
-      implements IStreamTransformer<OIN, E> {
+  class Impl<OIN, E> extends Transformer<StreamTransformer<OIN, E>, OIN, Stream<E>>
+      implements StreamTransformer<OIN, E> {
 
     /**
      *
@@ -26,7 +26,7 @@ public interface IStreamTransformer<OIN, E> extends ITransformer<IStreamTransfor
     }
 
     @Override
-    public IStreamVerifier<OIN, E> then() {
+    public StreamVerifier<OIN, E> then() {
       return streamVerifier(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
     }
   }

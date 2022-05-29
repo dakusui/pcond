@@ -31,27 +31,27 @@ public enum Fluents {
     return whenValueOf(value());
   }
 
-  public static IStringTransformer<String> when(String value) {
+  public static StringTransformer<String> when(String value) {
     return new Fluent<>("WHEN", value).asString();
   }
 
-  public static IIntegerTransformer<Integer> when(int value) {
+  public static IntegerTransformer<Integer> when(int value) {
     return new Fluent<>("WHEN", value).asInteger();
   }
 
-  public static IBooleanTransformer.Impl<Boolean> when(boolean value) {
+  public static BooleanTransformer.Impl<Boolean> when(boolean value) {
     return new Fluent<>("WHEN", value).asBoolean();
   }
 
-  public static <T> IObjectTransformer<T, T> when(T value) {
+  public static <T> ObjectTransformer<T, T> when(T value) {
     return new Fluent<>("WHEN", value).asObject();
   }
 
-  public static <E> IListTransformer<List<E>, E> when(List<E> value) {
+  public static <E> ListTransformer<List<E>, E> when(List<E> value) {
     return new Fluent<>("WHEN", value).asListOf(value());
   }
 
-  public static <E> IStreamTransformer<Stream<E>, E> when(Stream<E> value) {
+  public static <E> StreamTransformer<Stream<E>, E> when(Stream<E> value) {
     return new Fluent<>("WHEN", value).asStreamOf(value());
   }
 

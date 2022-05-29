@@ -11,36 +11,36 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.integerVerifier;
 
-public interface IIntegerVerifier<OIN> extends
+public interface IntegerVerifier<OIN> extends
     Identifiable,
     Predicate<OIN>,
     Evaluable.Transformation<OIN, Integer>,
-    IVerifier<IIntegerVerifier<OIN>, OIN, Integer>,
+    IVerifier<IntegerVerifier<OIN>, OIN, Integer>,
     Matcher.ForInteger<OIN> {
   @Override
-  IIntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue);
+  IntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue);
 
-  default IIntegerVerifier<OIN> equalTo(int v) {
+  default IntegerVerifier<OIN> equalTo(int v) {
     return predicate(Predicates.equalTo(v));
   }
 
-  default IIntegerVerifier<OIN> lessThan(int v) {
+  default IntegerVerifier<OIN> lessThan(int v) {
     return predicate(Predicates.lessThan(v));
   }
 
-  default IIntegerVerifier<OIN> lessThanOrEqualTo(int v) {
+  default IntegerVerifier<OIN> lessThanOrEqualTo(int v) {
     return predicate(Predicates.lessThanOrEqualTo(v));
   }
 
-  default IIntegerVerifier<OIN> greaterThan(int v) {
+  default IntegerVerifier<OIN> greaterThan(int v) {
     return predicate(Predicates.lessThan(v));
   }
 
-  default IIntegerVerifier<OIN> greaterThanOrEqualTo(int v) {
+  default IntegerVerifier<OIN> greaterThanOrEqualTo(int v) {
     return predicate(Predicates.lessThan(v));
   }
 
-  class Impl<OIN> extends Verifier<IIntegerVerifier<OIN>, OIN, Integer> implements IIntegerVerifier<OIN> {
+  class Impl<OIN> extends Verifier<IntegerVerifier<OIN>, OIN, Integer> implements IntegerVerifier<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
     }

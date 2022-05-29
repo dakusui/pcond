@@ -13,30 +13,30 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface IListVerifier<OIN, E> extends
+public interface ListVerifier<OIN, E> extends
     Identifiable,
     Predicate<OIN>,
     Evaluable.Transformation<OIN, List<E>>,
-    IVerifier<IListVerifier<OIN, E>, OIN, List<E>>,
+    IVerifier<ListVerifier<OIN, E>, OIN, List<E>>,
     Matcher.ForList<OIN, E> {
   @Override
-  IListVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue);
+  ListVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue);
 
-  default IListVerifier<OIN, E> isEmpty() {
+  default ListVerifier<OIN, E> isEmpty() {
     return predicate(Predicates.isEmpty());
   }
 
-  default IListVerifier<OIN, E> contains(E element) {
+  default ListVerifier<OIN, E> contains(E element) {
     return predicate(Predicates.contains(element));
   }
 
   @SuppressWarnings("unchecked")
-  default IListVerifier<OIN, E> findElementsInorderBy(Predicate<E>... predicates) {
+  default ListVerifier<OIN, E> findElementsInorderBy(Predicate<E>... predicates) {
     return predicate(Predicates.findElements(predicates));
   }
 
   @SuppressWarnings("unchecked")
-  default IListVerifier<OIN, E> findElementsInorder(E... elements) {
+  default ListVerifier<OIN, E> findElementsInorder(E... elements) {
     return this.findElementsInorderBy(
         Arrays.stream(elements)
             .map(v -> Printables.predicate("[" + v + "]s", e -> Objects.equals(v, e)))
@@ -44,14 +44,14 @@ public interface IListVerifier<OIN, E> extends
   }
 
   class Impl<OIN, E>
-      extends Verifier<IListVerifier<OIN, E>, OIN, List<E>>
-      implements IListVerifier<OIN, E> {
+      extends Verifier<ListVerifier<OIN, E>, OIN, List<E>>
+      implements ListVerifier<OIN, E> {
     public Impl(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
     }
 
     @Override
-    public IListVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
+    public ListVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
       return IVerifier.Factory.listVerifier(transformerName, function, predicate, originalInputValue);
     }
   }
