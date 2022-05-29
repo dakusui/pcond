@@ -15,21 +15,6 @@ public class ObjectTransformer<OIN, OUT> extends AbstractObjectTransformer<IObje
   }
 
   @Override
-  public Function<? super OIN, ? extends OUT> function() {
-    return null;
-  }
-
-  @Override
-  public String transformerName() {
-    return null;
-  }
-
-  @Override
-  public OIN originalInputValue() {
-    return null;
-  }
-
-  @Override
   public Verifier<?, OIN, OUT> then() {
     return new ObjectVerifier<>(transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
   }

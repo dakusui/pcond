@@ -62,12 +62,12 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> Verifier<?, OIN, NOUT> allOf(Predicate<? super NOUT>... predicates) {
+  default <NOUT> IVerifier<?, OIN, NOUT> allOf(Predicate<? super NOUT>... predicates) {
     return this.then().asValueOf((NOUT) value()).allOf(predicates);
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> Verifier<?, OIN, NOUT> anyOf(Predicate<? super NOUT>... predicates) {
+  default <NOUT> IVerifier<?, OIN, NOUT> anyOf(Predicate<? super NOUT>... predicates) {
     return this.then().asValueOf((NOUT) value()).anyOf(predicates);
   }
 
