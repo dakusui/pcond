@@ -14,8 +14,8 @@ public interface IIntegerTransformer<OIN> extends ITransformer<IIntegerTransform
   @Override
   IIntegerVerifier<OIN> then();
 
-  class IntegerTransformer<OIN> extends Transformer<IIntegerTransformer<OIN>, OIN, Integer> implements IIntegerTransformer<OIN> {
-    public <IN> IntegerTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Integer> function, OIN originalInputValue) {
+  class Impl<OIN> extends Transformer<IIntegerTransformer<OIN>, OIN, Integer> implements IIntegerTransformer<OIN> {
+    public <IN> Impl(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Integer> function, OIN originalInputValue) {
       super(transformerName, parent, function, originalInputValue);
     }
 

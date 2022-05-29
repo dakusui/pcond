@@ -58,10 +58,10 @@ public interface IStringVerifier<OIN> extends
     return this.predicate(Predicates.findSubstrings(tokens));
   }
 
-  class StringVerifier<OIN>
+  class Impl<OIN>
       extends Verifier<IStringVerifier<OIN>, OIN, String>
       implements IStringVerifier<OIN> {
-    public StringVerifier(String transformerName, Function<? super OIN, ? extends String> function, Predicate<? super String> predicate, OIN originalInputValue) {
+    public Impl(String transformerName, Function<? super OIN, ? extends String> function, Predicate<? super String> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
     }
 

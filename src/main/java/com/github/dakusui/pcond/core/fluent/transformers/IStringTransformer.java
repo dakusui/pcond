@@ -32,10 +32,10 @@ public interface IStringTransformer<OIN> extends
         this.originalInputValue());
   }
 
-  class StringTransformer<OIN>
+  class Impl<OIN>
       extends Transformer<IStringTransformer<OIN>, OIN, String>
       implements IStringTransformer<OIN> {
-    public <IN> StringTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends String> function, OIN originalInputValue) {
+    public <IN> Impl(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends String> function, OIN originalInputValue) {
       super(transformerName, parent, function, originalInputValue);
     }
   }

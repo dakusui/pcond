@@ -14,9 +14,9 @@ public interface IObjectTransformer<OIN, OUT> extends ITransformer<IObjectTransf
   @Override
   IObjectVerifier<OIN, OUT> then();
 
-  class ObjectTransformer<OIN, OUT> extends AbstractObjectTransformer<IObjectTransformer<OIN, OUT>, OIN, OUT> implements IObjectTransformer<OIN, OUT> {
+  class Impl<OIN, OUT> extends AbstractObjectTransformer<IObjectTransformer<OIN, OUT>, OIN, OUT> implements IObjectTransformer<OIN, OUT> {
 
-    public <IN> ObjectTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function, OIN originalInputValue) {
+    public <IN> Impl(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function, OIN originalInputValue) {
       super(transformerName, parent, function, originalInputValue);
     }
 

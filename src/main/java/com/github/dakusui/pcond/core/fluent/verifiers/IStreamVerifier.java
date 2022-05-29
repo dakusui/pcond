@@ -33,10 +33,10 @@ public interface IStreamVerifier<OIN, E> extends
     return this.predicate(Predicates.allMatch(p));
   }
 
-  class StreamVerifier<OIN, E>
+  class Impl<OIN, E>
       extends Verifier<IStreamVerifier<OIN, E>, OIN, Stream<E>>
       implements IStreamVerifier<OIN, E> {
-    public StreamVerifier(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
+    public Impl(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
     }
 

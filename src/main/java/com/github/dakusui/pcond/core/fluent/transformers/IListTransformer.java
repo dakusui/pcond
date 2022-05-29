@@ -41,7 +41,7 @@ public interface IListTransformer<OIN, E> extends ITransformer<IListTransformer<
     return this.transformToInBoolean(Printables.function("listIsEmpty", List::isEmpty));
   }
 
-  class ListTransformer<OIN, E>
+  class Impl<OIN, E>
       extends Transformer<IListTransformer<OIN, E>, OIN, List<E>>
       implements IListTransformer<OIN, E> {
     /**
@@ -52,7 +52,7 @@ public interface IListTransformer<OIN, E> extends ITransformer<IListTransformer<
      * @param function           A function that transforms an input value in to the target value of this transformer.
      * @param originalInputValue An original input value.
      */
-    public <IN> ListTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends List<E>> function, OIN originalInputValue) {
+    public <IN> Impl(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends List<E>> function, OIN originalInputValue) {
       super(transformerName, parent, function, originalInputValue);
     }
 

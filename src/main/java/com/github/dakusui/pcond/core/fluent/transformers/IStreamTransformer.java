@@ -15,13 +15,13 @@ public interface IStreamTransformer<OIN, E> extends ITransformer<IStreamTransfor
   @Override
   IStreamVerifier<OIN, E> then();
 
-  class StreamTransformer<OIN, E> extends Transformer<IStreamTransformer<OIN, E>, OIN, Stream<E>>
+  class Impl<OIN, E> extends Transformer<IStreamTransformer<OIN, E>, OIN, Stream<E>>
       implements IStreamTransformer<OIN, E> {
 
     /**
      *
      */
-    public <IN> StreamTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Stream<E>> function, OIN originalInputValue) {
+    public <IN> Impl(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Stream<E>> function, OIN originalInputValue) {
       super(transformerName, parent, function, originalInputValue);
     }
 

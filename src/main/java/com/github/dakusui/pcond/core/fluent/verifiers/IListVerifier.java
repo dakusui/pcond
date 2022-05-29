@@ -43,10 +43,10 @@ public interface IListVerifier<OIN, E> extends
             .toArray(Predicate[]::new));
   }
 
-  class ListVerifier<OIN, E>
+  class Impl<OIN, E>
       extends Verifier<IListVerifier<OIN, E>, OIN, List<E>>
       implements IListVerifier<OIN, E> {
-    public ListVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
+    public Impl(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
     }
 

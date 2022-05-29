@@ -106,12 +106,12 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
   }
 
   @Override
-  default IIntegerVerifier.IntegerVerifier<OIN> asInteger() {
+  default IIntegerVerifier.Impl<OIN> asInteger() {
     return integerVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Integer.class)), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default IBooleanVerifier.BooleanVerifier<OIN> asBoolean() {
+  default IBooleanVerifier.Impl<OIN> asBoolean() {
     return booleanVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Boolean.class)), dummyPredicate(), this.originalInputValue());
   }
 
@@ -137,17 +137,17 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
   }
 
   @Override
-  default IIntegerVerifier.IntegerVerifier<OIN> intoIntegerWith(Function<T, Integer> function) {
+  default IIntegerVerifier.Impl<OIN> intoIntegerWith(Function<T, Integer> function) {
     return integerVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default IBooleanVerifier.BooleanVerifier<OIN> intoBooleanWith(Function<T, Boolean> function) {
+  default IBooleanVerifier.Impl<OIN> intoBooleanWith(Function<T, Boolean> function) {
     return booleanVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default <OUT> IObjectVerifier.ObjectVerifier<OIN, OUT> intoObjectWith(Function<T, OUT> function) {
+  default <OUT> IObjectVerifier.Impl<OIN, OUT> intoObjectWith(Function<T, OUT> function) {
     return objectVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
@@ -196,31 +196,31 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
         Function<? super OIN, String> function,
         Predicate<? super String> predicate,
         OIN originalInputValue) {
-      return new IStringVerifier.StringVerifier<>(transformerName, function, predicate, originalInputValue);
+      return new IStringVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
-    public static <OIN, OUT> IObjectVerifier.ObjectVerifier<OIN, OUT> objectVerifier(IObjectTransformer.ObjectTransformer<OIN, OUT> objectTransformer) {
+    public static <OIN, OUT> IObjectVerifier.Impl<OIN, OUT> objectVerifier(IObjectTransformer.Impl<OIN, OUT> objectTransformer) {
       return objectVerifier(objectTransformer.transformerName(), objectTransformer.function(), dummyPredicate(), objectTransformer.originalInputValue());
     }
 
-    public static <OIN, OUT> IObjectVerifier.ObjectVerifier<OIN, OUT> objectVerifier(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInptValue) {
-      return new IObjectVerifier.ObjectVerifier<>(transformerName, function, predicate, originalInptValue);
+    public static <OIN, OUT> IObjectVerifier.Impl<OIN, OUT> objectVerifier(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInptValue) {
+      return new IObjectVerifier.Impl<>(transformerName, function, predicate, originalInptValue);
     }
 
-    public static <OIN, E> IListVerifier.ListVerifier<OIN, E> listVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
-      return new IListVerifier.ListVerifier<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN, E> IListVerifier.Impl<OIN, E> listVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
+      return new IListVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
-    public static <OIN> IIntegerVerifier.IntegerVerifier<OIN> integerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
-      return new IIntegerVerifier.IntegerVerifier<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN> IIntegerVerifier.Impl<OIN> integerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
+      return new IIntegerVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
-    public static <OIN, E> IStreamVerifier.StreamVerifier<OIN, E> streamVerifier(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
-      return new IStreamVerifier.StreamVerifier<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN, E> IStreamVerifier.Impl<OIN, E> streamVerifier(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
+      return new IStreamVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
-    public static <OIN> IBooleanVerifier.BooleanVerifier<OIN> booleanVerifier(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
-      return new IBooleanVerifier.BooleanVerifier<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN> IBooleanVerifier.Impl<OIN> booleanVerifier(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
+      return new IBooleanVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
   }
 }

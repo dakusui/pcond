@@ -18,7 +18,7 @@ public interface IIntegerVerifier<OIN> extends
     IVerifier<IIntegerVerifier<OIN>, OIN, Integer>,
     Matcher.ForInteger<OIN> {
   @Override
-  IntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue);
+  IIntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue);
 
   default IIntegerVerifier<OIN> equalTo(int v) {
     return predicate(Predicates.equalTo(v));
@@ -40,13 +40,13 @@ public interface IIntegerVerifier<OIN> extends
     return predicate(Predicates.lessThan(v));
   }
 
-  class IntegerVerifier<OIN> extends Verifier<IIntegerVerifier<OIN>, OIN, Integer> implements IIntegerVerifier<OIN> {
-    public IntegerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
+  class Impl<OIN> extends Verifier<IIntegerVerifier<OIN>, OIN, Integer> implements IIntegerVerifier<OIN> {
+    public Impl(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
     }
 
     @Override
-    public IntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
+    public Impl<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
       return integerVerifier(transformerName, function, predicate, originalInputValue);
     }
   }

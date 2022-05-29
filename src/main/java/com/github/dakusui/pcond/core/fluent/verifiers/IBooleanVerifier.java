@@ -14,8 +14,8 @@ public interface IBooleanVerifier<OIN> extends Identifiable, Predicate<OIN>, Eva
   @Override
   IBooleanVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue);
 
-  class BooleanVerifier<OIN> extends Verifier<IBooleanVerifier<OIN>, OIN, Boolean> implements IBooleanVerifier<OIN> {
-    public BooleanVerifier(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
+  class Impl<OIN> extends Verifier<IBooleanVerifier<OIN>, OIN, Boolean> implements IBooleanVerifier<OIN> {
+    public Impl(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
     }
 

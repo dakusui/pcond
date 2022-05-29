@@ -9,26 +9,26 @@ public interface IntoPhraseFactory<OIN, IN> {
     return intoStringWith((IN v) -> (String)v);
   }
 
-  default IIntegerVerifier.IntegerVerifier<OIN> intoInteger() {
+  default IIntegerVerifier.Impl<OIN> intoInteger() {
     return intoIntegerWith((IN v) -> (Integer) v);
   }
 
-  default IBooleanVerifier.BooleanVerifier<OIN> intoBoolean() {
+  default IBooleanVerifier.Impl<OIN> intoBoolean() {
     return intoBooleanWith((IN v) -> (Boolean) v);
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> IObjectVerifier.ObjectVerifier<OIN, NOUT> intoObject() {
+  default <NOUT> IObjectVerifier.Impl<OIN, NOUT> intoObject() {
     return intoObjectWith((IN v) -> (NOUT)v);
   }
 
   IStringVerifier<OIN> intoStringWith(Function<IN, String> function);
 
-  IIntegerVerifier.IntegerVerifier<OIN> intoIntegerWith(Function<IN, Integer> function);
+  IIntegerVerifier.Impl<OIN> intoIntegerWith(Function<IN, Integer> function);
 
-  IBooleanVerifier.BooleanVerifier<OIN> intoBooleanWith(Function<IN, Boolean> function);
+  IBooleanVerifier.Impl<OIN> intoBooleanWith(Function<IN, Boolean> function);
 
-  <OUT> IObjectVerifier.ObjectVerifier<OIN, OUT> intoObjectWith(Function<IN, OUT> function);
+  <OUT> IObjectVerifier.Impl<OIN, OUT> intoObjectWith(Function<IN, OUT> function);
 
   interface ForVerifier<OIN, IN> extends IntoPhraseFactory<OIN, IN> {
 

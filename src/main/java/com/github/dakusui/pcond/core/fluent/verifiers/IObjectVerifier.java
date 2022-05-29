@@ -19,10 +19,10 @@ public interface IObjectVerifier<OIN, OUT> extends
   @Override
   IObjectVerifier<OIN, OUT> create(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue);
 
-  class ObjectVerifier<OIN, OUT>
+  class Impl<OIN, OUT>
       extends Verifier<IObjectVerifier<OIN, OUT>, OIN, OUT>
       implements IObjectVerifier<OIN, OUT> {
-    public ObjectVerifier(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {
+    public Impl(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);
     }
 

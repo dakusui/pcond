@@ -12,7 +12,7 @@ import static com.github.dakusui.pcond.core.fluent.IVerifier.Factory.booleanVeri
 
 public interface IBooleanTransformer<OIN> extends ITransformer<IBooleanTransformer<OIN>, OIN, Boolean>, Matcher.ForBoolean<OIN> {
   @Override
-  IBooleanVerifier.BooleanVerifier<OIN> then();
+  IBooleanVerifier<OIN> then();
 
   class BooleanTransformer<OIN> extends Transformer<IBooleanTransformer<OIN>, OIN, Boolean> implements IBooleanTransformer<OIN> {
 
@@ -21,7 +21,7 @@ public interface IBooleanTransformer<OIN> extends ITransformer<IBooleanTransform
     }
 
     @Override
-    public IBooleanVerifier.BooleanVerifier<OIN> then() {
+    public IBooleanVerifier<OIN> then() {
       return booleanVerifier(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
     }
   }
