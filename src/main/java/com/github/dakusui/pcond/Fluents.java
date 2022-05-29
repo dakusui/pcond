@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond;
 
 import com.github.dakusui.pcond.core.fluent.Fluent;
+import com.github.dakusui.pcond.core.fluent.transformers.IStringTransformer;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public enum Fluents {
     return whenValueOf(value());
   }
 
-    /**
+  /**
    * Use the value returned from `value()` as the argument for this
    * method as a place-holder for the sake of readability.
    *
@@ -29,9 +30,14 @@ public enum Fluents {
     return whenValueOf(value());
   }
 
+  public static IStringTransformer<String> when(String value) {
+    return new Fluent<>("WHEN", value).asString();
+  }
+
   public static <T> Fluent<T> $() {
     return $(value());
   }
+
   /**
    * Use this method inside "when" clause.
    *
@@ -54,6 +60,7 @@ public enum Fluents {
   public static <T> Fluent<T> $valueOfClass(Class<T> klass) {
     return $(value());
   }
+
   /**
    * Returns a "type place-holder".
    * A type place-holder is a value that can be cast to any class, even if it has

@@ -51,9 +51,7 @@ public class FluentsTest extends TestBase {
             .elementAt(0)
             .then().asString()
             .findSubstrings("hello", "world")
-            .contains("hello")
-            .verify()
-    );
+            .contains("hello"));
   }
 
   @Test(expected = ComparisonFailure.class)
@@ -74,17 +72,14 @@ public class FluentsTest extends TestBase {
                   .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                   .then()
                   .asString()
-                  .isEqualTo("returnValueFromParentMethod")
-                  .verify(),
+                  .isEqualTo("returnValueFromParentMethod"),
               whenValueOfClass(Parent.class).<Parent>asObject()
                   .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                   .exercise(function("lambda:Child::childMethod", Child::childMethod))
                   .then()
                   .asString()
                   // 'not(...)' is added to make the matcher fail.
-                  .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))
-                  .verify()
-          ));
+                  .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       throw e;
@@ -96,21 +91,20 @@ public class FluentsTest extends TestBase {
     try {
       assertThat(
           (Supplier<Parent>) Parent::new,
-          whenValueOfClass(Supplier.class).<Supplier<?>>asObject()
+          whenValueOfClass(Supplier.class)
+              .asObject()
               .exercise(Supplier::get)
               .allOf(
                   $().as((Parent) value())
                       .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                       .then().asString()
-                      .isEqualTo("returnValueFromParentMethod")
-                      .verify(),
+                      .isEqualTo("returnValueFromParentMethod"),
                   $().asValueOfClass(Parent.class)
                       .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                       .exercise(function("lambda:Child::childMethod", Child::childMethod))
                       .then().asString()
                       // 'not(...)' is added to make the matcher fail.
-                      .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))
-                      .verify()).verify());
+                      .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       throw e;

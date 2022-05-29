@@ -27,6 +27,7 @@ public interface IStringTransformer<OIN> extends
     return IVerifier.stringVerifier(
         this.transformerName(),
         (Function<? super OIN, String>) this.function(),
-        dummyPredicate());
+        dummyPredicate(),
+        this.originalInputValue());
   }
 }

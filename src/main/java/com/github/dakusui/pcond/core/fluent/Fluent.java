@@ -6,11 +6,16 @@ import com.github.dakusui.pcond.forms.Functions;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
 
 public class Fluent<OIN> implements AsPhraseFactory.ForFluent<OIN> {
-  final String transformerName;
-  private OIN originalInputValue;
+  final         String transformerName;
+  private final OIN    originalInputValue;
 
   public Fluent(String transformerName) {
+    this(transformerName, null);
+  }
+
+  public Fluent(String transformerName, OIN originalInputValue) {
     this.transformerName = transformerName;
+    this.originalInputValue = originalInputValue;
   }
 
   public static <T> T value() {

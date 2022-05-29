@@ -23,6 +23,6 @@ public class ObjectTransformer<OIN, OUT> extends AbstractObjectTransformer<Objec
 
   @Override
   public Verifier<?, OIN, OUT> then() {
-    return new ObjectVerifier<>(transformerName(), this.function(), InternalUtils.dummyPredicate());
+    return new ObjectVerifier<>(transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
   }
 }

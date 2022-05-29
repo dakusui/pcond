@@ -7,13 +7,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class IntegerVerifier<OIN> extends Verifier<IntegerVerifier<OIN>, OIN, Integer> implements Matcher.ForInteger<OIN> {
-  public IntegerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate) {
-    super(transformerName, function, predicate);
+  public IntegerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
+    super(transformerName, function, predicate, originalInputValue);
   }
 
   @Override
-  public IntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate) {
-    return new IntegerVerifier<>(transformerName, function, predicate);
+  public IntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
+    return new IntegerVerifier<>(transformerName, function, predicate, originalInputValue);
   }
 
   public IntegerVerifier<OIN> equalTo(int v) {

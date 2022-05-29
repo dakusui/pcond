@@ -21,6 +21,6 @@ public class StreamTransformer<OIN, E> extends Transformer<StreamTransformer<OIN
 
   @Override
   public StreamVerifier<OIN, E> then() {
-    return new StreamVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate());
+    return new StreamVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
   }
 }

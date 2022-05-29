@@ -18,6 +18,6 @@ public class IntegerTransformer<OIN> extends Transformer<IntegerTransformer<OIN>
 
   @Override
   public Verifier<?, OIN, Integer> then() {
-    return new IntegerVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate());
+    return new IntegerVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
   }
 }

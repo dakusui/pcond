@@ -17,6 +17,6 @@ public class BooleanTransformer<OIN> extends Transformer<BooleanTransformer<OIN>
 
   @Override
   public Verifier<?, OIN, Boolean> then() {
-    return new BooleanVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate());
+    return new BooleanVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
   }
 }

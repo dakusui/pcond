@@ -13,13 +13,13 @@ import java.util.function.Predicate;
 public class ListVerifier<OIN, E>
     extends Verifier<ListVerifier<OIN, E>, OIN, List<E>>
     implements Matcher.ForList<OIN, E> {
-  public ListVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate) {
-    super(transformerName, function, predicate);
+  public ListVerifier(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
+    super(transformerName, function, predicate, originalInputValue);
   }
 
   @Override
-  public ListVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate) {
-    return new ListVerifier<>(transformerName, function, predicate);
+  public ListVerifier<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
+    return new ListVerifier<>(transformerName, function, predicate, originalInputValue);
   }
 
   public ListVerifier<OIN, E> isEmpty() {

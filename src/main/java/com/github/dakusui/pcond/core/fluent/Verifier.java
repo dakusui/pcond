@@ -13,13 +13,15 @@ public abstract class Verifier<V extends IVerifier<V, OIN, T>, OIN, T>
     implements IVerifier<V, OIN, T> {
   protected final String                             transformerName;
   private final   Function<? super OIN, ? extends T> function;
+  private final   OIN                                originalInputValue;
   private         Predicate<? super T>               predicate;
 
-  protected Verifier(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate) {
+  protected Verifier(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue) {
     super(predicate, function);
     this.transformerName = transformerName;
     this.function = function;
     this.predicate = predicate; // this field can be null, when the first verifier starts building.
+    this.originalInputValue = originalInputValue;
   }
 
   public String transformerName() {
@@ -40,6 +42,11 @@ public abstract class Verifier<V extends IVerifier<V, OIN, T>, OIN, T>
 
   public Predicate<? super T> predicate() {
     return this.predicate;
+  }
+
+  @Override
+  public OIN originalInputValue() {
+    return this.originalInputValue;
   }
 
   // BEGIN: ------------------------- High -level methods

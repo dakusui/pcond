@@ -29,7 +29,7 @@ public class ListTransformer<OIN, E>
 
   @Override
   public ListVerifier<OIN, E> then() {
-    return new ListVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate());
+    return new ListVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
   }
 
   public ObjectTransformer<OIN, E> elementAt(int i) {
