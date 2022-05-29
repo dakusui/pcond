@@ -35,7 +35,7 @@ public enum Fluents {
     return new Fluent<>("WHEN", value).asString();
   }
 
-  public static IntegerTransformer<Integer> when(int value) {
+  public static IIntegerTransformer<Integer> when(int value) {
     return new Fluent<>("WHEN", value).asInteger();
   }
 
@@ -47,7 +47,7 @@ public enum Fluents {
     return new Fluent<>("WHEN", value).asObject();
   }
 
-  public static <E> ListTransformer<List<E>, E> when(List<E> value) {
+  public static <E> IListTransformer<List<E>, E> when(List<E> value) {
     return new Fluent<>("WHEN", value).asListOf(value());
   }
 

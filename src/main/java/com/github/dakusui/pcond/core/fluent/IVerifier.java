@@ -125,7 +125,7 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
 
   @SuppressWarnings("unchecked")
   @Override
-  default <NOUT> ObjectVerifier<OIN, NOUT> asValueOf(NOUT value) {
+  default <NOUT> IObjectVerifier<OIN, NOUT> asValueOf(NOUT value) {
     return new ObjectVerifier<>(transformerName(), chainFunctions(this.function(), Printables.function("treatAs[NOUT]", v -> (NOUT) v)), dummyPredicate(), this.originalInputValue());
   }
 
@@ -135,7 +135,7 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
   }
 
   @Override
-  default <E> StreamVerifier<OIN, E> asStreamOf(E value) {
+  default <E> IStreamVerifier<OIN, E> asStreamOf(E value) {
     return new StreamVerifier<>(transformerName(), chainFunctions(this.function(), Functions.castTo(Functions.value())), dummyPredicate(), this.originalInputValue());
   }
 

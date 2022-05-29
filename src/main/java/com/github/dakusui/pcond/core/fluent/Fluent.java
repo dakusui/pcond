@@ -28,7 +28,7 @@ public class Fluent<OIN> implements AsPhraseFactory.ForFluent<OIN> {
   }
 
   @Override
-  public IntegerTransformer<OIN> asInteger() {
+  public IIntegerTransformer<OIN> asInteger() {
     return new IntegerTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 
@@ -43,7 +43,7 @@ public class Fluent<OIN> implements AsPhraseFactory.ForFluent<OIN> {
   }
 
   @Override
-  public <E> ListTransformer<OIN, E> asListOf(E value) {
+  public <E> IListTransformer<OIN, E> asListOf(E value) {
     return new ListTransformer<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
   }
 

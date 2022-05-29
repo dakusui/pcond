@@ -44,7 +44,7 @@ public interface AsPhraseFactory<
 
   interface ForTransformer<OIN> extends AsPhraseFactory<
       IStringTransformer<OIN>,
-      IntegerTransformer<OIN>,
+      IIntegerTransformer<OIN>,
       IBooleanTransformer<OIN>,
       OIN> {
     @Override
@@ -63,7 +63,7 @@ public interface AsPhraseFactory<
     }
 
     @Override
-    default <E> ListTransformer<OIN, E> asListOfClass(Class<E> klass) {
+    default <E> IListTransformer<OIN, E> asListOfClass(Class<E> klass) {
       return asListOf(value());
     }
 
@@ -76,7 +76,7 @@ public interface AsPhraseFactory<
     <E> IObjectTransformer<OIN, E> asValueOf(E value);
 
     @Override
-    <E> ListTransformer<OIN, E> asListOf(E value);
+    <E> IListTransformer<OIN, E> asListOf(E value);
 
     @Override
     <E> StreamTransformer<OIN, E> asStreamOf(E value);
@@ -97,22 +97,22 @@ public interface AsPhraseFactory<
 
   interface ForVerifier<OIN> extends AsPhraseFactory<
       IStringVerifier<OIN>,
-      IntegerVerifier<OIN>,
-      BooleanVerifier<OIN>,
+      IIntegerVerifier<OIN>,
+      IBooleanVerifier<OIN>,
       OIN
       > {
     @Override
-    default <E> ObjectVerifier<OIN, E> as(E value) {
+    default <E> IObjectVerifier<OIN, E> as(E value) {
       return asValueOf(value);
     }
 
     @Override
-    default ObjectVerifier<OIN, OIN> asObject() {
+    default IObjectVerifier<OIN, OIN> asObject() {
       return asValueOf(value());
     }
 
     @Override
-    default <E> ObjectVerifier<OIN, E> asValueOfClass(Class<E> value) {
+    default <E> IObjectVerifier<OIN, E> asValueOfClass(Class<E> value) {
       return asValueOf(value());
     }
 
@@ -122,18 +122,18 @@ public interface AsPhraseFactory<
     }
 
     @Override
-    default <E> StreamVerifier<OIN, E> asStreamOfClass(Class<E> value) {
+    default <E> IStreamVerifier<OIN, E> asStreamOfClass(Class<E> value) {
       return asStreamOf(value());
     }
 
     @Override
-    <E> ObjectVerifier<OIN, E> asValueOf(E value);
+    <E> IObjectVerifier<OIN, E> asValueOf(E value);
 
     @Override
     <E> IListVerifier<OIN, E> asListOf(E value);
 
     @Override
-    <E> StreamVerifier<OIN, E> asStreamOf(E value);
+    <E> IStreamVerifier<OIN, E> asStreamOf(E value);
 
   }
 }

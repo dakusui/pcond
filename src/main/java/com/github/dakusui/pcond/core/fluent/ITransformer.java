@@ -124,7 +124,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
   }
 
   @Override
-  default IntegerTransformer<OIN> asInteger() {
+  default IIntegerTransformer<OIN> asInteger() {
     return new IntegerTransformer<>(transformerName(), this, Printables.function("treatAsInteger", v -> (Integer) v), originalInputValue());
   }
 
@@ -141,7 +141,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
 
   @Override
   @SuppressWarnings("unchecked")
-  default <E> ListTransformer<OIN, E> asListOf(E value) {
+  default <E> IListTransformer<OIN, E> asListOf(E value) {
     return new ListTransformer<>(transformerName(), this, Printables.function("treatAsList", v -> (List<E>) v), originalInputValue());
   }
 
