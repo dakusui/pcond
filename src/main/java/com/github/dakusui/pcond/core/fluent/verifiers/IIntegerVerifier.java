@@ -8,7 +8,12 @@ import com.github.dakusui.pcond.forms.Predicates;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public interface IIntegerVerifier<OIN> extends Identifiable, Predicate<OIN>, Evaluable<OIN>, Evaluable.Transformation<OIN, Integer>, IVerifier<IIntegerVerifier<OIN>, OIN, Integer>, Matcher.ForInteger<OIN> {
+public interface IIntegerVerifier<OIN> extends
+    Identifiable,
+    Predicate<OIN>,
+    Evaluable.Transformation<OIN, Integer>,
+    IVerifier<IIntegerVerifier<OIN>, OIN, Integer>,
+    Matcher.ForInteger<OIN> {
   @Override
   IntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue);
 
