@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.Fluents.$;
+import static com.github.dakusui.pcond.Fluents.$valueOf;
 import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
@@ -229,10 +229,10 @@ public enum Predicates {
    * // @formatter:off
    * Returns a {@link Predicate} created from a method specified by a {@code methodQuery}.
    * If the {@code methodQuery} matches none or more than one methods, a {@code RuntimeException} will be thrown.
-   * <p>
+   *
    * The suffix {@code p} stands for "predicate" following the custom in LISP culture
    * and it is necessary to avoid collision with {@link Functions#call(MethodQuery)} method.
-   * <p>
+   *
    * // @formatter:on
    *
    * @param methodQuery A query object that specifies a method to be invoked by the returned predicate.
@@ -356,7 +356,7 @@ public enum Predicates {
             cursoredStringForSnapshotting.originalString.substring(cursoredStringForSnapshotting.position);
       }
     }
-    return $().asString()
+    return $valueOf().asString()
         .transformToObject(function("findTokens", CursoredString::new))
         .then()
         .allOf(
@@ -417,7 +417,7 @@ public enum Predicates {
       return false;
     };
 
-    return $().asListOf((E) Fluents.value())
+    return $valueOf().asListOf((E) Fluents.value())
         .transformToObject(function("toCursoredList", CursoredList::new))
         .then()
         .with(allOf(Stream.concat(

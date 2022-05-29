@@ -52,7 +52,7 @@ public class ListTransformer<OIN, E>
     return this.transformToStream(Printables.function("listStream", Collection::stream));
   }
 
-  public BooleanTransformer<OIN> isEmpty() {
+  public IBooleanTransformer<OIN> isEmpty() {
     return this.transformToInBoolean(Printables.function("listIsEmpty", List::isEmpty));
   }
 }

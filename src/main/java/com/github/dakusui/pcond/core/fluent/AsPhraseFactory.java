@@ -45,7 +45,7 @@ public interface AsPhraseFactory<
   interface ForTransformer<OIN> extends AsPhraseFactory<
       IStringTransformer<OIN>,
       IntegerTransformer<OIN>,
-      BooleanTransformer<OIN>,
+      IBooleanTransformer<OIN>,
       OIN> {
     @Override
     default <E> ObjectTransformer<OIN, E> as(E value) {

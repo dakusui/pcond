@@ -55,8 +55,8 @@ public enum Fluents {
     return new Fluent<>("WHEN", value).asStreamOf(value());
   }
 
-  public static <T> Fluent<T> $() {
-    return $(value());
+  public static <T> Fluent<T> $valueOf() {
+    return $valueOf(value());
   }
 
   /**
@@ -74,12 +74,12 @@ public enum Fluents {
    * @param <T>   The type of the object to be verified.
    * @return A new ObjectTransformer for type `T`.
    */
-  public static <T> Fluent<T> $(T value) {
+  public static <T> Fluent<T> $valueOf(@SuppressWarnings("unused") T value) {
     return fluent();
   }
 
-  public static <T> Fluent<T> $valueOfClass(Class<T> klass) {
-    return $(value());
+  public static <T> Fluent<T> $valueOfClass(@SuppressWarnings("unused") Class<T> klass) {
+    return $valueOf(value());
   }
 
   /**

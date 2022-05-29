@@ -103,7 +103,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
     return this.transform(f, (TX, func) -> new IntegerTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 
-  default BooleanTransformer<OIN> transformToInBoolean(Function<? super OUT, Boolean> f) {
+  default IBooleanTransformer<OIN> transformToInBoolean(Function<? super OUT, Boolean> f) {
     return this.transform(f, (TX, func) -> new BooleanTransformer<>(transformerName(), this, func, originalInputValue()));
   }
 

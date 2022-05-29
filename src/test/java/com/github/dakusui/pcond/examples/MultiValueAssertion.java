@@ -18,10 +18,10 @@ public class MultiValueAssertion {
                 .equalTo(122),
             when().valueAt(1)
                 .allOf(
-                    $().valueAt(0).asString()
+                    $valueOf().valueAt(0).asString()
                         .then()
                         .isEqualTo("hello"),
-                    $().valueAt(1).asString()
+                    $valueOf().valueAt(1).asString()
                         .then()
                         .isEqualTo("world"))));
   }

@@ -95,11 +95,11 @@ public class FluentsTest extends TestBase {
               .asObject()
               .exercise(Supplier::get)
               .allOf(
-                  $().as((Parent) value())
+                  $valueOf().as((Parent) value())
                       .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                       .then().asString()
                       .isEqualTo("returnValueFromParentMethod"),
-                  $().asValueOfClass(Parent.class)
+                  $valueOf().asValueOfClass(Parent.class)
                       .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                       .exercise(function("lambda:Child::childMethod", Child::childMethod))
                       .then().asString()
@@ -133,7 +133,7 @@ public class FluentsTest extends TestBase {
     assertThat(
         hello,
         when().asObject().allOf(
-            $().as((String) value())
+            $valueOf().as((String) value())
                 .exercise(objectHashCode())
                 .then().isInstanceOf(Integer.class))
     );
