@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.ITransformer;
 import com.github.dakusui.pcond.core.fluent.Transformer;
+import com.github.dakusui.pcond.core.fluent.verifiers.IListVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
 import com.github.dakusui.pcond.forms.Functions;
@@ -28,7 +29,7 @@ public class ListTransformer<OIN, E>
   }
 
   @Override
-  public ListVerifier<OIN, E> then() {
+  public IListVerifier<OIN, E> then() {
     return new ListVerifier<>(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
   }
 

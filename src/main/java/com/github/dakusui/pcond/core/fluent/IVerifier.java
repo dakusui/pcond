@@ -130,7 +130,7 @@ public interface IVerifier<V extends IVerifier<V, OIN, T>, OIN, T>
   }
 
   @Override
-  default <E> ListVerifier<OIN, E> asListOf(E value) {
+  default <E> IListVerifier<OIN, E> asListOf(E value) {
     return new ListVerifier<>(transformerName(), chainFunctions(this.function(), Functions.castTo(Functions.value())), dummyPredicate(), this.originalInputValue());
   }
 

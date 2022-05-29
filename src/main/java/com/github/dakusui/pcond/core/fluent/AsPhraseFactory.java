@@ -117,7 +117,7 @@ public interface AsPhraseFactory<
     }
 
     @Override
-    default <E> ListVerifier<OIN, E> asListOfClass(Class<E> value) {
+    default <E> IListVerifier<OIN, E> asListOfClass(Class<E> value) {
       return asListOf(value());
     }
 
@@ -130,7 +130,7 @@ public interface AsPhraseFactory<
     <E> ObjectVerifier<OIN, E> asValueOf(E value);
 
     @Override
-    <E> ListVerifier<OIN, E> asListOf(E value);
+    <E> IListVerifier<OIN, E> asListOf(E value);
 
     @Override
     <E> StreamVerifier<OIN, E> asStreamOf(E value);
