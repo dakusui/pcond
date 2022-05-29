@@ -156,7 +156,7 @@ public interface ITransformer<TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> e
     }
 
     public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IBooleanTransformer<OIN> booleanTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Boolean> function) {
-      return new IBooleanTransformer.BooleanTransformer<>(transformer.transformerName(), transformer, function, transformer.originalInputValue());
+      return new IBooleanTransformer.Impl<>(transformer.transformerName(), transformer, function, transformer.originalInputValue());
     }
 
     public static <TX extends ITransformer<TX, OIN, OUT>, OIN, OUT> IIntegerTransformer.Impl<OIN> integerTransformer(ITransformer<TX, OIN, OUT> transformer, Function<OUT, Integer> func) {

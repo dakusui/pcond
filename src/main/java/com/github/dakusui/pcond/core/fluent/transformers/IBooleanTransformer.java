@@ -14,9 +14,9 @@ public interface IBooleanTransformer<OIN> extends ITransformer<IBooleanTransform
   @Override
   IBooleanVerifier<OIN> then();
 
-  class BooleanTransformer<OIN> extends Transformer<IBooleanTransformer<OIN>, OIN, Boolean> implements IBooleanTransformer<OIN> {
+  class Impl<OIN> extends Transformer<IBooleanTransformer<OIN>, OIN, Boolean> implements IBooleanTransformer<OIN> {
 
-    public <IN> BooleanTransformer(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Boolean> function, OIN originalInputValue) {
+    public <IN> Impl(String transformerName, ITransformer<?, OIN, IN> parent, Function<? super IN, ? extends Boolean> function, OIN originalInputValue) {
       super(transformerName, parent, function, originalInputValue);
     }
 

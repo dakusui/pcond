@@ -39,7 +39,7 @@ public enum Fluents {
     return new Fluent<>("WHEN", value).asInteger();
   }
 
-  public static IBooleanTransformer.BooleanTransformer<Boolean> when(boolean value) {
+  public static IBooleanTransformer.Impl<Boolean> when(boolean value) {
     return new Fluent<>("WHEN", value).asBoolean();
   }
 
