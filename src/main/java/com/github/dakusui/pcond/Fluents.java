@@ -1,9 +1,10 @@
 package com.github.dakusui.pcond;
 
 import com.github.dakusui.pcond.core.fluent.Fluent;
-import com.github.dakusui.pcond.core.fluent.transformers.IStringTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.*;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 
@@ -22,16 +23,36 @@ public enum Fluents {
    * @param <T>   The type of the object to be verified.
    * @return A new ObjectTransformer for type `T`.
    */
-  public static <T> Fluent<T> whenValueOf(T value) {
+  public static <T> Fluent<T> whenValueOf(@SuppressWarnings("unused") T value) {
     return fluent("WHEN");
   }
 
-  public static <T> Fluent<T> whenValueOfClass(Class<T> klass) {
+  public static <T> Fluent<T> whenValueOfClass(@SuppressWarnings("unused") Class<T> klass) {
     return whenValueOf(value());
   }
 
   public static IStringTransformer<String> when(String value) {
     return new Fluent<>("WHEN", value).asString();
+  }
+
+  public static IntegerTransformer<Integer> when(int value) {
+    return new Fluent<>("WHEN", value).asInteger();
+  }
+
+  public static BooleanTransformer<Boolean> when(boolean value) {
+    return new Fluent<>("WHEN", value).asBoolean();
+  }
+
+  public static <T> ObjectTransformer<T, T> when(T value) {
+    return new Fluent<>("WHEN", value).asObject();
+  }
+
+  public static <E> ListTransformer<List<E>, E> when(List<E> value) {
+    return new Fluent<>("WHEN", value).asListOf(value());
+  }
+
+  public static <E> StreamTransformer<Stream<E>, E> when(Stream<E> value) {
+    return new Fluent<>("WHEN", value).asStreamOf(value());
   }
 
   public static <T> Fluent<T> $() {
