@@ -338,9 +338,9 @@ public class PredicatesTest {
   public static class FindStringsTest extends TestBase {
     @Test(expected = ComparisonFailure.class)
     public void findSubstringsTest() {
-      String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
+      String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur. De Bello Gallicco.";
       try {
-        TestAssertions.assertThat(text, Predicates.findSubstrings("Gallia", "quarum", "Belgium", "nostra"));
+        TestAssertions.assertThat(text, Predicates.findSubstrings("Gallia", "quarum", "Belgium", "nostra", "De", "Bellum"));
       } catch (ComparisonFailure e) {
         e.printStackTrace();
         throw e;
