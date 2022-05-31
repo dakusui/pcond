@@ -340,7 +340,7 @@ public class PredicatesTest {
     public void findSubstringsTest() {
       String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur. De Bello Gallicco.";
       try {
-        TestAssertions.assertThat(text, Predicates.findSubstrings("Gallia", "quarum", "Belgium", "nostra", "De", "Bellum"));
+        TestAssertions.assertThat(text, Predicates.findSubstrings("Gallia", "quarum", "Belgium", "nostra", "De", "Gallia", "Gallicco"));
       } catch (ComparisonFailure e) {
         e.printStackTrace();
         throw e;
@@ -358,7 +358,7 @@ public class PredicatesTest {
       }
     }
 
-    @Test(expected = ComparisonFailure.class)
+    @Test//(expected = ComparisonFailure.class)
     public void findElementTest() {
       List<String> list = asList("Hello", "world", "", "everyone", "quick", "brown", "fox", "runs", "forever");
       TestAssertions.assertThat(list,

@@ -43,8 +43,6 @@ public interface Evaluator {
   List<Entry> resultEntries();
 
 
-  Evaluator copyEvaluator();
-
   static Evaluator create() {
     return new Impl();
   }
@@ -241,9 +239,7 @@ public interface Evaluator {
       return unmodifiableList(this.entries);
     }
 
-    @Override
-    public Evaluator copyEvaluator() {
-
+    private Evaluator copyEvaluator() {
       Impl impl = new Impl();
       impl.currentlyExpectedBooleanValue = this.currentlyExpectedBooleanValue;
       return impl;
