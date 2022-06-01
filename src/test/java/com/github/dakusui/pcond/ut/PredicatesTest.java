@@ -361,6 +361,7 @@ public class PredicatesTest {
     @Test//(expected = ComparisonFailure.class)
     public void findElementTest() {
       List<String> list = asList("Hello", "world", "", "everyone", "quick", "brown", "fox", "runs", "forever");
+      list.forEach(System.out::println);
       TestAssertions.assertThat(list,
           Predicates.findElements(
               Predicates.isEqualTo("world"),

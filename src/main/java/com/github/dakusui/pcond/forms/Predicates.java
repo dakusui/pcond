@@ -11,9 +11,7 @@ import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
 import com.github.dakusui.pcond.internals.InternalChecks;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -32,6 +30,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public enum Predicates {
   ;
@@ -390,12 +390,12 @@ public enum Predicates {
         .then().with(Predicates.<CursoredString>allOf(
             Stream.concat(
                     Arrays.stream(tokens).map(CursoredStringPredicate::new),
-                    Stream.of(endMarkPredicate(lastTestedPosition, bExpectation, bActual, result, () -> cursoredStringForSnapshotting.originalString)))
+                    Stream.of(endMarkPredicateForString(lastTestedPosition, bExpectation, bActual, result, () -> cursoredStringForSnapshotting.originalString)))
                 .toArray(Predicate[]::new)))
         .build();
   }
 
-  private static Predicate<Object> endMarkPredicate(AtomicInteger lastTestedPosition, StringBuilder ongoingExpectationExplanation, StringBuilder ongoingActualExplanation, AtomicBoolean result, Supplier<String> originalStringSupplier) {
+  private static Predicate<Object> endMarkPredicateForString(AtomicInteger lastTestedPosition, StringBuilder ongoingExpectationExplanation, StringBuilder ongoingActualExplanation, AtomicBoolean result, Supplier<String> originalStringSupplier) {
     return makeExplainable((PrintablePredicate<? super Object>) predicate("(end)", v -> result.get()), new Evaluator.Explainable() {
 
       @Override
@@ -458,46 +458,125 @@ public enum Predicates {
     return findRegexPatterns(Arrays.stream(regexes).map(Pattern::compile).toArray(Pattern[]::new));
   }
 
+  private static class Explanation {
+    final         Object value;
+    private final String formatString;
+
+    private Explanation(Object value, String formatString) {
+      this.value = value;
+      this.formatString = formatString;
+    }
+
+    @Override
+    public String toString() {
+      return format(formatString, formatObject(this.value));
+    }
+  }
+
+  static class CursoredList<EE> implements Evaluator.Snapshottable {
+    int position;
+    final List<EE> originalList;
+
+    CursoredList(List<EE> originalList) {
+      this.originalList = originalList;
+    }
+
+    List<EE> currentList() {
+      return this.originalList.subList(position, this.originalList.size());
+    }
+
+    @Override
+    public Object snapshot() {
+      return this.currentList();
+    }
+  }
+
   @SuppressWarnings("unchecked")
   @SafeVarargs
   public static <E> Predicate<List<E>> findElements(Predicate<? super E>... predicates) {
-    class CursoredList<EE> implements Evaluator.Snapshottable {
-      int position;
-      final List<EE> originalList;
-
-      CursoredList(List<EE> originalList) {
-        this.originalList = originalList;
-      }
-
-      List<EE> currentList() {
-        return this.originalList.subList(position, this.originalList.size());
-      }
-
-      @Override
-      public Object snapshot() {
-        return this.currentList();
-      }
-    }
+    AtomicBoolean result = new AtomicBoolean(true);
+    List<Object> expectationExplanationList = new LinkedList<>();
+    List<Object> actualExplanationList = new LinkedList<>();
+    List<Object> rest = new LinkedList<>();
+    AtomicInteger previousPosition = new AtomicInteger(0);
     Function<Predicate<? super E>, Predicate<CursoredList<E>>> predicatePredicateFunction = (Predicate<? super E> p) -> (Predicate<CursoredList<E>>) cursoredList -> {
       AtomicInteger j = new AtomicInteger(0);
-      if (cursoredList.currentList().stream()
+      boolean isFound = cursoredList.currentList().stream()
           .peek((E each) -> j.getAndIncrement())
-          .anyMatch(p)) {
+          .anyMatch(p);
+      if (isFound) {
+        updateExplanationsForFoundElement(
+            expectationExplanationList,
+            cursoredList.currentList().get(j.get() - 1), p,
+            (List<Object>) cursoredList.currentList().subList(0, j.get() - 1));
+        rest.clear();
+        rest.add(cursoredList.currentList().subList(j.get(), cursoredList.currentList().size()));
         cursoredList.position += j.get();
+        previousPosition.set(cursoredList.position);
         return true;
       }
+      updateExplanationsForMissedPredicate(expectationExplanationList, p, cursoredList, j, previousPosition.get());
+      result.set(false);
+      previousPosition.set(cursoredList.position);
       return false;
     };
-
     return Fluents.value().asListOf((E) Fluents.$())
         .transformToObject(function("toCursoredList", CursoredList::new))
         .then()
         .with(allOf(Stream.concat(
                 Arrays.stream(predicates)
                     .map((Predicate<? super E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
-                Stream.of(endMarkPredicate(new AtomicInteger(0), new StringBuilder(), new StringBuilder(), new AtomicBoolean(true), null)))
+                Stream.of(endMarkPredicateForList(result, expectationExplanationList, actualExplanationList, rest)))
             .toArray(Predicate[]::new)))
         .toPredicate();
+  }
+
+  private static <E> void updateExplanationsForMissedPredicate(List<Object> expectationExplanationList, Predicate<? super E> missedPredicate, CursoredList<E> cursoredList, AtomicInteger currentPosition, int previousPosition) {
+    if (cursoredList.position > previousPosition)
+      expectationExplanationList.add(cursoredList.currentList().subList(0, currentPosition.get()));
+    Explanation missed = new Explanation(missedPredicate, "<matching element for:%s>");
+    expectationExplanationList.add(missed);
+  }
+
+  private static <E> void updateExplanationsForFoundElement(List<Object> expectationExplanationList, E foundElement, Predicate<? super E> matchedPredicate, List<Object> skippedElements) {
+    if (!skippedElements.isEmpty())
+      expectationExplanationList.add(skippedElements);
+    expectationExplanationList.add(new Explanation(foundElement, "<%s: found for:" + matchedPredicate + ">"));
+  }
+
+  private static boolean isRepeated(List<Object> explanationList, List<?> o) {
+    if (explanationList.isEmpty())
+      return false;
+    return explanationList.get(explanationList.size() - 1).equals(o);
+  }
+
+  private static List<Object> addExplanationToLastElement(List<? super Object> explanationList, Object p) {
+    Object v = explanationList.remove(explanationList.size() - 1);
+    explanationList.add(new Explanation(v, "<%s: found for:" + p + ">"));
+    return (List<Object>) explanationList;
+  }
+
+  private static Predicate<Object> endMarkPredicateForList(AtomicBoolean result, List<Object> expectationExplanationList, List<Object> actualExplanationList, List<?> rest) {
+    return makeExplainable((PrintablePredicate<? super Object>) predicate("(end)", v -> result.get()), new Evaluator.Explainable() {
+
+      @Override
+      public Object explainExpectation() {
+        return renderExplanationString(createFullExplanationList(expectationExplanationList, rest));
+      }
+
+      @Override
+      public Object explainActualInput() {
+        return renderExplanationString(createFullExplanationList(actualExplanationList, rest));
+      }
+
+      private List<Object> createFullExplanationList(List<Object> explanationList, List<?> rest) {
+        return Stream.concat(explanationList.stream(), rest.stream()).collect(toList());
+      }
+
+      private String renderExplanationString(List<Object> fullExplanationList) {
+        return fullExplanationList.stream().map(Object::toString).collect(joining(String.format("%n")));
+      }
+    });
   }
 
   enum Def {
