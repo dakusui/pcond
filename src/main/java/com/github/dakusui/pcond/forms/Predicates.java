@@ -10,6 +10,7 @@ import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.Paramet
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
 import com.github.dakusui.pcond.internals.InternalChecks;
+import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -506,16 +507,19 @@ public enum Predicates {
           .anyMatch(p);
       if (isFound) {
         updateExplanationsForFoundElement(
-            expectationExplanationList,
-            cursoredList.currentList().get(j.get() - 1), p,
-            (List<Object>) cursoredList.currentList().subList(0, j.get() - 1));
+            expectationExplanationList, actualExplanationList,
+            cursoredList.currentList().get(j.get() - 1),
+            p, (List<Object>) cursoredList.currentList().subList(0, j.get() - 1));
         rest.clear();
         rest.add(cursoredList.currentList().subList(j.get(), cursoredList.currentList().size()));
         cursoredList.position += j.get();
         previousPosition.set(cursoredList.position);
         return true;
       }
-      updateExplanationsForMissedPredicate(expectationExplanationList, p, cursoredList, j, previousPosition.get());
+      updateExplanationsForMissedPredicateIfCursorMoved(
+          expectationExplanationList, actualExplanationList,
+          cursoredList.position > previousPosition.get(),
+          p, cursoredList.currentList().subList(0, j.get()));
       result.set(false);
       previousPosition.set(cursoredList.position);
       return false;
@@ -531,29 +535,25 @@ public enum Predicates {
         .toPredicate();
   }
 
-  private static <E> void updateExplanationsForMissedPredicate(List<Object> expectationExplanationList, Predicate<? super E> missedPredicate, CursoredList<E> cursoredList, AtomicInteger currentPosition, int previousPosition) {
-    if (cursoredList.position > previousPosition)
-      expectationExplanationList.add(cursoredList.currentList().subList(0, currentPosition.get()));
-    Explanation missed = new Explanation(missedPredicate, "<matching element for:%s>");
-    expectationExplanationList.add(missed);
+  private static <E> void updateExplanationsForFoundElement(List<Object> expectationExplanationList, List<Object> actualExplanationList, E foundElement, Predicate<? super E> matchedPredicate, List<Object> skippedElements) {
+    if (!skippedElements.isEmpty()) {
+      //      expectationExplanationList.add(skippedElements);
+      actualExplanationList.add(skippedElements);
+    }
+    actualExplanationList.add(new Explanation(foundElement, "<%s:found for:" + matchedPredicate + ">"));
+    expectationExplanationList.add(new Explanation(matchedPredicate, "<matching element for:%s>"));
   }
 
-  private static <E> void updateExplanationsForFoundElement(List<Object> expectationExplanationList, E foundElement, Predicate<? super E> matchedPredicate, List<Object> skippedElements) {
-    if (!skippedElements.isEmpty())
-      expectationExplanationList.add(skippedElements);
-    expectationExplanationList.add(new Explanation(foundElement, "<%s: found for:" + matchedPredicate + ">"));
-  }
+  private static <E> void updateExplanationsForMissedPredicateIfCursorMoved(List<Object> expectationExplanationList, List<Object> actualExplanationList, boolean isCursorMoved, Predicate<? super E> missedPredicate, List<E> scannedElements) {
+    if (isCursorMoved) {
+      //expectationExplanationList.add(scannedElements);
+      actualExplanationList.add(scannedElements);
+    }
+    Explanation missedInExpectation = new Explanation(missedPredicate, "<matching element for:%s>");
+    expectationExplanationList.add(missedInExpectation);
 
-  private static boolean isRepeated(List<Object> explanationList, List<?> o) {
-    if (explanationList.isEmpty())
-      return false;
-    return explanationList.get(explanationList.size() - 1).equals(o);
-  }
-
-  private static List<Object> addExplanationToLastElement(List<? super Object> explanationList, Object p) {
-    Object v = explanationList.remove(explanationList.size() - 1);
-    explanationList.add(new Explanation(v, "<%s: found for:" + p + ">"));
-    return (List<Object>) explanationList;
+    Explanation missedInActual = new Explanation(missedPredicate, "<NOT FOUND:matching element for:%s>");
+    actualExplanationList.add(missedInActual);
   }
 
   private static Predicate<Object> endMarkPredicateForList(AtomicBoolean result, List<Object> expectationExplanationList, List<Object> actualExplanationList, List<?> rest) {
@@ -561,7 +561,7 @@ public enum Predicates {
 
       @Override
       public Object explainExpectation() {
-        return renderExplanationString(createFullExplanationList(expectationExplanationList, rest));
+        return renderExplanationString(expectationExplanationList);
       }
 
       @Override
@@ -574,7 +574,19 @@ public enum Predicates {
       }
 
       private String renderExplanationString(List<Object> fullExplanationList) {
-        return fullExplanationList.stream().map(Object::toString).collect(joining(String.format("%n")));
+        return fullExplanationList
+            .stream()
+            .map(e -> {
+              if (e instanceof List) {
+                return String.format("<%s:skipped>",
+                    ((List<?>) e).stream()
+                        .map(InternalUtils::formatObject)
+                        .collect(joining(",")));
+              }
+              return e;
+            })
+            .map(Object::toString)
+            .collect(joining(String.format("%n")));
       }
     });
   }
