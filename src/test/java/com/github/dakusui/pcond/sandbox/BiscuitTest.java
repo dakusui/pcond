@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.sandbox;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -18,6 +19,7 @@ public class BiscuitTest {
     }
   }
 
+  @Ignore
   @Test
   public void testEquals() {
     Biscuit theBiscuit = new Biscuit("Ginger");

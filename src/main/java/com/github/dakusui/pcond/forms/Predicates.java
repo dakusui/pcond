@@ -315,7 +315,7 @@ public enum Predicates {
       private void updateOngoingExplanation(StringBuilder b, T token, Cursor cursor, BiFunction<Object, T, String> locatorFactoryFormatter) {
         b.append(this.originalString, this.position, this.position + cursor.position);
         b.append("<");
-        b.append(this.originalString, this.position + cursor.position, this.position + cursor.position + cursor.length);
+        b.append(formatObject(this.originalString.substring(this.position + cursor.position, this.position + cursor.position + cursor.length)));
         b.append(":");
         b.append(locatorFactoryFormatter.apply(locatorFactory, token));
         b.append(">");
@@ -380,7 +380,7 @@ public enum Predicates {
       }
 
       private String formatExplanation(StringBuilder b, String keyword) {
-        String ret = b.toString() + format("%n") + "<<" + this.locatorFactoryName() + ":" + keyword + ">>";
+        String ret = b.toString() + format("%n") + "<" + this.locatorFactoryName() + ":" + keyword + ">";
         b.delete(0, b.length());
         return ret;
       }
