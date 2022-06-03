@@ -166,6 +166,6 @@ In order to reduce the necessity of creating custom classes, it takes an approac
 
 
 They are `String`, `Number`(`Integer`), `Boolean`, `List<E>`, `Stream<E>`, and (general) `Object`.
-For each of them
+For each of them, special `Transformer` s  and `Verifier` s come with the `pcond` library to provide type specific methods, such as `containsString` for `String`.
 
 

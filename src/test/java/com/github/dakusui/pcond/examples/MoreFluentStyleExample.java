@@ -45,4 +45,12 @@ public class MoreFluentStyleExample {
         .asString()
         .isEqualTo("HELLO"));
   }
+
+
+  @Test
+  public void test4() {
+    assertWhen(
+        valueOf("hello").toUpperCase().then().isEqualTo("HELLO"),
+        valueOf("world").toLowerCase().then().contains("HELLO"));
+  }
 }

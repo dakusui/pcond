@@ -21,6 +21,10 @@ public interface StringTransformer<OIN> extends
     return this.transformToString(Printables.function("toUpperCase", String::toUpperCase));
   }
 
+  default StringTransformer<OIN> toLowerCase() {
+    return this.transformToString(Printables.function("toLowerCase", String::toLowerCase));
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   default StringVerifier<OIN> then() {
