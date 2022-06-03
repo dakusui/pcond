@@ -10,12 +10,12 @@ import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.Paramet
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
 import com.github.dakusui.pcond.internals.InternalChecks;
+import com.github.dakusui.pcond.internals.InternalUtils;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -31,6 +31,8 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public enum Predicates {
   ;
@@ -254,12 +256,11 @@ public enum Predicates {
    * // @formatter:off
    * Returns a predicate that calls a method which matches the given {@code methodName}
    * and {@code args} on the object given as input to it.
-   * <p>
+   *
    * Note that method look up is done when the predicate is applied.
    * This means this method does not throw any exception by itself and in case
    * you give wrong {@code methodName} or {@code arguments}, an exception will be
    * thrown when the returned function is applied.
-   * <p>
    * // @formatter:on
    *
    * @param methodName The method name
@@ -271,9 +272,23 @@ public enum Predicates {
     return callp(Functions.instanceMethod(Functions.parameter(), methodName, arguments));
   }
 
+  /**
+   * Note that a predicate returned by this method is stateful and not to be re-used.
+   *
+   * @param locatorFactory A function to return a cursor which points the location where a given token appears in an original string.
+   * @param tokens         Tokens to be found in a given string passed to the returned predicate.
+   * @param <T>            The type of token to be searched for.
+   * @return A predicate that checks if `tokens` are all contained in a given string
+   * in the order, where they appear in the argument.
+   */
   @SuppressWarnings("unchecked")
   static <T> Predicate<String> findTokens(Function<T, Function<String, Cursor>> locatorFactory, T... tokens) {
+    AtomicBoolean result = new AtomicBoolean(true);
+    AtomicInteger lastTestedPosition = new AtomicInteger(0);
+    StringBuilder bExpectation = new StringBuilder();
+    StringBuilder bActual = new StringBuilder();
     class CursoredString implements Evaluator.Snapshottable {
+      public int previousFailingPosition;
       String originalString;
       int    position;
 
@@ -285,9 +300,25 @@ public enum Predicates {
       CursoredString findNext(T token) {
         Function<String, Cursor> locator = locatorFactory.apply(token);
         Cursor cursor = locator.apply(originalString.substring(this.position));
-        if (cursor.position >= 0)
+        if (cursor.position >= 0) {
+          updateOngoingExplanation(bExpectation, token, cursor, (lf, t) -> "found for:" + locatorFactory + "[" + t + "]");
+          updateOngoingExplanation(bActual, token, cursor, (lf, t) -> "found for:" + locatorFactory + "[" + t + "]");
+
           this.position += cursor.position + cursor.length;
+        } else {
+          this.previousFailingPosition = this.position;
+        }
+        lastTestedPosition.set(this.position);
         return this;
+      }
+
+      private void updateOngoingExplanation(StringBuilder b, T token, Cursor cursor, BiFunction<Object, T, String> locatorFactoryFormatter) {
+        b.append(this.originalString, this.position, this.position + cursor.position);
+        b.append("<");
+        b.append(formatObject(this.originalString.substring(this.position + cursor.position, this.position + cursor.position + cursor.length)));
+        b.append(":");
+        b.append(locatorFactoryFormatter.apply(locatorFactory, token));
+        b.append(">");
       }
 
       public String toString() {
@@ -300,14 +331,15 @@ public enum Predicates {
       }
     }
     CursoredString cursoredStringForSnapshotting = new CursoredString(null);
-    AtomicBoolean result = new AtomicBoolean(true);
-    class CursoredStringPredicate
-        extends PrintablePredicate<CursoredString>
-        implements Predicate<CursoredString>, Evaluable.LeafPred<CursoredString>, Evaluator.Explainable {
+    class CursoredStringPredicate extends PrintablePredicate<CursoredString> implements
+        Predicate<CursoredString>,
+        Evaluable.LeafPred<CursoredString>,
+        Evaluator.Explainable {
       final T each;
 
       CursoredStringPredicate(T each) {
         super(new Object(), emptyList(), () -> "findTokenBy[" + locatorFactory + "[" + each + "]]", cursoredString -> {
+          cursoredStringForSnapshotting.previousFailingPosition = cursoredString.previousFailingPosition;
           cursoredStringForSnapshotting.position = cursoredString.position;
           cursoredStringForSnapshotting.originalString = cursoredString.originalString;
           return cursoredString.position != cursoredString.findNext(each).position;
@@ -339,31 +371,73 @@ public enum Predicates {
 
       @Override
       public Object explainExpectation() {
-        return cursoredStringForSnapshotting.originalString.substring(0, cursoredStringForSnapshotting.position) +
-            format("%n") +
-            "<<NOTFOUND:" + this.locatorFactoryName() + ">>" +
-            format("%n") +
-            cursoredStringForSnapshotting.originalString.substring(cursoredStringForSnapshotting.position);
+        return formatExplanation(bExpectation, "SHOULD BE FOUND AFTER THIS POSITION");
       }
 
       @Override
       public Object explainActualInput() {
-        return cursoredStringForSnapshotting.originalString.substring(0, cursoredStringForSnapshotting.position) +
-            format("%n") +
-            "<<>>" +
-            format("%n") +
-            cursoredStringForSnapshotting.originalString.substring(cursoredStringForSnapshotting.position);
+        return formatExplanation(bActual, "BUT NOT FOUND");
+      }
+
+      private String formatExplanation(StringBuilder b, String keyword) {
+        String ret = b.toString() + format("%n") + "<" + this.locatorFactoryName() + ":" + keyword + ">";
+        b.delete(0, b.length());
+        return ret;
       }
     }
     //noinspection RedundantTypeArguments
     return Fluents.value().asString()
-        .transformToObject(function("findTokens", CursoredString::new))
+        .transformToObject(function("findTokens" + formatObject(tokens), CursoredString::new))
         .then().with(Predicates.<CursoredString>allOf(
             Stream.concat(
                     Arrays.stream(tokens).map(CursoredStringPredicate::new),
-                    Stream.of(predicate("(end)", v -> result.get())))
+                    Stream.of(endMarkPredicateForString(lastTestedPosition, bExpectation, bActual, result, () -> cursoredStringForSnapshotting.originalString)))
                 .toArray(Predicate[]::new)))
         .build();
+  }
+
+  private static Predicate<Object> endMarkPredicateForString(AtomicInteger lastTestedPosition, StringBuilder ongoingExpectationExplanation, StringBuilder ongoingActualExplanation, AtomicBoolean result, Supplier<String> originalStringSupplier) {
+    return makeExplainable((PrintablePredicate<? super Object>) predicate("(end)", v -> result.get()), new Evaluator.Explainable() {
+
+      @Override
+      public Object explainExpectation() {
+        return ongoingExpectationExplanation.toString() + originalStringSupplier.get().substring(lastTestedPosition.get());
+      }
+
+      @Override
+      public Object explainActualInput() {
+        return ongoingActualExplanation.toString() + originalStringSupplier.get().substring(lastTestedPosition.get());
+      }
+    });
+  }
+
+  private static <T> Predicate<T> makeExplainable(PrintablePredicate<? super T> predicate_, Evaluator.Explainable explainable) {
+    class ExplainablePredicate extends PrintablePredicate<T> implements
+        Predicate<T>,
+        Evaluable.LeafPred<T>,
+        Evaluator.Explainable {
+
+      protected ExplainablePredicate() {
+        super(new Object(), emptyList(), predicate_::toString, predicate_);
+      }
+
+      @Override
+      public Predicate<? super T> predicate() {
+        return predicate;
+      }
+
+      @Override
+      public Object explainExpectation() {
+        return explainable.explainExpectation();
+      }
+
+      @Override
+      public Object explainActualInput() {
+        return explainable.explainActualInput();
+      }
+    }
+
+    return new ExplainablePredicate();
   }
 
   public static Predicate<String> findSubstrings(String... tokens) {
@@ -385,46 +459,136 @@ public enum Predicates {
     return findRegexPatterns(Arrays.stream(regexes).map(Pattern::compile).toArray(Pattern[]::new));
   }
 
+  private static class Explanation {
+    final         Object value;
+    private final String formatString;
+
+    private Explanation(Object value, String formatString) {
+      this.value = value;
+      this.formatString = formatString;
+    }
+
+    @Override
+    public String toString() {
+      return format(formatString, formatObject(this.value));
+    }
+  }
+
+  static class CursoredList<EE> implements Evaluator.Snapshottable {
+    int position;
+    final List<EE> originalList;
+
+    CursoredList(List<EE> originalList) {
+      this.originalList = originalList;
+    }
+
+    List<EE> currentList() {
+      return this.originalList.subList(position, this.originalList.size());
+    }
+
+    @Override
+    public Object snapshot() {
+      return this.currentList();
+    }
+  }
+
   @SuppressWarnings("unchecked")
   @SafeVarargs
   public static <E> Predicate<List<E>> findElements(Predicate<? super E>... predicates) {
-    class CursoredList<EE> implements Evaluator.Snapshottable {
-      int position;
-      final List<EE> originalList;
-
-      CursoredList(List<EE> originalList) {
-        this.originalList = originalList;
-      }
-
-      List<EE> currentList() {
-        return this.originalList.subList(position, this.originalList.size());
-      }
-
-      @Override
-      public Object snapshot() {
-        return this.currentList();
-      }
-    }
+    AtomicBoolean result = new AtomicBoolean(true);
+    List<Object> expectationExplanationList = new LinkedList<>();
+    List<Object> actualExplanationList = new LinkedList<>();
+    List<Object> rest = new LinkedList<>();
+    AtomicInteger previousPosition = new AtomicInteger(0);
     Function<Predicate<? super E>, Predicate<CursoredList<E>>> predicatePredicateFunction = (Predicate<? super E> p) -> (Predicate<CursoredList<E>>) cursoredList -> {
       AtomicInteger j = new AtomicInteger(0);
-      if (cursoredList.currentList().stream()
+      boolean isFound = cursoredList.currentList().stream()
           .peek((E each) -> j.getAndIncrement())
-          .anyMatch(p)) {
+          .anyMatch(p);
+      if (isFound) {
+        updateExplanationsForFoundElement(
+            expectationExplanationList, actualExplanationList,
+            cursoredList.currentList().get(j.get() - 1),
+            p, (List<Object>) cursoredList.currentList().subList(0, j.get() - 1));
+        rest.clear();
+        rest.add(cursoredList.currentList().subList(j.get(), cursoredList.currentList().size()));
         cursoredList.position += j.get();
+        previousPosition.set(cursoredList.position);
         return true;
       }
+      updateExplanationsForMissedPredicateIfCursorMoved(
+          expectationExplanationList, actualExplanationList,
+          cursoredList.position > previousPosition.get(),
+          p, cursoredList.currentList().subList(0, j.get()));
+      result.set(false);
+      previousPosition.set(cursoredList.position);
       return false;
     };
-
     return Fluents.value().asListOf((E) Fluents.$())
         .transformToObject(function("toCursoredList", CursoredList::new))
         .then()
         .with(allOf(Stream.concat(
                 Arrays.stream(predicates)
                     .map((Predicate<? super E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
-                Stream.of(predicate("(end)", eCursoredList -> true)))
+                Stream.of(endMarkPredicateForList(result, expectationExplanationList, actualExplanationList, rest)))
             .toArray(Predicate[]::new)))
         .toPredicate();
+  }
+
+  private static <E> void updateExplanationsForFoundElement(List<Object> expectationExplanationList, List<Object> actualExplanationList, E foundElement, Predicate<? super E> matchedPredicate, List<Object> skippedElements) {
+    if (!skippedElements.isEmpty()) {
+      //      expectationExplanationList.add(skippedElements);
+      actualExplanationList.add(skippedElements);
+    }
+    actualExplanationList.add(new Explanation(foundElement, "<%s:found for:" + matchedPredicate + ">"));
+    expectationExplanationList.add(new Explanation(matchedPredicate, "<matching element for:%s>"));
+  }
+
+  private static <E> void updateExplanationsForMissedPredicateIfCursorMoved(List<Object> expectationExplanationList, List<Object> actualExplanationList, boolean isCursorMoved, Predicate<? super E> missedPredicate, List<E> scannedElements) {
+    if (isCursorMoved) {
+      //expectationExplanationList.add(scannedElements);
+      actualExplanationList.add(scannedElements);
+    }
+    Explanation missedInExpectation = new Explanation(missedPredicate, "<matching element for:%s>");
+    expectationExplanationList.add(missedInExpectation);
+
+    Explanation missedInActual = new Explanation(missedPredicate, "<NOT FOUND:matching element for:%s>");
+    actualExplanationList.add(missedInActual);
+  }
+
+  private static Predicate<Object> endMarkPredicateForList(AtomicBoolean result, List<Object> expectationExplanationList, List<Object> actualExplanationList, List<?> rest) {
+    return makeExplainable((PrintablePredicate<? super Object>) predicate("(end)", v -> result.get()), new Evaluator.Explainable() {
+
+      @Override
+      public Object explainExpectation() {
+        return renderExplanationString(expectationExplanationList);
+      }
+
+      @Override
+      public Object explainActualInput() {
+        return renderExplanationString(createFullExplanationList(actualExplanationList, rest));
+      }
+
+      private List<Object> createFullExplanationList(List<Object> explanationList, List<?> rest) {
+        return Stream.concat(explanationList.stream(), rest.stream()).collect(toList());
+      }
+
+      private String renderExplanationString(List<Object> fullExplanationList) {
+        return fullExplanationList
+            .stream()
+            .map(e -> {
+              if (e instanceof List) {
+                return String.format("<%s:skipped>",
+                    ((List<?>) e).stream()
+                        .map(InternalUtils::formatObject)
+                        .collect(joining(",")));
+              }
+              return e;
+            })
+            .map(Object::toString)
+            .collect(joining(String.format("%n")));
+      }
+    });
   }
 
   enum Def {
@@ -434,7 +598,15 @@ public enum Predicates {
   }
 
   static class Cursor {
+    /**
+     * The "relative" position, where the token was found, from the beginning of the string passed to a locator.
+     * By convention, it is designed to pass a substring of the original string, which starts from the position,
+     * where a token (element) searching attempt was made.
+     */
     final int position;
+    /**
+     * A length of a token to be searched.
+     */
     final int length;
 
     Cursor(int position, int length) {
