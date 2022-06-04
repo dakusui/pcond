@@ -386,9 +386,9 @@ public enum Predicates {
       }
     }
     //noinspection RedundantTypeArguments
-    return Fluents.value().asString()
+    return Fluents.$().asString()
         .transformToObject(function("findTokens" + formatObject(tokens), CursoredString::new))
-        .then().with(Predicates.<CursoredString>allOf(
+        .then().verifyWith(Predicates.<CursoredString>allOf(
             Stream.concat(
                     Arrays.stream(tokens).map(CursoredStringPredicate::new),
                     Stream.of(endMarkPredicateForString(lastTestedPosition, bExpectation, bActual, result, () -> cursoredStringForSnapshotting.originalString)))
@@ -524,10 +524,10 @@ public enum Predicates {
       previousPosition.set(cursoredList.position);
       return false;
     };
-    return Fluents.value().asListOf((E) Fluents.$())
+    return Fluents.$().asListOf((E) Fluents.value())
         .transformToObject(function("toCursoredList", CursoredList::new))
         .then()
-        .with(allOf(Stream.concat(
+        .verifyWith(allOf(Stream.concat(
                 Arrays.stream(predicates)
                     .map((Predicate<? super E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
                 Stream.of(endMarkPredicateForList(result, expectationExplanationList, actualExplanationList, rest)))

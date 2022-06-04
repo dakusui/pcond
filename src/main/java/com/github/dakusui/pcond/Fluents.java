@@ -14,7 +14,7 @@ public class Fluents {
   }
 
   public static <T> Fluent<T> when() {
-    return whenValueOf($());
+    return whenValueOf(value());
   }
 
   /**
@@ -30,11 +30,17 @@ public class Fluents {
   }
 
   public static <T> Fluent<T> whenValueOfClass(@SuppressWarnings("unused") Class<T> klass) {
-    return whenValueOf($());
+    return whenValueOf(value());
   }
 
-  public static <T> Fluent<T> value() {
-    return valueOf($());
+  /**
+   * A synonym with `valueOf(value())`.
+   *
+   * @return Returns a `Fluent<T>` object.
+   * @param <T> The type for which returned `Fluent` object is created.
+   */
+  public static <T> Fluent<T> $() {
+    return valueOf(value());
   }
 
   /**
@@ -57,7 +63,7 @@ public class Fluents {
   }
 
   public static <T> Fluent<T> valueOfClass(@SuppressWarnings("unused") Class<T> klass) {
-    return valueOf($());
+    return valueOf(value());
   }
 
   /**
@@ -70,7 +76,7 @@ public class Fluents {
    * @param <T> A parameter type of class that the returned value represents.
    * @return A `null` value.
    */
-  public static <T> T $() {
+  public static <T> T value() {
     return Fluent.value();
   }
 

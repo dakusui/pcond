@@ -17,9 +17,9 @@ public class MultiValueAssertion {
             when().at(0).asInteger()
                 .then().equalTo(122),
             when().at(1).asListOfClass(String.class).thenWithAllOf(asList(
-                value().at(0).asString()
+                $().at(0).asString()
                     .then().isEqualTo("hello"),
-                value().at(1).asString()
+                $().at(1).asString()
                     .then().isEqualTo("world")))));
   }
 }

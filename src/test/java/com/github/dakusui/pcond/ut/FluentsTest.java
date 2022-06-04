@@ -20,10 +20,10 @@ public class FluentsTest extends TestBase {
   public void whenPassingValidation_thenPasses$1() {
     assertThat(
         new Parent(),
-        when().as((Parent) $())
+        when().as((Parent) value())
             .exercise(Parent::parentMethod1)
             .then()
-            .with(isEqualTo("returnValueFromParentMethod")).build());
+            .verifyWith(isEqualTo("returnValueFromParentMethod")).build());
   }
 
 
@@ -47,7 +47,7 @@ public class FluentsTest extends TestBase {
   public void example() {
     assertThat(
         asList("Hello", "world"),
-        when().asListOf((String) $())
+        when().asListOf((String) value())
             .elementAt(0)
             .then().asString()
             .findSubstrings("hello", "world")
@@ -94,12 +94,12 @@ public class FluentsTest extends TestBase {
           whenValueOfClass(Supplier.class)
               .asObject()
               .exercise(Supplier::get)
-              .then().with(allOf(
-                  value().as((Parent) $())
+              .then().verifyWith(allOf(
+                  $().as((Parent) value())
                       .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                       .then().asString()
                       .isEqualTo("returnValueFromParentMethod"),
-                  value().asValueOfClass(Parent.class)
+                  $().asValueOfClass(Parent.class)
                       .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                       .exercise(function("lambda:Child::childMethod", Child::childMethod))
                       .then().asString()
@@ -133,7 +133,7 @@ public class FluentsTest extends TestBase {
     assertThat(
         hello,
         when().asObject().thenWith(allOf(
-            value().as((String) $())
+            $().as((String) value())
                 .exercise(objectHashCode())
                 .then().isInstanceOf(Integer.class)))
     );
@@ -144,8 +144,8 @@ public class FluentsTest extends TestBase {
     String hello = "hello";
     assertThat(
         hello,
-        when().asObject().then().with(allOf(
-            value().as((String) $())
+        when().asObject().then().verifyWith(allOf(
+            $().as((String) value())
                 .exercise(objectHashCode())
                 .then().isInstanceOf(Integer.class))));
   }

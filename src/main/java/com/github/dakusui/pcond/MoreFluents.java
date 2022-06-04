@@ -2,6 +2,7 @@ package com.github.dakusui.pcond;
 
 import com.github.dakusui.pcond.core.fluent.Fluent;
 import com.github.dakusui.pcond.core.fluent.transformers.*;
+import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.Arrays;
 import java.util.List;
@@ -22,6 +23,10 @@ import static java.util.stream.Collectors.toList;
  */
 public class MoreFluents {
   private MoreFluents() {
+  }
+
+  public static <T> T value() {
+    return Functions.value();
   }
 
   public static <T> void assertWhen(Statement<T> statement) {
@@ -59,11 +64,11 @@ public class MoreFluents {
   }
 
   public static <E> ListTransformer<List<E>, E> valueOf(List<E> value) {
-    return new Fluent<>("WHEN", value).asListOf(Fluents.$());
+    return new Fluent<>("WHEN", value).asListOf(Fluents.value());
   }
 
   public static <E> StreamTransformer<Stream<E>, E> valueOf(Stream<E> value) {
-    return new Fluent<>("WHEN", value).asStreamOf(Fluents.$());
+    return new Fluent<>("WHEN", value).asStreamOf(Fluents.value());
   }
 
   @FunctionalInterface

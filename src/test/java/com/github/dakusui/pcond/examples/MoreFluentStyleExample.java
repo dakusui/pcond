@@ -53,4 +53,16 @@ public class MoreFluentStyleExample {
         valueOf("hello").toUpperCase().then().isEqualTo("HELLO"),
         valueOf("world").toLowerCase().then().contains("HELLO"));
   }
+
+  @Test
+  public void test5() {
+    String s = "HI";
+    List<String> strings = asList("HELLO", "WORLD");
+
+    assertWhen(
+        valueOf(s).asString().exercise(stringToLowerCase()).then().isEqualTo("HI"),
+        valueOf(strings).asListOf((String)null).then().findElementsInOrder("hello", "world")
+    );
+  }
+
 }

@@ -78,7 +78,7 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   V create(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue);
 
   @SuppressWarnings("unchecked")
-  default V with(Predicate<? super T> predicate) {
+  default V verifyWith(Predicate<? super T> predicate) {
     @SuppressWarnings("unchecked") V ret = (V) this;
     if (isDummyFunction(this.function()))
       ret = (V) ret.asObject();

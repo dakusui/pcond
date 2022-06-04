@@ -75,7 +75,7 @@ public interface Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ext
 
   @SuppressWarnings("unchecked")
   default <NOUT> Verifier<?, OIN, NOUT> thenWith(Predicate<? super NOUT> predicate) {
-    return this.then().asValueOf((NOUT) value()).with(predicate);
+    return this.then().asValueOf((NOUT) value()).verifyWith(predicate);
   }
 
 

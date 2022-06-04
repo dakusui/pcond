@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.asList;
 
 public interface ListVerifier<OIN, E> extends
     Identifiable,
@@ -30,16 +33,22 @@ public interface ListVerifier<OIN, E> extends
   }
 
   @SuppressWarnings("unchecked")
-  default ListVerifier<OIN, E> findElementsInorderBy(Predicate<E>... predicates) {
-    return predicate(Predicates.findElements(predicates));
+  default ListVerifier<OIN, E> findElementsInOrderBy(Predicate<E>... predicates) {
+    return this.findElementsInOrderBy(asList(predicates));
   }
 
   @SuppressWarnings("unchecked")
-  default ListVerifier<OIN, E> findElementsInorder(E... elements) {
-    return this.findElementsInorderBy(
+  default ListVerifier<OIN, E> findElementsInOrderBy(List<Predicate<E>> predicates) {
+    return predicate(Predicates.findElements(predicates.toArray(new Predicate[0])));
+  }
+
+  @SuppressWarnings("unchecked")
+  default ListVerifier<OIN, E> findElementsInOrder(E... elements) {
+    return this.findElementsInOrderBy(
         Arrays.stream(elements)
             .map(v -> Printables.predicate("[" + v + "]s", e -> Objects.equals(v, e)))
-            .toArray(Predicate[]::new));
+            .map(p -> (Predicate<E>) p)
+            .collect(Collectors.toList()));
   }
 
   class Impl<OIN, E>
