@@ -8,11 +8,14 @@ import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 public interface AsPhraseFactory<
     MS extends Matcher.ForString<OIN>,
     MI extends Matcher.ForInteger<OIN>,
+    MD extends Matcher.ForDouble<OIN>,
     MB extends Matcher.ForBoolean<OIN>,
     OIN> {
   MS asString();
 
   MI asInteger();
+
+  MD asDouble();
 
   MB asBoolean();
 
@@ -45,6 +48,7 @@ public interface AsPhraseFactory<
   interface ForTransformer<OIN> extends AsPhraseFactory<
       StringTransformer<OIN>,
       IntegerTransformer<OIN>,
+      DoubleTransformer<OIN>,
       BooleanTransformer<OIN>,
       OIN> {
     @Override
@@ -98,6 +102,7 @@ public interface AsPhraseFactory<
   interface ForVerifier<OIN> extends AsPhraseFactory<
       StringVerifier<OIN>,
       IntegerVerifier<OIN>,
+      DoubleVerifier<OIN>,
       BooleanVerifier<OIN>,
       OIN
       > {

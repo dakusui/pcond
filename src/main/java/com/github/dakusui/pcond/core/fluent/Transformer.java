@@ -64,17 +64,17 @@ public interface Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ext
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> Verifier<?, OIN, NOUT> thenWithAllOf(List<? extends Predicate<? super NOUT>> predicates) {
-    return this.thenWith(Predicates.allOf(predicates.toArray(new Predicate[0])));
+  default <NOUT> Verifier<?, OIN, NOUT> thenVerifyWithAllOf(List<? extends Predicate<? super NOUT>> predicates) {
+    return this.thenVerifyWith(Predicates.allOf(predicates.toArray(new Predicate[0])));
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> Verifier<?, OIN, NOUT> thenWithAnyOf(List<? extends Predicate<? super NOUT>> predicates) {
-    return this.thenWith(Predicates.anyOf(predicates.toArray(new Predicate[0])));
+  default <NOUT> Verifier<?, OIN, NOUT> thenVerifyWithAnyOf(List<? extends Predicate<? super NOUT>> predicates) {
+    return this.thenVerifyWith(Predicates.anyOf(predicates.toArray(new Predicate[0])));
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> Verifier<?, OIN, NOUT> thenWith(Predicate<? super NOUT> predicate) {
+  default <NOUT> Verifier<?, OIN, NOUT> thenVerifyWith(Predicate<? super NOUT> predicate) {
     return this.then().asValueOf((NOUT) value()).verifyWith(predicate);
   }
 
@@ -130,6 +130,10 @@ public interface Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ext
   @Override
   default IntegerTransformer<OIN> asInteger() {
     return new IntegerTransformer.Impl<>(transformerName(), this, Printables.function("treatAsInteger", v -> (Integer) v), originalInputValue());
+  }
+
+  default DoubleTransformer<OIN> asDouble() {
+    return new DoubleTransformer.Impl<>(transformerName(), this, Printables.function("treatAsDouble", v -> (Double) v), originalInputValue());
   }
 
   @Override

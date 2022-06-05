@@ -10,6 +10,9 @@ public interface Matcher<OIN, OUT> {
   interface ForInteger<OIN> extends Matcher<OIN, Integer> {
   }
 
+  interface ForDouble<OIN> extends Matcher<OIN, Double> {
+  }
+
   interface ForBoolean<OIN> extends Matcher<OIN, Boolean> {
   }
 

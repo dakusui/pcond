@@ -132,7 +132,7 @@ public class FluentsTest extends TestBase {
     String hello = "hello";
     assertThat(
         hello,
-        when().asObject().thenWith(allOf(
+        when().asObject().thenVerifyWith(allOf(
             $().as((String) value())
                 .exercise(objectHashCode())
                 .then().isInstanceOf(Integer.class)))
@@ -147,6 +147,7 @@ public class FluentsTest extends TestBase {
         when().asObject().then().verifyWith(allOf(
             $().as((String) value())
                 .exercise(objectHashCode())
-                .then().isInstanceOf(Integer.class))));
+                .then()
+                .isInstanceOf(Integer.class))));
   }
 }

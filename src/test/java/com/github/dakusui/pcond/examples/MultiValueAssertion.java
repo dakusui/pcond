@@ -16,7 +16,7 @@ public class MultiValueAssertion {
         allOf(
             when().at(0).asInteger()
                 .then().equalTo(122),
-            when().at(1).asListOfClass(String.class).thenWithAllOf(asList(
+            when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
                 $().at(0).asString()
                     .then().isEqualTo("hello"),
                 $().at(1).asString()

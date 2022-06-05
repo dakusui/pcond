@@ -97,6 +97,11 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   }
 
   @Override
+  default DoubleVerifier<OIN> asDouble() {
+    return doubleVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Double.class)), dummyPredicate(), this.originalInputValue());
+  }
+
+  @Override
   default BooleanVerifier<OIN> asBoolean() {
     return booleanVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Boolean.class)), dummyPredicate(), this.originalInputValue());
   }
@@ -199,6 +204,10 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
 
     public static <OIN> IntegerVerifier<OIN> integerVerifier(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
       return new IntegerVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
+    }
+
+    public static <OIN> DoubleVerifier<OIN> doubleVerifier(String transformerName, Function<? super OIN, ? extends Double> function, Predicate<? super Double> predicate, OIN originalInputValue) {
+      return new DoubleVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
     public static <OIN, E> StreamVerifier<OIN, E> streamVerifier(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
