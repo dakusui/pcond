@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.longVerifier;
 
-public interface LongVerifier<OIN> extends NumberVerifier<LongVerifier<OIN>, OIN, Long>, Matcher.ForLong<OIN> {
+public interface LongVerifier<OIN> extends ComparableNumberVerifier<LongVerifier<OIN>, OIN, Long>, Matcher.ForLong<OIN> {
 
   class Impl<OIN> extends Verifier.Base<LongVerifier<OIN>, OIN, Long> implements LongVerifier<OIN> {
 

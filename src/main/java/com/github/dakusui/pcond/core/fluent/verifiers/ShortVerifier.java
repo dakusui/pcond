@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.shortVerifier;
 
-public interface ShortVerifier<OIN> extends NumberVerifier<ShortVerifier<OIN>, OIN, Short>, Matcher.ForShort<OIN> {
+public interface ShortVerifier<OIN> extends ComparableNumberVerifier<ShortVerifier<OIN>, OIN, Short>, Matcher.ForShort<OIN> {
   class Impl<OIN> extends Verifier.Base<ShortVerifier<OIN>, OIN, Short> implements ShortVerifier<OIN> {
 
     public Impl(String transformerName, Function<? super OIN, ? extends Short> function, Predicate<? super Short> predicate, OIN originalInputValue) {

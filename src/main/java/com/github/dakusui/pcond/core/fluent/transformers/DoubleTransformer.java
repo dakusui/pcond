@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.doubleVerifier;
 
-public interface DoubleTransformer<OIN> extends NumberTransformer<DoubleTransformer<OIN>, DoubleVerifier<OIN>, OIN, Double>, Matcher.ForDouble<OIN> {
+public interface DoubleTransformer<OIN> extends ComparableNumberTransformer<DoubleTransformer<OIN>, DoubleVerifier<OIN>, OIN, Double>, Matcher.ForDouble<OIN> {
   @Override
   DoubleVerifier<OIN> then();
 

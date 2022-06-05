@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut.types;
 
+import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.Fluents.when;
@@ -15,7 +16,7 @@ public class DoubleTest {
     );
   }
 
-  @Test
+  @Test(expected = ComparisonFailure.class)
   public void doubleTestFail() {
     double v = 1.23d;
     assertThat(
@@ -23,5 +24,4 @@ public class DoubleTest {
         when().asDouble().then().lessThan(1.22d)
     );
   }
-
 }

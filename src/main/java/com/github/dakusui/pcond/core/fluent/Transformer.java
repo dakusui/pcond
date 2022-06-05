@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
-import com.github.dakusui.pcond.core.fluent.transformers.extendable.LongTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.LongTransformer;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 

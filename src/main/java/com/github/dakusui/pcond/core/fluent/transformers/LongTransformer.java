@@ -1,8 +1,7 @@
-package com.github.dakusui.pcond.core.fluent.transformers.extendable;
+package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.transformers.NumberTransformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.LongVerifier;
 
 import java.util.function.Function;
@@ -10,7 +9,7 @@ import java.util.function.Function;
 import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.longVerifier;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 
-public interface LongTransformer<OIN> extends NumberTransformer<LongTransformer<OIN>, LongVerifier<OIN>, OIN, Long>, Matcher.ForLong<OIN> {
+public interface LongTransformer<OIN> extends ComparableNumberTransformer<LongTransformer<OIN>, LongVerifier<OIN>, OIN, Long>, Matcher.ForLong<OIN> {
   class Impl<OIN> extends Base<LongTransformer<OIN>, OIN, Long> implements LongTransformer<OIN> {
     /**
      * Constructs an instance of this class.

@@ -8,8 +8,8 @@ import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Predicate;
 
-public interface NumberVerifier<
-    TX extends NumberVerifier<TX, OIN, N>,
+public interface ComparableNumberVerifier<
+    TX extends ComparableNumberVerifier<TX, OIN, N>,
     OIN,
     N extends Number & Comparable<N>> extends
     Identifiable, Predicate<OIN>,

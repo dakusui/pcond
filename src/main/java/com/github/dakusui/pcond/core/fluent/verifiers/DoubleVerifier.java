@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.doubleVerifier;
 
-public interface DoubleVerifier<OIN> extends NumberVerifier<DoubleVerifier<OIN>, OIN, Double>, Matcher.ForDouble<OIN> {
+public interface DoubleVerifier<OIN> extends ComparableNumberVerifier<DoubleVerifier<OIN>, OIN, Double>, Matcher.ForDouble<OIN> {
   class Impl<OIN> extends Verifier.Base<DoubleVerifier<OIN>, OIN, Double> implements DoubleVerifier<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends Double> function, Predicate<? super Double> predicate, OIN originalInputValue) {
       super(transformerName, function, predicate, originalInputValue);

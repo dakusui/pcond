@@ -2,7 +2,6 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.transformers.extendable.LongTransformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.FloatVerifier;
 
 import java.util.function.Function;
@@ -15,7 +14,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
  *
  * @param <OIN> The type of original input value.
  */
-public interface FloatTransformer<OIN> extends NumberTransformer<FloatTransformer<OIN>, FloatVerifier<OIN>, OIN, Float>, Matcher.ForFloat<OIN> {
+public interface FloatTransformer<OIN> extends ComparableNumberTransformer<FloatTransformer<OIN>, FloatVerifier<OIN>, OIN, Float>, Matcher.ForFloat<OIN> {
   /**
    * An implementation of {@link FloatTransformer} interface.
    *

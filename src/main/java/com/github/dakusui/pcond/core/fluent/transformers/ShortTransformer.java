@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.shortVerifier;
 
-public interface ShortTransformer<OIN> extends NumberTransformer<ShortTransformer<OIN>, ShortVerifier<OIN>, OIN, Short>, Matcher.ForShort<OIN> {
+public interface ShortTransformer<OIN> extends ComparableNumberTransformer<ShortTransformer<OIN>, ShortVerifier<OIN>, OIN, Short>, Matcher.ForShort<OIN> {
 
   @Override
   ShortVerifier<OIN> then();

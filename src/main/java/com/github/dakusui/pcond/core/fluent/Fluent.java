@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
-import com.github.dakusui.pcond.core.fluent.transformers.extendable.LongTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.LongTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;

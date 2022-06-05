@@ -2,11 +2,11 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.Matcher;
-import com.github.dakusui.pcond.core.fluent.verifiers.NumberVerifier;
+import com.github.dakusui.pcond.core.fluent.verifiers.ComparableNumberVerifier;
 
-public interface NumberTransformer<
-    TX extends NumberTransformer<TX, V, OIN, N>,
-    V extends NumberVerifier<V, OIN, N>,
+public interface ComparableNumberTransformer<
+    TX extends ComparableNumberTransformer<TX, V, OIN, N>,
+    V extends ComparableNumberVerifier<V, OIN, N>,
     OIN,
     N extends Number & Comparable<N>>
     extends
