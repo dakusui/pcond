@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
+import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -18,6 +19,14 @@ public interface BooleanVerifier<OIN> extends
     Matcher.ForBoolean<OIN> {
   @Override
   BooleanVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue);
+
+  default BooleanVerifier<OIN> isTrue() {
+    return this.predicate(Predicates.isTrue());
+  }
+
+  default BooleanVerifier<OIN> isFalse() {
+    return this.predicate(Predicates.isFalse());
+  }
 
   class Impl<OIN> extends Verifier.Base<BooleanVerifier<OIN>, OIN, Boolean> implements BooleanVerifier<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
