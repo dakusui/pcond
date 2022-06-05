@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.IntegerVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
+import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.function.Function;

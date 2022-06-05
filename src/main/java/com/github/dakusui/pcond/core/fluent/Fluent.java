@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
+import com.github.dakusui.pcond.core.fluent.transformers.extendable.LongTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
@@ -33,8 +34,23 @@ public class Fluent<OIN> implements AsPhraseFactory.ForFluent<OIN> {
   }
 
   @Override
+  public LongTransformer<OIN> asLong() {
+    return new LongTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+  }
+
+  @Override
+  public ShortTransformer<OIN> asShort() {
+    return new ShortTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+  }
+
+  @Override
   public DoubleTransformer<OIN> asDouble() {
     return new DoubleTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+  }
+
+  @Override
+  public FloatTransformer<OIN> asFloat() {
+    return null;
   }
 
   @Override

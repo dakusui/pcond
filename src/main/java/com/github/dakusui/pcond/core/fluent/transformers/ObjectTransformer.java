@@ -3,7 +3,7 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.transformers.extendable.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
+import com.github.dakusui.pcond.core.fluent.Matcher;
 
 import java.util.function.Function;
 

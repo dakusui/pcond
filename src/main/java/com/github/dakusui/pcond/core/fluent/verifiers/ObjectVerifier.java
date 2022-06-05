@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.fluent.verifiers;
 
 import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 

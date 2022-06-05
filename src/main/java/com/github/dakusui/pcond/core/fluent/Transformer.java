@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
-import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
+import com.github.dakusui.pcond.core.fluent.transformers.extendable.LongTransformer;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 
@@ -132,8 +132,24 @@ public interface Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ext
     return new IntegerTransformer.Impl<>(transformerName(), this, Printables.function("treatAsInteger", v -> (Integer) v), originalInputValue());
   }
 
+  @Override
+   default LongTransformer<OIN> asLong() {
+    return new LongTransformer.Impl<>(transformerName(), this, Printables.function("treatAsLong", v -> (Long) v), originalInputValue());
+  }
+
+  @Override
+  default ShortTransformer<OIN> asShort() {
+    return new ShortTransformer.Impl<>(transformerName(), this, Printables.function("treatAsShort", v -> (Short) v), originalInputValue());
+  }
+
+  @Override
   default DoubleTransformer<OIN> asDouble() {
     return new DoubleTransformer.Impl<>(transformerName(), this, Printables.function("treatAsDouble", v -> (Double) v), originalInputValue());
+  }
+
+  @Override
+  default FloatTransformer<OIN> asFloat() {
+    return new FloatTransformer.Impl<>(transformerName(), this, Printables.function("treatAsShort", v -> (Float) v), originalInputValue());
   }
 
   @Override

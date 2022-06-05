@@ -3,7 +3,7 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.Verifier;
 import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
+import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.internals.InternalUtils;

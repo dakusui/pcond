@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
+import com.github.dakusui.pcond.core.fluent.transformers.extendable.LongTransformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.*;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
@@ -9,13 +10,22 @@ public interface AsPhraseFactory<
     MS extends Matcher.ForString<OIN>,
     MI extends Matcher.ForInteger<OIN>,
     MD extends Matcher.ForDouble<OIN>,
+    MF extends Matcher.ForFloat<OIN>,
+    MSH extends Matcher.ForShort<OIN>,
+    ML extends Matcher.ForLong<OIN>,
     MB extends Matcher.ForBoolean<OIN>,
     OIN> {
   MS asString();
 
   MI asInteger();
 
+  ML asLong();
+
+  MSH asShort();
+
   MD asDouble();
+
+  MF asFloat();
 
   MB asBoolean();
 
@@ -49,6 +59,9 @@ public interface AsPhraseFactory<
       StringTransformer<OIN>,
       IntegerTransformer<OIN>,
       DoubleTransformer<OIN>,
+      FloatTransformer<OIN>,
+      ShortTransformer<OIN>,
+      LongTransformer<OIN>,
       BooleanTransformer<OIN>,
       OIN> {
     @Override
@@ -91,7 +104,7 @@ public interface AsPhraseFactory<
 
     @SuppressWarnings("unchecked")
     default <E> ObjectTransformer<OIN, E> at(int i) {
-      return asListOf((E)value()).elementAt(i);
+      return asListOf((E) value()).elementAt(i);
     }
   }
 
@@ -103,6 +116,9 @@ public interface AsPhraseFactory<
       StringVerifier<OIN>,
       IntegerVerifier<OIN>,
       DoubleVerifier<OIN>,
+      FloatVerifier<OIN>,
+      ShortVerifier<OIN>,
+      LongVerifier<OIN>,
       BooleanVerifier<OIN>,
       OIN
       > {

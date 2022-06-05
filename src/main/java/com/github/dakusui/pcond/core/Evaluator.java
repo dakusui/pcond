@@ -159,7 +159,7 @@ public interface Evaluator {
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
       if (isDummyFunction((Function<?, ?>) transformation.mapper())) {
-        transformation.checker().accept((R) this.currentResult, this);
+        transformation.checker().accept((R) value, this);
         return;
       }
       this.enter(Entry.Type.TRANSFORM,

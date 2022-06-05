@@ -97,8 +97,23 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   }
 
   @Override
+  default LongVerifier<OIN> asLong() {
+    return longVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Long.class)), dummyPredicate(), this.originalInputValue());
+  }
+
+  @Override
+  default ShortVerifier<OIN> asShort() {
+    return shortVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Short.class)), dummyPredicate(), this.originalInputValue());
+  }
+
+  @Override
   default DoubleVerifier<OIN> asDouble() {
     return doubleVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Double.class)), dummyPredicate(), this.originalInputValue());
+  }
+
+  @Override
+  default FloatVerifier<OIN> asFloat() {
+    return floatVerifier(transformerName(), chainFunctions(this.function(), Functions.cast(Float.class)), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
@@ -130,6 +145,11 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   @Override
   default IntegerVerifier<OIN> intoIntegerWith(Function<T, Integer> function) {
     return integerVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+  }
+
+  @Override
+  default DoubleVerifier<OIN> intoDoubleWith(Function<T, Double> function) {
+    return doubleVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
@@ -208,6 +228,18 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
 
     public static <OIN> DoubleVerifier<OIN> doubleVerifier(String transformerName, Function<? super OIN, ? extends Double> function, Predicate<? super Double> predicate, OIN originalInputValue) {
       return new DoubleVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
+    }
+
+    public static <OIN> LongVerifier<OIN> longVerifier(String transformerName, Function<? super OIN, ? extends Long> function, Predicate<? super Long> predicate, OIN originalInputValue) {
+      return new LongVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
+    }
+
+    public static <OIN> FloatVerifier<OIN> floatVerifier(String transformerName, Function<? super OIN, ? extends Float> function, Predicate<? super Float> predicate, OIN originalInputValue) {
+      return new FloatVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
+    }
+
+    public static <OIN> ShortVerifier<OIN> shortVerifier(String transformerName, Function<? super OIN, ? extends Short> function, Predicate<? super Short> predicate, OIN originalInputValue) {
+      return new ShortVerifier.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
     public static <OIN, E> StreamVerifier<OIN, E> streamVerifier(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {

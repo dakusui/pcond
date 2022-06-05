@@ -13,6 +13,10 @@ public interface IntoPhraseFactory<OIN, IN> {
     return intoIntegerWith((IN v) -> (Integer) v);
   }
 
+  default DoubleVerifier<OIN> intoDouble() {
+    return intoDoubleWith((IN v) -> (Double) v);
+  }
+
   default BooleanVerifier<OIN> intoBoolean() {
     return intoBooleanWith((IN v) -> (Boolean) v);
   }
@@ -25,6 +29,8 @@ public interface IntoPhraseFactory<OIN, IN> {
   StringVerifier<OIN> intoStringWith(Function<IN, String> function);
 
   IntegerVerifier<OIN> intoIntegerWith(Function<IN, Integer> function);
+
+  DoubleVerifier<OIN> intoDoubleWith(Function<IN, Double> function);
 
   BooleanVerifier<OIN> intoBooleanWith(Function<IN, Boolean> function);
 
