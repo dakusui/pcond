@@ -24,4 +24,22 @@ public class LongTest {
         when().asLong().then().lessThan(122_000_000_000L)
     );
   }
+
+  @Test
+  public void longTransformerTest() {
+    long v = 123_000_000_000L;
+    assertThat(
+        v,
+        when().asObject().asLong().then().lessThan(124_000_000_000L)
+    );
+  }
+
+  @Test(expected = ComparisonFailure.class)
+  public void longTransformerTestFail() {
+    long v = 123_000_000_000L;
+    assertThat(
+        v,
+        when().asObject().asLong().then().lessThan(122_000_000_000L)
+    );
+  }
 }

@@ -24,4 +24,22 @@ public class DoubleTest {
         when().asDouble().then().lessThan(1.22d)
     );
   }
+
+  @Test
+  public void doubleTransformerTest() {
+    double v = 1.23d;
+    assertThat(
+        v,
+        when().asObject().asDouble().then().lessThan(1.24d)
+    );
+  }
+
+  @Test(expected = ComparisonFailure.class)
+  public void doubleTransformerTestFail() {
+    double v = 1.23d;
+    assertThat(
+        v,
+        when().asObject().asDouble().then().lessThan(1.22d)
+    );
+  }
 }

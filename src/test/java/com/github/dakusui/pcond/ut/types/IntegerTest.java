@@ -18,4 +18,16 @@ public class IntegerTest {
     int v = 123_000_000;
     assertThat(v, when().asInteger().then().lessThan(122_000_000));
   }
+
+  @Test
+  public void intTransformerTest() {
+    int v = 123_000_000;
+    assertThat(v, when().asObject().asInteger().then().lessThan(124_000_000));
+  }
+
+  @Test(expected = ComparisonFailure.class)
+  public void intTransformerTestFail() {
+    int v = 123_000_000;
+    assertThat(v, when().asObject().asInteger().then().lessThan(122_000_000));
+  }
 }

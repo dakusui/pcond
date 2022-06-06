@@ -24,4 +24,16 @@ public class FloatTest {
         when().asFloat().then().lessThan(1.22f)
     );
   }
+
+  @Test
+  public void floatTransformerTest() {
+    float v = 1.23f;
+    assertThat(v, when().asObject().asFloat().then().lessThan(1.24f));
+  }
+
+  @Test(expected = ComparisonFailure.class)
+  public void floatTransformerTestFail() {
+    float v = 1.23f;
+    assertThat(v, when().asObject().asFloat().then().lessThan(1.22f));
+  }
 }

@@ -8,13 +8,11 @@ import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.Fluents.when;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class BooleanTest extends TestBase {
   @Test
   public void booleanTest() {
     boolean value = true;
-
     TestAssertions.assertThat(value, when().asBoolean().then().isTrue());
   }
 
@@ -29,5 +27,17 @@ public class BooleanTest extends TestBase {
       MatcherAssert.assertThat(e.getActual(), CoreMatchers.containsString("true->isFalse->false"));
       throw e;
     }
+  }
+
+  @Test
+  public void booleanTransformerTest() {
+    boolean value = true;
+    TestAssertions.assertThat(value, when().asObject().asBoolean().then().isTrue());
+  }
+
+  @Test(expected = ComparisonFailure.class)
+  public void booleanTransformerTestFail() {
+    boolean value = true;
+    TestAssertions.assertThat(value, when().asObject().asBoolean().then().isFalse());
   }
 }

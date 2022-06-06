@@ -17,7 +17,12 @@ import static com.github.dakusui.pcond.core.fluent.Transformer.Factory.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 
-public interface Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> extends Matcher<OIN, OUT>, AsPhraseFactory.ForTransformer<OIN> {
+public interface Transformer<
+    TX extends Transformer<TX, OIN, OUT>,
+    OIN,
+    OUT> extends
+    Matcher<OIN, OUT>,
+    AsPhraseFactory.ForTransformer<OIN> {
   @SuppressWarnings("unchecked")
   static <
       OIN,
@@ -115,41 +120,40 @@ public interface Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ext
 
   @SuppressWarnings("unchecked")
   default TX peek(Consumer<OUT> consumer) {
-    applyFunction(v -> {
+    return (TX) this.applyFunction(v -> {
       consumer.accept(v);
       return v;
     });
-    return (TX) this;
   }
 
   @Override
-  default StringTransformer.Impl<OIN> asString() {
-    return (StringTransformer.Impl<OIN>) stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
+  default StringTransformer<OIN> asString() {
+    return stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
   }
 
   @Override
   default IntegerTransformer<OIN> asInteger() {
-    return new IntegerTransformer.Impl<>(transformerName(), this, Printables.function("treatAsInteger", v -> (Integer) v), originalInputValue());
+    return integerTransformer(this, Printables.function("treatAsInteger", v -> (Integer) v));
   }
 
   @Override
-   default LongTransformer<OIN> asLong() {
-    return new LongTransformer.Impl<>(transformerName(), this, Printables.function("treatAsLong", v -> (Long) v), originalInputValue());
+  default LongTransformer<OIN> asLong() {
+    return longTransformer(this, Printables.function("treatAsLong", v -> (Long) v));
   }
 
   @Override
   default ShortTransformer<OIN> asShort() {
-    return new ShortTransformer.Impl<>(transformerName(), this, Printables.function("treatAsShort", v -> (Short) v), originalInputValue());
+    return shortTransformer(this, Printables.function("treatAsShort", v -> (Short) v));
   }
 
   @Override
   default DoubleTransformer<OIN> asDouble() {
-    return new DoubleTransformer.Impl<>(transformerName(), this, Printables.function("treatAsDouble", v -> (Double) v), originalInputValue());
+    return doubleTransformer(this, Printables.function("treatAsDouble", v -> (Double) v));
   }
 
   @Override
   default FloatTransformer<OIN> asFloat() {
-    return new FloatTransformer.Impl<>(transformerName(), this, Printables.function("treatAsShort", v -> (Float) v), originalInputValue());
+    return floatTransformer(this, Printables.function("treatAsShort", v -> (Float) v));
   }
 
   @Override
@@ -186,15 +190,32 @@ public interface Transformer<TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ext
       return new BooleanTransformer.Impl<>(transformer.transformerName(), transformer, function, transformer.originalInputValue());
     }
 
-    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> IntegerTransformer.Impl<OIN> integerTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Integer> func) {
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> IntegerTransformer<OIN> integerTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Integer> func) {
       return new IntegerTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
 
-    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT, E> StreamTransformer.Impl<OIN, E> streamTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Stream<E>> func) {
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> LongTransformer<OIN> longTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Long> func) {
+      return new LongTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ShortTransformer<OIN> shortTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Short> func) {
+      return new ShortTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> DoubleTransformer<OIN> doubleTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Double> func) {
+      return new DoubleTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> FloatTransformer<OIN> floatTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Float> func) {
+      return new FloatTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT, E> StreamTransformer<OIN, E> streamTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Stream<E>> func) {
       return new StreamTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
 
-    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT, E> ListTransformer.Impl<OIN, E> listTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, List<E>> func) {
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT, E> ListTransformer<OIN, E> listTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, List<E>> func) {
       return new ListTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
 
