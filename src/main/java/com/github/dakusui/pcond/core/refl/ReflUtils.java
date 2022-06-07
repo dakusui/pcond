@@ -85,9 +85,7 @@ public enum ReflUtils {
       // overriding a public method cannot be invoked.
       method.setAccessible(true);
       return (R) method.invoke(obj, arguments);
-    } catch (IllegalAccessException e) {
-      throw new MethodAccessException(format("Method access to '%s' was failed", method), e);
-    } catch (InvocationTargetException e) {
+    } catch (IllegalAccessException | InvocationTargetException e) {
       throw new MethodInvocationException(format("Method invocation of '%s' was failed", method), e.getCause());
     } finally {
       method.setAccessible(wasAccessible);

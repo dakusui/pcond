@@ -176,12 +176,6 @@ public enum InternalUtils {
     return (Evaluable<T>) Printables.function(f::toString, f);
   }
 
-  public static String spaces(int num) {
-    char[] buf = new char[num];
-    Arrays.fill(buf, ' ');
-    return String.valueOf(buf);
-  }
-
   public static Class<?> wrapperClassOf(Class<?> clazz) {
     assert clazz != null;
     if (clazz == Integer.TYPE)

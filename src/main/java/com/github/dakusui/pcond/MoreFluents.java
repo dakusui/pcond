@@ -25,6 +25,14 @@ public class MoreFluents {
   private MoreFluents() {
   }
 
+  /**
+   * A function to provide a place-holder for `MoreFluent` style.
+   * So far, no valid usage of this method in `MoreFluent` style and this method might be
+   * dropped from future releases.
+   *
+   * @param <T> The type to which the place-holder is cast.
+   * @return A place-holder variable that can be cast to any type.
+   */
   public static <T> T value() {
     return Functions.value();
   }
@@ -35,40 +43,52 @@ public class MoreFluents {
 
   public static void assertWhen(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    AtomicInteger i = new AtomicInteger(0);
-    @SuppressWarnings("unchecked") Predicate<? super List<?>>[] predicates = Arrays.stream(statements)
-        .map(e -> transform(elementAt(i.getAndIncrement())).check((Predicate<? super Object>) e.statementPredicate()))
-        .toArray(Predicate[]::new);
-
-    TestAssertions.assertThat(values, allOf((predicates)));
+    TestAssertions.assertThat(values, createPredicateForAllOf(statements));
   }
 
   public static <T> void assumeWhen(Statement<T> statement) {
     TestAssertions.assumeThat(statement.statementValue(), statement.statementPredicate());
   }
 
+  public static void assumeWhen(Statement<?>... statements) {
+    List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+    TestAssertions.assumeThat(values, createPredicateForAllOf(statements));
+  }
+
   public static StringTransformer<String> valueOf(String value) {
-    return new Fluent<>("WHEN", value).asString();
+    return fluent(value).asString();
   }
 
   public static IntegerTransformer<Integer> valueOf(int value) {
-    return new Fluent<>("WHEN", value).asInteger();
+    return fluent(value).asInteger();
   }
 
   public static BooleanTransformer<Boolean> valueOf(boolean value) {
-    return new Fluent<>("WHEN", value).asBoolean();
+    return fluent(value).asBoolean();
   }
 
   public static <T> ObjectTransformer<T, T> valueOf(T value) {
-    return new Fluent<>("WHEN", value).asObject();
+    return fluent(value).asObject();
   }
 
   public static <E> ListTransformer<List<E>, E> valueOf(List<E> value) {
-    return new Fluent<>("WHEN", value).asListOf(Fluents.value());
+    return fluent(value).asListOf(Fluents.value());
   }
 
   public static <E> StreamTransformer<Stream<E>, E> valueOf(Stream<E> value) {
-    return new Fluent<>("WHEN", value).asStreamOf(Fluents.value());
+    return fluent(value).asStreamOf(Fluents.value());
+  }
+
+  private static <T> Fluent<T> fluent(T value) {
+    return new Fluent<>("WHEN", value);
+  }
+
+  private static Predicate<? super List<?>> createPredicateForAllOf(Statement<?>[] statements) {
+    AtomicInteger i = new AtomicInteger(0);
+    @SuppressWarnings("unchecked") Predicate<? super List<?>>[] predicates = Arrays.stream(statements)
+        .map(e -> transform(elementAt(i.getAndIncrement())).check((Predicate<? super Object>) e.statementPredicate()))
+        .toArray(Predicate[]::new);
+    return allOf((predicates));
   }
 
   @FunctionalInterface

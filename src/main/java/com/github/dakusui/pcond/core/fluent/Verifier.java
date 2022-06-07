@@ -162,6 +162,16 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     return objectVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
+  @Override
+  default <E> ListVerifier<OIN, E> intoListWith(Function<T, List<E>> function) {
+    return listVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+  }
+
+  @Override
+  default <E> StreamVerifier<OIN, E> intoStreamWith(Function<T, Stream<E>> function) {
+    return streamVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+  }
+
   default V isNotNull() {
     return this.predicate(Predicates.isNotNull());
   }

@@ -20,6 +20,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(Enclosed.class)
 public class InternalUtilsTest {
+  public static class DummyFormTest extends TestBase {
+    @Test(expected = UnsupportedOperationException.class)
+    public void testDummyFunction() {
+      InternalUtils.dummyFunction().apply(null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testDummyPredicate() {
+      InternalUtils.dummyPredicate().test(null);
+    }
+  }
+
   public static class FormatObjectTest extends TestBase {
     static class InnerClass {
     }

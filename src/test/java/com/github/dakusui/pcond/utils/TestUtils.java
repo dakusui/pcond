@@ -3,6 +3,9 @@ package com.github.dakusui.pcond.utils;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.Objects;
+import java.util.function.Function;
+
+import static com.github.dakusui.pcond.forms.Printables.function;
 
 public enum TestUtils {
   ;
@@ -55,5 +58,9 @@ public enum TestUtils {
 
   public static int numLines(String multilineString) {
     return split(multilineString).length;
+  }
+
+  public static Function<String, String> stringToLowerCase() {
+    return function("stringToLowerCase", String::toLowerCase);
   }
 }

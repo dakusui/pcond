@@ -1,9 +1,10 @@
 package com.github.dakusui.pcond.examples;
 
+import com.github.dakusui.pcond.utils.TestUtils;
+import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.function.Function;
 
 import static com.github.dakusui.pcond.MoreFluents.assertWhen;
 import static com.github.dakusui.pcond.MoreFluents.valueOf;
@@ -16,21 +17,17 @@ public class MoreFluentStyleExample {
   public void test() {
     String givenValue = "helloWorld";
     assertWhen(valueOf(givenValue)
-        .exercise(stringToLowerCase())
+        .exercise(TestUtils.stringToLowerCase())
         .then()
         .asString()
         .isEqualTo("HELLOWORLD"));
-  }
-
-  private static Function<String, String> stringToLowerCase() {
-    return function("stringToLowerCase", String::toLowerCase);
   }
 
   @Test
   public void test2() {
     List<String> givenValues = asList("hello", "world");
     assertWhen(valueOf(givenValues).elementAt(0)
-        .exercise(stringToLowerCase())
+        .exercise(TestUtils.stringToLowerCase())
         .then()
         .asString()
         .isEqualTo("HELLO"));
@@ -40,18 +37,22 @@ public class MoreFluentStyleExample {
   public void test3() {
     List<String> givenValues = asList("hello", "world");
     assertWhen(valueOf(givenValues).elementAt(0)
-        .exercise(stringToLowerCase())
+        .exercise(TestUtils.stringToLowerCase())
         .then()
         .asString()
         .isEqualTo("HELLO"));
   }
 
 
-  @Test
+  @Test//(expected = ComparisonFailure.class)
   public void test4() {
-    assertWhen(
-        valueOf("hello").toUpperCase().then().isEqualTo("HELLO"),
-        valueOf("world").toLowerCase().then().contains("HELLO"));
+    try {
+      assertWhen(
+          valueOf("hello").toUpperCase().then().isEqualTo("HELLO"),
+          valueOf("world").toLowerCase().then().contains("WORLD"));
+    } catch (ComparisonFailure e) {
+      throw e;
+    }
   }
 
   @Test
@@ -60,7 +61,7 @@ public class MoreFluentStyleExample {
     List<String> strings = asList("HELLO", "WORLD");
 
     assertWhen(
-        valueOf(s).asString().exercise(stringToLowerCase()).then().isEqualTo("HI"),
+        valueOf(s).asString().exercise(TestUtils.stringToLowerCase()).then().isEqualTo("HI"),
         valueOf(strings).asListOf((String)null).then().findElementsInOrder("hello", "world")
     );
   }
