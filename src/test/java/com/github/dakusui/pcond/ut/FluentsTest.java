@@ -73,7 +73,7 @@ public class FluentsTest extends TestBase {
                   .then()
                   .asString()
                   .isEqualTo("returnValueFromParentMethod"),
-              whenValueOfClass(Parent.class).<Parent>asObject()
+              valueOfClass(Parent.class).<Parent>asObject()
                   .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                   .exercise(function("lambda:Child::childMethod", Child::childMethod))
                   .then()
@@ -125,6 +125,20 @@ public class FluentsTest extends TestBase {
     public String childMethod() {
       return "returnedStringFromChildMethod";
     }
+  }
+
+  @Test(expected = ComparisonFailure.class)
+  public void multiValueAssertionTest() {
+    assertThat(
+        list(123, list("Hello", "world")),
+        allOf(
+            when().at(0).asInteger()
+                .then().equalTo(122),
+            when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
+                $().at(0).asString()
+                    .then().isEqualTo("hello"),
+                $().at(1).asString()
+                    .then().isEqualTo("world")))));
   }
 
   @Test

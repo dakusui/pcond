@@ -22,6 +22,7 @@ import static com.github.dakusui.pcond.Preconditions.require;
 import static com.github.dakusui.pcond.forms.Experimentals.*;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
+import static com.github.dakusui.pcond.forms.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static com.github.dakusui.pcond.ut.ExperimentalsTest.Utils.areEqual;
 import static com.github.dakusui.pcond.ut.ExperimentalsTest.Utils.stringEndsWith;
@@ -440,6 +441,20 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
     assertTrue(p.test("Hello!"));
     assertFalse(p.test("World!"));
     assertEquals("containsStringIgnoreCase[hello]", p.toString());
+  }
+
+  @Test
+  public void parameterizedPredicate_() {
+
+    Predicate<String> p = Experimentals.<String>parameterizedPredicate("containsStringIgnoreCase")
+        .factory((args) -> predicate(() -> "toUpperCase().contains(" + args.get(0) + ")", (String v) -> v.toUpperCase().contains(args.get(0).toString().toUpperCase())))
+        .create("hello");
+    System.out.println("p:<" + p + ">");
+    assertTrue(p.test("hello!"));
+    assertTrue(p.test("Hello!"));
+    assertFalse(p.test("World!"));
+    assertEquals("containsStringIgnoreCase[hello]", p.toString());
+
   }
 
   @Test
