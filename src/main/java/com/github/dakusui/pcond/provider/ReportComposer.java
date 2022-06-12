@@ -27,6 +27,11 @@ public interface ReportComposer {
     return Utils.composeExplanation(message, result, t);
   }
 
+  static ReportComposer createDefaultReportComposer() {
+    return new ReportComposer() {
+    };
+  }
+
   enum Utils {
     ;
 

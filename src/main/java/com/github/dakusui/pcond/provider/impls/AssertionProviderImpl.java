@@ -100,12 +100,6 @@ public class AssertionProviderImpl implements AssertionProvider {
     }
   }
 
-  @Override
-  public <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E {
-    return checkValueAndThrowIfFails(value, cond, messageComposer, explanation -> exceptionComposer.apply(explanation.toString()));
-  }
-
-
   private static boolean useEvaluator(Class<?> myClass, Properties properties) {
     return Boolean.parseBoolean(properties.getProperty(myClass.getName() + ".useEvaluator", "true"));
   }
