@@ -8,17 +8,27 @@ public class JUnit4AssertionProvider extends BaseAssertionProvider {
   }
 
   @SuppressWarnings("unchecked")
-  @Override
-  public <T extends RuntimeException> T testSkippedException(String message) {
-    throw (T) createException("org.junit.AssumptionViolatedException", Explanation.fromMessage(message), (c, exp) ->
-        c.getConstructor(String.class).newInstance(exp.message()));
-  }
 
-
-  @SuppressWarnings("unchecked")
   @Override
-  public <T extends Error> T testFailedException(Explanation explanation) {
-    throw (T) createException("org.junit.ComparisonFailure", explanation, (c, exp) ->
-        c.getConstructor(String.class, String.class, String.class).newInstance(exp.message(), exp.expected(), exp.actual()));
+  public ExceptionComposer exceptionComposer() {
+    return new ExceptionComposer() {
+      @Override
+      public <T extends RuntimeException> T testSkippedException(String message) {
+        throw (T) createException("org.junit.AssumptionViolatedException", Explanation.fromMessage(message), (c, exp) ->
+            c.getConstructor(String.class).newInstance(exp.message()));
+      }
+
+      @Override
+      public <T extends Error> T testFailedException(String message) {
+        throw testFailedException(Explanation.fromMessage(message));
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public <T extends Error> T testFailedException(Explanation explanation) {
+        throw (T) createException("org.junit.ComparisonFailure", explanation, (c, exp) ->
+            c.getConstructor(String.class, String.class, String.class).newInstance(exp.message(), exp.expected(), exp.actual()));
+      }
+    };
   }
 }

@@ -12,19 +12,20 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
 public interface AssertionProviderBase extends AssertionProvider {
+  ExceptionComposer exceptionComposer();
   @Override
   default <T> T requireNonNull(T value) {
-    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this::composeMessageForPrecondition, ExceptionComposer.from(NullPointerException::new));
+    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this::composeMessageForPrecondition, ExceptionFactory.from(NullPointerException::new));
   }
 
   @Override
   default <T> T requireArgument(T value, Predicate<? super T> cond) {
-    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPrecondition, ExceptionComposer.from(IllegalArgumentException::new));
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPrecondition, ExceptionFactory.from(IllegalArgumentException::new));
   }
 
   @Override
   default <T> T requireState(T value, Predicate<? super T> cond) {
-    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPrecondition, ExceptionComposer.from(IllegalStateException::new));
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPrecondition, ExceptionFactory.from(IllegalStateException::new));
   }
 
   @Override
@@ -34,23 +35,23 @@ public interface AssertionProviderBase extends AssertionProvider {
 
   @Override
   default <T, E extends Exception> T require(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
-    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPrecondition, ExceptionComposer.from(exceptionComposer));
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPrecondition, ExceptionFactory.from(exceptionComposer));
   }
 
   @Override
   default <T, E extends Exception> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
-    return checkValueAndThrowIfFails(value, cond, this::composeMessageForValidation, ExceptionComposer.from(exceptionComposer));
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForValidation, ExceptionFactory.from(exceptionComposer));
   }
 
 
   @Override
   default <T> T ensureNonNull(T value) {
-    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this::composeMessageForPostcondition, ExceptionComposer.from(NullPointerException::new));
+    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this::composeMessageForPostcondition, ExceptionFactory.from(NullPointerException::new));
   }
 
   @Override
   default <T> T ensureState(T value, Predicate<? super T> cond) {
-    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPostcondition, ExceptionComposer.from(IllegalStateException::new));
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPostcondition, ExceptionFactory.from(IllegalStateException::new));
   }
 
   @Override
@@ -60,7 +61,7 @@ public interface AssertionProviderBase extends AssertionProvider {
 
   @Override
   default <T, E extends Exception> T ensure(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
-    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPostcondition, ExceptionComposer.from(exceptionComposer));
+    return checkValueAndThrowIfFails(value, cond, this::composeMessageForPostcondition, ExceptionFactory.from(exceptionComposer));
   }
 
   @Override
@@ -80,13 +81,13 @@ public interface AssertionProviderBase extends AssertionProvider {
 
   @Override
   default <T> void assertThat(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this::composeMessageForAssertion, this::<Error>testFailedException);
+    checkValueAndThrowIfFails(value, cond, this::composeMessageForAssertion, this.exceptionComposer()::<Error>testFailedException);
   }
 
   @SuppressWarnings("RedundantTypeArguments")
   @Override
   default <T> void assumeThat(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this::composeMessageForAssertion, this::<RuntimeException>testSkippedException);
+    checkValueAndThrowIfFails(value, cond, this::composeMessageForAssertion, this.exceptionComposer()::<RuntimeException>testSkippedException);
   }
 
   @SuppressWarnings("unchecked")
@@ -107,27 +108,29 @@ public interface AssertionProviderBase extends AssertionProvider {
 
   <T> String composeMessageForValidation(T t, Predicate<? super T> predicate);
 
-  <T extends RuntimeException> T testSkippedException(String message);
-
-  default <T extends RuntimeException> T testSkippedException(Explanation explanation) {
-    return testSkippedException(explanation.toString());
-  }
-
-  <T extends Error> T testFailedException(String message);
-
-  default <T extends Error> T testFailedException(Explanation explanation) {
-    return testFailedException(explanation.toString());
-  }
-
   <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E;
 
-  default <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionComposer<E> exceptionComposer) throws E {
-    return checkValue(value, cond, messageComposer, msg -> exceptionComposer.apply(Explanation.fromMessage(msg)));
+  default <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<E> exceptionFactory) throws E {
+    return checkValue(value, cond, messageComposer, msg -> exceptionFactory.apply(Explanation.fromMessage(msg)));
   }
 
-  interface ExceptionComposer<E extends Throwable> extends Function<Explanation, E> {
-    static <E extends Throwable> ExceptionComposer<E> from(Function<String, E> exceptionComposingFunction) {
+  interface ExceptionFactory<E extends Throwable> extends Function<Explanation, E> {
+    static <E extends Throwable> ExceptionFactory<E> from(Function<String, E> exceptionComposingFunction) {
       return explanation -> exceptionComposingFunction.apply(explanation.toString());
+    }
+  }
+
+  interface ExceptionComposer {
+    <T extends RuntimeException> T testSkippedException(String message);
+
+    default <T extends RuntimeException> T testSkippedException(Explanation explanation) {
+      return testSkippedException(explanation.toString());
+    }
+
+    <T extends Error> T testFailedException(String message);
+
+    default <T extends Error> T testFailedException(Explanation explanation) {
+      return testFailedException(explanation.toString());
     }
   }
 

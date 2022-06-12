@@ -58,11 +58,6 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase {
   }
 
   @Override
-  public <T extends Error> T testFailedException(String message) {
-    throw testFailedException(Explanation.fromMessage(message));
-  }
-
-  @Override
   public Configuration configuration() {
     return this.configuration;
   }
@@ -93,7 +88,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionComposer<E> exceptionComposer) throws E {
+  public <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<E> exceptionFactory) throws E {
     if (useEvaluator && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
@@ -107,10 +102,10 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase {
       Result result = new Result(evaluator.resultValue(), evaluator.resultEntries());
       if (result.result())
         return value;
-      throw exceptionComposer.apply(composeExplanation(messageComposer.apply(value, cond), result.entries, null));
+      throw exceptionFactory.apply(composeExplanation(messageComposer.apply(value, cond), result.entries, null));
     } else {
       if (!cond.test(value))
-        throw exceptionComposer.apply(composeExplanation(messageComposer.apply(value, cond), emptyList(), null));
+        throw exceptionFactory.apply(composeExplanation(messageComposer.apply(value, cond), emptyList(), null));
       return value;
     }
   }
