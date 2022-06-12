@@ -25,20 +25,15 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public abstract class BaseAssertionProvider implements AssertionProviderBase<ApplicationException> {
-  private final boolean                             useEvaluator;
-  private final Configuration<ApplicationException> configuration;
+  private final boolean       useEvaluator;
+  private final Configuration configuration;
 
   public BaseAssertionProvider(Properties properties) {
     this.useEvaluator = useEvaluator(this.getClass(), properties);
-    this.configuration = new Configuration<ApplicationException>() {
+    this.configuration = new Configuration() {
       @Override
       public int summarizedStringLength() {
         return Configuration.super.summarizedStringLength();
-      }
-
-      @Override
-      public ApplicationException throwApplicationException(String message) {
-        return new ApplicationException(message);
       }
     };
   }
@@ -69,7 +64,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
   }
 
   @Override
-  public Configuration<ApplicationException> configuration() {
+  public Configuration configuration() {
     return this.configuration;
   }
 
@@ -131,7 +126,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
     List<Object> actualResultDetails = new LinkedList<>();
     String expectation = composeExplanationForExpectations(result, t, expectationDetails);
     String actualResult = composeExplanationForActualResults(result, t, actualResultDetails);
-//    assert expectationDetails.size() == actualResultDetails.size();
+    //    assert expectationDetails.size() == actualResultDetails.size();
     return new Explanation(message, composeReport(expectation, expectationDetails, new AtomicInteger(0)), composeReport(actualResult, actualResultDetails, new AtomicInteger(0)));
   }
 
