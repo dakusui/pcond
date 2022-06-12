@@ -13,7 +13,7 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.executionFailure;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
-import static com.github.dakusui.pcond.provider.AssertionProviderBase.ReportComposer.composeExplanation;
+import static com.github.dakusui.pcond.provider.AssertionProviderBase.ReportComposer.Utils.composeExplanation;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
