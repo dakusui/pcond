@@ -126,7 +126,7 @@ public interface AssertionProviderBase extends AssertionProvider {
     }
 
     @SuppressWarnings("unchecked")
-    default <E extends Exception> Function<String, E> preconditionViolationException() {
+    default <E extends RuntimeException> Function<String, E> preconditionViolationException() {
       return message -> (E) new PreconditionViolationException(message);
     }
 

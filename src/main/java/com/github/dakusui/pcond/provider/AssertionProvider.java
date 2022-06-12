@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.provider;
 
 import com.github.dakusui.pcond.internals.InternalUtils;
+import com.github.dakusui.pcond.provider.impls.BaseAssertionProvider;
 import com.github.dakusui.pcond.provider.impls.JUnit4AssertionProvider;
 
 import java.util.Properties;
@@ -15,17 +16,17 @@ import static java.lang.String.format;
  * An interface of a policy for behaviours on 'contract violations'.
  */
 public interface AssertionProvider {
+  /**
+   * A constant field that holds the default provider instance.
+   */
+  AssertionProvider INSTANCE = createAssertionProvider(System.getProperties());
+
   AssertionProviderBase.ExceptionComposer exceptionComposer();
 
   AssertionProviderBase.MessageComposer messageComposer();
 
   AssertionProviderBase.ReportComposer reportComposer();
 
-
-  /**
-   * A constant field that holds the default provider instance.
-   */
-  AssertionProvider INSTANCE = createAssertionProvider(System.getProperties());
 
   Configuration configuration();
 
@@ -38,11 +39,7 @@ public interface AssertionProvider {
    * @return Created provider instance.
    */
   static AssertionProvider createAssertionProvider(Properties properties) {
-    String propertyKeyName = AssertionProvider.class.getCanonicalName();
-    if (properties.containsKey(propertyKeyName)) {
-      return InternalUtils.createInstanceFromClassName(AssertionProvider.class, properties.getProperty(propertyKeyName), System.getProperties());
-    }
-    return new JUnit4AssertionProvider(properties);
+    return new BaseAssertionProvider(properties);
   }
 
   /**

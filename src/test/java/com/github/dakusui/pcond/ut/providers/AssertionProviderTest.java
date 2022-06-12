@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.ut.providers;
 
 import com.github.dakusui.pcond.core.Configurations;
 import com.github.dakusui.pcond.provider.AssertionProvider;
+import com.github.dakusui.pcond.provider.AssertionProviderBase;
 import com.github.dakusui.pcond.provider.impls.JUnit4AssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
@@ -19,6 +20,21 @@ public class AssertionProviderTest extends TestBase {
     };
 
     public TestAssertionProvider(Properties properties) {
+    }
+
+    @Override
+    public AssertionProviderBase.ExceptionComposer exceptionComposer() {
+      return null;
+    }
+
+    @Override
+    public AssertionProviderBase.MessageComposer messageComposer() {
+      return null;
+    }
+
+    @Override
+    public AssertionProviderBase.ReportComposer reportComposer() {
+      return null;
     }
 
     @Override
@@ -95,25 +111,6 @@ public class AssertionProviderTest extends TestBase {
     @Override
     public <T> void assumeThat(T value, Predicate<? super T> cond) {
     }
-  }
-
-  @Test
-  public void testAssertionEnabled() {
-    AssertionProvider assertionProvider = AssertionProvider.createAssertionProvider(new Properties());
-    assertThat(
-        assertionProvider,
-        instanceOf(JUnit4AssertionProvider.class));
-  }
-
-  @Test
-  public void test() {
-    AssertionProvider assertionProvider = AssertionProvider.createAssertionProvider(new Properties() {{
-      put(AssertionProvider.class.getCanonicalName(), TestAssertionProvider.class.getName());
-    }});
-    assertThat(
-        assertionProvider,
-        instanceOf(TestAssertionProvider.class)
-    );
   }
 
   @Test

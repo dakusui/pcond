@@ -12,11 +12,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.executionFailure;
-import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
-public abstract class BaseAssertionProvider implements AssertionProviderBase {
+public class BaseAssertionProvider implements AssertionProviderBase {
   private final MessageComposer messageComposer;
 
   private final ReportComposer reportComposer;
@@ -32,6 +31,10 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase {
     this.reportComposer = this.configuration.createReportComposer();
     this.exceptionComposer = this.configuration.createExceptionComposerFromProperties(properties, this);
   }
+  @Override
+  public Configuration configuration() {
+    return this.configuration;
+  }
 
   @Override
   public MessageComposer messageComposer() {
@@ -41,11 +44,6 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase {
   @Override
   public ReportComposer reportComposer() {
     return this.reportComposer;
-  }
-
-  @Override
-  public Configuration configuration() {
-    return this.configuration;
   }
 
   @Override
