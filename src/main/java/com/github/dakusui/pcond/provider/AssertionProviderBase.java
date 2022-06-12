@@ -155,7 +155,8 @@ public interface AssertionProviderBase extends AssertionProvider {
     enum Utils {
       ;
 
-      public static String composeReport(String summary, List<Object> details, AtomicInteger index) {
+      public static String composeReport(String summary, List<Object> details) {
+        AtomicInteger index = new AtomicInteger(0);
         if (summary == null && details == null)
           return null;
         String ret = summary;
@@ -179,7 +180,10 @@ public interface AssertionProviderBase extends AssertionProvider {
         String expectation = composeExplanationForExpectations(result, t, expectationDetails);
         String actualResult = composeExplanationForActualResults(result, t, actualResultDetails);
         //    assert expectationDetails.size() == actualResultDetails.size();
-        return new Explanation(message, composeReport(expectation, expectationDetails, new AtomicInteger(0)), composeReport(actualResult, actualResultDetails, new AtomicInteger(0)));
+        return new Explanation(message,
+            composeReport(expectation, expectationDetails),
+            composeReport(actualResult, actualResultDetails)
+        );
       }
 
       private static String composeExplanationForActualResults(List<Evaluator.Entry> result, Throwable t, List<Object> actualInputDetails) {
@@ -351,7 +355,9 @@ public interface AssertionProviderBase extends AssertionProvider {
     }
 
     public static Explanation fromMessage(String msg) {
-      return new Explanation(msg, ReportComposer.Utils.composeReport(null, null, new AtomicInteger(0)), ReportComposer.Utils.composeReport(null, null, new AtomicInteger(0)));
+      return new Explanation(msg,
+          ReportComposer.Utils.composeReport(null, null),
+          ReportComposer.Utils.composeReport(null, null));
     }
   }
 }
