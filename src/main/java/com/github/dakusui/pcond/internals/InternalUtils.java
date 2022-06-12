@@ -3,7 +3,7 @@ package com.github.dakusui.pcond.internals;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.provider.AssertionProvider;
-import com.github.dakusui.pcond.provider.AssertionProviderBase;
+import com.github.dakusui.pcond.provider.Explanation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -137,10 +137,10 @@ public enum InternalUtils {
   }
 
   public static InternalException executionFailure(String message, Throwable cause) {
-    throw executionFailure(AssertionProviderBase.Explanation.fromMessage(message), cause);
+    throw executionFailure(Explanation.fromMessage(message), cause);
   }
 
-  public static InternalException executionFailure(AssertionProviderBase.Explanation explanation, Throwable cause) {
+  public static InternalException executionFailure(Explanation explanation, Throwable cause) {
     throw new InternalException(explanation.toString(), cause);
   }
 

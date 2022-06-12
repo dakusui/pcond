@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.ut.providers;
 
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.provider.impls.BaseAssertionProvider;
+import com.github.dakusui.pcond.provider.impls.AssertionProviderImpl;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -223,17 +223,17 @@ public class DefaultAssertionProviderTest extends TestBase {
     }
   }
 
-  public BaseAssertionProvider createAssertionProvider(Properties properties) {
-    return new BaseAssertionProvider(properties);
+  public AssertionProviderImpl createAssertionProvider(Properties properties) {
+    return new AssertionProviderImpl(properties);
   }
 
   public static Properties useEvaluator(Properties properties, boolean useEvaluator) {
-    properties.setProperty(BaseAssertionProvider.class.getName() + ".useEvaluator", Objects.toString(useEvaluator));
+    properties.setProperty(AssertionProviderImpl.class.getName() + ".useEvaluator", Objects.toString(useEvaluator));
     return properties;
   }
 
   public static Properties nameWidth(Properties properties, int columns) {
-    properties.setProperty(BaseAssertionProvider.class.getName() + ".evaluableNameWidth", Objects.toString(columns));
+    properties.setProperty(AssertionProviderImpl.class.getName() + ".evaluableNameWidth", Objects.toString(columns));
     return properties;
   }
 

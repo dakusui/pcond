@@ -1,13 +1,15 @@
 package com.github.dakusui.pcond.provider;
 
-import com.github.dakusui.pcond.provider.impls.BaseAssertionProvider;
+import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.provider.impls.AssertionProviderImpl;
 
 import java.util.Properties;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
-import static com.github.dakusui.pcond.provider.impls.BaseAssertionProvider.createException;
+import static com.github.dakusui.pcond.provider.impls.AssertionProviderImpl.createException;
 import static java.lang.String.format;
 
 /**
@@ -19,11 +21,11 @@ public interface AssertionProvider {
    */
   AssertionProvider INSTANCE = createAssertionProvider(System.getProperties());
 
-  AssertionProviderBase.ExceptionComposer exceptionComposer();
+  ExceptionComposer exceptionComposer();
 
-  AssertionProviderBase.MessageComposer messageComposer();
+  MessageComposer messageComposer();
 
-  AssertionProviderBase.ReportComposer reportComposer();
+  ReportComposer reportComposer();
 
 
   Configuration configuration();
@@ -37,7 +39,7 @@ public interface AssertionProvider {
    * @return Created provider instance.
    */
   static AssertionProvider createAssertionProvider(Properties properties) {
-    return new BaseAssertionProvider(properties);
+    return new AssertionProviderImpl(properties);
   }
 
   /**
@@ -48,7 +50,9 @@ public interface AssertionProvider {
    * @param <T>   The type of the value.
    * @return The {@code value}.
    */
-  <T> T requireNonNull(T value);
+  default <T> T requireNonNull(T value) {
+    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(NullPointerException::new));
+  }
 
   /**
    * Checks a value if it meets a requirement specified by {@code cond}.
@@ -59,7 +63,9 @@ public interface AssertionProvider {
    * @param <T>   The type of the value.
    * @return The value.
    */
-  <T> T requireArgument(T value, Predicate<? super T> cond);
+  default <T> T requireArgument(T value, Predicate<? super T> cond) {
+    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(IllegalArgumentException::new));
+  }
 
   /**
    * Checks a value if it meets a requirement specified by {@code cond}.
@@ -70,12 +76,13 @@ public interface AssertionProvider {
    * @param <T>   The type of the value.
    * @return The value.
    */
-  <T> T requireState(T value, Predicate<? super T> cond);
-
+  default <T> T requireState(T value, Predicate<? super T> cond) {
+    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(IllegalStateException::new));
+  }
   /**
    * A method to check if a given `value` satisfies a precondition given as `cond`.
    * If the `cond` is satisfied, the `value` itself will be returned.
-   * Otherwise, an exception returned by {@link AssertionProviderBase.ExceptionComposer#preconditionViolationException()}
+   * Otherwise, an exception returned by {@link ExceptionComposer#preconditionViolationException()}
    * is thrown.
    *
    * @param value A value to be checked.
@@ -83,29 +90,51 @@ public interface AssertionProvider {
    * @param <T>   The of the `value`.
    * @return The `value`, if `cond` is satisfied.
    */
-  <T> T require(T value, Predicate<? super T> cond);
+  default <T> T require(T value, Predicate<? super T> cond) {
+    return require(value, cond, this.exceptionComposer().preconditionViolationException());
+  }
 
-  <T, E extends Exception> T require(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E;
+  default <T, E extends Exception> T require(T value, Predicate<? super T> cond, Function<String, E> exceptionFactory) throws E {
+    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(exceptionFactory));
+  }
+  default <T, E extends Exception> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionFactory) throws E {
+    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForValidation, ExceptionFactory.from(exceptionFactory));
+  }
 
-  <T, E extends Exception> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E;
+  default <T> T ensureNonNull(T value) {
+    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this.messageComposer()::composeMessageForPostcondition, ExceptionFactory.from(NullPointerException::new));
+  }
+  default <T> T ensureState(T value, Predicate<? super T> cond) {
+    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPostcondition, ExceptionFactory.from(IllegalStateException::new));
+  }
+  default <T, E extends Exception> T ensure(T value, Predicate<? super T> cond) throws E {
+    return ensure(value, cond, this.exceptionComposer().<E>postconditionViolationException());
+  }
+  default <T, E extends Exception> T ensure(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
+    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPostcondition, ExceptionFactory.from(exceptionComposer));
+  }
+  default <T> void checkInvariant(T value, Predicate<? super T> cond) {
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, AssertionError::new);
+  }
+  default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, AssertionError::new);
+  }
+  default <T> void checkPostcondition(T value, Predicate<? super T> cond) {
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPostcondition, AssertionError::new);
+  }
+  default <T> void assertThat(T value, Predicate<? super T> cond) {
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::<Error>testFailedException);
+  }
 
-  <T> T ensureNonNull(T value);
+  default <T> void assumeThat(T value, Predicate<? super T> cond) {
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::<RuntimeException>testSkippedException);
+  }
 
-  <T> T ensureState(T value, Predicate<? super T> cond);
+  <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E;
 
-  <T, E extends Exception> T ensure(T value, Predicate<? super T> cond) throws E;
-
-  <T, E extends Exception> T ensure(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E;
-
-  <T> void checkInvariant(T value, Predicate<? super T> cond);
-
-  <T> void checkPrecondition(T value, Predicate<? super T> cond);
-
-  <T> void checkPostcondition(T value, Predicate<? super T> cond);
-
-  <T> void assertThat(T value, Predicate<? super T> cond);
-
-  <T> void assumeThat(T value, Predicate<? super T> cond);
+  default <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<E> exceptionFactory) throws E {
+    return checkValue(value, cond, messageComposer, msg -> exceptionFactory.apply(reportComposer().explanationFromMessage(msg)));
+  }
 
   interface Configuration {
     static Configuration create(Properties properties) {
@@ -117,11 +146,11 @@ public interface AssertionProvider {
       return 40;
     }
 
-    default AssertionProviderBase.ExceptionComposer createExceptionComposerFromProperties(Properties properties, AssertionProvider assertionProvider) {
+    default ExceptionComposer createExceptionComposerFromProperties(Properties properties, AssertionProvider assertionProvider) {
       if (isJunit4(properties))
-        return new AssertionProviderBase.ExceptionComposer() {
+        return new ExceptionComposer() {
           @Override
-          public AssertionProviderBase.ReportComposer reportComposer() {
+          public ReportComposer reportComposer() {
             return assertionProvider.reportComposer();
           }
 
@@ -141,16 +170,16 @@ public interface AssertionProvider {
 
           @SuppressWarnings("unchecked")
           @Override
-          public <T extends Error> T testFailedException(AssertionProviderBase.Explanation explanation) {
+          public <T extends Error> T testFailedException(Explanation explanation) {
             throw (T) createException(
                 "org.junit.ComparisonFailure",
                 explanation,
                 (c, exp) -> c.getConstructor(String.class, String.class, String.class).newInstance(exp.message(), exp.expected(), exp.actual()));
           }
         };
-      return new AssertionProviderBase.ExceptionComposer() {
+      return new ExceptionComposer() {
         @Override
-        public AssertionProviderBase.ReportComposer reportComposer() {
+        public ReportComposer reportComposer() {
           return assertionProvider.reportComposer();
         }
 
@@ -168,7 +197,7 @@ public interface AssertionProvider {
 
         @SuppressWarnings("unchecked")
         @Override
-        public <T extends Error> T testFailedException(AssertionProviderBase.Explanation explanation) {
+        public <T extends Error> T testFailedException(Explanation explanation) {
           throw (T) createException("org.opentest4j.AssertionFailedError", explanation, (c, exp) ->
               c.getConstructor(String.class, Object.class, Object.class).newInstance(exp.message(), exp.expected(), exp.actual()));
         }
@@ -179,13 +208,13 @@ public interface AssertionProvider {
       return true;
     }
 
-    default AssertionProviderBase.ReportComposer createReportComposer() {
-      return new AssertionProviderBase.ReportComposer() {
+    default ReportComposer createReportComposer() {
+      return new ReportComposer() {
       };
     }
 
-    default AssertionProviderBase.MessageComposer createMessageComposer() {
-      return new AssertionProviderBase.MessageComposer() {
+    default MessageComposer createMessageComposer() {
+      return new MessageComposer() {
         @Override
         public <T> String composeMessageForPrecondition(T value, Predicate<? super T> predicate) {
           return format("value:<%s> violated precondition:value %s", formatObject(value), predicate);

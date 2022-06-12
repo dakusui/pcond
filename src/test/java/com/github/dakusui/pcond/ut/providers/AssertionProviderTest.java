@@ -1,13 +1,13 @@
 package com.github.dakusui.pcond.ut.providers;
 
 import com.github.dakusui.pcond.core.Configurations;
-import com.github.dakusui.pcond.provider.AssertionProvider;
-import com.github.dakusui.pcond.provider.AssertionProviderBase;
-import com.github.dakusui.pcond.provider.impls.BaseAssertionProvider;
+import com.github.dakusui.pcond.provider.*;
+import com.github.dakusui.pcond.provider.impls.AssertionProviderImpl;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
 import java.util.Properties;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -22,17 +22,17 @@ public class AssertionProviderTest extends TestBase {
     }
 
     @Override
-    public AssertionProviderBase.ExceptionComposer exceptionComposer() {
+    public ExceptionComposer exceptionComposer() {
       return null;
     }
 
     @Override
-    public AssertionProviderBase.MessageComposer messageComposer() {
+    public MessageComposer messageComposer() {
       return null;
     }
 
     @Override
-    public AssertionProviderBase.ReportComposer reportComposer() {
+    public ReportComposer reportComposer() {
       return null;
     }
 
@@ -110,6 +110,11 @@ public class AssertionProviderTest extends TestBase {
     @Override
     public <T> void assumeThat(T value, Predicate<? super T> cond) {
     }
+
+    @Override
+    public <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E {
+      return null;
+    }
   }
 
   @Test
@@ -123,6 +128,6 @@ public class AssertionProviderTest extends TestBase {
   public void test3() {
     Configurations.initializeWith(TestAssertionProvider.class);
     System.out.println(AssertionProvider.INSTANCE.getClass().getCanonicalName());
-    Configurations.initializeWith(BaseAssertionProvider.class);
+    Configurations.initializeWith(AssertionProviderImpl.class);
   }
 }

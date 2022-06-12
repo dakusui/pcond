@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.provider.impls;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
-import com.github.dakusui.pcond.provider.AssertionProviderBase;
+import com.github.dakusui.pcond.provider.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -15,7 +15,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.executionFailure;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
-public class BaseAssertionProvider implements AssertionProviderBase {
+public class AssertionProviderImpl implements AssertionProvider {
   private final MessageComposer messageComposer;
 
   private final ReportComposer reportComposer;
@@ -24,13 +24,14 @@ public class BaseAssertionProvider implements AssertionProviderBase {
   private final Configuration     configuration;
   private final ExceptionComposer exceptionComposer;
 
-  public BaseAssertionProvider(Properties properties) {
+  public AssertionProviderImpl(Properties properties) {
     this.useEvaluator = useEvaluator(this.getClass(), properties);
     this.configuration = Configuration.create(properties);
     this.messageComposer = this.configuration.createMessageComposer();
     this.reportComposer = this.configuration.createReportComposer();
     this.exceptionComposer = this.configuration.createExceptionComposerFromProperties(properties, this);
   }
+
   @Override
   public Configuration configuration() {
     return this.configuration;
