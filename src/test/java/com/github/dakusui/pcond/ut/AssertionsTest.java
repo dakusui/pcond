@@ -59,7 +59,7 @@ public class AssertionsTest {
   public static class MessageTest {
     @Test
     public void composeMessage$thenComposed() {
-      assertEquals("Value:\"hello\" violated: isNull", new JUnit4AssertionProvider(new Properties()).composeMessageForAssertion("hello", Predicates.isNull()));
+      assertEquals("Value:\"hello\" violated: isNull", new JUnit4AssertionProvider(new Properties()).messageComposer().composeMessageForAssertion("hello", Predicates.isNull()));
     }
   }
 }

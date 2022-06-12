@@ -10,7 +10,6 @@ import java.util.function.Predicate;
 /**
  * An interface of a policy for behaviours on 'contract violations'.
  *
- * @param <AE> The type of exception that should be thrown on an application error.
  */
 public interface AssertionProvider {
 

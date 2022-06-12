@@ -2,30 +2,49 @@ package com.github.dakusui.pcond.provider.impls;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
-import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.List;
+import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.executionFailure;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.provider.AssertionProviderBase.ReportComposer.composeExplanation;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 public abstract class BaseAssertionProvider implements AssertionProviderBase {
-  private final boolean       useEvaluator;
-  private final Configuration configuration;
+  private final MessageComposer messageComposer = new MessageComposer() {
+    @Override
+    public <T> String composeMessageForPrecondition(T value, Predicate<? super T> predicate) {
+      return format("value:<%s> violated precondition:value %s", formatObject(value), predicate);
+    }
+
+    @Override
+    public <T> String composeMessageForPostcondition(T value, Predicate<? super T> predicate) {
+      return format("value:<%s> violated postcondition:value %s", formatObject(value), predicate);
+    }
+
+    @Override
+    public <T> String composeMessageForAssertion(T t, Predicate<? super T> predicate) {
+      return "Value:" + formatObject(t) + " violated: " + predicate.toString();
+    }
+
+    @Override
+    public <T> String composeMessageForValidation(T t, Predicate<? super T> predicate) {
+      return "Value:" + formatObject(t) + " violated: " + predicate.toString();
+    }
+  };
+
+  private final ReportComposer  reportComposer  = new ReportComposer() {
+  };
+
+  private final boolean         useEvaluator;
+  private final Configuration   configuration;
 
   public BaseAssertionProvider(Properties properties) {
     this.useEvaluator = useEvaluator(this.getClass(), properties);
@@ -38,23 +57,13 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase {
   }
 
   @Override
-  public <T> String composeMessageForPrecondition(T value, Predicate<? super T> predicate) {
-    return format("value:<%s> violated precondition:value %s", formatObject(value), predicate);
+  public MessageComposer messageComposer() {
+    return this.messageComposer;
   }
 
   @Override
-  public <T> String composeMessageForPostcondition(T value, Predicate<? super T> predicate) {
-    return format("value:<%s> violated postcondition:value %s", formatObject(value), predicate);
-  }
-
-  @Override
-  public <T> String composeMessageForAssertion(T t, Predicate<? super T> predicate) {
-    return "Value:" + formatObject(t) + " violated: " + predicate.toString();
-  }
-
-  @Override
-  public <T> String composeMessageForValidation(T t, Predicate<? super T> predicate) {
-    return "Value:" + formatObject(t) + " violated: " + predicate.toString();
+  public ReportComposer reportComposer() {
+    return this.reportComposer;
   }
 
   @Override
@@ -115,174 +124,11 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase {
     return checkValueAndThrowIfFails(value, cond, messageComposer, explanation -> exceptionComposer.apply(explanation.toString()));
   }
 
-  private static Explanation composeExplanation(String message, List<Evaluator.Entry> result, Throwable t) {
-    List<Object> expectationDetails = new LinkedList<>();
-    List<Object> actualResultDetails = new LinkedList<>();
-    String expectation = composeExplanationForExpectations(result, t, expectationDetails);
-    String actualResult = composeExplanationForActualResults(result, t, actualResultDetails);
-    //    assert expectationDetails.size() == actualResultDetails.size();
-    return new Explanation(message, composeReport(expectation, expectationDetails, new AtomicInteger(0)), composeReport(actualResult, actualResultDetails, new AtomicInteger(0)));
-  }
-
-
-  public static String composeReport(String summary, List<Object> details, AtomicInteger index) {
-    if (summary == null && details == null)
-      return null;
-    String ret = summary;
-    ret += format("%n");
-    if (details != null && !details.isEmpty()) {
-      ret += format("%n");
-      ret += details.stream()
-          .map(Objects::toString)
-          .map(each -> format(".Detail of failure [%s]%n", index.getAndIncrement())
-              + format("----%n")
-              + each + format("%n")
-              + format("----%n"))
-          .collect(joining(format("%n")));
-    }
-    return ret;
-  }
-
-  private static String composeExplanationForActualResults(List<Evaluator.Entry> result, Throwable t, List<Object> actualInputDetails) {
-    return composeExplanation(result.stream()
-        .peek((Evaluator.Entry each) -> {
-          if (each.hasActualInputDetail())
-            actualInputDetails.add(each.actualInputDetail());
-        })
-        .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
-            each,
-            () -> each.hasOutput() ?
-                InternalUtils.formatObject(each.output()) :
-                InternalUtils.formatObject(t)))
-        .collect(toList()));
-  }
-
-  private static String composeExplanationForExpectations(List<Evaluator.Entry> result, Throwable t, List<Object> expectationDetails) {
-    return composeExplanation(result.stream()
-        .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
-            each,
-            () -> (each.hasOutput() ?
-                InternalUtils.formatObject(each.output() instanceof Boolean ? each.expectedBooleanValue() : each.output()) :
-                InternalUtils.formatObject(t))))
-        .peek((FormattedEntry each) -> {
-          Optional<Object> formSnapshot = each.mismatchExplanation();
-          formSnapshot.ifPresent(expectationDetails::add);
-        })
-        .collect(toList()));
-  }
-
-  private static String composeExplanation(List<FormattedEntry> formattedEntries) {
-    AtomicInteger mismatchExplanationCount = new AtomicInteger(0);
-    boolean mismatchExplanationFound = formattedEntries
-        .stream()
-        .anyMatch(e -> e.mismatchExplanation().isPresent());
-    return evaluatorEntriesToString(
-        formattedEntries,
-        columnLengths -> formattedEntryToString(
-            columnLengths[0], columnLengths[1], columnLengths[2],
-            mismatchExplanationCount, mismatchExplanationFound));
-  }
 
   private static boolean useEvaluator(Class<?> myClass, Properties properties) {
     return Boolean.parseBoolean(properties.getProperty(myClass.getName() + ".useEvaluator", "true"));
   }
 
-
-  private static FormattedEntry evaluatorEntryToFormattedEntry(Evaluator.Entry entry, Supplier<String> outputFormatter) {
-    return new FormattedEntry(
-        InternalUtils.formatObject(entry.input()),
-        entry.formName(),
-        entry.level() == 0 ?
-            "" :
-            format("%" + (entry.level() * 2) + "s", ""),
-        !asList(LEAF, AND, OR, NOT, FUNCTION).contains(entry.type()) ?
-            null :
-            outputFormatter.get(),
-        entry.hasExpectationDetail() ? entry.expectationDetail() : null);
-  }
-
-  private static Function<FormattedEntry, String> formattedEntryToString(
-      int inputColumnWidth, int formNameColumnLength, int outputColumnLength,
-      AtomicInteger i, boolean mismatchExplanationFound) {
-    return (FormattedEntry formattedEntry) ->
-        (mismatchExplanationFound ?
-            format("%-4s", formattedEntry.mismatchExplanation().isPresent() ?
-                "[" + i.getAndIncrement() + "]" : "") :
-            "") +
-            format("%-" + Math.max(2, inputColumnWidth) + "s" +
-                    "%-" + (formNameColumnLength + 2) + "s" +
-                    "%-" + Math.max(2, outputColumnLength) + "s",
-                formattedEntry.input().orElse(""),
-                formattedEntry.input().map(v -> "->").orElse("  ") + formattedEntry.indent() + formattedEntry.formName(),
-                formattedEntry.output().map(v -> "->" + v).orElse(""));
-  }
-
-  private static String evaluatorEntriesToString(List<FormattedEntry> formattedEntries, Function<int[], Function<FormattedEntry, String>> formatterFactory) {
-    int maxInputLength = 0, maxIndentAndFormNameLength = 0, maxOutputLength = 0;
-    for (FormattedEntry eachEntry : formattedEntries) {
-      int inputLength = eachEntry.input().map(String::length).orElse(0);
-      if (inputLength > maxInputLength)
-        maxInputLength = inputLength;
-      int inputAndFormNameLength = eachEntry.indent().length() + eachEntry.formName().length();
-      if (inputAndFormNameLength > maxIndentAndFormNameLength)
-        maxIndentAndFormNameLength = inputAndFormNameLength;
-      int outputLength = eachEntry.output().map(String::length).orElse(0);
-      if (outputLength > maxOutputLength)
-        maxOutputLength = outputLength;
-    }
-    Function<FormattedEntry, String> formatter = formatterFactory.apply(new int[] { maxInputLength, maxIndentAndFormNameLength, maxOutputLength });
-    AtomicReference<FormattedEntry> lastFormattedEntry = new AtomicReference<>();
-    return formattedEntries
-        .stream()
-        .map((FormattedEntry eachEntry) -> {
-          FormattedEntry lastEntry = lastFormattedEntry.get();
-          lastFormattedEntry.set(eachEntry);
-          if (lastEntry == null)
-            return eachEntry;
-          if (Objects.equals(lastEntry.input, eachEntry.input))
-            return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.mismatchExplanation);
-          return eachEntry;
-        })
-        .map(formatter)
-        .map(s -> ("+" + s).trim().substring(1))
-        .collect(joining(format("%n")));
-  }
-
-  static class FormattedEntry {
-    private final String input;
-    private final String formName;
-    private final String indent;
-    private final String output;
-    private final Object mismatchExplanation;
-
-    FormattedEntry(String input, String formName, String indent, String output, Object mismatchExplanation) {
-      this.input = input;
-      this.formName = formName;
-      this.indent = indent;
-      this.output = output;
-      this.mismatchExplanation = mismatchExplanation;
-    }
-
-    Optional<String> input() {
-      return Optional.ofNullable(this.input);
-    }
-
-    String indent() {
-      return this.indent;
-    }
-
-    String formName() {
-      return this.formName;
-    }
-
-    Optional<Object> mismatchExplanation() {
-      return Optional.ofNullable(this.mismatchExplanation);
-    }
-
-    Optional<String> output() {
-      return Optional.ofNullable(this.output);
-    }
-  }
 
   public static class Result {
     final boolean               result;
