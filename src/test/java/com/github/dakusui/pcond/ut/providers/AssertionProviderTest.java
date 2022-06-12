@@ -14,7 +14,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AssertionProviderTest extends TestBase {
-  public static class TestAssertionProvider implements AssertionProvider<RuntimeException> {
+  public static class TestAssertionProvider implements AssertionProvider {
     private final Configuration configuration = new Configuration() {
     };
 
@@ -99,7 +99,7 @@ public class AssertionProviderTest extends TestBase {
 
   @Test
   public void testAssertionEnabled() {
-    AssertionProvider<?> assertionProvider = AssertionProvider.createAssertionProvider(new Properties());
+    AssertionProvider assertionProvider = AssertionProvider.createAssertionProvider(new Properties());
     assertThat(
         assertionProvider,
         instanceOf(JUnit4AssertionProvider.class));
@@ -107,7 +107,7 @@ public class AssertionProviderTest extends TestBase {
 
   @Test
   public void test() {
-    AssertionProvider<?> assertionProvider = AssertionProvider.createAssertionProvider(new Properties() {{
+    AssertionProvider assertionProvider = AssertionProvider.createAssertionProvider(new Properties() {{
       put(AssertionProvider.class.getCanonicalName(), TestAssertionProvider.class.getName());
     }});
     assertThat(

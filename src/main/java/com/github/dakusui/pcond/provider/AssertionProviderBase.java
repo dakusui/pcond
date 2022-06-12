@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
-public interface AssertionProviderBase<AE extends RuntimeException> extends AssertionProvider<AE> {
+public interface AssertionProviderBase extends AssertionProvider {
   @Override
   default <T> T requireNonNull(T value) {
     return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this::composeMessageForPrecondition, ExceptionComposer.from(NullPointerException::new));

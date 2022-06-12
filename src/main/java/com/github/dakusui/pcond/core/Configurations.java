@@ -13,7 +13,7 @@ public enum Configurations {
    *
    * @param assertionProviderClass A provider class to be used hereafter.
    */
-  public static void initializeWith(Class<? extends AssertionProvider<?>> assertionProviderClass) {
+  public static void initializeWith(Class<? extends AssertionProvider> assertionProviderClass) {
     System.setProperty(AssertionProvider.class.getCanonicalName(), assertionProviderClass.getName());
     InternalChecks.requireState(AssertionProvider.INSTANCE, v -> Objects.equals(assertionProviderClass, v.getClass()),
         () -> assertionProviderClass.getName() + " was requested, but actually, " + AssertionProvider.INSTANCE.getClass() + " was already loaded.");

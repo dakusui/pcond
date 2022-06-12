@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.provider.impls;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.internals.InternalUtils;
-import com.github.dakusui.pcond.provider.ApplicationException;
 import com.github.dakusui.pcond.provider.AssertionProviderBase;
 
 import java.lang.reflect.InvocationTargetException;
@@ -24,7 +23,7 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public abstract class BaseAssertionProvider implements AssertionProviderBase<ApplicationException> {
+public abstract class BaseAssertionProvider implements AssertionProviderBase {
   private final boolean       useEvaluator;
   private final Configuration configuration;
 

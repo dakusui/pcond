@@ -12,12 +12,12 @@ import java.util.function.Predicate;
  *
  * @param <AE> The type of exception that should be thrown on an application error.
  */
-public interface AssertionProvider<AE extends Throwable> {
+public interface AssertionProvider {
 
   /**
    * A constant field that holds the default provider instance.
    */
-  AssertionProvider<?> INSTANCE = createAssertionProvider(System.getProperties());
+  AssertionProvider INSTANCE = createAssertionProvider(System.getProperties());
 
   Configuration configuration();
 
@@ -29,7 +29,7 @@ public interface AssertionProvider<AE extends Throwable> {
    * @param properties A {@code Properties} object from which an {@code AssertionProvider} is created
    * @return Created provider instance.
    */
-  static AssertionProvider<?> createAssertionProvider(Properties properties) {
+  static AssertionProvider createAssertionProvider(Properties properties) {
     String propertyKeyName = AssertionProvider.class.getCanonicalName();
     if (properties.containsKey(propertyKeyName)) {
       return InternalUtils.createInstanceFromClassName(AssertionProvider.class, properties.getProperty(propertyKeyName), System.getProperties());
