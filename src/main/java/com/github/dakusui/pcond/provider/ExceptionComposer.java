@@ -19,13 +19,13 @@ public interface ExceptionComposer {
   }
 
   @SuppressWarnings("unchecked")
-  default <E extends RuntimeException> Function<String, E> preconditionViolationException() {
-    return message -> (E) new PreconditionViolationException(message);
+  default <E extends RuntimeException>  E preconditionViolationException(String message) {
+    return (E) new PreconditionViolationException(message);
   }
 
   @SuppressWarnings("unchecked")
-  default <E extends Exception> Function<String, E> postconditionViolationException() {
-    return message -> (E) new PostconditionViolationException(message);
+  default <E extends Exception> E postconditionViolationException(String message) {
+    return (E) new PostconditionViolationException(message);
   }
 
   static ExceptionComposer createExceptionComposerForJUnit4(final ReportComposer reportComposer) {

@@ -79,7 +79,7 @@ public interface AssertionProvider {
   /**
    * A method to check if a given `value` satisfies a precondition given as `cond`.
    * If the `cond` is satisfied, the `value` itself will be returned.
-   * Otherwise, an exception returned by {@link ExceptionComposer#preconditionViolationException()}
+   * Otherwise, an exception returned by {@link ExceptionComposer#preconditionViolationException(String)}
    * is thrown.
    *
    * @param value A value to be checked.
@@ -87,8 +87,9 @@ public interface AssertionProvider {
    * @param <T>   The of the `value`.
    * @return The `value`, if `cond` is satisfied.
    */
+  @SuppressWarnings("RedundantTypeArguments")
   default <T> T require(T value, Predicate<? super T> cond) {
-    return require(value, cond, this.exceptionComposer().preconditionViolationException());
+    return require(value, cond, msg -> this.exceptionComposer().<RuntimeException>preconditionViolationException(msg));
   }
 
   /**
@@ -120,7 +121,7 @@ public interface AssertionProvider {
   }
 
   default <T, E extends Exception> T ensure(T value, Predicate<? super T> cond) throws E {
-    return ensure(value, cond, this.exceptionComposer().<E>postconditionViolationException());
+    return ensure(value, cond, msg -> this.exceptionComposer().<E>postconditionViolationException(msg));
   }
 
   default <T, E extends Exception> T ensure(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
@@ -143,12 +144,13 @@ public interface AssertionProvider {
     checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::<Error>testFailedException);
   }
 
+  @SuppressWarnings("RedundantTypeArguments") // Necessary to suppress compilation failure.
   default <T> void assumeThat(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::testSkippedException);
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::<RuntimeException>testSkippedException);
   }
 
-  default <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E {
-    return checkValueAndThrowIfFails(value, cond, messageComposer, explanation -> exceptionComposer.apply(explanation.toString()));
+  default <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionFactory) throws E {
+    return checkValueAndThrowIfFails(value, cond, messageComposer, explanation -> exceptionFactory.apply(explanation.toString()));
   }
 
   default <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<E> exceptionFactory) throws E {

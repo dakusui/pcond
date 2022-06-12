@@ -18,9 +18,6 @@ public class AssertionProviderTest extends TestBase {
     private final Configuration configuration = new Configuration() {
     };
 
-    public TestAssertionProvider(Properties properties) {
-    }
-
     @Override
     public ExceptionComposer exceptionComposer() {
       return null;
@@ -38,82 +35,7 @@ public class AssertionProviderTest extends TestBase {
 
     @Override
     public Configuration configuration() {
-      return this.configuration;
-    }
-
-    @Override
-    public <T> T requireNonNull(T value) {
-      return null;
-    }
-
-    @Override
-    public <T> T requireArgument(T value, Predicate<? super T> cond) {
-      return null;
-    }
-
-    @Override
-    public <T> T requireState(T value, Predicate<? super T> cond) {
-      return null;
-    }
-
-    @Override
-    public <T> T require(T value, Predicate<? super T> cond) {
-      return null;
-    }
-
-    @Override
-    public <T, E extends Exception> T require(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
-      return null;
-    }
-
-    @Override
-    public <T, E extends Exception> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
-      return null;
-    }
-
-    @Override
-    public <T> T ensureNonNull(T value) {
-      return null;
-    }
-
-    @Override
-    public <T> T ensureState(T value, Predicate<? super T> cond) {
-      return null;
-    }
-
-    @Override
-    public <T, E extends Exception> T ensure(T value, Predicate<? super T> cond) throws E {
-      return null;
-    }
-
-    @Override
-    public <T, E extends Exception> T ensure(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
-      return null;
-    }
-
-    @Override
-    public <T> void checkInvariant(T value, Predicate<? super T> cond) {
-    }
-
-    @Override
-    public <T> void checkPrecondition(T value, Predicate<? super T> cond) {
-    }
-
-    @Override
-    public <T> void checkPostcondition(T value, Predicate<? super T> cond) {
-    }
-
-    @Override
-    public <T> void assertThat(T value, Predicate<? super T> cond) {
-    }
-
-    @Override
-    public <T> void assumeThat(T value, Predicate<? super T> cond) {
-    }
-
-    @Override
-    public <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E {
-      return null;
+      return configuration;
     }
   }
 
