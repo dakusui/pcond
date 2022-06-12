@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.ut.providers;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.provider.impls.BaseAssertionProvider;
-import com.github.dakusui.pcond.provider.impls.JUnit4AssertionProvider;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -28,7 +27,8 @@ public class DefaultAssertionProviderTest extends TestBase {
           .requireArgument("Hello", and(isNotNull(), isEmptyString().negate(), transform(length()).check(gt(10))));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
-      assertEquals(9, numLines(e.getMessage()));
+      System.out.printf("----%n%s<%s>----%n", e.getMessage(), numLines(e.getMessage()));
+      assertEquals(1, numLines(e.getMessage()));
       throw e;
     }
   }
@@ -224,7 +224,7 @@ public class DefaultAssertionProviderTest extends TestBase {
   }
 
   public BaseAssertionProvider createAssertionProvider(Properties properties) {
-    return new JUnit4AssertionProvider(properties);
+    return new BaseAssertionProvider(properties);
   }
 
   public static Properties useEvaluator(Properties properties, boolean useEvaluator) {

@@ -1,8 +1,6 @@
 package com.github.dakusui.pcond.provider;
 
-import com.github.dakusui.pcond.internals.InternalUtils;
 import com.github.dakusui.pcond.provider.impls.BaseAssertionProvider;
-import com.github.dakusui.pcond.provider.impls.JUnit4AssertionProvider;
 
 import java.util.Properties;
 import java.util.function.Function;
