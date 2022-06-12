@@ -7,11 +7,20 @@ import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.provider.impls.BaseAssertionProvider.createException;
+import static java.lang.String.format;
+
 /**
  * An interface of a policy for behaviours on 'contract violations'.
- *
  */
 public interface AssertionProvider {
+  AssertionProviderBase.ExceptionComposer exceptionComposer();
+
+  AssertionProviderBase.MessageComposer messageComposer();
+
+  AssertionProviderBase.ReportComposer reportComposer();
+
 
   /**
    * A constant field that holds the default provider instance.
@@ -68,7 +77,18 @@ public interface AssertionProvider {
    */
   <T> T requireState(T value, Predicate<? super T> cond);
 
-  <T, E extends Exception> T require(T value, Predicate<? super T> cond) throws E;
+  /**
+   * A method to check if a given `value` satisfies a precondition given as `cond`.
+   * If the `cond` is satisfied, the `value` itself will be returned.
+   * Otherwise, an exception returned by {@link AssertionProviderBase.ExceptionComposer#preconditionViolationException()}
+   * is thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A condition to check if `value` satisfies.
+   * @param <T>   The of the `value`.
+   * @return The `value`, if `cond` is satisfied.
+   */
+  <T> T require(T value, Predicate<? super T> cond);
 
   <T, E extends Exception> T require(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E;
 
@@ -93,9 +113,104 @@ public interface AssertionProvider {
   <T> void assumeThat(T value, Predicate<? super T> cond);
 
   interface Configuration {
+    static Configuration create(Properties properties) {
+      return new Configuration() {
+      };
+    }
+
     default int summarizedStringLength() {
       return 40;
     }
 
+    default AssertionProviderBase.ExceptionComposer createExceptionComposerFromProperties(Properties properties, AssertionProvider assertionProvider) {
+      if (isJunit4(properties))
+        return new AssertionProviderBase.ExceptionComposer() {
+          @Override
+          public AssertionProviderBase.ReportComposer reportComposer() {
+            return assertionProvider.reportComposer();
+          }
+
+          @SuppressWarnings("unchecked")
+          @Override
+          public <T extends RuntimeException> T testSkippedException(String message) {
+            throw (T) createException(
+                "org.junit.AssumptionViolatedException",
+                reportComposer().explanationFromMessage(message),
+                (c, exp) -> c.getConstructor(String.class).newInstance(exp.message()));
+          }
+
+          @Override
+          public <T extends Error> T testFailedException(String message) {
+            throw testFailedException(reportComposer().explanationFromMessage(message));
+          }
+
+          @SuppressWarnings("unchecked")
+          @Override
+          public <T extends Error> T testFailedException(AssertionProviderBase.Explanation explanation) {
+            throw (T) createException(
+                "org.junit.ComparisonFailure",
+                explanation,
+                (c, exp) -> c.getConstructor(String.class, String.class, String.class).newInstance(exp.message(), exp.expected(), exp.actual()));
+          }
+        };
+      return new AssertionProviderBase.ExceptionComposer() {
+        @Override
+        public AssertionProviderBase.ReportComposer reportComposer() {
+          return assertionProvider.reportComposer();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T extends RuntimeException> T testSkippedException(String message) {
+          throw (T) createException("org.opentest4j.TestSkippedException", reportComposer().explanationFromMessage(message), (c, exp) ->
+              c.getConstructor(String.class).newInstance(exp.message()));
+        }
+
+        @Override
+        public <T extends Error> T testFailedException(String message) {
+          throw testFailedException(reportComposer().explanationFromMessage(message));
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public <T extends Error> T testFailedException(AssertionProviderBase.Explanation explanation) {
+          throw (T) createException("org.opentest4j.AssertionFailedError", explanation, (c, exp) ->
+              c.getConstructor(String.class, Object.class, Object.class).newInstance(exp.message(), exp.expected(), exp.actual()));
+        }
+      };
+    }
+
+    default boolean isJunit4(Properties properties) {
+      return true;
+    }
+
+    default AssertionProviderBase.ReportComposer createReportComposer() {
+      return new AssertionProviderBase.ReportComposer() {
+      };
+    }
+
+    default AssertionProviderBase.MessageComposer createMessageComposer() {
+      return new AssertionProviderBase.MessageComposer() {
+        @Override
+        public <T> String composeMessageForPrecondition(T value, Predicate<? super T> predicate) {
+          return format("value:<%s> violated precondition:value %s", formatObject(value), predicate);
+        }
+
+        @Override
+        public <T> String composeMessageForPostcondition(T value, Predicate<? super T> predicate) {
+          return format("value:<%s> violated postcondition:value %s", formatObject(value), predicate);
+        }
+
+        @Override
+        public <T> String composeMessageForAssertion(T t, Predicate<? super T> predicate) {
+          return "Value:" + formatObject(t) + " violated: " + predicate.toString();
+        }
+
+        @Override
+        public <T> String composeMessageForValidation(T t, Predicate<? super T> predicate) {
+          return "Value:" + formatObject(t) + " violated: " + predicate.toString();
+        }
+      };
+    }
   }
 }

@@ -17,42 +17,20 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 public abstract class BaseAssertionProvider implements AssertionProviderBase {
-  private final MessageComposer messageComposer = new MessageComposer() {
-    @Override
-    public <T> String composeMessageForPrecondition(T value, Predicate<? super T> predicate) {
-      return format("value:<%s> violated precondition:value %s", formatObject(value), predicate);
-    }
+  private final MessageComposer messageComposer;
 
-    @Override
-    public <T> String composeMessageForPostcondition(T value, Predicate<? super T> predicate) {
-      return format("value:<%s> violated postcondition:value %s", formatObject(value), predicate);
-    }
+  private final ReportComposer reportComposer;
 
-    @Override
-    public <T> String composeMessageForAssertion(T t, Predicate<? super T> predicate) {
-      return "Value:" + formatObject(t) + " violated: " + predicate.toString();
-    }
-
-    @Override
-    public <T> String composeMessageForValidation(T t, Predicate<? super T> predicate) {
-      return "Value:" + formatObject(t) + " violated: " + predicate.toString();
-    }
-  };
-
-  private final ReportComposer  reportComposer  = new ReportComposer() {
-  };
-
-  private final boolean         useEvaluator;
-  private final Configuration   configuration;
+  private final boolean           useEvaluator;
+  private final Configuration     configuration;
+  private final ExceptionComposer exceptionComposer;
 
   public BaseAssertionProvider(Properties properties) {
     this.useEvaluator = useEvaluator(this.getClass(), properties);
-    this.configuration = new Configuration() {
-      @Override
-      public int summarizedStringLength() {
-        return Configuration.super.summarizedStringLength();
-      }
-    };
+    this.configuration = Configuration.create(properties);
+    this.messageComposer = this.configuration.createMessageComposer();
+    this.reportComposer = this.configuration.createReportComposer();
+    this.exceptionComposer = this.configuration.createExceptionComposerFromProperties(properties, this);
   }
 
   @Override
@@ -70,8 +48,13 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase {
     return this.configuration;
   }
 
+  @Override
+  final public ExceptionComposer exceptionComposer() {
+    return this.exceptionComposer;
+  }
+
   @FunctionalInterface
-  interface ReflectiveExceptionFactory<T extends Throwable> {
+  public interface ReflectiveExceptionFactory<T extends Throwable> {
     T create(Class<T> c, Explanation explanation) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException;
 
     default T apply(Class<T> c, Explanation explanation) {
@@ -85,7 +68,7 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase {
   }
 
   @SuppressWarnings("unchecked")
-  <T extends Throwable> T createException(String className, Explanation explanation, ReflectiveExceptionFactory<T> reflectiveExceptionFactory) {
+  public static <T extends Throwable> T createException(String className, Explanation explanation, ReflectiveExceptionFactory<T> reflectiveExceptionFactory) {
     try {
       return reflectiveExceptionFactory.apply((Class<T>) Class.forName(className), explanation);
     } catch (ClassNotFoundException e) {

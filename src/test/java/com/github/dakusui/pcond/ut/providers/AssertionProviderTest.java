@@ -42,7 +42,7 @@ public class AssertionProviderTest extends TestBase {
     }
 
     @Override
-    public <T, E extends Exception> T require(T value, Predicate<? super T> cond) throws E {
+    public <T> T require(T value, Predicate<? super T> cond) {
       return null;
     }
 

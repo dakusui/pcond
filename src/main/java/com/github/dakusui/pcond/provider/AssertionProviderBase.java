@@ -22,12 +22,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 public interface AssertionProviderBase extends AssertionProvider {
-  ExceptionComposer exceptionComposer();
-
-  MessageComposer messageComposer();
-
-  ReportComposer reportComposer();
-
   @Override
   default <T> T requireNonNull(T value) {
     return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(NullPointerException::new));
@@ -44,8 +38,8 @@ public interface AssertionProviderBase extends AssertionProvider {
   }
 
   @Override
-  default <T, E extends Exception> T require(T value, Predicate<? super T> cond) throws E {
-    return require(value, cond, this.<E>exceptionComposerForPrecondition());
+  default <T> T require(T value, Predicate<? super T> cond) {
+    return require(value, cond, this.exceptionComposer().preconditionViolationException());
   }
 
   @Override
@@ -71,7 +65,7 @@ public interface AssertionProviderBase extends AssertionProvider {
 
   @Override
   default <T, E extends Exception> T ensure(T value, Predicate<? super T> cond) throws E {
-    return ensure(value, cond, this.<E>exceptionComposerForPostcondition());
+    return ensure(value, cond, this.exceptionComposer().<E>postconditionViolationException());
   }
 
   @Override
@@ -105,16 +99,6 @@ public interface AssertionProviderBase extends AssertionProvider {
     checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::<RuntimeException>testSkippedException);
   }
 
-  @SuppressWarnings("unchecked")
-  default <E extends Exception> Function<String, E> exceptionComposerForPrecondition() {
-    return message -> (E) new PreconditionViolationException(message);
-  }
-
-  @SuppressWarnings("unchecked")
-  default <E extends Exception> Function<String, E> exceptionComposerForPostcondition() {
-    return message -> (E) new PostconditionViolationException(message);
-  }
-
   <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E;
 
   default <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<E> exceptionFactory) throws E {
@@ -128,6 +112,7 @@ public interface AssertionProviderBase extends AssertionProvider {
   }
 
   interface ExceptionComposer {
+    ReportComposer reportComposer();
     <T extends RuntimeException> T testSkippedException(String message);
 
     default <T extends RuntimeException> T testSkippedException(Explanation explanation) {
@@ -138,6 +123,16 @@ public interface AssertionProviderBase extends AssertionProvider {
 
     default <T extends Error> T testFailedException(Explanation explanation) {
       return testFailedException(explanation.toString());
+    }
+
+    @SuppressWarnings("unchecked")
+    default <E extends Exception> Function<String, E> preconditionViolationException() {
+      return message -> (E) new PreconditionViolationException(message);
+    }
+
+    @SuppressWarnings("unchecked")
+    default <E extends Exception> Function<String, E> postconditionViolationException() {
+      return message -> (E) new PostconditionViolationException(message);
     }
   }
 
