@@ -14,13 +14,13 @@ public class JUnit4AssertionProvider extends BaseAssertionProvider {
     return new ExceptionComposer() {
       @Override
       public <T extends RuntimeException> T testSkippedException(String message) {
-        throw (T) createException("org.junit.AssumptionViolatedException", Explanation.fromMessage(message), (c, exp) ->
+        throw (T) createException("org.junit.AssumptionViolatedException", reportComposer().explanationFromMessage(message), (c, exp) ->
             c.getConstructor(String.class).newInstance(exp.message()));
       }
 
       @Override
       public <T extends Error> T testFailedException(String message) {
-        throw testFailedException(Explanation.fromMessage(message));
+        throw testFailedException(reportComposer().explanationFromMessage(message));
       }
 
       @SuppressWarnings("unchecked")

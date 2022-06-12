@@ -118,7 +118,7 @@ public interface AssertionProviderBase extends AssertionProvider {
   <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionComposer) throws E;
 
   default <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<E> exceptionFactory) throws E {
-    return checkValue(value, cond, messageComposer, msg -> exceptionFactory.apply(Explanation.fromMessage(msg)));
+    return checkValue(value, cond, messageComposer, msg -> exceptionFactory.apply(reportComposer().explanationFromMessage(msg)));
   }
 
   interface ExceptionFactory<E extends Throwable> extends Function<Explanation, E> {
@@ -152,6 +152,14 @@ public interface AssertionProviderBase extends AssertionProvider {
   }
 
   interface ReportComposer {
+    default Explanation explanationFromMessage(String msg) {
+      return Explanation.fromMessage(msg);
+    }
+
+    default Explanation composeExplanation(String message, List<Evaluator.Entry> result, Throwable t) {
+      return Utils.composeExplanation(message, result, t);
+    }
+
     enum Utils {
       ;
 
@@ -180,9 +188,7 @@ public interface AssertionProviderBase extends AssertionProvider {
         String expectation = composeExplanationForExpectations(result, t, expectationDetails);
         String actualResult = composeExplanationForActualResults(result, t, actualResultDetails);
         //    assert expectationDetails.size() == actualResultDetails.size();
-        return new Explanation(message,
-            composeReport(expectation, expectationDetails),
-            composeReport(actualResult, actualResultDetails)
+        return new Explanation(message, composeReport(expectation, expectationDetails), composeReport(actualResult, actualResultDetails)
         );
       }
 
@@ -355,9 +361,7 @@ public interface AssertionProviderBase extends AssertionProvider {
     }
 
     public static Explanation fromMessage(String msg) {
-      return new Explanation(msg,
-          ReportComposer.Utils.composeReport(null, null),
-          ReportComposer.Utils.composeReport(null, null));
+      return new Explanation(msg, ReportComposer.Utils.composeReport(null, null), ReportComposer.Utils.composeReport(null, null));
     }
   }
 }

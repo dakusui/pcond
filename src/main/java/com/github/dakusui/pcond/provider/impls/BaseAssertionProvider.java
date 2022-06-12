@@ -13,7 +13,6 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.executionFailure;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
-import static com.github.dakusui.pcond.provider.AssertionProviderBase.ReportComposer.Utils.composeExplanation;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
@@ -106,15 +105,15 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase {
         throw error;
       } catch (Throwable t) {
         String message = format("An exception(%s) was thrown during evaluation of value: %s: %s", t, value, cond);
-        throw executionFailure(composeExplanation(message, evaluator.resultEntries(), t), t);
+        throw executionFailure(reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
       }
       Result result = new Result(evaluator.resultValue(), evaluator.resultEntries());
       if (result.result())
         return value;
-      throw exceptionFactory.apply(composeExplanation(messageComposer.apply(value, cond), result.entries, null));
+      throw exceptionFactory.apply(reportComposer().composeExplanation(messageComposer.apply(value, cond), result.entries, null));
     } else {
       if (!cond.test(value))
-        throw exceptionFactory.apply(composeExplanation(messageComposer.apply(value, cond), emptyList(), null));
+        throw exceptionFactory.apply(reportComposer().composeExplanation(messageComposer.apply(value, cond), emptyList(), null));
       return value;
     }
   }
