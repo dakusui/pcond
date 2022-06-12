@@ -64,11 +64,6 @@ public abstract class BaseAssertionProvider implements AssertionProviderBase<App
   }
 
   @Override
-  public ApplicationException applicationException(String message) {
-    return new ApplicationException(message);
-  }
-
-  @Override
   public <T extends Error> T testFailedException(String message) {
     throw testFailedException(Explanation.fromMessage(message));
   }

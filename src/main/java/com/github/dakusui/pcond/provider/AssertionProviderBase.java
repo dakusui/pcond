@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
-public interface AssertionProviderBase<AE extends Exception> extends AssertionProvider<AE> {
+public interface AssertionProviderBase<AE extends RuntimeException> extends AssertionProvider<AE> {
   @Override
   default <T> T requireNonNull(T value) {
     return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this::composeMessageForPrecondition, ExceptionComposer.from(NullPointerException::new));
@@ -35,11 +35,6 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
   @Override
   default <T, E extends Exception> T require(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
     return checkValueAndThrowIfFails(value, cond, this::composeMessageForPrecondition, ExceptionComposer.from(exceptionComposer));
-  }
-
-  @Override
-  default <T> T validate(T value, Predicate<? super T> cond) throws AE {
-    return validate(value, cond, this::applicationException);
   }
 
   @Override
@@ -111,8 +106,6 @@ public interface AssertionProviderBase<AE extends Exception> extends AssertionPr
   <T> String composeMessageForAssertion(T t, Predicate<? super T> predicate);
 
   <T> String composeMessageForValidation(T t, Predicate<? super T> predicate);
-
-  AE applicationException(String message);
 
   <T extends RuntimeException> T testSkippedException(String message);
 

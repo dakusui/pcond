@@ -73,8 +73,6 @@ public interface AssertionProvider<AE extends Throwable> {
 
   <T, E extends Exception> T require(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E;
 
-  <T> T validate(T value, Predicate<? super T> cond) throws AE;
-
   <T, E extends Exception> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E;
 
   <T> T ensureNonNull(T value);

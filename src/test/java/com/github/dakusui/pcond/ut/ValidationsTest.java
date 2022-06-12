@@ -19,7 +19,7 @@ public class ValidationsTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void test() throws ApplicationException {
     try {
-      Object ret = Validations.<Object, ApplicationException>validate(null, Predicates.not(Predicates.isEqualTo(null)));
+      Object ret = Validations.validate(null, Predicates.not(Predicates.isEqualTo(null)), ApplicationException::new);
       System.out.println(ret);
     } catch (ApplicationException e) {
       assertEquals("Value:null violated: !isEqualTo[null]", firstLineOf(e.getMessage()));
@@ -29,7 +29,7 @@ public class ValidationsTest extends TestBase {
 
   @Test
   public void test2() {
-    Object ret = Validations.validate("Hello", Predicates.not(Predicates.isEqualTo(null)));
+    Object ret = Validations.validate("Hello", Predicates.not(Predicates.isEqualTo(null)), ApplicationException::new);
     System.out.println(ret);
     assertEquals("Hello", ret);
   }
@@ -45,6 +45,7 @@ public class ValidationsTest extends TestBase {
   public void testValidateMethod$failing() throws IOException {
     try {
       Object ret = Validations.validate("Bye", Predicates.isEqualTo(null), IOException::new);
+      System.out.println(ret);
     } catch (IOException e) {
       assertEquals("Value:\"Bye\" violated: isEqualTo[null]", firstLineOf(e.getMessage()));
       throw e;
@@ -71,7 +72,8 @@ transformAndCheck                                       -> false
             .check(allOf(
                 callp("equals", "hello, world"),
                 transform(call("toUpperCase")).check(Predicates.isEqualTo("Non!"))
-            ))
+            )),
+        ApplicationException::new
     );
   }
 
@@ -94,7 +96,8 @@ transformAndCheck                             -> false
             .check(allOf(
                 isEqualTo("hello, world"),
                 transform(stringToUpperCase()).check(Predicates.isEqualTo("Non!"))
-            ))
+            )),
+        ApplicationException::new
     );
   }
 

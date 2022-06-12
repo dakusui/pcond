@@ -15,7 +15,7 @@ public class WithMessageTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void test() throws ApplicationException {
     try {
-      Validations.<String, ApplicationException>validate("Value", Predicates.withMessage("Hello, world", not(alwaysTrue())));
+      Validations.validate("Value", Predicates.withMessage("Hello, world", not(alwaysTrue())), ApplicationException::new);
     } catch (ApplicationException e) {
       e.printStackTrace();
       assertThat(
@@ -33,9 +33,10 @@ public class WithMessageTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void test2() throws ApplicationException {
     try {
-      Validations.<String, ApplicationException>validate("Value",
+      Validations.validate("Value",
           Predicates.withMessage("Hello, world", not(
-              Predicates.withMessage("Always true!", alwaysTrue()))));
+              Predicates.withMessage("Always true!", alwaysTrue()))),
+          ApplicationException::new);
     } catch (ApplicationException e) {
       e.printStackTrace();
       assertThat(

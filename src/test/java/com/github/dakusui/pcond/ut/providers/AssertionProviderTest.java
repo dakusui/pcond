@@ -50,12 +50,6 @@ public class AssertionProviderTest extends TestBase {
       return null;
     }
 
-
-    @Override
-    public <T> T validate(T value, Predicate<? super T> cond) throws RuntimeException {
-      return null;
-    }
-
     @Override
     public <T, E extends Exception> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
       return null;
