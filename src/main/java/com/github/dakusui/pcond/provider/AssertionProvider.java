@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.provider;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.provider.impls.AssertionProviderImpl;
 
 import java.util.List;
 import java.util.Properties;
@@ -35,7 +34,7 @@ public interface AssertionProvider {
    * @return Created provider instance.
    */
   static AssertionProvider createAssertionProvider(Properties properties) {
-    return new AssertionProviderImpl(properties);
+    return new Impl(properties);
   }
 
   /**
@@ -268,37 +267,39 @@ public interface AssertionProvider {
     return checkValueAndThrowIfFails(value, cond, messageComposer, explanation -> exceptionFactory.apply(explanation.toString()));
   }
 
-   @SuppressWarnings("unchecked")
-   default <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory){
-     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
-       Evaluator evaluator = Evaluator.create();
-       try {
-         ((Evaluable<T>) cond).accept(value, evaluator);
-       } catch (Error error) {
-         throw error;
-       } catch (Throwable t) {
-         String message = format("An exception(%s) was thrown during evaluation of value: %s: %s", t, value, cond);
-         throw executionFailure(configuration().reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
-       }
-       if (evaluator.resultValue())
-         return value;
-       List<Evaluator.Entry> entries = evaluator.resultEntries();//result.entries;
-       throw createException(exceptionFactory, configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), entries, null));
-     } else {
-       if (!cond.test(value))
-         throw createException(exceptionFactory, configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), emptyList(), null));
-       return value;
-     }
-   }
+  @SuppressWarnings("unchecked")
+  default <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory) {
+    if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
+      Evaluator evaluator = Evaluator.create();
+      try {
+        ((Evaluable<T>) cond).accept(value, evaluator);
+      } catch (Error error) {
+        throw error;
+      } catch (Throwable t) {
+        String message = format("An exception(%s) was thrown during evaluation of value: %s: %s", t, value, cond);
+        throw executionFailure(configuration().reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
+      }
+      if (evaluator.resultValue())
+        return value;
+      List<Evaluator.Entry> entries = evaluator.resultEntries();//result.entries;
+      throw createException(exceptionFactory, configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), entries, null));
+    } else {
+      if (!cond.test(value))
+        throw createException(exceptionFactory, configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), emptyList(), null));
+      return value;
+    }
+  }
 
-   static RuntimeException createException(ExceptionFactory<?> exceptionFactory, Explanation explanation) {
+  static RuntimeException createException(ExceptionFactory<?> exceptionFactory, Explanation explanation) {
     Throwable t = exceptionFactory.apply(explanation);
     if (t instanceof Error)
       throw (Error) t;
     if (t instanceof RuntimeException)
       throw (RuntimeException) t;
     throw new AssertionError(format("Checked exception(%s) cannot be used for validation.", t.getClass()), t);
-  } ;
+  }
+
+  ;
 
   interface Configuration {
     int summarizedStringLength();
@@ -330,10 +331,8 @@ public interface AssertionProvider {
     ExceptionComposer exceptionComposer();
 
     class Builder {
-      Class<? extends AssertionProvider> assertionProvider;
-      Properties                         properties;
-      boolean                            useEvaluator;
-      int                                summarizedStringLength;
+      boolean useEvaluator;
+      int     summarizedStringLength;
 
 
       Function<ReportComposer, ExceptionComposer> exceptionComposerFactory;
@@ -341,8 +340,7 @@ public interface AssertionProvider {
       ReportComposer                              reportComposer;
 
       public Builder(Properties properties) {
-        this.assertionProviderClass(AssertionProviderImpl.class)
-            .useEvaluator(useEvaluator(assertionProvider, properties))
+        this.useEvaluator(true)
             .summarizedStringLength(40)
             .exceptionComposerFactory(new Function<ReportComposer, ExceptionComposer>() {
               final ExceptionComposer.ForPrecondition forPrecondition = IllegalArgumentException::new;
@@ -365,19 +363,9 @@ public interface AssertionProvider {
               }
             })
             .messageComposer(MessageComposer.createDefaultMessageComposer())
-            .reportComposer(ReportComposer.createDefaultReportComposer())
-            .properties(properties);
+            .reportComposer(ReportComposer.createDefaultReportComposer());
       }
 
-      public Builder properties(Properties properties) {
-        this.properties = properties;
-        return this;
-      }
-
-      public Builder assertionProviderClass(Class<? extends AssertionProvider> assertionProvider) {
-        this.assertionProvider = assertionProvider;
-        return this;
-      }
 
       public Builder useEvaluator(boolean useEvaluator) {
         this.useEvaluator = useEvaluator;
@@ -444,6 +432,22 @@ public interface AssertionProvider {
           }
         };
       }
+    }
+  }
+
+  class Impl implements AssertionProvider {
+
+    private final Configuration configuration;
+
+    public Impl(Properties properties) {
+      this.configuration = new Configuration.Builder(properties)
+          .useEvaluator(true)
+          .build();
+    }
+
+    @Override
+    public Configuration configuration() {
+      return this.configuration;
     }
   }
 }

@@ -2,7 +2,6 @@ package com.github.dakusui.pcond.ut.providers;
 
 import com.github.dakusui.pcond.core.Configurations;
 import com.github.dakusui.pcond.provider.*;
-import com.github.dakusui.pcond.provider.impls.AssertionProviderImpl;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
@@ -61,6 +60,6 @@ public class AssertionProviderTest extends TestBase {
   public void test3() {
     Configurations.initializeWith(TestAssertionProvider.class);
     System.out.println(AssertionProvider.INSTANCE.getClass().getCanonicalName());
-    Configurations.initializeWith(AssertionProviderImpl.class);
+    Configurations.initializeWith(AssertionProvider.Impl.class);
   }
 }
