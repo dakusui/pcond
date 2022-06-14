@@ -35,20 +35,20 @@ public class ValidationsTest extends TestBase {
   }
 
   @Test
-  public void testValidateMethod$passing() throws IOException {
-    Object ret = Validations.validate("Hello", Predicates.not(Predicates.isEqualTo(null)), IOException::new);
+  public void testValidateMethod$passing() {
+    Object ret = Validations.validate("Hello", Predicates.not(Predicates.isEqualTo(null)), UnsupportedOperationException::new);
     System.out.println(ret);
     assertEquals("Hello", ret);
   }
 
-  @Test(expected = IOException.class)
+  @Test(expected = UnsupportedOperationException.class)
   public void testValidateMethod$failing() throws Throwable {
     try {
-      Object ret = Validations.validate("Bye", Predicates.isEqualTo(null), IOException::new);
+      Object ret = Validations.validate("Bye", Predicates.isEqualTo(null), UnsupportedOperationException::new);
       System.out.println(ret);
-    } catch (AssertionError e) {
-      assertEquals("Value:\"Bye\" violated: isEqualTo[null]", firstLineOf(e.getCause().getMessage()));
-      throw e.getCause();
+    } catch (UnsupportedOperationException e) {
+      assertEquals("Value:\"Bye\" violated: isEqualTo[null]", firstLineOf(e.getMessage()));
+      throw e;
     }
   }
 

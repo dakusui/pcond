@@ -77,7 +77,7 @@ public class AssertionProviderImpl implements AssertionProvider {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<E> exceptionFactory) {
+  public <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory) {
     if (useEvaluator && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {

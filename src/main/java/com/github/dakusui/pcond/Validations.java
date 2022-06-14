@@ -7,7 +7,8 @@ import java.util.function.Predicate;
 
 public enum Validations {
   ;
-  public static <T, E extends Exception> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
-    return AssertionProvider.INSTANCE.validate(value, cond, exceptionComposer);
+
+  public static <T, E extends RuntimeException> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) {
+    return AssertionProvider.INSTANCE.validate(value, cond, exceptionComposer::apply);
   }
 }
