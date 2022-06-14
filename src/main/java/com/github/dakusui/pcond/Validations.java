@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 public enum Validations {
   ;
-  static final Validator VALIDATOR = createValidator(AssertionProvider.INSTANCE.exceptionComposer().defaultForValidate());
+  static final Validator VALIDATOR = createValidator(AssertionProvider.INSTANCE.configuration().exceptionComposer().defaultForValidate());
 
   public static <T> T validate(T value, Predicate<? super T> cond) {
     return VALIDATOR.validate(value, cond);

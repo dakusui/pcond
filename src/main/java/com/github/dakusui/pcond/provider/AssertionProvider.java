@@ -17,30 +17,6 @@ public interface AssertionProvider {
    */
   AssertionProvider INSTANCE = createAssertionProvider(System.getProperties());
 
-  /**
-   * Returns an exception composer, which is responsible for creating an exception
-   * object of an appropriate type for a context.
-   *
-   * @return An exception composer.
-   */
-  ExceptionComposer exceptionComposer();
-
-  /**
-   * Returns a message composer, which is responsible for composing an appropriate message for
-   * a context.
-   *
-   * @return A message composer.
-   */
-  MessageComposer messageComposer();
-
-  /**
-   * Returns a report composer, which is responsible for composing an appropriate "report" for
-   * a context.
-   *
-   * @return A report composer
-   */
-  ReportComposer reportComposer();
-
   Configuration configuration();
 
   /**
@@ -64,7 +40,7 @@ public interface AssertionProvider {
    * @return The {@code value}.
    */
   default <T> T requireNonNull(T value) {
-    return require(value, Predicates.isNotNull(), exceptionComposer().forRequire()::exceptionForNonNullViolation);
+    return require(value, Predicates.isNotNull(), configuration().exceptionComposer().forRequire()::exceptionForNonNullViolation);
   }
 
   /**
@@ -77,7 +53,7 @@ public interface AssertionProvider {
    * @return The value.
    */
   default <T> T requireArgument(T value, Predicate<? super T> cond) {
-    return require(value, cond, exceptionComposer().forRequire()::exceptionForIllegalArgument);
+    return require(value, cond, configuration().exceptionComposer().forRequire()::exceptionForIllegalArgument);
   }
 
   /**
@@ -90,7 +66,7 @@ public interface AssertionProvider {
    * @return The value.
    */
   default <T> T requireState(T value, Predicate<? super T> cond) {
-    return require(value, cond, exceptionComposer().forRequire()::exceptionForIllegalState);
+    return require(value, cond, configuration().exceptionComposer().forRequire()::exceptionForIllegalState);
   }
 
   /**
@@ -105,7 +81,7 @@ public interface AssertionProvider {
    * @return The `value`, if `cond` is satisfied.
    */
   default <T> T require(T value, Predicate<? super T> cond) {
-    return require(value, cond, msg -> this.exceptionComposer().forRequire().exceptionForGeneralViolation(msg));
+    return require(value, cond, msg -> configuration().exceptionComposer().forRequire().exceptionForGeneralViolation(msg));
   }
 
   /**
@@ -121,7 +97,7 @@ public interface AssertionProvider {
    * @return The `value`, if `cond` is satisfied.
    */
   default <T> T require(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionFactory) {
-    return checkValue(value, cond, this.messageComposer()::composeMessageForPrecondition, exceptionFactory);
+    return checkValue(value, cond, this.configuration().messageComposer()::composeMessageForPrecondition, exceptionFactory);
   }
 
   /**
@@ -209,23 +185,23 @@ public interface AssertionProvider {
    * @return The value itself.
    */
   default <T> T validate(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionFactory) {
-    return checkValue(value, cond, this.messageComposer()::composeMessageForValidation, exceptionFactory);
+    return checkValue(value, cond, configuration().messageComposer()::composeMessageForValidation, exceptionFactory);
   }
 
   default <T> T ensureNonNull(T value) {
-    return ensure(value, Predicates.isNotNull(), exceptionComposer().forEnsure()::exceptionForNonNullViolation);
+    return ensure(value, Predicates.isNotNull(), configuration().exceptionComposer().forEnsure()::exceptionForNonNullViolation);
   }
 
   default <T> T ensureState(T value, Predicate<? super T> cond) {
-    return ensure(value, cond, exceptionComposer().forEnsure()::exceptionForIllegalState);
+    return ensure(value, cond, configuration().exceptionComposer().forEnsure()::exceptionForIllegalState);
   }
 
   default <T> T ensure(T value, Predicate<? super T> cond) {
-    return ensure(value, cond, msg -> this.exceptionComposer().forEnsure().exceptionForGeneralViolation(msg));
+    return ensure(value, cond, msg -> configuration().exceptionComposer().forEnsure().exceptionForGeneralViolation(msg));
   }
 
   default <T> T ensure(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionComposer) {
-    return checkValue(value, cond, this.messageComposer()::composeMessageForPostcondition, exceptionComposer);
+    return checkValue(value, cond, configuration().messageComposer()::composeMessageForPostcondition, exceptionComposer);
   }
 
   /**
@@ -240,7 +216,7 @@ public interface AssertionProvider {
    * @param <T>   The type of `value`.
    */
   default <T> void checkInvariant(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, this.messageComposer()::composeMessageForAssertion, exceptionComposer().forAssert()::exceptionInvariantConditionViolation);
+    checkValue(value, cond, configuration().messageComposer()::composeMessageForAssertion, configuration().exceptionComposer().forAssert()::exceptionInvariantConditionViolation);
   }
 
   /**
@@ -255,7 +231,7 @@ public interface AssertionProvider {
    * @param <T>   The type of `value`.
    */
   default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, this.messageComposer()::composeMessageForPrecondition, exceptionComposer().forAssert()::exceptionPreconditionViolation);
+    checkValue(value, cond, configuration().messageComposer()::composeMessageForPrecondition, configuration().exceptionComposer().forAssert()::exceptionPreconditionViolation);
   }
 
   /**
@@ -270,15 +246,15 @@ public interface AssertionProvider {
    * @param <T>   The type of `value`.
    */
   default <T> void checkPostcondition(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, this.messageComposer()::composeMessageForPostcondition, exceptionComposer().forAssert()::exceptionPostconditionViolation);
+    checkValue(value, cond, configuration().messageComposer()::composeMessageForPostcondition, configuration().exceptionComposer().forAssert()::exceptionPostconditionViolation);
   }
 
   default <T> void assertThat(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::testFailedException);
+    checkValueAndThrowIfFails(value, cond, this.configuration().messageComposer()::composeMessageForAssertion, configuration().exceptionComposer()::testFailedException);
   }
 
   default <T> void assumeThat(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::testSkippedException);
+    checkValueAndThrowIfFails(value, cond, this.configuration().messageComposer()::composeMessageForAssertion, configuration().exceptionComposer()::testSkippedException);
   }
 
   default <T> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, Throwable> exceptionFactory) {
@@ -286,7 +262,7 @@ public interface AssertionProvider {
   }
 
   default <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory) {
-    return checkValue(value, cond, messageComposer, msg -> exceptionFactory.apply(reportComposer().explanationFromMessage(msg)));
+    return checkValue(value, cond, messageComposer, msg -> exceptionFactory.apply(configuration().reportComposer().explanationFromMessage(msg)));
   }
 
   interface Configuration {
@@ -294,15 +270,29 @@ public interface AssertionProvider {
 
     boolean useEvaluator();
 
-    ExceptionComposer createExceptionComposer(ReportComposer reportComposer);
-
+    /**
+     * Returns a message composer, which is responsible for composing an appropriate message for
+     * a context.
+     *
+     * @return A message composer.
+     */
     MessageComposer messageComposer();
 
+    /**
+     * Returns a report composer, which is responsible for composing an appropriate "report" for
+     * a context.
+     *
+     * @return A report composer
+     */
     ReportComposer reportComposer();
 
-    ReportComposer createReportComposer();
-
-    MessageComposer createMessageComposer();
+    /**
+     * Returns an exception composer, which is responsible for creating an exception
+     * object of an appropriate type for a context.
+     *
+     * @return An exception composer.
+     */
+    ExceptionComposer exceptionComposer();
 
     class Builder {
       Class<? extends AssertionProvider> assertionProvider;
@@ -385,6 +375,7 @@ public interface AssertionProvider {
 
       public Configuration build() {
         return new Configuration() {
+          private final ExceptionComposer exceptionComposer = Builder.this.exceptionComposerFactory.apply(reportComposer());
 
           @Override
           public int summarizedStringLength() {
@@ -396,9 +387,16 @@ public interface AssertionProvider {
             return Builder.this.useEvaluator;
           }
 
-          public ExceptionComposer createExceptionComposer(ReportComposer reportComposer) {
-            return Builder.this.exceptionComposerFactory.apply(reportComposer);
+          /**
+           * Returns an exception composer, which is responsible for creating an exception
+           * object of an appropriate type for a context.
+           *
+           * @return An exception composer.
+           */
+          public ExceptionComposer exceptionComposer() {
+            return this.exceptionComposer;
           }
+
 
           @Override
           public MessageComposer messageComposer() {
@@ -408,16 +406,6 @@ public interface AssertionProvider {
           @Override
           public ReportComposer reportComposer() {
             return Builder.this.reportComposer;
-          }
-
-          @Override
-          public ReportComposer createReportComposer() {
-            return Builder.this.reportComposer;
-          }
-
-          @Override
-          public MessageComposer createMessageComposer() {
-            return Builder.this.messageComposer;
           }
         };
       }

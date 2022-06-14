@@ -15,42 +15,19 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 public class AssertionProviderImpl implements AssertionProvider {
-  private final MessageComposer messageComposer;
 
-  private final ReportComposer reportComposer;
-
-  private final Configuration     configuration;
-
-  private final ExceptionComposer exceptionComposer;
+  private final Configuration configuration;
 
   public AssertionProviderImpl(Properties properties) {
     this.configuration = new Configuration.Builder(properties)
         .assertionProviderClass(this.getClass())
         .useEvaluator(true)
         .build();
-    this.messageComposer = this.configuration.createMessageComposer();
-    this.reportComposer = this.configuration.createReportComposer();
-    this.exceptionComposer = this.configuration.createExceptionComposer(this.reportComposer());
   }
 
   @Override
   public Configuration configuration() {
     return this.configuration;
-  }
-
-  @Override
-  public MessageComposer messageComposer() {
-    return this.messageComposer;
-  }
-
-  @Override
-  public ReportComposer reportComposer() {
-    return this.reportComposer;
-  }
-
-  @Override
-  final public ExceptionComposer exceptionComposer() {
-    return this.exceptionComposer;
   }
 
   @FunctionalInterface
@@ -88,7 +65,7 @@ public class AssertionProviderImpl implements AssertionProvider {
         throw error;
       } catch (Throwable t) {
         String message = format("An exception(%s) was thrown during evaluation of value: %s: %s", t, value, cond);
-        throw executionFailure(reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
+        throw executionFailure(configuration().reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
       }
       Result result = new Result(evaluator.resultValue(), evaluator.resultEntries());
       if (result.result())
@@ -102,7 +79,7 @@ public class AssertionProviderImpl implements AssertionProvider {
   }
 
   private RuntimeException createException(ExceptionFactory<?> exceptionFactory, String message, List<Evaluator.Entry> result) {
-    Throwable t = exceptionFactory.apply(reportComposer().composeExplanation(message, result, null));
+    Throwable t = exceptionFactory.apply(configuration().reportComposer().composeExplanation(message, result, null));
     if (t instanceof Error)
       throw (Error) t;
     if (t instanceof RuntimeException)
