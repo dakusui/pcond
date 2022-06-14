@@ -280,8 +280,7 @@ public interface AssertionProvider {
          String message = format("An exception(%s) was thrown during evaluation of value: %s: %s", t, value, cond);
          throw executionFailure(configuration().reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
        }
-       AssertionProviderImpl.Result result = new AssertionProviderImpl.Result(evaluator.resultValue(), evaluator.resultEntries());
-       if (result.result())
+       if (evaluator.resultValue())
          return value;
        List<Evaluator.Entry> entries = evaluator.resultEntries();//result.entries;
        throw createException(exceptionFactory, configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), entries, null));
