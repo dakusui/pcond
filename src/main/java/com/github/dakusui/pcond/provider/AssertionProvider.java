@@ -23,7 +23,6 @@ public interface AssertionProvider {
 
   ReportComposer reportComposer();
 
-
   Configuration configuration();
 
   /**
@@ -47,7 +46,7 @@ public interface AssertionProvider {
    * @return The {@code value}.
    */
   default <T> T requireNonNull(T value) {
-    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(NullPointerException::new));
+    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(exceptionComposer().forPrecondition()::exceptionForNonNullViolation));
   }
 
   /**
@@ -60,7 +59,7 @@ public interface AssertionProvider {
    * @return The value.
    */
   default <T> T requireArgument(T value, Predicate<? super T> cond) {
-    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(IllegalArgumentException::new));
+    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(exceptionComposer().forPrecondition()::exceptionForIllegalArgument));
   }
 
   /**
@@ -73,7 +72,7 @@ public interface AssertionProvider {
    * @return The value.
    */
   default <T> T requireState(T value, Predicate<? super T> cond) {
-    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(IllegalStateException::new));
+    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(exceptionComposer().forPrecondition()::exceptionForIllegalState));
   }
 
   /**
@@ -87,9 +86,8 @@ public interface AssertionProvider {
    * @param <T>   The of the `value`.
    * @return The `value`, if `cond` is satisfied.
    */
-  @SuppressWarnings("RedundantTypeArguments")
   default <T> T require(T value, Predicate<? super T> cond) {
-    return require(value, cond, msg -> this.exceptionComposer().<RuntimeException>preconditionViolationException(msg));
+    return require(value, cond, msg -> this.exceptionComposer().forPrecondition().exceptionForGeneralViolation(msg));
   }
 
   /**
@@ -104,32 +102,32 @@ public interface AssertionProvider {
    * @param <T>              The of the `value`.
    * @return The `value`, if `cond` is satisfied.
    */
-  default <T, E extends Exception> T require(T value, Predicate<? super T> cond, Function<String, E> exceptionFactory) throws E {
+  default <T> T require(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionFactory) {
     return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(exceptionFactory));
   }
 
-  default <T, E extends Exception> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionFactory) throws E {
+  default <T, E extends Exception> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionFactory) {
     return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForValidation, ExceptionFactory.from(exceptionFactory));
   }
 
   default <T> T ensureNonNull(T value) {
-    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this.messageComposer()::composeMessageForPostcondition, ExceptionFactory.from(NullPointerException::new));
+    return checkValueAndThrowIfFails(value, Predicates.isNotNull(), this.messageComposer()::composeMessageForPostcondition, ExceptionFactory.from(exceptionComposer().forPostCondition()::exceptionForNonNullViolation));
   }
 
   default <T> T ensureState(T value, Predicate<? super T> cond) {
-    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPostcondition, ExceptionFactory.from(IllegalStateException::new));
+    return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPostcondition, ExceptionFactory.from(exceptionComposer().forPostCondition()::exceptionForIllegalState));
   }
 
-  default <T, E extends Exception> T ensure(T value, Predicate<? super T> cond) throws E {
-    return ensure(value, cond, msg -> this.exceptionComposer().<E>postconditionViolationException(msg));
+  default <T> T ensure(T value, Predicate<? super T> cond) {
+    return ensure(value, cond, msg -> this.exceptionComposer().forPostCondition().exceptionForGeneralViolation(msg));
   }
 
-  default <T, E extends Exception> T ensure(T value, Predicate<? super T> cond, Function<String, E> exceptionComposer) throws E {
+  default <T> T ensure(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionComposer) {
     return checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPostcondition, ExceptionFactory.from(exceptionComposer));
   }
 
   default <T> void checkInvariant(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, AssertionError::new);
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, ExceptionFactory.from(exceptionComposer().forInvariantCondition()::exceptionForGeneralViolation));
   }
 
   default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
@@ -149,11 +147,11 @@ public interface AssertionProvider {
     checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::<RuntimeException>testSkippedException);
   }
 
-  default <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionFactory) throws E {
+  default <T, E extends Throwable> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, E> exceptionFactory) {
     return checkValueAndThrowIfFails(value, cond, messageComposer, explanation -> exceptionFactory.apply(explanation.toString()));
   }
 
-  default <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<E> exceptionFactory) throws E {
+  default <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<E> exceptionFactory) {
     return checkValue(value, cond, messageComposer, msg -> exceptionFactory.apply(reportComposer().explanationFromMessage(msg)));
   }
 

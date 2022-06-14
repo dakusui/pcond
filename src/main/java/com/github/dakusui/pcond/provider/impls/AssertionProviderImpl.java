@@ -8,7 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.executionFailure;
@@ -78,7 +77,7 @@ public class AssertionProviderImpl implements AssertionProvider {
 
   @SuppressWarnings("unchecked")
   @Override
-  public <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<E> exceptionFactory) throws E {
+  public <T, E extends Throwable> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<E> exceptionFactory) {
     if (useEvaluator && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
@@ -92,12 +91,21 @@ public class AssertionProviderImpl implements AssertionProvider {
       Result result = new Result(evaluator.resultValue(), evaluator.resultEntries());
       if (result.result())
         return value;
-      throw exceptionFactory.apply(reportComposer().composeExplanation(messageComposer.apply(value, cond), result.entries, null));
+      throw createException(exceptionFactory, messageComposer.apply(value, cond), result.entries);
     } else {
       if (!cond.test(value))
-        throw exceptionFactory.apply(reportComposer().composeExplanation(messageComposer.apply(value, cond), emptyList(), null));
+        throw createException(exceptionFactory, messageComposer.apply(value, cond), emptyList());
       return value;
     }
+  }
+
+  private RuntimeException createException(ExceptionFactory<?> exceptionFactory, String message, List<Evaluator.Entry> result) {
+    Throwable t = exceptionFactory.apply(reportComposer().composeExplanation(message, result, null));
+    if (t instanceof Error)
+      throw (Error) t;
+    if (t instanceof RuntimeException)
+      throw (RuntimeException) t;
+    throw new AssertionError(format("Checked exception(%s) cannot be used for validation.", t.getClass()), t);
   }
 
   private static boolean useEvaluator(Class<?> myClass, Properties properties) {

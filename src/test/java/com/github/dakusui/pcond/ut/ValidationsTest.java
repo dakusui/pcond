@@ -42,13 +42,13 @@ public class ValidationsTest extends TestBase {
   }
 
   @Test(expected = IOException.class)
-  public void testValidateMethod$failing() throws IOException {
+  public void testValidateMethod$failing() throws Throwable {
     try {
       Object ret = Validations.validate("Bye", Predicates.isEqualTo(null), IOException::new);
       System.out.println(ret);
-    } catch (IOException e) {
-      assertEquals("Value:\"Bye\" violated: isEqualTo[null]", firstLineOf(e.getMessage()));
-      throw e;
+    } catch (AssertionError e) {
+      assertEquals("Value:\"Bye\" violated: isEqualTo[null]", firstLineOf(e.getCause().getMessage()));
+      throw e.getCause();
     }
   }
 
