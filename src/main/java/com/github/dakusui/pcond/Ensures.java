@@ -4,7 +4,7 @@ import com.github.dakusui.pcond.provider.AssertionProvider;
 
 import java.util.function.Predicate;
 
-public enum Postconditions {
+public enum Ensures {
   ;
 
   public static <T> T ensureNonNull(T value) {

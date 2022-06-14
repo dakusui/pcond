@@ -20,6 +20,7 @@ public class AssertionProviderImpl implements AssertionProvider {
   private final ReportComposer reportComposer;
 
   private final Configuration     configuration;
+  
   private final ExceptionComposer exceptionComposer;
 
   public AssertionProviderImpl(Properties properties) {

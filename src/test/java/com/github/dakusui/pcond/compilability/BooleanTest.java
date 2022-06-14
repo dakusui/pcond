@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.compilability;
 
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.Preconditions.requireArgument;
+import static com.github.dakusui.pcond.Requires.requireArgument;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 
 public class BooleanTest {

@@ -116,23 +116,24 @@ public interface AssertionProvider {
    *
    * @param value The value to be checked.
    * @param cond  A condition to validate the `value`.
+   * @param forValidate
    * @param <T>   The type of the value.
    * @return The value.
    */
-  default <T> T validate(T value, Predicate<? super T> cond) {
-    return validate(value, cond, exceptionComposer().forValidate()::exceptionForGeneralViolation);
+  default <T> T validate(T value, Predicate<? super T> cond, ExceptionComposer.ForValidate forValidate) {
+    return validate(value, cond, forValidate::exceptionForGeneralViolation);
   }
 
-  default <T> T validateNonNull(T value) {
-    return validate(value, Predicates.isNotNull(), exceptionComposer().forValidate()::exceptionForNonNullViolation);
+  default <T> T validateNonNull(T value, ExceptionComposer.ForValidate forValidate) {
+    return validate(value, Predicates.isNotNull(), forValidate::exceptionForNonNullViolation);
   }
 
-  default <T> T validateArgument(T value, Predicate<? super T> cond) {
-    return validate(value, cond, exceptionComposer().forValidate()::exceptionForIllegalArgument);
+  default <T> T validateArgument(T value, Predicate<? super T> cond, ExceptionComposer.ForValidate forValidate) {
+    return validate(value, cond, forValidate::exceptionForIllegalArgument);
   }
 
-  default <T> T validateState(T value, Predicate<? super T> cond) {
-    return validate(value, cond, exceptionComposer().forValidate()::exceptionForIllegalState);
+  default <T> T validateState(T value, Predicate<? super T> cond, ExceptionComposer.ForValidate forValidate) {
+    return validate(value, cond, forValidate::exceptionForIllegalState);
   }
 
   default <T> T validate(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionFactory) {
@@ -230,13 +231,13 @@ public interface AssertionProvider {
           final ExceptionComposer.ForPrecondition forPrecondition = IllegalArgumentException::new;
           final ExceptionComposer.ForPostCondition forPostCondition = new ExceptionComposer.ForPostCondition() {
           };
-          final ExceptionComposer.ForValidation forValidation = new ExceptionComposer.ForValidation() {
+          final ExceptionComposer.ForValidate forValidate = new ExceptionComposer.ForValidate() {
           };
           final ExceptionComposer.ForAssertion forAssertion = new ExceptionComposer.ForAssertion() {
           };
           if (isJunit4())
-            return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
-          return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
+            return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forPostCondition, forValidate, forAssertion, assertionProvider.reportComposer());
+          return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forPostCondition, forValidate, forAssertion, assertionProvider.reportComposer());
         }
 
         private boolean isJunit4() {

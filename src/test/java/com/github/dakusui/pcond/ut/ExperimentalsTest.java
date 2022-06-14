@@ -18,7 +18,7 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.Preconditions.require;
+import static com.github.dakusui.pcond.Requires.require;
 import static com.github.dakusui.pcond.forms.Experimentals.*;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;

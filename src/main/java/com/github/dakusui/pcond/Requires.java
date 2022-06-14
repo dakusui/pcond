@@ -4,7 +4,7 @@ import com.github.dakusui.pcond.provider.AssertionProvider;
 
 import java.util.function.Predicate;
 
-public enum Preconditions {
+public enum Requires {
   ;
 
   public static <T> T requireNonNull(T value) {

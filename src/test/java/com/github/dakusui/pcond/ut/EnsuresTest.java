@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.Postconditions;
+import com.github.dakusui.pcond.Ensures;
 import com.github.dakusui.pcond.provider.AssertionProvider;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.provider.PostconditionViolationException;
@@ -11,11 +11,11 @@ import static com.github.dakusui.pcond.utils.TestUtils.firstLineOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public class PostconditionsTest extends TestBase.ForAssertionEnabledVM {
+public class EnsuresTest extends TestBase.ForAssertionEnabledVM {
   @Test(expected = NullPointerException.class)
   public void testEnsureNonNull() {
     try {
-      Object ret = Postconditions.ensureNonNull(null);
+      Object ret = Ensures.ensureNonNull(null);
       System.out.println("<" + ret + ">");
     } catch (NullPointerException e) {
       assertEquals("value:<null> violated postcondition:value isNotNull", firstLineOf(e.getMessage()));
@@ -30,7 +30,7 @@ public class PostconditionsTest extends TestBase.ForAssertionEnabledVM {
 
   @Test
   public void givenNonNull$whenEnsureNonNull$thenPasses() {
-    Object ret = Postconditions.ensureNonNull("hello");
+    Object ret = Ensures.ensureNonNull("hello");
     System.out.println("<" + ret + ">");
     assertNotNull(ret);
   }
@@ -38,7 +38,7 @@ public class PostconditionsTest extends TestBase.ForAssertionEnabledVM {
   @Test(expected = IllegalStateException.class)
   public void testEnsureState() {
     try {
-      Object ret = Postconditions.ensureState(null, Predicates.isNotNull());
+      Object ret = Ensures.ensureState(null, Predicates.isNotNull());
       System.out.println("<" + ret + ">");
     } catch (NullPointerException e) {
       assertEquals("value:null violated postcondition:value isNotNull", e.getMessage());
@@ -48,7 +48,7 @@ public class PostconditionsTest extends TestBase.ForAssertionEnabledVM {
 
   @Test
   public void givenValidState$whenEnsureState$thenPasses() {
-    Object ret = Postconditions.ensureState("hello", Predicates.isNotNull());
+    Object ret = Ensures.ensureState("hello", Predicates.isNotNull());
     System.out.println("<" + ret + ">");
     assertNotNull(ret);
   }
@@ -56,7 +56,7 @@ public class PostconditionsTest extends TestBase.ForAssertionEnabledVM {
   @Test(expected = PostconditionViolationException.class)
   public void testEnsure() {
     try {
-      Object ret = Postconditions.ensure(null, Predicates.isNotNull());
+      Object ret = Ensures.ensure(null, Predicates.isNotNull());
       System.out.println("<" + ret + ">");
     } catch (Error e) {
       assertEquals("Hello:null:isNotNull", firstLineOf(e.getMessage()));
@@ -66,7 +66,7 @@ public class PostconditionsTest extends TestBase.ForAssertionEnabledVM {
 
   @Test
   public void givenValidValue$whenEnsure$thenPasses() {
-    Object ret = Postconditions.ensure(
+    Object ret = Ensures.ensure(
         "hello",
         Predicates.isNotNull());
     System.out.println("<" + ret + ">");

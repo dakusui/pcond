@@ -31,7 +31,7 @@ public interface ExceptionComposer {
     }
   }
 
-  interface ForValidation extends Base {
+  interface ForValidate extends Base {
     @Override
     default Throwable exceptionForGeneralViolation(String message) {
       return new ValidationException(message);
@@ -60,7 +60,7 @@ public interface ExceptionComposer {
 
   ForPostCondition forEnsure();
 
-  ForValidation forValidate();
+  ForValidate defaultForValidate();
 
   ForAssertion forAssert();
 
@@ -72,7 +72,7 @@ public interface ExceptionComposer {
 
   <T extends Error> T testFailedException(Explanation explanation);
 
-  static ExceptionComposer createExceptionComposerForJUnit4(final ForPrecondition forPrecondition, final ForPostCondition forPostCondition, final ForValidation forValidation, final ForAssertion forAssertion, final ReportComposer reportComposer) {
+  static ExceptionComposer createExceptionComposerForJUnit4(final ForPrecondition forPrecondition, final ForPostCondition forPostCondition, final ForValidate forValidate, final ForAssertion forAssertion, final ReportComposer reportComposer) {
     return new ExceptionComposer() {
 
       private ReportComposer reportComposer() {
@@ -90,8 +90,8 @@ public interface ExceptionComposer {
       }
 
       @Override
-      public ForValidation forValidate() {
-        return forValidation;
+      public ForValidate defaultForValidate() {
+        return forValidate;
       }
 
       @Override
@@ -119,7 +119,7 @@ public interface ExceptionComposer {
     };
   }
 
-  static ExceptionComposer createExceptionComposerForOpentest4J(ForPrecondition forPrecondition, final ForPostCondition forPostCondition, ForValidation forValidation, ForAssertion forAssertion, final ReportComposer reportComposer) {
+  static ExceptionComposer createExceptionComposerForOpentest4J(ForPrecondition forPrecondition, final ForPostCondition forPostCondition, ForValidate forValidate, ForAssertion forAssertion, final ReportComposer reportComposer) {
     return new ExceptionComposer() {
       private ReportComposer reportComposer() {
         return reportComposer;
@@ -136,8 +136,8 @@ public interface ExceptionComposer {
       }
 
       @Override
-      public ForValidation forValidate() {
-        return forValidation;
+      public ForValidate defaultForValidate() {
+        return forValidate;
       }
 
       @Override

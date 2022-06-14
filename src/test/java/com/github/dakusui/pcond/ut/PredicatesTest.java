@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.Preconditions.requireArgument;
+import static com.github.dakusui.pcond.Requires.requireArgument;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;

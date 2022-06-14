@@ -2,8 +2,8 @@ package com.github.dakusui.pcond.examples;
 
 // <1>
 
-import static com.github.dakusui.pcond.Postconditions.ensureNonNull;
-import static com.github.dakusui.pcond.Preconditions.requireArgument;
+import static com.github.dakusui.pcond.Ensures.ensureNonNull;
+import static com.github.dakusui.pcond.Requires.requireArgument;
 import static com.github.dakusui.pcond.forms.Functions.length;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 

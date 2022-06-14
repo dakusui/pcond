@@ -3,7 +3,7 @@ package com.github.dakusui.pcond.ut.bugfixes;
 import com.github.dakusui.pcond.utils.TestBase;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.Preconditions.requireArgument;
+import static com.github.dakusui.pcond.Requires.requireArgument;
 import static com.github.dakusui.pcond.forms.Functions.elementAt;
 import static com.github.dakusui.pcond.forms.Functions.size;
 import static com.github.dakusui.pcond.forms.Predicates.*;

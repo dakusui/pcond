@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.Preconditions;
+import com.github.dakusui.pcond.Requires;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.provider.PreconditionViolationException;
@@ -14,11 +14,11 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
-public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
+public class RequiresTest extends TestBase.ForAssertionEnabledVM {
   @Test(expected = NullPointerException.class)
   public void testRequireNonNull() {
     try {
-      Preconditions.requireNonNull(null);
+      Requires.requireNonNull(null);
     } catch (NullPointerException e) {
       e.printStackTrace();
       assertThat(firstLineOf(e.getMessage()),
@@ -32,7 +32,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
   @Test(expected = IllegalArgumentException.class)
   public void testRequireArgument() {
     try {
-      Preconditions.requireArgument(null, isNotNull());
+      Requires.requireArgument(null, isNotNull());
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(firstLineOf(e.getMessage()),
@@ -46,7 +46,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
   @Test(expected = IllegalStateException.class)
   public void givenInvalidState$whenRequireState$thenIllegalStateExceptionThrown() {
     try {
-      Preconditions.requireState(null, isNotNull());
+      Requires.requireState(null, isNotNull());
     } catch (IllegalStateException e) {
       e.printStackTrace();
       assertThat(firstLineOf(e.getMessage()),
@@ -59,14 +59,14 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
 
   @Test
   public void givenValidState$whenRequireState$thenPass() {
-    String var = Preconditions.requireState("hello", isNotNull());
+    String var = Requires.requireState("hello", isNotNull());
     assertNotNull(var);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void testRequireWithTransformingPredicate() {
     String value = "hello";
-    Preconditions.requireArgument(
+    Requires.requireArgument(
         value,
         Predicates.transform(Functions.length()).check(Predicates.gt(100)));
   }
@@ -75,7 +75,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
   public void testRequireWithCustomStringTransformingPredicate() {
     String value = "hello";
     try {
-      Preconditions.requireArgument(
+      Requires.requireArgument(
           value,
           Predicates.transform("LENGTH", Functions.length())
               .check("GT[100]", Predicates.gt(100)));
@@ -92,7 +92,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
   public void testRequireWithSatisfyingValue() {
     String value = "hello";
     assertThat(
-        Preconditions.requireNonNull(value),
+        Requires.requireNonNull(value),
         is(value));
   }
 
@@ -100,7 +100,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
   public void testRequireWithTransformingPredicateAndSatisfyingValue() {
     String value = "hello";
     assertThat(
-        Preconditions.requireArgument(
+        Requires.requireArgument(
             value,
             Predicates.transform(Functions.length()).check(Predicates.gt(0))),
         is(value));
@@ -110,7 +110,7 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
   public void testRequireWithCustomStringTransformingPredicateAndSatisfyingValue() {
     String value = "hello";
     assertThat(
-        Preconditions.requireArgument(
+        Requires.requireArgument(
             value,
             Predicates.transform(Functions.length()).check(Predicates.gt(0))),
         is(value));
@@ -118,14 +118,14 @@ public class PreconditionsTest extends TestBase.ForAssertionEnabledVM {
 
   @Test
   public void testRequire() {
-    String message = Preconditions.require("hello", Predicates.isNotNull());
+    String message = Requires.require("hello", Predicates.isNotNull());
     assertNotNull(message);
   }
 
   @Test(expected = PreconditionViolationException.class)
   public void testRequire$thenError() {
     String value = null;
-    String message = Preconditions.require(
+    String message = Requires.require(
         value,
         Predicates.isNotNull()
     );
