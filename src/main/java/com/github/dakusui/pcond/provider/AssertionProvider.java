@@ -78,7 +78,7 @@ public interface AssertionProvider {
   /**
    * A method to check if a given `value` satisfies a precondition given as `cond`.
    * If the `cond` is satisfied, the `value` itself will be returned.
-   * Otherwise, an exception returned by {@link ExceptionComposer#preconditionViolationException(String)}
+   * Otherwise, an exception returned by {@link ExceptionComposer#forPrecondition()#preconditionViolationException(String)}
    * is thrown.
    *
    * @param value A value to be checked.
@@ -131,18 +131,19 @@ public interface AssertionProvider {
   }
 
   default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, AssertionError::new);
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(exceptionComposer().forPrecondition()::exceptionForGeneralViolation));
   }
 
   default <T> void checkPostcondition(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPostcondition, AssertionError::new);
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPostcondition, ExceptionFactory.from(exceptionComposer().forPostCondition()::exceptionForGeneralViolation));
   }
 
   default <T> void assertThat(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::<Error>testFailedException);
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::testFailedException);
   }
 
-  @SuppressWarnings("RedundantTypeArguments") // Necessary to suppress compilation failure.
+  @SuppressWarnings("RedundantTypeArguments")
+  // Necessary to suppress compilation failure.
   default <T> void assumeThat(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::<RuntimeException>testSkippedException);
   }
@@ -166,9 +167,21 @@ public interface AssertionProvider {
     }
 
     default ExceptionComposer createExceptionComposerFromProperties(Properties properties, AssertionProvider assertionProvider) {
+      final ExceptionComposer.ForPrecondition forPrecondition = new ExceptionComposer.ForPrecondition() {
+        @Override
+        public Throwable exceptionForIllegalArgument(String message) {
+          return new IllegalArgumentException(message);
+        }
+      };
+      final ExceptionComposer.ForInvariantCondition forInvariantCondition = new ExceptionComposer.ForInvariantCondition() {
+      };
+      final ExceptionComposer.ForPostCondition forPostCondition = new ExceptionComposer.ForPostCondition() {
+      };
+      final ExceptionComposer.ForValidation forValidation = new ExceptionComposer.ForValidation() {
+      };
       if (isJunit4(properties))
-        return ExceptionComposer.createExceptionComposerForJUnit4(assertionProvider.reportComposer());
-      return ExceptionComposer.createExceptionComposerForOpentest4J(assertionProvider);
+        return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forInvariantCondition, forPostCondition, forValidation, assertionProvider.reportComposer());
+      return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forInvariantCondition, forPostCondition, forValidation, assertionProvider.reportComposer());
     }
 
     default boolean isJunit4(Properties properties) {

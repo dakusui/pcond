@@ -1,7 +1,5 @@
 package com.github.dakusui.pcond.provider;
 
-import java.util.function.Function;
-
 import static com.github.dakusui.pcond.provider.impls.AssertionProviderImpl.createException;
 
 public interface ExceptionComposer {
@@ -23,7 +21,7 @@ public interface ExceptionComposer {
       return new PreconditionViolationException(message);
     }
 
-    <T extends Throwable> T exceptionForIllegalArgument(String message);
+    Throwable exceptionForIllegalArgument(String message);
   }
 
   interface ForInvariantCondition extends Base {
@@ -67,48 +65,31 @@ public interface ExceptionComposer {
     return testFailedException(explanation.toString());
   }
 
-  @SuppressWarnings("unchecked")
-  default <E extends RuntimeException> E preconditionViolationException(String message) {
-    return (E) new PreconditionViolationException(message);
-  }
-
-  @SuppressWarnings("unchecked")
-  default <E extends Exception> E postconditionViolationException(String message) {
-    return (E) new PostconditionViolationException(message);
-  }
-
-  static ExceptionComposer createExceptionComposerForJUnit4(final ReportComposer reportComposer) {
+  static ExceptionComposer createExceptionComposerForJUnit4(final ForPrecondition forPrecondition, final ForInvariantCondition forInvariantCondition, final ForPostCondition forPostCondition, final ForValidation forValidation, final ReportComposer reportComposer) {
     return new ExceptionComposer() {
+
       private ReportComposer reportComposer() {
         return reportComposer;
       }
 
       @Override
       public ForPrecondition forPrecondition() {
-        return new ForPrecondition() {
-          @Override
-          public <T extends Throwable> T exceptionForIllegalArgument(String message) {
-            return (T) new IllegalArgumentException(message);
-          }
-        };
+        return forPrecondition;
       }
 
       @Override
       public ForInvariantCondition forInvariantCondition() {
-        return new ForInvariantCondition() {
-        };
+        return forInvariantCondition;
       }
 
       @Override
       public ForPostCondition forPostCondition() {
-        return new ForPostCondition() {
-        };
+        return forPostCondition;
       }
 
       @Override
       public ForValidation forValidation() {
-        return new ForValidation() {
-        };
+        return forValidation;
       }
 
       @SuppressWarnings("unchecked")
@@ -136,30 +117,30 @@ public interface ExceptionComposer {
     };
   }
 
-  static ExceptionComposer createExceptionComposerForOpentest4J(AssertionProvider assertionProvider) {
+  static ExceptionComposer createExceptionComposerForOpentest4J(ForPrecondition forPrecondition, ForInvariantCondition forInvariantCondition, final ForPostCondition forPostCondition, ForValidation forValidation, final ReportComposer reportComposer) {
     return new ExceptionComposer() {
       private ReportComposer reportComposer() {
-        return assertionProvider.reportComposer();
+        return reportComposer;
       }
 
       @Override
       public ForPrecondition forPrecondition() {
-        return null;
+        return forPrecondition;
       }
 
       @Override
       public ForInvariantCondition forInvariantCondition() {
-        return null;
+        return forInvariantCondition;
       }
 
       @Override
       public ForPostCondition forPostCondition() {
-        return null;
+        return forPostCondition;
       }
 
       @Override
       public ForValidation forValidation() {
-        return null;
+        return forValidation;
       }
 
       @SuppressWarnings("unchecked")
