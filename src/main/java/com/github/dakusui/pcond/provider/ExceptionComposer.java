@@ -59,15 +59,15 @@ public interface ExceptionComposer {
     }
   }
 
-  ForPrecondition forPrecondition();
+  ForPrecondition forRequire();
 
   ForInvariantCondition forInvariantCondition();
 
-  ForPostCondition forPostCondition();
+  ForPostCondition forEnsure();
 
   ForValidation forValidation();
 
-  ForAssertion forAssertion();
+  ForAssertion forAssert();
 
   <T extends RuntimeException> T testSkippedException(String message);
 
@@ -85,7 +85,7 @@ public interface ExceptionComposer {
       }
 
       @Override
-      public ForPrecondition forPrecondition() {
+      public ForPrecondition forRequire() {
         return forPrecondition;
       }
 
@@ -95,7 +95,7 @@ public interface ExceptionComposer {
       }
 
       @Override
-      public ForPostCondition forPostCondition() {
+      public ForPostCondition forEnsure() {
         return forPostCondition;
       }
 
@@ -105,7 +105,7 @@ public interface ExceptionComposer {
       }
 
       @Override
-      public ForAssertion forAssertion() {
+      public ForAssertion forAssert() {
         return forAssertion;
       }
 
@@ -136,7 +136,7 @@ public interface ExceptionComposer {
       }
 
       @Override
-      public ForPrecondition forPrecondition() {
+      public ForPrecondition forRequire() {
         return forPrecondition;
       }
 
@@ -146,7 +146,7 @@ public interface ExceptionComposer {
       }
 
       @Override
-      public ForPostCondition forPostCondition() {
+      public ForPostCondition forEnsure() {
         return forPostCondition;
       }
 
@@ -156,7 +156,7 @@ public interface ExceptionComposer {
       }
 
       @Override
-      public ForAssertion forAssertion() {
+      public ForAssertion forAssert() {
         return forAssertion;
       }
 
