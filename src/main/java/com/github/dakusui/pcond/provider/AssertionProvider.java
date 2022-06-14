@@ -1,12 +1,19 @@
 package com.github.dakusui.pcond.provider;
 
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.provider.impls.AssertionProviderImpl;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.executionFailure;
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 
 /**
  * An interface of a policy for behaviours on 'contract violations'.
@@ -261,7 +268,38 @@ public interface AssertionProvider {
     return checkValueAndThrowIfFails(value, cond, messageComposer, explanation -> exceptionFactory.apply(explanation.toString()));
   }
 
-   <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory) ;
+   @SuppressWarnings("unchecked")
+   default <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory){
+     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
+       Evaluator evaluator = Evaluator.create();
+       try {
+         ((Evaluable<T>) cond).accept(value, evaluator);
+       } catch (Error error) {
+         throw error;
+       } catch (Throwable t) {
+         String message = format("An exception(%s) was thrown during evaluation of value: %s: %s", t, value, cond);
+         throw executionFailure(configuration().reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
+       }
+       AssertionProviderImpl.Result result = new AssertionProviderImpl.Result(evaluator.resultValue(), evaluator.resultEntries());
+       if (result.result())
+         return value;
+       List<Evaluator.Entry> entries = evaluator.resultEntries();//result.entries;
+       throw createException(exceptionFactory, configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), entries, null));
+     } else {
+       if (!cond.test(value))
+         throw createException(exceptionFactory, configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), emptyList(), null));
+       return value;
+     }
+   }
+
+   static RuntimeException createException(ExceptionFactory<?> exceptionFactory, Explanation explanation) {
+    Throwable t = exceptionFactory.apply(explanation);
+    if (t instanceof Error)
+      throw (Error) t;
+    if (t instanceof RuntimeException)
+      throw (RuntimeException) t;
+    throw new AssertionError(format("Checked exception(%s) cannot be used for validation.", t.getClass()), t);
+  } ;
 
   interface Configuration {
     int summarizedStringLength();

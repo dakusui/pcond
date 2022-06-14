@@ -1,8 +1,19 @@
 package com.github.dakusui.pcond.provider;
 
-import static com.github.dakusui.pcond.provider.impls.AssertionProviderImpl.createException;
+import java.lang.reflect.InvocationTargetException;
+
+import static com.github.dakusui.pcond.provider.ExceptionComposer.createException;
 
 public interface ExceptionComposer {
+  @SuppressWarnings("unchecked")
+  static <T extends Throwable> T createException(String className, Explanation explanation, ReflectiveExceptionFactory<T> reflectiveExceptionFactory) {
+    try {
+      return reflectiveExceptionFactory.apply((Class<T>) Class.forName(className), explanation);
+    } catch (ClassNotFoundException e) {
+      throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + className + "' (NOT FOUND)", e);
+    }
+  }
+
   interface Base {
     default Throwable exceptionForNonNullViolation(String message) {
       return new NullPointerException(message);
@@ -159,5 +170,19 @@ public interface ExceptionComposer {
             c.getConstructor(String.class, Object.class, Object.class).newInstance(exp.message(), exp.expected(), exp.actual()));
       }
     };
+  }
+
+  @FunctionalInterface
+  interface ReflectiveExceptionFactory<T extends Throwable> {
+    T create(Class<T> c, Explanation explanation) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException;
+
+    default T apply(Class<T> c, Explanation explanation) {
+      try {
+        return create(c, explanation);
+      } catch (InvocationTargetException | InstantiationException |
+               IllegalAccessException | NoSuchMethodException e) {
+        throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + c.getCanonicalName() + "'", e);
+      }
+    }
   }
 }
