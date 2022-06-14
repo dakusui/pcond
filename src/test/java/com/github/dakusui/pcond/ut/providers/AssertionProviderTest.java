@@ -1,13 +1,13 @@
 package com.github.dakusui.pcond.ut.providers;
 
 import com.github.dakusui.pcond.core.Configurations;
-import com.github.dakusui.pcond.provider.AssertionProvider;
-import com.github.dakusui.pcond.provider.ExceptionComposer;
-import com.github.dakusui.pcond.provider.MessageComposer;
-import com.github.dakusui.pcond.provider.ReportComposer;
+import com.github.dakusui.pcond.provider.*;
 import com.github.dakusui.pcond.provider.impls.AssertionProviderImpl;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
+
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
 
 public class AssertionProviderTest extends TestBase {
   public static class TestAssertionProvider implements AssertionProvider {
@@ -42,6 +42,11 @@ public class AssertionProviderTest extends TestBase {
     @Override
     public Configuration configuration() {
       return configuration;
+    }
+
+    @Override
+    public <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory) {
+      return null;
     }
   }
 

@@ -261,9 +261,7 @@ public interface AssertionProvider {
     return checkValueAndThrowIfFails(value, cond, messageComposer, explanation -> exceptionFactory.apply(explanation.toString()));
   }
 
-  default <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory) {
-    return checkValue(value, cond, messageComposer, msg -> exceptionFactory.apply(configuration().reportComposer().explanationFromMessage(msg)));
-  }
+   <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory) ;
 
   interface Configuration {
     int summarizedStringLength();
