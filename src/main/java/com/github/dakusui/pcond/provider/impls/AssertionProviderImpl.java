@@ -20,14 +20,17 @@ public class AssertionProviderImpl implements AssertionProvider {
   private final ReportComposer reportComposer;
 
   private final Configuration     configuration;
-  
+
   private final ExceptionComposer exceptionComposer;
 
   public AssertionProviderImpl(Properties properties) {
-    this.configuration = Configuration.create(this.getClass(), properties);
+    this.configuration = new Configuration.Builder(properties)
+        .assertionProviderClass(this.getClass())
+        .useEvaluator(true)
+        .build();
     this.messageComposer = this.configuration.createMessageComposer();
     this.reportComposer = this.configuration.createReportComposer();
-    this.exceptionComposer = this.configuration.createExceptionComposerFromProperties(this);
+    this.exceptionComposer = this.configuration.createExceptionComposer(this.reportComposer());
   }
 
   @Override

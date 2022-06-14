@@ -6,23 +6,43 @@ import com.github.dakusui.pcond.provider.impls.AssertionProviderImpl;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
-import java.util.Properties;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AssertionProviderTest extends TestBase {
   public static class TestAssertionProvider implements AssertionProvider {
     private final Configuration configuration = new Configuration() {
       @Override
+      public int summarizedStringLength() {
+        return 40;
+      }
+
+      @Override
       public boolean useEvaluator() {
         return false;
       }
 
       @Override
-      public ExceptionComposer createExceptionComposerFromProperties(AssertionProvider assertionProvider) {
+      public ExceptionComposer createExceptionComposer(ReportComposer reportComposer) {
+        return null;
+      }
+
+      @Override
+      public MessageComposer messageComposer() {
+        return null;
+      }
+
+      @Override
+      public ReportComposer reportComposer() {
+        return null;
+      }
+
+      @Override
+      public ReportComposer createReportComposer() {
+        return null;
+      }
+
+      @Override
+      public MessageComposer createMessageComposer() {
         return null;
       }
     };

@@ -41,6 +41,15 @@ public enum Assertions {
 
   /**
    * A method to be used for checking a value satisfies a given invariant condition.
+   * This method is intended to be used in `assert` statements.
+   *
+   * [source,java]
+   * .Example
+   * ----
+   * public void aMethod(String var) {
+   *   assert that(var, isNotNull());
+   * }
+   * ----
    *
    * @param value     A value to be checked.
    * @param predicate An invariant condition to check the {@code value}.
@@ -54,6 +63,15 @@ public enum Assertions {
 
   /**
    * A method to be used for checking a value satisfies a given pre-condition.
+   * This method is intended to be used in `assert` statements.
+   *
+   * [source,java]
+   * .Example
+   * ----
+   * public void aMethod(String var) {
+   *   assert precondition(var, isNotNull());
+   * }
+   * ----
    *
    * @param value     A value to be checked.
    * @param predicate A pre-condition to check the {@code value}.
@@ -67,6 +85,15 @@ public enum Assertions {
 
   /**
    * A method to be used for checking a value satisfies a given post-condition.
+   * This method is intended to be used in `assert` statements.
+   *
+   * [source,java]
+   * .Example
+   * ----
+   * public void aMethod(String var) {
+   *   assert postcondition(var, isNotNull());
+   * }
+   * ----
    *
    * @param value     A value to be checked.
    * @param predicate A post-condition to check the {@code value}.

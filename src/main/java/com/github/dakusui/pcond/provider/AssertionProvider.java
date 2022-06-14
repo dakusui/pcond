@@ -17,10 +17,28 @@ public interface AssertionProvider {
    */
   AssertionProvider INSTANCE = createAssertionProvider(System.getProperties());
 
+  /**
+   * Returns an exception composer, which is responsible for creating an exception
+   * object of an appropriate type for a context.
+   *
+   * @return An exception composer.
+   */
   ExceptionComposer exceptionComposer();
 
+  /**
+   * Returns a message composer, which is responsible for composing an appropriate message for
+   * a context.
+   *
+   * @return A message composer.
+   */
   MessageComposer messageComposer();
 
+  /**
+   * Returns a report composer, which is responsible for composing an appropriate "report" for
+   * a context.
+   *
+   * @return A report composer
+   */
   ReportComposer reportComposer();
 
   Configuration configuration();
@@ -109,33 +127,87 @@ public interface AssertionProvider {
   /**
    * Validates the given `value`.
    * If the value satisfies a condition `cond`, the value itself will be returned.
+   * Otherwise, an exception created by `forValidate.exceptionForGeneralViolation()`
+   * will be thrown.
    * This method is intended to be used by {@link com.github.dakusui.pcond.Validations#validate(Object, Predicate, Function)}
    * method.
-   * Otherwise, an exception created by `this#exceptionComposer().exceptionForGeneralViolation()`
-   * will be thrown.
    *
-   * @param value The value to be checked.
-   * @param cond  A condition to validate the `value`.
-   * @param forValidate
-   * @param <T>   The type of the value.
-   * @return The value.
+   * @param value       The value to be checked.
+   * @param cond        A condition to validate the `value`.
+   * @param forValidate An exception composer for "validate" methods.
+   * @param <T>         The type of the value.
+   * @return The value itself.
    */
   default <T> T validate(T value, Predicate<? super T> cond, ExceptionComposer.ForValidate forValidate) {
     return validate(value, cond, forValidate::exceptionForGeneralViolation);
   }
 
+  /**
+   * Validates the given `value`.
+   * If the value is not `null`, the value itself will be returned.
+   * Otherwise, an exception created by `forValidate.exceptionForGeneralViolation()`
+   * will be thrown.
+   * This method is intended to be used by {@link com.github.dakusui.pcond.Validations#validateNonNull(Object)}
+   * method.
+   *
+   * @param value       The value to be checked.
+   * @param forValidate An exception composer for "validate" methods.
+   * @param <T>         The type of the value.
+   * @return The value itself.
+   */
   default <T> T validateNonNull(T value, ExceptionComposer.ForValidate forValidate) {
     return validate(value, Predicates.isNotNull(), forValidate::exceptionForNonNullViolation);
   }
 
+  /**
+   * Validates the given argument variable `value`.
+   * If the value satisfies a condition `cond` for checking an argument variable, the value itself will be returned.
+   * Otherwise, an exception created by `forValidate.exceptionForIllegalArgument()`
+   * will be thrown.
+   * This method is intended to be used by {@link com.github.dakusui.pcond.Validations#validateArgument(Object, Predicate)}
+   * method.
+   *
+   * @param value       The value to be checked.
+   * @param cond        A condition to validate the `value`.
+   * @param forValidate An exception composer for "validate" methods.
+   * @param <T>         The type of the value.
+   * @return The value itself.
+   */
   default <T> T validateArgument(T value, Predicate<? super T> cond, ExceptionComposer.ForValidate forValidate) {
     return validate(value, cond, forValidate::exceptionForIllegalArgument);
   }
 
+  /**
+   * Validates the given state variable `value`.
+   * If the value satisfies a condition `cond` for checking a state, the value itself will be returned.
+   * Otherwise, an exception created by `forValidate.exceptionForIllegalState()`
+   * will be thrown.
+   * This method is intended to be used by {@link com.github.dakusui.pcond.Validations#validateState(Object, Predicate)}
+   * method.
+   *
+   * @param value       The value to be checked.
+   * @param cond        A condition to validate the `value`.
+   * @param forValidate An exception composer for "validate" methods.
+   * @param <T>         The type of the value.
+   * @return The value itself.
+   */
   default <T> T validateState(T value, Predicate<? super T> cond, ExceptionComposer.ForValidate forValidate) {
     return validate(value, cond, forValidate::exceptionForIllegalState);
   }
 
+  /**
+   * Validates the given variable `value`.
+   * If the value satisfies a condition `cond`, the value itself will be returned.
+   * Otherwise, an exception created by `exceptionFactory` will be thrown.
+   * This method is intended to be used by {@link com.github.dakusui.pcond.Validations#validate(Object, Predicate, Function)}
+   * method.
+   *
+   * @param value            The value to be checked.
+   * @param cond             A condition to validate the `value`.
+   * @param exceptionFactory A function to create an exception when the `cond` is not satisfied.
+   * @param <T>              The type of the value.
+   * @return The value itself.
+   */
   default <T> T validate(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionFactory) {
     return checkValue(value, cond, this.messageComposer()::composeMessageForValidation, exceptionFactory);
   }
@@ -218,52 +290,137 @@ public interface AssertionProvider {
   }
 
   interface Configuration {
-    static Configuration create(Class<? extends AssertionProvider> providerClass, Properties properties) {
-      return new Configuration() {
-        final boolean useEvaluator = useEvaluator(providerClass, properties);
-
-        @Override
-        public boolean useEvaluator() {
-          return this.useEvaluator;
-        }
-
-        public ExceptionComposer createExceptionComposerFromProperties(AssertionProvider assertionProvider) {
-          final ExceptionComposer.ForPrecondition forPrecondition = IllegalArgumentException::new;
-          final ExceptionComposer.ForPostCondition forPostCondition = new ExceptionComposer.ForPostCondition() {
-          };
-          final ExceptionComposer.ForValidate forValidate = new ExceptionComposer.ForValidate() {
-          };
-          final ExceptionComposer.ForAssertion forAssertion = new ExceptionComposer.ForAssertion() {
-          };
-          if (isJunit4())
-            return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forPostCondition, forValidate, forAssertion, assertionProvider.reportComposer());
-          return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forPostCondition, forValidate, forAssertion, assertionProvider.reportComposer());
-        }
-
-        private boolean isJunit4() {
-          return true;
-        }
-
-        private boolean useEvaluator(Class<?> myClass, Properties properties) {
-          return Boolean.parseBoolean(properties.getProperty(myClass.getName() + ".useEvaluator", "true"));
-        }
-      };
-    }
-
-    default int summarizedStringLength() {
-      return 40;
-    }
+    int summarizedStringLength();
 
     boolean useEvaluator();
 
-    ExceptionComposer createExceptionComposerFromProperties(AssertionProvider assertionProvider);
+    ExceptionComposer createExceptionComposer(ReportComposer reportComposer);
 
-    default ReportComposer createReportComposer() {
-      return ReportComposer.createDefaultReportComposer();
-    }
+    MessageComposer messageComposer();
 
-    default MessageComposer createMessageComposer() {
-      return MessageComposer.createDefaultMessageComposer();
+    ReportComposer reportComposer();
+
+    ReportComposer createReportComposer();
+
+    MessageComposer createMessageComposer();
+
+    class Builder {
+      Class<? extends AssertionProvider> assertionProvider;
+      Properties                         properties;
+      boolean                            useEvaluator;
+      int                                summarizedStringLength;
+
+
+      Function<ReportComposer, ExceptionComposer> exceptionComposerFactory;
+      MessageComposer                             messageComposer;
+      ReportComposer                              reportComposer;
+
+      public Builder(Properties properties) {
+        this.assertionProviderClass(AssertionProviderImpl.class)
+            .useEvaluator(useEvaluator(assertionProvider, properties))
+            .summarizedStringLength(40)
+            .exceptionComposerFactory(new Function<ReportComposer, ExceptionComposer>() {
+              final ExceptionComposer.ForPrecondition forPrecondition = IllegalArgumentException::new;
+              final ExceptionComposer.ForPostCondition forPostCondition = new ExceptionComposer.ForPostCondition() {
+              };
+              final ExceptionComposer.ForValidate forValidate = new ExceptionComposer.ForValidate() {
+              };
+              final ExceptionComposer.ForAssertion forAssertion = new ExceptionComposer.ForAssertion() {
+              };
+
+              @Override
+              public ExceptionComposer apply(ReportComposer reportComposer) {
+                if (isJunit4())
+                  return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forPostCondition, forValidate, forAssertion, reportComposer);
+                return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forPostCondition, forValidate, forAssertion, reportComposer);
+              }
+
+              private boolean isJunit4() {
+                return true;
+              }
+            })
+            .messageComposer(MessageComposer.createDefaultMessageComposer())
+            .reportComposer(ReportComposer.createDefaultReportComposer())
+            .properties(properties);
+      }
+
+      public Builder properties(Properties properties) {
+        this.properties = properties;
+        return this;
+      }
+
+      public Builder assertionProviderClass(Class<? extends AssertionProvider> assertionProvider) {
+        this.assertionProvider = assertionProvider;
+        return this;
+      }
+
+      public Builder useEvaluator(boolean useEvaluator) {
+        this.useEvaluator = useEvaluator;
+        return this;
+      }
+
+      public Builder summarizedStringLength(int summarizedStringLength) {
+        this.summarizedStringLength = summarizedStringLength;
+        return this;
+      }
+
+      public Builder exceptionComposerFactory(Function<ReportComposer, ExceptionComposer> exceptionComposerFactory) {
+        this.exceptionComposerFactory = exceptionComposerFactory;
+        return this;
+      }
+
+      public Builder messageComposer(MessageComposer messageComposer) {
+        this.messageComposer = messageComposer;
+        return this;
+      }
+
+      public Builder reportComposer(ReportComposer reportComposer) {
+        this.reportComposer = reportComposer;
+        return this;
+      }
+
+      private boolean useEvaluator(Class<?> myClass, Properties properties) {
+        return Boolean.parseBoolean(properties.getProperty(myClass.getName() + ".useEvaluator", "true"));
+      }
+
+      public Configuration build() {
+        return new Configuration() {
+
+          @Override
+          public int summarizedStringLength() {
+            return Builder.this.summarizedStringLength;
+          }
+
+          @Override
+          public boolean useEvaluator() {
+            return Builder.this.useEvaluator;
+          }
+
+          public ExceptionComposer createExceptionComposer(ReportComposer reportComposer) {
+            return Builder.this.exceptionComposerFactory.apply(reportComposer);
+          }
+
+          @Override
+          public MessageComposer messageComposer() {
+            return Builder.this.messageComposer;
+          }
+
+          @Override
+          public ReportComposer reportComposer() {
+            return Builder.this.reportComposer;
+          }
+
+          @Override
+          public ReportComposer createReportComposer() {
+            return Builder.this.reportComposer;
+          }
+
+          @Override
+          public MessageComposer createMessageComposer() {
+            return Builder.this.messageComposer;
+          }
+        };
+      }
     }
   }
 }
