@@ -24,13 +24,6 @@ public interface ExceptionComposer {
     Throwable exceptionForIllegalArgument(String message);
   }
 
-  interface ForInvariantCondition extends Base {
-    @Override
-    default Throwable exceptionForGeneralViolation(String message) {
-      return new AssertionError(message);
-    }
-  }
-
   interface ForPostCondition extends Base {
     @Override
     default Throwable exceptionForGeneralViolation(String message) {
@@ -42,6 +35,10 @@ public interface ExceptionComposer {
     @Override
     default Throwable exceptionForGeneralViolation(String message) {
       return new ValidationException(message);
+    }
+
+    default Throwable exceptionForIllegalArgument(String message) {
+      return new IllegalArgumentException(message);
     }
   }
 
@@ -61,11 +58,9 @@ public interface ExceptionComposer {
 
   ForPrecondition forRequire();
 
-  ForInvariantCondition forInvariantCondition();
-
   ForPostCondition forEnsure();
 
-  ForValidation forValidation();
+  ForValidation forValidate();
 
   ForAssertion forAssert();
 
@@ -77,7 +72,7 @@ public interface ExceptionComposer {
 
   <T extends Error> T testFailedException(Explanation explanation);
 
-  static ExceptionComposer createExceptionComposerForJUnit4(final ForPrecondition forPrecondition, final ForInvariantCondition forInvariantCondition, final ForPostCondition forPostCondition, final ForValidation forValidation, final ForAssertion forAssertion, final ReportComposer reportComposer) {
+  static ExceptionComposer createExceptionComposerForJUnit4(final ForPrecondition forPrecondition, final ForPostCondition forPostCondition, final ForValidation forValidation, final ForAssertion forAssertion, final ReportComposer reportComposer) {
     return new ExceptionComposer() {
 
       private ReportComposer reportComposer() {
@@ -90,17 +85,12 @@ public interface ExceptionComposer {
       }
 
       @Override
-      public ForInvariantCondition forInvariantCondition() {
-        return forInvariantCondition;
-      }
-
-      @Override
       public ForPostCondition forEnsure() {
         return forPostCondition;
       }
 
       @Override
-      public ForValidation forValidation() {
+      public ForValidation forValidate() {
         return forValidation;
       }
 
@@ -129,7 +119,7 @@ public interface ExceptionComposer {
     };
   }
 
-  static ExceptionComposer createExceptionComposerForOpentest4J(ForPrecondition forPrecondition, ForInvariantCondition forInvariantCondition, final ForPostCondition forPostCondition, ForValidation forValidation, ForAssertion forAssertion, final ReportComposer reportComposer) {
+  static ExceptionComposer createExceptionComposerForOpentest4J(ForPrecondition forPrecondition, final ForPostCondition forPostCondition, ForValidation forValidation, ForAssertion forAssertion, final ReportComposer reportComposer) {
     return new ExceptionComposer() {
       private ReportComposer reportComposer() {
         return reportComposer;
@@ -141,17 +131,12 @@ public interface ExceptionComposer {
       }
 
       @Override
-      public ForInvariantCondition forInvariantCondition() {
-        return forInvariantCondition;
-      }
-
-      @Override
       public ForPostCondition forEnsure() {
         return forPostCondition;
       }
 
       @Override
-      public ForValidation forValidation() {
+      public ForValidation forValidate() {
         return forValidation;
       }
 

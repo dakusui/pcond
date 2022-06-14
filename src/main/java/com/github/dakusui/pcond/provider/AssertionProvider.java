@@ -46,7 +46,7 @@ public interface AssertionProvider {
    * @return The {@code value}.
    */
   default <T> T requireNonNull(T value) {
-    return checkValue(value, Predicates.isNotNull(), this.messageComposer()::composeMessageForPrecondition, exceptionComposer().forRequire()::exceptionForNonNullViolation);
+    return require(value, Predicates.isNotNull(), exceptionComposer().forRequire()::exceptionForNonNullViolation);
   }
 
   /**
@@ -59,7 +59,7 @@ public interface AssertionProvider {
    * @return The value.
    */
   default <T> T requireArgument(T value, Predicate<? super T> cond) {
-    return checkValue(value, cond, this.messageComposer()::composeMessageForPrecondition, exceptionComposer().forRequire()::exceptionForIllegalArgument);
+    return require(value, cond, exceptionComposer().forRequire()::exceptionForIllegalArgument);
   }
 
   /**
@@ -72,7 +72,7 @@ public interface AssertionProvider {
    * @return The value.
    */
   default <T> T requireState(T value, Predicate<? super T> cond) {
-    return checkValue(value, cond, this.messageComposer()::composeMessageForPrecondition, exceptionComposer().forRequire()::exceptionForIllegalState);
+    return require(value, cond, exceptionComposer().forRequire()::exceptionForIllegalState);
   }
 
   /**
@@ -106,16 +106,32 @@ public interface AssertionProvider {
     return checkValue(value, cond, this.messageComposer()::composeMessageForPrecondition, exceptionFactory);
   }
 
+  default <T> T validate(T value, Predicate<? super T> cond) {
+    return validate(value, cond, exceptionComposer().forValidate()::exceptionForGeneralViolation);
+  }
+
+  default <T> T validateNonNull(T value) {
+    return validate(value, Predicates.isNotNull(), exceptionComposer().forValidate()::exceptionForNonNullViolation);
+  }
+
+  default <T> T validateArgument(T value, Predicate<? super T> cond) {
+    return validate(value, cond, exceptionComposer().forValidate()::exceptionForIllegalArgument);
+  }
+
+  default <T> T validateState(T value, Predicate<? super T> cond) {
+    return validate(value, cond, exceptionComposer().forValidate()::exceptionForIllegalState);
+  }
+
   default <T> T validate(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionFactory) {
     return checkValue(value, cond, this.messageComposer()::composeMessageForValidation, exceptionFactory);
   }
 
   default <T> T ensureNonNull(T value) {
-    return checkValue(value, Predicates.isNotNull(), this.messageComposer()::composeMessageForPostcondition, exceptionComposer().forEnsure()::exceptionForNonNullViolation);
+    return ensure(value, Predicates.isNotNull(), exceptionComposer().forEnsure()::exceptionForNonNullViolation);
   }
 
   default <T> T ensureState(T value, Predicate<? super T> cond) {
-    return checkValue(value, cond, this.messageComposer()::composeMessageForPostcondition, exceptionComposer().forEnsure()::exceptionForIllegalState);
+    return ensure(value, cond, exceptionComposer().forEnsure()::exceptionForIllegalState);
   }
 
   default <T> T ensure(T value, Predicate<? super T> cond) {
@@ -126,14 +142,47 @@ public interface AssertionProvider {
     return checkValue(value, cond, this.messageComposer()::composeMessageForPostcondition, exceptionComposer);
   }
 
+  /**
+   * A method to check if a `value` satisfies a predicate `cond`.
+   *
+   * This method is intended to be used by {@link com.github.dakusui.pcond.Assertions#that(Object, Predicate)}.
+   * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionInvariantConditionViolation()`
+   * method will be thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A condition to check the `value`.
+   * @param <T>   The type of `value`.
+   */
   default <T> void checkInvariant(T value, Predicate<? super T> cond) {
     checkValue(value, cond, this.messageComposer()::composeMessageForAssertion, exceptionComposer().forAssert()::exceptionInvariantConditionViolation);
   }
 
+  /**
+   * A method to check if a `value` satisfies a predicate `cond`.
+   *
+   * This method is intended to be used by {@link com.github.dakusui.pcond.Assertions#precondition(Object, Predicate)}.
+   * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionPreconditionViolation()`
+   * method will be thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A condition to check the `value`.
+   * @param <T>   The type of `value`.
+   */
   default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
     checkValue(value, cond, this.messageComposer()::composeMessageForPrecondition, exceptionComposer().forAssert()::exceptionPreconditionViolation);
   }
 
+  /**
+   * A method to check if a `value` satisfies a predicate `cond`.
+   *
+   * This method is intended to be used by {@link com.github.dakusui.pcond.Assertions#postcondition(Object, Predicate)} .
+   * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionPostconditionViolation()`
+   * method will be thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A condition to check the `value`.
+   * @param <T>   The type of `value`.
+   */
   default <T> void checkPostcondition(T value, Predicate<? super T> cond) {
     checkValue(value, cond, this.messageComposer()::composeMessageForPostcondition, exceptionComposer().forAssert()::exceptionPostconditionViolation);
   }
@@ -142,9 +191,8 @@ public interface AssertionProvider {
     checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::testFailedException);
   }
 
-  // Necessary to suppress compilation failure.
   default <T> void assumeThat(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::<RuntimeException>testSkippedException);
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, this.exceptionComposer()::testSkippedException);
   }
 
   default <T> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, Throwable> exceptionFactory) {
@@ -166,14 +214,7 @@ public interface AssertionProvider {
     }
 
     default ExceptionComposer createExceptionComposerFromProperties(Properties properties, AssertionProvider assertionProvider) {
-      final ExceptionComposer.ForPrecondition forPrecondition = new ExceptionComposer.ForPrecondition() {
-        @Override
-        public Throwable exceptionForIllegalArgument(String message) {
-          return new IllegalArgumentException(message);
-        }
-      };
-      final ExceptionComposer.ForInvariantCondition forInvariantCondition = new ExceptionComposer.ForInvariantCondition() {
-      };
+      final ExceptionComposer.ForPrecondition forPrecondition = IllegalArgumentException::new;
       final ExceptionComposer.ForPostCondition forPostCondition = new ExceptionComposer.ForPostCondition() {
       };
       final ExceptionComposer.ForValidation forValidation = new ExceptionComposer.ForValidation() {
@@ -181,8 +222,8 @@ public interface AssertionProvider {
       final ExceptionComposer.ForAssertion forAssertion = new ExceptionComposer.ForAssertion() {
       };
       if (isJunit4(properties))
-        return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forInvariantCondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
-      return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forInvariantCondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
+        return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
+      return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
     }
 
     default boolean isJunit4(Properties properties) {
