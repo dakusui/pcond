@@ -19,16 +19,14 @@ public class AssertionProviderImpl implements AssertionProvider {
 
   private final ReportComposer reportComposer;
 
-  private final boolean           useEvaluator;
   private final Configuration     configuration;
   private final ExceptionComposer exceptionComposer;
 
   public AssertionProviderImpl(Properties properties) {
-    this.useEvaluator = useEvaluator(this.getClass(), properties);
-    this.configuration = Configuration.create(properties);
+    this.configuration = Configuration.create(this.getClass(), properties);
     this.messageComposer = this.configuration.createMessageComposer();
     this.reportComposer = this.configuration.createReportComposer();
-    this.exceptionComposer = this.configuration.createExceptionComposerFromProperties(properties, this);
+    this.exceptionComposer = this.configuration.createExceptionComposerFromProperties(this);
   }
 
   @Override
@@ -78,7 +76,7 @@ public class AssertionProviderImpl implements AssertionProvider {
   @SuppressWarnings("unchecked")
   @Override
   public <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory) {
-    if (useEvaluator && cond instanceof Evaluable) {
+    if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
         ((Evaluable<T>) cond).accept(value, evaluator);
@@ -107,11 +105,6 @@ public class AssertionProviderImpl implements AssertionProvider {
       throw (RuntimeException) t;
     throw new AssertionError(format("Checked exception(%s) cannot be used for validation.", t.getClass()), t);
   }
-
-  private static boolean useEvaluator(Class<?> myClass, Properties properties) {
-    return Boolean.parseBoolean(properties.getProperty(myClass.getName() + ".useEvaluator", "true"));
-  }
-
 
   public static class Result {
     final boolean               result;

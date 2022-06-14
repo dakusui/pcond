@@ -106,6 +106,19 @@ public interface AssertionProvider {
     return checkValue(value, cond, this.messageComposer()::composeMessageForPrecondition, exceptionFactory);
   }
 
+  /**
+   * Validates the given `value`.
+   * If the value satisfies a condition `cond`, the value itself will be returned.
+   * This method is intended to be used by {@link com.github.dakusui.pcond.Validations#validate(Object, Predicate, Function)}
+   * method.
+   * Otherwise, an exception created by `this#exceptionComposer().exceptionForGeneralViolation()`
+   * will be thrown.
+   *
+   * @param value The value to be checked.
+   * @param cond  A condition to validate the `value`.
+   * @param <T>   The type of the value.
+   * @return The value.
+   */
   default <T> T validate(T value, Predicate<? super T> cond) {
     return validate(value, cond, exceptionComposer().forValidate()::exceptionForGeneralViolation);
   }
@@ -204,8 +217,35 @@ public interface AssertionProvider {
   }
 
   interface Configuration {
-    static Configuration create(Properties properties) {
+    static Configuration create(Class<? extends AssertionProvider> providerClass, Properties properties) {
       return new Configuration() {
+        final boolean useEvaluator = useEvaluator(providerClass, properties);
+
+        @Override
+        public boolean useEvaluator() {
+          return this.useEvaluator;
+        }
+
+        public ExceptionComposer createExceptionComposerFromProperties(AssertionProvider assertionProvider) {
+          final ExceptionComposer.ForPrecondition forPrecondition = IllegalArgumentException::new;
+          final ExceptionComposer.ForPostCondition forPostCondition = new ExceptionComposer.ForPostCondition() {
+          };
+          final ExceptionComposer.ForValidation forValidation = new ExceptionComposer.ForValidation() {
+          };
+          final ExceptionComposer.ForAssertion forAssertion = new ExceptionComposer.ForAssertion() {
+          };
+          if (isJunit4())
+            return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
+          return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
+        }
+
+        private boolean isJunit4() {
+          return true;
+        }
+
+        private boolean useEvaluator(Class<?> myClass, Properties properties) {
+          return Boolean.parseBoolean(properties.getProperty(myClass.getName() + ".useEvaluator", "true"));
+        }
       };
     }
 
@@ -213,22 +253,9 @@ public interface AssertionProvider {
       return 40;
     }
 
-    default ExceptionComposer createExceptionComposerFromProperties(Properties properties, AssertionProvider assertionProvider) {
-      final ExceptionComposer.ForPrecondition forPrecondition = IllegalArgumentException::new;
-      final ExceptionComposer.ForPostCondition forPostCondition = new ExceptionComposer.ForPostCondition() {
-      };
-      final ExceptionComposer.ForValidation forValidation = new ExceptionComposer.ForValidation() {
-      };
-      final ExceptionComposer.ForAssertion forAssertion = new ExceptionComposer.ForAssertion() {
-      };
-      if (isJunit4(properties))
-        return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
-      return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
-    }
+    boolean useEvaluator();
 
-    default boolean isJunit4(Properties properties) {
-      return true;
-    }
+    ExceptionComposer createExceptionComposerFromProperties(AssertionProvider assertionProvider);
 
     default ReportComposer createReportComposer() {
       return ReportComposer.createDefaultReportComposer();
