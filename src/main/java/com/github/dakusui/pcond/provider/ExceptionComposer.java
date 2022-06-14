@@ -45,6 +45,20 @@ public interface ExceptionComposer {
     }
   }
 
+  interface ForAssertion {
+    default Throwable exceptionPreconditionViolation(String message) {
+      return new AssertionError(message);
+    }
+
+    default Throwable exceptionInvariantConditionViolation(String message) {
+      return new AssertionError(message);
+    }
+
+    default Throwable exceptionPostconditionViolation(String message) {
+      return new AssertionError(message);
+    }
+  }
+
   ForPrecondition forPrecondition();
 
   ForInvariantCondition forInvariantCondition();
@@ -53,19 +67,17 @@ public interface ExceptionComposer {
 
   ForValidation forValidation();
 
+  ForAssertion forAssertion();
+
   <T extends RuntimeException> T testSkippedException(String message);
 
   default <T extends RuntimeException> T testSkippedException(Explanation explanation) {
     return testSkippedException(explanation.toString());
   }
 
-  <T extends Error> T testFailedException(String message);
+  <T extends Error> T testFailedException(Explanation explanation);
 
-  default <T extends Error> T testFailedException(Explanation explanation) {
-    return testFailedException(explanation.toString());
-  }
-
-  static ExceptionComposer createExceptionComposerForJUnit4(final ForPrecondition forPrecondition, final ForInvariantCondition forInvariantCondition, final ForPostCondition forPostCondition, final ForValidation forValidation, final ReportComposer reportComposer) {
+  static ExceptionComposer createExceptionComposerForJUnit4(final ForPrecondition forPrecondition, final ForInvariantCondition forInvariantCondition, final ForPostCondition forPostCondition, final ForValidation forValidation, final ForAssertion forAssertion, final ReportComposer reportComposer) {
     return new ExceptionComposer() {
 
       private ReportComposer reportComposer() {
@@ -92,6 +104,11 @@ public interface ExceptionComposer {
         return forValidation;
       }
 
+      @Override
+      public ForAssertion forAssertion() {
+        return forAssertion;
+      }
+
       @SuppressWarnings("unchecked")
       @Override
       public <T extends RuntimeException> T testSkippedException(String message) {
@@ -99,11 +116,6 @@ public interface ExceptionComposer {
             "org.junit.AssumptionViolatedException",
             reportComposer().explanationFromMessage(message),
             (c, exp) -> c.getConstructor(String.class).newInstance(exp.message()));
-      }
-
-      @Override
-      public <T extends Error> T testFailedException(String message) {
-        throw testFailedException(reportComposer().explanationFromMessage(message));
       }
 
       @SuppressWarnings("unchecked")
@@ -117,7 +129,7 @@ public interface ExceptionComposer {
     };
   }
 
-  static ExceptionComposer createExceptionComposerForOpentest4J(ForPrecondition forPrecondition, ForInvariantCondition forInvariantCondition, final ForPostCondition forPostCondition, ForValidation forValidation, final ReportComposer reportComposer) {
+  static ExceptionComposer createExceptionComposerForOpentest4J(ForPrecondition forPrecondition, ForInvariantCondition forInvariantCondition, final ForPostCondition forPostCondition, ForValidation forValidation, ForAssertion forAssertion, final ReportComposer reportComposer) {
     return new ExceptionComposer() {
       private ReportComposer reportComposer() {
         return reportComposer;
@@ -143,16 +155,16 @@ public interface ExceptionComposer {
         return forValidation;
       }
 
+      @Override
+      public ForAssertion forAssertion() {
+        return forAssertion;
+      }
+
       @SuppressWarnings("unchecked")
       @Override
       public <T extends RuntimeException> T testSkippedException(String message) {
         throw (T) createException("org.opentest4j.TestSkippedException", reportComposer().explanationFromMessage(message), (c, exp) ->
             c.getConstructor(String.class).newInstance(exp.message()));
-      }
-
-      @Override
-      public <T extends Error> T testFailedException(String message) {
-        throw testFailedException(reportComposer().explanationFromMessage(message));
       }
 
       @SuppressWarnings("unchecked")

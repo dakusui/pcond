@@ -127,15 +127,15 @@ public interface AssertionProvider {
   }
 
   default <T> void checkInvariant(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, ExceptionFactory.from(exceptionComposer().forInvariantCondition()::exceptionForGeneralViolation));
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForAssertion, ExceptionFactory.from(exceptionComposer().forAssertion()::exceptionInvariantConditionViolation));
   }
 
   default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(exceptionComposer().forPrecondition()::exceptionForGeneralViolation));
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPrecondition, ExceptionFactory.from(exceptionComposer().forAssertion()::exceptionPreconditionViolation));
   }
 
   default <T> void checkPostcondition(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPostcondition, ExceptionFactory.from(exceptionComposer().forPostCondition()::exceptionForGeneralViolation));
+    checkValueAndThrowIfFails(value, cond, this.messageComposer()::composeMessageForPostcondition, ExceptionFactory.from(exceptionComposer().forAssertion()::exceptionPostconditionViolation));
   }
 
   default <T> void assertThat(T value, Predicate<? super T> cond) {
@@ -179,9 +179,11 @@ public interface AssertionProvider {
       };
       final ExceptionComposer.ForValidation forValidation = new ExceptionComposer.ForValidation() {
       };
+      final ExceptionComposer.ForAssertion forAssertion = new ExceptionComposer.ForAssertion() {
+      };
       if (isJunit4(properties))
-        return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forInvariantCondition, forPostCondition, forValidation, assertionProvider.reportComposer());
-      return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forInvariantCondition, forPostCondition, forValidation, assertionProvider.reportComposer());
+        return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forInvariantCondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
+      return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forInvariantCondition, forPostCondition, forValidation, forAssertion, assertionProvider.reportComposer());
     }
 
     default boolean isJunit4(Properties properties) {
