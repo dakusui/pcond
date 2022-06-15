@@ -299,8 +299,6 @@ public interface AssertionProvider {
     throw new AssertionError(format("Checked exception(%s) cannot be used for validation.", t.getClass()), t);
   }
 
-  ;
-
   interface Configuration {
     int summarizedStringLength();
 
@@ -339,7 +337,7 @@ public interface AssertionProvider {
       MessageComposer                             messageComposer;
       ReportComposer                              reportComposer;
 
-      public Builder(Properties properties) {
+      public Builder() {
         this.useEvaluator(true)
             .summarizedStringLength(40)
             .exceptionComposerFactory(new Function<ReportComposer, ExceptionComposer>() {
@@ -440,7 +438,7 @@ public interface AssertionProvider {
     private final Configuration configuration;
 
     public Impl(Properties properties) {
-      this.configuration = new Configuration.Builder(properties)
+      this.configuration = new Configuration.Builder()
           .useEvaluator(true)
           .build();
     }
