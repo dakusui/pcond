@@ -103,7 +103,11 @@ public interface AssertionProvider {
    * @return The `value`, if `cond` is satisfied.
    */
   default <T> T require(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionFactory) {
-    return checkValue(value, cond, this.configuration().messageComposer()::composeMessageForPrecondition, exceptionFactory);
+    return checkValueAndThrowIfFails(
+        value,
+        cond,
+        this.configuration().messageComposer()::composeMessageForPrecondition,
+        explanation -> exceptionFactory.apply(explanation.toString()));
   }
 
   /**
@@ -191,7 +195,11 @@ public interface AssertionProvider {
    * @return The value itself.
    */
   default <T> T validate(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionFactory) {
-    return checkValue(value, cond, configuration().messageComposer()::composeMessageForValidation, exceptionFactory);
+    return checkValueAndThrowIfFails(
+        value,
+        cond,
+        configuration().messageComposer()::composeMessageForValidation,
+        explanation -> exceptionFactory.apply(explanation.toString()));
   }
 
   /**
@@ -252,7 +260,11 @@ public interface AssertionProvider {
    * @return The value.
    */
   default <T> T ensure(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionComposer) {
-    return checkValue(value, cond, configuration().messageComposer()::composeMessageForPostcondition, exceptionComposer);
+    return checkValueAndThrowIfFails(
+        value,
+        cond,
+        configuration().messageComposer()::composeMessageForPostcondition,
+        explanation -> exceptionComposer.apply(explanation.toString()));
   }
 
   /**
@@ -267,7 +279,11 @@ public interface AssertionProvider {
    * @param <T>   The type of `value`.
    */
   default <T> void checkInvariant(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, configuration().messageComposer()::composeMessageForAssertion, configuration().exceptionComposer().forAssert()::exceptionInvariantConditionViolation);
+    checkValueAndThrowIfFails(
+        value,
+        cond,
+        configuration().messageComposer()::composeMessageForAssertion,
+        explanation -> ((Function<String, Throwable>) configuration().exceptionComposer().forAssert()::exceptionInvariantConditionViolation).apply(explanation.toString()));
   }
 
   /**
@@ -322,14 +338,6 @@ public interface AssertionProvider {
         cond,
         this.configuration().messageComposer()::composeMessageForAssertion,
         configuration().exceptionComposer()::testSkippedException);
-  }
-
-  default <T> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, Throwable> exceptionFactory) {
-    return checkValueAndThrowIfFails(
-        value,
-        cond,
-        messageComposer,
-        explanation -> exceptionFactory.apply(explanation.toString()));
   }
 
   @SuppressWarnings("unchecked")
