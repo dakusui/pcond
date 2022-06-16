@@ -194,18 +194,63 @@ public interface AssertionProvider {
     return checkValue(value, cond, configuration().messageComposer()::composeMessageForValidation, exceptionFactory);
   }
 
+  /**
+   * Checks a value if it is not `null`.
+   * If it is not `null`, the value itself will be returned.
+   * If it is, an exception created by `configuration().exceptionComposer().forEnsure().exceptionForNonNullViolation()` will be thrown.
+   * This method is intended for ensuring a "post-condition".
+   *
+   * @param value The value to be checked.
+   * @param <T>   The type of the value.
+   * @return The value.
+   */
   default <T> T ensureNonNull(T value) {
     return ensure(value, Predicates.isNotNull(), configuration().exceptionComposer().forEnsure()::exceptionForNonNullViolation);
   }
 
+  /**
+   * Checks a value if it meets a requirement specified by {@code cond}.
+   * If it does, the value itself will be returned.
+   * If it does not, an exception created by `configuration().exceptionComposer().forEnsure().exceptionForIllegalState()` will be thrown.
+   * This method is intended for ensuring a "post-condition" of a state.
+   *
+   * @param value The value to be checked.
+   * @param cond  The requirement to check the {@code value}.
+   * @param <T>   The type of the value.
+   * @return The value.
+   */
   default <T> T ensureState(T value, Predicate<? super T> cond) {
     return ensure(value, cond, configuration().exceptionComposer().forEnsure()::exceptionForIllegalState);
   }
 
+  /**
+   * Checks a value if it meets a requirement specified by {@code cond}.
+   * If it does, the value itself will be returned.
+   * If it does not, an exception created by `configuration().exceptionComposer().forEnsure().exceptionForGeneralViolation()` will be thrown.
+   * This method is intended for ensuring a "post-condition".
+   *
+   * @param value The value to be checked.
+   * @param cond  The requirement to check the {@code value}.
+   * @param <T>   The type of the value.
+   * @return The value.
+   */
   default <T> T ensure(T value, Predicate<? super T> cond) {
     return ensure(value, cond, msg -> configuration().exceptionComposer().forEnsure().exceptionForGeneralViolation(msg));
   }
 
+  /**
+   * Checks a value if it meets a requirement specified by {@code cond}.
+   * If it does, the value itself will be returned.
+   * If it does not, an exception created by `exceptionComposer` will be thrown.
+   * This method is intended for ensuring a "post-condition".
+   *
+   * @param value             The value to be checked.
+   * @param cond              The requirement to check the {@code value}.
+   * @param exceptionComposer A function to create an exception to be thrown when
+   *                          `cond` is not met.
+   * @param <T>               The type of the value.
+   * @return The value.
+   */
   default <T> T ensure(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionComposer) {
     return checkValue(value, cond, configuration().messageComposer()::composeMessageForPostcondition, exceptionComposer);
   }
@@ -237,7 +282,11 @@ public interface AssertionProvider {
    * @param <T>   The type of `value`.
    */
   default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, configuration().messageComposer()::composeMessageForPrecondition, configuration().exceptionComposer().forAssert()::exceptionPreconditionViolation);
+    checkValueAndThrowIfFails(
+        value,
+        cond,
+        configuration().messageComposer()::composeMessageForPrecondition,
+        explanation -> configuration().exceptionComposer().forAssert().exceptionPreconditionViolation(explanation.toString()));
   }
 
   /**
@@ -252,19 +301,35 @@ public interface AssertionProvider {
    * @param <T>   The type of `value`.
    */
   default <T> void checkPostcondition(T value, Predicate<? super T> cond) {
-    checkValue(value, cond, configuration().messageComposer()::composeMessageForPostcondition, configuration().exceptionComposer().forAssert()::exceptionPostconditionViolation);
+    checkValueAndThrowIfFails(
+        value,
+        cond,
+        configuration().messageComposer()::composeMessageForPostcondition,
+        explanation -> configuration().exceptionComposer().forAssert().exceptionPostconditionViolation(explanation.toString()));
   }
 
   default <T> void assertThat(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.configuration().messageComposer()::composeMessageForAssertion, configuration().exceptionComposer()::testFailedException);
+    checkValueAndThrowIfFails(
+        value,
+        cond,
+        this.configuration().messageComposer()::composeMessageForAssertion,
+        configuration().exceptionComposer()::testFailedException);
   }
 
   default <T> void assumeThat(T value, Predicate<? super T> cond) {
-    checkValueAndThrowIfFails(value, cond, this.configuration().messageComposer()::composeMessageForAssertion, configuration().exceptionComposer()::testSkippedException);
+    checkValueAndThrowIfFails(
+        value,
+        cond,
+        this.configuration().messageComposer()::composeMessageForAssertion,
+        configuration().exceptionComposer()::testSkippedException);
   }
 
   default <T> T checkValue(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, Function<String, Throwable> exceptionFactory) {
-    return checkValueAndThrowIfFails(value, cond, messageComposer, explanation -> exceptionFactory.apply(explanation.toString()));
+    return checkValueAndThrowIfFails(
+        value,
+        cond,
+        messageComposer,
+        explanation -> exceptionFactory.apply(explanation.toString()));
   }
 
   @SuppressWarnings("unchecked")
