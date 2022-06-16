@@ -42,11 +42,6 @@ public class AssertionProviderTest extends TestBase {
     public Configuration configuration() {
       return configuration;
     }
-
-    @Override
-    public <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory) {
-      return null;
-    }
   }
 
   @Test

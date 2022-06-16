@@ -283,7 +283,7 @@ public interface AssertionProvider {
         value,
         cond,
         configuration().messageComposer()::composeMessageForAssertion,
-        explanation -> ((Function<String, Throwable>) configuration().exceptionComposer().forAssert()::exceptionInvariantConditionViolation).apply(explanation.toString()));
+        explanation -> configuration().exceptionComposer().forAssert().exceptionInvariantConditionViolation(explanation.toString()));
   }
 
   /**
@@ -324,19 +324,37 @@ public interface AssertionProvider {
         explanation -> configuration().exceptionComposer().forAssert().exceptionPostconditionViolation(explanation.toString()));
   }
 
+  /**
+   * Executes a test assertion for a given `value` using a predicate `cond`.
+   * If the `cond` is not satisfied by the `value`, an exception created by `configuration().messageComposer().composeMessageForAssertion()`
+   * will be thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A predicate to check a given `value`.
+   * @param <T>   The type of the `value`.
+   */
   default <T> void assertThat(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
         value,
         cond,
-        this.configuration().messageComposer()::composeMessageForAssertion,
+        configuration().messageComposer()::composeMessageForAssertion,
         configuration().exceptionComposer()::testFailedException);
   }
 
+  /**
+   * Executes a test assumption check for a given `value` using a predicate `cond`.
+   * If the `cond` is not satisfied by the `value`, an exception created by `configuration().messageComposer().composeMessageForAssertion()`
+   * will be thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A predicate to check a given `value`.
+   * @param <T>   The type of the `value`.
+   */
   default <T> void assumeThat(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
         value,
         cond,
-        this.configuration().messageComposer()::composeMessageForAssertion,
+        configuration().messageComposer()::composeMessageForAssertion,
         configuration().exceptionComposer()::testSkippedException);
   }
 
