@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.internals.InternalChecks;
-import com.github.dakusui.pcond.provider.AssertionProvider;
+import com.github.dakusui.pcond.provider.ValueChecker;
 
 import java.util.Objects;
 
@@ -13,9 +13,9 @@ public enum Configurations {
    *
    * @param assertionProviderClass A provider class to be used hereafter.
    */
-  public static void initializeWith(Class<? extends AssertionProvider> assertionProviderClass) {
-    System.setProperty(AssertionProvider.class.getCanonicalName(), assertionProviderClass.getName());
-    InternalChecks.requireState(AssertionProvider.INSTANCE, v -> Objects.equals(assertionProviderClass, v.getClass()),
-        () -> assertionProviderClass.getName() + " was requested, but actually, " + AssertionProvider.INSTANCE.getClass() + " was already loaded.");
+  public static void initializeWith(Class<? extends ValueChecker> assertionProviderClass) {
+    System.setProperty(ValueChecker.class.getCanonicalName(), assertionProviderClass.getName());
+    InternalChecks.requireState(ValueChecker.INSTANCE, v -> Objects.equals(assertionProviderClass, v.getClass()),
+        () -> assertionProviderClass.getName() + " was requested, but actually, " + ValueChecker.INSTANCE.getClass() + " was already loaded.");
   }
 }

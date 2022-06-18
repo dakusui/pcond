@@ -27,9 +27,7 @@ public interface ReportComposer {
     return Utils.composeExplanation(message, result, t);
   }
 
-  static ReportComposer createDefaultReportComposer() {
-    return new ReportComposer() {
-    };
+  class Default implements ReportComposer {
   }
 
   enum Utils {
@@ -163,41 +161,41 @@ public interface ReportComposer {
           .map(s -> ("+" + s).trim().substring(1))
           .collect(joining(format("%n")));
     }
-  }
 
-  class FormattedEntry {
-    private final String input;
-    private final String formName;
-    private final String indent;
-    private final String output;
-    private final Object mismatchExplanation;
+    public static class FormattedEntry {
+      private final String input;
+      private final String formName;
+      private final String indent;
+      private final String output;
+      private final Object mismatchExplanation;
 
-    FormattedEntry(String input, String formName, String indent, String output, Object mismatchExplanation) {
-      this.input = input;
-      this.formName = formName;
-      this.indent = indent;
-      this.output = output;
-      this.mismatchExplanation = mismatchExplanation;
-    }
+      FormattedEntry(String input, String formName, String indent, String output, Object mismatchExplanation) {
+        this.input = input;
+        this.formName = formName;
+        this.indent = indent;
+        this.output = output;
+        this.mismatchExplanation = mismatchExplanation;
+      }
 
-    Optional<String> input() {
-      return Optional.ofNullable(this.input);
-    }
+      Optional<String> input() {
+        return Optional.ofNullable(this.input);
+      }
 
-    String indent() {
-      return this.indent;
-    }
+      String indent() {
+        return this.indent;
+      }
 
-    String formName() {
-      return this.formName;
-    }
+      String formName() {
+        return this.formName;
+      }
 
-    Optional<Object> mismatchExplanation() {
-      return Optional.ofNullable(this.mismatchExplanation);
-    }
+      Optional<Object> mismatchExplanation() {
+        return Optional.ofNullable(this.mismatchExplanation);
+      }
 
-    Optional<String> output() {
-      return Optional.ofNullable(this.output);
+      Optional<String> output() {
+        return Optional.ofNullable(this.output);
+      }
     }
   }
 }

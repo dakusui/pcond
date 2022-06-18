@@ -5,11 +5,8 @@ import com.github.dakusui.pcond.provider.*;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-
-public class AssertionProviderTest extends TestBase {
-  public static class TestAssertionProvider implements AssertionProvider {
+public class ValueCheckerTest extends TestBase {
+  public static class TestValueChecker implements ValueChecker {
     private final Configuration configuration = new Configuration() {
       @Override
       public int summarizedStringLength() {
@@ -46,15 +43,15 @@ public class AssertionProviderTest extends TestBase {
 
   @Test
   public void test2() {
-    System.out.println(TestAssertionProvider.class.getName());
+    System.out.println(TestValueChecker.class.getName());
     System.setProperty("com.github.dakusui.pcond.provider.AssertionProvider", "com.github.dakusui.pcond.ut.providers.AssertionProviderTest$TestAssertionProvider");
-    System.out.println("-->" + AssertionProvider.INSTANCE.getClass().getCanonicalName());
+    System.out.println("-->" + ValueChecker.INSTANCE.getClass().getCanonicalName());
   }
 
   @Test(expected = IllegalStateException.class)
   public void test3() {
-    Configurations.initializeWith(TestAssertionProvider.class);
-    System.out.println(AssertionProvider.INSTANCE.getClass().getCanonicalName());
-    Configurations.initializeWith(AssertionProvider.Impl.class);
+    Configurations.initializeWith(TestValueChecker.class);
+    System.out.println(ValueChecker.INSTANCE.getClass().getCanonicalName());
+    Configurations.initializeWith(ValueChecker.Impl.class);
   }
 }

@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.ut.providers;
 
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.provider.AssertionProvider;
+import com.github.dakusui.pcond.provider.ValueChecker;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -19,7 +19,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class DefaultAssertionProviderTest extends TestBase {
+public class DefaultValueCheckerTest extends TestBase {
   @Test(expected = IllegalArgumentException.class)
   public void withoutEvaluator_conj_thenFail() {
     try {
@@ -223,17 +223,17 @@ public class DefaultAssertionProviderTest extends TestBase {
     }
   }
 
-  public AssertionProvider.Impl createAssertionProvider(Properties properties) {
-    return new AssertionProvider.Impl(properties);
+  public ValueChecker.Impl createAssertionProvider(Properties properties) {
+    return new ValueChecker.Impl(properties);
   }
 
   public static Properties useEvaluator(Properties properties, boolean useEvaluator) {
-    properties.setProperty(AssertionProvider.Impl.class.getName() + ".useEvaluator", Objects.toString(useEvaluator));
+    properties.setProperty(ValueChecker.Impl.class.getName() + ".useEvaluator", Objects.toString(useEvaluator));
     return properties;
   }
 
   public static Properties nameWidth(Properties properties, int columns) {
-    properties.setProperty(AssertionProvider.Impl.class.getName() + ".evaluableNameWidth", Objects.toString(columns));
+    properties.setProperty(ValueChecker.Impl.class.getName() + ".evaluableNameWidth", Objects.toString(columns));
     return properties;
   }
 

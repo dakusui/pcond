@@ -14,27 +14,25 @@ public interface MessageComposer {
 
   <T> String composeMessageForValidation(T t, Predicate<? super T> predicate);
 
-  static MessageComposer createDefaultMessageComposer() {
-    return new MessageComposer() {
-      @Override
-      public <T> String composeMessageForPrecondition(T value, Predicate<? super T> predicate) {
-        return format("value:<%s> violated precondition:value %s", formatObject(value), predicate);
-      }
+  class Default implements MessageComposer {
+    @Override
+    public <T> String composeMessageForPrecondition(T value, Predicate<? super T> predicate) {
+      return format("value:<%s> violated precondition:value %s", formatObject(value), predicate);
+    }
 
-      @Override
-      public <T> String composeMessageForPostcondition(T value, Predicate<? super T> predicate) {
-        return format("value:<%s> violated postcondition:value %s", formatObject(value), predicate);
-      }
+    @Override
+    public <T> String composeMessageForPostcondition(T value, Predicate<? super T> predicate) {
+      return format("value:<%s> violated postcondition:value %s", formatObject(value), predicate);
+    }
 
-      @Override
-      public <T> String composeMessageForAssertion(T t, Predicate<? super T> predicate) {
-        return "Value:" + formatObject(t) + " violated: " + predicate.toString();
-      }
+    @Override
+    public <T> String composeMessageForAssertion(T t, Predicate<? super T> predicate) {
+      return "Value:" + formatObject(t) + " violated: " + predicate.toString();
+    }
 
-      @Override
-      public <T> String composeMessageForValidation(T t, Predicate<? super T> predicate) {
-        return "Value:" + formatObject(t) + " violated: " + predicate.toString();
-      }
-    };
+    @Override
+    public <T> String composeMessageForValidation(T t, Predicate<? super T> predicate) {
+      return "Value:" + formatObject(t) + " violated: " + predicate.toString();
+    }
   }
 }

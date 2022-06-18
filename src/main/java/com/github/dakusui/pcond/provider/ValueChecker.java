@@ -17,11 +17,11 @@ import static java.util.Collections.emptyList;
 /**
  * An interface of a policy for behaviours on 'contract violations'.
  */
-public interface AssertionProvider {
+public interface ValueChecker {
   /**
    * A constant field that holds the default provider instance.
    */
-  AssertionProvider INSTANCE = createAssertionProvider(System.getProperties());
+  ValueChecker INSTANCE = createAssertionProvider(System.getProperties());
 
   Configuration configuration();
 
@@ -33,7 +33,7 @@ public interface AssertionProvider {
    * @param properties A {@code Properties} object from which an {@code AssertionProvider} is created
    * @return Created provider instance.
    */
-  static AssertionProvider createAssertionProvider(Properties properties) {
+  static ValueChecker createAssertionProvider(Properties properties) {
     return new Impl(properties);
   }
 
@@ -338,7 +338,7 @@ public interface AssertionProvider {
         value,
         cond,
         configuration().messageComposer()::composeMessageForAssertion,
-        configuration().exceptionComposer()::testFailedException);
+        explanation -> configuration().exceptionComposer().forAssertThat().testFailedException(explanation, configuration().reportComposer()));
   }
 
   /**
@@ -355,7 +355,7 @@ public interface AssertionProvider {
         value,
         cond,
         configuration().messageComposer()::composeMessageForAssertion,
-        configuration().exceptionComposer()::testSkippedException);
+        explantion -> configuration().exceptionComposer().forAssertThat().testSkippedException(explantion, configuration().reportComposer()));
   }
 
   @SuppressWarnings("unchecked")
@@ -419,40 +419,59 @@ public interface AssertionProvider {
      */
     ExceptionComposer exceptionComposer();
 
+    enum Utils {
+      ;
+
+      static Configuration configure(Properties properties) {
+        return new Builder()
+            .useEvaluator(Boolean.parseBoolean(properties.getProperty( "useEvaluator", "true")))
+            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForPrecondition.class, properties.getProperty( "exceptionComposerFactory", "com.github.dakusui.pcond.provider.ExceptionComposer.ForPrecondition.Default")))
+            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForPostCondition.class, properties.getProperty( "exceptionComposerFactory", "com.github.dakusui.pcond.provider.ExceptionComposer.ForPostCondition.Default")))
+            .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty( "exceptionComposerFactory", "com.github.dakusui.pcond.provider.ExceptionComposer.ForValidate.Default")))
+            .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty( "exceptionComposerFactory", "com.github.dakusui.pcond.provider.ExceptionComposer.ForAssertion.Default")))
+            .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty( "exceptionComposerFactory", "com.github.dakusui.pcond.provider.ExceptionComposer.ForTestAssertion.JUnit4")))
+            .messageComposer(instantiate(MessageComposer.class, properties.getProperty( "reportComposer", "com.github.dakusui.pcond.provider.MessageComposer.Default")))
+            .reportComposer(instantiate(ReportComposer.class, properties.getProperty( "messageComposer", "com.github.dakusui.pcond.provider.ReportComposer.Default")))
+            .build();
+      }
+
+      static <E> E instantiate(Class<E> baseClass, String className) {
+        try {
+          return (E)Class.forName(className).newInstance();
+        } catch (InstantiationException e) {
+          throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+          throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+    }
+
     class Builder {
       boolean useEvaluator;
       int     summarizedStringLength;
 
 
-      Function<ReportComposer, ExceptionComposer> exceptionComposerFactory;
-      MessageComposer                             messageComposer;
-      ReportComposer                              reportComposer;
+      MessageComposer messageComposer;
+      ReportComposer  reportComposer;
+      private ExceptionComposer.ForPrecondition  exceptionComposerForPrecondition;
+      private ExceptionComposer.ForPostCondition exceptionComposerForPostCondition;
+      private ExceptionComposer.ForValidate      defaultExceptionComposerForValidate;
+      private ExceptionComposer.ForAssertion     exceptionComposerForAssert;
+      private ExceptionComposer.ForTestAssertion exceptionComposerForAssertThat;
 
       public Builder() {
         this.useEvaluator(true)
             .summarizedStringLength(40)
-            .exceptionComposerFactory(new Function<ReportComposer, ExceptionComposer>() {
-              final ExceptionComposer.ForPrecondition forPrecondition = IllegalArgumentException::new;
-              final ExceptionComposer.ForPostCondition forPostCondition = new ExceptionComposer.ForPostCondition() {
-              };
-              final ExceptionComposer.ForValidate forValidate = new ExceptionComposer.ForValidate() {
-              };
-              final ExceptionComposer.ForAssertion forAssertion = new ExceptionComposer.ForAssertion() {
-              };
-
-              @Override
-              public ExceptionComposer apply(ReportComposer reportComposer) {
-                if (isJunit4())
-                  return ExceptionComposer.createExceptionComposerForJUnit4(forPrecondition, forPostCondition, forValidate, forAssertion, reportComposer);
-                return ExceptionComposer.createExceptionComposerForOpentest4J(forPrecondition, forPostCondition, forValidate, forAssertion, reportComposer);
-              }
-
-              private boolean isJunit4() {
-                return true;
-              }
-            })
-            .messageComposer(MessageComposer.createDefaultMessageComposer())
-            .reportComposer(ReportComposer.createDefaultReportComposer());
+            .exceptionComposerForRequire(new ExceptionComposer.ForPrecondition.Default())
+            .exceptionComposerForEnsure(new ExceptionComposer.ForPostCondition.Default())
+            .defaultExceptionComposerForValidate(new ExceptionComposer.ForValidate.Default())
+            .exceptionComposerForAssert(new ExceptionComposer.ForAssertion.Default())
+            .exceptionComposerForAssertThat(new ExceptionComposer.ForTestAssertion.JUnit4())
+            .messageComposer(new MessageComposer.Default())
+            .reportComposer(new ReportComposer.Default());
       }
 
 
@@ -466,8 +485,28 @@ public interface AssertionProvider {
         return this;
       }
 
-      public Builder exceptionComposerFactory(Function<ReportComposer, ExceptionComposer> exceptionComposerFactory) {
-        this.exceptionComposerFactory = exceptionComposerFactory;
+      public Builder exceptionComposerForRequire(ExceptionComposer.ForPrecondition exceptionComposerForPrecondition) {
+        this.exceptionComposerForPrecondition = exceptionComposerForPrecondition;
+        return this;
+      }
+
+      public Builder exceptionComposerForEnsure(ExceptionComposer.ForPostCondition exceptionComposerForPostCondition) {
+        this.exceptionComposerForPostCondition = exceptionComposerForPostCondition;
+        return this;
+      }
+
+      public Builder defaultExceptionComposerForValidate(ExceptionComposer.ForValidate exceptionComposerForValidate) {
+        this.defaultExceptionComposerForValidate = exceptionComposerForValidate;
+        return this;
+      }
+
+      public Builder exceptionComposerForAssert(ExceptionComposer.ForAssertion exceptionComposerForAssert) {
+        this.exceptionComposerForAssert = exceptionComposerForAssert;
+        return this;
+      }
+
+      public Builder exceptionComposerForAssertThat(ExceptionComposer.ForTestAssertion exceptionComposerForAssertThat) {
+        this.exceptionComposerForAssertThat = exceptionComposerForAssertThat;
         return this;
       }
 
@@ -481,13 +520,15 @@ public interface AssertionProvider {
         return this;
       }
 
-      private boolean useEvaluator(Class<?> myClass, Properties properties) {
-        return Boolean.parseBoolean(properties.getProperty(myClass.getName() + ".useEvaluator", "true"));
-      }
-
       public Configuration build() {
         return new Configuration() {
-          private final ExceptionComposer exceptionComposer = Builder.this.exceptionComposerFactory.apply(reportComposer());
+          private final ExceptionComposer exceptionComposer = new ExceptionComposer.Impl(
+              exceptionComposerForPrecondition,
+              exceptionComposerForPostCondition,
+              defaultExceptionComposerForValidate,
+              exceptionComposerForAssert,
+              exceptionComposerForAssertThat
+          );
 
           @Override
           public int summarizedStringLength() {
@@ -524,7 +565,7 @@ public interface AssertionProvider {
     }
   }
 
-  class Impl implements AssertionProvider {
+  class Impl implements ValueChecker {
 
     private final Configuration configuration;
 
