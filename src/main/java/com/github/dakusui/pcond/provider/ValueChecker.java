@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Predicates;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
@@ -21,7 +22,8 @@ public interface ValueChecker {
   /**
    * A constant field that holds the default provider instance.
    */
-  ValueChecker INSTANCE = createAssertionProvider(System.getProperties());
+  ValueChecker INSTANCE = createAssertionProvider(Configuration.Utils.loadPcondProperties(System.getProperties()));
+
 
   Configuration configuration();
 
@@ -446,6 +448,20 @@ public interface ValueChecker {
         }
       }
 
+      public static Properties loadPcondProperties(Properties properties) {
+        String propertyKeyForPropertyFile = "com.github.dakusui.pcond";
+        if (!properties.containsKey(propertyKeyForPropertyFile))
+          return new Properties();
+        else {
+          try {
+            Properties ret = new Properties();
+            ret.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(properties.getProperty(propertyKeyForPropertyFile)));
+            return ret;
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        }
+      }
     }
 
     class Builder {
