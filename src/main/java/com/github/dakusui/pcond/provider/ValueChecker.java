@@ -5,6 +5,7 @@ import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 import java.util.function.BiFunction;
@@ -22,7 +23,7 @@ public interface ValueChecker {
   /**
    * A constant field that holds the default provider instance.
    */
-  ValueChecker INSTANCE = createAssertionProvider(Configuration.Utils.loadPcondProperties(System.getProperties()));
+  ValueChecker INSTANCE = createAssertionProvider(Configuration.Utils.loadPcondProperties());
 
 
   Configuration configuration();
@@ -448,18 +449,16 @@ public interface ValueChecker {
         }
       }
 
-      public static Properties loadPcondProperties(Properties properties) {
-        String propertyKeyForPropertyFile = "com.github.dakusui.pcond";
-        if (!properties.containsKey(propertyKeyForPropertyFile))
-          return new Properties();
-        else {
-          try {
-            Properties ret = new Properties();
-            ret.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(properties.getProperty(propertyKeyForPropertyFile)));
+      public static Properties loadPcondProperties() {
+        try {
+          Properties ret = new Properties();
+          InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("pcond.properties");
+          if (inputStream == null)
             return ret;
-          } catch (IOException e) {
-            throw new RuntimeException(e);
-          }
+          ret.load(inputStream);
+          return ret;
+        } catch (IOException e) {
+          throw new RuntimeException(e);
         }
       }
     }
