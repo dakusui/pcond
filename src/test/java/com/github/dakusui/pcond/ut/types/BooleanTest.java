@@ -7,7 +7,7 @@ import org.hamcrest.MatcherAssert;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.Fluents.when;
+import static com.github.dakusui.pcond.fluent.Fluents.when;
 
 public class BooleanTest extends TestBase {
   @Test

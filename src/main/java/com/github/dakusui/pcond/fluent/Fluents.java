@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond;
+package com.github.dakusui.pcond.fluent;
 
 import com.github.dakusui.pcond.core.fluent.Fluent;
 

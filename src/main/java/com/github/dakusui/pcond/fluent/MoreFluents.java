@@ -1,5 +1,6 @@
-package com.github.dakusui.pcond;
+package com.github.dakusui.pcond.fluent;
 
+import com.github.dakusui.pcond.TestAssertions;
 import com.github.dakusui.pcond.core.fluent.Fluent;
 import com.github.dakusui.pcond.core.fluent.transformers.*;
 import com.github.dakusui.pcond.forms.Functions;

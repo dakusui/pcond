@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.examples;
 
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.Fluents.*;
+import static com.github.dakusui.pcond.fluent.Fluents.*;
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
 import static java.util.Arrays.asList;

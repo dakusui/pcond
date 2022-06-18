@@ -1,12 +1,12 @@
 package com.github.dakusui.pcond.sandbox;
 
-import com.github.dakusui.pcond.MoreFluents;
+import com.github.dakusui.pcond.fluent.MoreFluents;
 import org.junit.Test;
 
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.MoreFluents.valueOf;
-import static com.github.dakusui.pcond.MoreFluents.assertWhen;
+import static com.github.dakusui.pcond.fluent.MoreFluents.valueOf;
+import static com.github.dakusui.pcond.fluent.MoreFluents.assertWhen;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 
 @SuppressWarnings("NewClassNamingConvention")

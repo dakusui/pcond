@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static com.github.dakusui.pcond.Fluents.when;
+import static com.github.dakusui.pcond.fluent.Fluents.when;
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 import static java.util.Arrays.asList;
 

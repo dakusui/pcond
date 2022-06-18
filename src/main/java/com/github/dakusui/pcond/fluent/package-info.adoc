@@ -1,0 +1,171 @@
+=== Method name syntax
+
+
+
+[cols=">1,^2,^2,^2,^3,^3,^3"]
+|===
+|#|Clause Type|Phrase Type|Target Type |Type Preposition |Element Type Argument |Conversion Function
+
+|1
+|(none)
+|(none)
+|(none)
+|(none)
+|(none)
+|(none)
+
+|2
+|when
+|as
+|value
+|of
+|`(E) value()`
+|`Function<T,R>`
+
+|3
+|then
+|into
+|list
+|ofClass
+|`E.class`
+|-
+
+
+|4
+|-
+|-
+|stream
+|with
+|-
+|-
+
+
+|5
+|-
+|-
+|string
+|-
+|-
+|-
+
+
+|6
+|-
+|-
+|number
+|-
+|-
+|-
+
+
+|7
+|-
+|-
+|boolean
+|-
+|-
+|-
+
+|===
+
+
+
+[source,bnf]
+."Exposed" conversion method names in Transformers and verifiers.
+----
+<WHEN_CLAUSE>  ::= when <AS_PHRASE>?
+<THEN_CLAUSE>  ::= then <INTO_PHRASE>?
+<AS_PHRASE>    ::= as <ELEMENT_TYPE_ARGUMENT>
+               | as <CONTAINER_TYPE> <ELEMENT_TYPE_SPECIFIER>
+               | as <ATOM_TYPE>
+<INTO_PHRASE>  ::= into <ATOM_TYPE> (with function)?
+               | into <CONTAINER_TYPE> <ELEMENT_TYPE_SPECIFIER> function?
+
+
+<CONTAINER_TYPE>         ::= value | list | stream
+<ATOM_TYPE>              ::= string | <NUMBER> | boolean | object
+<NUMBER>                 ::= integer
+<ELEMETN_TYPE_SPECIFIER> ::= of (E) value() | ofClass E.class
+<ELEMENT_TYPE_ARGUMRNT>  ::= (E) value()
+----
+
+
+[[as-phrase-list]]
+.The list of all the possible `AS_PHRASE` s
+- `as( (E)value() )`
+- `asString()`
+- `asNumber()`
+- `asBoolean()`
+- `asObject()`
+- `asValueOf( (E)value() )`
+- `asListOf( (E)value() )`
+- `asStreamOf( (E)value() )`
+- `asValueOfClass( E.class )`
+- `asListOfClass( E.class )`
+- `asStreamOfClass( E.class )`
+
+
+[[into-phrase-list]]
+.The list of all the possible `INTO_PHRASE` s
+- `intoString`
+- `intoNumber`
+- `intoBoolean`
+- `intoObject`
+- `intoStringWith( function )`
+- `intoNumberWith( function )`
+- `intoBooleanWith( function )`
+- `intoObjectWith( function )`
+- `intoValueOf( (E)value(), function  )`
+- `intoListOf( (E)value(), function  )`
+- `intoStreamOf( (E)value(), function )`
+- `intoValueOfClass( E.class, function  )`
+- `intoListOfClass( E.class, function  )`
+- `intoStreamClass( E.class, function  )`
+
+
+
+Thus, there are 9 methods for `AS_PHRASE` and 6 for `INTO_PHRASE`.
+For `WHEN_CLAUSE`, 10 and for `THEN_CLAUSE` 7 methods.
+
+
+[cols="^,^,^,^"]
+|===
+|    |`Fluent` |`Transformer` |`Verifier`
+
+|`WHEN_CLAUSE`
+|✓
+|
+|
+
+|`THEN_CLAUSE`
+|
+|✓
+|
+
+|`AS_PHRASE`
+|✓
+|✓
+|✓
+
+|`INTO_PHRASE`
+|
+|
+|✓
+|===
+
+
+
+=== Special Types of `pcond`
+
+In the `pcond` library divides an evaluation of an assertion into two stages.
+"Exercise" and "verification".
+Not like other assertion libraries, it has separated group of classes for each of them.
+"Transformers"
+
+In order to reduce the necessity of creating custom classes, it takes an approach, where
+
+
+They are `String`, `Number`(`Integer`), `Boolean`, `List<E>`, `Stream<E>`, and (general) `Object`.
+For each of them, special `Transformer` s  and `Verifier` s come with the `pcond` library to provide type specific methods, such as `containsString` for `String`.
+
+

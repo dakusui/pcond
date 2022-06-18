@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.Fluents.*;
+import static com.github.dakusui.pcond.fluent.Fluents.*;
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
 import static com.github.dakusui.pcond.forms.Predicates.*;

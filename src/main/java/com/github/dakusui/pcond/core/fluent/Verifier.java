@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.MoreFluents;
+import com.github.dakusui.pcond.fluent.MoreFluents;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.verifiers.*;

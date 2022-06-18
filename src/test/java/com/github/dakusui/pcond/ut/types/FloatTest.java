@@ -3,7 +3,7 @@ package com.github.dakusui.pcond.ut.types;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.Fluents.when;
+import static com.github.dakusui.pcond.fluent.Fluents.when;
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 
 public class FloatTest {

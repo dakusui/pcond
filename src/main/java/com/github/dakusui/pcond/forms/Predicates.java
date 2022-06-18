@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.forms;
 
-import com.github.dakusui.pcond.Fluents;
+import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.core.printable.PrintablePredicate;

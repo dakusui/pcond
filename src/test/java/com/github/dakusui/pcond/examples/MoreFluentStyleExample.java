@@ -6,12 +6,11 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static com.github.dakusui.pcond.MoreFluents.assertWhen;
-import static com.github.dakusui.pcond.MoreFluents.valueOf;
+import static com.github.dakusui.pcond.fluent.MoreFluents.assertWhen;
+import static com.github.dakusui.pcond.fluent.MoreFluents.valueOf;
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static java.util.Arrays.asList;
 
-@SuppressWarnings("NewClassNamingConvention")
 public class MoreFluentStyleExample {
   @Test
   public void test() {
@@ -44,13 +43,14 @@ public class MoreFluentStyleExample {
   }
 
 
-  @Test//(expected = ComparisonFailure.class)
+  @Test(expected = ComparisonFailure.class)
   public void test4() {
     try {
       assertWhen(
           valueOf("hello").toUpperCase().then().isEqualTo("HELLO"),
           valueOf("world").toLowerCase().then().contains("WORLD"));
     } catch (ComparisonFailure e) {
+      e.printStackTrace();
       throw e;
     }
   }
