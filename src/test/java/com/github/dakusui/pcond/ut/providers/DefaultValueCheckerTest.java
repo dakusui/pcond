@@ -228,12 +228,12 @@ public class DefaultValueCheckerTest extends TestBase {
   }
 
   public static Properties useEvaluator(Properties properties, boolean useEvaluator) {
-    properties.setProperty(ValueChecker.Impl.class.getName() + ".useEvaluator", Objects.toString(useEvaluator));
+    properties.setProperty("useEvaluator", Objects.toString(useEvaluator));
     return properties;
   }
 
   public static Properties nameWidth(Properties properties, int columns) {
-    properties.setProperty(ValueChecker.Impl.class.getName() + ".evaluableNameWidth", Objects.toString(columns));
+    properties.setProperty("summarizedStringLength", Objects.toString(columns));
     return properties;
   }
 

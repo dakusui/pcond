@@ -104,7 +104,7 @@ public interface ExceptionComposer {
       return new IllegalArgumentException(message);
     }
 
-    class Default implements ForValidate {
+    public class Default implements ForValidate {
     }
   }
 

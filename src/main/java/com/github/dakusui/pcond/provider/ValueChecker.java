@@ -424,25 +424,24 @@ public interface ValueChecker {
 
       static Configuration configure(Properties properties) {
         return new Builder()
-            .useEvaluator(Boolean.parseBoolean(properties.getProperty( "useEvaluator", "true")))
-            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForPrecondition.class, properties.getProperty( "exceptionComposerFactory", "com.github.dakusui.pcond.provider.ExceptionComposer.ForPrecondition.Default")))
-            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForPostCondition.class, properties.getProperty( "exceptionComposerFactory", "com.github.dakusui.pcond.provider.ExceptionComposer.ForPostCondition.Default")))
-            .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty( "exceptionComposerFactory", "com.github.dakusui.pcond.provider.ExceptionComposer.ForValidate.Default")))
-            .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty( "exceptionComposerFactory", "com.github.dakusui.pcond.provider.ExceptionComposer.ForAssertion.Default")))
-            .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty( "exceptionComposerFactory", "com.github.dakusui.pcond.provider.ExceptionComposer.ForTestAssertion.JUnit4")))
-            .messageComposer(instantiate(MessageComposer.class, properties.getProperty( "reportComposer", "com.github.dakusui.pcond.provider.MessageComposer.Default")))
-            .reportComposer(instantiate(ReportComposer.class, properties.getProperty( "messageComposer", "com.github.dakusui.pcond.provider.ReportComposer.Default")))
+            .useEvaluator(Boolean.parseBoolean(properties.getProperty("useEvaluator", "true")))
+            .summarizedStringLength(Integer.parseInt(properties.getProperty("summarizedStringLength", "40")))
+            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForPrecondition.class, properties.getProperty("exceptionComposerForRequire", "com.github.dakusui.pcond.provider.ExceptionComposer$ForPrecondition$Default")))
+            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForPostCondition.class, properties.getProperty("exceptionComposerForEnsure", "com.github.dakusui.pcond.provider.ExceptionComposer$ForPostCondition$Default")))
+            .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty("defaultExceptionComposerForValidate", "com.github.dakusui.pcond.provider.ExceptionComposer$ForValidate$Default")))
+            .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty("exceptionComposerForAssert", "com.github.dakusui.pcond.provider.ExceptionComposer$ForAssertion$Default")))
+            .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty("exceptionComposerForAssertThat", "com.github.dakusui.pcond.provider.ExceptionComposer$ForTestAssertion$JUnit4")))
+            .messageComposer(instantiate(MessageComposer.class, properties.getProperty("reportComposer", "com.github.dakusui.pcond.provider.MessageComposer$Default")))
+            .reportComposer(instantiate(ReportComposer.class, properties.getProperty("messageComposer", "com.github.dakusui.pcond.provider.ReportComposer$Default")))
             .build();
       }
 
-      static <E> E instantiate(Class<E> baseClass, String className) {
+      @SuppressWarnings("unchecked")
+      static <E> E instantiate(@SuppressWarnings("unused") Class<E> baseClass, String className) {
         try {
-          return (E)Class.forName(className).newInstance();
-        } catch (InstantiationException e) {
-          throw new RuntimeException(e);
-        } catch (IllegalAccessException e) {
-          throw new RuntimeException(e);
-        } catch (ClassNotFoundException e) {
+          return (E) Class.forName(className).newInstance();
+        } catch (InstantiationException | IllegalAccessException |
+                 ClassNotFoundException e) {
           throw new RuntimeException(e);
         }
       }
@@ -570,9 +569,7 @@ public interface ValueChecker {
     private final Configuration configuration;
 
     public Impl(Properties properties) {
-      this.configuration = new Configuration.Builder()
-          .useEvaluator(true)
-          .build();
+      this.configuration = Configuration.Utils.configure(properties);
     }
 
     @Override
