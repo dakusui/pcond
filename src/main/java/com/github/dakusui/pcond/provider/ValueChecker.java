@@ -394,10 +394,6 @@ public interface ValueChecker {
       return createException(this, explanation);
     }
 
-    static <E extends Throwable> ExceptionFactory<E> from(Function<String, E> exceptionComposingFunction) {
-      return explanation -> exceptionComposingFunction.apply(explanation.toString());
-    }
-
     static RuntimeException createException(ExceptionFactory<?> exceptionFactory, Explanation explanation) {
       Throwable t = exceptionFactory.apply(explanation);
       if (t instanceof Error)

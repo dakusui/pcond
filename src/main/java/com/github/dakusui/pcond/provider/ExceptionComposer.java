@@ -1,5 +1,9 @@
 package com.github.dakusui.pcond.provider;
 
+import com.github.dakusui.pcond.provider.exceptions.PostconditionViolationException;
+import com.github.dakusui.pcond.provider.exceptions.PreconditionViolationException;
+import com.github.dakusui.pcond.provider.exceptions.ValidationException;
+
 import java.lang.reflect.InvocationTargetException;
 
 import static com.github.dakusui.pcond.provider.ExceptionComposer.Utils.createException;

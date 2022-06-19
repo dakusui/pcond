@@ -7,7 +7,7 @@ import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.internals.InternalException;
-import com.github.dakusui.pcond.provider.PreconditionViolationException;
+import com.github.dakusui.pcond.provider.exceptions.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.ComparisonFailure;
@@ -80,7 +80,7 @@ public class ExperimentalsTest extends TestBase {
           transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toContextPredicate(stringEndsWith(), 0, 1))));
     } catch (PreconditionViolationException e) {
       /* BEFORE
-com.github.dakusui.pcond.provider.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
+com.github.dakusui.pcond.provider.exceptions.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
 ["Hi","hello","world"]          -> =>                                                                  ->     false
                                      stream                                                            ->   ReferencePipeline$Head@1888ff2c
 ReferencePipeline$Head@1888ff2c ->   nest["1","2","o"]                                                 ->   ReferencePipeline$7@6adca536
@@ -89,7 +89,7 @@ context:[hello, o]              ->     contextPredicate(stringEndsWith(String)(S
 	at com.github.dakusui.pcond.provider.AssertionProviderBase.lambda$exceptionComposerForPrecondition$0(AssertionProviderBase.java:83)
        */
       /* AFTER
-com.github.dakusui.pcond.provider.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
+com.github.dakusui.pcond.provider.exceptions.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
 ["Hi","hello","world"]       -> =>                                                                  ->     false
                                   stream->nest["1","2","o"]                                         ->   ReferencePipeline$7@6c3708b3
 ReferencePipeline$7@6c3708b3 ->   noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])] ->   false

@@ -27,6 +27,9 @@ public interface ReportComposer {
     return Utils.composeExplanation(message, result, t);
   }
 
+  /**
+   * A default implementation of `ReportComposer`.
+   */
   class Default implements ReportComposer {
   }
 
