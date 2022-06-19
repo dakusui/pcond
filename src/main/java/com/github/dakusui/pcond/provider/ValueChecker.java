@@ -23,9 +23,14 @@ public interface ValueChecker {
   /**
    * A constant field that holds the default provider instance.
    */
-  ValueChecker INSTANCE = createAssertionProvider(Configuration.Utils.loadPcondProperties());
+  ValueChecker INSTANCE = create(Configuration.Utils.loadPcondProperties());
 
 
+  /**
+   * Returns a configuration object that determines behaviors of this object.
+   *
+   * @return A configuration object.
+   */
   Configuration configuration();
 
   /**
@@ -36,7 +41,7 @@ public interface ValueChecker {
    * @param properties A {@code Properties} object from which an {@code AssertionProvider} is created
    * @return Created provider instance.
    */
-  static ValueChecker createAssertionProvider(Properties properties) {
+  static ValueChecker create(Properties properties) {
     return new Impl(properties);
   }
 
@@ -81,8 +86,8 @@ public interface ValueChecker {
   /**
    * A method to check if a given `value` satisfies a precondition given as `cond`.
    * If the `cond` is satisfied, the `value` itself will be returned.
-   * Otherwise, an exception returned by {@link ExceptionComposer#forRequire()#preconditionViolationException(String)}
-   * is thrown.
+   * Otherwise, an exception returned by `configuration().exceptionComposer().forRequire().exceptionForGeneralViolation(String)`
+   * will be thrown.
    *
    * @param value A value to be checked.
    * @param cond  A condition to check if `value` satisfies.
@@ -375,22 +380,32 @@ public interface ValueChecker {
       }
       if (evaluator.resultValue())
         return value;
-      List<Evaluator.Entry> entries = evaluator.resultEntries();//result.entries;
-      throw createException(exceptionFactory, configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), entries, null));
+      List<Evaluator.Entry> entries = evaluator.resultEntries();
+      throw exceptionFactory.create(configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), entries, null));
     } else {
       if (!cond.test(value))
-        throw createException(exceptionFactory, configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), emptyList(), null));
+        throw exceptionFactory.create(configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), emptyList(), null));
       return value;
     }
   }
 
-  static RuntimeException createException(ExceptionFactory<?> exceptionFactory, Explanation explanation) {
-    Throwable t = exceptionFactory.apply(explanation);
-    if (t instanceof Error)
-      throw (Error) t;
-    if (t instanceof RuntimeException)
-      throw (RuntimeException) t;
-    throw new AssertionError(format("Checked exception(%s) cannot be used for validation.", t.getClass()), t);
+  interface ExceptionFactory<E extends Throwable> extends Function<Explanation, E> {
+    default RuntimeException create(Explanation explanation) {
+      return createException(this, explanation);
+    }
+
+    static <E extends Throwable> ExceptionFactory<E> from(Function<String, E> exceptionComposingFunction) {
+      return explanation -> exceptionComposingFunction.apply(explanation.toString());
+    }
+
+    static RuntimeException createException(ExceptionFactory<?> exceptionFactory, Explanation explanation) {
+      Throwable t = exceptionFactory.apply(explanation);
+      if (t instanceof Error)
+        throw (Error) t;
+      if (t instanceof RuntimeException)
+        throw (RuntimeException) t;
+      throw new AssertionError(format("Checked exception(%s) cannot be used for validation.", t.getClass()), t);
+    }
   }
 
   interface Configuration {

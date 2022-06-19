@@ -8,6 +8,8 @@ Not only that, it gives a very informative message when a check you defined fail
 Unlike `Guava` 's `Preconditions` class<<GuavaPreconditions>>, you do not need to repeat the same fact both in Java for the actual check and in a natural language of yours for the message on its failure.
 Unlike `valid4j`<<v4j>>, it provides a set of human-readable predicates, which can be used as normal `java.util.function.Predicate` s instead of depending on `hamcrest` library.
 
+You can also use the `pcond` as a test assertion library instead of `hamcrest`, `Google Truth`, or `AssertJ`.
+
 == Installation
 
 Have a following maven dependency in your `pom.xml`.
