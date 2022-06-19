@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.perf;
 
-import com.github.dakusui.pcond.provider.ApplicationException;
+import com.github.dakusui.pcond.valuechecker.ApplicationException;
 import org.junit.*;
 import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;

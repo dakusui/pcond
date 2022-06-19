@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Validations;
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.provider.ApplicationException;
+import com.github.dakusui.pcond.valuechecker.ApplicationException;
 import com.github.dakusui.pcond.utils.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;

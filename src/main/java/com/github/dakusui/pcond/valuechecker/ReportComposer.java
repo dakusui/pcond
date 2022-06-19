@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.provider;
+package com.github.dakusui.pcond.valuechecker;
 
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.internals.InternalUtils;

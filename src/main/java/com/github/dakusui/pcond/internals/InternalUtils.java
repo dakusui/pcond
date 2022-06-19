@@ -2,8 +2,8 @@ package com.github.dakusui.pcond.internals;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.pcond.provider.ValueChecker;
-import com.github.dakusui.pcond.provider.Explanation;
+import com.github.dakusui.pcond.valuechecker.ValueChecker;
+import com.github.dakusui.pcond.valuechecker.Explanation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

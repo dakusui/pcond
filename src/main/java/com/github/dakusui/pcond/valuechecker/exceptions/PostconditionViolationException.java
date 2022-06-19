@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.provider.exceptions;
+package com.github.dakusui.pcond.valuechecker.exceptions;
 
 public class PostconditionViolationException extends RuntimeException {
   public PostconditionViolationException(String message) {

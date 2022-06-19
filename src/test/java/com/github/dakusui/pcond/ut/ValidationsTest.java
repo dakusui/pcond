@@ -3,11 +3,10 @@ package com.github.dakusui.pcond.ut;
 import com.github.dakusui.pcond.Validations;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.pcond.provider.ApplicationException;
+import com.github.dakusui.pcond.valuechecker.ApplicationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.forms.Functions.call;

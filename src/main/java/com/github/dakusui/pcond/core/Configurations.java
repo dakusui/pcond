@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.internals.InternalChecks;
-import com.github.dakusui.pcond.provider.ValueChecker;
+import com.github.dakusui.pcond.valuechecker.ValueChecker;
 
 import java.util.Objects;
 

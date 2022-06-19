@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut.providers;
 
 import com.github.dakusui.pcond.core.Configurations;
-import com.github.dakusui.pcond.provider.*;
+import com.github.dakusui.pcond.valuechecker.*;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 

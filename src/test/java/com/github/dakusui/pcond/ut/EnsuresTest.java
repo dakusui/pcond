@@ -1,9 +1,9 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Ensures;
-import com.github.dakusui.pcond.provider.ValueChecker;
+import com.github.dakusui.pcond.valuechecker.ValueChecker;
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.provider.exceptions.PostconditionViolationException;
+import com.github.dakusui.pcond.valuechecker.exceptions.PostconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 

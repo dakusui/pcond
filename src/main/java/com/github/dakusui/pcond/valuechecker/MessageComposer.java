@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.provider;
+package com.github.dakusui.pcond.valuechecker;
 
 import java.util.function.Predicate;
 

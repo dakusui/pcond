@@ -7,7 +7,7 @@ import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.internals.InternalException;
-import com.github.dakusui.pcond.provider.exceptions.PreconditionViolationException;
+import com.github.dakusui.pcond.valuechecker.exceptions.PreconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.ComparisonFailure;

@@ -1,12 +1,12 @@
-package com.github.dakusui.pcond.provider;
+package com.github.dakusui.pcond.valuechecker;
 
-import com.github.dakusui.pcond.provider.exceptions.PostconditionViolationException;
-import com.github.dakusui.pcond.provider.exceptions.PreconditionViolationException;
-import com.github.dakusui.pcond.provider.exceptions.ValidationException;
+import com.github.dakusui.pcond.valuechecker.exceptions.PostconditionViolationException;
+import com.github.dakusui.pcond.valuechecker.exceptions.PreconditionViolationException;
+import com.github.dakusui.pcond.valuechecker.exceptions.ValidationException;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static com.github.dakusui.pcond.provider.ExceptionComposer.Utils.createException;
+import static com.github.dakusui.pcond.valuechecker.ExceptionComposer.Utils.createException;
 
 public interface ExceptionComposer {
   ForPrecondition forRequire();
