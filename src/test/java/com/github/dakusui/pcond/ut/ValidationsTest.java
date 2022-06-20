@@ -42,7 +42,7 @@ public class ValidationsTest extends TestBase {
   }
 
   @Test(expected = UnsupportedOperationException.class)
-  public void testValidateMethod$failing() throws Throwable {
+  public void testValidateMethod$failing() {
     try {
       Object ret = Validations.validate("Bye", Predicates.isEqualTo(null), UnsupportedOperationException::new);
       System.out.println(ret);
@@ -119,10 +119,22 @@ transformAndCheck                             -> false
     Validations.validateArgument(var, isNotNull());
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void test_validateArgument_fail() {
+    String var = "Hello";
+    Validations.validateArgument(var, isNull());
+  }
+
   @Test
   public void test_validate_pass() {
     String var = "Hello";
     Validations.validate(var, isNotNull());
+  }
+
+  @Test(expected = ValidationException.class)
+  public void test_validate_fail() {
+    String var = "Hello";
+    Validations.validate(var, isNull());
   }
 
   private Function<String, String> stringToLowerCase() {

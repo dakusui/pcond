@@ -80,6 +80,7 @@ public interface ExceptionComposer {
 
     Throwable exceptionForIllegalArgument(String message);
 
+    @SuppressWarnings("unused") // Referenced reflectively
     class Default implements ForPrecondition {
       @Override
       public Throwable exceptionForIllegalArgument(String message) {
@@ -94,6 +95,7 @@ public interface ExceptionComposer {
       return new PostconditionViolationException(message);
     }
 
+    @SuppressWarnings("unused") // Referenced reflectively
     class Default implements ForPostCondition {
     }
   }
@@ -108,7 +110,8 @@ public interface ExceptionComposer {
       return new IllegalArgumentException(message);
     }
 
-    public class Default implements ForValidate {
+    @SuppressWarnings("unused") // Referenced reflectively
+    class Default implements ForValidate {
     }
   }
 
@@ -125,6 +128,7 @@ public interface ExceptionComposer {
       return new AssertionError(message);
     }
 
+    @SuppressWarnings("unused") // Referenced reflectively
     class Default implements ForAssertion {
     }
   }
@@ -138,6 +142,7 @@ public interface ExceptionComposer {
 
     <T extends Error> T testFailedException(Explanation explanation, ReportComposer reportComposer);
 
+    @SuppressWarnings("unused") // Referenced reflectively
     class JUnit4 implements ForTestAssertion {
       @SuppressWarnings("unchecked")
       @Override
@@ -158,6 +163,7 @@ public interface ExceptionComposer {
       }
     }
 
+    @SuppressWarnings("unused") // Referenced reflectively
     class Opentest4J implements ForTestAssertion {
       @SuppressWarnings("unchecked")
       @Override
