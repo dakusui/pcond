@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.ut.providers;
+package com.github.dakusui.pcond.ut.valuechecker;
 
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;

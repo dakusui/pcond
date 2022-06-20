@@ -38,11 +38,9 @@ public interface ReportComposer {
 
     static String composeReport(String summary, List<Object> details) {
       AtomicInteger index = new AtomicInteger(0);
-      if (summary == null && details == null)
-        return null;
       String ret = summary;
       ret += format("%n");
-      if (details != null && !details.isEmpty()) {
+      if (details != null) {
         ret += format("%n");
         ret += details.stream()
             .map(Objects::toString)

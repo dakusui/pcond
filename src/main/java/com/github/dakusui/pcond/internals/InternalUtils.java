@@ -177,7 +177,6 @@ public enum InternalUtils {
   }
 
   public static Class<?> wrapperClassOf(Class<?> clazz) {
-    assert clazz != null;
     if (clazz == Integer.TYPE)
       return Integer.class;
     if (clazz == Long.TYPE)
@@ -196,7 +195,7 @@ public enum InternalUtils {
       return Short.class;
     if (clazz == Void.TYPE)
       return Void.class;
-    throw new IllegalArgumentException("Unsupported type:" + clazz.getName() + " was given.");
+    throw new IllegalArgumentException("Unsupported type:" + (clazz != null ? clazz.getName() : "null") + " was given.");
   }
 
   public static Method getMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {

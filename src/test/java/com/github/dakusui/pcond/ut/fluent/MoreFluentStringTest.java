@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut.fluent;
 
+import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 
 import java.util.regex.Pattern;
@@ -7,7 +8,7 @@ import java.util.regex.Pattern;
 import static com.github.dakusui.pcond.fluent.MoreFluents.assertWhen;
 import static com.github.dakusui.pcond.fluent.MoreFluents.valueOf;
 
-public class MoreFluentStringTest {
+public class MoreFluentStringTest extends TestBase {
   @Test
   public void test_contains() {
     String var = "world";
