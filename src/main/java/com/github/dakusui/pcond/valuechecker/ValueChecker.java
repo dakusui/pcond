@@ -467,8 +467,9 @@ public interface ValueChecker {
           System.getProperties().forEach((k, v) -> {
             String key = Objects.toString(k);
             String value = Objects.toString(v);
-            if (key.startsWith("com.github.dakusui.pcond")) {
-              ret.put(key, value);
+            String prefix = "com.github.dakusui.pcond.";
+            if (key.startsWith(prefix)) {
+              ret.put(key.replace(prefix, ""), value);
             }
           });
           try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("pcond.properties")) {

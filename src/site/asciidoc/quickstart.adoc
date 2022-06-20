@@ -213,6 +213,6 @@ Thus, you can read the output above as "The check failed because the value `\"Jo
 
 == References
 
-- [[[DbC]]] Wikipedia article on Design by Contract, https://en.wikipedia.org/wiki/Design_by_contract
-- [[[v4j]]] Valid4j, http://www.valid4j.org
-- [[[GuavaPreconditions]]] PreconditionsExplained, https://github.com/google/guava/wiki/PreconditionsExplained
+- [[DbC]] Wikipedia article on Design by Contract, https://en.wikipedia.org/wiki/Design_by_contract
+- [[v4j]] Valid4j, http://www.valid4j.org
+- [[GuavaPreconditions]] PreconditionsExplained, https://github.com/google/guava/wiki/PreconditionsExplained

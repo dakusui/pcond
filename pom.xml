@@ -230,6 +230,22 @@
                 <!-- configuration>
                     <argLine>-ea</argLine>
                 </configuration -->
+                <executions>
+                    <execution>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <excludes>
+                                <exclude>none</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*IT</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <!-- Run with mvn org.pitest:pitest-maven:mutationCoverage -->
