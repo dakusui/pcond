@@ -11,34 +11,9 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.integerVerifier;
 
-public interface IntegerVerifier<OIN> extends
-    Identifiable,
-    Predicate<OIN>,
-    Evaluable.Transformation<OIN, Integer>,
-    Verifier<IntegerVerifier<OIN>, OIN, Integer>,
-    Matcher.ForInteger<OIN> {
+public interface IntegerVerifier<OIN> extends ComparableNumberVerifier<IntegerVerifier<OIN>, OIN, Integer>, Matcher.ForInteger<OIN> {
   @Override
   IntegerVerifier<OIN> create(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue);
-
-  default IntegerVerifier<OIN> equalTo(int v) {
-    return predicate(Predicates.equalTo(v));
-  }
-
-  default IntegerVerifier<OIN> lessThan(int v) {
-    return predicate(Predicates.lessThan(v));
-  }
-
-  default IntegerVerifier<OIN> lessThanOrEqualTo(int v) {
-    return predicate(Predicates.lessThanOrEqualTo(v));
-  }
-
-  default IntegerVerifier<OIN> greaterThan(int v) {
-    return predicate(Predicates.lessThan(v));
-  }
-
-  default IntegerVerifier<OIN> greaterThanOrEqualTo(int v) {
-    return predicate(Predicates.lessThan(v));
-  }
 
   class Impl<OIN> extends Verifier.Base<IntegerVerifier<OIN>, OIN, Integer> implements IntegerVerifier<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {

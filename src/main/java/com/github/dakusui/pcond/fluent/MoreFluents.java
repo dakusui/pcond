@@ -60,8 +60,24 @@ public class MoreFluents {
     return fluent(value).asString();
   }
 
+  public static DoubleTransformer<Double> valueOf(double value) {
+    return fluent(value).asDouble();
+  }
+
+  public static FloatTransformer<Float> valueOf(float value) {
+    return fluent(value).asFloat();
+  }
+
+  public static LongTransformer<Long> valueOf(long value) {
+    return fluent(value).asLong();
+  }
+
   public static IntegerTransformer<Integer> valueOf(int value) {
     return fluent(value).asInteger();
+  }
+
+  public static ShortTransformer<Short> valueOf(short value) {
+    return fluent(value).asShort();
   }
 
   public static BooleanTransformer<Boolean> valueOf(boolean value) {

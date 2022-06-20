@@ -7,6 +7,7 @@ import com.github.dakusui.pcond.forms.Predicates;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -463,11 +464,19 @@ public interface ValueChecker {
       public static Properties loadPcondProperties() {
         try {
           Properties ret = new Properties();
-          InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("pcond.properties");
-          if (inputStream == null)
+          System.getProperties().forEach((k, v) -> {
+            String key = Objects.toString(k);
+            String value = Objects.toString(v);
+            if (key.startsWith("com.github.dakusui.pcond")) {
+              ret.put(key, value);
+            }
+          });
+          try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("pcond.properties")) {
+            if (inputStream == null)
+              return ret;
+            ret.load(inputStream);
             return ret;
-          ret.load(inputStream);
-          return ret;
+          }
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
@@ -488,15 +497,6 @@ public interface ValueChecker {
       private ExceptionComposer.ForTestAssertion exceptionComposerForAssertThat;
 
       public Builder() {
-        this.useEvaluator(true)
-            .summarizedStringLength(40)
-            .exceptionComposerForRequire(new ExceptionComposer.ForPrecondition.Default())
-            .exceptionComposerForEnsure(new ExceptionComposer.ForPostCondition.Default())
-            .defaultExceptionComposerForValidate(new ExceptionComposer.ForValidate.Default())
-            .exceptionComposerForAssert(new ExceptionComposer.ForAssertion.Default())
-            .exceptionComposerForAssertThat(new ExceptionComposer.ForTestAssertion.JUnit4())
-            .messageComposer(new MessageComposer.Default())
-            .reportComposer(new ReportComposer.Default());
       }
 
 

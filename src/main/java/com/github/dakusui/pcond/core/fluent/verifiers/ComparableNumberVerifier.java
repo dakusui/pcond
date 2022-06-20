@@ -29,10 +29,10 @@ public interface ComparableNumberVerifier<
   }
 
   default TX greaterThan(N v) {
-    return predicate(Predicates.lessThan(v));
+    return predicate(Predicates.greaterThan(v));
   }
 
   default TX greaterThanOrEqualTo(N v) {
-    return predicate(Predicates.lessThan(v));
+    return predicate(Predicates.greaterThanOrEqualTo(v));
   }
 }
