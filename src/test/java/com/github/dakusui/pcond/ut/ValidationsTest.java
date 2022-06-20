@@ -5,6 +5,7 @@ import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.valuechecker.ApplicationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.pcond.valuechecker.exceptions.ValidationException;
 import org.junit.Test;
 
 import java.util.function.Function;
@@ -98,6 +99,30 @@ transformAndCheck                             -> false
             )),
         ApplicationException::new
     );
+  }
+
+  @Test
+  public void test_validateNonNull_pass() {
+    String var = "Hello";
+    Validations.validateNonNull(var);
+  }
+
+  @Test
+  public void test_validateState_pass() {
+    String var = "Hello";
+    Validations.validateState(var, isNotNull());
+  }
+
+  @Test
+  public void test_validateArgument_pass() {
+    String var = "Hello";
+    Validations.validateArgument(var, isNotNull());
+  }
+
+  @Test
+  public void test_validate_pass() {
+    String var = "Hello";
+    Validations.validate(var, isNotNull());
   }
 
   private Function<String, String> stringToLowerCase() {

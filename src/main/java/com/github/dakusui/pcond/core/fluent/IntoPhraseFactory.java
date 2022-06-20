@@ -15,6 +15,18 @@ public interface IntoPhraseFactory<OIN, IN> {
     return intoIntegerWith((IN v) -> (Integer) v);
   }
 
+  default LongVerifier<OIN> intoLong() {
+    return intoLongWith((IN v) -> (Long) v);
+  }
+
+  default FloatVerifier<OIN> intoFloat() {
+    return intoFloatWith((IN v) -> (Float) v);
+  }
+
+  default ShortVerifier<OIN> intoShort() {
+    return intoShortWith((IN v) -> (Short) v);
+  }
+
   default DoubleVerifier<OIN> intoDouble() {
     return intoDoubleWith((IN v) -> (Double) v);
   }
@@ -42,7 +54,13 @@ public interface IntoPhraseFactory<OIN, IN> {
 
   IntegerVerifier<OIN> intoIntegerWith(Function<IN, Integer> function);
 
+  LongVerifier<OIN> intoLongWith(Function<IN, Long> function);
+
+  ShortVerifier<OIN> intoShortWith(Function<IN, Short> function);
+
   DoubleVerifier<OIN> intoDoubleWith(Function<IN, Double> function);
+
+  FloatVerifier<OIN> intoFloatWith(Function<IN, Float> function);
 
   BooleanVerifier<OIN> intoBooleanWith(Function<IN, Boolean> function);
 

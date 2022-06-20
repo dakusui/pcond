@@ -128,13 +128,27 @@ public class FluentsTest extends TestBase {
   }
 
   @Test(expected = ComparisonFailure.class)
-  public void multiValueAssertionTest() {
+  public void multiValueAssertionTest_allOf() {
     assertThat(
         list(123, list("Hello", "world")),
         allOf(
             when().at(0).asInteger()
                 .then().equalTo(122),
             when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
+                $().at(0).asString()
+                    .then().isEqualTo("hello"),
+                $().at(1).asString()
+                    .then().isEqualTo("world")))));
+  }
+
+  @Test(expected = ComparisonFailure.class)
+  public void multiValueAssertionTest_anyOf() {
+    assertThat(
+        list(123, list("Hello", "world")),
+        allOf(
+            when().at(0).asInteger()
+                .then().equalTo(122),
+            when().at(1).asListOfClass(String.class).thenVerifyWithAnyOf(asList(
                 $().at(0).asString()
                     .then().isEqualTo("hello"),
                 $().at(1).asString()

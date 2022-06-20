@@ -47,7 +47,8 @@ public class ExperimentalsTest extends TestBase {
   public void hello() {
     require(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(toContextPredicate(stringEndsWith()))));
+        transform(stream().andThen(nest(asList("1", "2", "o"))))
+            .check(anyMatch(toContextPredicate(stringEndsWith()))));
   }
 
   @Test(expected = ComparisonFailure.class)

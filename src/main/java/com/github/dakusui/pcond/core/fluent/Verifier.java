@@ -148,8 +148,23 @@ public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
   }
 
   @Override
+  default LongVerifier<OIN> intoLongWith(Function<T, Long> function) {
+    return longVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+  }
+
+  @Override
+  default ShortVerifier<OIN> intoShortWith(Function<T, Short> function) {
+    return shortVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+  }
+
+  @Override
   default DoubleVerifier<OIN> intoDoubleWith(Function<T, Double> function) {
     return doubleVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+  }
+
+  @Override
+  default FloatVerifier<OIN> intoFloatWith(Function<T, Float> function) {
+    return floatVerifier(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
