@@ -1,3 +1,5 @@
 = pcond: The Printable {pre,post}-conditions
 
+The `pcond` is a multi-purposes library for "Design by Contract" style programming, replacing Guava's `Preconditions` class and Apache Common's `Validate` class, and test  assertions.
+
 Enjoy.

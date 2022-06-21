@@ -1,6 +1,6 @@
-=== Method name syntax
+A package to provide entry-point classes for the `Fluent` and `MoreFluent` styles.
 
-
+== Method name syntax
 
 [cols=">1,^2,^2,^2,^3,^3,^3"]
 |===
@@ -68,8 +68,6 @@
 
 |===
 
-
-
 [source,bnf]
 ."Exposed" conversion method names in Transformers and verifiers.
 ----
@@ -84,11 +82,10 @@
 
 <CONTAINER_TYPE>         ::= value | list | stream
 <ATOM_TYPE>              ::= string | <NUMBER> | boolean | object
-<NUMBER>                 ::= integer
+<NUMBER>                 ::= long | integer | short | double | float
 <ELEMETN_TYPE_SPECIFIER> ::= of (E) value() | ofClass E.class
 <ELEMENT_TYPE_ARGUMRNT>  ::= (E) value()
 ----
-
 
 [[as-phrase-list]]
 .The list of all the possible `AS_PHRASE` s
@@ -122,11 +119,8 @@
 - `intoListOfClass( E.class, function  )`
 - `intoStreamClass( E.class, function  )`
 
-
-
 Thus, there are 9 methods for `AS_PHRASE` and 6 for `INTO_PHRASE`.
 For `WHEN_CLAUSE`, 10 and for `THEN_CLAUSE` 7 methods.
-
 
 [cols="^,^,^,^"]
 |===
@@ -153,8 +147,6 @@ For `WHEN_CLAUSE`, 10 and for `THEN_CLAUSE` 7 methods.
 |✓
 |===
 
-
-
 === Special Types of `pcond`
 
 In the `pcond` library divides an evaluation of an assertion into two stages.
@@ -164,8 +156,7 @@ Not like other assertion libraries, it has separated group of classes for each o
 
 In order to reduce the necessity of creating custom classes, it takes an approach, where
 
-
 They are `String`, `Number`(`Integer`), `Boolean`, `List<E>`, `Stream<E>`, and (general) `Object`.
-For each of them, special `Transformer` s  and `Verifier` s come with the `pcond` library to provide type specific methods, such as `containsString` for `String`.
+For each of them, special `Transformer` s and `Verifier` s come with the `pcond` library to provide type specific methods, such as `containsString` for `String`.
 
 

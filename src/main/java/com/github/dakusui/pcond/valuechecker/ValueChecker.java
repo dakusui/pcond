@@ -367,8 +367,25 @@ public interface ValueChecker {
         explantion -> configuration().exceptionComposer().forAssertThat().testSkippedException(explantion, configuration().reportComposer()));
   }
 
+  /**
+   * The core method of the `ValueChecker`.
+   * This method checks if the given `value` satisfies a condition, passed as `cond`.
+   * If it does, the `value` itself will be returned.
+   * If not, an appropriate message will be composed based on the `value` and `cond` by the `messageComposerFunction`.
+   * Internally in this method, an `Explanation` of the failure is created by a {@link ReportComposer}
+   * object returned by `configuration().reportComposer()` method.
+   * The `Explanation` is passed to the `exceptionComposerFunction` and the exception
+   * created by the function will be thrown.
+   *
+   * @param value                     A `value` to be checked.
+   * @param cond                      A predicate that checks the `value`.
+   * @param messageComposerFunction   A function that composes an error message from the `value` and the predicate `cond`.
+   * @param exceptionComposerFunction A function that creates an exception from a failure report created inside this method.
+   * @param <T>                       The type of the `value`.
+   * @return The `value` itself.
+   */
   @SuppressWarnings("unchecked")
-  default <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposer, ExceptionFactory<Throwable> exceptionFactory) {
+  default <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposerFunction, ExceptionFactory<Throwable> exceptionComposerFunction) {
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
@@ -382,10 +399,10 @@ public interface ValueChecker {
       if (evaluator.resultValue())
         return value;
       List<Evaluator.Entry> entries = evaluator.resultEntries();
-      throw exceptionFactory.create(configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), entries, null));
+      throw exceptionComposerFunction.create(configuration().reportComposer().composeExplanation(messageComposerFunction.apply(value, cond), entries, null));
     } else {
       if (!cond.test(value))
-        throw exceptionFactory.create(configuration().reportComposer().composeExplanation(messageComposer.apply(value, cond), emptyList(), null));
+        throw exceptionComposerFunction.create(configuration().reportComposer().composeExplanation(messageComposerFunction.apply(value, cond), emptyList(), null));
       return value;
     }
   }

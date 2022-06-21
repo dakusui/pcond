@@ -1,0 +1,8 @@
+A package to provide a value checker mechanism.
+The `ValueChecker` consists of three parts.
+
+`ExceptionComposer`:: An interface to compose appropriate exceptions from a given message.
+`MessageComposer`:: An interface to compose appropriate messages for various purposes.
+`ReportComposer`:: An interface to compose a report for a given failure.
+
+These are designed replaceable independently.
