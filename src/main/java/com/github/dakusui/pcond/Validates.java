@@ -6,7 +6,7 @@ import com.github.dakusui.pcond.valuechecker.ExceptionComposer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-public enum Validations {
+public enum Validates {
   ;
   static final Validator VALIDATOR = createValidator(ValueChecker.INSTANCE.configuration().exceptionComposer().defaultForValidate());
 

@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.joining;
  * An interface that represents a function that can have more than one parameters.
  * This interface is often used in combination with {@link com.github.dakusui.pcond.forms.Functions#curry(MultiFunction)} method.
  *
- * @param <R>
+ * @param <R> The type of the returned value.
  */
 public interface MultiFunction<R> extends Function<List<? super Object>, R> {
   /**

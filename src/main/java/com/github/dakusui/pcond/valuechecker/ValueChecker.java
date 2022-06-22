@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.valuechecker;
 
+import com.github.dakusui.pcond.Validates;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Predicates;
@@ -124,7 +125,7 @@ public interface ValueChecker {
    * If the value satisfies a condition `cond`, the value itself will be returned.
    * Otherwise, an exception created by `forValidate.exceptionForGeneralViolation()`
    * will be thrown.
-   * This method is intended to be used by {@link com.github.dakusui.pcond.Validations#validate(Object, Predicate, Function)}
+   * This method is intended to be used by {@link Validates#validate(Object, Predicate, Function)}
    * method.
    *
    * @param value       The value to be checked.
@@ -142,7 +143,7 @@ public interface ValueChecker {
    * If the value is not `null`, the value itself will be returned.
    * Otherwise, an exception created by `forValidate.exceptionForGeneralViolation()`
    * will be thrown.
-   * This method is intended to be used by {@link com.github.dakusui.pcond.Validations#validateNonNull(Object)}
+   * This method is intended to be used by {@link Validates#validateNonNull(Object)}
    * method.
    *
    * @param value       The value to be checked.
@@ -159,7 +160,7 @@ public interface ValueChecker {
    * If the value satisfies a condition `cond` for checking an argument variable, the value itself will be returned.
    * Otherwise, an exception created by `forValidate.exceptionForIllegalArgument()`
    * will be thrown.
-   * This method is intended to be used by {@link com.github.dakusui.pcond.Validations#validateArgument(Object, Predicate)}
+   * This method is intended to be used by {@link Validates#validateArgument(Object, Predicate)}
    * method.
    *
    * @param value       The value to be checked.
@@ -177,7 +178,7 @@ public interface ValueChecker {
    * If the value satisfies a condition `cond` for checking a state, the value itself will be returned.
    * Otherwise, an exception created by `forValidate.exceptionForIllegalState()`
    * will be thrown.
-   * This method is intended to be used by {@link com.github.dakusui.pcond.Validations#validateState(Object, Predicate)}
+   * This method is intended to be used by {@link Validates#validateState(Object, Predicate)}
    * method.
    *
    * @param value       The value to be checked.
@@ -194,7 +195,7 @@ public interface ValueChecker {
    * Validates the given variable `value`.
    * If the value satisfies a condition `cond`, the value itself will be returned.
    * Otherwise, an exception created by `exceptionFactory` will be thrown.
-   * This method is intended to be used by {@link com.github.dakusui.pcond.Validations#validate(Object, Predicate, Function)}
+   * This method is intended to be used by {@link Validates#validate(Object, Predicate, Function)}
    * method.
    *
    * @param value            The value to be checked.
@@ -458,8 +459,8 @@ public interface ValueChecker {
         return new Builder()
             .useEvaluator(Boolean.parseBoolean(properties.getProperty("useEvaluator", "true")))
             .summarizedStringLength(Integer.parseInt(properties.getProperty("summarizedStringLength", "40")))
-            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForPrecondition.class, properties.getProperty("exceptionComposerForRequire", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForPrecondition$Default")))
-            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForPostCondition.class, properties.getProperty("exceptionComposerForEnsure", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForPostCondition$Default")))
+            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForRequire.class, properties.getProperty("exceptionComposerForRequire", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForRequire$Default")))
+            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForEnsure.class, properties.getProperty("exceptionComposerForEnsure", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForEnsure$Default")))
             .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty("defaultExceptionComposerForValidate", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForValidate$Default")))
             .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty("exceptionComposerForAssert", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForAssertion$Default")))
             .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty("exceptionComposerForAssertThat", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForTestAssertion$JUnit4")))
@@ -508,9 +509,9 @@ public interface ValueChecker {
 
       MessageComposer messageComposer;
       ReportComposer  reportComposer;
-      private ExceptionComposer.ForPrecondition  exceptionComposerForPrecondition;
-      private ExceptionComposer.ForPostCondition exceptionComposerForPostCondition;
-      private ExceptionComposer.ForValidate      defaultExceptionComposerForValidate;
+      private ExceptionComposer.ForRequire  exceptionComposerForRequire;
+      private ExceptionComposer.ForEnsure   exceptionComposerForEnsure;
+      private ExceptionComposer.ForValidate defaultExceptionComposerForValidate;
       private ExceptionComposer.ForAssertion     exceptionComposerForAssert;
       private ExceptionComposer.ForTestAssertion exceptionComposerForAssertThat;
 
@@ -528,13 +529,13 @@ public interface ValueChecker {
         return this;
       }
 
-      public Builder exceptionComposerForRequire(ExceptionComposer.ForPrecondition exceptionComposerForPrecondition) {
-        this.exceptionComposerForPrecondition = exceptionComposerForPrecondition;
+      public Builder exceptionComposerForRequire(ExceptionComposer.ForRequire exceptionComposerForRequire) {
+        this.exceptionComposerForRequire = exceptionComposerForRequire;
         return this;
       }
 
-      public Builder exceptionComposerForEnsure(ExceptionComposer.ForPostCondition exceptionComposerForPostCondition) {
-        this.exceptionComposerForPostCondition = exceptionComposerForPostCondition;
+      public Builder exceptionComposerForEnsure(ExceptionComposer.ForEnsure exceptionComposerForEnsure) {
+        this.exceptionComposerForEnsure = exceptionComposerForEnsure;
         return this;
       }
 
@@ -566,8 +567,8 @@ public interface ValueChecker {
       public Configuration build() {
         return new Configuration() {
           private final ExceptionComposer exceptionComposer = new ExceptionComposer.Impl(
-              exceptionComposerForPrecondition,
-              exceptionComposerForPostCondition,
+              exceptionComposerForRequire,
+              exceptionComposerForEnsure,
               defaultExceptionComposerForValidate,
               exceptionComposerForAssert,
               exceptionComposerForAssertThat

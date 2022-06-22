@@ -10,7 +10,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.Assertions.that;
-import static com.github.dakusui.pcond.Validations.validate;
+import static com.github.dakusui.pcond.Validates.validate;
 import static com.github.dakusui.pcond.forms.Functions.length;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 

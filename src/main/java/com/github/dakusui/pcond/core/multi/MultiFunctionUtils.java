@@ -12,6 +12,9 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * A utility class that collects helper methods for the multi-parameters function.
+ */
 public enum MultiFunctionUtils {
   ;
   private static final ThreadLocal<Map<List<Object>, MultiFunction<?>>> METHOD_BASED_FUNCTION_POOL = new ThreadLocal<>();

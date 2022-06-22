@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.valuechecker;
 
+import com.github.dakusui.pcond.Validates;
 import com.github.dakusui.pcond.valuechecker.exceptions.PostconditionViolationException;
 import com.github.dakusui.pcond.valuechecker.exceptions.PreconditionViolationException;
 import com.github.dakusui.pcond.valuechecker.exceptions.ValidationException;
@@ -8,25 +9,74 @@ import java.lang.reflect.InvocationTargetException;
 
 import static com.github.dakusui.pcond.valuechecker.ExceptionComposer.Utils.createException;
 
+/**
+ * An interface to define how an exception is composed based on a given message,
+ * a class of a condition that the value violates (non-null constraint, invalid state,
+ * input validation), and the context the violation happened (pre-, post-condition check,
+ * test-assertion, etc.).
+ *
+ * This interface has methods to return objects, each of which composes actual exceptions.
+ * Each of them intended to group methods that compose exceptions for a single context.
+ */
 public interface ExceptionComposer {
-  ForPrecondition forRequire();
+  /**
+   * Returns an instance to compose exceptions used with `requireXyz` methods in
+   * {@link com.github.dakusui.pcond.Requires} entry-point class.
+   *
+   * @return An object to compose exceptions for methods in {@link com.github.dakusui.pcond.Requires}.
+   */
+  ForRequire forRequire();
 
-  ForPostCondition forEnsure();
+  /**
+   * Returns an instance to compose exceptions used with `ensureXyz` methods in
+   * {@link com.github.dakusui.pcond.Ensures} entry-point class.
+   *
+   * @return An object to compose exceptions for methods in {@link com.github.dakusui.pcond.Ensures}.
+   */
+  ForEnsure forEnsure();
 
+  /**
+   * Returns an instance to compose exceptions used with `validateXyz` methods in
+   * {@link Validates} entry-point class.
+   *
+   * @return An object to compose exceptions for methods in {@link Validates}.
+   */
   ForValidate defaultForValidate();
 
+  /**
+   * Returns an instance to compose exceptions used in `assert` statements.
+   *
+   * @return An object to compose exceptions for "precondition" violation.
+   */
   ForAssertion forAssert();
 
+  /**
+   * Returns an instance to compose exceptions used in `assertThat` and `assumeThat`
+   * methods in {@link com.github.dakusui.pcond.TestAssertions} entry-point class.
+   * Other entry-point classes provided for use cases of the `pcond` library as
+   * a test assertion library may also use this method.
+   *
+   * @return An object to compose exceptions for test assertions
+   */
   ForTestAssertion forAssertThat();
 
+  /**
+   * An implementation of the {@link ExceptionComposer} interface.
+   * You usually do not need to extend this method to customize its behavior.
+   * Rather you only need to control the arguments passed to its constructor
+   * through {@link com.github.dakusui.pcond.valuechecker.ValueChecker.Configuration.Builder}.
+   *
+   * @see com.github.dakusui.pcond.valuechecker.ValueChecker.Configuration
+   * @see com.github.dakusui.pcond.valuechecker.ValueChecker.Configuration.Builder
+   */
   class Impl implements ExceptionComposer {
-    final private ForPrecondition  forRequire;
-    final private ForPostCondition forEnsure;
-    final private ForValidate      defaultForValidate;
+    final private ForRequire  forRequire;
+    final private ForEnsure   forEnsure;
+    final private ForValidate defaultForValidate;
     final private ForAssertion     forAssert;
     final private ForTestAssertion forAssertThat;
 
-    public Impl(ForPrecondition forRequire, ForPostCondition forEnsure, ForValidate defaultForValidate, ForAssertion forAssert, ForTestAssertion forAssertThat) {
+    public Impl(ForRequire forRequire, ForEnsure forEnsure, ForValidate defaultForValidate, ForAssertion forAssert, ForTestAssertion forAssertThat) {
       this.forRequire = forRequire;
       this.forEnsure = forEnsure;
       this.defaultForValidate = defaultForValidate;
@@ -35,12 +85,12 @@ public interface ExceptionComposer {
     }
 
     @Override
-    public ForPrecondition forRequire() {
+    public ForRequire forRequire() {
       return this.forRequire;
     }
 
     @Override
-    public ForPostCondition forEnsure() {
+    public ForEnsure forEnsure() {
       return this.forEnsure;
     }
 
@@ -60,19 +110,56 @@ public interface ExceptionComposer {
     }
   }
 
+  /**
+   * An interface that defines common methods that an object returned by each method
+   * in the {@link ExceptionComposer} has.
+   */
   interface Base {
+    /**
+     * A method to compose an exception for a "Null-violation".
+     * When you are checking a "pre-condition", if the value must not be `null`,
+     * you may prefer a {@link NullPointerException}, rather than an exception
+     * such as `YourPreconditionException` as Google Guava's `Precondition` does
+     * so.
+     *
+     * This method by default, returns a `NullPointerException`.
+     *
+     * In case you prefer to throw `YourPreconditionException` for the sake of uniformity,
+     * you can override this method for an object returned by {@link ExceptionComposer#forRequire()}
+     *
+     * For more detail, please refer to {@link com.github.dakusui.pcond.valuechecker.ValueChecker.Configuration}.
+     *
+     * @param message A message attached to the composed exception.
+     * @return A composed exception.
+     */
     default Throwable exceptionForNonNullViolation(String message) {
       return new NullPointerException(message);
     }
 
+    /**
+     * A method to compose an exception for a "State-violation".
+     *
+     * @param message A message attached to the composed exception.
+     * @return A composed exception.
+     *
+     * @see Base#exceptionForNonNullViolation(String)
+     */
     default Throwable exceptionForIllegalState(String message) {
       return new IllegalStateException(message);
     }
 
+    /**
+     * A method to compose an exception for a general violation.
+     * An extension-point to customize the exception to be thrown for a certain
+     * context.
+     *
+     * @param message A message attached to the composed exception.
+     * @return A composed exception.
+     */
     Throwable exceptionForGeneralViolation(String message);
   }
 
-  interface ForPrecondition extends Base {
+  interface ForRequire extends Base {
     @Override
     default Throwable exceptionForGeneralViolation(String message) {
       return new PreconditionViolationException(message);
@@ -81,7 +168,7 @@ public interface ExceptionComposer {
     Throwable exceptionForIllegalArgument(String message);
 
     @SuppressWarnings("unused") // Referenced reflectively
-    class Default implements ForPrecondition {
+    class Default implements ForRequire {
       @Override
       public Throwable exceptionForIllegalArgument(String message) {
         return new IllegalArgumentException(message);
@@ -89,14 +176,14 @@ public interface ExceptionComposer {
     }
   }
 
-  interface ForPostCondition extends Base {
+  interface ForEnsure extends Base {
     @Override
     default Throwable exceptionForGeneralViolation(String message) {
       return new PostconditionViolationException(message);
     }
 
     @SuppressWarnings("unused") // Referenced reflectively
-    class Default implements ForPostCondition {
+    class Default implements ForEnsure {
     }
   }
 

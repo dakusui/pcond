@@ -9,6 +9,11 @@ import java.util.function.Function;
 
 import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.shortVerifier;
 
+/**
+ * A transformer for `short` type.
+ *
+ * @param <OIN> The type of original input value.
+ */
 public interface ShortTransformer<OIN> extends ComparableNumberTransformer<ShortTransformer<OIN>, ShortVerifier<OIN>, OIN, Short>, Matcher.ForShort<OIN> {
 
   @Override

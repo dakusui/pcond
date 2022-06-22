@@ -17,6 +17,13 @@ import static com.github.dakusui.pcond.core.fluent.Transformer.Factory.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 
+/**
+ * The transformer interface.
+ *
+ * @param <TX>  The type of the {@link Transformer} implementation.
+ * @param <OIN> The type of the original input value.
+ * @param <OUT> The output of the transformation.
+ */
 public interface Transformer<
     TX extends Transformer<TX, OIN, OUT>,
     OIN,
@@ -116,6 +123,11 @@ public interface Transformer<
     return this.transform(f, (TX, func) -> booleanTransformer(this, func));
   }
 
+  /**
+   * A method to finish the transformation stage and return a {@link Verifier} object.
+   *
+   * @return A verifier object.
+   */
   Verifier<?, OIN, OUT> then();
 
   @SuppressWarnings("unchecked")

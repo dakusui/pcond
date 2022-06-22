@@ -21,6 +21,13 @@ import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.*;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
 
+/**
+ * A verifier interface.
+ *
+ * @param <V>   The type of the {@link Verifier} implementation.
+ * @param <OIN> The type of the original input value.
+ * @param <T>The type of the value to be verified by this object.
+ */
 public interface Verifier<V extends Verifier<V, OIN, T>, OIN, T>
     extends
     Identifiable,

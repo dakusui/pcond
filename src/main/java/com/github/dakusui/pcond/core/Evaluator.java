@@ -426,6 +426,9 @@ public interface Evaluator {
     }
   }
 
+  /**
+   * An interface to define methods that make a predicate "explainable" to humans.
+   */
   interface Explainable {
     Object explainExpectation();
 

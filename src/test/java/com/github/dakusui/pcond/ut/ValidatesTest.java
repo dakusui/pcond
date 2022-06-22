@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.Validations;
+import com.github.dakusui.pcond.Validates;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.valuechecker.ApplicationException;
@@ -15,11 +15,11 @@ import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.firstLineOf;
 import static org.junit.Assert.assertEquals;
 
-public class ValidationsTest extends TestBase {
+public class ValidatesTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void test() throws ApplicationException {
     try {
-      Object ret = Validations.validate(null, Predicates.not(Predicates.isEqualTo(null)), ApplicationException::new);
+      Object ret = Validates.validate(null, Predicates.not(Predicates.isEqualTo(null)), ApplicationException::new);
       System.out.println(ret);
     } catch (ApplicationException e) {
       assertEquals("Value:null violated: !isEqualTo[null]", firstLineOf(e.getMessage()));
@@ -29,14 +29,14 @@ public class ValidationsTest extends TestBase {
 
   @Test
   public void test2() {
-    Object ret = Validations.validate("Hello", Predicates.not(Predicates.isEqualTo(null)), ApplicationException::new);
+    Object ret = Validates.validate("Hello", Predicates.not(Predicates.isEqualTo(null)), ApplicationException::new);
     System.out.println(ret);
     assertEquals("Hello", ret);
   }
 
   @Test
   public void testValidateMethod$passing() {
-    Object ret = Validations.validate("Hello", Predicates.not(Predicates.isEqualTo(null)), UnsupportedOperationException::new);
+    Object ret = Validates.validate("Hello", Predicates.not(Predicates.isEqualTo(null)), UnsupportedOperationException::new);
     System.out.println(ret);
     assertEquals("Hello", ret);
   }
@@ -44,7 +44,7 @@ public class ValidationsTest extends TestBase {
   @Test(expected = UnsupportedOperationException.class)
   public void testValidateMethod$failing() {
     try {
-      Object ret = Validations.validate("Bye", Predicates.isEqualTo(null), UnsupportedOperationException::new);
+      Object ret = Validates.validate("Bye", Predicates.isEqualTo(null), UnsupportedOperationException::new);
       System.out.println(ret);
     } catch (UnsupportedOperationException e) {
       assertEquals("Value:\"Bye\" violated: isEqualTo[null]", firstLineOf(e.getMessage()));
@@ -65,7 +65,7 @@ transformAndCheck                                       -> false
    */
   @Test(expected = ApplicationException.class)
   public void testX() {
-    Validations.validate(
+    Validates.validate(
         "Hello, World",
         transform(call("toUpperCase").andThen(call("toLowerCase")))
             .castTo(String.class)
@@ -90,7 +90,7 @@ transformAndCheck                             -> false
    */
   @Test(expected = ApplicationException.class)
   public void testY() {
-    Validations.validate(
+    Validates.validate(
         "Hello, World",
         transform(stringToLowerCase())
             .check(allOf(
@@ -104,37 +104,37 @@ transformAndCheck                             -> false
   @Test
   public void test_validateNonNull_pass() {
     String var = "Hello";
-    Validations.validateNonNull(var);
+    Validates.validateNonNull(var);
   }
 
   @Test
   public void test_validateState_pass() {
     String var = "Hello";
-    Validations.validateState(var, isNotNull());
+    Validates.validateState(var, isNotNull());
   }
 
   @Test
   public void test_validateArgument_pass() {
     String var = "Hello";
-    Validations.validateArgument(var, isNotNull());
+    Validates.validateArgument(var, isNotNull());
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void test_validateArgument_fail() {
     String var = "Hello";
-    Validations.validateArgument(var, isNull());
+    Validates.validateArgument(var, isNull());
   }
 
   @Test
   public void test_validate_pass() {
     String var = "Hello";
-    Validations.validate(var, isNotNull());
+    Validates.validate(var, isNotNull());
   }
 
   @Test(expected = ValidationException.class)
   public void test_validate_fail() {
     String var = "Hello";
-    Validations.validate(var, isNull());
+    Validates.validate(var, isNull());
   }
 
   private Function<String, String> stringToLowerCase() {
