@@ -5,7 +5,7 @@ import org.junit.Test;
 import static com.github.dakusui.pcond.fluent.MoreFluents.assertWhen;
 import static com.github.dakusui.pcond.fluent.MoreFluents.valueOf;
 
-public class MoreFluentComparableNumberVerifierTest {
+public class MoreFluentComparableNumberCheckerTest {
   @Test
   public void test_equalTo() {
     double var = 1.0d;

@@ -2,14 +2,14 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.verifiers.LongVerifier;
+import com.github.dakusui.pcond.core.fluent.checkers.LongChecker;
 
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.longVerifier;
+import static com.github.dakusui.pcond.core.fluent.Checker.Factory.longChecker;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 
-public interface LongTransformer<OIN> extends ComparableNumberTransformer<LongTransformer<OIN>, LongVerifier<OIN>, OIN, Long>, Matcher.ForLong<OIN> {
+public interface LongTransformer<OIN> extends ComparableNumberTransformer<LongTransformer<OIN>, LongChecker<OIN>, OIN, Long>, Matcher.ForLong<OIN> {
   class Impl<OIN> extends Base<LongTransformer<OIN>, OIN, Long> implements LongTransformer<OIN> {
     /**
      * Constructs an instance of this class.
@@ -24,8 +24,8 @@ public interface LongTransformer<OIN> extends ComparableNumberTransformer<LongTr
     }
 
     @Override
-    public LongVerifier<OIN> then() {
-      return longVerifier(this.transformerName(), this.function(), dummyPredicate(), this.originalInputValue());
+    public LongChecker<OIN> then() {
+      return longChecker(this.transformerName(), this.function(), dummyPredicate(), this.originalInputValue());
     }
   }
 }

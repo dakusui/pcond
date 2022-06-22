@@ -76,17 +76,17 @@ public interface Transformer<
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> Verifier<?, OIN, NOUT> thenVerifyWithAllOf(List<? extends Predicate<? super NOUT>> predicates) {
+  default <NOUT> Checker<?, OIN, NOUT> thenVerifyWithAllOf(List<? extends Predicate<? super NOUT>> predicates) {
     return this.thenVerifyWith(Predicates.allOf(predicates.toArray(new Predicate[0])));
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> Verifier<?, OIN, NOUT> thenVerifyWithAnyOf(List<? extends Predicate<? super NOUT>> predicates) {
+  default <NOUT> Checker<?, OIN, NOUT> thenVerifyWithAnyOf(List<? extends Predicate<? super NOUT>> predicates) {
     return this.thenVerifyWith(Predicates.anyOf(predicates.toArray(new Predicate[0])));
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> Verifier<?, OIN, NOUT> thenVerifyWith(Predicate<? super NOUT> predicate) {
+  default <NOUT> Checker<?, OIN, NOUT> thenVerifyWith(Predicate<? super NOUT> predicate) {
     return this.then().asValueOf((NOUT) value()).verifyWith(predicate);
   }
 
@@ -124,11 +124,11 @@ public interface Transformer<
   }
 
   /**
-   * A method to finish the transformation stage and return a {@link Verifier} object.
+   * A method to finish the transformation stage and return a {@link Checker} object.
    *
    * @return A verifier object.
    */
-  Verifier<?, OIN, OUT> then();
+  Checker<?, OIN, OUT> then();
 
   @SuppressWarnings("unchecked")
   default TX peek(Consumer<OUT> consumer) {

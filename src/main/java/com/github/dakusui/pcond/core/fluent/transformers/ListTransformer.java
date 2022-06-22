@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.Verifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.ListVerifier;
+import com.github.dakusui.pcond.core.fluent.Checker;
+import com.github.dakusui.pcond.core.fluent.checkers.ListChecker;
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 public interface ListTransformer<OIN, E> extends Transformer<ListTransformer<OIN, E>, OIN, List<E>>, Matcher.ForList<OIN, E> {
   @Override
-  ListVerifier<OIN, E> then();
+  ListChecker<OIN, E> then();
 
   default ObjectTransformer<OIN, E> elementAt(int i) {
     return this.transformToObject(Functions.elementAt(i));
@@ -56,8 +56,8 @@ public interface ListTransformer<OIN, E> extends Transformer<ListTransformer<OIN
     }
 
     @Override
-    public ListVerifier<OIN, E> then() {
-      return Verifier.Factory.listVerifier(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+    public ListChecker<OIN, E> then() {
+      return Checker.Factory.listChecker(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
     }
   }
 }

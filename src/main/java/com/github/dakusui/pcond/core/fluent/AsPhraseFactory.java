@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
 import com.github.dakusui.pcond.core.fluent.transformers.LongTransformer;
-import com.github.dakusui.pcond.core.fluent.verifiers.*;
+import com.github.dakusui.pcond.core.fluent.checkers.*;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 
@@ -112,49 +112,49 @@ public interface AsPhraseFactory<
 
   }
 
-  interface ForVerifier<OIN> extends AsPhraseFactory<
-      StringVerifier<OIN>,
-      IntegerVerifier<OIN>,
-      DoubleVerifier<OIN>,
-      FloatVerifier<OIN>,
-      ShortVerifier<OIN>,
-      LongVerifier<OIN>,
-      BooleanVerifier<OIN>,
+  interface ForChecker<OIN> extends AsPhraseFactory<
+      StringChecker<OIN>,
+      IntegerChecker<OIN>,
+      DoubleChecker<OIN>,
+      FloatChecker<OIN>,
+      ShortChecker<OIN>,
+      LongChecker<OIN>,
+      BooleanChecker<OIN>,
       OIN
       > {
     @Override
-    default <E> ObjectVerifier<OIN, E> as(E value) {
+    default <E> ObjectChecker<OIN, E> as(E value) {
       return asValueOf(value);
     }
 
     @Override
-    default ObjectVerifier<OIN, OIN> asObject() {
+    default ObjectChecker<OIN, OIN> asObject() {
       return asValueOf(value());
     }
 
     @Override
-    default <E> ObjectVerifier<OIN, E> asValueOfClass(Class<E> value) {
+    default <E> ObjectChecker<OIN, E> asValueOfClass(Class<E> value) {
       return asValueOf(value());
     }
 
     @Override
-    default <E> ListVerifier<OIN, E> asListOfClass(Class<E> value) {
+    default <E> ListChecker<OIN, E> asListOfClass(Class<E> value) {
       return asListOf(value());
     }
 
     @Override
-    default <E> StreamVerifier<OIN, E> asStreamOfClass(Class<E> value) {
+    default <E> StreamChecker<OIN, E> asStreamOfClass(Class<E> value) {
       return asStreamOf(value());
     }
 
     @Override
-    <E> ObjectVerifier<OIN, E> asValueOf(E value);
+    <E> ObjectChecker<OIN, E> asValueOf(E value);
 
     @Override
-    <E> ListVerifier<OIN, E> asListOf(E value);
+    <E> ListChecker<OIN, E> asListOf(E value);
 
     @Override
-    <E> StreamVerifier<OIN, E> asStreamOf(E value);
+    <E> StreamChecker<OIN, E> asStreamOf(E value);
 
   }
 }

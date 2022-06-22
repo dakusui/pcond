@@ -2,22 +2,22 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.verifiers.ShortVerifier;
+import com.github.dakusui.pcond.core.fluent.checkers.ShortChecker;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.shortVerifier;
+import static com.github.dakusui.pcond.core.fluent.Checker.Factory.shortChecker;
 
 /**
  * A transformer for `short` type.
  *
  * @param <OIN> The type of original input value.
  */
-public interface ShortTransformer<OIN> extends ComparableNumberTransformer<ShortTransformer<OIN>, ShortVerifier<OIN>, OIN, Short>, Matcher.ForShort<OIN> {
+public interface ShortTransformer<OIN> extends ComparableNumberTransformer<ShortTransformer<OIN>, ShortChecker<OIN>, OIN, Short>, Matcher.ForShort<OIN> {
 
   @Override
-  ShortVerifier<OIN> then();
+  ShortChecker<OIN> then();
 
   class Impl<OIN> extends Base<ShortTransformer<OIN>, OIN, Short> implements ShortTransformer<OIN> {
 
@@ -34,8 +34,8 @@ public interface ShortTransformer<OIN> extends ComparableNumberTransformer<Short
     }
 
     @Override
-    public ShortVerifier<OIN> then() {
-      return shortVerifier(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+    public ShortChecker<OIN> then() {
+      return shortChecker(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
     }
   }
 }

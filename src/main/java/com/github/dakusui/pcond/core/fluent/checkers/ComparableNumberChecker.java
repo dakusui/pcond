@@ -1,20 +1,20 @@
-package com.github.dakusui.pcond.core.fluent.verifiers;
+package com.github.dakusui.pcond.core.fluent.checkers;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.fluent.Matcher;
-import com.github.dakusui.pcond.core.fluent.Verifier;
+import com.github.dakusui.pcond.core.fluent.Checker;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Predicate;
 
-public interface ComparableNumberVerifier<
-    TX extends ComparableNumberVerifier<TX, OIN, N>,
+public interface ComparableNumberChecker<
+    TX extends ComparableNumberChecker<TX, OIN, N>,
     OIN,
     N extends Number & Comparable<N>> extends
     Identifiable, Predicate<OIN>,
     Evaluable.Transformation<OIN, N>,
-    Verifier<TX, OIN, N>,
+    Checker<TX, OIN, N>,
     Matcher.ForNumber<OIN, N> {
   default TX equalTo(N v) {
     return predicate(Predicates.equalTo(v));

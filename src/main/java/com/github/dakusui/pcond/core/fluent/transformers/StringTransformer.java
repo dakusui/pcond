@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.Verifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
+import com.github.dakusui.pcond.core.fluent.Checker;
+import com.github.dakusui.pcond.core.fluent.checkers.StringChecker;
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.forms.Printables;
 
@@ -27,8 +27,8 @@ public interface StringTransformer<OIN> extends
 
   @SuppressWarnings("unchecked")
   @Override
-  default StringVerifier<OIN> then() {
-    return Verifier.Factory.stringVerifier(
+  default StringChecker<OIN> then() {
+    return Checker.Factory.stringVerifier(
         this.transformerName(),
         (Function<? super OIN, String>) this.function(),
         dummyPredicate(),

@@ -1,17 +1,17 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.verifiers.BooleanVerifier;
+import com.github.dakusui.pcond.core.fluent.checkers.BooleanChecker;
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.booleanVerifier;
+import static com.github.dakusui.pcond.core.fluent.Checker.Factory.booleanChecker;
 
 public interface BooleanTransformer<OIN> extends Transformer<BooleanTransformer<OIN>, OIN, Boolean>, Matcher.ForBoolean<OIN> {
   @Override
-  BooleanVerifier<OIN> then();
+  BooleanChecker<OIN> then();
 
   class Impl<OIN> extends Base<BooleanTransformer<OIN>, OIN, Boolean> implements BooleanTransformer<OIN> {
 
@@ -20,8 +20,8 @@ public interface BooleanTransformer<OIN> extends Transformer<BooleanTransformer<
     }
 
     @Override
-    public BooleanVerifier<OIN> then() {
-      return booleanVerifier(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+    public BooleanChecker<OIN> then() {
+      return booleanChecker(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
     }
   }
 }

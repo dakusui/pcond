@@ -2,11 +2,11 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.verifiers.FloatVerifier;
+import com.github.dakusui.pcond.core.fluent.checkers.FloatChecker;
 
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.floatVerifier;
+import static com.github.dakusui.pcond.core.fluent.Checker.Factory.floatChecker;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 
 /**
@@ -14,7 +14,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
  *
  * @param <OIN> The type of original input value.
  */
-public interface FloatTransformer<OIN> extends ComparableNumberTransformer<FloatTransformer<OIN>, FloatVerifier<OIN>, OIN, Float>, Matcher.ForFloat<OIN> {
+public interface FloatTransformer<OIN> extends ComparableNumberTransformer<FloatTransformer<OIN>, FloatChecker<OIN>, OIN, Float>, Matcher.ForFloat<OIN> {
   /**
    * An implementation of {@link FloatTransformer} interface.
    *
@@ -34,8 +34,8 @@ public interface FloatTransformer<OIN> extends ComparableNumberTransformer<Float
     }
 
     @Override
-    public FloatVerifier<OIN> then() {
-      return floatVerifier(this.transformerName(), this.function(), dummyPredicate(), this.originalInputValue());
+    public FloatChecker<OIN> then() {
+      return floatChecker(this.transformerName(), this.function(), dummyPredicate(), this.originalInputValue());
     }
   }
 }

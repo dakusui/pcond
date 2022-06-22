@@ -1,18 +1,18 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
 import com.github.dakusui.pcond.core.fluent.Transformer;
-import com.github.dakusui.pcond.core.fluent.verifiers.StreamVerifier;
+import com.github.dakusui.pcond.core.fluent.checkers.StreamChecker;
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.fluent.Verifier.Factory.streamVerifier;
+import static com.github.dakusui.pcond.core.fluent.Checker.Factory.streamChecker;
 
 public interface StreamTransformer<OIN, E> extends Transformer<StreamTransformer<OIN, E>, OIN, Stream<E>>, Matcher.ForStream<OIN, E> {
   @Override
-  StreamVerifier<OIN, E> then();
+  StreamChecker<OIN, E> then();
 
   class Impl<OIN, E> extends Base<StreamTransformer<OIN, E>, OIN, Stream<E>>
       implements StreamTransformer<OIN, E> {
@@ -25,8 +25,8 @@ public interface StreamTransformer<OIN, E> extends Transformer<StreamTransformer
     }
 
     @Override
-    public StreamVerifier<OIN, E> then() {
-      return streamVerifier(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+    public StreamChecker<OIN, E> then() {
+      return streamChecker(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
     }
   }
 
