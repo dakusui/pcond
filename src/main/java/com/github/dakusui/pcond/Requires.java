@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond;
 
-import com.github.dakusui.pcond.valuechecker.ValueChecker;
+import com.github.dakusui.pcond.valuechecker.Validator;
 
 import java.util.function.Predicate;
 
@@ -23,22 +23,22 @@ public enum Requires {
   ;
 
   public static <T> T requireNonNull(T value) {
-    return ValueChecker.INSTANCE.requireNonNull(value);
+    return Validator.INSTANCE.requireNonNull(value);
   }
 
   public static <T> T requireArgument(T value, Predicate<? super T> cond) {
-    return ValueChecker.INSTANCE.requireArgument(value, cond);
+    return Validator.INSTANCE.requireArgument(value, cond);
   }
 
   public static <T> T requireState(T value, Predicate<? super T> cond) {
-    return ValueChecker.INSTANCE.requireState(value, cond);
+    return Validator.INSTANCE.requireState(value, cond);
   }
 
   @SuppressWarnings("RedundantThrows")
   public static <T, E extends Throwable> T require(
       T value,
       Predicate<? super T> cond) throws E {
-    return ValueChecker.INSTANCE.require(value, cond);
+    return Validator.INSTANCE.require(value, cond);
   }
 
 }

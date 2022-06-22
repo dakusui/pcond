@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond;
 
-import com.github.dakusui.pcond.valuechecker.ValueChecker;
+import com.github.dakusui.pcond.valuechecker.Validator;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -53,7 +53,7 @@ public enum TestAssertions {
    * @param <T>       The type of the `value`.
    */
   public static <T> void assertThat(T value, Predicate<? super T> predicate) {
-    ValueChecker.INSTANCE.assertThat(value, predicate);
+    Validator.INSTANCE.assertThat(value, predicate);
   }
 
   /**
@@ -66,6 +66,6 @@ public enum TestAssertions {
    * @param <T>       The type of the `value`.
    */
   public static <T> void assumeThat(T value, Predicate<? super T> predicate) {
-    ValueChecker.INSTANCE.assumeThat(value, predicate);
+    Validator.INSTANCE.assumeThat(value, predicate);
   }
 }

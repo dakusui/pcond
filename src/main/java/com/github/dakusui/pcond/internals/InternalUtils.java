@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.internals;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.pcond.valuechecker.ValueChecker;
+import com.github.dakusui.pcond.valuechecker.Validator;
 import com.github.dakusui.pcond.valuechecker.Explanation;
 
 import java.lang.reflect.InvocationTargetException;
@@ -91,7 +91,7 @@ public enum InternalUtils {
   }
 
   private static int summarizedStringLength() {
-    return ValueChecker.INSTANCE.configuration().summarizedStringLength();
+    return Validator.INSTANCE.configuration().summarizedStringLength();
   }
 
   private static boolean isToStringOverridden(Object object) {

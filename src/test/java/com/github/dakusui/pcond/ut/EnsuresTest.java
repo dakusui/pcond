@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Ensures;
-import com.github.dakusui.pcond.valuechecker.ValueChecker;
+import com.github.dakusui.pcond.valuechecker.Validator;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.valuechecker.exceptions.PostconditionViolationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
@@ -25,7 +25,7 @@ public class EnsuresTest extends TestBase.ForAssertionEnabledVM {
 
   @Test
   public void test() {
-    System.out.println(ValueChecker.INSTANCE);
+    System.out.println(Validator.INSTANCE);
   }
 
   @Test

@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.Assertions;
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.valuechecker.ValueChecker;
+import com.github.dakusui.pcond.valuechecker.Validator;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -59,7 +59,7 @@ public class AssertionsTest {
   public static class MessageTest {
     @Test
     public void composeMessage$thenComposed() {
-      assertEquals("Value:\"hello\" violated: isNull", new ValueChecker.Impl(new Properties()).configuration().messageComposer().composeMessageForAssertion("hello", Predicates.isNull()));
+      assertEquals("Value:\"hello\" violated: isNull", new Validator.Impl(new Properties()).configuration().messageComposer().composeMessageForAssertion("hello", Predicates.isNull()));
     }
   }
 }

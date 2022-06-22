@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond;
 
-import com.github.dakusui.pcond.valuechecker.ValueChecker;
+import com.github.dakusui.pcond.valuechecker.Validator;
 
 import java.util.function.Predicate;
 
@@ -57,7 +57,7 @@ public enum Assertions {
    * @return {@code true}, if the condition given as {@code predicate} is satisfied.
    */
   public static <T> boolean that(T value, Predicate<? super T> predicate) {
-    ValueChecker.INSTANCE.checkInvariant(value, predicate);
+    Validator.INSTANCE.checkInvariant(value, predicate);
     return trueValue();
   }
 
@@ -79,7 +79,7 @@ public enum Assertions {
    * @return {@code true}, if the condition given as {@code predicate} is satisfied.
    */
   public static <T> boolean precondition(T value, Predicate<? super T> predicate) {
-    ValueChecker.INSTANCE.checkPrecondition(value, predicate);
+    Validator.INSTANCE.checkPrecondition(value, predicate);
     return trueValue();
   }
 
@@ -101,7 +101,7 @@ public enum Assertions {
    * @return {@code true}, if the condition given as {@code predicate} is satisfied.
    */
   public static <T> boolean postcondition(T value, Predicate<? super T> predicate) {
-    ValueChecker.INSTANCE.checkPostcondition(value, predicate);
+    Validator.INSTANCE.checkPostcondition(value, predicate);
     return trueValue();
   }
 

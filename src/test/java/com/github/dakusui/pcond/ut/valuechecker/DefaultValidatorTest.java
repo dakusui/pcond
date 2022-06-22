@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.ut.valuechecker;
 
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.valuechecker.ValueChecker;
+import com.github.dakusui.pcond.valuechecker.Validator;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -19,7 +19,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class DefaultValueCheckerTest extends TestBase {
+public class DefaultValidatorTest extends TestBase {
   @Test(expected = IllegalArgumentException.class)
   public void withoutEvaluator_conj_thenFail() {
     try {
@@ -223,8 +223,8 @@ public class DefaultValueCheckerTest extends TestBase {
     }
   }
 
-  public ValueChecker.Impl createAssertionProvider(Properties properties) {
-    return new ValueChecker.Impl(properties);
+  public Validator.Impl createAssertionProvider(Properties properties) {
+    return new Validator.Impl(properties);
   }
 
   public static Properties useEvaluator(Properties properties, boolean useEvaluator) {

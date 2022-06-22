@@ -21,11 +21,11 @@ import static java.util.Collections.emptyList;
 /**
  * An interface of a policy for behaviours on 'contract violations'.
  */
-public interface ValueChecker {
+public interface Validator {
   /**
    * A constant field that holds the default provider instance.
    */
-  ValueChecker INSTANCE = create(Configuration.Utils.loadPcondProperties());
+  Validator INSTANCE = create(Configuration.Utils.loadPcondProperties());
 
 
   /**
@@ -43,7 +43,7 @@ public interface ValueChecker {
    * @param properties A {@code Properties} object from which an {@code AssertionProvider} is created
    * @return Created provider instance.
    */
-  static ValueChecker create(Properties properties) {
+  static Validator create(Properties properties) {
     return new Impl(properties);
   }
 
@@ -609,7 +609,7 @@ public interface ValueChecker {
     }
   }
 
-  class Impl implements ValueChecker {
+  class Impl implements Validator {
 
     private final Configuration configuration;
 

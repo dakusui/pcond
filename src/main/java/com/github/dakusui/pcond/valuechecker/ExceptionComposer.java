@@ -64,10 +64,10 @@ public interface ExceptionComposer {
    * An implementation of the {@link ExceptionComposer} interface.
    * You usually do not need to extend this method to customize its behavior.
    * Rather you only need to control the arguments passed to its constructor
-   * through {@link com.github.dakusui.pcond.valuechecker.ValueChecker.Configuration.Builder}.
+   * through {@link Validator.Configuration.Builder}.
    *
-   * @see com.github.dakusui.pcond.valuechecker.ValueChecker.Configuration
-   * @see com.github.dakusui.pcond.valuechecker.ValueChecker.Configuration.Builder
+   * @see Validator.Configuration
+   * @see Validator.Configuration.Builder
    */
   class Impl implements ExceptionComposer {
     final private ForRequire  forRequire;
@@ -127,7 +127,7 @@ public interface ExceptionComposer {
      * In case you prefer to throw `YourPreconditionException` for the sake of uniformity,
      * you can override this method for an object returned by {@link ExceptionComposer#forRequire()}
      *
-     * For more detail, please refer to {@link com.github.dakusui.pcond.valuechecker.ValueChecker.Configuration}.
+     * For more detail, please refer to {@link Validator.Configuration}.
      *
      * @param message A message attached to the composed exception.
      * @return A composed exception.
