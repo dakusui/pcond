@@ -33,7 +33,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
     Identifiable,
     MoreFluents.Statement<OIN>,
     Evaluable.Transformation<OIN, T>,
-    IntoPhraseFactory.ForVerifier<OIN, T>,
+    IntoPhraseFactory.ForChecker<OIN, T>,
     AsPhraseFactory.ForChecker<OIN> {
 
   String transformerName();
@@ -95,7 +95,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   @Override
   default StringChecker<OIN> asString() {
-    return stringVerifier(this, Function.class.cast(Functions.cast(String.class)));
+    return stringChecker(this, Function.class.cast(Functions.cast(String.class)));
   }
 
   @Override
@@ -146,7 +146,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
 
   @Override
   default StringChecker<OIN> intoStringWith(Function<T, String> function) {
-    return stringVerifier(this, function);
+    return stringChecker(this, function);
   }
 
   @Override
@@ -230,11 +230,11 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
   enum Factory {
     ;
 
-    public static <V extends Checker<V, OIN, T>, OIN, T> StringChecker<OIN> stringVerifier(Checker<V, OIN, T> checker, Function<T, String> function) {
-      return stringVerifier(checker.transformerName(), chainFunctions(checker.function(), function), dummyPredicate(), checker.originalInputValue());
+    public static <V extends Checker<V, OIN, T>, OIN, T> StringChecker<OIN> stringChecker(Checker<V, OIN, T> checker, Function<T, String> function) {
+      return stringChecker(checker.transformerName(), chainFunctions(checker.function(), function), dummyPredicate(), checker.originalInputValue());
     }
 
-    public static <OIN> StringChecker<OIN> stringVerifier(
+    public static <OIN> StringChecker<OIN> stringChecker(
         String transformerName,
         Function<? super OIN, String> function,
         Predicate<? super String> predicate,

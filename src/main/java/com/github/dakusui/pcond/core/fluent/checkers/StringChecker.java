@@ -68,7 +68,7 @@ public interface StringChecker<OIN> extends
     @SuppressWarnings("unchecked")
     @Override
     public StringChecker<OIN> create(String transformerName, Function<? super OIN, ? extends String> function, Predicate<? super String> predicate, OIN originalInputValue) {
-      return Checker.Factory.stringVerifier(transformerName, (Function<? super OIN, String>) function, predicate, originalInputValue);
+      return Checker.Factory.stringChecker(transformerName, (Function<? super OIN, String>) function, predicate, originalInputValue);
     }
   }
 }

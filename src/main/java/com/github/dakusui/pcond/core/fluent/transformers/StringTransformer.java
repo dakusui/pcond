@@ -28,7 +28,7 @@ public interface StringTransformer<OIN> extends
   @SuppressWarnings("unchecked")
   @Override
   default StringChecker<OIN> then() {
-    return Checker.Factory.stringVerifier(
+    return Checker.Factory.stringChecker(
         this.transformerName(),
         (Function<? super OIN, String>) this.function(),
         dummyPredicate(),

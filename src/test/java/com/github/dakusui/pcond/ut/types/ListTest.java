@@ -47,26 +47,26 @@ public class ListTest extends TestBase {
   }
 
   @Test(expected = ComparisonFailure.class)
-  public void listVerifierTest_isEmpty_fail() {
+  public void listCheckerTest_isEmpty_fail() {
     List<String> value = asList("Hello", "world");
     TestAssertions.assertThat(value, when().asListOf((String) value()).then().isEmpty());
   }
 
   @Test
-  public void listVerifierTest_isEmpty_pass() {
+  public void listCheckerTest_isEmpty_pass() {
     List<String> value = asList("Hello", "world");
     TestAssertions.assertThat(value, when().asListOf((String) value()).then().isEmpty().negate());
   }
 
   @Test
-  public void listVerifierTest_findElementsInOrder() {
+  public void listCheckerTest_findElementsInOrder() {
     List<String> value = asList("Hello", "world");
     TestAssertions.assertThat(value, when().asListOf((String) value()).then().findElementsInOrder("Hello", "world"));
   }
 
   @SuppressWarnings("unchecked")
   @Test
-  public void listVerifierTest_findElementsInOrderBy() {
+  public void listCheckerTest_findElementsInOrderBy() {
     List<String> value = asList("Hello", "world");
     TestAssertions.assertThat(value, when().asListOf((String) value()).then().findElementsInOrderBy(Predicates.isEqualTo("Hello"), Predicates.isEqualTo("world")));
   }

@@ -69,7 +69,7 @@ A package to provide entry-point classes for the `Fluent` and `MoreFluent` style
 |===
 
 [source,bnf]
-."Exposed" conversion method names in Transformers and verifiers.
+."Exposed" conversion method names in Transformers and checkers.
 ----
 <WHEN_CLAUSE>  ::= when <AS_PHRASE>?
 <THEN_CLAUSE>  ::= then <INTO_PHRASE>?
@@ -124,7 +124,7 @@ For `WHEN_CLAUSE`, 10 and for `THEN_CLAUSE` 7 methods.
 
 [cols="^,^,^,^"]
 |===
-|    |`Fluent` |`Transformer` |`Verifier`
+|    |`Fluent` |`Transformer` |`Checker`
 
 |`WHEN_CLAUSE`
 |✓
@@ -150,13 +150,13 @@ For `WHEN_CLAUSE`, 10 and for `THEN_CLAUSE` 7 methods.
 === Special Types of `pcond`
 
 In the `pcond` library divides an evaluation of an assertion into two stages.
-"Exercise" and "verification".
+"Transform" and "check".
 Not like other assertion libraries, it has separated group of classes for each of them.
 "Transformers"
 
 In order to reduce the necessity of creating custom classes, it takes an approach, where
 
 They are `String`, `Number`(`Integer`), `Boolean`, `List<E>`, `Stream<E>`, and (general) `Object`.
-For each of them, special `Transformer` s and `Verifier` s come with the `pcond` library to provide type specific methods, such as `containsString` for `String`.
+For each of them, special `Transformer` s and `Checker` s come with the `pcond` library to provide type specific methods, such as `containsString` for `String`.
 
 

@@ -70,7 +70,7 @@ public interface IntoPhraseFactory<OIN, IN> {
 
   <E> StreamChecker<OIN, E> intoStreamWith(Function<IN, Stream<E>> function);
 
-  interface ForVerifier<OIN, IN> extends IntoPhraseFactory<OIN, IN> {
+  interface ForChecker<OIN, IN> extends IntoPhraseFactory<OIN, IN> {
 
   }
 }
