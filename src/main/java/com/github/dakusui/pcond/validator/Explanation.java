@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.valuechecker;
+package com.github.dakusui.pcond.validator;
 
 import static java.lang.String.format;
 

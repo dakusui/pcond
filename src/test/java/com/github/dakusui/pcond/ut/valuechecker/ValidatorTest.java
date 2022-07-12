@@ -1,10 +1,10 @@
 package com.github.dakusui.pcond.ut.valuechecker;
 
 import com.github.dakusui.pcond.utils.ut.TestBase;
-import com.github.dakusui.pcond.valuechecker.ExceptionComposer;
-import com.github.dakusui.pcond.valuechecker.MessageComposer;
-import com.github.dakusui.pcond.valuechecker.ReportComposer;
-import com.github.dakusui.pcond.valuechecker.Validator;
+import com.github.dakusui.pcond.validator.ExceptionComposer;
+import com.github.dakusui.pcond.validator.MessageComposer;
+import com.github.dakusui.pcond.validator.ReportComposer;
+import com.github.dakusui.pcond.validator.Validator;
 import org.junit.Test;
 
 public class ValidatorTest extends TestBase {

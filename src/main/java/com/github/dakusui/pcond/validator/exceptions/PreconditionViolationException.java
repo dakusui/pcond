@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.valuechecker.exceptions;
+package com.github.dakusui.pcond.validator.exceptions;
 
 /**
  * An exception intended to be used, when a pre-condition is not satisfied.

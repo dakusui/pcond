@@ -411,14 +411,14 @@ public enum Predicates {
     });
   }
 
-  private static <T> Predicate<T> makeExplainable(PrintablePredicate<? super T> predicate_, Evaluator.Explainable explainable) {
+  private static <T> Predicate<T> makeExplainable(PrintablePredicate<? super T> p, Evaluator.Explainable explainable) {
     class ExplainablePredicate extends PrintablePredicate<T> implements
         Predicate<T>,
         Evaluable.LeafPred<T>,
         Evaluator.Explainable {
 
       protected ExplainablePredicate() {
-        super(new Object(), emptyList(), predicate_::toString, predicate_);
+        super(new Object(), emptyList(), p::toString, p);
       }
 
       @Override

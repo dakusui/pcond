@@ -3,9 +3,9 @@ package com.github.dakusui.pcond.ut;
 import com.github.dakusui.pcond.Validates;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.pcond.valuechecker.ApplicationException;
+import com.github.dakusui.pcond.validator.ApplicationException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
-import com.github.dakusui.pcond.valuechecker.exceptions.ValidationException;
+import com.github.dakusui.pcond.validator.exceptions.ValidationException;
 import org.junit.Test;
 
 import java.util.function.Function;

@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.currying.Checks.validateParamOrderList;
+import static com.github.dakusui.pcond.internals.InternalChecks.validateParamOrderList;
 import static com.github.dakusui.pcond.core.refl.ReflUtils.formatMethodName;
 import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeStaticMethod;
 import static com.github.dakusui.pcond.internals.InternalChecks.requireStaticMethod;

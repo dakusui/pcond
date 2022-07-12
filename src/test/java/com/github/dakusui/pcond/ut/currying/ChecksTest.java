@@ -2,8 +2,8 @@ package com.github.dakusui.pcond.ut.currying;
 
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.core.currying.Checks.isWiderThan;
-import static com.github.dakusui.pcond.core.currying.Checks.isWiderThanOrEqualTo;
+import static com.github.dakusui.pcond.internals.InternalChecks.isWiderThan;
+import static com.github.dakusui.pcond.internals.InternalChecks.isWiderThanOrEqualTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

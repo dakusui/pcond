@@ -1,13 +1,13 @@
-package com.github.dakusui.pcond.valuechecker;
+package com.github.dakusui.pcond.validator;
 
 import com.github.dakusui.pcond.Validates;
-import com.github.dakusui.pcond.valuechecker.exceptions.PostconditionViolationException;
-import com.github.dakusui.pcond.valuechecker.exceptions.PreconditionViolationException;
-import com.github.dakusui.pcond.valuechecker.exceptions.ValidationException;
+import com.github.dakusui.pcond.validator.exceptions.PostconditionViolationException;
+import com.github.dakusui.pcond.validator.exceptions.PreconditionViolationException;
+import com.github.dakusui.pcond.validator.exceptions.ValidationException;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static com.github.dakusui.pcond.valuechecker.ExceptionComposer.Utils.createException;
+import static com.github.dakusui.pcond.validator.ExceptionComposer.Utils.createException;
 
 /**
  * An interface to define how an exception is composed based on a given message,

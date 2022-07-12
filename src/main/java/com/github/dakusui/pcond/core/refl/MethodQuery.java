@@ -11,6 +11,9 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
+/**
+ * An interface that models a query to specify a method.
+ */
 public interface MethodQuery {
   boolean isStatic();
 
@@ -44,6 +47,14 @@ public interface MethodQuery {
     return create(false, requireNonNull(targetObject), ReflUtils.targetTypeOf(targetObject), methodName, arguments);
   }
 
+  /**
+   * Create a `MethodQuery` object to search matching static methods.
+   *
+   * @param targetClass A class from which a method is searched.
+   * @param methodName  A name of a method to be searched.
+   * @param arguments   Argument values;
+   * @return A `MethodQuery` object.
+   */
   static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
     return create(true, null, targetClass, methodName, arguments);
   }

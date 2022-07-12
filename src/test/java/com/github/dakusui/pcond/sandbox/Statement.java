@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.sandbox;
 
-import com.github.dakusui.pcond.valuechecker.Validator;
+import com.github.dakusui.pcond.validator.Validator;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;

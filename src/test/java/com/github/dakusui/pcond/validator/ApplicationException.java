@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.valuechecker;
+package com.github.dakusui.pcond.validator;
 
 public class ApplicationException extends RuntimeException {
   public ApplicationException(String message) {

@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.valuechecker;
+package com.github.dakusui.pcond.validator;
 
 import com.github.dakusui.pcond.Validates;
 import com.github.dakusui.pcond.core.Evaluable;
@@ -459,13 +459,13 @@ public interface Validator {
         return new Builder()
             .useEvaluator(Boolean.parseBoolean(properties.getProperty("useEvaluator", "true")))
             .summarizedStringLength(Integer.parseInt(properties.getProperty("summarizedStringLength", "40")))
-            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForRequire.class, properties.getProperty("exceptionComposerForRequire", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForRequire$Default")))
-            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForEnsure.class, properties.getProperty("exceptionComposerForEnsure", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForEnsure$Default")))
-            .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty("defaultExceptionComposerForValidate", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForValidate$Default")))
-            .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty("exceptionComposerForAssert", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForAssertion$Default")))
-            .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty("exceptionComposerForAssertThat", "com.github.dakusui.pcond.valuechecker.ExceptionComposer$ForTestAssertion$JUnit4")))
-            .messageComposer(instantiate(MessageComposer.class, properties.getProperty("reportComposer", "com.github.dakusui.pcond.valuechecker.MessageComposer$Default")))
-            .reportComposer(instantiate(ReportComposer.class, properties.getProperty("messageComposer", "com.github.dakusui.pcond.valuechecker.ReportComposer$Default")))
+            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForRequire.class, properties.getProperty("exceptionComposerForRequire", "com.github.dakusui.pcond.validator.ExceptionComposer$ForRequire$Default")))
+            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForEnsure.class, properties.getProperty("exceptionComposerForEnsure", "com.github.dakusui.pcond.validator.ExceptionComposer$ForEnsure$Default")))
+            .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty("defaultExceptionComposerForValidate", "com.github.dakusui.pcond.validator.ExceptionComposer$ForValidate$Default")))
+            .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty("exceptionComposerForAssert", "com.github.dakusui.pcond.validator.ExceptionComposer$ForAssertion$Default")))
+            .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty("exceptionComposerForAssertThat", "com.github.dakusui.pcond.validator.ExceptionComposer$ForTestAssertion$JUnit4")))
+            .messageComposer(instantiate(MessageComposer.class, properties.getProperty("reportComposer", "com.github.dakusui.pcond.validator.MessageComposer$Default")))
+            .reportComposer(instantiate(ReportComposer.class, properties.getProperty("messageComposer", "com.github.dakusui.pcond.validator.ReportComposer$Default")))
             .build();
       }
 

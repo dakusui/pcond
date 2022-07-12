@@ -1,14 +1,35 @@
 package com.github.dakusui.pcond.internals;
 
+import com.github.dakusui.pcond.core.refl.ReflUtils;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static java.lang.String.format;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.toList;
+
 public enum InternalChecks {
   ;
+
+  private static final Set<Class<?>> PRIMITIVE_WRAPPERS = new HashSet<Class<?>>() {{
+    add(Integer.class);
+    add(Long.class);
+    add(Boolean.class);
+    add(Byte.class);
+    add(Character.class);
+    add(Float.class);
+    add(Double.class);
+    add(Short.class);
+    add(Void.class);
+  }};
 
   public static void checkArgument(boolean b, Supplier<String> messageFormatter) {
     if (!b)
@@ -43,5 +64,42 @@ public enum InternalChecks {
     if (requiredSize != args.size())
       throw new IllegalArgumentException(String.format("Wrong number of arguments are given: required: %s, actual: %s", requiredSize, args.size()));
     return args;
+  }
+
+  public static boolean isWiderThanOrEqualTo(Class<?> classA, Class<?> classB) {
+    requireArgument(classA, InternalChecks::isPrimitiveWrapperClass, () -> format("'%s' is not a primitive wrapper class", classA));
+    requireArgument(classB, InternalChecks::isPrimitiveWrapperClass, () -> format("'%s' is not a primitive wrapper class", classB));
+    return classA.equals(classB) || isWiderThan(classA, classB);
+  }
+
+  public static boolean isPrimitiveWrapperClass(Class<?> aClass) {
+    return PRIMITIVE_WRAPPERS.contains(aClass);
+  }
+
+  public static boolean isPrimitiveWrapperClassOrPrimitive(Class<?> aClass) {
+    return aClass.isPrimitive() || isPrimitiveWrapperClass(aClass);
+  }
+
+  /**
+   * @param classA A non-primitive type class.
+   * @param classB Another non-primitive type class.
+   * @return {@code true} iff {@code classA} is a "wider" wrapper class than {@code classB}.
+   */
+  public static boolean isWiderThan(Class<?> classA, Class<?> classB) {
+    requireArgument(classA, InternalChecks::isPrimitiveWrapperClass, () -> format("'%s' is not a primitive wrapper class", classA));
+    requireArgument(classB, InternalChecks::isPrimitiveWrapperClass, () -> format("'%s' is not a primitive wrapper class", classB));
+    Set<Class<?>> widerBoxedClassesForClassA = widerTypesThan(classB);
+    return widerBoxedClassesForClassA.contains(classA);
+  }
+
+  private static Set<Class<?>> widerTypesThan(Class<?> classB) {
+    return ReflUtils.WIDER_TYPES.getOrDefault(classB, emptySet());
+  }
+
+  public static List<Integer> validateParamOrderList(List<Integer> order, int numParameters) {
+    final List<Integer> paramOrder = unmodifiableList(order.stream().distinct().collect(toList()));
+    requireArgument(order, o -> o.size() == paramOrder.size(), () -> "Duplicated elements are found in the 'order' argument:" + order.toString() + " " + paramOrder);
+    requireArgument(order, o -> o.size() == numParameters, () -> "Inconsistent number of parameters are supplied by 'order'. Expected:" + numParameters + ", Actual: " + order.size());
+    return paramOrder;
   }
 }

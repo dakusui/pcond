@@ -1,7 +1,6 @@
 package com.github.dakusui.pcond.it;
 
-import com.github.dakusui.pcond.valuechecker.ExceptionComposer;
-import org.junit.Ignore;
+import com.github.dakusui.pcond.validator.ExceptionComposer;
 import org.junit.Test;
 import org.opentest4j.AssertionFailedError;
 

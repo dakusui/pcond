@@ -82,7 +82,6 @@ public class CurryingTest extends TestBase {
     }
   }
 
-  @SuppressWarnings("UnnecessaryCallToStringValueOf")
   @Test
   public void test3() {
     CurriedFunction<Object, Object> curried = Utils.example();

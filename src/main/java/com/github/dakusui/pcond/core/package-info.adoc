@@ -7,4 +7,6 @@ This package hosts the most important interfaces for this architecture.
 
 Evaluable:: Corresponds to a function and a predicate.
 Sub-interfaces are defined to model a non-simple function and a predicate, such as "and", "or", "not", etc.
-Evaluator:: A visitor that computes the value of the entire tree composed from the `Evaluable` objects.
+Evaluator:: A visitor that computes a result value of the entire tree composed of the `Evaluable` objects.
+
+These consists the "evaluation framework" of the `pcond` library.
