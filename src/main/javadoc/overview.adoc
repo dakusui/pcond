@@ -97,6 +97,40 @@ For stem:[p], we only need to support a limited number of predicates because, pr
 So, we don't need to come up with a nicely readable messages for every method you define in your custom matchers.
 Instead, the `pcond` library composes it from the transformation function stem:[f] and stem:[p] 's string representations.
 
+Following is a small example code, which examines if a given value `yourName` satisfies required conditions.
+
+[source,java]
+----
+public class ExampleDbC {
+  public static void main(String[] args) {
+    System.out.println(hello("JohnDoe"));
+  }
+
+  public static String hello(String yourName) {
+    // <2>
+    requireArgument(yourName, and(isNotNull(),
+                                  transform(length()).check(gt(0)),
+                                  containsString(" ")));
+    String ret = String.format("Hello, %s", NameUtils.firstNameOf(yourName));
+    // <3>
+    return ensureNonNull(ret);
+  }
+}
+----
+
+This prints the following output.
+
+----
+Exception in thread "main" java.lang.IllegalArgumentException: value:<"JohnDoe"> violated precondition:value (isNotNull&&length >[0]&&containsString[" "])
+"JohnDoe"->&&                   ->false
+             isNotNull          ->true
+             transform
+               length           ->7
+7        ->  check
+               >[0]             ->true
+"JohnDoe"->  containsString[" "]->false
+----
+
 It might not be 100% natural English text, but still very easily understandable for programmers.
 The author of the library believes it is  more useful and reliable for developers.
 
