@@ -30,6 +30,10 @@ public interface StringChecker<OIN> extends
     return this.predicate(Predicates.isEmptyString());
   }
 
+  default StringChecker<OIN> isNotEmpty() {
+    return this.predicate(Predicates.isEmptyString().negate());
+  }
+
   default StringChecker<OIN> isEqualTo(String string) {
     return this.predicate(explainableStringIsEqualTo(string));
   }

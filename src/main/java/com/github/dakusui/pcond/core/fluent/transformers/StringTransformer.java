@@ -1,14 +1,15 @@
 package com.github.dakusui.pcond.core.fluent.transformers;
 
-import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.Checker;
-import com.github.dakusui.pcond.core.fluent.checkers.StringChecker;
 import com.github.dakusui.pcond.core.fluent.Matcher;
+import com.github.dakusui.pcond.core.fluent.Transformer;
+import com.github.dakusui.pcond.core.fluent.checkers.StringChecker;
 import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
+import static java.util.Arrays.asList;
 
 public interface StringTransformer<OIN> extends
     Transformer<StringTransformer<OIN>, OIN, String>,
@@ -23,6 +24,10 @@ public interface StringTransformer<OIN> extends
 
   default StringTransformer<OIN> toLowerCase() {
     return this.transformToString(Printables.function("toLowerCase", String::toLowerCase));
+  }
+
+  default ListTransformer<OIN, String> split(String regex) {
+    return this.transformToList(Printables.function("split[" + regex + "]", (String s) -> asList((s.split(regex)))));
   }
 
   @SuppressWarnings("unchecked")

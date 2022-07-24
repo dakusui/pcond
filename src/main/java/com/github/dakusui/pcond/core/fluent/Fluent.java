@@ -69,7 +69,18 @@ public class Fluent<OIN> implements AsPhraseFactory.ForFluent<OIN> {
   }
 
   @Override
+  public <E> ListTransformer<OIN, E> asListOfClass(Class<E> klass) {
+    return AsPhraseFactory.ForFluent.super.asListOfClass(klass);
+  }
+
+  @Override
   public <E> StreamTransformer<OIN, E> asStreamOf(E value) {
     return new StreamTransformer.Impl<>(this.transformerName, null, dummyFunction(), this.originalInputValue);
+  }
+
+
+  @Override
+  public <E> StreamTransformer<OIN, E> asStreamOfClass(Class<E> klass) {
+    return AsPhraseFactory.ForFluent.super.asStreamOfClass(klass);
   }
 }

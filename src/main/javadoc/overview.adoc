@@ -197,13 +197,49 @@ public class Example {
 
 (t.b.d.)
 
-=== Fluent Style
+=== Fluent Style (Experimental)
+
+(t.b.d.)
+[source,java]
+----
+public class FluentStyleExample {
+  @Test
+  public void givenValidName_whenValidatePersonName_thenPass() {
+    String s = "John Doe";
+    assertThat(
+        s,
+        $().asString().split(" ").thenVerifyWithAllOf(asList(
+          $().asListOfClass(String.class).elementAt(0).then()
+             .asString().isNullOrEmpty().negate(),
+          $().asListOfClass(String.class).elementAt(1).then()
+             .asString().isNullOrEmpty().negate())));
+  }
+}
+----
+
+=== More Fluent Style (Experimental)
 
 (t.b.d.)
 
-=== More Fluent Style
+[source,java]
+----
+public class MoreFluentExample {
+  @Test
+  public void checkTwoValues() {
+    String s = "HI";
+    List<String> strings = asList("HELLO", "WORLD");
 
-(t.b.d.)
+    assertWhen(
+        valueOf(s).asString()
+          .exercise(TestUtils.stringToLowerCase())
+          .then()
+          .isEqualTo("HI"),
+        valueOf(strings).asListOf((String)value())
+          .then()
+          .findElementsInOrder("hello", "world"));
+  }
+}
+----
 
 == Related Works
 

@@ -34,8 +34,10 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-public enum Predicates {
+public class Predicates {
   ;
+  private Predicates() {
+  }
 
   public static <T> Predicate<T> alwaysTrue() {
     return Leaf.ALWAYS_TRUE.instance();
