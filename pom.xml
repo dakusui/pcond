@@ -1,11 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.dakusui</groupId>
     <artifactId>pcond</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.0-alpha3-SNAPSHOT</version>
+    <version>3.0.0-alpha3</version>
     <description>A Small Java Library for Design by Contract style programming with printable preconditions.
     </description>
 
@@ -26,7 +24,7 @@
         <developerConnection>scm:git:git@github.com:dakusui/${project.name}.git
         </developerConnection>
         <url>http://dakusui.github.io/${project.name}</url>
-        <tag>${project.name}-${project.version}</tag>
+        <tag>pcond-3.0.0-alpha3</tag>
     </scm>
 
     <developers>
@@ -280,7 +278,7 @@
                         <format>html</format>
                         <format>xml</format>
                     </formats>
-                    <check/>
+                    <check />
                 </configuration>
             </plugin>
             <plugin>
@@ -434,7 +432,7 @@
                                 <toc>left</toc>
                                 <icons>font</icons>
                                 <sectanchors>true</sectanchors>
-                                <idprefix/>
+                                <idprefix />
                                 <idseparator>-</idseparator>
                             </attributes>
                         </configuration>
