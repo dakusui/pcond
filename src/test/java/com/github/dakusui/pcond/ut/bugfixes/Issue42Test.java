@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.util.*;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.Preconditions.require;
+import static com.github.dakusui.pcond.Requires.require;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.ut.bugfixes.issue42.Issue42Utils.createPrivateExtendingPublicMap;

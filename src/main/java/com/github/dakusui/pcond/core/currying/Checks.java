@@ -1,36 +1,36 @@
 package com.github.dakusui.pcond.core.currying;
 
-import com.github.dakusui.pcond.core.refl.ReflUtils;
 import com.github.dakusui.pcond.internals.InternalChecks;
 
-import java.util.List;
-import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;
-import static java.util.Collections.emptySet;
-import static java.util.Collections.unmodifiableList;
-import static java.util.stream.Collectors.toList;
+import static java.lang.String.format;
 
+/**
+ * A utility class for checking values that the "currying" mechanism of the `pcond`
+ * library processes.
+ */
 public enum Checks {
   ;
 
-  public static <T extends CurriedFunction<?, ?>> T requireLast(T value) {
+  static <T extends CurriedFunction<?, ?>> T requireLast(T value) {
     if (value.hasNext())
       throw new IllegalStateException();
     return value;
   }
 
-  public static List<Integer> validateParamOrderList(List<Integer> order, int numParameters) {
-    final List<Integer> paramOrder = unmodifiableList(order.stream().distinct().collect(toList()));
-    requireArgument(order, o -> o.size() == paramOrder.size(), () -> "Duplicated elements are found in the 'order' argument:" + order.toString() + " " + paramOrder);
-    requireArgument(order, o -> o.size() == numParameters, () -> "Inconsistent number of parameters are supplied by 'order'. Expected:" + numParameters + ", Actual: " + order.size());
-    return paramOrder;
-  }
-
-  public static <T> T validateArgumentType(T arg, Class<?> paramType, Supplier<String> messageFormatter) {
+  /**
+   * Validates if a given argument value is appropriate for a parameter type (`paramType`).
+   *
+   * @param arg              An argument value is to check with `paramType`.
+   * @param paramType        An expected type for `arg`.
+   * @param messageFormatter A message formatter which generates a message on a failure.
+   * @param <T>              The type of the argument value.
+   * @return The `arg` value itself.
+   */
+  static <T> T validateArgumentType(T arg, Class<?> paramType, Supplier<String> messageFormatter) {
     InternalChecks.checkArgument(isValidValueForType(arg, paramType), messageFormatter);
     return arg;
   }
@@ -39,38 +39,18 @@ public enum Checks {
     if (paramType.isPrimitive()) {
       if (arg == null)
         return paramType.equals(void.class);
-      Class<?> wrapperClass = wrapperClassOf(paramType);
-      if (wrapperClass.equals(arg.getClass()))
-        return true;
-      return isWiderThan(wrapperClass, arg.getClass());
+      if (InternalChecks.isPrimitiveWrapperClassOrPrimitive(arg.getClass())) {
+        Class<?> wrapperClassForParamType = wrapperClassOf(paramType);
+        if (wrapperClassForParamType.equals(arg.getClass()))
+          return true;
+        return InternalChecks.isWiderThan(wrapperClassForParamType, arg.getClass());
+      }
+      return false;
     } else {
       if (arg == null)
         return true;
       return paramType.isAssignableFrom(arg.getClass());
     }
-  }
-
-  /**
-   * @param classA A non-primitive type class.
-   * @param classB Another non-primitive type class.
-   * @return {@code true} iff {@code classA} is a "wider" wrapper class than {@code classB}.
-   */
-  public static boolean isWiderThan(Class<?> classA, Class<?> classB) {
-    assert !classB.isPrimitive();
-    assert !classA.isPrimitive();
-    Set<Class<?>> widerBoxedClassesForClassA = widerTypesThan(classB);
-    return widerBoxedClassesForClassA.contains(classA);
-  }
-
-  public static boolean isWiderThanOrEqualTo(Class<?> classA, Class<?> classB) {
-    assert !classB.isPrimitive();
-    assert !classA.isPrimitive();
-    return classA.equals(classB) || isWiderThan(classA, classB);
-  }
-
-  private static Set<Class<?>> widerTypesThan(Class<?> classB) {
-    assert !classB.isPrimitive();
-    return ReflUtils.WIDER_TYPES.getOrDefault(classB, emptySet());
   }
 
   @SuppressWarnings("unchecked")

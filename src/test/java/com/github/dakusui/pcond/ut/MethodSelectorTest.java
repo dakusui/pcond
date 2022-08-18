@@ -2,19 +2,18 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.core.refl.MethodSelector;
 import com.github.dakusui.pcond.core.refl.ReflUtils;
-import com.github.dakusui.pcond.internals.MethodAccessException;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
-import javax.swing.plaf.synth.SynthStyle;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class MethodSelectorTest extends TestBase {
   @Test(expected = IllegalArgumentException.class)

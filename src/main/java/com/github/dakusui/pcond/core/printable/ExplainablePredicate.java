@@ -2,8 +2,10 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
+import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -27,6 +29,7 @@ public abstract class ExplainablePredicate<V> extends PrintablePredicate<V>
   protected V actualInput() {
     return this.actualInput;
   }
+
   @Override
   public Object explainActualInput() {
     return actualInput();

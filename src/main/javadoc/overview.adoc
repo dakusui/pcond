@@ -1,3 +1,246 @@
-= pcond: The Printable {pre,post}-conditions
+= `pcond`: The Printable {pre,post}-conditions
+
+The `pcond` is a multi-purposes predicate library for "Design by Contract" style programming, replacing Guava's `Preconditions` class and Apache Common's `Validate` class, and test assertions.
+
+== Design Goals
+
+Following is a list of goals that the `pcond` library tries to achieve.
+
+* **Unified Support for Value Check, DbC, Test Assertion programming:**  Input/status value checking, user input validation, Checks in Design by Contract, and test assertions have similar concerns, however, completely different solutions are provided footnote:[Valid4J is the only example to the best knowledge of author of `pcond` library.
+It offers a style that unifies test assertions and DbC programming based on the Hamcrest library.].
+The `pcond` tries to offer a unified solution to those use cases.
+* **More Programmer-Friendly Readability and Writability:** Test assertion libraries have more and more focused on writability of code from readability of code and output.
+The `pcond` makes one step further by addressing remaining pain points.
+** **Easy to handle custom types:** Test assertion libraries require users to implement custom value verifier (`Matcher` in Hamcrest, `Assert` in AssertJ, `Subject` in Google Truth) classes.
+This is a significant work by itself, and it may also impede refactorings of the software under test.
+** **Remove repeating the same fact twice in the failure message and the predicate:** More or less similar to Google Guava's `Preconditions` class, a human needs to describe the condition to be checked twice.
+One is in a natural language to print what condition is violated.
+And the other is in Java programming language to define what check should be done for a given value.
+This is a practice that violates "D-R-Y" (Don't repeat yourself) principle.
+This is more important for programmers than printing a nice message on a failure.
+** **Remove fail->fix->run loop:** In the earliest age of JUnit, there used not to be a good way to verify multiple conditions in one test method.
+Programmers needed to call `assert`, `assertEquals`, etc. multiple times from inside one test method.
+This was causing a situation, where they need to repeat fail->fix->run->fail->fix->run... loop, once an assert method call fails.
+Ensuring a good way to write a test method with only a single assertion method call is important.
+** **Not having to go back-and-force between source code and output:** When a check fails, making a full description of the failure available is important.
+Otherwise, you will need to go back-and-forth between the code and the log (or test report).
+** **Human-analyzable output:** A readable message is essential to understand what happened when a check fails.
+However, the `pcond` interprets it in a slightly different way from other existing assertion libraries.
+It focuses more on making a failure report self-sufficient and structured.
+Rather than making it look "natural" as if it were written by a human, it focuses on make it readable for *programmers*.
+Not for general English-speaking human.
+* **Make custom verifiers composable:** Instead of let a user define a custom verifier for every type, `pcond` offers a way to compose a verifier for a user type from already provided functions and predicates.
+* **Configurable:** There are customization points for a general purpose library like `pcond`.
+For instance a failure report format, an exception type for a combination of a certain context and a certain use case, A message template for a failure, etc.
+Providing a good way to customize these configurations at runtime is important.
+
+
+== Design
+
+To achieve the goals, the `pcond` library equips the following mechanisms.
+
+* **Predicates and function for value checking:** Instead of custom verifier classes like `Matcher`, `Assert`, or `Subject`, use conventional`Function` and `Predicate` so that it can be used not only for test assertions but also for DbC, general value checking, etc.
+** **Transform and Check mechanism:** Decompose a verification process into two steps: "Transform" function and "Check" predicate.
+** **`Printable` mechanism:** Make functions and predicates "printable".
+** **`Identifiable` mechanism:**
+* **`Context` mechanism:**
+* **`Currying`**
+* **"Fluent" style support mechanism:**
+* **Unified and configurable `ValueChecker` mechanism:**
+
+
+=== "Transform and Check"
+
+The most fundamental idea of the `pcond` library is to use `Predicate` s, not special classes like `Matcher` s (Hamcrest), `AbstractAssert` (AssertJ), or `Subject` (Google Truth).
+
+A basis of the design of the `pcond` library is an observation that we almost always can convert a given value into a type, which is convenient for verification, and then we can do the final verification.
+
+For instance, if we have a custom typed value, we can convert it to a string, for which we can think of a lot of ways to verify if the value matches our expectation and to report how it didn't match the expectation.
+
+In the step one, we transform a value into a type for which we have a method to verify it.
+Then we will check it with the intended method.
+
+[ditaa]
+[.text-center]
+.Value Verification in a Test
+----
+   T                                    R
+          +------=------------------------------------------------+
+          |      f                                          p     |
++-----+   |  /---------\       +-----------------+       /-----\  |    +------+
+|Value|<-----+Transform+-----=>|Transformed Value|<------+Check+-----=>|Result|
++-----+   |  \---------/       +-----------------+       \-----/  |    +------+
+          +------=------------------------------------------------+
+                                        q
+                                                       /-\    /-\
+                                                       |A+--->|B| A reads from B
+                                                       \-/    \-/
+
+                                                       /-\    /-\
+                                                       |A+--=>|B|  A writes to B
+                                                       \-/    \-/
+----
+
+"Convenient" types for verification `pcond` chose are `Object`, `String`, `List`, and numbers (`int`, `long`, `double`, ...), as of now.
+
+This entire step stem:[q] can be considered one `Predicate` for a value of type `T`.
+stem:[p] is a predicate for verification of a convenient type value.
+stem:[f] is a function to transform a given value to a convenient type.
+
+[stem]
+[.text-center]
+++++
+q(v) = p(f(v))
+++++
+
+For stem:[p], we only need to support a limited number of predicates because, programmers will always convert a given value into some handy types.
+So, we don't need to come up with a nicely readable messages for every method you define in your custom matchers.
+Instead, the `pcond` library composes it from the transformation function stem:[f] and stem:[p] 's string representations.
+
+Following is a small example code, which examines if a given value `yourName` satisfies required conditions.
+
+[source,java]
+----
+public class ExampleDbC {
+  public static void main(String[] args) {
+    System.out.println(hello("JohnDoe"));
+  }
+
+  public static String hello(String yourName) {
+    // <2>
+    requireArgument(yourName, and(isNotNull(),
+                                  transform(length()).check(gt(0)),
+                                  containsString(" ")));
+    String ret = String.format("Hello, %s", NameUtils.firstNameOf(yourName));
+    // <3>
+    return ensureNonNull(ret);
+  }
+}
+----
+
+This prints the following output.
+
+----
+Exception in thread "main" java.lang.IllegalArgumentException: value:<"JohnDoe"> violated precondition:value (isNotNull&&length >[0]&&containsString[" "])
+"JohnDoe"->&&                   ->false
+             isNotNull          ->true
+             transform
+               length           ->7
+7        ->  check
+               >[0]             ->true
+"JohnDoe"->  containsString[" "]->false
+----
+
+It might not be 100% natural English text, but still very easily understandable for programmers.
+The author of the library believes it is  more useful and reliable for developers.
+
+=== `Printable` mechanism
+
+(t.b.d.)
+
+=== `Identifiable` mechanism
+
+The `pcond` has a mechanism to create a "parameterized" predicate, such as `Predicates.containsString(String)`.
+If you call this method twice, two different predicate objects are returned.
+However, should those return make `Objects.equals(Object,Object)` return `false`?
+
+[source,java]
+----
+class Example{
+  public static void main(String... args) {
+    Predicate<String> p1 = Predicates.containsString("hello");
+    Predicate<String> p2 = Predicates.containsString("hello");
+    System.out.println(p1.equals(p2));
+  }
+}
+----
+
+
+
+
+== As a Helper Library for Design by Contract programming
+
+The `pcond` can be used as a library for Design by Contract style programming in Java
+
+=== With `assert` statement
+
+[source,java]
+----
+public class Example {
+  public void example(String arg) {
+    assert precondition(arg, isNotNull().and(not(isEmpty())));
+    System.out.println("Hello, " + arg + "!");
+  }
+}
+----
+
+=== With `requireXyz` and `ensureXyz` methods
+
+[source,java]
+----
+public class Example {
+  public static String hello(String yourName) {
+    // <2>
+    requireArgument(yourName, and(isNotNull(), transform(length()).check(gt(0)), containsString(" ")));
+    String ret = String.format("Hello, %s", NameUtils.firstNameOf(yourName));
+    // <3>
+    return ensureNonNull(ret);
+  }
+}
+----
+
+== (Test) Assertion Library
+
+(t.b.d.)
+
+=== Hamcrest Style
+
+(t.b.d.)
+
+=== Fluent Style (Experimental)
+
+(t.b.d.)
+[source,java]
+----
+public class FluentStyleExample {
+  @Test
+  public void givenValidName_whenValidatePersonName_thenPass() {
+    String s = "John Doe";
+    assertThat(
+        s,
+        $().asString().split(" ").thenVerifyWithAllOf(asList(
+          $().asListOfClass(String.class).elementAt(0).then()
+             .asString().isNullOrEmpty().negate(),
+          $().asListOfClass(String.class).elementAt(1).then()
+             .asString().isNullOrEmpty().negate())));
+  }
+}
+----
+
+=== More Fluent Style (Experimental)
+
+(t.b.d.)
+
+[source,java]
+----
+public class MoreFluentExample {
+  @Test
+  public void checkTwoValues() {
+    String s = "HI";
+    List<String> strings = asList("HELLO", "WORLD");
+
+    assertWhen(
+        valueOf(s).asString()
+          .exercise(TestUtils.stringToLowerCase())
+          .then()
+          .isEqualTo("HI"),
+        valueOf(strings).asListOf((String)value())
+          .then()
+          .findElementsInOrder("hello", "world"));
+  }
+}
+----
+
+== Related Works
 
 Enjoy.

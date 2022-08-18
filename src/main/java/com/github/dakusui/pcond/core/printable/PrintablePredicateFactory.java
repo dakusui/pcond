@@ -349,13 +349,13 @@ public enum PrintablePredicateFactory {
    * This is an interface that corresponds to a "matcher" in other assertion
    * libraries.
    */
-  public static class TransformingPredicate<P, O> extends PrintablePredicate<O> implements Evaluable.Transformation<O, P> {
-    private final Evaluable<? super P> checker;
-    private final Evaluable<? super O> mapper;
+  public static class TransformingPredicate<T, R> extends PrintablePredicate<T> implements Evaluable.Transformation<T, R> {
+    private final Evaluable<? super T> mapper;
+    private final Evaluable<? super R> checker;
     private final String               mapperName;
     private final String               checkerName;
 
-    public TransformingPredicate(String mapperName, String checkerName, Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
+    public TransformingPredicate(String mapperName, String checkerName, Predicate<? super R> predicate, Function<? super T, ? extends R> function) {
       super(
           TransformingPredicate.class,
           asList(predicate, function),
@@ -369,17 +369,17 @@ public enum PrintablePredicateFactory {
       this.checkerName = checkerName;
     }
 
-    protected TransformingPredicate(Predicate<? super P> predicate, Function<? super O, ? extends P> function) {
+    protected TransformingPredicate(Predicate<? super R> predicate, Function<? super T, ? extends R> function) {
       this(null, null, predicate, function);
     }
 
     @Override
-    public Evaluable<? super O> mapper() {
+    public Evaluable<? super T> mapper() {
       return this.mapper;
     }
 
     @Override
-    public Evaluable<? super P> checker() {
+    public Evaluable<? super R> checker() {
       return this.checker;
     }
 
@@ -401,7 +401,7 @@ public enum PrintablePredicateFactory {
      * @param <O> Input parameter type.
      */
     public interface Factory<P, O> {
-      default TransformingPredicate<P, O> check(String condName, Predicate<? super P> cond) {
+      default TransformingPredicate<O, P> check(String condName, Predicate<? super P> cond) {
         return check(leaf(condName, cond));
       }
 
@@ -410,7 +410,7 @@ public enum PrintablePredicateFactory {
         return (Factory<P, OO>) this;
       }
 
-      TransformingPredicate<P, O> check(Predicate<? super P> cond);
+      TransformingPredicate<O, P> check(Predicate<? super P> cond);
 
       static <P, O> Factory<P, O> create(Function<O, P> function) {
         return create(null, null, function);

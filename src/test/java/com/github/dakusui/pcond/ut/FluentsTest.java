@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.Fluents.*;
+import static com.github.dakusui.pcond.fluent.Fluents.*;
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
 import static com.github.dakusui.pcond.forms.Predicates.*;
@@ -23,7 +23,7 @@ public class FluentsTest extends TestBase {
         when().as((Parent) value())
             .exercise(Parent::parentMethod1)
             .then()
-            .with(isEqualTo("returnValueFromParentMethod")).build());
+            .verifyWith(isEqualTo("returnValueFromParentMethod")).build());
   }
 
 
@@ -51,9 +51,7 @@ public class FluentsTest extends TestBase {
             .elementAt(0)
             .then().asString()
             .findSubstrings("hello", "world")
-            .contains("hello")
-            .verify()
-    );
+            .contains("hello"));
   }
 
   @Test(expected = ComparisonFailure.class)
@@ -74,17 +72,14 @@ public class FluentsTest extends TestBase {
                   .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                   .then()
                   .asString()
-                  .isEqualTo("returnValueFromParentMethod")
-                  .verify(),
-              whenValueOfClass(Parent.class).<Parent>asObject()
+                  .isEqualTo("returnValueFromParentMethod"),
+              valueOfClass(Parent.class).<Parent>asObject()
                   .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                   .exercise(function("lambda:Child::childMethod", Child::childMethod))
                   .then()
                   .asString()
                   // 'not(...)' is added to make the matcher fail.
-                  .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))
-                  .verify()
-          ));
+                  .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       throw e;
@@ -96,21 +91,20 @@ public class FluentsTest extends TestBase {
     try {
       assertThat(
           (Supplier<Parent>) Parent::new,
-          whenValueOfClass(Supplier.class).<Supplier<?>>asObject()
+          whenValueOfClass(Supplier.class)
+              .asObject()
               .exercise(Supplier::get)
-              .allOf(
+              .then().verifyWith(allOf(
                   $().as((Parent) value())
                       .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                       .then().asString()
-                      .isEqualTo("returnValueFromParentMethod")
-                      .verify(),
+                      .isEqualTo("returnValueFromParentMethod"),
                   $().asValueOfClass(Parent.class)
                       .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                       .exercise(function("lambda:Child::childMethod", Child::childMethod))
                       .then().asString()
                       // 'not(...)' is added to make the matcher fail.
-                      .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))
-                      .verify()).verify());
+                      .testPredicate(not(isEqualTo("returnedStringFromChildMethod"))))));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       throw e;
@@ -133,15 +127,55 @@ public class FluentsTest extends TestBase {
     }
   }
 
+  @Test(expected = ComparisonFailure.class)
+  public void multiValueAssertionTest_allOf() {
+    assertThat(
+        list(123, list("Hello", "world")),
+        allOf(
+            when().at(0).asInteger()
+                .then().equalTo(122),
+            when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
+                $().at(0).asString()
+                    .then().isEqualTo("hello"),
+                $().at(1).asString()
+                    .then().isEqualTo("world")))));
+  }
+
+  @Test(expected = ComparisonFailure.class)
+  public void multiValueAssertionTest_anyOf() {
+    assertThat(
+        list(123, list("Hello", "world")),
+        allOf(
+            when().at(0).asInteger()
+                .then().equalTo(122),
+            when().at(1).asListOfClass(String.class).thenVerifyWithAnyOf(asList(
+                $().at(0).asString()
+                    .then().isEqualTo("hello"),
+                $().at(1).asString()
+                    .then().isEqualTo("world")))));
+  }
+
   @Test
   public void teeTest() {
     String hello = "hello";
     assertThat(
         hello,
-        when().asObject().allOf(
+        when().asObject().thenVerifyWith(allOf(
             $().as((String) value())
                 .exercise(objectHashCode())
-                .then().isInstanceOf(Integer.class))
+                .then().isInstanceOf(Integer.class)))
     );
+  }
+
+  @Test
+  public void teeTest2() {
+    String hello = "hello";
+    assertThat(
+        hello,
+        when().asObject().then().verifyWith(allOf(
+            $().as((String) value())
+                .exercise(objectHashCode())
+                .then()
+                .isInstanceOf(Integer.class))));
   }
 }

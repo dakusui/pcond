@@ -24,8 +24,11 @@ import static java.util.Collections.singletonList;
  * An entry point for acquiring function objects.
  * Functions retrieved by method in this class are all "printable".
  */
-public enum Functions {
+public class Functions {
   ;
+  private Functions() {
+
+  }
 
   /**
    * Returns a printable function that returns a given object itself.

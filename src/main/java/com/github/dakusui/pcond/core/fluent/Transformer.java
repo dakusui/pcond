@@ -1,7 +1,8 @@
 package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
-import com.github.dakusui.pcond.core.fluent.verifiers.Matcher;
+import com.github.dakusui.pcond.core.fluent.transformers.LongTransformer;
+import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.List;
@@ -12,100 +13,42 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
+import static com.github.dakusui.pcond.core.fluent.Transformer.Factory.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 
 /**
- * Method names start with `as` or contain `As` suggests that the methods should be
- * used when you know the type of the object you are treating at the line of your code.
- * <p>
- * One starts with `into` or contains `Into` should be used for objects you need to
- * apply a function in order to convert it to treat it in the following lines.
+ * The transformer interface.
  *
- * @param <TX>  The type of this object.
- * @param <OIN> Original input type.
- * @param <OUT> (Current) Output type.
+ * @param <TX>  The type of the {@link Transformer} implementation.
+ * @param <OIN> The type of the original input value.
+ * @param <OUT> The output of the transformation.
  */
-public abstract class Transformer<
+public interface Transformer<
     TX extends Transformer<TX, OIN, OUT>,
-    OIN, OUT>
-    implements Matcher<OIN, OUT>,
+    OIN,
+    OUT> extends
+    Matcher<OIN, OUT>,
     AsPhraseFactory.ForTransformer<OIN> {
-  private final Function<OIN, OUT> function;
-  private final String             transformerName;
-
-  /**
-   * Constructs an instance of this class.
-   *
-   * @param transformerName THe name of transformer. This can be {@code null}.
-   * @param parent          The parent of the new transformer. {@code null} if it is a root.
-   * @param function        A function with which a given value is converted.
-   * @param <IN>            The type of the input.
-   */
   @SuppressWarnings("unchecked")
-  public <IN> Transformer(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function) {
-    this.transformerName = transformerName;
-    this.function = (Function<OIN, OUT>) chainFunctions(parent == null ? dummyFunction() : parent.function, function);
-  }
-
-  public Function<? super OIN, ? extends OUT> function() {
-    return this.function;
-  }
-
-  public String transformerName() {
-    return this.transformerName;
-  }
-
-  @SuppressWarnings("unchecked")
-  public <
+  static <
+      OIN,
+      COUT,
       NOUT,
-      BB extends Transformer<BB, OIN, NOUT>>
-  BB transform(Function<? super OUT, NOUT> f, BiFunction<TX, Function<OUT, NOUT>, BB> factory) {
-    return Transformer.transform((TX) this, f, factory);
-  }
-
-  @SuppressWarnings("unchecked")
-  @SafeVarargs
-  public final <NOUT> Verifier<?, OIN, NOUT> allOf(Predicate<? super NOUT>... predicates) {
-    return this.then().asValueOf((NOUT) value()).allOf(predicates);
-  }
-
-  @SuppressWarnings("unchecked")
-  @SafeVarargs
-  public final <NOUT> Verifier<?, OIN, NOUT> anyOf(Predicate<? super NOUT>... predicates) {
-    return this.then().asValueOf((NOUT) value()).anyOf(predicates);
-  }
-
-  public <O> ObjectTransformer<OIN, O> exercise(Function<? super OUT, O> f) {
-    return applyFunction(f);
-  }
-
-  public <O> ObjectTransformer<OIN, O> applyFunction(Function<? super OUT, O> f) {
-    return transformToObject(f);
-  }
-
-  public <O> ObjectTransformer<OIN, O> transformToObject(Function<? super OUT, O> f) {
-    return this.transform(f, (TX, func) -> new ObjectTransformer<>(transformerName, this, func));
-  }
-
-  public StringTransformer<OIN> transformToString(Function<OUT, String> f) {
-    return this.transform(f, (TX, func) -> new StringTransformer<>(transformerName, this, func));
-  }
-
-  public <E> ListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
-    return this.transform(f, (TX, func) -> new ListTransformer<>(transformerName, this, func));
-  }
-
-  public <E> StreamTransformer<OIN, E> transformToStream(Function<OUT, Stream<E>> f) {
-    return this.transform(f, (TX, func) -> new StreamTransformer<>(transformerName, this, func));
-  }
-
-  public IntegerTransformer<OIN> transformToInteger(Function<? super OUT, Integer> f) {
-    return this.transform(f, (TX, func) -> new IntegerTransformer<>(transformerName, this, func));
-  }
-
-  public BooleanTransformer<OIN> transformToInBoolean(Function<? super OUT, Boolean> f) {
-    return this.transform(f, (TX, func) -> new BooleanTransformer<>(transformerName, this, func));
+      B extends Transformer<
+          B,
+          OIN,
+          COUT>,
+      C extends BiFunction<
+          B,
+          Function<COUT, NOUT>,
+          BB>,
+      BB extends Transformer<
+          BB,
+          OIN,
+          NOUT>>
+  BB transform(B parent, Function<? super COUT, NOUT> f, C constructor) {
+    return constructor.apply(parent, (Function<COUT, NOUT>) f);
   }
 
   @SuppressWarnings("unchecked")
@@ -118,61 +61,231 @@ public abstract class Transformer<
       return isDummyFunction(after) ? (Function<I, O>) func : func.andThen(after);
   }
 
+  Function<? super OIN, ? extends OUT> function();
+
+  String transformerName();
+
+  OIN originalInputValue();
+
   @SuppressWarnings("unchecked")
-  private static <
-      OIN,
-      COUT,
+  default <
       NOUT,
-      B extends Transformer<B, OIN, COUT>,
-      C extends BiFunction<
-          B,
-          Function<COUT, NOUT>,
-          BB>,
       BB extends Transformer<BB, OIN, NOUT>>
-  BB transform(B parent, Function<? super COUT, NOUT> f, C constructor) {
-    return constructor.apply(parent, (Function<COUT, NOUT>) f);
+  BB transform(Function<? super OUT, NOUT> f, BiFunction<TX, Function<OUT, NOUT>, BB> factory) {
+    return transform((TX) this, f, factory);
   }
 
-  public abstract Verifier<?, OIN, OUT> then();
+  @SuppressWarnings("unchecked")
+  default <NOUT> Checker<?, OIN, NOUT> thenVerifyWithAllOf(List<? extends Predicate<? super NOUT>> predicates) {
+    return this.thenVerifyWith(Predicates.allOf(predicates.toArray(new Predicate[0])));
+  }
 
   @SuppressWarnings("unchecked")
-  public TX peek(Consumer<OUT> consumer) {
-    applyFunction(v -> {
+  default <NOUT> Checker<?, OIN, NOUT> thenVerifyWithAnyOf(List<? extends Predicate<? super NOUT>> predicates) {
+    return this.thenVerifyWith(Predicates.anyOf(predicates.toArray(new Predicate[0])));
+  }
+
+  @SuppressWarnings("unchecked")
+  default <NOUT> Checker<?, OIN, NOUT> thenVerifyWith(Predicate<? super NOUT> predicate) {
+    return this.then().asValueOf((NOUT) value()).verifyWith(predicate);
+  }
+
+
+  default <O> ObjectTransformer<OIN, O> exercise(Function<? super OUT, O> f) {
+    return applyFunction(f);
+  }
+
+  default <O> ObjectTransformer<OIN, O> applyFunction(Function<? super OUT, O> f) {
+    return transformToObject(f);
+  }
+
+  default <O> ObjectTransformer<OIN, O> transformToObject(Function<? super OUT, O> f) {
+    return this.transform(f, (TX, func) -> objectTransformer(this, func));
+  }
+
+  default StringTransformer<OIN> transformToString(Function<OUT, String> f) {
+    return this.transform(f, (TX, func) -> stringTransformer(this, func));
+  }
+
+  default <E> ListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
+    return this.transform(f, (TX, func) -> listTransformer(this, func));
+  }
+
+  default <E> StreamTransformer<OIN, E> transformToStream(Function<OUT, Stream<E>> f) {
+    return this.transform(f, (TX, func) -> streamTransformer(this, func));
+  }
+
+  default IntegerTransformer<OIN> transformToInteger(Function<? super OUT, Integer> f) {
+    return this.transform(f, (TX, func) -> integerTransformer(this, func));
+  }
+
+  default BooleanTransformer<OIN> transformToInBoolean(Function<? super OUT, Boolean> f) {
+    return this.transform(f, (TX, func) -> booleanTransformer(this, func));
+  }
+
+  /**
+   * A method to finish the transformation stage and return a {@link Checker} object.
+   *
+   * @return A verifier object.
+   */
+  Checker<?, OIN, OUT> then();
+
+  @SuppressWarnings("unchecked")
+  default TX peek(Consumer<OUT> consumer) {
+    return (TX) this.applyFunction(v -> {
       consumer.accept(v);
       return v;
     });
-    return (TX) this;
-  }
-  @Override
-  public StringTransformer<OIN> asString() {
-    return new StringTransformer<>(transformerName, this, Printables.function("treatAsString", v -> (String) v));
   }
 
   @Override
-  public IntegerTransformer<OIN> asInteger() {
-    return new IntegerTransformer<>(transformerName, this, Printables.function("treatAsInteger", v -> (Integer) v));
+  default StringTransformer<OIN> asString() {
+    return stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
   }
 
   @Override
-  public BooleanTransformer<OIN> asBoolean() {
-    return new BooleanTransformer<>(transformerName, this, Printables.function("tratAsBoolean", v -> (Boolean) v));
+  default IntegerTransformer<OIN> asInteger() {
+    return integerTransformer(this, Printables.function("treatAsInteger", v -> (Integer) v));
+  }
+
+  @Override
+  default LongTransformer<OIN> asLong() {
+    return longTransformer(this, Printables.function("treatAsLong", v -> (Long) v));
+  }
+
+  @Override
+  default ShortTransformer<OIN> asShort() {
+    return shortTransformer(this, Printables.function("treatAsShort", v -> (Short) v));
+  }
+
+  @Override
+  default DoubleTransformer<OIN> asDouble() {
+    return doubleTransformer(this, Printables.function("treatAsDouble", v -> (Double) v));
+  }
+
+  @Override
+  default FloatTransformer<OIN> asFloat() {
+    return floatTransformer(this, Printables.function("treatAsShort", v -> (Float) v));
+  }
+
+  @Override
+  default BooleanTransformer<OIN> asBoolean() {
+    return booleanTransformer(this, Printables.function("treatAsBoolean", v -> (Boolean) v));
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <NOUT> ObjectTransformer<OIN, NOUT> asValueOf(NOUT value) {
-    return new ObjectTransformer<>(transformerName, this, Printables.function("treatAs[NOUT]", v -> (NOUT) v));
+  default <NOUT> ObjectTransformer<OIN, NOUT> asValueOf(NOUT value) {
+    return objectTransformer(this, Printables.function("treatAs[NOUT]", v -> (NOUT) v));
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  public <E> ListTransformer<OIN, E> asListOf(E value) {
-    return new ListTransformer<>(transformerName, this, Printables.function("treatAsList", v -> (List<E>) v));
+  default <E> ListTransformer<OIN, E> asListOf(E value) {
+    return listTransformer(this, Printables.function("treatAsList", v -> (List<E>) v));
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public <E> StreamTransformer<OIN, E> asStreamOf(E value) {
-    return new StreamTransformer<>(transformerName, this, Printables.function("treatAsStream[NOUT]", v -> (Stream<E>) v));
+  default <E> StreamTransformer<OIN, E> asStreamOf(E value) {
+    return streamTransformer(this, Printables.function("treatAsStream[NOUT]", v -> (Stream<E>) v));
+  }
+
+  enum Factory {
+    ;
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> StringTransformer<OIN> stringTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, String> func) {
+      return new StringTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> BooleanTransformer<OIN> booleanTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Boolean> function) {
+      return new BooleanTransformer.Impl<>(transformer.transformerName(), transformer, function, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> IntegerTransformer<OIN> integerTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Integer> func) {
+      return new IntegerTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> LongTransformer<OIN> longTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Long> func) {
+      return new LongTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> ShortTransformer<OIN> shortTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Short> func) {
+      return new ShortTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> DoubleTransformer<OIN> doubleTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Double> func) {
+      return new DoubleTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT> FloatTransformer<OIN> floatTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Float> func) {
+      return new FloatTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT, E> StreamTransformer<OIN, E> streamTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, Stream<E>> func) {
+      return new StreamTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT, E> ListTransformer<OIN, E> listTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, List<E>> func) {
+      return new ListTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT, O> ObjectTransformer<OIN, O> objectTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, O> func) {
+      return new ObjectTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+  }
+
+  /**
+   * Method names start with `as` or contain `As` suggests that the methods should be
+   * used when you know the type of the object you are treating at the line of your code.
+   * <p>
+   * One starts with `into` or contains `Into` should be used for objects you need to
+   * apply a function in order to convert it to treat it in the following lines.
+   *
+   * @param <TX>  The type of this object.
+   * @param <OIN> Original input type.
+   * @param <OUT> (Current) Output type.
+   */
+  abstract class Base<
+      TX extends Transformer<TX, OIN, OUT>,
+      OIN, OUT>
+      implements
+      Transformer<TX, OIN, OUT> {
+    private final Function<OIN, OUT> function;
+    private final String             transformerName;
+
+    private final OIN originalInputValue;
+
+    /**
+     * Constructs an instance of this class.
+     *
+     * @param <IN>               The type of the input.
+     * @param transformerName    THe name of transformer. This can be {@code null}.
+     * @param parent             The parent of the new transformer. {@code null} if it is a root.
+     * @param function           A function with which a given value is converted.
+     * @param originalInputValue An original input value, if available. Otherwise {@code null}.
+     */
+    @SuppressWarnings("unchecked")
+    public <IN> Base(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function, OIN originalInputValue) {
+      this.transformerName = transformerName;
+      this.function = (Function<OIN, OUT>) Transformer.chainFunctions(parent == null ? dummyFunction() : parent.function(), function);
+      this.originalInputValue = originalInputValue;
+    }
+
+    @Override
+    public Function<? super OIN, ? extends OUT> function() {
+      return this.function;
+    }
+
+    @Override
+    public String transformerName() {
+      return this.transformerName;
+    }
+
+    @Override
+    public OIN originalInputValue() {
+      return this.originalInputValue;
+    }
   }
 }

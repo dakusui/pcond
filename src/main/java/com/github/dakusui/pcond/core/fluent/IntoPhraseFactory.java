@@ -1,39 +1,76 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.core.fluent.verifiers.BooleanVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.IntegerVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.ObjectVerifier;
-import com.github.dakusui.pcond.core.fluent.verifiers.StringVerifier;
+import com.github.dakusui.pcond.core.fluent.checkers.*;
 
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public interface IntoPhraseFactory<OIN, IN> {
-  default StringVerifier<OIN> intoString() {
-    return intoStringWith((IN v) -> (String)v);
+  default StringChecker<OIN> intoString() {
+    return intoStringWith((IN v) -> (String) v);
   }
 
-  default IntegerVerifier<OIN> intoInteger() {
+  default IntegerChecker<OIN> intoInteger() {
     return intoIntegerWith((IN v) -> (Integer) v);
   }
 
-  default BooleanVerifier<OIN> intoBoolean() {
+  default LongChecker<OIN> intoLong() {
+    return intoLongWith((IN v) -> (Long) v);
+  }
+
+  default FloatChecker<OIN> intoFloat() {
+    return intoFloatWith((IN v) -> (Float) v);
+  }
+
+  default ShortChecker<OIN> intoShort() {
+    return intoShortWith((IN v) -> (Short) v);
+  }
+
+  default DoubleChecker<OIN> intoDouble() {
+    return intoDoubleWith((IN v) -> (Double) v);
+  }
+
+  default BooleanChecker<OIN> intoBoolean() {
     return intoBooleanWith((IN v) -> (Boolean) v);
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> ObjectVerifier<OIN, NOUT> intoObject() {
-    return intoObjectWith((IN v) -> (NOUT)v);
+  default <NOUT> ObjectChecker<OIN, NOUT> intoObject() {
+    return intoObjectWith((IN v) -> (NOUT) v);
   }
 
-  StringVerifier<OIN> intoStringWith(Function<IN, String> function);
+  @SuppressWarnings("unchecked")
+  default <E> ListChecker<OIN, E> intoList() {
+    return intoListWith((IN v) -> (List<E>) v);
+  }
 
-  IntegerVerifier<OIN> intoIntegerWith(Function<IN, Integer> function);
+  @SuppressWarnings("unchecked")
+  default <E> StreamChecker<OIN, E> intoStream() {
+    return intoStreamWith((IN v) -> (Stream<E>) v);
+  }
 
-  BooleanVerifier<OIN> intoBooleanWith(Function<IN, Boolean> function);
+  StringChecker<OIN> intoStringWith(Function<IN, String> function);
 
-  <OUT> ObjectVerifier<OIN, OUT> intoObjectWith(Function<IN, OUT> function);
+  IntegerChecker<OIN> intoIntegerWith(Function<IN, Integer> function);
 
-  interface ForVerifier<OIN, IN> extends IntoPhraseFactory<OIN, IN> {
+  LongChecker<OIN> intoLongWith(Function<IN, Long> function);
+
+  ShortChecker<OIN> intoShortWith(Function<IN, Short> function);
+
+  DoubleChecker<OIN> intoDoubleWith(Function<IN, Double> function);
+
+  FloatChecker<OIN> intoFloatWith(Function<IN, Float> function);
+
+  BooleanChecker<OIN> intoBooleanWith(Function<IN, Boolean> function);
+
+  <OUT> ObjectChecker<OIN, OUT> intoObjectWith(Function<IN, OUT> function);
+
+  <E> ListChecker<OIN, E> intoListWith(Function<IN, List<E>> function);
+
+  <E> StreamChecker<OIN, E> intoStreamWith(Function<IN, Stream<E>> function);
+
+  interface ForChecker<OIN, IN> extends IntoPhraseFactory<OIN, IN> {
 
   }
 }

@@ -2,8 +2,8 @@ package com.github.dakusui.pcond.internals;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.pcond.provider.AssertionProvider;
-import com.github.dakusui.pcond.provider.AssertionProviderBase;
+import com.github.dakusui.pcond.validator.Validator;
+import com.github.dakusui.pcond.validator.Explanation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -91,7 +91,7 @@ public enum InternalUtils {
   }
 
   private static int summarizedStringLength() {
-    return AssertionProvider.INSTANCE.configuration().summarizedStringLength();
+    return Validator.INSTANCE.configuration().summarizedStringLength();
   }
 
   private static boolean isToStringOverridden(Object object) {
@@ -137,10 +137,10 @@ public enum InternalUtils {
   }
 
   public static InternalException executionFailure(String message, Throwable cause) {
-    throw executionFailure(AssertionProviderBase.Explanation.fromMessage(message), cause);
+    throw executionFailure(Explanation.fromMessage(message), cause);
   }
 
-  public static InternalException executionFailure(AssertionProviderBase.Explanation explanation, Throwable cause) {
+  public static InternalException executionFailure(Explanation explanation, Throwable cause) {
     throw new InternalException(explanation.toString(), cause);
   }
 
@@ -176,14 +176,7 @@ public enum InternalUtils {
     return (Evaluable<T>) Printables.function(f::toString, f);
   }
 
-  public static String spaces(int num) {
-    char[] buf = new char[num];
-    Arrays.fill(buf, ' ');
-    return String.valueOf(buf);
-  }
-
   public static Class<?> wrapperClassOf(Class<?> clazz) {
-    assert clazz != null;
     if (clazz == Integer.TYPE)
       return Integer.class;
     if (clazz == Long.TYPE)
@@ -202,7 +195,7 @@ public enum InternalUtils {
       return Short.class;
     if (clazz == Void.TYPE)
       return Void.class;
-    throw new IllegalArgumentException("Unsupported type:" + clazz.getName() + " was given.");
+    throw new IllegalArgumentException("Unsupported type:" + (clazz != null ? clazz.getName() : "null") + " was given.");
   }
 
   public static Method getMethod(Class<?> aClass, String methodName, Class<?>... parameterTypes) {

@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.sandbox;
 
-import com.github.dakusui.pcond.provider.AssertionProvider;
+import com.github.dakusui.pcond.validator.Validator;
 
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -35,7 +35,7 @@ public interface Statement<T> {
   default boolean evaluate(boolean evaluationCondition, boolean throwExceptionOnFailure) {
     try {
       T value = this.value();
-      return !evaluationCondition || AssertionProvider.INSTANCE.validate(value, this.predicate(), StatementWasFalsified::new) == value;
+      return !evaluationCondition || Validator.INSTANCE.validate(value, this.predicate(), StatementWasFalsified::new) == value;
     } catch (StatementWasFalsified e) {
       if (throwExceptionOnFailure) {
         throw e;

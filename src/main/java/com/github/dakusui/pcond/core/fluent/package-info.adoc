@@ -1,0 +1,5 @@
+This package offers a mechanism required by the "Fluent" and "MoreFluent" styles.
+
+In both styles, the basic idea is to divide the entire step to test a value into two.
+The "transformation" and the "check".
+This is also a key concept of the `pcond` itself.

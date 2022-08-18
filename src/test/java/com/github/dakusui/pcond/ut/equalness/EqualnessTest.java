@@ -18,7 +18,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.Preconditions.requireNonNull;
+import static com.github.dakusui.pcond.Requires.requireNonNull;
 import static com.github.dakusui.pcond.ut.equalness.EqualnessTest.TestDef.DUMMY_OBJECT;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;

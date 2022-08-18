@@ -20,31 +20,115 @@ import static java.util.Collections.unmodifiableList;
  * A visitor interface that defines a mechanism to "evaluate" printable predicates.
  */
 public interface Evaluator {
+  /**
+   * Evaluates `value` with `conjunction` predicate ("and").
+   *
+   * @param value       A value to be evaluated.
+   * @param conjunction A conjunction predicate with which `value` is evaluated.
+   * @param <T>         The type of the `value`.
+   * @see com.github.dakusui.pcond.core.Evaluable.Conjunction
+   */
   <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction);
 
+  /**
+   * Evaluates `value` with a `disjunction` predicate ("or").
+   *
+   * @param value       A value to be evaluated.
+   * @param disjunction A disjunction predicate with which `value` is evaluated.
+   * @param <T>         The type of the `value`.
+   * @see com.github.dakusui.pcond.core.Evaluable.Disjunction
+   */
   <T> void evaluate(T value, Evaluable.Disjunction<T> disjunction);
 
+  /**
+   * Evaluates `value` with a `negation` predicate ("not").
+   *
+   * @param value    A value to be evaluated.
+   * @param negation A negation predicate with which `value` is evaluated.
+   * @param <T>      The type of the `value`.
+   * @see com.github.dakusui.pcond.core.Evaluable.Negation
+   */
   <T> void evaluate(T value, Evaluable.Negation<T> negation);
 
+  /**
+   * Evaluates `value` with a leaf predicate.
+   *
+   * @param value    A value to be evaluated.
+   * @param leafPred A predicate with which `value` is evaluated.
+   * @param <T>      The type of the `value`.
+   * @see com.github.dakusui.pcond.core.Evaluable.LeafPred
+   */
   <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred);
 
+  /**
+   * Evaluates `value` with a messaged predicate.
+   *
+   * @param value    A value to be evaluated.
+   * @param messaged A predicate with which `value` is evaluated.
+   * @param <T>      The type of the `value`.
+   * @see com.github.dakusui.pcond.core.Evaluable.Messaged
+   */
   <T> void evaluate(T value, Evaluable.Messaged<T> messaged);
 
+  /**
+   * Evaluates `value` with a context predicate.
+   *
+   * @param value       A value to be evaluated.
+   * @param contextPred A predicate with which `value` is evaluated.
+   * @see com.github.dakusui.pcond.core.Evaluable.ContextPred
+   */
   void evaluate(Context value, Evaluable.ContextPred contextPred);
 
+  /**
+   * Evaluates `value` with a "transformatioin" predicate.
+   *
+   * @param value          A value to be evaluated.
+   * @param transformation A predicate with which `value` is evaluated.
+   * @see com.github.dakusui.pcond.core.Evaluable.Transformation
+   */
   <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation);
 
+  /**
+   * Evaluates `value` with a "function" predicate.
+   *
+   * @param value A value to be evaluated.
+   * @param func  A predicate with which `value` is evaluated.
+   * @see com.github.dakusui.pcond.core.Evaluable.Func
+   */
   <T> void evaluate(T value, Evaluable.Func<T> func);
 
+  /**
+   * Evaluates `value` with a predicate for a stream.
+   *
+   * @param value      A value to be evaluated.
+   * @param streamPred A predicate with which `value` is evaluated.
+   * @see com.github.dakusui.pcond.core.Evaluable.StreamPred
+   */
   <E> void evaluate(Stream<? extends E> value, Evaluable.StreamPred<E> streamPred);
 
+  /**
+   * The last evaluated value by an `evaluate` method defined in this interface.
+   * This method is expected to be called from inside an `evaluated` method, not
+   * to be called by a user.
+   *
+   * @return The evaluated result value.
+   * @param <T> The type of the last value evaluated by this object.
+   */
   <T> T resultValue();
 
+  /**
+   * Returns a list of result entries.
+   *
+   * @return A list of result entries.
+   * @see Entry
+   */
   List<Entry> resultEntries();
 
 
-  Evaluator copyEvaluator();
-
+  /**
+   * Returns a new instance of this interface.
+   * @return a new instance of this interface.
+   */
   static Evaluator create() {
     return new Impl();
   }
@@ -161,7 +245,7 @@ public interface Evaluator {
     @Override
     public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
       if (isDummyFunction((Function<?, ?>) transformation.mapper())) {
-        transformation.checker().accept((R) this.currentResult, this);
+        transformation.checker().accept((R) value, this);
         return;
       }
       this.enter(Entry.Type.TRANSFORM,
@@ -241,9 +325,7 @@ public interface Evaluator {
       return unmodifiableList(this.entries);
     }
 
-    @Override
-    public Evaluator copyEvaluator() {
-
+    private Evaluator copyEvaluator() {
       Impl impl = new Impl();
       impl.currentlyExpectedBooleanValue = this.currentlyExpectedBooleanValue;
       return impl;
@@ -267,6 +349,9 @@ public interface Evaluator {
     }
   }
 
+  /**
+   * A class to hold an entry of an execution history of the {@link Evaluator}.
+   */
   abstract class Entry {
     private final Type    type;
     private final int     level;
@@ -430,6 +515,9 @@ public interface Evaluator {
     }
   }
 
+  /**
+   * An interface to define methods that make a predicate "explainable" to humans.
+   */
   interface Explainable {
     Object explainExpectation();
 

@@ -1,18 +1,31 @@
 package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
-import com.github.dakusui.pcond.core.fluent.verifiers.*;
+import com.github.dakusui.pcond.core.fluent.transformers.LongTransformer;
+import com.github.dakusui.pcond.core.fluent.checkers.*;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 
 public interface AsPhraseFactory<
     MS extends Matcher.ForString<OIN>,
     MI extends Matcher.ForInteger<OIN>,
+    MD extends Matcher.ForDouble<OIN>,
+    MF extends Matcher.ForFloat<OIN>,
+    MSH extends Matcher.ForShort<OIN>,
+    ML extends Matcher.ForLong<OIN>,
     MB extends Matcher.ForBoolean<OIN>,
     OIN> {
   MS asString();
 
   MI asInteger();
+
+  ML asLong();
+
+  MSH asShort();
+
+  MD asDouble();
+
+  MF asFloat();
 
   MB asBoolean();
 
@@ -45,6 +58,10 @@ public interface AsPhraseFactory<
   interface ForTransformer<OIN> extends AsPhraseFactory<
       StringTransformer<OIN>,
       IntegerTransformer<OIN>,
+      DoubleTransformer<OIN>,
+      FloatTransformer<OIN>,
+      ShortTransformer<OIN>,
+      LongTransformer<OIN>,
       BooleanTransformer<OIN>,
       OIN> {
     @Override
@@ -81,13 +98,13 @@ public interface AsPhraseFactory<
     @Override
     <E> StreamTransformer<OIN, E> asStreamOf(E value);
 
-    default <E> ObjectTransformer<OIN, E> valueAt(int i, E value) {
+    default <E> ObjectTransformer<OIN, E> at(int i, E value) {
       return asListOf(value).elementAt(i);
     }
 
     @SuppressWarnings("unchecked")
-    default <E> ObjectTransformer<OIN, E> valueAt(int i) {
-      return asListOf((E)value()).elementAt(i);
+    default <E> ObjectTransformer<OIN, E> at(int i) {
+      return asListOf((E) value()).elementAt(i);
     }
   }
 
@@ -95,45 +112,49 @@ public interface AsPhraseFactory<
 
   }
 
-  interface ForVerifier<OIN> extends AsPhraseFactory<
-      StringVerifier<OIN>,
-      IntegerVerifier<OIN>,
-      BooleanVerifier<OIN>,
+  interface ForChecker<OIN> extends AsPhraseFactory<
+      StringChecker<OIN>,
+      IntegerChecker<OIN>,
+      DoubleChecker<OIN>,
+      FloatChecker<OIN>,
+      ShortChecker<OIN>,
+      LongChecker<OIN>,
+      BooleanChecker<OIN>,
       OIN
       > {
     @Override
-    default <E> ObjectVerifier<OIN, E> as(E value) {
+    default <E> ObjectChecker<OIN, E> as(E value) {
       return asValueOf(value);
     }
 
     @Override
-    default ObjectVerifier<OIN, OIN> asObject() {
+    default ObjectChecker<OIN, OIN> asObject() {
       return asValueOf(value());
     }
 
     @Override
-    default <E> ObjectVerifier<OIN, E> asValueOfClass(Class<E> value) {
+    default <E> ObjectChecker<OIN, E> asValueOfClass(Class<E> value) {
       return asValueOf(value());
     }
 
     @Override
-    default <E> ListVerifier<OIN, E> asListOfClass(Class<E> value) {
+    default <E> ListChecker<OIN, E> asListOfClass(Class<E> value) {
       return asListOf(value());
     }
 
     @Override
-    default <E> StreamVerifier<OIN, E> asStreamOfClass(Class<E> value) {
+    default <E> StreamChecker<OIN, E> asStreamOfClass(Class<E> value) {
       return asStreamOf(value());
     }
 
     @Override
-    <E> ObjectVerifier<OIN, E> asValueOf(E value);
+    <E> ObjectChecker<OIN, E> asValueOf(E value);
 
     @Override
-    <E> ListVerifier<OIN, E> asListOf(E value);
+    <E> ListChecker<OIN, E> asListOf(E value);
 
     @Override
-    <E> StreamVerifier<OIN, E> asStreamOf(E value);
+    <E> StreamChecker<OIN, E> asStreamOf(E value);
 
   }
 }

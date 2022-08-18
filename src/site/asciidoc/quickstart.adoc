@@ -8,6 +8,8 @@ Not only that, it gives a very informative message when a check you defined fail
 Unlike `Guava` 's `Preconditions` class<<GuavaPreconditions>>, you do not need to repeat the same fact both in Java for the actual check and in a natural language of yours for the message on its failure.
 Unlike `valid4j`<<v4j>>, it provides a set of human-readable predicates, which can be used as normal `java.util.function.Predicate` s instead of depending on `hamcrest` library.
 
+You can also use the `pcond` as a test assertion library instead of `hamcrest`, `Google Truth`, or `AssertJ`.
+
 == Installation
 
 Have a following maven dependency in your `pom.xml`.
@@ -33,8 +35,8 @@ package com.github.dakusui.pcond.examples;
 
 // <1>
 import static com.github.dakusui.pcond.Assertions.precondition;
-import static com.github.dakusui.pcond.Postconditions.ensureNonNull;
-import static com.github.dakusui.pcond.Preconditions.requireArgument;
+import static com.github.dakusui.pcond.Ensures.ensureNonNull;
+import static com.github.dakusui.pcond.Requires.requireArgument;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 
@@ -211,6 +213,6 @@ Thus, you can read the output above as "The check failed because the value `\"Jo
 
 == References
 
-- [[[DbC]]] Wikipedia article on Design by Contract, https://en.wikipedia.org/wiki/Design_by_contract
-- [[[v4j]]] Valid4j, http://www.valid4j.org
-- [[[GuavaPreconditions]]] PreconditionsExplained, https://github.com/google/guava/wiki/PreconditionsExplained
+- [[DbC]] Wikipedia article on Design by Contract, https://en.wikipedia.org/wiki/Design_by_contract
+- [[v4j]] Valid4j, http://www.valid4j.org
+- [[GuavaPreconditions]] PreconditionsExplained, https://github.com/google/guava/wiki/PreconditionsExplained

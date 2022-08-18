@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.perf;
 
-import com.github.dakusui.pcond.Preconditions;
+import com.github.dakusui.pcond.Requires;
 import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Ignore;
@@ -387,7 +387,7 @@ public class PerfVariation {
   }
 
   public static int preconditionsRequireNonNull(Integer i) {
-    return Preconditions.requireNonNull(i) + 1;
+    return Requires.requireNonNull(i) + 1;
   }
 
   public static int assertNonNull(int i) {
@@ -398,7 +398,7 @@ public class PerfVariation {
 
   public static int preconditionsRequireNonNullWithSimpleLambda(Integer i) {
     //noinspection Convert2MethodRef
-    return Preconditions.requireArgument(i, v -> v != null) + 1;
+    return Requires.requireArgument(i, v -> v != null) + 1;
   }
 
   @Ignore

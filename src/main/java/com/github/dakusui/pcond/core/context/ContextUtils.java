@@ -15,6 +15,9 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A utility class that collects helper methods for the "Context" mechanism.
+ */
 public enum ContextUtils {
   ;
 

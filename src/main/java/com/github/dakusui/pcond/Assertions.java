@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond;
 
-import com.github.dakusui.pcond.provider.AssertionProvider;
+import com.github.dakusui.pcond.validator.Validator;
 
 import java.util.function.Predicate;
 
@@ -41,6 +41,15 @@ public enum Assertions {
 
   /**
    * A method to be used for checking a value satisfies a given invariant condition.
+   * This method is intended to be used in `assert` statements.
+   *
+   * [source,java]
+   * .Example
+   * ----
+   * public void aMethod(String var) {
+   *   assert that(var, isNotNull());
+   * }
+   * ----
    *
    * @param value     A value to be checked.
    * @param predicate An invariant condition to check the {@code value}.
@@ -48,12 +57,21 @@ public enum Assertions {
    * @return {@code true}, if the condition given as {@code predicate} is satisfied.
    */
   public static <T> boolean that(T value, Predicate<? super T> predicate) {
-    AssertionProvider.INSTANCE.checkInvariant(value, predicate);
+    Validator.INSTANCE.checkInvariant(value, predicate);
     return trueValue();
   }
 
   /**
    * A method to be used for checking a value satisfies a given pre-condition.
+   * This method is intended to be used in `assert` statements.
+   *
+   * [source,java]
+   * .Example
+   * ----
+   * public void aMethod(String var) {
+   *   assert precondition(var, isNotNull());
+   * }
+   * ----
    *
    * @param value     A value to be checked.
    * @param predicate A pre-condition to check the {@code value}.
@@ -61,12 +79,21 @@ public enum Assertions {
    * @return {@code true}, if the condition given as {@code predicate} is satisfied.
    */
   public static <T> boolean precondition(T value, Predicate<? super T> predicate) {
-    AssertionProvider.INSTANCE.checkPrecondition(value, predicate);
+    Validator.INSTANCE.checkPrecondition(value, predicate);
     return trueValue();
   }
 
   /**
    * A method to be used for checking a value satisfies a given post-condition.
+   * This method is intended to be used in `assert` statements.
+   *
+   * [source,java]
+   * .Example
+   * ----
+   * public void aMethod(String var) {
+   *   assert postcondition(var, isNotNull());
+   * }
+   * ----
    *
    * @param value     A value to be checked.
    * @param predicate A post-condition to check the {@code value}.
@@ -74,7 +101,7 @@ public enum Assertions {
    * @return {@code true}, if the condition given as {@code predicate} is satisfied.
    */
   public static <T> boolean postcondition(T value, Predicate<? super T> predicate) {
-    AssertionProvider.INSTANCE.checkPostcondition(value, predicate);
+    Validator.INSTANCE.checkPostcondition(value, predicate);
     return trueValue();
   }
 

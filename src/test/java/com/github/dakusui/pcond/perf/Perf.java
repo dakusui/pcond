@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.perf;
 
+import com.github.dakusui.pcond.validator.ApplicationException;
 import org.junit.*;
 import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;
@@ -9,7 +10,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.Assertions.that;
-import static com.github.dakusui.pcond.Validations.validate;
+import static com.github.dakusui.pcond.Validates.validate;
 import static com.github.dakusui.pcond.forms.Functions.length;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 
@@ -40,6 +41,7 @@ import static com.github.dakusui.pcond.forms.Predicates.*;
  * validateValueWithPrintablePredicate      3588[msec] (succeeded)
  * </pre>
  */
+@SuppressWarnings("NewClassNamingConvention")
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class Perf {
   @Rule
@@ -123,11 +125,11 @@ public class Perf {
 
 
   private static void validateValueWithPrintablePredicate(String value) {
-    validate(value, and(isNotNull(), transform(length()).check(gt(0)), containsString(" ")));
+    validate(value, and(isNotNull(), transform(length()).check(gt(0)), containsString(" ")), ApplicationException::new);
   }
 
   private static void validateValueWithLambda(String value) {
-    validate(value, ((Predicate<String>) Objects::nonNull).and(v -> v.length() > 0).and(v -> v.contains(" ")));
+    validate(value, ((Predicate<String>) Objects::nonNull).and(v -> v.length() > 0).and(v -> v.contains(" ")), ApplicationException::new);
   }
 
   private static void checkValueWithLambda(String value) {

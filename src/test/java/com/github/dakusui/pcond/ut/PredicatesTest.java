@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.Preconditions.requireArgument;
+import static com.github.dakusui.pcond.Requires.requireArgument;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
@@ -337,10 +337,21 @@ public class PredicatesTest {
 
   public static class FindStringsTest extends TestBase {
     @Test(expected = ComparisonFailure.class)
-    public void findSubstringsTest() {
-      String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
+    public void givenSomeFoundSomeNot$whenFindString$thenFailed() {
+      String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur. De Bello Gallicco.";
       try {
-        TestAssertions.assertThat(text, Predicates.findSubstrings("Gallia", "quarum", "Belgium", "nostra"));
+        TestAssertions.assertThat(text, Predicates.findSubstrings("Gallia", "quarum", "Belgium", "nostra", "De", "Gallia", "Gallicco"));
+      } catch (ComparisonFailure e) {
+        e.printStackTrace();
+        throw e;
+      }
+    }
+
+    @Test
+    public void givenAllFound$whenFindString$thenPassed() {
+      String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur. De Bello Gallicco.";
+      try {
+        TestAssertions.assertThat(text, Predicates.findSubstrings("Gallia", "quarum", "Belgae", "nostra", "De", "Gallicco"));
       } catch (ComparisonFailure e) {
         e.printStackTrace();
         throw e;
@@ -348,7 +359,7 @@ public class PredicatesTest {
     }
 
     @Test(expected = ComparisonFailure.class)
-    public void findRegexesTest() {
+    public void givenSomeFoundSomeNotFound$whenFindRegexes$thenFailed() {
       String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
       try {
         TestAssertions.assertThat(text, Predicates.findRegexes("Gall.a", "quar.m", "Belgium", "nostr(um|a)"));
@@ -357,14 +368,39 @@ public class PredicatesTest {
         throw e;
       }
     }
+    @Test
+    public void givenAllFound$whenFindRegexes$thenPassed() {
+      String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
+      try {
+        TestAssertions.assertThat(text, Predicates.findRegexes("Gall.a", "quar.m", "Belg.+e,", "nostr(um|a)"));
+      } catch (ComparisonFailure e) {
+        e.printStackTrace();
+        throw e;
+      }
+    }
+  }
 
+  public static class FindElementsTest extends TestBase {
     @Test(expected = ComparisonFailure.class)
-    public void findElementTest() {
+    public void givenSomeToBeFoundSomeNotToBe$whenFindElements$thenFailed() {
       List<String> list = asList("Hello", "world", "", "everyone", "quick", "brown", "fox", "runs", "forever");
+      list.forEach(System.out::println);
       TestAssertions.assertThat(list,
           Predicates.findElements(
               Predicates.isEqualTo("world"),
               Predicates.isEqualTo("cat"), Predicates.isEqualTo("organization"), Predicates.isNotNull(), Predicates.isEqualTo("fox"), Predicates.isEqualTo("world")));
+    }
+
+    @Test
+    public void givenAllFound$whenFindElements$thenPassed() {
+      List<String> list = asList("Hello", "world", "", "everyone", "quick", "brown", "fox", "runs", "forever");
+      list.forEach(System.out::println);
+      TestAssertions.assertThat(list,
+          Predicates.findElements(
+              Predicates.isEqualTo("world"),
+              Predicates.isNotNull(),
+              Predicates.isEqualTo("fox")));
+
     }
   }
 }

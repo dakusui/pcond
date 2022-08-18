@@ -1,12 +1,12 @@
 package com.github.dakusui.pcond.core.refl;
 
+import com.github.dakusui.pcond.internals.InternalChecks;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static com.github.dakusui.pcond.core.currying.Checks.isWiderThanOrEqualTo;
 import static com.github.dakusui.pcond.core.refl.MethodSelector.Utils.isAssignableWithBoxingFrom;
 import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
 import static java.lang.String.format;
@@ -188,7 +188,9 @@ public interface MethodSelector extends Formattable {
     static boolean isAssignableWithBoxingFrom(Class<?> a, Class<?> b) {
       if (a.isAssignableFrom(b))
         return true;
-      return isWiderThanOrEqualTo(toWrapperIfPrimitive(a), toWrapperIfPrimitive(b));
+      if (InternalChecks.isPrimitiveWrapperClassOrPrimitive(a) && InternalChecks.isPrimitiveWrapperClassOrPrimitive(b))
+        return InternalChecks.isWiderThanOrEqualTo(toWrapperIfPrimitive(a), toWrapperIfPrimitive(b));
+      return false;
     }
 
     private static Class<?> toWrapperIfPrimitive(Class<?> in) {

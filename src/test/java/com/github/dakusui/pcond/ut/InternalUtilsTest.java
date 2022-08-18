@@ -11,6 +11,7 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
 import java.util.function.Predicate;
 
 import static java.util.Arrays.asList;
@@ -20,6 +21,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(Enclosed.class)
 public class InternalUtilsTest {
+  public static class DummyFormTest extends TestBase {
+    @Test(expected = UnsupportedOperationException.class)
+    public void testDummyFunction() {
+      InternalUtils.dummyFunction().apply(null);
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testDummyPredicate() {
+      InternalUtils.dummyPredicate().test(null);
+    }
+  }
+
   public static class FormatObjectTest extends TestBase {
     static class InnerClass {
     }
@@ -215,6 +228,86 @@ public class InternalUtilsTest {
       Predicate<Object> predicate = Predicate.isEqual("Hello");
       Evaluable<Object> ev = InternalUtils.toEvaluableIfNecessary(predicate);
       assertNotNull(ev);
+    }
+  }
+
+  public static class CreateInstanceFromClassNameTest {
+    public static class TargetClass {
+      public TargetClass() {
+        throw new IllegalArgumentException();
+      }
+
+      private TargetClass(int v) {
+      }
+    }
+
+    @Test(expected = InternalException.class)
+    public void testUndefinedConstructor() {
+      try {
+        InternalUtils.createInstanceFromClassName(Object.class, TargetClass.class.getName(), "Hello");
+      } catch (InternalException e) {
+        assertThat(e.getCause(), instanceOf(NoSuchMethodException.class));
+        throw e;
+      }
+    }
+
+    @Test(expected = InternalException.class)
+    public void testConstructorThrowingException() {
+      try {
+        InternalUtils.createInstanceFromClassName(Object.class, TargetClass.class.getName());
+      } catch (InternalException e) {
+        assertThat(e.getCause(), instanceOf(IllegalArgumentException.class));
+        throw e;
+      }
+    }
+
+    @Test(expected = InternalException.class)
+    public void testConstructorPrivate() {
+      try {
+        InternalUtils.createInstanceFromClassName(Object.class, TargetClass.class.getName() + "NotFound", 3);
+      } catch (InternalException e) {
+        assertThat(e.getCause(), instanceOf(ClassNotFoundException.class));
+        throw e;
+      }
+    }
+  }
+
+  public static class WrapIfNecessaryTest {
+    @Test(expected = InternalException.class)
+    public void testWrapIfNecessary() {
+      try {
+        throw InternalUtils.wrapIfNecessary(new IOException());
+      } catch (InternalException e) {
+        assertThat(e.getCause(), instanceOf(IOException.class));
+        throw e;
+      }
+    }
+  }
+
+  public static class GetMethodTest {
+    @Test(expected = InternalException.class)
+    public void testGetMethod() {
+      try {
+        InternalUtils.getMethod(GetMethodTest.class, "undefinedMethod");
+      } catch (InternalException e) {
+        assertThat(e.getCause(), instanceOf(NoSuchMethodException.class));
+        throw e;
+      }
+    }
+  }
+
+  public static class WrapperClassOfTest {
+    @Test(expected = IllegalArgumentException.class)
+    public void testWrapperClassOf() {
+      try {
+        InternalUtils.wrapperClassOf(null);
+      } catch (IllegalArgumentException e) {
+        assertThat(e.getMessage(),
+            allOf(
+                containsString("Unsupported type:"),
+                containsString("null")));
+        throw e;
+      }
     }
   }
 }
