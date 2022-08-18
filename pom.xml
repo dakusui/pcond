@@ -5,9 +5,8 @@
     <groupId>com.github.dakusui</groupId>
     <artifactId>pcond</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.0-alpha2-SNAPSHOT</version>
-    <description>A Small Java Library for Design by Contract style programming
-        with printable preconditions.
+    <version>3.0.0-alpha3-SNAPSHOT</version>
+    <description>A Small Java Library for Design by Contract style programming with printable preconditions.
     </description>
 
     <name>${project.artifactId}</name>
