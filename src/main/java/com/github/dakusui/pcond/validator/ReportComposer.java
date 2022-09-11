@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
 import static java.lang.String.format;
@@ -99,7 +100,7 @@ public interface ReportComposer {
           .stream()
           .anyMatch(e -> e.mismatchExplanation().isPresent());
       return evaluatorEntriesToString(
-          formattedEntries,
+          squashFormattedEntriesWherePossible(formattedEntries),
           columnLengths -> formattedEntryToString(
               columnLengths[0], columnLengths[1], columnLengths[2],
               mismatchExplanationCount, mismatchExplanationFound));
@@ -163,6 +164,80 @@ public interface ReportComposer {
           .map(formatter)
           .map(s -> ("+" + s).trim().substring(1))
           .collect(joining(format("%n")));
+    }
+
+    /*
+  "Doe"               ->WHEN
+                      treatAs[NOUT]   ->"Doe"
+                    THEN
+                      &&              ->true
+                        isNotNull     ->true
+                        !             ->true
+                          isEmpty     ->false
+["John","Doe","PhD"]->WHEN
+                        treatAsList     ->["John","Doe","PhD"]
+                      THEN
+                        contains["Doe_"]->true
+----
+"Doe"               ->WHEN:treatAs[NOUT]->"Doe"
+                      THEN:&&           ->true
+                          isNotNull     ->true
+                            isEmpty     ->false
+["John","Doe","PhD"]->  treatAsList     ->["John","Doe","PhD"]
+                        contains["Doe_"]->true
+
+
+---
+"Doe"               ->WHEN
+                      THEN
+                          isNotNull->true
+                          !        ->true
+                            isEmpty->false
+["John","Doe","PhD"]->WHEN
+                      THEN
+
+
+     */
+    private static List<FormattedEntry> squashFormattedEntriesWherePossible(List<FormattedEntry> formattedEntries) {
+      List<FormattedEntry> ret = new LinkedList<>();
+      List<FormattedEntry> tmp;
+      AtomicReference<FormattedEntry> lastFormattedEntry = new AtomicReference<>();
+      tmp = formattedEntries.stream()
+          .map((FormattedEntry eachEntry) -> {
+            FormattedEntry lastEntry = lastFormattedEntry.get();
+            lastFormattedEntry.set(eachEntry);
+            if (lastEntry == null)
+              return eachEntry;
+            if (Objects.equals(lastEntry.input, eachEntry.input))
+              return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.mismatchExplanation);
+            return eachEntry;
+          }).collect(Collectors.toList());
+
+      FormattedEntry cur = null;
+      for (FormattedEntry each : tmp) {
+        if (cur == null) {
+          if (!each.output().isPresent()) {
+            cur = each;
+          } else {
+            ret.add(each);
+          }
+        } else {
+          if (!cur.output().isPresent() && !each.input().isPresent()) {
+            cur = new FormattedEntry(
+                cur.input().orElse(null),
+                String.format("%s:%s", cur.formName(), each.formName()),
+                cur.indent(),
+                each.output().orElse(null),
+                cur.mismatchExplanation().orElse(null));
+          } else {
+            ret.add(cur);
+            cur = each;
+          }
+        }
+      }
+      if (cur != null)
+        ret.add(cur);
+      return ret;
     }
 
     public static class FormattedEntry {
