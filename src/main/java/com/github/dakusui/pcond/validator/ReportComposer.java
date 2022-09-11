@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
 import static java.lang.String.format;
@@ -152,15 +152,6 @@ public interface ReportComposer {
       AtomicReference<FormattedEntry> lastFormattedEntry = new AtomicReference<>();
       return formattedEntries
           .stream()
-          .map((FormattedEntry eachEntry) -> {
-            FormattedEntry lastEntry = lastFormattedEntry.get();
-            lastFormattedEntry.set(eachEntry);
-            if (lastEntry == null)
-              return eachEntry;
-            if (Objects.equals(lastEntry.input, eachEntry.input))
-              return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.mismatchExplanation);
-            return eachEntry;
-          })
           .map(formatter)
           .map(s -> ("+" + s).trim().substring(1))
           .collect(joining(format("%n")));
@@ -196,56 +187,78 @@ public interface ReportComposer {
 ["John","Doe","PhD"]->WHEN
                       THEN
 
-
+----
+"Doe"               ->WHEN:treatAs[NOUT]   ->"Doe"
+                      THEN:&&              ->true
+                          isNotNull        ->true
+                          !                ->true
+                            isEmpty        ->false
+["John","Doe","PhD"]->WHEN:treatAsList     ->["John","Doe","PhD"]
+                      THEN:contains["Doe_"]->true
+----
      */
     private static List<FormattedEntry> squashFormattedEntriesWherePossible(List<FormattedEntry> formattedEntries) {
-      List<FormattedEntry> ret = new LinkedList<>();
-      List<FormattedEntry> tmp;
       AtomicReference<FormattedEntry> lastFormattedEntry = new AtomicReference<>();
-      tmp = formattedEntries.stream()
-          .map((FormattedEntry eachEntry) -> {
-            FormattedEntry lastEntry = lastFormattedEntry.get();
-            lastFormattedEntry.set(eachEntry);
-            if (lastEntry == null)
-              return eachEntry;
-            if (Objects.equals(lastEntry.input, eachEntry.input))
-              return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.mismatchExplanation);
-            return eachEntry;
-          }).collect(Collectors.toList());
+      AtomicReference<FormattedEntry> curHolder = new AtomicReference<>();
+      return Stream.concat(
+              formattedEntries.stream()
+                  .map((FormattedEntry eachEntry) -> squashFormattedEntries(lastFormattedEntry, eachEntry)),
+              Stream.of(FormattedEntry.SENTINEL))
+          .map(each -> squashFormattedEntries2(curHolder, each))
+          .map(each -> flushRemainder(curHolder, each))
+          .filter(Objects::nonNull)
+          .collect(toList());
+    }
 
-      FormattedEntry cur = null;
-      for (FormattedEntry each : tmp) {
-        if (cur == null) {
-          if (!each.output().isPresent()) {
-            cur = each;
-          } else {
-            ret.add(each);
-          }
+    private static FormattedEntry flushRemainder(AtomicReference<FormattedEntry> curHolder, FormattedEntry each) {
+      if (each == FormattedEntry.SENTINEL)
+        return curHolder.get();
+      else
+        return each;
+    }
+
+    private static FormattedEntry squashFormattedEntries2(AtomicReference<FormattedEntry> curHolder, FormattedEntry each) {
+      final FormattedEntry cur = curHolder.get();
+      if (cur == null) {
+        if (!each.output().isPresent()) {
+          curHolder.set(each);
+          return null;
         } else {
-          if (!cur.output().isPresent() && !each.input().isPresent()) {
-            cur = new FormattedEntry(
-                cur.input().orElse(null),
-                String.format("%s:%s", cur.formName(), each.formName()),
-                cur.indent(),
-                each.output().orElse(null),
-                cur.mismatchExplanation().orElse(null));
-          } else {
-            ret.add(cur);
-            cur = each;
-          }
+          return each;
+        }
+      } else {
+        if (!cur.output().isPresent() && !each.input().isPresent()) {
+          curHolder.set(new FormattedEntry(
+              cur.input().orElse(null),
+              String.format("%s:%s", cur.formName(), each.formName()),
+              cur.indent(),
+              each.output().orElse(null),
+              cur.mismatchExplanation().orElse(null)));
+          return null;
+        } else {
+          curHolder.set(each);
+          return cur;
         }
       }
-      if (cur != null)
-        ret.add(cur);
-      return ret;
+    }
+
+    private static FormattedEntry squashFormattedEntries(AtomicReference<FormattedEntry> lastFormattedEntry, FormattedEntry eachEntry) {
+      FormattedEntry lastEntry = lastFormattedEntry.get();
+      lastFormattedEntry.set(eachEntry);
+      if (lastEntry == null)
+        return eachEntry;
+      if (Objects.equals(lastEntry.input, eachEntry.input))
+        return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.mismatchExplanation);
+      return eachEntry;
     }
 
     public static class FormattedEntry {
-      private final String input;
-      private final String formName;
-      private final String indent;
-      private final String output;
-      private final Object mismatchExplanation;
+      private static final FormattedEntry SENTINEL = new FormattedEntry(null, null, null, null, null);
+      private final        String         input;
+      private final        String         formName;
+      private final        String         indent;
+      private final        String         output;
+      private final        Object         mismatchExplanation;
 
       FormattedEntry(String input, String formName, String indent, String output, Object mismatchExplanation) {
         this.input = input;
