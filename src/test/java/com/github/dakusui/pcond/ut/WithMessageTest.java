@@ -17,12 +17,12 @@ public class WithMessageTest extends TestBase {
     try {
       Validates.validate("Value", Predicates.withMessage("Hello, world", not(alwaysTrue())), ApplicationException::new);
     } catch (ApplicationException e) {
-      e.printStackTrace();
+      e.printStackTrace(System.out);
       assertThat(
           e.getMessage().replaceAll(" +", " ").replaceAll("\"", "'"),
           CoreMatchers.allOf(
               CoreMatchers.containsString("Hello, world"),
-              CoreMatchers.containsString("! ->false"),
+              CoreMatchers.containsString("!->false"),
               CoreMatchers.containsString("alwaysTrue->true")
           ));
 
