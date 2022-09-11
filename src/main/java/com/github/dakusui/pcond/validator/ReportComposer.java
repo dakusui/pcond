@@ -157,54 +157,15 @@ public interface ReportComposer {
           .collect(joining(format("%n")));
     }
 
-    /*
-  "Doe"               ->WHEN
-                      treatAs[NOUT]   ->"Doe"
-                    THEN
-                      &&              ->true
-                        isNotNull     ->true
-                        !             ->true
-                          isEmpty     ->false
-["John","Doe","PhD"]->WHEN
-                        treatAsList     ->["John","Doe","PhD"]
-                      THEN
-                        contains["Doe_"]->true
-----
-"Doe"               ->WHEN:treatAs[NOUT]->"Doe"
-                      THEN:&&           ->true
-                          isNotNull     ->true
-                            isEmpty     ->false
-["John","Doe","PhD"]->  treatAsList     ->["John","Doe","PhD"]
-                        contains["Doe_"]->true
-
-
----
-"Doe"               ->WHEN
-                      THEN
-                          isNotNull->true
-                          !        ->true
-                            isEmpty->false
-["John","Doe","PhD"]->WHEN
-                      THEN
-
-----
-"Doe"               ->WHEN:treatAs[NOUT]   ->"Doe"
-                      THEN:&&              ->true
-                          isNotNull        ->true
-                          !                ->true
-                            isEmpty        ->false
-["John","Doe","PhD"]->WHEN:treatAsList     ->["John","Doe","PhD"]
-                      THEN:contains["Doe_"]->true
-----
-     */
     private static List<FormattedEntry> squashFormattedEntriesWherePossible(List<FormattedEntry> formattedEntries) {
       AtomicReference<FormattedEntry> lastFormattedEntry = new AtomicReference<>();
       AtomicReference<FormattedEntry> curHolder = new AtomicReference<>();
       return Stream.concat(
-              formattedEntries.stream()
-                  .map((FormattedEntry eachEntry) -> squashFormattedEntries(lastFormattedEntry, eachEntry)),
+              formattedEntries
+                  .stream()
+                  .map((FormattedEntry eachEntry) -> hideRedundantInputValues(lastFormattedEntry, eachEntry)),
               Stream.of(FormattedEntry.SENTINEL))
-          .map(each -> squashFormattedEntries2(curHolder, each))
+          .map(each -> squashFormattedEntries(curHolder, each))
           .map(each -> flushRemainder(curHolder, each))
           .filter(Objects::nonNull)
           .collect(toList());
@@ -217,7 +178,7 @@ public interface ReportComposer {
         return each;
     }
 
-    private static FormattedEntry squashFormattedEntries2(AtomicReference<FormattedEntry> curHolder, FormattedEntry each) {
+    private static FormattedEntry squashFormattedEntries(AtomicReference<FormattedEntry> curHolder, FormattedEntry each) {
       final FormattedEntry cur = curHolder.get();
       if (cur == null) {
         if (!each.output().isPresent()) {
@@ -242,7 +203,7 @@ public interface ReportComposer {
       }
     }
 
-    private static FormattedEntry squashFormattedEntries(AtomicReference<FormattedEntry> lastFormattedEntry, FormattedEntry eachEntry) {
+    private static FormattedEntry hideRedundantInputValues(AtomicReference<FormattedEntry> lastFormattedEntry, FormattedEntry eachEntry) {
       FormattedEntry lastEntry = lastFormattedEntry.get();
       lastFormattedEntry.set(eachEntry);
       if (lastEntry == null)
