@@ -9,9 +9,10 @@ import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public abstract class PrintablePredicate<T> extends Identifiable.Base implements Predicate<T>, Evaluable<T> {
+public abstract class PrintablePredicate<T> extends Identifiable.Base implements Predicate<T>, Evaluable<T>, Cloneable {
   protected final Predicate<? super T> predicate;
   final           Supplier<String>     formatter;
+  boolean trivial = false;
 
   protected PrintablePredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<? super T> predicate) {
     super(creator, args);
@@ -51,6 +52,28 @@ public abstract class PrintablePredicate<T> extends Identifiable.Base implements
       ret = ((PrintablePredicate<? super T>) predicate).predicate;
       assert !(ret instanceof PrintablePredicate);
     }
+    return ret;
+  }
+
+  @SuppressWarnings({ "CloneDoesntDeclareCloneNotSupportedException", "unchecked" })
+  @Override
+  protected PrintablePredicate<T> clone() {
+    try {
+      return (PrintablePredicate<T>) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
+  }
+
+
+  public boolean isTrivial() {
+    return this.trivial;
+  }
+
+  @Override
+  public PrintablePredicate<T> makeTrivial() {
+    PrintablePredicate<T> ret = this.clone();
+    ret.trivial = true;
     return ret;
   }
 

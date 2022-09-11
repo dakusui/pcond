@@ -69,6 +69,7 @@ public interface ReportComposer {
             if (each.hasActualInputDetail())
               actualInputDetails.add(each.actualInputDetail());
           })
+          .filter((Evaluator.Entry each) -> !each.isTrivial())
           .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
               each,
               () -> each.hasOutput() ?
@@ -79,6 +80,7 @@ public interface ReportComposer {
 
     private static String composeExplanationForExpectations(List<Evaluator.Entry> result, Throwable t, List<Object> expectationDetails) {
       return composeExplanation(result.stream()
+          .filter((Evaluator.Entry each) -> !each.isTrivial())
           .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
               each,
               () -> (each.hasOutput() ?

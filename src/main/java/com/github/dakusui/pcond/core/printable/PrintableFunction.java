@@ -10,12 +10,14 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class PrintableFunction<T, R> extends Identifiable.Base implements Evaluable.Func<T>, CurriedFunction<T, R> {
+public class PrintableFunction<T, R> extends Identifiable.Base implements Evaluable.Func<T>, CurriedFunction<T, R>, Cloneable {
   final         Function<? super T, ? extends R> function;
   private final Function<? super T, ?>           head;
   private final Evaluable<?>                     tail;
   private final Supplier<String>                 formatter;
   private final Function<?, R>                   tailAsFunction;
+
+  boolean trivial = false;
 
   @SuppressWarnings("unchecked")
   protected PrintableFunction(Object creator, List<Object> args, Supplier<String> s, Function<? super T, ? extends R> function, Function<? super T, ?> head, Evaluable<?> tail) {
@@ -88,6 +90,29 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
       ret = (Function<T, R>) ((PrintableFunction<T, R>) function).function;
       assert !(ret instanceof PrintableFunction);
     }
+    return ret;
+  }
+
+
+  @SuppressWarnings({ "CloneDoesntDeclareCloneNotSupportedException", "unchecked" })
+  @Override
+  protected PrintableFunction<T, R> clone() {
+    try {
+      return (PrintableFunction<T, R>) super.clone();
+    } catch (CloneNotSupportedException e) {
+      throw new AssertionError();
+    }
+  }
+
+
+  public boolean isTrivial() {
+    return this.trivial;
+  }
+
+  @Override
+  public PrintableFunction<T, R> makeTrivial() {
+    PrintableFunction<T, R> ret = this.clone();
+    ret.trivial = true;
     return ret;
   }
 
