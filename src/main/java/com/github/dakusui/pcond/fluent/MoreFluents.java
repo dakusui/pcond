@@ -3,12 +3,15 @@ package com.github.dakusui.pcond.fluent;
 import com.github.dakusui.pcond.TestAssertions;
 import com.github.dakusui.pcond.core.fluent.Fluent;
 import com.github.dakusui.pcond.core.fluent.transformers.*;
+import com.github.dakusui.pcond.core.printable.PrintableFunction;
+import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -103,9 +106,17 @@ public class MoreFluents {
   private static Predicate<? super List<?>> createPredicateForAllOf(Statement<?>[] statements) {
     AtomicInteger i = new AtomicInteger(0);
     @SuppressWarnings("unchecked") Predicate<? super List<?>>[] predicates = Arrays.stream(statements)
-        .map(e -> transform(elementAt(i.getAndIncrement())).check((Predicate<? super Object>) e.statementPredicate()))
+        .map(e -> makeTrivial(transform(makeTrivial(elementAt(i.getAndIncrement()))).check((Predicate<? super Object>) e.statementPredicate())))
         .toArray(Predicate[]::new);
-    return allOf((predicates));
+    return makeTrivial(allOf(predicates));
+  }
+
+  private static <T> Predicate<T> makeTrivial(Predicate<T> predicates) {
+    return ((PrintablePredicate<T>) predicates).makeTrivial();
+  }
+
+  private static <T, R> Function<T, R> makeTrivial(Function<T, R> predicates) {
+    return ((PrintableFunction<T, R>) predicates).makeTrivial();
   }
 
   @FunctionalInterface

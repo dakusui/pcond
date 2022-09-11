@@ -92,20 +92,21 @@ public class DefaultValidatorTest extends TestBase {
       createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
           .requireArgument("Hello", transform(Functions.length()).check(Predicates.gt(10)));
     } catch (IllegalArgumentException e) {
-      e.printStackTrace();
-      assertThat(lineAt(e.getMessage(), 1),
+      e.printStackTrace(System.out);
+      int i = 0;
+      assertThat(lineAt(e.getMessage(), ++i),
           CoreMatchers.containsString("transform")
       );
-      assertThat(lineAt(e.getMessage(), 2), allOf(
+      assertThat(lineAt(e.getMessage(), i), allOf(
           CoreMatchers.containsString("length"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("5")
 
       ));
-      assertThat(lineAt(e.getMessage(), 3),
+      assertThat(lineAt(e.getMessage(), ++i),
           CoreMatchers.containsString("check")
       );
-      assertThat(lineAt(e.getMessage(), 4), allOf(
+      assertThat(lineAt(e.getMessage(), i), allOf(
           CoreMatchers.containsString(">[10]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
@@ -204,17 +205,17 @@ public class DefaultValidatorTest extends TestBase {
       assertThat(lineAt(e.getMessage(), 5),
           CoreMatchers.containsString("  transform")
       );
-      assertThat(lineAt(e.getMessage(), 6), allOf(
-          CoreMatchers.containsString("  length"),
+      assertThat(lineAt(e.getMessage(), 5), allOf(
+          CoreMatchers.containsString("length"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("5")
 
       ));
-      assertThat(lineAt(e.getMessage(), 7),
+      assertThat(lineAt(e.getMessage(), 6),
           CoreMatchers.containsString("  check")
       );
-      assertThat(lineAt(e.getMessage(), 8), allOf(
-          CoreMatchers.containsString("  >[10]"),
+      assertThat(lineAt(e.getMessage(), 6), allOf(
+          CoreMatchers.containsString(">[10]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 

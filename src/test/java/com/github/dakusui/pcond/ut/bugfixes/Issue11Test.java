@@ -25,13 +25,13 @@ public class Issue11Test extends TestBase {
       int i = 0;
       assertThat(lineAt(e.getMessage(), ++i), containsString("&&"));
       assertThat(lineAt(e.getMessage(), ++i), containsString("transform"));
-      assertThat(lineAt(e.getMessage(), ++i), containsString("size"));
+      assertThat(lineAt(e.getMessage(), i), containsString("size"));
       assertThat(lineAt(e.getMessage(), ++i), containsString("check"));
-      assertThat(lineAt(e.getMessage(), ++i), containsString("isEqualTo[1]"));
+      assertThat(lineAt(e.getMessage(), i), containsString("isEqualTo[1]"));
       assertThat(lineAt(e.getMessage(), ++i), containsString("transform"));
-      assertThat(lineAt(e.getMessage(), ++i), containsString("at[0]"));
+      assertThat(lineAt(e.getMessage(), i), containsString("at[0]"));
       assertThat(lineAt(e.getMessage(), ++i), containsString("check"));
-      assertThat(lineAt(e.getMessage(), ++i), containsString("&&"));
+      assertThat(lineAt(e.getMessage(), i), containsString("&&"));
       assertThat(lineAt(e.getMessage(), ++i), containsString("isNotNull"));
       assertThat(lineAt(e.getMessage(), ++i), containsString("isInstanceOf"));
       throw e;

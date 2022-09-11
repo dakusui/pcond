@@ -111,8 +111,8 @@ public interface Evaluator {
    * This method is expected to be called from inside an `evaluated` method, not
    * to be called by a user.
    *
-   * @return The evaluated result value.
    * @param <T> The type of the last value evaluated by this object.
+   * @return The evaluated result value.
    */
   <T> T resultValue();
 
@@ -127,6 +127,7 @@ public interface Evaluator {
 
   /**
    * Returns a new instance of this interface.
+   *
    * @return a new instance of this interface.
    */
   static Evaluator create() {
@@ -144,7 +145,14 @@ public interface Evaluator {
     }
 
     void enter(Entry.Type type, Evaluable<?> evaluable, String name, Object input) {
-      Entry.OnGoing newEntry = new Entry.OnGoing(type, onGoingEntries.size(), entries.size(), name, toSnapshotIfPossible(input), this.currentlyExpectedBooleanValue);
+      Entry.OnGoing newEntry = new Entry.OnGoing(
+          type,
+          (int)onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
+          entries.size(),
+          name,
+          toSnapshotIfPossible(input),
+          this.currentlyExpectedBooleanValue,
+          evaluable.isTrivial());
       onGoingEntries.add(newEntry);
       entries.add(newEntry);
       if (evaluable.requestExpectationFlip())
@@ -164,7 +172,6 @@ public interface Evaluator {
       this.currentResult = result;
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
-
     }
 
     void flipCurrentlyExpectedBooleanValue() {
@@ -345,7 +352,8 @@ public interface Evaluator {
           each.hasOutput() ? each.output() : other, each.formName(),
           each.expectedBooleanValue,
           each.hasExpectationDetail() ? each.expectationDetail() : null,
-          each.hasActualInputDetail() ? each.actualInputDetail() : null);
+          each.hasActualInputDetail() ? each.actualInputDetail() : null,
+          each.trivial);
     }
   }
 
@@ -359,12 +367,15 @@ public interface Evaluator {
     private final String  name;
     private final boolean expectedBooleanValue;
 
-    Entry(Type type, int level, Object input, String name, boolean expectedBooleanValue) {
+    final boolean trivial;
+
+    Entry(Type type, int level, Object input, String name, boolean expectedBooleanValue, boolean trivial) {
       this.type = type;
       this.level = level;
       this.input = input;
       this.name = name;
       this.expectedBooleanValue = expectedBooleanValue;
+      this.trivial = trivial;
     }
 
     public int level() {
@@ -400,6 +411,10 @@ public interface Evaluator {
 
     public abstract Object actualInputDetail();
 
+    public boolean isTrivial() {
+      return this.trivial;
+    }
+
     public enum Type {
       TRANSFORM,
       CHECK,
@@ -416,8 +431,8 @@ public interface Evaluator {
       final         Object expectationDetail;
       private final Object actualInputDetail;
 
-      Finalized(Type type, int level, Object input, Object output, String name, boolean expectedBooleanValue, Object expectationDetail, Object actualInputDetail) {
-        super(type, level, input, name, expectedBooleanValue);
+      Finalized(Type type, int level, Object input, Object output, String name, boolean expectedBooleanValue, Object expectationDetail, Object actualInputDetail, boolean trivial) {
+        super(type, level, input, name, expectedBooleanValue, trivial);
         this.output = output;
         this.expectationDetail = expectationDetail;
         this.actualInputDetail = actualInputDetail;
@@ -458,13 +473,13 @@ public interface Evaluator {
     static class OnGoing extends Entry {
       final int positionInEntries;
 
-      OnGoing(Type type, int level, int positionInEntries, String name, Object input, boolean expectedBooleanValue) {
-        super(type, level, input, name, expectedBooleanValue);
+      OnGoing(Type type, int level, int positionInEntries, String name, Object input, boolean expectedBooleanValue, boolean trivial) {
+        super(type, level, input, name, expectedBooleanValue, trivial);
         this.positionInEntries = positionInEntries;
       }
 
       Finalized result(Object result, Object expectationDetail, Object actualInputDetail) {
-        return new Finalized(this.type(), this.level(), this.input(), result, this.formName(), this.expectedBooleanValue(), expectationDetail, actualInputDetail);
+        return new Finalized(this.type(), this.level(), this.input(), result, this.formName(), this.expectedBooleanValue(), expectationDetail, actualInputDetail, this.trivial);
       }
 
       @Override

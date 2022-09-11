@@ -54,12 +54,20 @@ public interface Evaluable<T> {
     return false;
   }
 
-  /**
-   * A base interface to model all the predicates in the model of the evaluation
-   * framework.
-   *
-   * @param <T> The type of the value to be tested.
-   */
+  default boolean isTrivial() {
+    return false;
+  }
+
+  default Evaluable<T> makeTrivial() {
+    throw new UnsupportedOperationException();
+  }
+
+    /**
+     * A base interface to model all the predicates in the model of the evaluation
+     * framework.
+     *
+     * @param <T> The type of the value to be tested.
+     */
   interface Pred<T> extends Evaluable<T> {
   }
 

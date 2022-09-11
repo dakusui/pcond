@@ -367,6 +367,7 @@ public enum PrintablePredicateFactory {
       this.mapperName = mapperName;
       this.checker = toEvaluableIfNecessary(predicate);
       this.checkerName = checkerName;
+      this.trivial = true;
     }
 
     protected TransformingPredicate(Predicate<? super R> predicate, Function<? super T, ? extends R> function) {

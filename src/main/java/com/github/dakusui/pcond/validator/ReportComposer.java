@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
 import static java.lang.String.format;
@@ -69,6 +70,7 @@ public interface ReportComposer {
             if (each.hasActualInputDetail())
               actualInputDetails.add(each.actualInputDetail());
           })
+          .filter((Evaluator.Entry each) -> !each.isTrivial())
           .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
               each,
               () -> each.hasOutput() ?
@@ -79,6 +81,7 @@ public interface ReportComposer {
 
     private static String composeExplanationForExpectations(List<Evaluator.Entry> result, Throwable t, List<Object> expectationDetails) {
       return composeExplanation(result.stream()
+          .filter((Evaluator.Entry each) -> !each.isTrivial())
           .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
               each,
               () -> (each.hasOutput() ?
@@ -97,7 +100,7 @@ public interface ReportComposer {
           .stream()
           .anyMatch(e -> e.mismatchExplanation().isPresent());
       return evaluatorEntriesToString(
-          formattedEntries,
+          squashFormattedEntriesWherePossible(formattedEntries),
           columnLengths -> formattedEntryToString(
               columnLengths[0], columnLengths[1], columnLengths[2],
               mismatchExplanationCount, mismatchExplanationFound));
@@ -149,26 +152,74 @@ public interface ReportComposer {
       AtomicReference<FormattedEntry> lastFormattedEntry = new AtomicReference<>();
       return formattedEntries
           .stream()
-          .map((FormattedEntry eachEntry) -> {
-            FormattedEntry lastEntry = lastFormattedEntry.get();
-            lastFormattedEntry.set(eachEntry);
-            if (lastEntry == null)
-              return eachEntry;
-            if (Objects.equals(lastEntry.input, eachEntry.input))
-              return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.mismatchExplanation);
-            return eachEntry;
-          })
           .map(formatter)
           .map(s -> ("+" + s).trim().substring(1))
           .collect(joining(format("%n")));
     }
 
+    private static List<FormattedEntry> squashFormattedEntriesWherePossible(List<FormattedEntry> formattedEntries) {
+      AtomicReference<FormattedEntry> lastFormattedEntry = new AtomicReference<>();
+      AtomicReference<FormattedEntry> curHolder = new AtomicReference<>();
+      return Stream.concat(
+              formattedEntries
+                  .stream()
+                  .map((FormattedEntry eachEntry) -> hideRedundantInputValues(lastFormattedEntry, eachEntry)),
+              Stream.of(FormattedEntry.SENTINEL))
+          .map(each -> squashFormattedEntries(curHolder, each))
+          .map(each -> flushRemainder(curHolder, each))
+          .filter(Objects::nonNull)
+          .collect(toList());
+    }
+
+    private static FormattedEntry flushRemainder(AtomicReference<FormattedEntry> curHolder, FormattedEntry each) {
+      if (each == FormattedEntry.SENTINEL)
+        return curHolder.get();
+      else
+        return each;
+    }
+
+    private static FormattedEntry squashFormattedEntries(AtomicReference<FormattedEntry> curHolder, FormattedEntry each) {
+      final FormattedEntry cur = curHolder.get();
+      if (cur == null) {
+        if (!each.output().isPresent()) {
+          curHolder.set(each);
+          return null;
+        } else {
+          return each;
+        }
+      } else {
+        if (!cur.output().isPresent() && !each.input().isPresent()) {
+          curHolder.set(new FormattedEntry(
+              cur.input().orElse(null),
+              String.format("%s:%s", cur.formName(), each.formName()),
+              cur.indent(),
+              each.output().orElse(null),
+              cur.mismatchExplanation().orElse(null)));
+          return null;
+        } else {
+          curHolder.set(each);
+          return cur;
+        }
+      }
+    }
+
+    private static FormattedEntry hideRedundantInputValues(AtomicReference<FormattedEntry> lastFormattedEntry, FormattedEntry eachEntry) {
+      FormattedEntry lastEntry = lastFormattedEntry.get();
+      lastFormattedEntry.set(eachEntry);
+      if (lastEntry == null)
+        return eachEntry;
+      if (Objects.equals(lastEntry.input, eachEntry.input))
+        return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.mismatchExplanation);
+      return eachEntry;
+    }
+
     public static class FormattedEntry {
-      private final String input;
-      private final String formName;
-      private final String indent;
-      private final String output;
-      private final Object mismatchExplanation;
+      private static final FormattedEntry SENTINEL = new FormattedEntry(null, null, null, null, null);
+      private final        String         input;
+      private final        String         formName;
+      private final        String         indent;
+      private final        String         output;
+      private final        Object         mismatchExplanation;
 
       FormattedEntry(String input, String formName, String indent, String output, Object mismatchExplanation) {
         this.input = input;

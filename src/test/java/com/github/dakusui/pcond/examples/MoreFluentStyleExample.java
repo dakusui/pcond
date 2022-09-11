@@ -94,7 +94,7 @@ public class MoreFluentStyleExample {
                 not(isEmptyString()))),
         valueOf(fullName).asListOfClass(String.class)
             .then()
-            .contains(lastName));
+            .contains(lastName + "_"));
   }
 
   @Test

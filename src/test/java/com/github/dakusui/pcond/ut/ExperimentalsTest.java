@@ -97,9 +97,9 @@ ReferencePipeline$7@6c3708b3 ->   noneMatch[contextPredicate(stringEndsWith(Stri
 context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(String)[0, 1])          -> true
 	at com.github.dakusui.pcond.provider.AssertionProviderBase.lambda$exceptionComposerForPrecondition$0(AssertionProviderBase.java:83)
        */
-      e.printStackTrace();
+      e.printStackTrace(System.out);
       assertThat(
-          lineAt(e.getMessage(), 6),
+          lineAt(e.getMessage(), 4),
           allOf(
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("stringEndsWith(String)(String)[0, 1]"),
@@ -120,9 +120,9 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
                       toContextPredicate(transform(Functions.length()).check(gt(3))))
               ));
     } catch (PreconditionViolationException e) {
-      e.printStackTrace();
+      e.printStackTrace(System.out);
       assertThat(
-          lineAt(e.getMessage(), 6),
+          lineAt(e.getMessage(), 4),
           allOf(
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("length >[3]"),
@@ -130,22 +130,22 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
               CoreMatchers.containsString("true")
           ));
       assertThat(
-          lineAt(e.getMessage(), 7),
+          lineAt(e.getMessage(), 5),
           CoreMatchers.containsString("transform"));
       assertThat(
-          lineAt(e.getMessage(), 8),
+          lineAt(e.getMessage(), 5),
           allOf(
               CoreMatchers.containsString("length"),
               CoreMatchers.containsString("5")
           ));
       assertThat(
-          lineAt(e.getMessage(), 9),
+          lineAt(e.getMessage(), 6),
           allOf(
               CoreMatchers.containsString("5"),
               CoreMatchers.containsString("check")
           ));
       assertThat(
-          lineAt(e.getMessage(), 10),
+          lineAt(e.getMessage(), 6),
           allOf(
               CoreMatchers.containsString(">[3]"),
               CoreMatchers.containsString("true")
@@ -155,16 +155,17 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   }
 
   @Test(expected = NullPointerException.class)
-  public void hello_b_e3() {
+  public void givenStreamContainingNull_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
     try {
       require(
           asList(null, "Hi", "hello", "world", null),
-          transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
-              toContextPredicate(transform(Functions.length()).check(gt(3))))));
+          transform(stream().andThen(nest(asList("1", "2", "o"))))
+              .check(noneMatch(
+                  toContextPredicate(transform(Functions.length()).check(gt(3))))));
     } catch (InternalException e) {
       e.printStackTrace(System.out);
       assertThat(
-          lineAt(e.getMessage(), 6),
+          lineAt(e.getMessage(), 3),
           allOf(
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("length >[3]"),
@@ -172,10 +173,10 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
               CoreMatchers.containsString("NullPointerException")
           ));
       assertThat(
-          lineAt(e.getMessage(), 7),
+          lineAt(e.getMessage(), 5),
           CoreMatchers.containsString("transform"));
       assertThat(
-          lineAt(e.getMessage(), 8),
+          lineAt(e.getMessage(), 5),
           allOf(
               CoreMatchers.containsString("length"),
               CoreMatchers.containsString("NullPointerException")
@@ -218,26 +219,27 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   }
 
   @Test(expected = PreconditionViolationException.class)
-  public void hello_d_2e() {
+  public void givenStreamOfSingleString$hello$_whenRequireNullIsFound_thenPreconditionViolationWithCorrectMessageIsThrown() {
     try {
       require(
           "hello",
           transform(streamOf().andThen(toContextStream())).check(anyMatch(toContextPredicate(isNull()))));
     } catch (PreconditionViolationException e) {
       e.printStackTrace();
+      int i = 0;
       assertThat(
-          lineAt(e.getMessage(), 1),
+          lineAt(e.getMessage(), ++i),
           allOf(
               CoreMatchers.containsString("hello"),
               CoreMatchers.containsString("transform")));
       assertThat(
-          lineAt(e.getMessage(), 2),
+          lineAt(e.getMessage(), i),
           CoreMatchers.containsString("streamOf"));
       assertThat(
-          lineAt(e.getMessage(), 3),
+          lineAt(e.getMessage(), ++i),
           CoreMatchers.containsString("toContextStream"));
       assertThat(
-          lineAt(e.getMessage(), 5),
+          lineAt(e.getMessage(), ++i),
           allOf(
               CoreMatchers.containsString("anyMatch"),
               CoreMatchers.containsString("contextPredicate"),
@@ -249,22 +251,23 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   }
 
   @Test
-  public void hello_d_2() {
+  public void givenStreamOfSingleString$hello$_whenRequireNonNullIsFound_thenPassing() {
     require(
         "hello",
         transform(toContext()).check(toContextPredicate(isNotNull())));
   }
 
   @Test(expected = PreconditionViolationException.class)
-  public void hello_d_3e() {
+  public void givenString$hello$_whenTransformToContextAndCheckContextValueIsNull_thenPreconditionViolationWithCorrectMessageThrown() {
     try {
       require(
           "hello",
           transform(toContext()).check(toContextPredicate(isNull())));
     } catch (PreconditionViolationException e) {
-      e.printStackTrace();
+      e.printStackTrace(System.out);
+      int i = 0;
       assertThat(
-          lineAt(e.getMessage(), 2),
+          lineAt(e.getMessage(), ++i),
           allOf(
               CoreMatchers.containsString("hello"),
               CoreMatchers.containsString("toContext"),
@@ -272,13 +275,13 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           ));
 
       assertThat(
-          lineAt(e.getMessage(), 3),
+          lineAt(e.getMessage(), ++i),
           allOf(
               CoreMatchers.containsString("context:[hello]"),
               CoreMatchers.containsString("check")
           ));
       assertThat(
-          lineAt(e.getMessage(), 4),
+          lineAt(e.getMessage(), i),
           allOf(
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("isNull"),
@@ -291,28 +294,29 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   }
 
   @Test(expected = PreconditionViolationException.class)
-  public void hello_e() {
+  public void given$hello$_$world$_whenRequireNestedStreamImpossibleConditions_thenPreconditionViolationExceptionWithCorrectMessage() {
     try {
       require(
           asList("hello", "world"),
           transform(stream().andThen(nest(asList("1", "2", "o")))).check(allMatch(toContextPredicate(stringEndsWith()))));
     } catch (PreconditionViolationException e) {
-      e.printStackTrace();
+      e.printStackTrace(System.out);
+      int i = 0;
       assertThat(
-          lineAt(e.getMessage(), 1),
+          lineAt(e.getMessage(), ++i),
           allOf(
               CoreMatchers.containsString("\"hello\",\"world\""),
               CoreMatchers.containsString("transform")));
       assertThat(
-          lineAt(e.getMessage(), 2),
+          lineAt(e.getMessage(), i),
           CoreMatchers.containsString("stream"));
       assertThat(
-          lineAt(e.getMessage(), 3),
+          lineAt(e.getMessage(), ++i),
           allOf(
               CoreMatchers.containsString("nest"),
               CoreMatchers.containsString("\"1\",\"2\",\"o\"")));
       assertThat(
-          lineAt(e.getMessage(), 5),
+          lineAt(e.getMessage(), ++i),
           allOf(
               CoreMatchers.containsString("allMatch"),
               CoreMatchers.containsString("contextPredicate"),
