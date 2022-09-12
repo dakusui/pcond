@@ -131,7 +131,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
   @SuppressWarnings("unchecked")
   @Override
   default <NOUT> ObjectChecker<OIN, NOUT> asValueOf(NOUT value) {
-    return objectChecker(transformerName(), chainFunctions(this.function(), Printables.function("treatAs[NOUT]", v -> (NOUT) v)), dummyPredicate(), this.originalInputValue());
+    return objectChecker(transformerName(), chainFunctions(this.function(), Printables.function("treatAsIs", v -> (NOUT) v)), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
