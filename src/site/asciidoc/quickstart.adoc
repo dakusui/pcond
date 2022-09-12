@@ -24,6 +24,18 @@ Have a following maven dependency in your `pom.xml`.
 </dependency>
 ----
 
+=== Using the library with `opentest4j`
+
+Create a file `pcond.properties` whose content is as follows in order to configure the `pcond` to use `opentest4j` instead of JUnit4's exceptions.
+
+.pcond.properties
+----
+exceptionComposerForAssertThat=com.github.dakusui.pcond.validator.ExceptionComposer$ForTestAssertion$Opentest4J
+----
+
+Place it at the top level of one of your classpath entries.
+In maven, the directory `src/main/resources` is a good place for that.
+
 == Getting started
 
 Following is the first example of the `pcond` library.
@@ -70,18 +82,17 @@ This results in a following output.
 [source]
 .Output of Example.java
 ----
-Exception in thread "main" java.lang.IllegalArgumentException: value:"JohnDoe" violated precondition:value (isNotNull&&length >[0]&&containsString[" "])
-&&                               -> false
-  isNotNull("JohnDoe")           -> true
-  transformAndCheck              -> true
-    length("JohnDoe")            -> 7
-    >[0](7)                      -> true
-  containsString[" "]("JohnDoe") -> false
+"JohnDoe"->&&                   ->false
+             isNotNull          ->true
+             transform:length   ->7
+7        ->  check:>[0]         ->true
+"JohnDoe"->  containsString[" "]->false
+
 at com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider.checkValue...
 	at ...
 ----
 
-You can see the violated condition and how it is violated in the stacktrace.
+You can see the violated condition and how it is violated in the exception message.
 
 === Writing the code
 
@@ -185,12 +196,11 @@ This is describing the value that was examined and the condition violated by it.
 The next several lines explain how a given value violated a condition to be satisfied.
 
 ----
-&&                               -> false
-  isNotNull("JohnDoe")           -> true
-  transformAndCheck              -> true
-    length("JohnDoe")            -> 7
-    >[0](7)                      -> true
-  containsString[" "]("JohnDoe") -> false
+"JohnDoe"->&&                   ->false
+             isNotNull          ->true
+             transform:length   ->7
+7        ->  check:>[0]         ->true
+"JohnDoe"->  containsString[" "]->false
 ----
 
 See the last line, this means the given string `JohnDoe` made a condition `containsString[" "]` `false`, and it made the entire check fail.
@@ -199,7 +209,6 @@ That is, if you have an `or` condition, and the first predicate under it becomes
 So the last line in the message always shows the direct reason why the check failed.
 
 Thus, you can read the output above as "The check failed because the value `\"JohnDoe\"` `containsString[" "]` was `false`.
-"
 
 == Building the `pcond` Library
 
