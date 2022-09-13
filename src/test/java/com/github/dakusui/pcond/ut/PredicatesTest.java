@@ -342,7 +342,7 @@ public class PredicatesTest {
       try {
         TestAssertions.assertThat(text, Predicates.findSubstrings("Gallia", "quarum", "Belgium", "nostra", "De", "Gallia", "Gallicco"));
       } catch (ComparisonFailure e) {
-        e.printStackTrace();
+        e.printStackTrace(System.out);
         throw e;
       }
     }
@@ -353,7 +353,7 @@ public class PredicatesTest {
       try {
         TestAssertions.assertThat(text, Predicates.findSubstrings("Gallia", "quarum", "Belgae", "nostra", "De", "Gallicco"));
       } catch (ComparisonFailure e) {
-        e.printStackTrace();
+        e.printStackTrace(System.out);
         throw e;
       }
     }
@@ -364,17 +364,18 @@ public class PredicatesTest {
       try {
         TestAssertions.assertThat(text, Predicates.findRegexes("Gall.a", "quar.m", "Belgium", "nostr(um|a)"));
       } catch (ComparisonFailure e) {
-        e.printStackTrace();
+        e.printStackTrace(System.out);
         throw e;
       }
     }
+
     @Test
     public void givenAllFound$whenFindRegexes$thenPassed() {
       String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
       try {
         TestAssertions.assertThat(text, Predicates.findRegexes("Gall.a", "quar.m", "Belg.+e,", "nostr(um|a)"));
       } catch (ComparisonFailure e) {
-        e.printStackTrace();
+        e.printStackTrace(System.out);
         throw e;
       }
     }
@@ -385,10 +386,15 @@ public class PredicatesTest {
     public void givenSomeToBeFoundSomeNotToBe$whenFindElements$thenFailed() {
       List<String> list = asList("Hello", "world", "", "everyone", "quick", "brown", "fox", "runs", "forever");
       list.forEach(System.out::println);
-      TestAssertions.assertThat(list,
-          Predicates.findElements(
-              Predicates.isEqualTo("world"),
-              Predicates.isEqualTo("cat"), Predicates.isEqualTo("organization"), Predicates.isNotNull(), Predicates.isEqualTo("fox"), Predicates.isEqualTo("world")));
+      try {
+        TestAssertions.assertThat(list,
+            Predicates.findElements(
+                Predicates.isEqualTo("world"),
+                Predicates.isEqualTo("cat"), Predicates.isEqualTo("organization"), Predicates.isNotNull(), Predicates.isEqualTo("fox"), Predicates.isEqualTo("world")));
+      } catch (ComparisonFailure e) {
+        e.printStackTrace(System.out);
+        throw e;
+      }
     }
 
     @Test
