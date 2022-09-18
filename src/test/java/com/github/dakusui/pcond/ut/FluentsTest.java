@@ -81,7 +81,7 @@ public class FluentsTest extends TestBase {
                   // 'not(...)' is added to make the matcher fail.
                   .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))));
     } catch (ComparisonFailure e) {
-      e.printStackTrace();
+      e.printStackTrace(System.out);
       throw e;
     }
   }
@@ -177,5 +177,25 @@ public class FluentsTest extends TestBase {
                 .exercise(objectHashCode())
                 .then()
                 .isInstanceOf(Integer.class))));
+  }
+
+  @Test
+  public void givenValidName_whenValidatePersonName_thenPass() {
+    String s = "John Doe, Ph.D.";
+    assertThat(
+        s,
+        $().asString().split(" ")                 // <1>
+            .thenVerifyWithAllOf(asList(                // <2>
+                $().asListOfClass(String.class)
+                    .size()
+                    .then().isEqualTo(2),
+                $().asListOfClass(String.class)
+                    .elementAt(0)                     // <3>
+                    .then().asString()
+                    .isNullOrEmpty().negate(),        // <4>
+                $().asListOfClass(String.class)
+                    .elementAt(1)                     // <5>
+                    .then().asString()
+                    .isNullOrEmpty().negate())));     // <6>
   }
 }

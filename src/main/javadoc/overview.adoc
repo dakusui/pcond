@@ -34,7 +34,6 @@ Not for general English-speaking human.
 For instance a failure report format, an exception type for a combination of a certain context and a certain use case, A message template for a failure, etc.
 Providing a good way to customize these configurations at runtime is important.
 
-
 == Design
 
 To achieve the goals, the `pcond` library equips the following mechanisms.
@@ -64,21 +63,21 @@ Then we will check it with the intended method.
 [.text-center]
 .Value Verification in a Test
 ----
-   T                                    R
-          +------=------------------------------------------------+
-          |      f                                          p     |
-+-----+   |  /---------\       +-----------------+       /-----\  |    +------+
-|Value|<-----+Transform+-----=>|Transformed Value|<------+Check+-----=>|Result|
-+-----+   |  \---------/       +-----------------+       \-----/  |    +------+
-          +------=------------------------------------------------+
-                                        q
-                                                       /-\    /-\
-                                                       |A+--->|B| A reads from B
-                                                       \-/    \-/
+    T                                    R
+           +------=------------------------------------------------+
+           |      f                                          p     |
+ +-----+   |  /---------\       +-----------------+       /-----\  |    +------+
+ |Value|<-----+Transform+-----=>|Transformed Value|<------+Check+-----=>|Result|
+ +-----+   |  \---------/       +-----------------+       \-----/  |    +------+
+           +------=------------------------------------------------+
+                                         q
+                                                        /-\    /-\
+                                                        |A+--->|B| A reads from B
+                                                        \-/    \-/
 
-                                                       /-\    /-\
-                                                       |A+--=>|B|  A writes to B
-                                                       \-/    \-/
+                                                        /-\    /-\
+                                                        |A+--=>|B|  A writes to B
+                                                        \-/    \-/
 ----
 
 "Convenient" types for verification `pcond` chose are `Object`, `String`, `List`, and numbers (`int`, `long`, `double`, ...), as of now.
@@ -124,15 +123,13 @@ This prints the following output.
 Exception in thread "main" java.lang.IllegalArgumentException: value:<"JohnDoe"> violated precondition:value (isNotNull&&length >[0]&&containsString[" "])
 "JohnDoe"->&&                   ->false
              isNotNull          ->true
-             transform
-               length           ->7
-7        ->  check
-               >[0]             ->true
+             transform:length   ->7
+7        ->  check:>[0]         ->true
 "JohnDoe"->  containsString[" "]->false
 ----
 
 It might not be 100% natural English text, but still very easily understandable for programmers.
-The author of the library believes it is  more useful and reliable for developers.
+The author of the library believes it is more useful and reliable for developers.
 
 === `Printable` mechanism
 
@@ -154,9 +151,6 @@ class Example{
   }
 }
 ----
-
-
-
 
 == As a Helper Library for Design by Contract programming
 
@@ -199,8 +193,17 @@ public class Example {
 
 === Fluent Style (Experimental)
 
-(t.b.d.)
+This example checks if a given string looks like a person name.
+That is, it seems a first name and last name, concatenated by a single white space.
+
+When first splits the string into a list by a whitespace (1), then, checks if all the predicates of the followings match (2):
+
+- When it's size is exercised (3), it is equal to (2)
+- When it picks up the 0th element of the list (3), it is not a null or empty (4).
+- Also, when it picks up the 1st element of the list, it is not a null or empty (7)
+
 [source,java]
+.Fluent Style Example
 ----
 public class FluentStyleExample {
   @Test
@@ -208,20 +211,69 @@ public class FluentStyleExample {
     String s = "John Doe";
     assertThat(
         s,
-        $().asString().split(" ").thenVerifyWithAllOf(asList(
-          $().asListOfClass(String.class).elementAt(0).then()
-             .asString().isNullOrEmpty().negate(),
-          $().asListOfClass(String.class).elementAt(1).then()
-             .asString().isNullOrEmpty().negate())));
+        $().asString().split(" ")                    // <1>
+            .thenVerifyWithAllOf(asList(             // <2>
+                $().asListOfClass(String.class)
+                    .size()                          // <3>
+                    .then().isEqualTo(2),            // <4>
+                $().asListOfClass(String.class)
+                    .elementAt(0)                    // <5>
+                    .then().asString()
+                    .isNullOrEmpty().negate(),       // <6>
+                $().asListOfClass(String.class)      // <7>
+                    .elementAt(1)
+                    .then().asString()
+                    .isNullOrEmpty().negate())));
   }
 }
 ----
+
+If you modify the `s` 's value to `John Doe, Ph.D.`, the test will fail with the following output.
+
+[source,text,numbered,highlight="3,5"]
+----
+"John Doe, Ph.D."      ->transform:split[ ]             ->["John","Doe,","Ph.D."]
+["John","Doe,","Ph.D."]->  treatAs[NOUT]                ->["John","Doe,","Ph.D."]
+                         check:&&                        ->false
+                             transform:size              ->3
+3                      ->    check:isEqualTo[2]         ->false
+["John","Doe,","Ph.D."]->    !                          ->true
+                               transform:at[0]           ->"John"
+"John"                 ->        castTo[String]         ->"John"
+                               check:isNullOrEmptyString->false
+["John","Doe,","Ph.D."]->    !                          ->true
+                               transform:at[1]           ->"Doe,"
+"Doe,"                 ->        castTo[String]         ->"Doe,"
+                               check:isNullOrEmptyString->false
+----
+
+Since the expectation message is accordingly generated and embedded in the comparison failure message, the lines that made your test fail may be generated by your IDE (in this case, line 3 and 5).
 
 === More Fluent Style (Experimental)
 
 (t.b.d.)
 
+So far, we have been verifying only one value.
+However, your feature under test may have more than one input value and for some reason, you will need to write multiple `assertThat` method calls.
+
+[source, java]
+----
+class TestClass {
+    void testMethod() {
+        assertThat(v1, $().exercise().some().check());
+        assertThat(v2, $().exercise().someOther().check());
+        assertThat(vn, $().exercise().yetAnother().check());
+    }
+}
+----
+
+This is a situation that you should avoid, because a failure in `vi` 's assertion makes the executions of assertions for `vj`, where `j > i`, not happen.
+It leads to a situation, where your fix for `vi` may introduce a side effect that breaks an assertion for `vx` and you may not see the entire picture of the impact of your fix.
+
+
+
 [source,java]
+."More Fluent" Style Example
 ----
 public class MoreFluentExample {
   @Test

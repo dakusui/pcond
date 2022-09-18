@@ -65,7 +65,8 @@ public interface ReportComposer {
     }
 
     private static String composeExplanationForActualResults(List<Evaluator.Entry> result, Throwable t, List<Object> actualInputDetails) {
-      return composeExplanation(result.stream()
+      return composeExplanation(result
+          .stream()
           .peek((Evaluator.Entry each) -> {
             if (each.hasActualInputDetail())
               actualInputDetails.add(each.actualInputDetail());
@@ -80,7 +81,8 @@ public interface ReportComposer {
     }
 
     private static String composeExplanationForExpectations(List<Evaluator.Entry> result, Throwable t, List<Object> expectationDetails) {
-      return composeExplanation(result.stream()
+      return composeExplanation(result
+          .stream()
           .filter((Evaluator.Entry each) -> !each.isTrivial())
           .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
               each,

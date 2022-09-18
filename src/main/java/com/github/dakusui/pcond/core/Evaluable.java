@@ -54,20 +54,49 @@ public interface Evaluable<T> {
     return false;
   }
 
+  /**
+   * Returns if this predicate is marked trivial or not.
+   *
+   * @return `true` if this object is marked trivial, otherwise `false`.
+   */
   default boolean isTrivial() {
     return false;
   }
 
+  /**
+   * Returns a "trivial" version of this object.
+   * The object returned by this object is marked trivial, and it will create a record marked trivial during the evaluation step.
+   * By the default report composer ({@link com.github.dakusui.pcond.validator.ReportComposer}) of the `pcond` library, such a record will not result in an independent line
+   * if its output is equal to input.
+   * That is,
+   *
+   * .trivial form example
+   * ----
+   * inputValue->trivialForm->inputValue
+   * inputValue->function   ->outputValue
+   * ----
+   *
+   * this report will be squashed into:
+   *
+   * ----
+   * inputValue->trivialForm:function->outputValue
+   * ----
+   *
+   * This doesn't propagate to its descendants.
+   *
+   * @return A trivial version of this object.
+   * @see com.github.dakusui.pcond.validator.ReportComposer
+   */
   default Evaluable<T> makeTrivial() {
     throw new UnsupportedOperationException();
   }
 
-    /**
-     * A base interface to model all the predicates in the model of the evaluation
-     * framework.
-     *
-     * @param <T> The type of the value to be tested.
-     */
+  /**
+   * A base interface to model all the predicates in the model of the evaluation
+   * framework.
+   *
+   * @param <T> The type of the value to be tested.
+   */
   interface Pred<T> extends Evaluable<T> {
   }
 
@@ -228,7 +257,7 @@ public interface Evaluable<T> {
     /**
      * Returns an evaluable object which makes "cut" happen.
      * If the result of the evaluation of the returned object becomes equal to the
-     * returned value of the {@link this#valueToCut()}, a "cut" will actually happen.
+     * returned value of the {@link StreamPred#valueToCut()}, a "cut" will actually happen.
      *
      * @return An evaluable which triggers a "cut".
      */

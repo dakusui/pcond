@@ -411,6 +411,7 @@ public interface Evaluator {
 
     public abstract Object actualInputDetail();
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isTrivial() {
       return this.trivial;
     }
