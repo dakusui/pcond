@@ -6,6 +6,20 @@ import com.github.dakusui.pcond.core.fluent.checkers.*;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 
+/**
+ * We need to let the `pcond` library know the type of the "given" value.
+ * This interface is responsible for creating an appropriate "matcher" based on the intention a programmer told to the library.
+ *
+ *
+ * @param <MS>
+ * @param <MI>
+ * @param <MD>
+ * @param <MF>
+ * @param <MSH>
+ * @param <ML>
+ * @param <MB>
+ * @param <OIN>
+ */
 public interface AsPhraseFactory<
     MS extends Matcher.ForString<OIN>,
     MI extends Matcher.ForInteger<OIN>,
@@ -15,6 +29,11 @@ public interface AsPhraseFactory<
     ML extends Matcher.ForLong<OIN>,
     MB extends Matcher.ForBoolean<OIN>,
     OIN> {
+  /**
+   * Treat given value as string.
+   *
+   * @return A matcher for a string value.
+   */
   MS asString();
 
   MI asInteger();
