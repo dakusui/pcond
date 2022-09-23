@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.ut;
 
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.ComparisonFailure;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.function.Supplier;
@@ -179,6 +180,10 @@ public class FluentsTest extends TestBase {
                 .isInstanceOf(Integer.class))));
   }
 
+  /**
+   * Intentionally failing.
+   */
+  @Ignore
   @Test
   public void givenValidName_whenValidatePersonName_thenPass() {
     String s = "John Doe, Ph.D.";
