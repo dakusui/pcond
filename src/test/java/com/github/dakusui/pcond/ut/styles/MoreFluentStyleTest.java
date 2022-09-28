@@ -20,7 +20,7 @@ public class MoreFluentStyleTest {
   public void string_assertWhenTest_failed() {
     String givenValue = "helloWorld";
     try {
-      assertWhen(valueOf(givenValue)
+      assertWhen(Fluents.value(givenValue)
           .exercise(stringToLowerCase())
           .then()
           .asString()
@@ -34,7 +34,7 @@ public class MoreFluentStyleTest {
   @Test
   public void string_assertWhenTest_passed() {
     String givenValue = "helloWorld";
-    assertWhen(valueOf(givenValue)
+    assertWhen(value(givenValue)
         .exercise(stringToLowerCase())
         .then()
         .asString()
@@ -44,7 +44,7 @@ public class MoreFluentStyleTest {
   @Test
   public void string_assertWhen_useValue_passed() {
     String givenValue = "helloWorld";
-    assertWhen(valueOf(givenValue)
+    assertWhen(value(givenValue)
         .exercise(stringToLowerCase())
         .then()
         .asString()
@@ -54,7 +54,7 @@ public class MoreFluentStyleTest {
   @Test
   public void int_assertWhenTest_passed() {
     int givenValue = 1234;
-    assertWhen(valueOf(givenValue)
+    assertWhen(Fluents.value(givenValue)
         .then()
         .isEqualTo(1234));
   }
@@ -62,7 +62,7 @@ public class MoreFluentStyleTest {
   @Test
   public void boolean_assertWhenTest_passed() {
     boolean givenValue = true;
-    assertWhen(valueOf(givenValue)
+    assertWhen(Fluents.value(givenValue)
         .then()
         .isEqualTo(true));
   }
@@ -75,7 +75,7 @@ public class MoreFluentStyleTest {
         return "OBJECT";
       }
     };
-    assertWhen(valueOf(givenValue)
+    assertWhen(Fluents.value(givenValue)
         .then()
         .intoStringWith(Object::toString)
         .isEqualTo("OBJECT"));
@@ -84,7 +84,7 @@ public class MoreFluentStyleTest {
   @Test
   public void list_assertWhenTest_passed() {
     List<String> givenValue = asList("hello", "world");
-    assertWhen(valueOf(givenValue)
+    assertWhen(value(givenValue)
         .then()
         .isEqualTo(asList("hello", "world")));
   }
@@ -92,7 +92,7 @@ public class MoreFluentStyleTest {
   @Test
   public void stream_assertWhenTest_passed() {
     Stream<String> givenValue = Stream.of("hello", "world");
-    assertWhen(valueOf(givenValue)
+    assertWhen(Fluents.value(givenValue)
         .then()
         .intoListWith(v -> v.collect(toList()))
         .isEqualTo(asList("hello", "world")));
@@ -102,8 +102,8 @@ public class MoreFluentStyleTest {
   public void multiAssertWhen_failed() {
     try {
       assertWhen(
-          valueOf("hello").toUpperCase().then().isEqualTo("HELLO"),
-          valueOf("world").toLowerCase().then().contains("WORLD"));
+          value("hello").toUpperCase().then().isEqualTo("HELLO"),
+          value("world").toLowerCase().then().contains("WORLD"));
     } catch (ComparisonFailure e) {
       MatcherAssert.assertThat(e.getActual(), CoreMatchers.containsString("stringIsEqualTo[\"HELLO\"]->true"));
       MatcherAssert.assertThat(e.getActual(), CoreMatchers.containsString("containsString[\"WORLD\"] ->false"));
@@ -116,15 +116,15 @@ public class MoreFluentStyleTest {
   @Test
   public void multiAssertWhen_passed() {
     assertWhen(
-        valueOf("hello").toUpperCase().then().isEqualTo("HELLO"),
-        valueOf("world").toLowerCase().then().contains("world"));
+        value("hello").toUpperCase().then().isEqualTo("HELLO"),
+        value("world").toLowerCase().then().contains("world"));
   }
 
   @Test(expected = AssumptionViolatedException.class)
   public void assumeWhenTest_failed() {
     String givenValue = "helloWorld";
     try {
-      assumeWhen(valueOf(givenValue)
+      assumeWhen(value(givenValue)
           .exercise(stringToLowerCase())
           .then()
           .asString()
@@ -138,7 +138,7 @@ public class MoreFluentStyleTest {
   @Test
   public void assumeWhenTest_passed() {
     String givenValue = "helloWorld";
-    assumeWhen(valueOf(givenValue)
+    assumeWhen(value(givenValue)
         .exercise(stringToLowerCase())
         .then()
         .asString()
@@ -149,8 +149,8 @@ public class MoreFluentStyleTest {
   public void multiAssumeWhen_failed() {
     try {
       assumeWhen(
-          valueOf("hello").toUpperCase().then().isEqualTo("HELLO"),
-          valueOf("world").toLowerCase().then().contains("WORLD"));
+          value("hello").toUpperCase().then().isEqualTo("HELLO"),
+          value("world").toLowerCase().then().contains("WORLD"));
     } catch (AssumptionViolatedException e) {
       MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("stringIsEqualTo[\"HELLO\"]->true"));
       MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("containsString[\"WORLD\"] ->false"));
@@ -161,8 +161,8 @@ public class MoreFluentStyleTest {
   @Test
   public void multiAssumeWhen_passed() {
     assumeWhen(
-        valueOf("hello").toUpperCase().then().isEqualTo("HELLO"),
-        valueOf("world").toLowerCase().then().contains("world"));
+        value("hello").toUpperCase().then().isEqualTo("HELLO"),
+        value("world").toLowerCase().then().contains("world"));
   }
 
   @Test

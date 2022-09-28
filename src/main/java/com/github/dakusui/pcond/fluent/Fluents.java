@@ -22,8 +22,8 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * An "entry-point" class to write a "fluent" style tests.
- * In order to avoid a conflict in `valueOf` method, this class is implemented as
- * a conventional class, not an `enum`.
+ * Since the overloaded methods `value` are important entry-points of this interface, in order to avoid confusing users by `valueOf` method in `Enum`,
+ * this class is implemented as a conventional class, not an `enum`.
  */
 public class Fluents {
   private Fluents() {
@@ -41,6 +41,11 @@ public class Fluents {
     return Functions.value();
   }
 
+  /**
+   * Verifies
+   * @param statement
+   * @param <T>
+   */
   public static <T> void assertWhen(Statement<T> statement) {
     TestAssertions.assertThat(statement.statementValue(), statement.statementPredicate());
   }
@@ -59,43 +64,43 @@ public class Fluents {
     TestAssertions.assumeThat(values, createPredicateForAllOf(statements));
   }
 
-  public static StringTransformer<String> valueOf(String value) {
+  public static StringTransformer<String> value(String value) {
     return fluent(value).asString();
   }
 
-  public static DoubleTransformer<Double> valueOf(double value) {
+  public static DoubleTransformer<Double> value(double value) {
     return fluent(value).asDouble();
   }
 
-  public static FloatTransformer<Float> valueOf(float value) {
+  public static FloatTransformer<Float> value(float value) {
     return fluent(value).asFloat();
   }
 
-  public static LongTransformer<Long> valueOf(long value) {
+  public static LongTransformer<Long> value(long value) {
     return fluent(value).asLong();
   }
 
-  public static IntegerTransformer<Integer> valueOf(int value) {
+  public static IntegerTransformer<Integer> value(int value) {
     return fluent(value).asInteger();
   }
 
-  public static ShortTransformer<Short> valueOf(short value) {
+  public static ShortTransformer<Short> value(short value) {
     return fluent(value).asShort();
   }
 
-  public static BooleanTransformer<Boolean> valueOf(boolean value) {
+  public static BooleanTransformer<Boolean> value(boolean value) {
     return fluent(value).asBoolean();
   }
 
-  public static <T> ObjectTransformer<T, T> valueOf(T value) {
+  public static <T> ObjectTransformer<T, T> value(T value) {
     return fluent(value).asObject();
   }
 
-  public static <E> ListTransformer<List<E>, E> valueOf(List<E> value) {
+  public static <E> ListTransformer<List<E>, E> value(List<E> value) {
     return fluent(value).asListOf(FluentsInternal.value());
   }
 
-  public static <E> StreamTransformer<Stream<E>, E> valueOf(Stream<E> value) {
+  public static <E> StreamTransformer<Stream<E>, E> value(Stream<E> value) {
     return fluent(value).asStreamOf(FluentsInternal.value());
   }
 

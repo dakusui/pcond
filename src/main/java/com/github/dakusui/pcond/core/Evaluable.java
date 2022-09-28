@@ -228,7 +228,7 @@ public interface Evaluable<T> {
     /**
      * Returns an evaluable object which makes "cut" happen.
      * If the result of the evaluation of the returned object becomes equal to the
-     * returned value of the {@link this#valueToCut()}, a "cut" will actually happen.
+     * returned value of the {@link StreamPred#valueToCut()}, a "cut" will actually happen.
      *
      * @return An evaluable which triggers a "cut".
      */

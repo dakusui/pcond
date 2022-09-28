@@ -1,4 +1,45 @@
-A package to provide entry-point classes for the `Fluent` and `MoreFluent` styles.
+A package to provide entry-point classes for the `Fluent` style.
+
+The goal of the "fluent" style of the `pcond` library is to make it possible:
+
+- To write tests in a readable and consistent manner
+- To show a readable failure when a test fails
+
+[source, java]
+.Example Test Code
+----
+public class FluentStyleExample {
+  @Test
+  public void givenKnownLastName_whenFindMembersByFullName_thenLastNastIsNotNullAndContainedInFullName() {
+    MemberDatabase database = new MemberDatabase();
+    String lastName = database.lookUp("0001")
+        .orElseThrow(NoSuchElementException::new)
+        .lastName();
+    List<String> fullName = database.findMembersByLastName(lastName).get(0).toFullName();
+    assertWhen(
+        value(lastName)
+            .then()
+            .verifyWith(allOf(
+                isNotNull(),
+                not(isEmptyString()))),
+        value(fullName).asListOfClass(String.class)
+            .then()
+            .contains("DOE"));
+  }
+}
+----
+
+
+.Output Example
+----
+ "Doe"               ->WHEN:treatAsIs       ->"Doe"               |"Doe"               ->WHEN:treatAsIs     ->"Doe"
+                       THEN:&&              ->true                |                      THEN:&&            ->true
+                           isNotNull        ->true                |                           isNotNull     ->true
+                           !                ->true                |                           !             ->true
+                             isEmpty        ->false               |                             isEmpty     ->false
+ ["John","Doe","PhD"]->WHEN:treatAsList     ->["John","Doe","PhD"]|["John","Doe","PhD"]->WHEN:treatAsList   ->["John","Doe","PhD"]
+X                      THEN:contains["DOE"] ->true                |                     THEN:contains["DOE"]->false
+----
 
 == Method name syntax
 
