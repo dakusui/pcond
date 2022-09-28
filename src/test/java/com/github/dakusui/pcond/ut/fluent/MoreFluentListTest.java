@@ -4,8 +4,8 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static com.github.dakusui.pcond.fluent.MoreFluents.assertWhen;
-import static com.github.dakusui.pcond.fluent.MoreFluents.valueOf;
+import static com.github.dakusui.pcond.fluent.Fluents.assertWhen;
+import static com.github.dakusui.pcond.fluent.Fluents.valueOf;
 import static com.github.dakusui.pcond.forms.Predicates.isNotNull;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;

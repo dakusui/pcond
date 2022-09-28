@@ -1,94 +1,132 @@
 package com.github.dakusui.pcond.fluent;
 
+import com.github.dakusui.pcond.TestAssertions;
 import com.github.dakusui.pcond.core.fluent.Fluent;
+import com.github.dakusui.pcond.core.fluent.transformers.*;
+import com.github.dakusui.pcond.core.printable.PrintableFunction;
+import com.github.dakusui.pcond.core.printable.PrintablePredicate;
+import com.github.dakusui.pcond.forms.Functions;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
+import static com.github.dakusui.pcond.forms.Functions.elementAt;
+import static com.github.dakusui.pcond.forms.Predicates.allOf;
+import static com.github.dakusui.pcond.forms.Predicates.transform;
+import static java.util.stream.Collectors.toList;
 
 /**
- * Not made this class `enum` in order to provide a method whose name is `valueOf`.
+ * An "entry-point" class to write a "fluent" style tests.
+ * In order to avoid a conflict in `valueOf` method, this class is implemented as
+ * a conventional class, not an `enum`.
  */
 public class Fluents {
   private Fluents() {
   }
 
-  public static <T> Fluent<T> when() {
-    return whenValueOf(value());
-  }
-
   /**
-   * Use the value returned from `value()` as the argument for this
-   * method as a place-holder for the sake of readability.
+   * A function to provide a place-holder for `MoreFluent` style.
+   * So far, no valid usage of this method in `MoreFluent` style and this method might be
+   * dropped from future releases.
    *
-   * @param value A value place-holder.
-   * @param <T>   The type of the object to be verified.
-   * @return A new ObjectTransformer for type `T`.
-   */
-  public static <T> Fluent<T> whenValueOf(@SuppressWarnings("unused") T value) {
-    return fluent("WHEN");
-  }
-
-  public static <T> Fluent<T> whenValueOfClass(@SuppressWarnings("unused") Class<T> klass) {
-    return whenValueOf(value());
-  }
-
-  /**
-   * A synonym with `valueOf(value())`.
-   *
-   * @return Returns a `Fluent<T>` object.
-   * @param <T> The type for which returned `Fluent` object is created.
-   */
-  public static <T> Fluent<T> $() {
-    return valueOf(value());
-  }
-
-  /**
-   * Use this method inside "when" clause.
-   *
-   * Use the value returned from `value()` as the argument for this
-   * method as a place-holder for the sake of readability.
-   *
-   * [source]
-   * ----
-   * as((Map<String, Object>)value())
-   * ----
-   *
-   * @param value A value place-holder.
-   * @param <T>   The type of the object to be verified.
-   * @return A new ObjectTransformer for type `T`.
-   */
-  public static <T> Fluent<T> valueOf(@SuppressWarnings("unused") T value) {
-    return fluent();
-  }
-
-  public static <T> Fluent<T> valueOfClass(@SuppressWarnings("unused") Class<T> klass) {
-    return valueOf(value());
-  }
-
-  /**
-   * Returns a "type place-holder".
-   * A type place-holder is a value that can be cast to any class, even if it has
-   * a generic type parameters.
-   * Note that accessing any field or method of the returned value results in
-   * `NullPointerException`.
-   *
-   * @param <T> A parameter type of class that the returned value represents.
-   * @return A `null` value.
+   * @param <T> The type to which the place-holder is cast.
+   * @return A place-holder variable that can be cast to any type.
    */
   public static <T> T value() {
-    return Fluent.value();
+    return Functions.value();
   }
 
-  public static <IN> Fluent<IN> fluent() {
-    return fluent(null);
+  public static <T> void assertWhen(Statement<T> statement) {
+    TestAssertions.assertThat(statement.statementValue(), statement.statementPredicate());
   }
 
-  public static <IN> Fluent<IN> fluent(String transformerName) {
-    return new Fluent<>(transformerName);
+  public static void assertWhen(Statement<?>... statements) {
+    List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+    TestAssertions.assertThat(values, createPredicateForAllOf(statements));
   }
 
-  public static List<?> list(Object... args) {
-    return asList(args);
+  public static <T> void assumeWhen(Statement<T> statement) {
+    TestAssertions.assumeThat(statement.statementValue(), statement.statementPredicate());
+  }
+
+  public static void assumeWhen(Statement<?>... statements) {
+    List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+    TestAssertions.assumeThat(values, createPredicateForAllOf(statements));
+  }
+
+  public static StringTransformer<String> valueOf(String value) {
+    return fluent(value).asString();
+  }
+
+  public static DoubleTransformer<Double> valueOf(double value) {
+    return fluent(value).asDouble();
+  }
+
+  public static FloatTransformer<Float> valueOf(float value) {
+    return fluent(value).asFloat();
+  }
+
+  public static LongTransformer<Long> valueOf(long value) {
+    return fluent(value).asLong();
+  }
+
+  public static IntegerTransformer<Integer> valueOf(int value) {
+    return fluent(value).asInteger();
+  }
+
+  public static ShortTransformer<Short> valueOf(short value) {
+    return fluent(value).asShort();
+  }
+
+  public static BooleanTransformer<Boolean> valueOf(boolean value) {
+    return fluent(value).asBoolean();
+  }
+
+  public static <T> ObjectTransformer<T, T> valueOf(T value) {
+    return fluent(value).asObject();
+  }
+
+  public static <E> ListTransformer<List<E>, E> valueOf(List<E> value) {
+    return fluent(value).asListOf(FluentsInternal.value());
+  }
+
+  public static <E> StreamTransformer<Stream<E>, E> valueOf(Stream<E> value) {
+    return fluent(value).asStreamOf(FluentsInternal.value());
+  }
+
+  private static <T> Fluent<T> fluent(T value) {
+    return new Fluent<>("WHEN", value);
+  }
+
+  private static Predicate<? super List<?>> createPredicateForAllOf(Statement<?>[] statements) {
+    AtomicInteger i = new AtomicInteger(0);
+    @SuppressWarnings("unchecked") Predicate<? super List<?>>[] predicates = Arrays.stream(statements)
+        .map(e -> makeTrivial(transform(makeTrivial(elementAt(i.getAndIncrement()))).check((Predicate<? super Object>) e.statementPredicate())))
+        .toArray(Predicate[]::new);
+    return makeTrivial(allOf(predicates));
+  }
+
+  private static <T> Predicate<T> makeTrivial(Predicate<T> predicates) {
+    return ((PrintablePredicate<T>) predicates).makeTrivial();
+  }
+
+  private static <T, R> Function<T, R> makeTrivial(Function<T, R> predicates) {
+    return ((PrintableFunction<T, R>) predicates).makeTrivial();
+  }
+
+  @FunctionalInterface
+  public interface Statement<T> extends Predicate<T> {
+    default T statementValue() {
+      throw new NoSuchElementException();
+    }
+
+    default Predicate<T> statementPredicate() {
+      return this;
+    }
   }
 }

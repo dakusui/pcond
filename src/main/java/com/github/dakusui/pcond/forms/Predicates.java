@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.forms;
 
-import com.github.dakusui.pcond.fluent.Fluents;
+import com.github.dakusui.pcond.fluent.FluentsInternal;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.core.printable.PrintablePredicate;
@@ -388,7 +388,7 @@ public class Predicates {
       }
     }
     //noinspection RedundantTypeArguments
-    return Fluents.$().asString()
+    return FluentsInternal.$().asString()
         .transformToObject(function("findTokens" + formatObject(tokens), CursoredString::new))
         .then().verifyWith(Predicates.<CursoredString>allOf(
             Stream.concat(
@@ -526,7 +526,7 @@ public class Predicates {
       previousPosition.set(cursoredList.position);
       return false;
     };
-    return Fluents.$().asListOf((E) Fluents.value())
+    return FluentsInternal.$().asListOf((E) FluentsInternal.value())
         .transformToObject(function("toCursoredList", CursoredList::new))
         .then()
         .verifyWith(allOf(Stream.concat(

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.fluent.MoreFluents.*;
+import static com.github.dakusui.pcond.fluent.Fluents.*;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.forms.Predicates.isNotNull;
 import static java.util.Arrays.asList;

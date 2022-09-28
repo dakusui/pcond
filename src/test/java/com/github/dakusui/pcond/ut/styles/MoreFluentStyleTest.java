@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut.styles;
 
-import com.github.dakusui.pcond.fluent.MoreFluents;
+import com.github.dakusui.pcond.fluent.Fluents;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.AssumptionViolatedException;
@@ -10,7 +10,7 @@ import org.junit.Test;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.fluent.MoreFluents.*;
+import static com.github.dakusui.pcond.fluent.Fluents.*;
 import static com.github.dakusui.pcond.utils.TestUtils.stringToLowerCase;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -167,6 +167,6 @@ public class MoreFluentStyleTest {
 
   @Test
   public void test_valueMethod() {
-    MatcherAssert.assertThat(MoreFluents.value(), CoreMatchers.equalTo(null));
+    MatcherAssert.assertThat(Fluents.value(), CoreMatchers.equalTo(null));
   }
 }

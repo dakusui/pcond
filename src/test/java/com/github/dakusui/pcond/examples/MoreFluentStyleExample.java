@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.fluent.MoreFluents.assertWhen;
-import static com.github.dakusui.pcond.fluent.MoreFluents.valueOf;
+import static com.github.dakusui.pcond.fluent.Fluents.assertWhen;
+import static com.github.dakusui.pcond.fluent.Fluents.valueOf;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static java.lang.String.format;

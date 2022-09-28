@@ -2,8 +2,8 @@ package com.github.dakusui.pcond.ut.fluent;
 
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.fluent.MoreFluents.assertWhen;
-import static com.github.dakusui.pcond.fluent.MoreFluents.valueOf;
+import static com.github.dakusui.pcond.fluent.Fluents.assertWhen;
+import static com.github.dakusui.pcond.fluent.Fluents.valueOf;
 
 public class MoreFluentComparableNumberCheckerTest {
   @Test
