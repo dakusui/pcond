@@ -5,8 +5,8 @@ import org.junit.Test;
 
 import java.util.regex.Pattern;
 
-import static com.github.dakusui.pcond.fluent.MoreFluents.assertWhen;
-import static com.github.dakusui.pcond.fluent.MoreFluents.valueOf;
+import static com.github.dakusui.pcond.fluent.Fluents.assertWhen;
+import static com.github.dakusui.pcond.fluent.Fluents.valueOf;
 
 public class MoreFluentStringTest extends TestBase {
   @Test

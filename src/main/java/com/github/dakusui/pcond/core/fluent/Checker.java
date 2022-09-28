@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.fluent.MoreFluents;
+import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.checkers.*;
@@ -31,7 +31,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.*;
 public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
     extends
     Identifiable,
-    MoreFluents.Statement<OIN>,
+    Fluents.Statement<OIN>,
     Evaluable.Transformation<OIN, T>,
     IntoPhraseFactory.ForChecker<OIN, T>,
     AsPhraseFactory.ForChecker<OIN> {

@@ -9,8 +9,8 @@ import org.junit.Test;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.github.dakusui.pcond.fluent.Fluents.value;
-import static com.github.dakusui.pcond.fluent.Fluents.when;
+import static com.github.dakusui.pcond.fluent.FluentsInternal.value;
+import static com.github.dakusui.pcond.ut.FluentsInternalTest.Utils.when;
 import static java.util.Collections.singletonList;
 
 public class StringTest {
