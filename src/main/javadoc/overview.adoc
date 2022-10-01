@@ -64,21 +64,21 @@ Then we will check it with the intended method.
 [.text-center]
 .Value Verification in a Test
 ----
-   T                                    R
-          +------=------------------------------------------------+
-          |      f                                          p     |
-+-----+   |  /---------\       +-----------------+       /-----\  |    +------+
-|Value|<-----+Transform+-----=>|Transformed Value|<------+Check+-----=>|Result|
-+-----+   |  \---------/       +-----------------+       \-----/  |    +------+
-          +------=------------------------------------------------+
-                                        q
-                                                       /-\    /-\
-                                                       |A+--->|B| A reads from B
-                                                       \-/    \-/
+    T                                    R
+           +------=------------------------------------------------+
+           |      f                                          p     |
+ +-----+   |  /---------\       +-----------------+       /-----\  |    +------+
+ |Value|<-----+Transform+-----=>|Transformed Value|<------+Check+-----=>|Result|
+ +-----+   |  \---------/       +-----------------+       \-----/  |    +------+
+           +------=------------------------------------------------+
+                                         q
+                                                        /-\    /-\
+                                                        |A+--->|B| A reads from B
+                                                        \-/    \-/
 
-                                                       /-\    /-\
-                                                       |A+--=>|B|  A writes to B
-                                                       \-/    \-/
+                                                        /-\    /-\
+                                                        |A+--=>|B|  A writes to B
+                                                        \-/    \-/
 ----
 
 "Convenient" types for verification `pcond` chose are `Object`, `String`, `List`, and numbers (`int`, `long`, `double`, ...), as of now.
@@ -136,7 +136,20 @@ The author of the library believes it is  more useful and reliable for developer
 
 === `Printable` mechanism
 
-(t.b.d.)
+To implement library like above, it's necessary to format a predicate into a human-understandable format.
+Unfortunately, it is not sufficient and not straight forward to override the `toString` method.
+Because:
+
+1. In the "transform and check" style requires `Function` s, not only `Predicate` s.
+2. It is not possible to override `toString` method in an interface.
+3. `Predicate` and `Function` interfaces have a few methods that return a newly created `Predicate` and `Function` (`Predicate#and`, `Function#compose`, for instances ).
+These returned objects also need to have overridden version of `toString`.
+4. Overriding `toString` is a cumbersome manual task.
+
+The `pcond` library provides a solution to these problems by offering its own base classes for `Predicate` and `Function`.
+
+The implementation of this feature is provided by the link:com/github/dakusui/pcond/core/printable/package-summary.html[`com.github.dakusui.pcond.core.printable`] package.
+
 
 === `Identifiable` mechanism
 
@@ -155,14 +168,20 @@ class Example{
 }
 ----
 
+`pcond` is designed to return `true` for this check.
 
+The implementation of this feature is provided by the link:com/github/dakusui/pcond/core/identifieable/package-summary.html[`com.github.dakusui.pcond.core.identifieable`] package.
 
+== Entry points
 
-== As a Helper Library for Design by Contract programming
+=== As a Helper Library for Design by Contract programming
 
-The `pcond` can be used as a library for Design by Contract style programming in Java
+The `pcond` can be used as a library for Design by Contract style programming in Java.
+There is a couple of ways for this usage.
 
-=== With `assert` statement
+==== With `assert` statement
+
+With this style, you can benefit the good old feature of Java: `assert`.
 
 [source,java]
 ----
@@ -174,7 +193,12 @@ public class Example {
 }
 ----
 
-=== With `requireXyz` and `ensureXyz` methods
+You will see a human-readable and analyzable output, when an assertion fails.
+At the same time, once the assertion is disabled by the VM option `-da`, you will see no performance penalty for the feature.
+
+==== With `requireXyz` and `ensureXyz` methods
+
+That said, you may want to force your code to conduct a check for input value.
 
 [source,java]
 ----
@@ -189,35 +213,15 @@ public class Example {
 }
 ----
 
-== (Test) Assertion Library
+=== (Test) Assertion Library
 
 (t.b.d.)
 
-=== Hamcrest Style
+==== Hamcrest Style
 
 (t.b.d.)
 
-=== Fluent Style (Experimental)
-
-(t.b.d.)
-[source,java]
-----
-public class FluentStyleExample {
-  @Test
-  public void givenValidName_whenValidatePersonName_thenPass() {
-    String s = "John Doe";
-    assertThat(
-        s,
-        $().asString().split(" ").thenVerifyWithAllOf(asList(
-          $().asListOfClass(String.class).elementAt(0).then()
-             .asString().isNullOrEmpty().negate(),
-          $().asListOfClass(String.class).elementAt(1).then()
-             .asString().isNullOrEmpty().negate())));
-  }
-}
-----
-
-=== More Fluent Style (Experimental)
+==== Fluent Style (Experimental)
 
 (t.b.d.)
 

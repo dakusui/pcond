@@ -42,14 +42,20 @@ public class Fluents {
   }
 
   /**
-   * Verifies
-   * @param statement
-   * @param <T>
+   * Verifies given a statement.
+   *
+   * @param statement A statement to be verified
+   * @param <T>       The type of the value to be verified which a given statement holds.
    */
   public static <T> void assertWhen(Statement<T> statement) {
     TestAssertions.assertThat(statement.statementValue(), statement.statementPredicate());
   }
 
+  /**
+   * Verifies given statements.
+   *
+   * @param statements A statement to be verified
+   */
   public static void assertWhen(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
     TestAssertions.assertThat(values, createPredicateForAllOf(statements));

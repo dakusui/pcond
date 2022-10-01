@@ -10,4 +10,4 @@ The class to do `static import` is `Assertions`.
 For input validations:: For detecting a recoverable violation of a condition (i.e., checking a human user's input, file content check, etc.), a class to do `static import` is `Validation`.
 For test assertions:: If you are using this library as an "assertion" library instead of Hamcrest, AssertJ, or Google Truth, the class to do `static import` is `TestAssertions`.
 
-For all of these, you want to do also `static import` classes under `forms` package, suchs as `Functions` and `Predicates`.
+For all of these, you want to do also `static import` classes under `forms` package, such as `Functions` and `Predicates`.

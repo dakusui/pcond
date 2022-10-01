@@ -3,3 +3,150 @@ This package offers a mechanism required by the "Fluent" and "MoreFluent" styles
 In both styles, the basic idea is to divide the entire step to test a value into two.
 The "transformation" and the "check".
 This is also a key concept of the `pcond` itself.
+
+== Method name syntax
+
+[cols=">1,^2,^2,^2,^3,^3,^3"]
+|===
+|#|Clause Type|Phrase Type|Target Type |Type Preposition |Element Type Argument |Conversion Function
+
+|1
+|(none)
+|(none)
+|(none)
+|(none)
+|(none)
+|(none)
+
+|2
+|when
+|as
+|value
+|of
+|`(E) value()`
+|`Function<T,R>`
+
+|3
+|then
+|into
+|list
+|ofClass
+|`E.class`
+|-
+
+
+|4
+|-
+|-
+|stream
+|with
+|-
+|-
+
+
+|5
+|-
+|-
+|string
+|-
+|-
+|-
+
+
+|6
+|-
+|-
+|number
+|-
+|-
+|-
+
+
+|7
+|-
+|-
+|boolean
+|-
+|-
+|-
+
+|===
+
+[source,bnf]
+."Exposed" conversion method names in Transformers and checkers.
+----
+<WHEN_CLAUSE>  ::= when <AS_PHRASE>?
+<THEN_CLAUSE>  ::= then <INTO_PHRASE>?
+<AS_PHRASE>    ::= as <ELEMENT_TYPE_ARGUMENT>
+               | as <CONTAINER_TYPE> <ELEMENT_TYPE_SPECIFIER>
+               | as <ATOM_TYPE>
+<INTO_PHRASE>  ::= into <ATOM_TYPE> (with function)?
+               | into <CONTAINER_TYPE> <ELEMENT_TYPE_SPECIFIER> function?
+
+
+<CONTAINER_TYPE>         ::= value | list | stream
+<ATOM_TYPE>              ::= string | <NUMBER> | boolean | object
+<NUMBER>                 ::= long | integer | short | double | float
+<ELEMETN_TYPE_SPECIFIER> ::= of (E) value() | ofClass E.class
+<ELEMENT_TYPE_ARGUMRNT>  ::= (E) value()
+----
+
+[[as-phrase-list]]
+.The list of all the possible `AS_PHRASE` s
+- `as( (E)value() )`
+- `asString()`
+- `asNumber()`
+- `asBoolean()`
+- `asObject()`
+- `asValueOf( (E)value() )`
+- `asListOf( (E)value() )`
+- `asStreamOf( (E)value() )`
+- `asValueOfClass( E.class )`
+- `asListOfClass( E.class )`
+- `asStreamOfClass( E.class )`
+
+
+[[into-phrase-list]]
+.The list of all the possible `INTO_PHRASE` s
+- `intoString`
+- `intoNumber`
+- `intoBoolean`
+- `intoObject`
+- `intoStringWith( function )`
+- `intoNumberWith( function )`
+- `intoBooleanWith( function )`
+- `intoObjectWith( function )`
+- `intoValueOf( (E)value(), function  )`
+- `intoListOf( (E)value(), function  )`
+- `intoStreamOf( (E)value(), function )`
+- `intoValueOfClass( E.class, function  )`
+- `intoListOfClass( E.class, function  )`
+- `intoStreamClass( E.class, function  )`
+
+Thus, there are 9 methods for `AS_PHRASE` and 6 for `INTO_PHRASE`.
+For `WHEN_CLAUSE`, 10 and for `THEN_CLAUSE` 7 methods.
+
+[cols="^,^,^,^"]
+|===
+|    |`Fluent` |`Transformer` |`Checker`
+
+|`WHEN_CLAUSE`
+|✓
+|
+|
+
+|`THEN_CLAUSE`
+|
+|✓
+|
+
+|`AS_PHRASE`
+|✓
+|✓
+|✓
+
+|`INTO_PHRASE`
+|
+|
+|✓
+|===
