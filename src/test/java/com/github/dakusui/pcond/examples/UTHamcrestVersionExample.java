@@ -6,10 +6,10 @@ import com.github.dakusui.pcond.utils.TestClassExpectation.ResultPredicateFactor
 import com.github.dakusui.pcond.utils.TestMethodExpectation;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.TestAssertions.assertThat;
-import static com.github.dakusui.pcond.TestAssertions.assumeThat;
-import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestMethodExpectation.Result.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assume.assumeThat;
 
 @TestClassExpectation({
     @EnsureJUnitResult(type = WasNotSuccessful.class, args = {}),
@@ -18,7 +18,7 @@ import static com.github.dakusui.pcond.utils.TestMethodExpectation.Result.*;
     @EnsureJUnitResult(type = AssumptionFailureCountIsEqualTo.class, args = "1"),
     @EnsureJUnitResult(type = SizeOfFailuresIsEqualTo.class, args = "1")
 })
-public class UTExample {
+public class UTHamcrestVersionExample {
   @TestMethodExpectation(PASSING)
   @Test
   public void shouldPass_testFirstNameOf() {

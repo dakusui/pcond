@@ -1,6 +1,7 @@
 = `pcond`: The Printable {pre,post}-conditions
 
-The `pcond` is a multi-purposes predicate library for "Design by Contract" style programming, replacing Guava's `Preconditions` class and Apache Common's `Validate` class, and test assertions.
+The `pcond` is a multi-purposes predicate library for "Design by Contract" style programming and test assertions.
+You can replace Guava's `Preconditions` class, Apache Common's `Validate` class, and test assertion libraries with this.
 
 == Design Goals
 
@@ -42,11 +43,14 @@ To achieve the goals, the `pcond` library equips the following mechanisms.
 * **Predicates and function for value checking:** Instead of custom verifier classes like `Matcher`, `Assert`, or `Subject`, use conventional`Function` and `Predicate` so that it can be used not only for test assertions but also for DbC, general value checking, etc.
 ** **Transform and Check mechanism:** Decompose a verification process into two steps: "Transform" function and "Check" predicate.
 ** **`Printable` mechanism:** Make functions and predicates "printable".
-** **`Identifiable` mechanism:**
-* **`Context` mechanism:**
-* **`Currying`**
-* **"Fluent" style support mechanism:**
-* **Unified and configurable `ValueChecker` mechanism:**
+** **`Identifiable` mechanism:** It's preferable to be able to "identify" two predicates are equal, if they are meant to be the same.
+* **`Context` and `Currying` mechanism:** Sometimes we need to handle functions and predicates that have more than one parameter.
+The `Context` and `Currying` are designed for such functions.
+* **"Fluent" style support mechanism:** Nowadays, "fluent" style is more and more preferred in test assertions.
+`pcond` also supports the style.
+* **Configurable `ValueChecker` mechanism:** To use the library with various testing frameworks, `pcond` has a configurable mechanism called `ValueChecker`.
+You can configure it for your own testing framework.
+It supports JUnit4 and JUnit5 out-of-box.
 
 
 === "Transform and Check"
@@ -254,11 +258,36 @@ Following is the simplest example of `pcond` style test.
 public class UTExample {
   @Test
   public void shouldPass_testFirstNameOf() {
-    String firstName = NameUtils.firstNameOf("Risa Kitajima");
-    assertThat(firstName, and(not(containsString(" ")), startsWith("R")));
+    String firstName = NameUtils.firstNameOf("Yoshihiko Naito");
+    assertThat(firstName, allOf(not(containsString(" ")), startsWith("Y")));
   }
 }
 ----
+
+`and`, `not`, `containsString`, and `startsWith` are just predicates of Java.
+If the `NameUtils.firstNameOf` returns an empty string, it will print the following error message.
+
+----
+org.junit.ComparisonFailure: Value:"" violated: (!containsString[" "]&&startsWith["R"])
+ ""->&&                     ->true |""->&&                     ->false
+       !                    ->true |      !                    ->true
+         containsString[" "]->false|        containsString[" "]->false
+X      startsWith["Y"]      ->true |      startsWith["Y"]      ->false
+----
+
+For an equivalent test, what Hamcrest prints as an error report is:
+----
+java.lang.AssertionError:
+Expected: (not a string containing " " and a string starting with "R")
+     but: a string starting with "R" was ""
+----
+
+As you see, `pcond` gives more informative report.
+It shows each predicate's expected actual predicate one by one and with a modern IDE, those will be shown side-by-side.
+You will notice the only last predicate `startsWith["Y"]` was not satisfied by the value `""` and that's why the test failed.
+
+While you will need to analyze which part of the `Expected` was not satisfied by the input value `""` and how by yourself from the Hamcrest's report.
+
 
 ==== Fluent Style (Experimental)
 
