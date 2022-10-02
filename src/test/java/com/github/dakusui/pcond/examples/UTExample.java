@@ -18,7 +18,7 @@ import static com.github.dakusui.pcond.utils.TestMethodExpectation.Result.*;
     @EnsureJUnitResult(type = AssumptionFailureCountIsEqualTo.class, args = "1"),
     @EnsureJUnitResult(type = SizeOfFailuresIsEqualTo.class, args = "1")
 })
-public class ExampleUT {
+public class UTExample {
   @TestMethodExpectation(PASSING)
   @Test
   public void shouldPass_testFirstNameOf() {
