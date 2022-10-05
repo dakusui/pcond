@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.fluent;
 
+import com.github.dakusui.pcond.Assertions;
+import com.github.dakusui.pcond.Ensures;
 import com.github.dakusui.pcond.Requires;
 import com.github.dakusui.pcond.TestAssertions;
 import com.github.dakusui.pcond.core.fluent.Fluent;
@@ -43,7 +45,7 @@ public class Fluents {
   }
 
   /**
-   * Verifies given a statement.
+   * Fluent version of {@link TestAssertions#assertThat(Object, Predicate)}.
    *
    * @param statement A statement to be verified
    * @param <T>       The type of the value to be verified which a given statement holds.
@@ -53,7 +55,8 @@ public class Fluents {
   }
 
   /**
-   * Verifies given statements.
+   * Fluent version of {@link TestAssertions#assertThat(Object, Predicate)}.
+   * Use this method when you need to verify multiple values.
    *
    * @param statements A statement to be verified
    */
@@ -61,6 +64,16 @@ public class Fluents {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
     TestAssertions.assertThat(values, createPredicateForAllOf(statements));
   }
+
+  public static <T> void assumeThat(Statement<T> statement) {
+    TestAssertions.assumeThat(statement.statementValue(), statement.statementPredicate());
+  }
+
+  public static void assumeAll(Statement<?>... statements) {
+    List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+    TestAssertions.assumeThat(values, createPredicateForAllOf(statements));
+  }
+
 
   public static <T> T requireArgument(Statement<T> statement) {
     return Requires.requireArgument(statement.statementValue(), statement.statementPredicate());
@@ -71,13 +84,64 @@ public class Fluents {
     Requires.requireArgument(values, createPredicateForAllOf(statements));
   }
 
-  public static <T> void assumeThat(Statement<T> statement) {
-    TestAssertions.assumeThat(statement.statementValue(), statement.statementPredicate());
+  public static <T> T requireState(Statement<T> statement) {
+    return Requires.requireState(statement.statementValue(), statement.statementPredicate());
   }
 
-  public static void assumeAll(Statement<?>... statements) {
+  @SafeVarargs
+  public static <T> void requireStates(Statement<T>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    TestAssertions.assumeThat(values, createPredicateForAllOf(statements));
+    Requires.requireState(values, createPredicateForAllOf(statements));
+  }
+
+  public static <T> T ensureValue(Statement<T> statement) {
+    return Ensures.ensure(statement.statementValue(), statement.statementPredicate());
+  }
+
+  @SafeVarargs
+  public static <T> void ensureValues(Statement<T>... statements) {
+    List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+    Ensures.ensure(values, createPredicateForAllOf(statements));
+  }
+
+  public static <T> T ensureState(Statement<T> statement) {
+    return Ensures.ensureState(statement.statementValue(), statement.statementPredicate());
+  }
+
+  @SafeVarargs
+  public static <T> void ensureStates(Statement<T>... statements) {
+    List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+    Ensures.ensureState(values, createPredicateForAllOf(statements));
+  }
+
+  public static <T> boolean that(Statement<T> statement) {
+    return Assertions.that(statement.statementValue(), statement.statementPredicate());
+  }
+
+  @SafeVarargs
+  public static <T> boolean all(Statement<T>... statements) {
+    List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+    return Assertions.that(values, createPredicateForAllOf(statements));
+  }
+
+  public static <T> boolean precondition(Statement<T> statement) {
+    return Assertions.precondition(statement.statementValue(), statement.statementPredicate());
+  }
+
+  @SafeVarargs
+  public static <T> boolean preconditions(Statement<T>... statements) {
+    List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+    return Assertions.precondition(values, createPredicateForAllOf(statements));
+  }
+
+  public static <T> boolean postcondition(Statement<T> statement) {
+    return Assertions.postcondition(statement.statementValue(), statement.statementPredicate());
+  }
+
+  @SafeVarargs
+  public static <T> boolean postconditions(Statement<T>... statements) {
+    List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+    return Assertions.postcondition(values, createPredicateForAllOf(statements));
   }
 
   public static StringTransformer<String> value(String value) {

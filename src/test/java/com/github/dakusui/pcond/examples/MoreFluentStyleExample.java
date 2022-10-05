@@ -33,7 +33,7 @@ public class MoreFluentStyleExample {
   public void testExpectingException() {
     String givenValue = "helloWorld";
     assertThat(value(givenValue)
-        .expectingException(Exception.class, TestUtils.stringToLowerCase())
+        .expectException(Exception.class, TestUtils.stringToLowerCase())
         .then()
         .asString()
         .isEqualTo("HELLOWORLD"));
@@ -43,7 +43,7 @@ public class MoreFluentStyleExample {
   public void testExpectingException2() {
     String givenValue = "helloWorld";
     assertThat(value(givenValue)
-        .expectingException(Exception.class, throwRuntimeException())
+        .expectException(Exception.class, throwRuntimeException())
         .getCause()
         .then()
         .isNotNull());

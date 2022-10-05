@@ -100,7 +100,7 @@ public interface Transformer<
     return transformToObject(f);
   }
 
-  default <O extends Throwable> ThrowableTransformer<OIN, O> expectingException(Class<O> exceptionClass, Function<? super OUT, ?> f) {
+  default <O extends Throwable> ThrowableTransformer<OIN, O> expectException(Class<O> exceptionClass, Function<? super OUT, ?> f) {
     requireNonNull(exceptionClass);
     return this.transform(Functions.expectingException(exceptionClass, f), (TX, func) -> throwableTransformer(this, func));
   }
