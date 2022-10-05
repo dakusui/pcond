@@ -1,24 +1,29 @@
 package com.github.dakusui.pcond.forms;
 
+import com.github.dakusui.pcond.TestAssertions;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
+import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.core.multi.MultiFunctionUtils;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
-import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
+import static com.github.dakusui.pcond.forms.Predicates.allOf;
+import static com.github.dakusui.pcond.forms.Predicates.isInstanceOf;
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 
 /**
  * An entry point for acquiring function objects.
@@ -26,6 +31,7 @@ import static java.util.Collections.singletonList;
  */
 public class Functions {
   ;
+
   private Functions() {
 
   }
@@ -173,7 +179,7 @@ public class Functions {
    * @return The string after the {@code substring}.
    */
   public static Function<String, String> findString(String substring) {
-    Objects.requireNonNull(substring);
+    requireNonNull(substring);
     return PrintableFunctionFactory.function(
         () -> format("findString[%s]", substring),
         s -> {
@@ -350,5 +356,32 @@ public class Functions {
    */
   public static <T, R> Function<T, R> call(String methodName, Object... arguments) {
     return callInstanceMethod(parameter(), methodName, arguments);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T, E extends Throwable> Function<T, E> expectingException(Class<E> exceptionClass, Function<? super T, ?> f) {
+    return Printables.function(
+        () -> String.format("expectingException(%s,%s)", exceptionClass.getSimpleName(), f),
+        in -> {
+          Object out;
+          try {
+            out = f.apply(in);
+          } catch (Throwable e) {
+            TestAssertions.assertThat(e, isInstanceOf(exceptionClass));
+            return (E) e;
+          }
+          TestAssertions.assertThat(
+              String.format("%s(%s)->%s", f, formatObject(in, 12), formatObject(out, 12)),
+              allOf(exceptionThrown(), exceptionClassWas(exceptionClass)));
+          throw new AssertionError("A line that shouldn't be reached. File a ticket.");
+        });
+  }
+
+  private static Predicate<Object> exceptionThrown() {
+    return Printables.predicate("exceptionThrown", v -> false);
+  }
+
+  private static Predicate<Object> exceptionClassWas(Class<? extends Throwable> exceptionClass) {
+    return Printables.predicate(() -> "exceptionClass:" + requireNonNull(exceptionClass).getSimpleName(), v -> false);
   }
 }

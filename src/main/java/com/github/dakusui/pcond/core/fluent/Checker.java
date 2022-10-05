@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.fluent;
 
+import com.github.dakusui.pcond.core.fluent.transformers.ThrowableTransformer;
 import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
@@ -24,8 +25,8 @@ import static com.github.dakusui.pcond.internals.InternalUtils.*;
 /**
  * A verifier interface.
  *
- * @param <V>   The type of the {@link Checker} implementation.
- * @param <OIN> The type of the original input value.
+ * @param <V>    The type of the {@link Checker} implementation.
+ * @param <OIN>  The type of the original input value.
  * @param <T>The type of the value to be verified by this object.
  */
 public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
@@ -242,7 +243,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
       return new StringChecker.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
-    public static <OIN, OUT> ObjectChecker<OIN, OUT> objectChecker(ObjectTransformer.Impl<OIN, OUT> objectTransformer) {
+    public static <OIN, OUT> ObjectChecker<OIN, OUT> objectChecker(ObjectTransformer<OIN, OUT> objectTransformer) {
       return objectChecker(objectTransformer.transformerName(), objectTransformer.function(), dummyPredicate(), objectTransformer.originalInputValue());
     }
 
@@ -278,8 +279,17 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
       return new StreamChecker.Impl<>(transformerName, function, predicate, originalInputValue);
     }
 
+
     public static <OIN> BooleanChecker<OIN> booleanChecker(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
       return new BooleanChecker.Impl<>(transformerName, function, predicate, originalInputValue);
+    }
+
+    public static <OIN, OUT extends Throwable> ThrowableChecker<OIN, OUT> throwableChecker(ThrowableTransformer<OIN, OUT> throwableTransformer) {
+      return new ThrowableChecker.Impl<>(throwableTransformer.transformerName(), throwableTransformer.function(), dummyPredicate(), throwableTransformer.originalInputValue());
+    }
+
+    public static <OIN, OUT extends Throwable> ThrowableChecker<OIN, OUT> throwableChecker(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {
+      return new ThrowableChecker.Impl<>(transformerName, function, predicate, originalInputValue);
     }
   }
 
@@ -307,7 +317,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
       if (isDummyPredicate(this.predicate))
         this.predicate = predicate;
       else
-        this.predicate = Predicates.and(this.predicate, predicate);
+        this.predicate = Predicates.allOf(this.predicate, predicate);
       return this.create();
     }
 

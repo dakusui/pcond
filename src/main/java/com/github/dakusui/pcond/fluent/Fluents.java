@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.fluent;
 
+import com.github.dakusui.pcond.Requires;
 import com.github.dakusui.pcond.TestAssertions;
 import com.github.dakusui.pcond.core.fluent.Fluent;
 import com.github.dakusui.pcond.core.fluent.transformers.*;
@@ -47,7 +48,7 @@ public class Fluents {
    * @param statement A statement to be verified
    * @param <T>       The type of the value to be verified which a given statement holds.
    */
-  public static <T> void assertWhen(Statement<T> statement) {
+  public static <T> void assertThat(Statement<T> statement) {
     TestAssertions.assertThat(statement.statementValue(), statement.statementPredicate());
   }
 
@@ -56,16 +57,25 @@ public class Fluents {
    *
    * @param statements A statement to be verified
    */
-  public static void assertWhen(Statement<?>... statements) {
+  public static void assertAll(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
     TestAssertions.assertThat(values, createPredicateForAllOf(statements));
   }
 
-  public static <T> void assumeWhen(Statement<T> statement) {
+  public static <T> T requireArgument(Statement<T> statement) {
+    return Requires.requireArgument(statement.statementValue(), statement.statementPredicate());
+  }
+
+  public static void requireArguments(Statement<?>... statements) {
+    List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+    Requires.requireArgument(values, createPredicateForAllOf(statements));
+  }
+
+  public static <T> void assumeThat(Statement<T> statement) {
     TestAssertions.assumeThat(statement.statementValue(), statement.statementPredicate());
   }
 
-  public static void assumeWhen(Statement<?>... statements) {
+  public static void assumeAll(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
     TestAssertions.assumeThat(values, createPredicateForAllOf(statements));
   }

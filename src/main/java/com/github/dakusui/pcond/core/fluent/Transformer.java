@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
 import com.github.dakusui.pcond.core.fluent.transformers.LongTransformer;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 
@@ -14,8 +15,8 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 import static com.github.dakusui.pcond.core.fluent.Transformer.Factory.*;
-import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
-import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
+import static com.github.dakusui.pcond.internals.InternalUtils.*;
+import static java.util.Objects.requireNonNull;
 
 /**
  * The transformer interface.
@@ -99,6 +100,11 @@ public interface Transformer<
     return transformToObject(f);
   }
 
+  default <O extends Throwable> ThrowableTransformer<OIN, O> expectingException(Class<O> exceptionClass, Function<? super OUT, ?> f) {
+    requireNonNull(exceptionClass);
+    return this.transform(Functions.expectingException(exceptionClass, f), (TX, func) -> throwableTransformer(this, func));
+  }
+
   default <O> ObjectTransformer<OIN, O> transformToObject(Function<? super OUT, O> f) {
     return this.transform(f, (TX, func) -> objectTransformer(this, func));
   }
@@ -172,6 +178,10 @@ public interface Transformer<
   default BooleanTransformer<OIN> asBoolean() {
     return booleanTransformer(this, Printables.function("treatAsBoolean", v -> (Boolean) v));
   }
+  @SuppressWarnings("unchecked")
+  default <OUT2 extends Throwable> ThrowableTransformer<OIN, OUT2> asThrowable() {
+    return throwableTransformer(this, Printables.function("treatAsThrowable", v -> (OUT2) v));
+  }
 
   @Override
   @SuppressWarnings("unchecked")
@@ -233,6 +243,10 @@ public interface Transformer<
 
     public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT, O> ObjectTransformer<OIN, O> objectTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, O> func) {
       return new ObjectTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
+    }
+
+    public static <TX extends Transformer<TX, OIN, OUT>, OIN, OUT, O extends Throwable> ThrowableTransformer<OIN, O> throwableTransformer(Transformer<TX, OIN, OUT> transformer, Function<OUT, O> func) {
+      return new ThrowableTransformer.Impl<>(transformer.transformerName(), transformer, func, transformer.originalInputValue());
     }
   }
 

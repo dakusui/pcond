@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut.styles;
 
 import com.github.dakusui.pcond.fluent.Fluents;
+import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.AssumptionViolatedException;
@@ -11,16 +12,18 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.fluent.Fluents.*;
+import static com.github.dakusui.pcond.forms.Predicates.containsString;
+import static com.github.dakusui.pcond.forms.Predicates.not;
 import static com.github.dakusui.pcond.utils.TestUtils.stringToLowerCase;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
-public class MoreFluentStyleTest {
+public class MoreFluentStyleTest extends TestBase {
   @Test(expected = ComparisonFailure.class)
   public void string_assertWhenTest_failed() {
     String givenValue = "helloWorld";
     try {
-      assertWhen(Fluents.value(givenValue)
+      assertThat(Fluents.value(givenValue)
           .exercise(stringToLowerCase())
           .then()
           .asString()
@@ -34,7 +37,7 @@ public class MoreFluentStyleTest {
   @Test
   public void string_assertWhenTest_passed() {
     String givenValue = "helloWorld";
-    assertWhen(value(givenValue)
+    assertThat(value(givenValue)
         .exercise(stringToLowerCase())
         .then()
         .asString()
@@ -44,7 +47,7 @@ public class MoreFluentStyleTest {
   @Test
   public void string_assertWhen_useValue_passed() {
     String givenValue = "helloWorld";
-    assertWhen(value(givenValue)
+    assertThat(value(givenValue)
         .exercise(stringToLowerCase())
         .then()
         .asString()
@@ -54,7 +57,7 @@ public class MoreFluentStyleTest {
   @Test
   public void int_assertWhenTest_passed() {
     int givenValue = 1234;
-    assertWhen(Fluents.value(givenValue)
+    assertThat(Fluents.value(givenValue)
         .then()
         .isEqualTo(1234));
   }
@@ -62,7 +65,7 @@ public class MoreFluentStyleTest {
   @Test
   public void boolean_assertWhenTest_passed() {
     boolean givenValue = true;
-    assertWhen(Fluents.value(givenValue)
+    assertThat(Fluents.value(givenValue)
         .then()
         .isEqualTo(true));
   }
@@ -75,7 +78,7 @@ public class MoreFluentStyleTest {
         return "OBJECT";
       }
     };
-    assertWhen(Fluents.value(givenValue)
+    assertThat(Fluents.value(givenValue)
         .then()
         .intoStringWith(Object::toString)
         .isEqualTo("OBJECT"));
@@ -84,7 +87,7 @@ public class MoreFluentStyleTest {
   @Test
   public void list_assertWhenTest_passed() {
     List<String> givenValue = asList("hello", "world");
-    assertWhen(value(givenValue)
+    assertThat(value(givenValue)
         .then()
         .isEqualTo(asList("hello", "world")));
   }
@@ -92,7 +95,7 @@ public class MoreFluentStyleTest {
   @Test
   public void stream_assertWhenTest_passed() {
     Stream<String> givenValue = Stream.of("hello", "world");
-    assertWhen(Fluents.value(givenValue)
+    assertThat(Fluents.value(givenValue)
         .then()
         .intoListWith(v -> v.collect(toList()))
         .isEqualTo(asList("hello", "world")));
@@ -101,7 +104,7 @@ public class MoreFluentStyleTest {
   @Test(expected = ComparisonFailure.class)
   public void multiAssertWhen_failed() {
     try {
-      assertWhen(
+      assertAll(
           value("hello").toUpperCase().then().isEqualTo("HELLO"),
           value("world").toLowerCase().then().contains("WORLD"));
     } catch (ComparisonFailure e) {
@@ -113,18 +116,33 @@ public class MoreFluentStyleTest {
     }
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void requireArgumentsTest_failing() {
+    try {
+      requireArguments(
+          value("hello").toUpperCase().then().isEqualTo("HELLO"),
+          value("world").toLowerCase().then().contains("WORLD").verifyWith(not(containsString("w"))));
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+      String message = e.getMessage().replaceAll(" +", "");
+      MatcherAssert.assertThat(message, CoreMatchers.containsString("stringIsEqualTo[\"HELLO\"]->true"));
+      MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[\"WORLD\"]->false"));
+      throw e;
+    }
+  }
+
   @Test
-  public void multiAssertWhen_passed() {
-    assertWhen(
+  public void assertAll_passed() {
+    assertAll(
         value("hello").toUpperCase().then().isEqualTo("HELLO"),
         value("world").toLowerCase().then().contains("world"));
   }
 
   @Test(expected = AssumptionViolatedException.class)
-  public void assumeWhenTest_failed() {
+  public void assumeThatTest_failed() {
     String givenValue = "helloWorld";
     try {
-      assumeWhen(value(givenValue)
+      assumeThat(value(givenValue)
           .exercise(stringToLowerCase())
           .then()
           .asString()
@@ -136,9 +154,9 @@ public class MoreFluentStyleTest {
   }
 
   @Test
-  public void assumeWhenTest_passed() {
+  public void assumeThatTest_passed() {
     String givenValue = "helloWorld";
-    assumeWhen(value(givenValue)
+    assumeThat(value(givenValue)
         .exercise(stringToLowerCase())
         .then()
         .asString()
@@ -148,7 +166,7 @@ public class MoreFluentStyleTest {
   @Test(expected = AssumptionViolatedException.class)
   public void multiAssumeWhen_failed() {
     try {
-      assumeWhen(
+      assumeAll(
           value("hello").toUpperCase().then().isEqualTo("HELLO"),
           value("world").toLowerCase().then().contains("WORLD"));
     } catch (AssumptionViolatedException e) {
@@ -160,7 +178,7 @@ public class MoreFluentStyleTest {
 
   @Test
   public void multiAssumeWhen_passed() {
-    assumeWhen(
+    assumeAll(
         value("hello").toUpperCase().then().isEqualTo("HELLO"),
         value("world").toLowerCase().then().contains("world"));
   }

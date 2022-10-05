@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.fluent.Fluents.value;
-import static com.github.dakusui.pcond.fluent.Fluents.assertWhen;
+import static com.github.dakusui.pcond.fluent.Fluents.assertThat;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 
 @SuppressWarnings("NewClassNamingConvention")
@@ -30,6 +30,6 @@ public class Sandbox {
 
   @Test
   public void hello3() {
-    assertWhen(Fluents.value("hello").substring(2).then().isEqualTo("world"));
+    assertThat(Fluents.value("hello").substring(2).then().isEqualTo("world"));
   }
 }

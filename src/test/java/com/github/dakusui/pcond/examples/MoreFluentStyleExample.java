@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.examples;
 
+import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.TestUtils;
 import org.junit.ComparisonFailure;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.fluent.Fluents.assertWhen;
+import static com.github.dakusui.pcond.fluent.Fluents.assertThat;
 import static com.github.dakusui.pcond.fluent.Fluents.value;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
@@ -20,17 +21,45 @@ public class MoreFluentStyleExample {
   @Test
   public void test() {
     String givenValue = "helloWorld";
-    assertWhen(value(givenValue)
+    assertThat(value(givenValue)
         .exercise(TestUtils.stringToLowerCase())
         .then()
         .asString()
         .isEqualTo("HELLOWORLD"));
   }
 
+
+  @Test
+  public void testExpectingException() {
+    String givenValue = "helloWorld";
+    assertThat(value(givenValue)
+        .expectingException(Exception.class, TestUtils.stringToLowerCase())
+        .then()
+        .asString()
+        .isEqualTo("HELLOWORLD"));
+  }
+
+  @Test
+  public void testExpectingException2() {
+    String givenValue = "helloWorld";
+    assertThat(value(givenValue)
+        .expectingException(Exception.class, throwRuntimeException())
+        .getCause()
+        .then()
+        .isNotNull());
+  }
+
+  private static Function<String, Object> throwRuntimeException() {
+    return Printables.function("throwRuntimeException", v -> {
+      throw new RuntimeException();
+    });
+  }
+
+
   @Test
   public void test2() {
     List<String> givenValues = asList("hello", "world");
-    assertWhen(value(givenValues).elementAt(0)
+    assertThat(value(givenValues).elementAt(0)
         .exercise(TestUtils.stringToLowerCase())
         .then()
         .asString()
@@ -40,7 +69,7 @@ public class MoreFluentStyleExample {
   @Test
   public void test3() {
     List<String> givenValues = asList("hello", "world");
-    assertWhen(value(givenValues).elementAt(0)
+    assertThat(value(givenValues).elementAt(0)
         .exercise(TestUtils.stringToLowerCase())
         .then()
         .asString()
@@ -50,7 +79,7 @@ public class MoreFluentStyleExample {
   @Test(expected = ComparisonFailure.class)
   public void test4() {
     try {
-      assertWhen(
+      Fluents.assertAll(
           value("hello").toUpperCase().then().isEqualTo("HELLO"),
           value("world").toLowerCase().then().contains("WORLD"));
     } catch (ComparisonFailure e) {
@@ -70,7 +99,7 @@ public class MoreFluentStyleExample {
     Function<MemberDatabase.Member, String> memberLastName =
         Printables.function("memberLastName", MemberDatabase.Member::lastName);
 
-    assertWhen(value(database)
+    assertThat(value(database)
         .exercise(lookUpMemberWith.apply(identifier))
         .then()
         .intoStringWith(memberLastName)
@@ -86,7 +115,7 @@ public class MoreFluentStyleExample {
         .orElseThrow(NoSuchElementException::new)
         .lastName();
     List<String> fullName = database.findMembersByLastName(lastName).get(0).toFullName();
-    assertWhen(
+    Fluents.assertAll(
         value(lastName)
             .then()
             .verifyWith(allOf(
@@ -101,7 +130,7 @@ public class MoreFluentStyleExample {
   public void givenValidName_whenValidatePersonName_thenPass() {
     String s = "John Doe";
 
-    assertWhen(value(s).asString().split(" ").size()
+    assertThat(value(s).asString().split(" ").size()
         .then().isEqualTo(2));
   }
 
@@ -109,7 +138,7 @@ public class MoreFluentStyleExample {
   public void givenValidName_whenValidatePersonName_thenPass_2() {
     String s = "John doe";
 
-    assertWhen(
+    assertThat(
         value(s).asString().split(" ").thenVerifyWith(allOf(
             transform(size()).check(isEqualTo(2)),
             transform(elementAt(0).andThen(cast(String.class))).check(matchesRegex("[A-Z][a-z]+")),
