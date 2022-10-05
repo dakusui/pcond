@@ -84,6 +84,16 @@ public class Fluents {
     Requires.requireArgument(values, createPredicateForAllOf(statements));
   }
 
+
+  public static <T> T requireValue(Statement<T> statement) {
+    return Requires.require(statement.statementValue(), statement.statementPredicate());
+  }
+
+  public static void requireValues(Statement<?>... statements) {
+    List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+    Requires.require(values, createPredicateForAllOf(statements));
+  }
+
   public static <T> T requireState(Statement<T> statement) {
     return Requires.requireState(statement.statementValue(), statement.statementPredicate());
   }
