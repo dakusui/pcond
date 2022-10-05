@@ -1,11 +1,13 @@
 package com.github.dakusui.pcond.ut.styles;
 
 import com.github.dakusui.pcond.fluent.Fluents;
+import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import com.github.dakusui.pcond.validator.exceptions.PostconditionViolationException;
 import com.github.dakusui.pcond.validator.exceptions.PreconditionViolationException;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
 import org.junit.AssumptionViolatedException;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
@@ -26,6 +28,55 @@ import static java.util.stream.Collectors.toList;
 public class MoreFluentStyleTest {
 
   public static class ForTestAssertionsTest extends TestBase {
+    @Test(expected = ComparisonFailure.class)
+    public void expectingDifferentException_testFailing() {
+      try {
+        String givenValue = "helloWorld";
+        assertThat(value(givenValue)
+            .expectException(ArrayIndexOutOfBoundsException.class, Printables.function("substring100", (String s) -> s.substring(100)))
+            .getMessage()
+            .then()
+            .asString()
+            .isEqualTo("HELLOWORLD"));
+      } catch (ComparisonFailure e) {
+        e.printStackTrace();
+        MatcherAssert.assertThat(e.getMessage(), CoreMatchers.allOf(
+            CoreMatchers.containsString("StringIndexOutOfBounds"),
+            CoreMatchers.containsString("isInstanceOf")));
+        throw e;
+      }
+    }
+
+    @Test(expected = ComparisonFailure.class)
+    public void expectingExceptionButNotThrown_testFailing() {
+      try {
+        String givenValue = "helloWorld";
+        assertThat(value(givenValue)
+            .expectException(StringIndexOutOfBoundsException.class, Printables.function("substring0", (String s) -> s.substring(0)))
+            .getMessage()
+            .then()
+            .asString()
+            .isEqualTo("HELLOWORLD"));
+      } catch (ComparisonFailure e) {
+        e.printStackTrace();
+        MatcherAssert.assertThat(e.getMessage(), CoreMatchers.allOf(
+            CoreMatchers.containsString("exceptionThrown"),
+            CoreMatchers.containsString("exceptionClass:StringIndexOutOfBoundsException")));
+        throw e;
+      }
+    }
+
+    @Test
+    public void expectedExceptionThrown_testPassing() {
+      String givenValue = "helloWorld";
+      assertThat(value(givenValue)
+          .expectException(StringIndexOutOfBoundsException.class, Printables.function("substring100", (String s) -> s.substring(100)))
+          .getMessage()
+          .then()
+          .asString()
+          .isEqualTo("String index out of range: -90"));
+    }
+
     @Test(expected = ComparisonFailure.class)
     public void string_assertThatTest_failed() {
       String givenValue = "helloWorld";
@@ -228,6 +279,40 @@ public class MoreFluentStyleTest {
         throw e;
       }
     }
+
+    @Test
+    public void requireArgument_passing() {
+      String givenValue = "helloWorld";
+      requireArgument(value(givenValue)
+          .exercise(stringToLowerCase())
+          .then()
+          .asString()
+          .isEqualTo("helloworld"));
+    }
+
+    @Test
+    public void requireValue_passing() {
+      String givenValue = "helloWorld";
+      MatcherAssert.assertThat(
+          requireValue(value(givenValue)
+              .exercise(stringToLowerCase())
+              .then()
+              .asString()
+              .isEqualTo("helloworld")),
+          Matchers.equalTo(givenValue));
+    }
+
+    @Test
+    public void reqireState_passing() {
+      String givenValue = "helloWorld";
+      MatcherAssert.assertThat(
+          requireState(value(givenValue)
+              .exercise(stringToLowerCase())
+              .then()
+              .asString()
+              .isEqualTo("helloworld")),
+          Matchers.equalTo(givenValue));
+    }
   }
 
   public static class ForEnsuresTest extends TestBase {
@@ -259,6 +344,30 @@ public class MoreFluentStyleTest {
         MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[\"WORLD\"]->false"));
         throw e;
       }
+    }
+
+    @Test
+    public void ensureValue_passing() {
+      String givenValue = "helloWorld";
+      MatcherAssert.assertThat(
+          ensureValue(value(givenValue)
+              .exercise(stringToLowerCase())
+              .then()
+              .asString()
+              .isEqualTo("helloworld")),
+          CoreMatchers.equalTo(givenValue));
+    }
+
+    @Test
+    public void ensureState_passing() {
+      String givenValue = "helloWorld";
+      MatcherAssert.assertThat(
+          ensureState(value(givenValue)
+              .exercise(stringToLowerCase())
+              .then()
+              .asString()
+              .isEqualTo("helloworld")),
+          CoreMatchers.equalTo(givenValue));
     }
   }
 }
