@@ -1,153 +1,56 @@
-A package to provide entry-point classes for the `Fluent` and `MoreFluent` styles.
+A package to provide entry-point classes for the `Fluent` style.
 
-== Method name syntax
+The goal of the "fluent" style of the `pcond` library is to make it possible:
 
-[cols=">1,^2,^2,^2,^3,^3,^3"]
-|===
-|#|Clause Type|Phrase Type|Target Type |Type Preposition |Element Type Argument |Conversion Function
+- To be able to rely on IDE's help for recalling what you can do now.
+- To write tests in a readable and consistent manner.
+- To show a readable report failure when a test fails.
+- Not to need to a custom support class for your own class.
 
-|1
-|(none)
-|(none)
-|(none)
-|(none)
-|(none)
-|(none)
+That is, if you have a following example code:
 
-|2
-|when
-|as
-|value
-|of
-|`(E) value()`
-|`Function<T,R>`
-
-|3
-|then
-|into
-|list
-|ofClass
-|`E.class`
-|-
-
-
-|4
-|-
-|-
-|stream
-|with
-|-
-|-
-
-
-|5
-|-
-|-
-|string
-|-
-|-
-|-
-
-
-|6
-|-
-|-
-|number
-|-
-|-
-|-
-
-
-|7
-|-
-|-
-|boolean
-|-
-|-
-|-
-
-|===
-
-[source,bnf]
-."Exposed" conversion method names in Transformers and checkers.
+[source, java]
+.Example Test Code
 ----
-<WHEN_CLAUSE>  ::= when <AS_PHRASE>?
-<THEN_CLAUSE>  ::= then <INTO_PHRASE>?
-<AS_PHRASE>    ::= as <ELEMENT_TYPE_ARGUMENT>
-               | as <CONTAINER_TYPE> <ELEMENT_TYPE_SPECIFIER>
-               | as <ATOM_TYPE>
-<INTO_PHRASE>  ::= into <ATOM_TYPE> (with function)?
-               | into <CONTAINER_TYPE> <ELEMENT_TYPE_SPECIFIER> function?
-
-
-<CONTAINER_TYPE>         ::= value | list | stream
-<ATOM_TYPE>              ::= string | <NUMBER> | boolean | object
-<NUMBER>                 ::= long | integer | short | double | float
-<ELEMETN_TYPE_SPECIFIER> ::= of (E) value() | ofClass E.class
-<ELEMENT_TYPE_ARGUMRNT>  ::= (E) value()
+public class FluentStyleExample {
+  @Test
+  public void givenKnownLastName_whenFindMembersByFullName_thenLastNastIsNotNullAndContainedInFullName() {
+    // Find a user entry from a member database
+    MemberDatabase database = new MemberDatabase();
+    String lastName = database.lookUp("0001")
+        .orElseThrow(NoSuchElementException::new)
+        .lastName();
+    List<String> fullName = database.findMembersByLastName(lastName).get(0).toFullName();
+    // Check if
+    // - The last name of the entry is not null and not an empty string.
+    // - The last name is "DOE".
+    assertWhen(
+        value(lastName)
+            .then()
+            .verifyWith(allOf(
+                isNotNull(),
+                not(isEmptyString()))),
+        value(fullName).asListOfClass(String.class)
+            .then()
+            .contains("DOE"));
+  }
+}
 ----
 
-[[as-phrase-list]]
-.The list of all the possible `AS_PHRASE` s
-- `as( (E)value() )`
-- `asString()`
-- `asNumber()`
-- `asBoolean()`
-- `asObject()`
-- `asValueOf( (E)value() )`
-- `asListOf( (E)value() )`
-- `asStreamOf( (E)value() )`
-- `asValueOfClass( E.class )`
-- `asListOfClass( E.class )`
-- `asStreamOfClass( E.class )`
+May result in the following output:
 
+.Output Example
+----
+ "Doe"               ->WHEN:treatAsIs      ->"Doe"                | "Doe"               ->WHEN:treatAsIs      ->"Doe"
+                       THEN:&&             ->true                 |                       THEN:&&             ->true
+                           isNotNull       ->true                 |                            isNotNull      ->true
+                           !               ->true                 |                            !              ->true
+                             isEmpty       ->false                |                              isEmpty      ->false
+ ["John","Doe","PhD"]->WHEN:treatAsList    ->["John","Doe","PhD"] | ["John","Doe","PhD"]->WHEN:treatAsList    ->["John","Doe","PhD"]
+X                      THEN:contains["DOE"]->true                 |                       THEN:contains["DOE"]->false
+----
 
-[[into-phrase-list]]
-.The list of all the possible `INTO_PHRASE` s
-- `intoString`
-- `intoNumber`
-- `intoBoolean`
-- `intoObject`
-- `intoStringWith( function )`
-- `intoNumberWith( function )`
-- `intoBooleanWith( function )`
-- `intoObjectWith( function )`
-- `intoValueOf( (E)value(), function  )`
-- `intoListOf( (E)value(), function  )`
-- `intoStreamOf( (E)value(), function )`
-- `intoValueOfClass( E.class, function  )`
-- `intoListOfClass( E.class, function  )`
-- `intoStreamClass( E.class, function  )`
-
-Thus, there are 9 methods for `AS_PHRASE` and 6 for `INTO_PHRASE`.
-For `WHEN_CLAUSE`, 10 and for `THEN_CLAUSE` 7 methods.
-
-[cols="^,^,^,^"]
-|===
-|    |`Fluent` |`Transformer` |`Checker`
-
-|`WHEN_CLAUSE`
-|✓
-|
-|
-
-|`THEN_CLAUSE`
-|
-|✓
-|
-
-|`AS_PHRASE`
-|✓
-|✓
-|✓
-
-|`INTO_PHRASE`
-|
-|
-|✓
-|===
-
-=== Special Types of `pcond`
+== Special Types of `pcond`
 
 In the `pcond` library divides an evaluation of an assertion into two stages.
 "Transform" and "check".

@@ -47,7 +47,7 @@ public interface ListChecker<OIN, E> extends
   default ListChecker<OIN, E> findElementsInOrder(E... elements) {
     return this.findElementsInOrderBy(
         Arrays.stream(elements)
-            .map(v -> Printables.predicate("[" + v + "]s", e -> Objects.equals(v, e)))
+            .map(v -> Printables.predicate("[" + v + "]", e -> Objects.equals(v, e)))
             .map(p -> (Predicate<E>) p)
             .collect(Collectors.toList()));
   }

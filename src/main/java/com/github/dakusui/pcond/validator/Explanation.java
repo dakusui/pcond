@@ -1,6 +1,11 @@
 package com.github.dakusui.pcond.validator;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+
 import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 
 public class Explanation {
   private final String message;
@@ -26,10 +31,23 @@ public class Explanation {
   }
 
   public String toString() {
-    // Did not include "expected" because it is too much overlapping "actual" in most cases.
     return actual != null ?
-        format("%s%n%s", message, actual) :
+        format("%s%n%s", message, composeDiff(expected, actual)) :
         message;
+  }
+
+  private static String composeDiff(String expected, String actual) {
+    String[] e = expected.split(format("%n"));
+    String[] a = actual.split(format("%n"));
+    List<String> b = new LinkedList<>();
+    for (int i = 0; i < a.length; i++) {
+      if (i < Math.min(e.length, a.length) && Objects.equals(e[i], a[i])) {
+        b.add(format("         %s", a[i]));
+      } else {
+        b.add(format("Mismatch %s", a[i]));
+      }
+    }
+    return b.stream().collect(joining(format("%n")));
   }
 
   public static Explanation fromMessage(String msg) {

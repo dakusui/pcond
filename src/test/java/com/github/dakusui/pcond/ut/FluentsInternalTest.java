@@ -1,13 +1,15 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.core.fluent.Fluent;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.fluent.Fluents.*;
+import static com.github.dakusui.pcond.fluent.FluentsInternal.*;
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
 import static com.github.dakusui.pcond.forms.Predicates.*;
@@ -15,12 +17,12 @@ import static com.github.dakusui.pcond.forms.Printables.function;
 import static com.github.dakusui.pcond.utils.TestForms.objectHashCode;
 import static java.util.Arrays.asList;
 
-public class FluentsTest extends TestBase {
+public class FluentsInternalTest extends TestBase {
   @Test
   public void whenPassingValidation_thenPasses$1() {
     assertThat(
         new Parent(),
-        when().as((Parent) value())
+        Utils.when().as((Parent) value())
             .exercise(Parent::parentMethod1)
             .then()
             .verifyWith(isEqualTo("returnValueFromParentMethod")).build());
@@ -47,7 +49,7 @@ public class FluentsTest extends TestBase {
   public void example() {
     assertThat(
         asList("Hello", "world"),
-        when().asListOf((String) value())
+        Utils.when().asListOf((String) value())
             .elementAt(0)
             .then().asString()
             .findSubstrings("hello", "world")
@@ -68,12 +70,12 @@ public class FluentsTest extends TestBase {
       assertThat(
           new Parent(),
           allOf(
-              whenValueOfClass(Parent.class).<Parent>asObject()
+              Utils.whenValueOfClass(Parent.class).<Parent>asObject()
                   .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                   .then()
                   .asString()
                   .isEqualTo("returnValueFromParentMethod"),
-              valueOfClass(Parent.class).<Parent>asObject()
+              valueOfClass(Parent.class).asObject()
                   .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                   .exercise(function("lambda:Child::childMethod", Child::childMethod))
                   .then()
@@ -91,7 +93,7 @@ public class FluentsTest extends TestBase {
     try {
       assertThat(
           (Supplier<Parent>) Parent::new,
-          whenValueOfClass(Supplier.class)
+          Utils.whenValueOfClass(Supplier.class)
               .asObject()
               .exercise(Supplier::get)
               .then().verifyWith(allOf(
@@ -130,11 +132,11 @@ public class FluentsTest extends TestBase {
   @Test(expected = ComparisonFailure.class)
   public void multiValueAssertionTest_allOf() {
     assertThat(
-        list(123, list("Hello", "world")),
+        Utils.list(123, Utils.list("Hello", "world")),
         allOf(
-            when().at(0).asInteger()
+            Utils.when().at(0).asInteger()
                 .then().equalTo(122),
-            when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
+            Utils.when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
                 $().at(0).asString()
                     .then().isEqualTo("hello"),
                 $().at(1).asString()
@@ -144,11 +146,11 @@ public class FluentsTest extends TestBase {
   @Test(expected = ComparisonFailure.class)
   public void multiValueAssertionTest_anyOf() {
     assertThat(
-        list(123, list("Hello", "world")),
+        Utils.list(123, Utils.list("Hello", "world")),
         allOf(
-            when().at(0).asInteger()
+            Utils.when().at(0).asInteger()
                 .then().equalTo(122),
-            when().at(1).asListOfClass(String.class).thenVerifyWithAnyOf(asList(
+            Utils.when().at(1).asListOfClass(String.class).thenVerifyWithAnyOf(asList(
                 $().at(0).asString()
                     .then().isEqualTo("hello"),
                 $().at(1).asString()
@@ -160,7 +162,7 @@ public class FluentsTest extends TestBase {
     String hello = "hello";
     assertThat(
         hello,
-        when().asObject().thenVerifyWith(allOf(
+        Utils.when().asObject().thenVerifyWith(allOf(
             $().as((String) value())
                 .exercise(objectHashCode())
                 .then().isInstanceOf(Integer.class)))
@@ -172,10 +174,38 @@ public class FluentsTest extends TestBase {
     String hello = "hello";
     assertThat(
         hello,
-        when().asObject().then().verifyWith(allOf(
+        Utils.when().asObject().then().verifyWith(allOf(
             $().as((String) value())
                 .exercise(objectHashCode())
                 .then()
                 .isInstanceOf(Integer.class))));
+  }
+
+  public enum Utils {
+    ;
+
+    public static <T> Fluent<T> when() {
+      return whenValueOf(value());
+    }
+
+    /**
+     * Use the value returned from `value()` as the argument for this
+     * method as a place-holder for the sake of readability.
+     *
+     * @param value A value place-holder.
+     * @param <T>   The type of the object to be verified.
+     * @return A new ObjectTransformer for type `T`.
+     */
+    public static <T> Fluent<T> whenValueOf(@SuppressWarnings("unused") T value) {
+      return fluent("WHEN");
+    }
+
+    public static <T> Fluent<T> whenValueOfClass(@SuppressWarnings("unused") Class<T> klass) {
+      return whenValueOf(value());
+    }
+
+    public static List<?> list(Object... args) {
+      return asList(args);
+    }
   }
 }

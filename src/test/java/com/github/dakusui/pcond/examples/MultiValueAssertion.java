@@ -1,8 +1,9 @@
 package com.github.dakusui.pcond.examples;
 
+import com.github.dakusui.pcond.ut.FluentsInternalTest;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.fluent.Fluents.*;
+import static com.github.dakusui.pcond.fluent.FluentsInternal.*;
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
 import static java.util.Arrays.asList;
@@ -12,11 +13,11 @@ public class MultiValueAssertion {
   @Test//(expected = ComparisonFailure.class)
   public void test() {
     assertThat(
-        list(123, list("Hello", "world")),
+        FluentsInternalTest.Utils.list(123, FluentsInternalTest.Utils.list("Hello", "world")),
         allOf(
-            when().at(0).asInteger()
+            FluentsInternalTest.Utils.when().at(0).asInteger()
                 .then().equalTo(122),
-            when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
+            FluentsInternalTest.Utils.when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
                 $().at(0).asString()
                     .then().isEqualTo("hello"),
                 $().at(1).asString()

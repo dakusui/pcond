@@ -23,5 +23,5 @@ function convert_package_info_adoc_to_package_info_java() {
 
 base=src/main/java
 for i in $(find ${base} -name 'package-info.adoc'); do
-  convert_package_info_adoc_to_package_info_java ${base} $(dirname ${i#${base}/})
+  convert_package_info_adoc_to_package_info_java ${base} "$(dirname ${i#${base}/})"
 done;

@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.examples;
 
 import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.pcond.ut.FluentsInternalTest;
 import org.junit.Test;
 
 import java.util.List;
@@ -8,7 +9,6 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.TestAssertions.assertThat;
-import static com.github.dakusui.pcond.fluent.Fluents.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static java.lang.String.format;
@@ -27,7 +27,7 @@ public class FluentStyleExample {
 
     assertThat(
         database,
-        when().asValueOfClass(MemberDatabase.class)
+        FluentsInternalTest.Utils.when().asValueOfClass(MemberDatabase.class)
             .exercise(lookUpMemberAndGetLastName)
             .then()
             .isNotNull());
@@ -46,7 +46,7 @@ public class FluentStyleExample {
 
     assertThat(
         database,
-        when().asValueOfClass(MemberDatabase.class)
+        FluentsInternalTest.Utils.when().asValueOfClass(MemberDatabase.class)
             .exercise(lookUpMemberWith.apply(identifier))
             .then()
             .intoStringWith(memberLastName)
@@ -65,12 +65,12 @@ public class FluentStyleExample {
     assertThat(
         asList(lastName, fullName),
         allOf(
-            when().asListOfClass(String.class)
+            FluentsInternalTest.Utils.when().asListOfClass(String.class)
                 .elementAt(0)
                 .then().verifyWith(allOf(
                     isNotNull(),
                     not(isEmptyString()))),
-            when().asListOfClass(String.class)
+            FluentsInternalTest.Utils.when().asListOfClass(String.class)
                 .then()
                 .contains(lastName)));
   }

@@ -18,25 +18,25 @@ import static com.github.dakusui.pcond.utils.TestMethodExpectation.Result.*;
     @EnsureJUnitResult(type = AssumptionFailureCountIsEqualTo.class, args = "1"),
     @EnsureJUnitResult(type = SizeOfFailuresIsEqualTo.class, args = "1")
 })
-public class ExampleUT {
+public class UTExample {
   @TestMethodExpectation(PASSING)
   @Test
   public void shouldPass_testFirstNameOf() {
     String firstName = NameUtils.firstNameOf("Risa Kitajima");
-    assertThat(firstName, and(not(containsString(" ")), startsWith("R")));
+    assertThat(firstName, allOf(not(containsString(" ")), startsWith("R")));
   }
 
   @TestMethodExpectation(FAILURE)
   @Test
   public void shouldFail_testFirstNameOf() {
     String firstName = NameUtils.firstNameOf("Yoshihiko Naito");
-    assertThat(firstName, and(not(containsString(" ")), startsWith("N")));
+    assertThat(firstName, allOf(not(containsString(" ")), startsWith("N")));
   }
 
   @TestMethodExpectation(ASSUMPTION_FAILURE)
   @Test
   public void shouldBeIgnored_testFirstNameOf() {
     String firstName = NameUtils.firstNameOf("Yoshihiko Naito");
-    assumeThat(firstName, and(not(containsString(" ")), startsWith("N")));
+    assumeThat(firstName, allOf(not(containsString(" ")), startsWith("N")));
   }
 }

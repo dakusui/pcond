@@ -31,8 +31,9 @@ import java.util.function.Predicate;
  * 	...
  * ----
  *
- * NOTE::
- * Do not forget giving ```-ea``` VM option to enable assertions.
+ * To enable this feature, do not forget giving ```-ea``` VM option to enable assertions.
+ * Otherwise, the evaluation doesn't happen completely and even printable predicates constructed the right side of the `assert` statement.
+ * This means you can enable the feature during the development and disable it in the production so that you will not see no performance impact.
  *
  * // @formatter:on
  */
