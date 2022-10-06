@@ -178,6 +178,7 @@ public interface Transformer<
   default BooleanTransformer<OIN> asBoolean() {
     return booleanTransformer(this, Printables.function("treatAsBoolean", v -> (Boolean) v));
   }
+
   @SuppressWarnings("unchecked")
   default <OUT2 extends Throwable> ThrowableTransformer<OIN, OUT2> asThrowable() {
     return throwableTransformer(this, Printables.function("treatAsThrowable", v -> (OUT2) v));
@@ -253,7 +254,7 @@ public interface Transformer<
   /**
    * Method names start with `as` or contain `As` suggests that the methods should be
    * used when you know the type of the object you are treating at the line of your code.
-   * <p>
+   *
    * One starts with `into` or contains `Into` should be used for objects you need to
    * apply a function in order to convert it to treat it in the following lines.
    *

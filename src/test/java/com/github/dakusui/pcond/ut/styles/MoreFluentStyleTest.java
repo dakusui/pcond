@@ -228,7 +228,7 @@ public class MoreFluentStyleTest {
 
     @Test
     public void test_valueMethod() {
-      MatcherAssert.assertThat(Fluents.value(), CoreMatchers.equalTo(null));
+      MatcherAssert.assertThat(Fluents.$(), CoreMatchers.equalTo(null));
     }
   }
 
@@ -268,7 +268,7 @@ public class MoreFluentStyleTest {
     @Test(expected = PreconditionViolationException.class)
     public void requireValuesTest_failing() {
       try {
-        requireValues(
+        Fluents.require(
             value("hello").toUpperCase().then().isEqualTo("HELLO"),
             value("world").toLowerCase().then().contains("WORLD").verifyWith(not(containsString("w"))));
       } catch (PreconditionViolationException e) {
@@ -294,7 +294,7 @@ public class MoreFluentStyleTest {
     public void requireValue_passing() {
       String givenValue = "helloWorld";
       MatcherAssert.assertThat(
-          requireValue(value(givenValue)
+          require(value(givenValue)
               .exercise(stringToLowerCase())
               .then()
               .asString()
@@ -319,7 +319,7 @@ public class MoreFluentStyleTest {
     @Test(expected = PostconditionViolationException.class)
     public void ensureValuesTest_failing() {
       try {
-        ensureValues(
+        Fluents.ensure(
             value("hello").toUpperCase().then().isEqualTo("HELLO"),
             value("world").toLowerCase().then().contains("WORLD").verifyWith(not(containsString("w"))));
       } catch (PostconditionViolationException e) {
@@ -350,7 +350,7 @@ public class MoreFluentStyleTest {
     public void ensureValue_passing() {
       String givenValue = "helloWorld";
       MatcherAssert.assertThat(
-          ensureValue(value(givenValue)
+          ensure(value(givenValue)
               .exercise(stringToLowerCase())
               .then()
               .asString()

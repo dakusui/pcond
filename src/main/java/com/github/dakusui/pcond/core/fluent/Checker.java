@@ -137,12 +137,12 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
 
   @Override
   default <E> ListChecker<OIN, E> asListOf(E value) {
-    return listChecker(transformerName(), chainFunctions(this.function(), Functions.castTo(Functions.value())), dummyPredicate(), this.originalInputValue());
+    return listChecker(transformerName(), chainFunctions(this.function(), Functions.castTo(Fluents.value())), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
   default <E> StreamChecker<OIN, E> asStreamOf(E value) {
-    return streamChecker(transformerName(), chainFunctions(this.function(), Functions.castTo(Functions.value())), dummyPredicate(), this.originalInputValue());
+    return streamChecker(transformerName(), chainFunctions(this.function(), Functions.castTo(Fluents.value())), dummyPredicate(), this.originalInputValue());
   }
 
   @Override

@@ -53,7 +53,7 @@ public class MoreFluentObjectTest {
   @Test
   public void test_asListOf() {
     List<String> var = asList("hello", "world");
-    assertThat(Fluents.value((Object) var).asListOf((String) value()).then().asListOf((String) value()).isEqualTo(asList("hello", "world")));
+    assertThat(Fluents.value((Object) var).asListOf((String) $()).then().asListOf((String) $()).isEqualTo(asList("hello", "world")));
   }
 
   @Test
@@ -65,7 +65,7 @@ public class MoreFluentObjectTest {
   @Test
   public void test_asStreamOf() {
     Stream<String> var = Stream.of("hello", "world");
-    assertThat(Fluents.value((Object) var).asStreamOf((String) value()).then().asStreamOf((String) value()).allMatch(isNotNull()));
+    assertThat(Fluents.value((Object) var).asStreamOf((String) $()).then().asStreamOf((String) $()).allMatch(isNotNull()));
   }
 
   @Test

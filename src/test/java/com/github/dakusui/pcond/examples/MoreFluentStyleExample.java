@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.examples;
 
-import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.TestUtils;
 import org.junit.ComparisonFailure;
@@ -10,8 +9,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.fluent.Fluents.assertThat;
-import static com.github.dakusui.pcond.fluent.Fluents.value;
+import static com.github.dakusui.pcond.fluent.Fluents.*;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static java.lang.String.format;
@@ -79,7 +77,7 @@ public class MoreFluentStyleExample {
   @Test(expected = ComparisonFailure.class)
   public void test4() {
     try {
-      Fluents.assertAll(
+      assertAll(
           value("hello").toUpperCase().then().isEqualTo("HELLO"),
           value("world").toLowerCase().then().contains("WORLD"));
     } catch (ComparisonFailure e) {
@@ -115,7 +113,7 @@ public class MoreFluentStyleExample {
         .orElseThrow(NoSuchElementException::new)
         .lastName();
     List<String> fullName = database.findMembersByLastName(lastName).get(0).toFullName();
-    Fluents.assertAll(
+    assertAll(
         value(lastName)
             .then()
             .verifyWith(allOf(
@@ -144,5 +142,20 @@ public class MoreFluentStyleExample {
             transform(elementAt(0).andThen(cast(String.class))).check(matchesRegex("[A-Z][a-z]+")),
             transform(elementAt(1).andThen(cast(String.class))).check(matchesRegex("[A-Z][a-z]+"))
         )));
+  }
+
+  @Test
+  public void checkTwoValues() {
+    String s = "HI";
+    List<String> strings = asList("HELLO", "WORLD");
+
+    assertAll(
+        value(s).asString()
+            .exercise(TestUtils.stringToLowerCase())
+            .then()
+            .isEqualTo("HI"),
+        value(strings).asListOf((String) value())
+            .then()
+            .findElementsInOrder("HELLO", "WORLD"));
   }
 }

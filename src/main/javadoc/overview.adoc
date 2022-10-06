@@ -270,11 +270,11 @@ If you watn to check your custom class, you can write your own function, which c
 If the `NameUtils.firstNameOf` returns an empty string, it will print the following error message.
 
 ----
-org.junit.ComparisonFailure: Value:"" violated: (!containsString[" "]&&startsWith["R"])
- ""->&&                     ->true |""->&&                     ->false
-       !                    ->true |      !                    ->true
-         containsString[" "]->false|        containsString[" "]->false
-X      startsWith["Y"]      ->true |      startsWith["Y"]      ->false
+ org.junit.ComparisonFailure: Value:"" violated: (!containsString[" "]&&startsWith["R"])
+  ""->&&                     ->true |""->&&                     ->false
+        !                    ->true |      !                    ->true
+          containsString[" "]->false|        containsString[" "]->false
+ X      startsWith["Y"]      ->true |      startsWith["Y"]      ->false
 ----
 
 For an equivalent test, what Hamcrest prints as an error report is:
@@ -352,7 +352,7 @@ public class MoreFluentExample {
     String s = "HI";
     List<String> strings = asList("HELLO", "WORLD");
 
-    assertWhen(
+    assertAll(
         valueOf(s).asString()
           .exercise(TestUtils.stringToLowerCase())
           .then()
@@ -364,7 +364,19 @@ public class MoreFluentExample {
 }
 ----
 
-(t.b.d.)
+This leads to the following report.:
+
+----
+  "HI"             ->WHEN:treatAsString        ->"HI"
+                       stringToLowerCase       ->"hi"
+ X"hi"             ->THEN:isEqualTo["HI"]      ->false
+  ["HELLO","WORLD"]->WHEN:treatAsList          ->["HELLO","WORLD"]
+                              :
+                              :
+  []               ->    (end)                 ->true
+----
+
+Thus, we can keep both the code and report human-readable.
 
 === As a Helper Library for Design by Contract programming
 

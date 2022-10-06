@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * //@formater:off
  * An interface representing an object that selects {@link Method}s from given ones.
- * <p>
+ *
  * This interface is used to choose methods that are appropriate to invoke with
  * given arguments.
  * //@formater:on
@@ -122,7 +122,7 @@ public interface MethodSelector extends Formattable {
      * If {@code a} is 'narrower' than {@code b}, positive integer will be returned.
      * If {@code b} is 'narrower' than {@code a}, negative integer will be returned.
      * Otherwise {@code zero}.
-     * <p>
+     *
      * 'Narrower' means that every parameter of {@code a} is assignable to corresponding
      * one of {@code b}, but any of {@code b} cannot be assigned to {@code a}'s
      * corresponding parameter.

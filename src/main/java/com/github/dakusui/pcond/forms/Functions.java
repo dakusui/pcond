@@ -8,6 +8,7 @@ import com.github.dakusui.pcond.core.multi.MultiFunctionUtils;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
+import com.github.dakusui.pcond.fluent.Fluents;
 
 import java.util.Collection;
 import java.util.List;
@@ -116,22 +117,12 @@ public class Functions {
    * Returns a function that casts an object into a given class.
    *
    * @param value A type place-holder.
-   *              Always use a value returned from {@link Functions#value()} method.
+   *              Always use a value returned from {@link Fluents#value()} method.
    * @param <E>   The type to which the object is case.
    * @return The function.
    */
   public static <E> Function<? super Object, E> castTo(@SuppressWarnings("unused") E value) {
     return PrintableFunctionFactory.Simple.CAST_TO.instance();
-  }
-
-  /**
-   * A method to return a value for a "casting placeholder value".
-   *
-   * @param <E> Type to cast to.
-   * @return Casting placeholder value
-   */
-  public static <E> E value() {
-    return null;
   }
 
   /**
@@ -165,15 +156,17 @@ public class Functions {
   }
 
   /**
+   * //@formatter:off
    * The returned function tries to find a {@code substring} after a given string.
    * If found, it returns the result of the following statement.
-   * <p>
+   *
    * [source,java]
    * ----
    * s.substring(s.indexOf(substring) + substring.length())
    * ----
-   * <p>
+   *
    * If not found, a {@link StringIndexOutOfBoundsException} will be thrown.
+   * //@formatter:on
    *
    * @param substring A substring to find in a given string.
    * @return The string after the {@code substring}.
@@ -240,11 +233,11 @@ public class Functions {
    * The pcond library searches for the "best" matching method for you.
    * In case no matching method is found or more than one methods are found, a {@link RuntimeException}
    * will be thrown.
-   * <p>
+   *
    * In order to specify a parameter which should be passed to the returned function at applying,
    * you can use an object returned by {@link Functions#parameter} method.
    * This is useful to construct a function from an existing method.
-   * <p>
+   *
    * That is, in order to create a function which computes sin using query a method {@link Math#sin(double)},
    * you can do following
    * [source, java]
@@ -256,10 +249,10 @@ public class Functions {
    * }
    * ----
    * This prints {@code 1.0}.
-   * <p>
+   *
    * In case your arguments do not contain any {@link Parameter} object, the input
    * argument passed to the built function will be simply ignored.
-   * <p>
+   *
    * // @formatter:on
    *
    * @param targetClass A class
@@ -277,21 +270,21 @@ public class Functions {
    * Creates a {@link MethodQuery} object from given arguments to search for {@code static} methods.
    * Excepting that this method returns a query for instance methods, it is quite
    * similar to {@link Functions#classMethod(Class, String, Object[])}.
-   * <p>
+   *
    * This method is useful to build a function from an instance method.
    * That is, you can create a function which returns the length of a given string
    * from a method {@link String#length()} with a following code snippet.
-   * <p>
+   *
    * [source, java]
    * ----
    * public void buildLengthFunction() {
    * Function<String, Integer> length = call(instanceMethod(parameter(), "length"));
    * }
    * ----
-   * <p>
+   *
    * In case the {@code targetObject} is not an instance of {@link Parameter} and {@code arguments}
    * contain no {@code Parameter} object, the function will simply ignore the input passed to it.
-   * <p>
+   *
    * // @formatter:on
    *
    * @param targetObject An object on which methods matching returned query should be invoked.
@@ -342,7 +335,7 @@ public class Functions {
   /**
    * Returns a function that calls a method which matches the given {@code methodName}
    * and {@code args} on the object given as input to it.
-   * <p>
+   *
    * Note that method look up is done when the predicate is applied.
    * This means this method does not throw any exception by itself and in case
    * you give wrong {@code methodName} or {@code arguments}, an exception will be
@@ -358,20 +351,32 @@ public class Functions {
     return callInstanceMethod(parameter(), methodName, arguments);
   }
 
+  /**
+   * Returns a function that converts an input value to an exception object, which is thrown by `func`, when it is applied.
+   * If it does not throw an exception, or even if thrown, it is not an instance of {@code exceptionClass}, an assertion executed inside this method will fail and an exception
+   * to indicate it will be thrown.
+   * The exception will be typically an {@link AssertionError}.
+   *
+   * @param exceptionClass An exception class to be thrown.
+   * @param func           A function to be exercised
+   * @param <T>            A type of exception value to be thrown by {@code func}.
+   * @param <E>            An input value type of {@code func}.
+   * @return A function that maps an input value to an exception.
+   */
   @SuppressWarnings("unchecked")
-  public static <T, E extends Throwable> Function<T, E> expectingException(Class<E> exceptionClass, Function<? super T, ?> f) {
+  public static <T, E extends Throwable> Function<T, E> expectingException(Class<E> exceptionClass, Function<? super T, ?> func) {
     return Printables.function(
-        () -> String.format("expectingException(%s,%s)", exceptionClass.getSimpleName(), f),
+        () -> String.format("expectingException(%s,%s)", exceptionClass.getSimpleName(), func),
         in -> {
           Object out;
           try {
-            out = f.apply(in);
+            out = func.apply(in);
           } catch (Throwable e) {
             TestAssertions.assertThat(e, isInstanceOf(exceptionClass));
             return (E) e;
           }
           TestAssertions.assertThat(
-              String.format("%s(%s)->%s", f, formatObject(in, 12), formatObject(out, 12)),
+              String.format("%s(%s)->%s", func, formatObject(in, 12), formatObject(out, 12)),
               allOf(exceptionThrown(), exceptionClassWas(exceptionClass)));
           throw new AssertionError("A line that shouldn't be reached. File a ticket.");
         });

@@ -50,7 +50,7 @@ public enum ReflUtils {
    * Invokes a method found by {@code methodQuery}.
    * All parameters in the query needs to be bound before calling this method.
    * When a query matches no or more than one methods, an exception will be thrown.
-   * <p>
+   *
    * If an exception is thrown by the method, it will be wrapped by {@link RuntimeException} and re-thrown.
    *
    * @param methodQuery A query that speficies the method to be executed.
@@ -95,10 +95,10 @@ public enum ReflUtils {
   /**
    * Tries to find a method whose name is {@code methodName} from a given class {@code aClass}
    * and that can be invoked with parameter values {@code args}.
-   * <p>
+   *
    * Unless one and only one method is found appropriate, an exception will be
    * thrown.
-   * <p>
+   *
    * In this version, boxing/unboxing and casting are not attempted to determine
    * the methodto be returned during the search. This means, if there are overloaded
    * methods of the {@code methodName} that can be invoked with {@code args}, this
