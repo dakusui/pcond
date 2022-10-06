@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.LEAF;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActualInputIfPossibleOrNull;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainExpectationIfPossibleOrNull;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
@@ -147,7 +148,7 @@ public interface Evaluator {
     void enter(Entry.Type type, Evaluable<?> evaluable, String name, Object input) {
       Entry.OnGoing newEntry = new Entry.OnGoing(
           type,
-          (int)onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
+          (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
           entries.size(),
           name,
           toSnapshotIfPossible(input),
@@ -222,14 +223,37 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(T value, Evaluable.Negation<T> negation) {
-      this.enter(Entry.Type.NOT, negation, "!", value);
+      this.enter(Entry.Type.NOT, negation, "not", value);
       negation.target().accept(value, this);
       this.leave(!this.<Boolean>resultValue(), negation, false);
+      mergeLastTwoEntriesIfPossible(this.entries);
+    }
+
+    private static void mergeLastTwoEntriesIfPossible(List<Entry> entries) {
+      if (LEAF.equals(entries.get(entries.size() - 1).type())) {
+        Entry entryForLeaf = entries.remove(entries.size() - 1);
+        Entry entryForNegate = entries.remove(entries.size() - 1);
+        entries.add(mergeNegateAndLeafEntries(entryForNegate, entryForLeaf));
+      }
+    }
+
+    public static Entry.Finalized mergeNegateAndLeafEntries(Entry negate, Entry predicate) {
+      return new Entry.Finalized(
+          predicate.type(),
+          negate.level(),
+          negate.input(),
+          negate.output(),
+          String.format("not(%s)", predicate.formName()),
+          negate.expectedBooleanValue(),
+          negate.expectationDetail(),
+          negate.actualInputDetail(),
+          false
+      );
     }
 
     @Override
     public <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred) {
-      this.enter(Entry.Type.LEAF, leafPred, String.format("%s", leafPred), value);
+      this.enter(LEAF, leafPred, String.format("%s", leafPred), value);
       boolean result = leafPred.predicate().test(value);
       this.leave(result, leafPred, this.currentlyExpectedBooleanValue != result);
     }
@@ -243,7 +267,7 @@ public interface Evaluator {
 
     @Override
     public void evaluate(Context context, Evaluable.ContextPred contextPred) {
-      this.enter(Entry.Type.LEAF, contextPred, String.format("%s", contextPred), context);
+      this.enter(LEAF, contextPred, String.format("%s", contextPred), context);
       contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
       this.leave(this.resultValue(), contextPred, false);
     }
@@ -282,7 +306,7 @@ public interface Evaluator {
     @Override
     public <E> void evaluate(Stream<? extends E> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
-      this.enter(Entry.Type.LEAF, streamPred, String.format("%s", streamPred), value);
+      this.enter(LEAF, streamPred, String.format("%s", streamPred), value);
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
       // on 'findFirst()'.
       // Although NULL_VALUE is an ordinary Object, not a value of E, this works
@@ -411,6 +435,7 @@ public interface Evaluator {
 
     public abstract Object actualInputDetail();
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isTrivial() {
       return this.trivial;
     }
@@ -431,7 +456,16 @@ public interface Evaluator {
       final         Object expectationDetail;
       private final Object actualInputDetail;
 
-      Finalized(Type type, int level, Object input, Object output, String name, boolean expectedBooleanValue, Object expectationDetail, Object actualInputDetail, boolean trivial) {
+      Finalized(
+          Type type,
+          int level,
+          Object input,
+          Object output,
+          String name,
+          boolean expectedBooleanValue,
+          Object expectationDetail,
+          Object actualInputDetail,
+          boolean trivial) {
         super(type, level, input, name, expectedBooleanValue, trivial);
         this.output = output;
         this.expectationDetail = expectationDetail;

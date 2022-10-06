@@ -149,7 +149,6 @@ public interface ReportComposer {
           maxOutputLength = outputLength;
       }
       Function<FormattedEntry, String> formatter = formatterFactory.apply(new int[] { maxInputLength, maxIndentAndFormNameLength, maxOutputLength });
-      AtomicReference<FormattedEntry> lastFormattedEntry = new AtomicReference<>();
       return formattedEntries
           .stream()
           .map(formatter)
@@ -178,26 +177,27 @@ public interface ReportComposer {
         return each;
     }
 
-    private static FormattedEntry squashFormattedEntries(AtomicReference<FormattedEntry> curHolder, FormattedEntry each) {
+    private static FormattedEntry squashFormattedEntries(AtomicReference<FormattedEntry> curHolder, FormattedEntry entry) {
       final FormattedEntry cur = curHolder.get();
       if (cur == null) {
-        if (!each.output().isPresent()) {
-          curHolder.set(each);
+        if (!entry.output().isPresent()) {
+          curHolder.set(entry);
+          // null will be filtered out by the caller.
           return null;
         } else {
-          return each;
+          return entry;
         }
       } else {
-        if (!cur.output().isPresent() && !each.input().isPresent()) {
+        if (!cur.output().isPresent() && !entry.input().isPresent()) {
           curHolder.set(new FormattedEntry(
               cur.input().orElse(null),
-              String.format("%s:%s", cur.formName(), each.formName()),
+              String.format("%s:%s", cur.formName(), entry.formName()),
               cur.indent(),
-              each.output().orElse(null),
+              entry.output().orElse(null),
               cur.mismatchExplanation().orElse(null)));
           return null;
         } else {
-          curHolder.set(each);
+          curHolder.set(entry);
           return cur;
         }
       }
