@@ -8,8 +8,6 @@ import com.github.dakusui.pcond.validator.ApplicationException;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.forms.Functions.length;
-import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -60,15 +58,5 @@ public class WithMessageTest extends TestBase {
               CoreMatchers.containsString("alwaysTrue->true")));
       throw e;
     }
-  }
-
-  @Test
-  public void whenTrasformingPredicateFails_thenPrintDesignedMessage() {
-    Validates.validate("", not(transform(length()).check(lt(100))), ApplicationException::new);
-  }
-
-  @Test
-  public void abc() {
-    Validates.validate("Hello", not(equalTo("Hello")), ApplicationException::new);
   }
 }

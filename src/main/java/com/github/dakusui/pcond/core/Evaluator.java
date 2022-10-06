@@ -5,6 +5,7 @@ import com.github.dakusui.pcond.core.context.Context;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -187,7 +188,7 @@ public interface Evaluator {
       boolean shortcut = conjunction.shortcut();
       for (Evaluable<? super T> each : conjunction.children()) {
         if (i == 0)
-          this.enter(Entry.Type.AND, conjunction, "&&", value);
+          this.enter(Entry.Type.AND, conjunction, conjunction.shortcut() ? "and" : "allOf", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (!cur)
@@ -208,7 +209,7 @@ public interface Evaluator {
       boolean shortcut = disjunction.shortcut();
       for (Evaluable<? super T> each : disjunction.children()) {
         if (i == 0)
-          this.enter(Entry.Type.OR, disjunction, "||", value);
+          this.enter(Entry.Type.OR, disjunction, disjunction.shortcut() ? "or" : "anyOf", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (cur)
@@ -226,7 +227,8 @@ public interface Evaluator {
       this.enter(Entry.Type.NOT, negation, "not", value);
       negation.target().accept(value, this);
       this.leave(!this.<Boolean>resultValue(), negation, false);
-      mergeLastTwoEntriesIfPossible(this.entries);
+      if (Objects.equals(this.resultValue(), this.currentlyExpectedBooleanValue))
+        mergeLastTwoEntriesIfPossible(this.entries);
     }
 
     private static void mergeLastTwoEntriesIfPossible(List<Entry> entries) {
