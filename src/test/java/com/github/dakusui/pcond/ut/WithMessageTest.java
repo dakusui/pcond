@@ -25,7 +25,16 @@ public class WithMessageTest extends TestBase {
           CoreMatchers.containsString("Value:'Value' violated: <Hello, world>"));
       assertThat(
           TestUtils.simplifyString(lineAt(e.getMessage(), 1)),
-          CoreMatchers.containsString("'Value'-><Hello, world>:not(alwaysTrue)->true"));
+          CoreMatchers.allOf(
+              CoreMatchers.containsString("Mismatch:"),
+              CoreMatchers.containsString("'Value'-><Hello, world>:not"),
+              CoreMatchers.containsString("->false")));
+      assertThat(
+          TestUtils.simplifyString(lineAt(e.getMessage(), 2)),
+          CoreMatchers.allOf(
+              CoreMatchers.containsString("Mismatch:"),
+              CoreMatchers.containsString("alwaysTrue"),
+              CoreMatchers.containsString("->true")));
       throw e;
     }
   }
@@ -45,17 +54,18 @@ public class WithMessageTest extends TestBase {
       assertThat(
           TestUtils.simplifyString(lineAt(e.getMessage(), 1)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Hello, world"),
-              CoreMatchers.containsString("not ->false"),
-              CoreMatchers.containsString("Always true!"),
-              CoreMatchers.containsString("alwaysTrue->true")));
+              CoreMatchers.containsString("Mismatch:"),
+              CoreMatchers.containsString("'Value'"),
+              CoreMatchers.containsString("Hello, world:"),
+              CoreMatchers.containsString("not"),
+              CoreMatchers.containsString("->false")));
       assertThat(
           TestUtils.simplifyString(lineAt(e.getMessage(), 2)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Hello, world"),
-              CoreMatchers.containsString("not ->false"),
-              CoreMatchers.containsString("Always true!"),
-              CoreMatchers.containsString("alwaysTrue->true")));
+              CoreMatchers.containsString("Mismatch:"),
+              CoreMatchers.containsString("Always true!:"),
+              CoreMatchers.containsString("alwaysTrue"),
+              CoreMatchers.containsString("->true")));
       throw e;
     }
   }
