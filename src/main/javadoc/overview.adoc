@@ -218,7 +218,7 @@ public class BiscuitTest {
 The object returned by a static method `Matchers.equalTo` is a `Matcher` object as other static methods in the class do.
 The example verifies if `theBuiscuit` is `equalTo` `myBiscuit` as it says.
 
-If this fails, the following message will be printed:
+Suppose if `myBiscuit` is `Sugar` and this test fails, the following message will be printed:
 
 ----
 java.lang.AssertionError:
