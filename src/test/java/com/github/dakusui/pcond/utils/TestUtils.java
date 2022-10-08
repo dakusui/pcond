@@ -63,4 +63,8 @@ public enum TestUtils {
   public static Function<String, String> stringToLowerCase() {
     return function("stringToLowerCase", String::toLowerCase);
   }
+
+  public static String simplifyString(String str) {
+    return str.replaceAll(" +", " ").replaceAll("\"", "'");
+  }
 }

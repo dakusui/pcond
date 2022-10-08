@@ -40,7 +40,7 @@ import static com.github.dakusui.pcond.Requires.requireArgument;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 
-public class Example {
+public class ExampleDbC {
   public static String hello(String yourName) {
     // <2>
     requireArgument(yourName, and(isNotNull(), transform(length()).check(gt(0)), containsString(" ")));
@@ -71,13 +71,12 @@ This results in a following output.
 .Output of Example.java
 ----
 Exception in thread "main" java.lang.IllegalArgumentException: value:"JohnDoe" violated precondition:value (isNotNull&&length >[0]&&containsString[" "])
-&&                               -> false
-  isNotNull("JohnDoe")           -> true
-  transformAndCheck              -> true
-    length("JohnDoe")            -> 7
-    >[0](7)                      -> true
-  containsString[" "]("JohnDoe") -> false
-at com.github.dakusui.pcond.provider.impls.DefaultAssertionProvider.checkValue...
+Mismatch:"JohnDoe"->and                  ->false
+                      isNotNull          ->true
+                      transform:length   ->7
+         7        ->  check:>[0]         ->true
+Mismatch:"JohnDoe"->  containsString[" "]->false
+	at com.github.dakusui.pcond.validator.ExceptionComposer$ForRequire$Default...
 	at ...
 ----
 

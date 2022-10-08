@@ -33,7 +33,7 @@ public class PredicatesTest {
         System.out.println(message);
         TestAssertions.assertThat(
             lineAt(message, 1),
-            Predicates.containsString("100->&& ->false"));
+            Predicates.containsString("100->and ->false"));
         TestAssertions.assertThat(
             lineAt(message, 2),
             Predicates.containsString("isNotNull ->true"));

@@ -58,14 +58,14 @@ public class DefaultValidatorTest extends TestBase {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void withEvaluator_disj_thenFail() {
+  public void withEvaluator_disj$or$_thenFail() {
     try {
       createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
           .requireArgument("Hello", or(isEqualTo("hello"), isEqualTo("HELLO")));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.containsString("||"),
+          CoreMatchers.containsString("or"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
@@ -81,6 +81,22 @@ public class DefaultValidatorTest extends TestBase {
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
+      ));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void withEvaluator_disj$anyOf$_thenFail() {
+    try {
+      createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
+          .requireArgument("Hello", anyOf(isEqualTo("hello"), isEqualTo("HELLO")));
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+      assertThat(lineAt(e.getMessage(), 1), allOf(
+          CoreMatchers.containsString("anyOf"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("false")
       ));
       throw e;
     }
@@ -143,15 +159,15 @@ public class DefaultValidatorTest extends TestBase {
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.containsString("&&"),
-          CoreMatchers.containsString("->"),
-          CoreMatchers.containsString("false")
+          CoreMatchers.containsString("Mismatch:"),
+          CoreMatchers.containsString("and"),
+          CoreMatchers.containsString("->false")
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
+          CoreMatchers.containsString("Mismatch:"),
           CoreMatchers.containsString("isNotNull"),
-          CoreMatchers.containsString("->"),
-          CoreMatchers.containsString("false")
+          CoreMatchers.containsString("->false")
 
       ));
       throw e;
@@ -160,16 +176,15 @@ public class DefaultValidatorTest extends TestBase {
 
   /**
    * Expected message:
-   * <pre>
+   * ----
    * java.lang.IllegalArgumentException: value:"hello" violated precondition:value (isNotNull&&!isEmpty&&length >[10])
-   * "hello" -> &&          ->     false
-   *              isNotNull ->   true
-   *              !         ->   true
-   *                isEmpty -> false
-   *              =>        ->   false
-   *                length  -> 5
-   * 5       ->     >[10]   -> false
-   * </pre>
+   * Mismatch:"hello"->and               ->false
+   *                     isNotNull       ->true
+   *                     not(isEmpty)    ->true
+   *                     transform:length->5
+   * Mismatch:5      ->  check:>[10]     ->false
+   * ----
+   *
    */
   @Test(expected = IllegalArgumentException.class)
   public void withEvaluator_columns100$whenShorterThan10() {
@@ -179,45 +194,35 @@ public class DefaultValidatorTest extends TestBase {
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.containsString("&&"),
-          CoreMatchers.containsString("->"),
-          CoreMatchers.containsString("false")
+          CoreMatchers.containsString("Mismatch:"),
+          CoreMatchers.containsString("and"),
+          CoreMatchers.containsString("->false")
 
       ));
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.containsString("  isNotNull"),
-          CoreMatchers.containsString("->"),
-          CoreMatchers.containsString("true")
+          CoreMatchers.not(CoreMatchers.containsString("Mismatch:")),
+          CoreMatchers.containsString("isNotNull"),
+          CoreMatchers.containsString("->true")
 
       ));
       assertThat(lineAt(e.getMessage(), 3), allOf(
-          CoreMatchers.containsString("  !"),
-          CoreMatchers.containsString("->"),
-          CoreMatchers.containsString("true")
+          CoreMatchers.not(CoreMatchers.containsString("Mismatch:")),
+          CoreMatchers.containsString("not(isEmpty)"),
+          CoreMatchers.containsString("->true")
 
       ));
       assertThat(lineAt(e.getMessage(), 4), allOf(
-          CoreMatchers.containsString("  isEmpty"),
-          CoreMatchers.containsString("->"),
-          CoreMatchers.containsString("false")
-
-      ));
-      assertThat(lineAt(e.getMessage(), 5),
-          CoreMatchers.containsString("  transform")
-      );
-      assertThat(lineAt(e.getMessage(), 5), allOf(
+          CoreMatchers.not(CoreMatchers.containsString("Mismatch:")),
+          CoreMatchers.containsString("transform:"),
           CoreMatchers.containsString("length"),
-          CoreMatchers.containsString("->"),
-          CoreMatchers.containsString("5")
+          CoreMatchers.containsString("->5")
 
       ));
-      assertThat(lineAt(e.getMessage(), 6),
-          CoreMatchers.containsString("  check")
-      );
-      assertThat(lineAt(e.getMessage(), 6), allOf(
+      assertThat(lineAt(e.getMessage(), 5), allOf(
+          CoreMatchers.containsString("Mismatch:"),
+          CoreMatchers.containsString("check:"),
           CoreMatchers.containsString(">[10]"),
-          CoreMatchers.containsString("->"),
-          CoreMatchers.containsString("false")
+          CoreMatchers.containsString("->false")
 
       ));
       throw e;

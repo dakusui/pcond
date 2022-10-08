@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.validator;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -14,8 +15,8 @@ public class Explanation {
 
   public Explanation(String message, String expected, String actual) {
     this.message = message;
-    this.expected = expected;
-    this.actual = actual;
+    this.expected = joinStringArray(splitAndTrim(expected));
+    this.actual = joinStringArray(splitAndTrim(actual));
   }
 
   public String message() {
@@ -37,14 +38,14 @@ public class Explanation {
   }
 
   private static String composeDiff(String expected, String actual) {
-    String[] e = expected.split(format("%n"));
-    String[] a = actual.split(format("%n"));
+    String[] e = splitAndTrim(expected);
+    String[] a = splitAndTrim(actual);
     List<String> b = new LinkedList<>();
-    for (int i = 0; i < a.length; i++) {
+    for (int i = 0; i < Math.max(a.length, e.length); i++) {
       if (i < Math.min(e.length, a.length) && Objects.equals(e[i], a[i])) {
         b.add(format("         %s", a[i]));
       } else {
-        b.add(format("Mismatch %s", a[i]));
+        b.add(format("Mismatch:%s", i < a.length ? a[i] : ""));
       }
     }
     return b.stream().collect(joining(format("%n")));
@@ -52,5 +53,22 @@ public class Explanation {
 
   public static Explanation fromMessage(String msg) {
     return new Explanation(msg, ReportComposer.Utils.composeReport(null, null), ReportComposer.Utils.composeReport(null, null));
+  }
+
+  private static String[] splitAndTrim(String expected) {
+    String[] in = expected.split(format("%n"));
+    List<String> out = new LinkedList<>();
+    boolean nonEmptyFound = false;
+    for (int i = in.length - 1; i >= 0; i--) {
+      if (!"".equals(in[i]))
+        nonEmptyFound = true;
+      if (nonEmptyFound)
+        out.add(0, in[i]);
+    }
+    return out.toArray(new String[0]);
+  }
+
+  private static String joinStringArray(String[] stringArray) {
+    return Arrays.stream(stringArray).collect(joining(format("%n")));
   }
 }
