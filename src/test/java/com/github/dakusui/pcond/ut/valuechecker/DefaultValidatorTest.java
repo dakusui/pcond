@@ -58,7 +58,7 @@ public class DefaultValidatorTest extends TestBase {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void withEvaluator_disj_thenFail() {
+  public void withEvaluator_disj$or$_thenFail() {
     try {
       createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
           .requireArgument("Hello", or(isEqualTo("hello"), isEqualTo("HELLO")));
@@ -81,6 +81,22 @@ public class DefaultValidatorTest extends TestBase {
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
+      ));
+      throw e;
+    }
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void withEvaluator_disj$anyOf$_thenFail() {
+    try {
+      createAssertionProvider(nameWidth(useEvaluator(newProperties(), true), 100))
+          .requireArgument("Hello", anyOf(isEqualTo("hello"), isEqualTo("HELLO")));
+    } catch (IllegalArgumentException e) {
+      e.printStackTrace();
+      assertThat(lineAt(e.getMessage(), 1), allOf(
+          CoreMatchers.containsString("anyOf"),
+          CoreMatchers.containsString("->"),
+          CoreMatchers.containsString("false")
       ));
       throw e;
     }
