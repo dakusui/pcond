@@ -66,6 +66,8 @@
         <cobertura-maven-plugin.version>2.7</cobertura-maven-plugin.version>
         <github.global.server>github</github.global.server>
         <env.GEM_PATH>${project.basedir}/generated/build/gems</env.GEM_PATH>
+        <maven-compiler-plugin.source>1.8</maven-compiler-plugin.source>
+        <maven-compiler-plugin.target>1.8</maven-compiler-plugin.target>
     </properties>
 
     <dependencies>
@@ -200,8 +202,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${maven-compiler-plugin.source}</source>
+                    <target>${maven-compiler-plugin.target}</target>
                     <compilerArgs>
                         <!--
                         <arg>-Xlint:all,-options,-path</arg>
