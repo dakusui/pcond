@@ -53,6 +53,10 @@ public class Fluents {
     return value();
   }
 
+  public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
+    return value(value).then().predicate(predicate);
+  }
+
   /**
    * Fluent version of {@link TestAssertions#assertThat(Object, Predicate)}.
    *

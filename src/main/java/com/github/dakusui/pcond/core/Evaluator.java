@@ -14,8 +14,7 @@ import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.LEAF;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActualInputIfPossibleOrNull;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainExpectationIfPossibleOrNull;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
-import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
-import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
+import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.util.Collections.unmodifiableList;
 
 /**
@@ -169,7 +168,7 @@ public interface Evaluator {
           current.result(
               toSnapshotIfPossible(result),
               unexpected ? explainExpectationIfPossibleOrNull(evaluable) : null,
-              unexpected ? explainActualInputIfPossibleOrNull(evaluable) : null));
+              unexpected ? explainActualInputIfPossibleOrNull(evaluable, current.input()) : null));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult = result;
       if (evaluable.requestExpectationFlip())
@@ -572,17 +571,17 @@ public interface Evaluator {
   interface Explainable {
     Object explainExpectation();
 
-    Object explainActualInput();
+    Object explainActualInput(Object actualInputValue);
 
     static Object explainExpectationIfPossibleOrNull(Object value) {
       if (value instanceof Explainable)
-        return ((Explainable) value).explainExpectation();
+        return explainValue(((Explainable) value).explainExpectation());
       return null;
     }
 
-    static Object explainActualInputIfPossibleOrNull(Object value) {
+    static Object explainActualInputIfPossibleOrNull(Object value, Object actualInputValue) {
       if (value instanceof Explainable)
-        return ((Explainable) value).explainActualInput();
+        return explainValue(((Explainable) value).explainActualInput(actualInputValue));
       return null;
     }
   }

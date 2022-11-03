@@ -377,7 +377,7 @@ public class Predicates {
       }
 
       @Override
-      public Object explainActualInput() {
+      public Object explainActualInput(Object actualInputValue) {
         return formatExplanation(bActual, "BUT NOT FOUND");
       }
 
@@ -407,7 +407,7 @@ public class Predicates {
       }
 
       @Override
-      public Object explainActualInput() {
+      public Object explainActualInput(Object actualInputValue) {
         return ongoingActualExplanation.toString() + originalStringSupplier.get().substring(lastTestedPosition.get());
       }
     });
@@ -434,8 +434,8 @@ public class Predicates {
       }
 
       @Override
-      public Object explainActualInput() {
-        return explainable.explainActualInput();
+      public Object explainActualInput(Object actualInputValue) {
+        return explainable.explainActualInput(actualInputValue);
       }
     }
 
@@ -567,7 +567,7 @@ public class Predicates {
       }
 
       @Override
-      public Object explainActualInput() {
+      public Object explainActualInput(Object actualInputValue) {
         return renderExplanationString(createFullExplanationList(actualExplanationList, rest));
       }
 
