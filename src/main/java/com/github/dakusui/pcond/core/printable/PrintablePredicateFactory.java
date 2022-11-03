@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.internals.InternalUtils;
@@ -217,7 +218,7 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  private static class LeafPredicate<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T> {
+  private static class LeafPredicate<T> extends PrintablePredicate<T> implements Evaluable.LeafPred<T>, Evaluator.Explainable {
     protected LeafPredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<? super T> predicate) {
       super(creator, args, formatter, predicate);
     }
@@ -225,6 +226,16 @@ public enum PrintablePredicateFactory {
     @Override
     public Predicate<? super T> predicate() {
       return predicate;
+    }
+
+    @Override
+    public Object explainExpectation() {
+      return asList(this.formatter.get(), this.args());
+    }
+
+    @Override
+    public Object explainActualInput(Object actualInputValue) {
+      return actualInputValue;
     }
 
     @Override

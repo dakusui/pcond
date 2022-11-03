@@ -2,8 +2,8 @@ package com.github.dakusui.pcond.internals;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.pcond.validator.Validator;
 import com.github.dakusui.pcond.validator.Explanation;
+import com.github.dakusui.pcond.validator.Validator;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -71,6 +71,37 @@ public enum InternalUtils {
           maxLength + 2 /* 2 for margin for single quotes not necessary for non-strings */
       );
     return value.toString().substring(value.getClass().getPackage().getName().length() + 1);
+  }
+
+  public static String explainValue(Object value) {
+    StringBuilder b = new StringBuilder();
+    if (value instanceof Collection) {
+      for (Object each : (Collection<?>) value) {
+        explainValue(b, 0, each);
+      }
+    } else {
+      explainValue(b, 0, value);
+    }
+    return b.toString().trim();
+  }
+
+  private static void explainValue(StringBuilder buffer, int level, Object value) {
+    if (value instanceof Collection) {
+      if (((Collection<?>) value).isEmpty())
+        explainValue(buffer, level, "[]");
+      else {
+        for (Object each : (Collection<?>) value)
+          explainValue(buffer, level + 1, each);
+      }
+    } else {
+      buffer.append(String.format("%s%s%n", spaces(level * 2), value));
+    }
+  }
+
+  private static String spaces(int spaces) {
+    if (spaces <= 0)
+      return "";
+    return String.format("%-" + (spaces) + "s", "");
   }
 
   private static int toNextEven(int value) {
