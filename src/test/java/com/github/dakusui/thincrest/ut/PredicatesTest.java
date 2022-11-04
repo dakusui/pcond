@@ -2,7 +2,7 @@ package com.github.dakusui.thincrest.ut;
 
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.thincrest.TestAssertions;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
+import static com.github.dakusui.shared.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;

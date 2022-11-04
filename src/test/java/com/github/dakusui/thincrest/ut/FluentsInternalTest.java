@@ -1,6 +1,6 @@
 package com.github.dakusui.thincrest.ut;
 
-import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.shared.FluentTestUtils;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
@@ -13,7 +13,7 @@ import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.function;
-import static com.github.dakusui.pcond.utils.TestForms.objectHashCode;
+import static com.github.dakusui.shared.utils.TestForms.objectHashCode;
 import static java.util.Arrays.asList;
 
 public class FluentsInternalTest extends TestBase {

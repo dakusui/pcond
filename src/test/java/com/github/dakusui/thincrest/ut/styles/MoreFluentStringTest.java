@@ -1,7 +1,7 @@
 package com.github.dakusui.thincrest.ut.styles;
 
 import com.github.dakusui.pcond.fluent.Fluents;
-import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 
 import java.util.regex.Pattern;

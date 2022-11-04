@@ -1,6 +1,6 @@
 package com.github.dakusui.thincrest.ut;
 
-import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 

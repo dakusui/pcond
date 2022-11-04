@@ -1,7 +1,7 @@
 package com.github.dakusui.valid8j.compatibility;
 
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 
 import java.io.Serializable;

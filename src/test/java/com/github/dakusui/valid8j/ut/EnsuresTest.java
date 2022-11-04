@@ -4,10 +4,10 @@ import com.github.dakusui.valid8j.Ensures;
 import com.github.dakusui.pcond.validator.Validator;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.validator.exceptions.PostconditionViolationException;
-import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.utils.TestUtils.firstLineOf;
+import static com.github.dakusui.shared.utils.TestUtils.firstLineOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 

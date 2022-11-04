@@ -2,7 +2,7 @@ package com.github.dakusui.valid8j.ut;
 
 import com.github.dakusui.valid8j.Assertions;
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.pcond.validator.Validator;
 import com.github.dakusui.valid8j.ValidationFluents;
 import org.junit.Test;

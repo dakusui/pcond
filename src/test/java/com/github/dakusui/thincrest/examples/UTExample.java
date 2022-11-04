@@ -1,16 +1,16 @@
 package com.github.dakusui.thincrest.examples;
 
 import com.github.dakusui.thincrest.examples.sut.NameUtils;
-import com.github.dakusui.pcond.utils.TestClassExpectation;
-import com.github.dakusui.pcond.utils.TestClassExpectation.EnsureJUnitResult;
-import com.github.dakusui.pcond.utils.TestClassExpectation.ResultPredicateFactory.*;
-import com.github.dakusui.pcond.utils.TestMethodExpectation;
+import com.github.dakusui.shared.utils.TestClassExpectation;
+import com.github.dakusui.shared.utils.TestClassExpectation.EnsureJUnitResult;
+import com.github.dakusui.shared.utils.TestClassExpectation.ResultPredicateFactory.*;
+import com.github.dakusui.shared.utils.TestMethodExpectation;
 import org.junit.Test;
 
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.thincrest.TestAssertions.assumeThat;
 import static com.github.dakusui.pcond.forms.Predicates.*;
-import static com.github.dakusui.pcond.utils.TestMethodExpectation.Result.*;
+import static com.github.dakusui.shared.utils.TestMethodExpectation.Result.*;
 
 @TestClassExpectation({
     @EnsureJUnitResult(type = WasNotSuccessful.class, args = {}),

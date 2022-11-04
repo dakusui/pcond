@@ -1,6 +1,6 @@
 package com.github.dakusui.valid8j.ut.styles;
 
-import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.pcond.validator.exceptions.PostconditionViolationException;
 import com.github.dakusui.pcond.validator.exceptions.PreconditionViolationException;
 import com.github.dakusui.valid8j.ValidationFluents;
@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 import static com.github.dakusui.pcond.fluent.Fluents.value;
 import static com.github.dakusui.pcond.forms.Predicates.containsString;
 import static com.github.dakusui.pcond.forms.Predicates.not;
-import static com.github.dakusui.pcond.utils.TestUtils.stringToLowerCase;
+import static com.github.dakusui.shared.utils.TestUtils.stringToLowerCase;
 
 @RunWith(Enclosed.class)
 public class FluentStyleDbCTest {

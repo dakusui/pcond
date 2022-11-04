@@ -4,12 +4,12 @@ import com.github.dakusui.valid8j.Requires;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.validator.exceptions.PreconditionViolationException;
-import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.forms.Predicates.isNotNull;
-import static com.github.dakusui.pcond.utils.TestUtils.firstLineOf;
+import static com.github.dakusui.shared.utils.TestUtils.firstLineOf;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;

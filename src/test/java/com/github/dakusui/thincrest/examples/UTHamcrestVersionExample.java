@@ -1,13 +1,13 @@
 package com.github.dakusui.thincrest.examples;
 
-import com.github.dakusui.pcond.utils.TestClassExpectation;
-import com.github.dakusui.pcond.utils.TestClassExpectation.EnsureJUnitResult;
-import com.github.dakusui.pcond.utils.TestClassExpectation.ResultPredicateFactory.*;
-import com.github.dakusui.pcond.utils.TestMethodExpectation;
+import com.github.dakusui.shared.utils.TestClassExpectation;
+import com.github.dakusui.shared.utils.TestClassExpectation.EnsureJUnitResult;
+import com.github.dakusui.shared.utils.TestClassExpectation.ResultPredicateFactory.*;
+import com.github.dakusui.shared.utils.TestMethodExpectation;
 import com.github.dakusui.thincrest.examples.sut.NameUtils;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.utils.TestMethodExpectation.Result.*;
+import static com.github.dakusui.shared.utils.TestMethodExpectation.Result.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assume.assumeThat;
