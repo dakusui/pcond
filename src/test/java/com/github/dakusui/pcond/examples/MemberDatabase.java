@@ -10,12 +10,12 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
-class MemberDatabase {
-  Optional<Member> lookUp(String id) {
+public class MemberDatabase {
+  public Optional<Member> lookUp(String id) {
     return MEMBERS.stream().filter(each -> Objects.equals(id, each.id())).findFirst();
   }
 
-  List<Member> findMembersByLastName(String lastName) {
+  public List<Member> findMembersByLastName(String lastName) {
     return findMembersByPredicate(each -> Objects.equals(lastName, each.lastName()));
   }
 
@@ -43,7 +43,7 @@ class MemberDatabase {
       new Member("0011", "Woodrow", "Wilson", "PhD", "President of the United States"),
       new Member("0012", "Joshua", "Norton", "Emperor of the United State", "Protector of Mexico"));
 
-  static class Member {
+  public static class Member {
     private final String       id;
     private final List<String> titles;
     private final String       firstName;
@@ -64,7 +64,7 @@ class MemberDatabase {
       return this.firstName;
     }
 
-    String lastName() {
+    public String lastName() {
       return this.lastName;
     }
 
@@ -72,7 +72,7 @@ class MemberDatabase {
       return this.titles;
     }
 
-    List<String> toFullName() {
+    public List<String> toFullName() {
       return Stream.concat(Stream.of(firstName(), lastName()), titles().stream()).collect(toList());
     }
   }
