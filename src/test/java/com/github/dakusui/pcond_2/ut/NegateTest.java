@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond_2.ut;
 
-import com.github.dakusui.valid8j.Validates;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import com.github.dakusui.pcond.validator.ApplicationException;
@@ -14,12 +13,13 @@ import static com.github.dakusui.pcond.forms.Functions.length;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static com.github.dakusui.pcond.utils.TestUtils.simplifyString;
+import static com.github.dakusui.shared.TestUtils.validate;
 
 public class NegateTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void whenInvertedTrasformingPredicateFails_thenPrintDesignedMessage$transformIsntLeafAndNotMerged() {
     try {
-      Validates.validate("", not(transform(length()).check(lt(100))), ApplicationException::new);
+      validate("", not(transform(length()).check(lt(100))), ApplicationException::new);
     } catch (ApplicationException e) {
       e.printStackTrace();
       MatcherAssert.assertThat(
@@ -50,7 +50,7 @@ public class NegateTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void whenInvertedTrasformingPredicateFails_thenPrintDesignedMessage$notMergedWhenMismatch() {
     try {
-      Validates.validate("Hello", not(equalTo("Hello")), ApplicationException::new);
+      validate("Hello", not(equalTo("Hello")), ApplicationException::new);
     } catch (ApplicationException e) {
       e.printStackTrace();
       MatcherAssert.assertThat(
@@ -77,7 +77,7 @@ public class NegateTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void whenInvertedTrasformingPredicateFails_thenPrintDesignedMessage$mergedWhenNotMismatch() {
     try {
-      Validates.validate("Hello", and(not(equalTo("Hello!")), alwaysFalse()), ApplicationException::new);
+      validate("Hello", and(not(equalTo("Hello!")), alwaysFalse()), ApplicationException::new);
     } catch (ApplicationException e) {
       e.printStackTrace();
       MatcherAssert.assertThat(

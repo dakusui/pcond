@@ -3,6 +3,7 @@ package com.github.dakusui.pcond_2.ut;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.TestUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -10,7 +11,7 @@ import org.junit.runner.RunWith;
 
 import java.util.function.Function;
 
-import static com.github.dakusui.valid8j.Requires.requireArgument;
+import static com.github.dakusui.shared.TestUtils.validate;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -35,11 +36,11 @@ public class PrintablesFunctionTest {
               not(is(o))));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = TestUtils.IllegalValueException.class)
     public void testHandleNull() {
       Function<String, String> f = Functions.identity();
       String o = null;
-      requireArgument(o, Predicates.transform(f).check(Predicates.isNotNull()));
+      validate(o, Predicates.transform(f).check(Predicates.isNotNull()));
     }
 
   }

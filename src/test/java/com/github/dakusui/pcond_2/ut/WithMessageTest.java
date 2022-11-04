@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond_2.ut;
 
-import com.github.dakusui.valid8j.Validates;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.utils.TestBase;
 import com.github.dakusui.pcond.utils.TestUtils;
@@ -9,13 +8,14 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
+import static com.github.dakusui.shared.TestUtils.validate;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class WithMessageTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void whenWithMessagePredicateFails_thenPrintDesignedMessage() throws ApplicationException {
     try {
-      Validates.validate("Value",
+      validate("Value",
           Predicates.withMessage("<Hello, world>",
               Predicates.not(Predicates.alwaysTrue())), ApplicationException::new);
     } catch (ApplicationException e) {
@@ -42,7 +42,7 @@ public class WithMessageTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void whenNestedWithMessagePredicateFails_thenPrintDesignedMessage() throws ApplicationException {
     try {
-      Validates.validate("Value",
+      validate("Value",
           Predicates.withMessage("Hello, world", Predicates.not(
               Predicates.withMessage("Always true!", Predicates.alwaysTrue()))),
           ApplicationException::new);

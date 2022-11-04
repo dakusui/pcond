@@ -6,9 +6,9 @@ import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.ut.IntentionalError;
-import com.github.dakusui.pcond.validator.exceptions.PreconditionViolationException;
 import com.github.dakusui.shared.ExperimentalsUtils;
 import com.github.dakusui.shared.TargetMethodHolder;
+import com.github.dakusui.shared.TestUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
@@ -23,7 +23,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static com.github.dakusui.shared.ExperimentalsUtils.areEqual;
 import static com.github.dakusui.shared.ExperimentalsUtils.stringEndsWith;
-import static com.github.dakusui.valid8j.Requires.require;
+import static com.github.dakusui.shared.TestUtils.validate;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -39,7 +39,7 @@ public class DbCExperimentalsTest {
    */
   @Test
   public void hello() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2", "o"))))
             .check(anyMatch(toContextPredicate(stringEndsWith()))));
@@ -47,25 +47,25 @@ public class DbCExperimentalsTest {
 
   @Test
   public void hello_a() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(toContextPredicate(stringEndsWith(), 0, 1))));
   }
 
   @Test
   public void hello_b() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toContextPredicate(stringEndsWith(), 1, 0))));
   }
 
-  @Test(expected = PreconditionViolationException.class)
+  @Test(expected = TestUtils.IllegalValueException.class)
   public void hello_b_e() {
     try {
-      require(
+      validate(
           asList("Hi", "hello", "world"),
           transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toContextPredicate(stringEndsWith(), 0, 1))));
-    } catch (PreconditionViolationException e) {
+    } catch (TestUtils.IllegalValueException e) {
       /* BEFORE
 com.github.dakusui.pcond.provider.exceptions.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
 ["Hi","hello","world"]          -> =>                                                                  ->     false
@@ -99,7 +99,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   @Test(expected = NullPointerException.class)
   public void givenStreamContainingNull_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
     try {
-      require(
+      validate(
           asList(null, "Hi", "hello", "world", null),
           transform(stream().andThen(nest(asList("1", "2", "o"))))
               .check(noneMatch(
@@ -127,17 +127,17 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
     }
   }
 
-  @Test(expected = PreconditionViolationException.class)
+  @Test(expected = TestUtils.IllegalValueException.class)
   public void hello_b_e2() {
     try {
-      require(
+      validate(
           asList("Hi", "hello", "world", null),
           transform(stream().andThen(nest(asList("1", "2", "o"))))
               .check(
                   noneMatch(
                       toContextPredicate(transform(Functions.length()).check(gt(3))))
               ));
-    } catch (PreconditionViolationException e) {
+    } catch (TestUtils.IllegalValueException e) {
       e.printStackTrace(System.out);
       assertThat(
           lineAt(e.getMessage(), 4),
@@ -174,7 +174,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
 
   @Test(expected = IntentionalError.class)
   public void hello_b_e4() {
-    require(
+    validate(
         asList(null, "Hi", "hello", "world", null),
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
             toContextPredicate(transform((Function<String, Integer>) s -> {
@@ -184,25 +184,25 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
 
   @Test
   public void hello_c() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(toContextStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(toContextPredicate(stringEndsWith(), 0, 1))));
   }
 
   @Test
   public void hello_d_1() {
-    require(
+    validate(
         "hello",
         transform(streamOf().andThen(nest(asList("Hello", "HELLO", "hello")))).check(anyMatch(toContextPredicate(areEqual()))));
   }
 
-  @Test(expected = PreconditionViolationException.class)
+  @Test(expected = TestUtils.IllegalValueException.class)
   public void givenStreamOfSingleString$hello$_whenRequireNullIsFound_thenPreconditionViolationWithCorrectMessageIsThrown() {
     try {
-      require(
+      validate(
           "hello",
           transform(streamOf().andThen(toContextStream())).check(anyMatch(toContextPredicate(isNull()))));
-    } catch (PreconditionViolationException e) {
+    } catch (TestUtils.IllegalValueException e) {
       e.printStackTrace();
       int i = 0;
       assertThat(
@@ -230,18 +230,18 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
 
   @Test
   public void givenStreamOfSingleString$hello$_whenRequireNonNullIsFound_thenPassing() {
-    require(
+    validate(
         "hello",
         transform(toContext()).check(toContextPredicate(isNotNull())));
   }
 
-  @Test(expected = PreconditionViolationException.class)
+  @Test(expected = TestUtils.IllegalValueException.class)
   public void givenString$hello$_whenTransformToContextAndCheckContextValueIsNull_thenPreconditionViolationWithCorrectMessageThrown() {
     try {
-      require(
+      validate(
           "hello",
           transform(toContext()).check(toContextPredicate(isNull())));
-    } catch (PreconditionViolationException e) {
+    } catch (TestUtils.IllegalValueException e) {
       e.printStackTrace(System.out);
       int i = 0;
       assertThat(
@@ -271,13 +271,13 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
     }
   }
 
-  @Test(expected = PreconditionViolationException.class)
+  @Test(expected = TestUtils.IllegalValueException.class)
   public void given$hello$_$world$_whenRequireNestedStreamImpossibleConditions_thenPreconditionViolationExceptionWithCorrectMessage() {
     try {
-      require(
+      validate(
           asList("hello", "world"),
           transform(stream().andThen(nest(asList("1", "2", "o")))).check(allMatch(toContextPredicate(stringEndsWith()))));
-    } catch (PreconditionViolationException e) {
+    } catch (TestUtils.IllegalValueException e) {
       e.printStackTrace(System.out);
       int i = 0;
       assertThat(
@@ -307,35 +307,35 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
 
   @Test
   public void hello2() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2")))).check(alwaysTrue()));
   }
 
   @Test
   public void hello3() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(alwaysTrue())));
   }
 
   @Test
   public void hello3_a() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(alwaysTrue()));
   }
 
   @Test
   public void hello3_b() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(alwaysTrue())));
   }
 
   @Test
   public void hello4() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(new Predicate<Context>() {
           @Override
@@ -352,7 +352,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
 
   @Test
   public void hello4_a() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<Context>() {
           @Override
@@ -367,9 +367,9 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
         })));
   }
 
-  @Test(expected = PreconditionViolationException.class)
+  @Test(expected = TestUtils.IllegalValueException.class)
   public void hello5() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2")))).check(allMatch(new Predicate<Context>() {
           @Override
@@ -386,7 +386,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
 
   @Test
   public void hello6() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<Context>() {
           @Override
@@ -403,16 +403,15 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
 
   @Test
   public void nestedLoop_success() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toContextPredicate(equalTo("msg-2"), 1))));
   }
 
-  @Test(expected = PreconditionViolationException.class)
+  @Test(expected = TestUtils.IllegalValueException.class)
   public void nestedLoop_fail() {
-    require(
+    validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toContextPredicate(equalTo("msg-3"), 1))));
   }
-
 }

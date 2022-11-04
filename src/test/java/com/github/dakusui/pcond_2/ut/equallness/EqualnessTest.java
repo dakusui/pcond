@@ -19,10 +19,11 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.valid8j.Requires.requireNonNull;
 import static com.github.dakusui.pcond_2.ut.equallness.EqualnessTest.TestDef.DUMMY_OBJECT;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 

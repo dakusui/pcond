@@ -11,8 +11,8 @@ import org.junit.Test;
 import java.util.Objects;
 import java.util.function.Function;
 
-import static com.github.dakusui.valid8j.Requires.requireArgument;
 import static com.github.dakusui.pcond.forms.Functions.*;
+import static com.github.dakusui.shared.TestUtils.validate;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -65,7 +65,7 @@ public class CallTest extends TestBase {
   @Test(expected = InternalException.class)
   public void methodNotFound() {
     try {
-      requireArgument("hello", Predicates.callp("undefined", "H"));
+      validate("hello", Predicates.callp("undefined", "H"));
     } catch (InternalException e) {
       e.printStackTrace();
       assertThat(
@@ -99,12 +99,12 @@ public class CallTest extends TestBase {
 
   @Test
   public void nullCanMatch() {
-    requireArgument(new AcceptsNull(), Predicates.callp("method", "hello", null));
+    validate(new AcceptsNull(), Predicates.callp("method", "hello", null));
   }
 
   @Test(expected = InternalException.class)
   public void nullReturningFunctionAsPredicate() {
-    requireArgument(new ReturnsNull(), Predicates.callp("method", "hello"));
+    validate(new ReturnsNull(), Predicates.callp("method", "hello"));
   }
 
   @Test(expected = InternalException.class)
@@ -128,7 +128,7 @@ public class CallTest extends TestBase {
   @Test(expected = InternalException.class)
   public void methodAmbiguous_primitiveBoxed() {
     try {
-      requireArgument(new Ambiguous2(), Predicates.callp("method", 1));
+      validate(new Ambiguous2(), Predicates.callp("method", 1));
     } catch (InternalException e) {
       e.printStackTrace();
       assertThat(
