@@ -3,8 +3,8 @@ package com.github.dakusui.pcondtest.experimentals;
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.forms.Experimentals;
+import com.github.dakusui.shared.TestUtils;
 import com.github.dakusui.shared.utils.ut.TestBase;
-import com.github.dakusui.thincrest.TestAssertions;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
@@ -18,15 +18,16 @@ import static com.github.dakusui.pcond.forms.Functions.stream;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
 import static com.github.dakusui.shared.ExperimentalsUtils.stringEndsWith;
+import static com.github.dakusui.shared.TestUtils.validate;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.*;
 
 public class TestAssertionsExperimentalsTest extends TestBase {
 
-  @Test(expected = ComparisonFailure.class)
+  @Test(expected = TestUtils.IllegalValueException.class)
   public void helloError() {
-    TestAssertions.assertThat(
+    validate(
         singletonList("hello"),
         transform(stream().andThen(nest(singletonList("o"))))
             .check(noneMatch(toContextPredicate(stringEndsWith()))));
