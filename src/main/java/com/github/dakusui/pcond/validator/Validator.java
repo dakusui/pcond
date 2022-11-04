@@ -1,7 +1,5 @@
 package com.github.dakusui.pcond.validator;
 
-import com.github.dakusui.valid8j.Assertions;
-import com.github.dakusui.valid8j.Validates;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Predicates;
@@ -126,8 +124,8 @@ public interface Validator {
    * If the value satisfies a condition `cond`, the value itself will be returned.
    * Otherwise, an exception created by `forValidate.exceptionForGeneralViolation()`
    * will be thrown.
-   * This method is intended to be used by {@link Validates#validate(Object, Predicate, Function)}
-   * method.
+   * This method is intended to be used by {@code Validates#validate(Object, Predicate, Function)}
+   * method in valid8j library.
    *
    * @param value       The value to be checked.
    * @param cond        A condition to validate the `value`.
@@ -144,8 +142,8 @@ public interface Validator {
    * If the value is not `null`, the value itself will be returned.
    * Otherwise, an exception created by `forValidate.exceptionForGeneralViolation()`
    * will be thrown.
-   * This method is intended to be used by {@link Validates#validateNonNull(Object)}
-   * method.
+   * This method is intended to be used by {@code Validates#validateNonNull(Object)}
+   * method in valid8j library.
    *
    * @param value       The value to be checked.
    * @param forValidate An exception composer for "validate" methods.
@@ -161,8 +159,8 @@ public interface Validator {
    * If the value satisfies a condition `cond` for checking an argument variable, the value itself will be returned.
    * Otherwise, an exception created by `forValidate.exceptionForIllegalArgument()`
    * will be thrown.
-   * This method is intended to be used by {@link Validates#validateArgument(Object, Predicate)}
-   * method.
+   * This method is intended to be used by {@code Validates#validateArgument(Object, Predicate)}
+   * method in valid8j library.
    *
    * @param value       The value to be checked.
    * @param cond        A condition to validate the `value`.
@@ -179,8 +177,8 @@ public interface Validator {
    * If the value satisfies a condition `cond` for checking a state, the value itself will be returned.
    * Otherwise, an exception created by `forValidate.exceptionForIllegalState()`
    * will be thrown.
-   * This method is intended to be used by {@link Validates#validateState(Object, Predicate)}
-   * method.
+   * This method is intended to be used by {@code Validates#validateState(Object, Predicate)}
+   * method in valid8j library.
    *
    * @param value       The value to be checked.
    * @param cond        A condition to validate the `value`.
@@ -196,8 +194,8 @@ public interface Validator {
    * Validates the given variable `value`.
    * If the value satisfies a condition `cond`, the value itself will be returned.
    * Otherwise, an exception created by `exceptionFactory` will be thrown.
-   * This method is intended to be used by {@link Validates#validate(Object, Predicate, Function)}
-   * method.
+   * This method is intended to be used by {@code Validates#validate(Object, Predicate, Function)}
+   * method in valid8j library.
    *
    * @param value            The value to be checked.
    * @param cond             A condition to validate the `value`.
@@ -281,7 +279,7 @@ public interface Validator {
   /**
    * A method to check if a `value` satisfies a predicate `cond`.
    *
-   * This method is intended to be used by {@link Assertions#that(Object, Predicate)}.
+   * This method is intended to be used by {@code Assertions#that(Object, Predicate)} in valid8j library.
    * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionInvariantConditionViolation()`
    * method will be thrown.
    *
@@ -300,7 +298,7 @@ public interface Validator {
   /**
    * A method to check if a `value` satisfies a predicate `cond`.
    *
-   * This method is intended to be used by {@link Assertions#precondition(Object, Predicate)}.
+   * This method is intended to be used by {@code Assertions#precondition(Object, Predicate)} in valid8j library.
    * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionPreconditionViolation()`
    * method will be thrown.
    *
@@ -319,7 +317,7 @@ public interface Validator {
   /**
    * A method to check if a `value` satisfies a predicate `cond`.
    *
-   * This method is intended to be used by {@link Assertions#postcondition(Object, Predicate)} .
+   * This method is intended to be used by {@code Assertions#postcondition(Object, Predicate)} in valid8j library.
    * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionPostconditionViolation()`
    * method will be thrown.
    *

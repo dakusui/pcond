@@ -1,4 +1,4 @@
-package com.github.dakusui.valid8j.ut;
+package com.github.dakusui.pcond_2.ut;
 
 import com.github.dakusui.valid8j.Validates;
 import com.github.dakusui.pcond.forms.Predicates;

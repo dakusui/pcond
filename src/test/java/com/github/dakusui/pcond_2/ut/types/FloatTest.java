@@ -1,4 +1,4 @@
-package com.github.dakusui.thincrest.ut.types;
+package com.github.dakusui.pcond_2.ut.types;
 
 import org.junit.ComparisonFailure;
 import org.junit.Test;

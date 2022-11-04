@@ -31,8 +31,6 @@ import static java.util.Objects.requireNonNull;
  * Functions retrieved by method in this class are all "printable".
  */
 public class Functions {
-  ;
-
   private Functions() {
 
   }

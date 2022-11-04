@@ -1,6 +1,6 @@
-package com.github.dakusui.valid8j.ut.bugfixes;
+package com.github.dakusui.pcond_2.ut.bugfixes;
 
-import com.github.dakusui.valid8j.ut.bugfixes.issue42.Issue42Utils;
+import com.github.dakusui.pcond_2.ut.bugfixes.issue42.Issue42Utils;
 import org.junit.Test;
 
 import java.util.Collections;

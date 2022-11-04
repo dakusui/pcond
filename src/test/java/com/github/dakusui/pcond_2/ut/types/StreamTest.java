@@ -1,4 +1,4 @@
-package com.github.dakusui.thincrest.ut.types;
+package com.github.dakusui.pcond_2.ut.types;
 
 import com.github.dakusui.thincrest.TestAssertions;
 import com.github.dakusui.pcond.forms.Predicates;

@@ -1,12 +1,8 @@
 package com.github.dakusui.pcond.validator;
 
-import com.github.dakusui.valid8j.Ensures;
-import com.github.dakusui.valid8j.Validates;
 import com.github.dakusui.pcond.validator.exceptions.PostconditionViolationException;
 import com.github.dakusui.pcond.validator.exceptions.PreconditionViolationException;
 import com.github.dakusui.pcond.validator.exceptions.ValidationException;
-import com.github.dakusui.valid8j.Requires;
-import com.github.dakusui.thincrest.TestAssertions;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -24,25 +20,25 @@ import static com.github.dakusui.pcond.validator.ExceptionComposer.Utils.createE
 public interface ExceptionComposer {
   /**
    * Returns an instance to compose exceptions used with `requireXyz` methods in
-   * {@link Requires} entry-point class.
+   * {@code Requires} entry-point class of valid8j library.
    *
-   * @return An object to compose exceptions for methods in {@link Requires}.
+   * @return An object to compose exceptions for methods in {@code Requires}.
    */
   ForRequire forRequire();
 
   /**
    * Returns an instance to compose exceptions used with `ensureXyz` methods in
-   * {@link Ensures} entry-point class.
+   * {@code Ensures} entry-point class of valid8j library.
    *
-   * @return An object to compose exceptions for methods in {@link Ensures}.
+   * @return An object to compose exceptions for methods in {@code Ensures}.
    */
   ForEnsure forEnsure();
 
   /**
    * Returns an instance to compose exceptions used with `validateXyz` methods in
-   * {@link Validates} entry-point class.
+   * {@code Validates} entry-point class of valid8j library.
    *
-   * @return An object to compose exceptions for methods in {@link Validates}.
+   * @return An object to compose exceptions for methods in {@code Validates}.
    */
   ForValidate defaultForValidate();
 
@@ -55,7 +51,7 @@ public interface ExceptionComposer {
 
   /**
    * Returns an instance to compose exceptions used in `assertThat` and `assumeThat`
-   * methods in {@link TestAssertions} entry-point class.
+   * methods in {@code TestAssertions} entry-point class of thincrest library.
    * Other entry-point classes provided for use cases of the `pcond` library as
    * a test assertion library may also use this method.
    *
@@ -73,9 +69,9 @@ public interface ExceptionComposer {
    * @see Validator.Configuration.Builder
    */
   class Impl implements ExceptionComposer {
-    final private ForRequire  forRequire;
-    final private ForEnsure   forEnsure;
-    final private ForValidate defaultForValidate;
+    final private ForRequire       forRequire;
+    final private ForEnsure        forEnsure;
+    final private ForValidate      defaultForValidate;
     final private ForAssertion     forAssert;
     final private ForTestAssertion forAssertThat;
 
@@ -144,7 +140,6 @@ public interface ExceptionComposer {
      *
      * @param message A message attached to the composed exception.
      * @return A composed exception.
-     *
      * @see Base#exceptionForNonNullViolation(String)
      */
     default Throwable exceptionForIllegalState(String message) {
@@ -292,7 +287,7 @@ public interface ExceptionComposer {
         try {
           return create(c, explanation);
         } catch (InvocationTargetException | InstantiationException |
-                 IllegalAccessException | NoSuchMethodException e) {
+            IllegalAccessException | NoSuchMethodException e) {
           throw new RuntimeException("FAILED TO INSTANTIATE EXCEPTION: '" + c.getCanonicalName() + "'", e);
         }
       }

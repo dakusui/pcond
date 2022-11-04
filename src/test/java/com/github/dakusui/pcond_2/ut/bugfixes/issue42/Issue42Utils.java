@@ -1,4 +1,4 @@
-package com.github.dakusui.valid8j.ut.bugfixes.issue42;
+package com.github.dakusui.pcond_2.ut.bugfixes.issue42;
 
 import java.util.HashMap;
 import java.util.HashSet;

@@ -1,4 +1,4 @@
-package com.github.dakusui.valid8j.ut.bugfixes;
+package com.github.dakusui.pcond_2.ut.bugfixes;
 
 import com.github.dakusui.pcond.utils.TestBase;
 import org.junit.Test;

@@ -1,4 +1,4 @@
-package com.github.dakusui.thincrest.ut;
+package com.github.dakusui.pcond_2.ut.experimentals;
 
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
@@ -14,7 +14,6 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.forms.Experimentals.nest;
 import static com.github.dakusui.pcond.forms.Experimentals.toContextPredicate;
-import static com.github.dakusui.pcond.forms.Functions.curry;
 import static com.github.dakusui.pcond.forms.Functions.stream;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
@@ -37,9 +36,6 @@ public class TestAssertionsExperimentalsTest extends TestBase {
   public void toContextPredicateTest() {
     assertFalse(toContextPredicate(isNotNull()).test(Context.from(null)));
     assertTrue(toContextPredicate(isNotNull()).test(Context.from(new Object())));
-  }
-
-  public static class IntentionalError extends Error {
   }
 
   @Test

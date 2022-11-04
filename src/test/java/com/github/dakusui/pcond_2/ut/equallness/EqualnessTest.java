@@ -1,4 +1,4 @@
-package com.github.dakusui.valid8j.ut.equallness;
+package com.github.dakusui.pcond_2.ut.equallness;
 
 import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.pcond.forms.Functions;
@@ -6,6 +6,7 @@ import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.ut.FunctionsTest.MultiFunctionTest.TargetMethodHolder;
 import com.github.dakusui.pcond.utils.ut.TestBase;
+import org.junit.Assert;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,7 +20,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.valid8j.Requires.requireNonNull;
-import static com.github.dakusui.valid8j.ut.equallness.EqualnessTest.TestDef.DUMMY_OBJECT;
+import static com.github.dakusui.pcond_2.ut.equallness.EqualnessTest.TestDef.DUMMY_OBJECT;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -82,7 +83,7 @@ public class EqualnessTest extends TestBase {
 
   @Test
   public void notEqualsWithForeignObject() {
-    assertNotEquals(target, DUMMY_OBJECT);
+    Assert.assertNotEquals(target, DUMMY_OBJECT);
   }
 
   @Test
