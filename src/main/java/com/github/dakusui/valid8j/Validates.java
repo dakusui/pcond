@@ -6,6 +6,8 @@ import com.github.dakusui.pcond.validator.ExceptionComposer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.validator.Validator.INSTANCE;
+
 public enum Validates {
   ;
   static final Validator VALIDATOR = createValidator(com.github.dakusui.pcond.validator.Validator.INSTANCE.configuration().exceptionComposer().defaultForValidate());
@@ -39,23 +41,23 @@ public enum Validates {
 
 
     default <T> T validate(T value, Predicate<? super T> cond) {
-      return com.github.dakusui.pcond.validator.Validator.INSTANCE.validate(value, cond, exceptionComposerForValidate());
+      return INSTANCE.validate(value, cond, exceptionComposerForValidate());
     }
 
     default <T, E extends RuntimeException> T validate(T value, Predicate<? super T> cond, Function<String, E> exceptionFactory) {
-      return com.github.dakusui.pcond.validator.Validator.INSTANCE.validate(value, cond, exceptionFactory::apply);
+      return INSTANCE.validate(value, cond, exceptionFactory::apply);
     }
 
     default <T> T validateNonNull(T value) {
-      return com.github.dakusui.pcond.validator.Validator.INSTANCE.validateNonNull(value, exceptionComposerForValidate());
+      return INSTANCE.validateNonNull(value, exceptionComposerForValidate());
     }
 
     default <T> T validateArgument(T value, Predicate<? super T> cond) {
-      return com.github.dakusui.pcond.validator.Validator.INSTANCE.validateArgument(value, cond, exceptionComposerForValidate());
+      return INSTANCE.validateArgument(value, cond, exceptionComposerForValidate());
     }
 
     default <T> T validateState(T value, Predicate<? super T> cond) {
-      return com.github.dakusui.pcond.validator.Validator.INSTANCE.validateState(value, cond, exceptionComposerForValidate());
+      return INSTANCE.validateState(value, cond, exceptionComposerForValidate());
     }
 
     static Validator create(ExceptionComposer.ForValidate exceptionComposerForValidate) {
