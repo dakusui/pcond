@@ -45,5 +45,4 @@ public class StreamTest extends TestBase {
     Stream<String> value = Stream.of("Hello", "world");
     validate(value, when().asObject().asStreamOf((String) value()).then().anyMatch(Predicates.isEqualTo("World")));
   }
-
 }
