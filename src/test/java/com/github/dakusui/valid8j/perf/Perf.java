@@ -1,6 +1,6 @@
 package com.github.dakusui.valid8j.perf;
 
-import com.github.dakusui.pcondtest.validator.ApplicationException;
+import com.github.dakusui.shared.ApplicationException;
 import org.junit.*;
 import org.junit.rules.Stopwatch;
 import org.junit.runner.Description;

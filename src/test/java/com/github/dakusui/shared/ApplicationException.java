@@ -1,4 +1,4 @@
-package com.github.dakusui.pcondtest.validator;
+package com.github.dakusui.shared;
 
 public class ApplicationException extends RuntimeException {
   public ApplicationException(String message) {

@@ -3,7 +3,7 @@ package com.github.dakusui.pcondtest;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.shared.utils.TestBase;
 import com.github.dakusui.shared.utils.TestUtils;
-import com.github.dakusui.pcondtest.validator.ApplicationException;
+import com.github.dakusui.shared.ApplicationException;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
