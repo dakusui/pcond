@@ -1,9 +1,12 @@
 package com.github.dakusui.pcond.validator;
 
-import com.github.dakusui.pcond.Validates;
+import com.github.dakusui.valid8j.Ensures;
+import com.github.dakusui.valid8j.Validates;
 import com.github.dakusui.pcond.validator.exceptions.PostconditionViolationException;
 import com.github.dakusui.pcond.validator.exceptions.PreconditionViolationException;
 import com.github.dakusui.pcond.validator.exceptions.ValidationException;
+import com.github.dakusui.valid8j.Requires;
+import com.github.dakusui.thincrest.TestAssertions;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -21,17 +24,17 @@ import static com.github.dakusui.pcond.validator.ExceptionComposer.Utils.createE
 public interface ExceptionComposer {
   /**
    * Returns an instance to compose exceptions used with `requireXyz` methods in
-   * {@link com.github.dakusui.pcond.Requires} entry-point class.
+   * {@link Requires} entry-point class.
    *
-   * @return An object to compose exceptions for methods in {@link com.github.dakusui.pcond.Requires}.
+   * @return An object to compose exceptions for methods in {@link Requires}.
    */
   ForRequire forRequire();
 
   /**
    * Returns an instance to compose exceptions used with `ensureXyz` methods in
-   * {@link com.github.dakusui.pcond.Ensures} entry-point class.
+   * {@link Ensures} entry-point class.
    *
-   * @return An object to compose exceptions for methods in {@link com.github.dakusui.pcond.Ensures}.
+   * @return An object to compose exceptions for methods in {@link Ensures}.
    */
   ForEnsure forEnsure();
 
@@ -52,7 +55,7 @@ public interface ExceptionComposer {
 
   /**
    * Returns an instance to compose exceptions used in `assertThat` and `assumeThat`
-   * methods in {@link com.github.dakusui.pcond.TestAssertions} entry-point class.
+   * methods in {@link TestAssertions} entry-point class.
    * Other entry-point classes provided for use cases of the `pcond` library as
    * a test assertion library may also use this method.
    *

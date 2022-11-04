@@ -1,10 +1,10 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.Assertions;
-import com.github.dakusui.pcond.fluent.Fluents;
+import com.github.dakusui.valid8j.Assertions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import com.github.dakusui.pcond.validator.Validator;
+import com.github.dakusui.valid8j.ValidationFluents;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -27,13 +27,13 @@ public class AssertionsTest {
     @Test
     public void fluent$testAssertThat$thenPassing() {
       String var = "10";
-      assert Fluents.that(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
+      assert ValidationFluents.that(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
     }
 
     @Test
     public void fluent$testAssertAll$thenPassing() {
       String var = "10";
-      assert Fluents.all(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
+      assert ValidationFluents.all(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
     }
 
 
@@ -45,13 +45,13 @@ public class AssertionsTest {
     @Test
     public void fluent$testAssertPrecondition$thenPassing() {
       String var = "10";
-      assert Fluents.precondition(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
+      assert ValidationFluents.precondition(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
     }
 
     @Test
     public void fluent$testAssertPreconditions$thenPassing() {
       String var = "10";
-      assert Fluents.preconditions(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
+      assert ValidationFluents.preconditions(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
     }
 
     @Test
@@ -63,13 +63,13 @@ public class AssertionsTest {
     @Test
     public void fluent$testAssertPostcondition$thenPassing() {
       String var = "10";
-      assert Fluents.postcondition(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
+      assert ValidationFluents.postcondition(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
     }
 
     @Test
     public void fluent$testAssertPostconditions$thenPassing() {
       String var = "10";
-      assert Fluents.postconditions(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
+      assert ValidationFluents.postconditions(value(var).thenVerifyWith(Predicates.ge("10").and(Predicates.lt("20"))));
     }
   }
 

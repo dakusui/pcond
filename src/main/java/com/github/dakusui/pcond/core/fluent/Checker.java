@@ -8,6 +8,7 @@ import com.github.dakusui.pcond.core.fluent.checkers.*;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
+import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
@@ -32,7 +33,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.*;
 public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
     extends
     Identifiable,
-    Fluents.Statement<OIN>,
+    Statement<OIN>,
     Evaluable.Transformation<OIN, T>,
     IntoPhraseFactory.ForChecker<OIN, T>,
     AsPhraseFactory.ForChecker<OIN> {

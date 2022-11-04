@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.fluent.Fluents.value;
-import static com.github.dakusui.pcond.fluent.Fluents.assertThat;
+import static com.github.dakusui.thincrest.TestFluents.assertThat;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 
 @SuppressWarnings("NewClassNamingConvention")

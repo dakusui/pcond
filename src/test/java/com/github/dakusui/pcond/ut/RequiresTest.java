@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.Requires;
+import com.github.dakusui.valid8j.Requires;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.validator.exceptions.PreconditionViolationException;

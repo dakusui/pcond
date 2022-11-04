@@ -1,10 +1,10 @@
 package com.github.dakusui.pcond.examples;
 
-import com.github.dakusui.pcond.ut.FluentsInternalTest;
+import com.github.dakusui.thincrest.ut.FluentsInternalTest;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.fluent.FluentsInternal.*;
-import static com.github.dakusui.pcond.TestAssertions.assertThat;
+import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
 import static java.util.Arrays.asList;
 

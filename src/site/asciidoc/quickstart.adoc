@@ -34,9 +34,9 @@ Following is the first example of the `pcond` library.
 package com.github.dakusui.pcond.examples;
 
 // <1>
-import static com.github.dakusui.pcond.Assertions.precondition;
-import static com.github.dakusui.pcond.Ensures.ensureNonNull;
-import static com.github.dakusui.pcond.Requires.requireArgument;
+import static com.github.dakusui.valid8j.Assertions.precondition;
+import static com.github.dakusui.valid8j.Ensures.ensureNonNull;
+import static com.github.dakusui.valid8j.Requires.requireArgument;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 

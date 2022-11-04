@@ -11,7 +11,7 @@ import org.junit.Test;
 import java.util.Objects;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.Requires.requireArgument;
+import static com.github.dakusui.valid8j.Requires.requireArgument;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;

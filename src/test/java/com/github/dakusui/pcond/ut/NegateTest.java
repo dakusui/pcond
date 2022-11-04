@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.Validates;
+import com.github.dakusui.valid8j.Validates;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
 import com.github.dakusui.pcond.validator.ApplicationException;

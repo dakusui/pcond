@@ -7,7 +7,7 @@ import org.junit.Test;
 import java.io.Serializable;
 import java.util.Map;
 
-import static com.github.dakusui.pcond.Requires.requireArgument;
+import static com.github.dakusui.valid8j.Requires.requireArgument;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 
 public class StringTest extends TestBase {

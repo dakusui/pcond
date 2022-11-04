@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.Requires.requireArgument;
+import static com.github.dakusui.valid8j.Requires.requireArgument;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;

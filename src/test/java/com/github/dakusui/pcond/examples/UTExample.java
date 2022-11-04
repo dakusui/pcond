@@ -6,8 +6,8 @@ import com.github.dakusui.pcond.utils.TestClassExpectation.ResultPredicateFactor
 import com.github.dakusui.pcond.utils.TestMethodExpectation;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.TestAssertions.assertThat;
-import static com.github.dakusui.pcond.TestAssertions.assumeThat;
+import static com.github.dakusui.thincrest.TestAssertions.assertThat;
+import static com.github.dakusui.thincrest.TestAssertions.assumeThat;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.utils.TestMethodExpectation.Result.*;
 

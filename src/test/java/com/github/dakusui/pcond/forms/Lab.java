@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.Requires.requireArgument;
+import static com.github.dakusui.valid8j.Requires.requireArgument;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static java.util.Arrays.asList;

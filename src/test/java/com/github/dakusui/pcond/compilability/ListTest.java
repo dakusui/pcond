@@ -5,7 +5,7 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.List;
 
-import static com.github.dakusui.pcond.Requires.requireArgument;
+import static com.github.dakusui.valid8j.Requires.requireArgument;
 import static com.github.dakusui.pcond.forms.Functions.stream;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static java.util.Arrays.asList;

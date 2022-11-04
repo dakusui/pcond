@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.examples;
 
-import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 import org.junit.Test;
@@ -9,7 +8,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.TestAssertions.assertThat;
+import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.forms.Functions.cast;
 import static com.github.dakusui.pcond.forms.Functions.elementAt;
 import static com.github.dakusui.pcond.forms.Predicates.*;

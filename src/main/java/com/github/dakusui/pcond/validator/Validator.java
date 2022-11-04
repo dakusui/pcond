@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.validator;
 
-import com.github.dakusui.pcond.Validates;
+import com.github.dakusui.valid8j.Assertions;
+import com.github.dakusui.valid8j.Validates;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Predicates;
@@ -280,7 +281,7 @@ public interface Validator {
   /**
    * A method to check if a `value` satisfies a predicate `cond`.
    *
-   * This method is intended to be used by {@link com.github.dakusui.pcond.Assertions#that(Object, Predicate)}.
+   * This method is intended to be used by {@link Assertions#that(Object, Predicate)}.
    * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionInvariantConditionViolation()`
    * method will be thrown.
    *
@@ -299,7 +300,7 @@ public interface Validator {
   /**
    * A method to check if a `value` satisfies a predicate `cond`.
    *
-   * This method is intended to be used by {@link com.github.dakusui.pcond.Assertions#precondition(Object, Predicate)}.
+   * This method is intended to be used by {@link Assertions#precondition(Object, Predicate)}.
    * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionPreconditionViolation()`
    * method will be thrown.
    *
@@ -318,7 +319,7 @@ public interface Validator {
   /**
    * A method to check if a `value` satisfies a predicate `cond`.
    *
-   * This method is intended to be used by {@link com.github.dakusui.pcond.Assertions#postcondition(Object, Predicate)} .
+   * This method is intended to be used by {@link Assertions#postcondition(Object, Predicate)} .
    * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionPostconditionViolation()`
    * method will be thrown.
    *

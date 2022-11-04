@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.forms;
 
-import com.github.dakusui.pcond.TestAssertions;
+import com.github.dakusui.thincrest.TestAssertions;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
