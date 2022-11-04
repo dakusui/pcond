@@ -204,11 +204,15 @@ public interface Validator {
    * @return The value itself.
    */
   default <T> T validate(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionFactory) {
+    return validate_2(value, cond, explanation -> exceptionFactory.apply(explanation.toString()));
+  }
+
+  default <T> T validate_2(T value, Predicate<? super T> cond, ExceptionFactory<Throwable> exceptionFactory) {
     return checkValueAndThrowIfFails(
         value,
         cond,
         configuration().messageComposer()::composeMessageForValidation,
-        explanation -> exceptionFactory.apply(explanation.toString()));
+        exceptionFactory);
   }
 
   /**
@@ -385,7 +389,10 @@ public interface Validator {
    * @return The `value` itself.
    */
   @SuppressWarnings("unchecked")
-  default <T> T checkValueAndThrowIfFails(T value, Predicate<? super T> cond, BiFunction<T, Predicate<? super T>, String> messageComposerFunction, ExceptionFactory<Throwable> exceptionComposerFunction) {
+  default <T> T checkValueAndThrowIfFails(
+      T value, Predicate<? super T> cond,
+      BiFunction<T, Predicate<? super T>, String> messageComposerFunction,
+      ExceptionFactory<Throwable> exceptionComposerFunction) {
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {

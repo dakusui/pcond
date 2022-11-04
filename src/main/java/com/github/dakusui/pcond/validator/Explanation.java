@@ -43,9 +43,10 @@ public class Explanation {
     List<String> b = new LinkedList<>();
     for (int i = 0; i < Math.max(a.length, e.length); i++) {
       if (i < Math.min(e.length, a.length) && Objects.equals(e[i], a[i])) {
-        b.add(format("         %s", a[i]));
+        b.add(format("          %s", a[i]));
       } else {
-        b.add(format("Mismatch:%s", i < a.length ? a[i] : ""));
+        b.add(format("Mismatch:<%s", i < e.length ? e[i] : ""));
+        b.add(format("Mismatch:>%s", i < a.length ? a[i] : ""));
       }
     }
     return b.stream().collect(joining(format("%n")));
