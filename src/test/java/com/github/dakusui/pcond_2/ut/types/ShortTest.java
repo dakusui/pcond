@@ -1,45 +1,42 @@
 package com.github.dakusui.pcond_2.ut.types;
 
+import com.github.dakusui.shared.TestUtils;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
-import static com.github.dakusui.thincrest.ut.FluentsInternalTest.Utils.when;
-import static com.github.dakusui.thincrest.TestAssertions.assertThat;
+import static com.github.dakusui.shared.FluentTestUtils.when;
+import static com.github.dakusui.shared.TestUtils.validate;
 
 public class ShortTest {
   @Test
   public void shortTest() {
     short v = 123;
-    assertThat(
+    validate(
         v,
-        when().asShort().then().lessThan((short)124)
-    );
+        when().asShort().then().lessThan((short) 124));
   }
 
   @Test(expected = ComparisonFailure.class)
   public void shortTestFail() {
     short v = 123;
-    assertThat(
+    validate(
         v,
-        when().asShort().then().lessThan((short)122)
-    );
+        when().asShort().then().lessThan((short) 122));
   }
 
   @Test
   public void shortTransformerTest() {
     short v = 123;
-    assertThat(
+    validate(
         v,
-        when().asObject().asShort().then().lessThan((short)124)
-    );
+        when().asObject().asShort().then().lessThan((short) 124));
   }
 
-  @Test(expected = ComparisonFailure.class)
+  @Test(expected = TestUtils.IllegalValueException.class)
   public void shortTransformerTestFail() {
     short v = 123;
-    assertThat(
+    validate(
         v,
-        when().asObject().asShort().then().lessThan((short)122)
-    );
+        when().asObject().asShort().then().lessThan((short) 122));
   }
 }

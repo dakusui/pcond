@@ -1,11 +1,10 @@
 package com.github.dakusui.thincrest.ut;
 
-import com.github.dakusui.pcond.core.fluent.Fluent;
 import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.FluentTestUtils;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -22,7 +21,7 @@ public class FluentsInternalTest extends TestBase {
   public void whenPassingValidation_thenPasses$1() {
     assertThat(
         new Parent(),
-        Utils.when().as((Parent) value())
+        FluentTestUtils.when().as((Parent) value())
             .exercise(Parent::parentMethod1)
             .then()
             .verifyWith(isEqualTo("returnValueFromParentMethod")).build());
@@ -49,7 +48,7 @@ public class FluentsInternalTest extends TestBase {
   public void example() {
     assertThat(
         asList("Hello", "world"),
-        Utils.when().asListOf((String) value())
+        FluentTestUtils.when().asListOf((String) value())
             .elementAt(0)
             .then().asString()
             .findSubstrings("hello", "world")
@@ -70,7 +69,7 @@ public class FluentsInternalTest extends TestBase {
       assertThat(
           new Parent(),
           allOf(
-              Utils.whenValueOfClass(Parent.class).<Parent>asObject()
+              FluentTestUtils.whenValueOfClass(Parent.class).<Parent>asObject()
                   .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                   .then()
                   .asString()
@@ -93,7 +92,7 @@ public class FluentsInternalTest extends TestBase {
     try {
       assertThat(
           (Supplier<Parent>) Parent::new,
-          Utils.whenValueOfClass(Supplier.class)
+          FluentTestUtils.whenValueOfClass(Supplier.class)
               .asObject()
               .exercise(Supplier::get)
               .then().verifyWith(allOf(
@@ -132,11 +131,11 @@ public class FluentsInternalTest extends TestBase {
   @Test(expected = ComparisonFailure.class)
   public void multiValueAssertionTest_allOf() {
     assertThat(
-        Utils.list(123, Utils.list("Hello", "world")),
+        FluentTestUtils.list(123, FluentTestUtils.list("Hello", "world")),
         allOf(
-            Utils.when().at(0).asInteger()
+            FluentTestUtils.when().at(0).asInteger()
                 .then().equalTo(122),
-            Utils.when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
+            FluentTestUtils.when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
                 $().at(0).asString()
                     .then().isEqualTo("hello"),
                 $().at(1).asString()
@@ -146,11 +145,11 @@ public class FluentsInternalTest extends TestBase {
   @Test(expected = ComparisonFailure.class)
   public void multiValueAssertionTest_anyOf() {
     assertThat(
-        Utils.list(123, Utils.list("Hello", "world")),
+        FluentTestUtils.list(123, FluentTestUtils.list("Hello", "world")),
         allOf(
-            Utils.when().at(0).asInteger()
+            FluentTestUtils.when().at(0).asInteger()
                 .then().equalTo(122),
-            Utils.when().at(1).asListOfClass(String.class).thenVerifyWithAnyOf(asList(
+            FluentTestUtils.when().at(1).asListOfClass(String.class).thenVerifyWithAnyOf(asList(
                 $().at(0).asString()
                     .then().isEqualTo("hello"),
                 $().at(1).asString()
@@ -162,7 +161,7 @@ public class FluentsInternalTest extends TestBase {
     String hello = "hello";
     assertThat(
         hello,
-        Utils.when().asObject().thenVerifyWith(allOf(
+        FluentTestUtils.when().asObject().thenVerifyWith(allOf(
             $().as((String) value())
                 .exercise(objectHashCode())
                 .then().isInstanceOf(Integer.class)))
@@ -174,38 +173,11 @@ public class FluentsInternalTest extends TestBase {
     String hello = "hello";
     assertThat(
         hello,
-        Utils.when().asObject().then().verifyWith(allOf(
+        FluentTestUtils.when().asObject().then().verifyWith(allOf(
             $().as((String) value())
                 .exercise(objectHashCode())
                 .then()
                 .isInstanceOf(Integer.class))));
   }
 
-  public enum Utils {
-    ;
-
-    public static <T> Fluent<T> when() {
-      return whenValueOf(value());
-    }
-
-    /**
-     * Use the value returned from `value()` as the argument for this
-     * method as a place-holder for the sake of readability.
-     *
-     * @param value A value place-holder.
-     * @param <T>   The type of the object to be verified.
-     * @return A new ObjectTransformer for type `T`.
-     */
-    public static <T> Fluent<T> whenValueOf(@SuppressWarnings("unused") T value) {
-      return fluent("WHEN");
-    }
-
-    public static <T> Fluent<T> whenValueOfClass(@SuppressWarnings("unused") Class<T> klass) {
-      return whenValueOf(value());
-    }
-
-    public static List<?> list(Object... args) {
-      return asList(args);
-    }
-  }
 }

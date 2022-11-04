@@ -2,7 +2,7 @@ package com.github.dakusui.thincrest.examples;
 
 import com.github.dakusui.thincrest.examples.sut.MemberDatabase;
 import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.thincrest.ut.FluentsInternalTest;
+import com.github.dakusui.shared.FluentTestUtils;
 import org.junit.Test;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class FluentStyleExample {
 
     assertThat(
         database,
-        FluentsInternalTest.Utils.when().asValueOfClass(MemberDatabase.class)
+        FluentTestUtils.when().asValueOfClass(MemberDatabase.class)
             .exercise(lookUpMemberAndGetLastName)
             .then()
             .isNotNull());
@@ -47,7 +47,7 @@ public class FluentStyleExample {
 
     assertThat(
         database,
-        FluentsInternalTest.Utils.when().asValueOfClass(MemberDatabase.class)
+        FluentTestUtils.when().asValueOfClass(MemberDatabase.class)
             .exercise(lookUpMemberWith.apply(identifier))
             .then()
             .intoStringWith(memberLastName)
@@ -66,12 +66,12 @@ public class FluentStyleExample {
     assertThat(
         asList(lastName, fullName),
         allOf(
-            FluentsInternalTest.Utils.when().asListOfClass(String.class)
+            FluentTestUtils.when().asListOfClass(String.class)
                 .elementAt(0)
                 .then().verifyWith(allOf(
                     isNotNull(),
                     not(isEmptyString()))),
-            FluentsInternalTest.Utils.when().asListOfClass(String.class)
+            FluentTestUtils.when().asListOfClass(String.class)
                 .then()
                 .contains(lastName)));
   }

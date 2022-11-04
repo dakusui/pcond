@@ -1,6 +1,6 @@
 package com.github.dakusui.thincrest.examples;
 
-import com.github.dakusui.thincrest.ut.FluentsInternalTest;
+import com.github.dakusui.shared.FluentTestUtils;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.fluent.FluentsInternal.*;
@@ -13,11 +13,11 @@ public class MultiValueAssertion {
   @Test//(expected = ComparisonFailure.class)
   public void test() {
     assertThat(
-        FluentsInternalTest.Utils.list(123, FluentsInternalTest.Utils.list("Hello", "world")),
+        FluentTestUtils.list(123, FluentTestUtils.list("Hello", "world")),
         allOf(
-            FluentsInternalTest.Utils.when().at(0).asInteger()
+            FluentTestUtils.when().at(0).asInteger()
                 .then().equalTo(122),
-            FluentsInternalTest.Utils.when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
+            FluentTestUtils.when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
                 $().at(0).asString()
                     .then().isEqualTo("hello"),
                 $().at(1).asString()
