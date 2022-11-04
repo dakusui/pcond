@@ -33,14 +33,14 @@ public class NegateTest extends TestBase {
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 1)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:<"),
+              CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("not"),
               CoreMatchers.containsString("->true")));
       // actual (1)
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 2)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:>"),
+              CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("not"),
               CoreMatchers.containsString("->false")));
       // (2)
@@ -54,14 +54,14 @@ public class NegateTest extends TestBase {
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 4)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:"),
+              CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("check:<[100]"),
               CoreMatchers.containsString("->false")));
       // actual (3)
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 5)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:>"),
+              CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("check:<[100]"),
               CoreMatchers.containsString("->true")));
       throw e;
@@ -84,7 +84,7 @@ public class NegateTest extends TestBase {
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 1)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:<"),
+              CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("'Hello'"),
               CoreMatchers.containsString("->not"),
               CoreMatchers.containsString("->true")
@@ -93,7 +93,7 @@ public class NegateTest extends TestBase {
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 2)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:>"),
+              CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("'Hello'"),
               CoreMatchers.containsString("->not"),
               CoreMatchers.containsString("->false")));
@@ -101,14 +101,14 @@ public class NegateTest extends TestBase {
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 3)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:<"),
+              CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("=['Hello']"),
               CoreMatchers.containsString("->false")));
       // actual (2)
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 4)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:>"),
+              CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("=['Hello']"),
               CoreMatchers.containsString("->true")));
       throw e;
@@ -132,7 +132,7 @@ public class NegateTest extends TestBase {
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 1)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:<"),
+              CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("'Hello'"),
               CoreMatchers.containsString("and"),
               CoreMatchers.containsString("->true")));
@@ -140,7 +140,7 @@ public class NegateTest extends TestBase {
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 2)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:>"),
+              CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("'Hello'"),
               CoreMatchers.containsString("and"),
               CoreMatchers.containsString("->false")));
@@ -148,21 +148,21 @@ public class NegateTest extends TestBase {
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 3)),
           CoreMatchers.allOf(
-              CoreMatchers.not(CoreMatchers.containsString("Mismatch:")),
+              CoreMatchers.not(CoreMatchers.containsString("Mismatch<:")),
               CoreMatchers.containsString("not(=['Hello!'])"),
               CoreMatchers.containsString("->true")));
       // expected (3)
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 4)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:"),
+              CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("alwaysFalse"),
               CoreMatchers.containsString("->true")));
       // actual (3)
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 5)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:"),
+              CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("alwaysFalse"),
               CoreMatchers.containsString("->false")));
       throw e;

@@ -29,28 +29,28 @@ public class WithMessageTest extends TestBase {
       assertThat(
           TestUtils.simplifyString(lineAt(e.getMessage(), 1)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:<"),
+              CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("'Value'-><Hello, world>:not"),
               CoreMatchers.containsString("->true")));
       // actual (1)
       assertThat(
           TestUtils.simplifyString(lineAt(e.getMessage(), 2)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:>"),
+              CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("'Value'-><Hello, world>:not"),
               CoreMatchers.containsString("->false")));
       // expected (2)
       assertThat(
           TestUtils.simplifyString(lineAt(e.getMessage(), 3)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:<"),
+              CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("alwaysTrue"),
               CoreMatchers.containsString("->false")));
       // actual (2)
       assertThat(
           TestUtils.simplifyString(lineAt(e.getMessage(), 4)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:>"),
+              CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("alwaysTrue"),
               CoreMatchers.containsString("->true")));
       throw e;
@@ -74,7 +74,7 @@ public class WithMessageTest extends TestBase {
       assertThat(
           TestUtils.simplifyString(lineAt(e.getMessage(), 1)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:<"),
+              CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("'Value'"),
               CoreMatchers.containsString("Hello, world:"),
               CoreMatchers.containsString("not"),
@@ -83,7 +83,7 @@ public class WithMessageTest extends TestBase {
       assertThat(
           TestUtils.simplifyString(lineAt(e.getMessage(), 2)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:>"),
+              CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("'Value'"),
               CoreMatchers.containsString("Hello, world:"),
               CoreMatchers.containsString("not"),
@@ -92,7 +92,7 @@ public class WithMessageTest extends TestBase {
       assertThat(
           TestUtils.simplifyString(lineAt(e.getMessage(), 3)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:<"),
+              CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("Always true!:"),
               CoreMatchers.containsString("alwaysTrue"),
               CoreMatchers.containsString("->false")));
@@ -100,7 +100,7 @@ public class WithMessageTest extends TestBase {
       assertThat(
           TestUtils.simplifyString(lineAt(e.getMessage(), 4)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch:>"),
+              CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("Always true!:"),
               CoreMatchers.containsString("alwaysTrue"),
               CoreMatchers.containsString("->true")));

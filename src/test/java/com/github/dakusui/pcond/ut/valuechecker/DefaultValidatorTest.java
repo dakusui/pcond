@@ -208,28 +208,28 @@ public class DefaultValidatorTest extends TestBase {
       e.printStackTrace();
       // expected (1)
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.containsString("Mismatch:<"),
+          CoreMatchers.containsString("Mismatch<:"),
           CoreMatchers.containsString("and"),
           CoreMatchers.containsString("->true")
 
       ));
       // actual (1)
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.containsString("Mismatch:>"),
+          CoreMatchers.containsString("Mismatch>:"),
           CoreMatchers.containsString("and"),
           CoreMatchers.containsString("->false")
 
       ));
       // expected (2)
       assertThat(lineAt(e.getMessage(), 3), allOf(
-          CoreMatchers.containsString("Mismatch:<"),
+          CoreMatchers.containsString("Mismatch<:"),
           CoreMatchers.containsString("isNotNull"),
           CoreMatchers.containsString("->true")
 
       ));
       // actual (2)
       assertThat(lineAt(e.getMessage(), 4), allOf(
-          CoreMatchers.containsString("Mismatch:>"),
+          CoreMatchers.containsString("Mismatch>:"),
           CoreMatchers.containsString("isNotNull"),
           CoreMatchers.containsString("->false")
 
@@ -242,13 +242,13 @@ public class DefaultValidatorTest extends TestBase {
    * Expected message:
    * ----
    * java.lang.IllegalArgumentException: value:"hello" violated precondition:value (isNotNull&&!isEmpty&&length >[10])
-   * Mismatch:<"hello"->and               ->true                 // (1)
-   * Mismatch:>"hello"->and               ->false                // (1)
+   * Mismatch<:"hello"->and               ->true                 // (1)
+   * Mismatch>:"hello"->and               ->false                // (1)
    * isNotNull       ->true                 // (2)
    * not(isEmpty)    ->true                 // (3)
    * transform:length->5                    // (4)
-   * Mismatch:<5      ->  check:>[10]     ->true                 // (5)
-   * Mismatch:>5      ->  check:>[10]     ->false                // (5)
+   * Mismatch<:5      ->  check:>[10]     ->true                 // (5)
+   * Mismatch>:5      ->  check:>[10]     ->false                // (5)
    * ----
    */
   @Test(expected = IllegalArgumentException.class)
@@ -265,14 +265,14 @@ public class DefaultValidatorTest extends TestBase {
       e.printStackTrace();
       // expected (1)
       assertThat(lineAt(e.getMessage(), 1), allOf(
-          CoreMatchers.containsString("Mismatch:<"),
+          CoreMatchers.containsString("Mismatch<:"),
           CoreMatchers.containsString("and"),
           CoreMatchers.containsString("->true")
 
       ));
       // actual (1)
       assertThat(lineAt(e.getMessage(), 2), allOf(
-          CoreMatchers.containsString("Mismatch:>"),
+          CoreMatchers.containsString("Mismatch>:"),
           CoreMatchers.containsString("and"),
           CoreMatchers.containsString("->false")
 
@@ -301,7 +301,7 @@ public class DefaultValidatorTest extends TestBase {
       ));
       // expected (5)
       assertThat(lineAt(e.getMessage(), 6), allOf(
-          CoreMatchers.containsString("Mismatch:<"),
+          CoreMatchers.containsString("Mismatch<:"),
           CoreMatchers.containsString("check:"),
           CoreMatchers.containsString(">[10]"),
           CoreMatchers.containsString("->true")
@@ -309,7 +309,7 @@ public class DefaultValidatorTest extends TestBase {
       ));
       // actual (5)
       assertThat(lineAt(e.getMessage(), 7), allOf(
-          CoreMatchers.containsString("Mismatch:>"),
+          CoreMatchers.containsString("Mismatch>:"),
           CoreMatchers.containsString("check:"),
           CoreMatchers.containsString(">[10]"),
           CoreMatchers.containsString("->false")
