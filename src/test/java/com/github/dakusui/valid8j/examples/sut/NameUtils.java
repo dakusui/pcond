@@ -1,7 +1,7 @@
-package com.github.dakusui.valid8j.examples;
+package com.github.dakusui.valid8j.examples.sut;
 
+import static com.github.dakusui.pcond.forms.Predicates.containsString;
 import static com.github.dakusui.valid8j.Assertions.precondition;
-import static com.github.dakusui.pcond.forms.Predicates.*;
 
 public enum NameUtils {
   ;

@@ -1,6 +1,6 @@
 package com.github.dakusui.thincrest.examples;
 
-import com.github.dakusui.pcond.examples.MemberDatabase;
+import com.github.dakusui.thincrest.examples.sut.MemberDatabase;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.TestUtils;
 import com.github.dakusui.thincrest.TestFluents;

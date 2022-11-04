@@ -1,45 +1,39 @@
-package com.github.dakusui.thincrest.ut;
+package com.github.dakusui.valid8j.ut;
 
-import com.github.dakusui.thincrest.TestAssertions;
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.internals.InternalException;
+import com.github.dakusui.pcond.ut.IntentionalError;
 import com.github.dakusui.pcond.validator.exceptions.PreconditionViolationException;
-import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.shared.ExperimentalsUtils;
+import com.github.dakusui.shared.TargetMethodHolder;
 import org.hamcrest.CoreMatchers;
-import org.junit.ComparisonFailure;
 import org.junit.Test;
 
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.valid8j.Requires.require;
 import static com.github.dakusui.pcond.forms.Experimentals.*;
-import static com.github.dakusui.pcond.forms.Functions.*;
+import static com.github.dakusui.pcond.forms.Functions.stream;
+import static com.github.dakusui.pcond.forms.Functions.streamOf;
 import static com.github.dakusui.pcond.forms.Predicates.*;
-import static com.github.dakusui.pcond.forms.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
-import static com.github.dakusui.thincrest.ut.ExperimentalsTest.Utils.areEqual;
-import static com.github.dakusui.thincrest.ut.ExperimentalsTest.Utils.stringEndsWith;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
+import static com.github.dakusui.shared.ExperimentalsUtils.areEqual;
+import static com.github.dakusui.shared.ExperimentalsUtils.stringEndsWith;
+import static com.github.dakusui.valid8j.Requires.require;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
 
-public class ExperimentalsTest extends TestBase {
+public class DbCExperimentalsTest {
   /**
    * Building a nested loop with the {@code pcond} library.
    *
    * You can build a check using a multi-parameter static method which returns a boolean value.
    * In this example, {@link TargetMethodHolder#stringEndsWith(String, String)} is the method.
-   * It is turned into a curried function in {@link Utils#stringEndsWith()} and then passed to {@link Experimentals#toContextPredicate(CurriedFunction, int...)}.
+   * It is turned into a curried function in {@link ExperimentalsUtils#stringEndsWith()} and then passed to {@link Experimentals#toContextPredicate(CurriedFunction, int...)}.
    * The method {@code Experimentals#test(CurriedFunction, int...)} converts a curried function whose final returned value is a boolean into a predicate of a {@link Context}.
    * A {@code Context} may have one or more values at once and those values are indexed.
    */
@@ -49,14 +43,6 @@ public class ExperimentalsTest extends TestBase {
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2", "o"))))
             .check(anyMatch(toContextPredicate(stringEndsWith()))));
-  }
-
-  @Test(expected = ComparisonFailure.class)
-  public void helloError() {
-    TestAssertions.assertThat(
-        singletonList("hello"),
-        transform(stream().andThen(nest(singletonList("o"))))
-            .check(noneMatch(toContextPredicate(stringEndsWith()))));
   }
 
   @Test
@@ -100,12 +86,44 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       e.printStackTrace(System.out);
       assertThat(
           lineAt(e.getMessage(), 4),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("stringEndsWith(String)(String)[0, 1]"),
               CoreMatchers.containsString("true")
           ));
       throw e;
+    }
+  }
+
+
+  @Test(expected = NullPointerException.class)
+  public void givenStreamContainingNull_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
+    try {
+      require(
+          asList(null, "Hi", "hello", "world", null),
+          transform(stream().andThen(nest(asList("1", "2", "o"))))
+              .check(noneMatch(
+                  toContextPredicate(transform(Functions.length()).check(gt(3))))));
+    } catch (InternalException e) {
+      e.printStackTrace(System.out);
+      assertThat(
+          lineAt(e.getMessage(), 3),
+          CoreMatchers.allOf(
+              CoreMatchers.containsString("contextPredicate"),
+              CoreMatchers.containsString("length >[3]"),
+              CoreMatchers.containsString(",0"),
+              CoreMatchers.containsString("NullPointerException")
+          ));
+      assertThat(
+          lineAt(e.getMessage(), 5),
+          CoreMatchers.containsString("transform"));
+      assertThat(
+          lineAt(e.getMessage(), 5),
+          CoreMatchers.allOf(
+              CoreMatchers.containsString("length"),
+              CoreMatchers.containsString("NullPointerException")
+          ));
+      throw wrapIfNecessary(e.getCause());
     }
   }
 
@@ -123,7 +141,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       e.printStackTrace(System.out);
       assertThat(
           lineAt(e.getMessage(), 4),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("length >[3]"),
               CoreMatchers.containsString(",0"),
@@ -134,54 +152,23 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           CoreMatchers.containsString("transform"));
       assertThat(
           lineAt(e.getMessage(), 5),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("length"),
               CoreMatchers.containsString("5")
           ));
       assertThat(
           lineAt(e.getMessage(), 6),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("5"),
               CoreMatchers.containsString("check")
           ));
       assertThat(
           lineAt(e.getMessage(), 6),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString(">[3]"),
               CoreMatchers.containsString("true")
           ));
       throw e;
-    }
-  }
-
-  @Test(expected = NullPointerException.class)
-  public void givenStreamContainingNull_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
-    try {
-      require(
-          asList(null, "Hi", "hello", "world", null),
-          transform(stream().andThen(nest(asList("1", "2", "o"))))
-              .check(noneMatch(
-                  toContextPredicate(transform(Functions.length()).check(gt(3))))));
-    } catch (InternalException e) {
-      e.printStackTrace(System.out);
-      assertThat(
-          lineAt(e.getMessage(), 3),
-          allOf(
-              CoreMatchers.containsString("contextPredicate"),
-              CoreMatchers.containsString("length >[3]"),
-              CoreMatchers.containsString(",0"),
-              CoreMatchers.containsString("NullPointerException")
-          ));
-      assertThat(
-          lineAt(e.getMessage(), 5),
-          CoreMatchers.containsString("transform"));
-      assertThat(
-          lineAt(e.getMessage(), 5),
-          allOf(
-              CoreMatchers.containsString("length"),
-              CoreMatchers.containsString("NullPointerException")
-          ));
-      throw wrapIfNecessary(e.getCause());
     }
   }
 
@@ -193,15 +180,6 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
             toContextPredicate(transform((Function<String, Integer>) s -> {
               throw new IntentionalError();
             }).check(gt(3))))));
-  }
-
-  @Test
-  public void toContextPredicateTest() {
-    assertFalse(toContextPredicate(isNotNull()).test(Context.from(null)));
-    assertTrue(toContextPredicate(isNotNull()).test(Context.from(new Object())));
-  }
-
-  public static class IntentionalError extends Error {
   }
 
   @Test
@@ -229,7 +207,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       int i = 0;
       assertThat(
           lineAt(e.getMessage(), ++i),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("hello"),
               CoreMatchers.containsString("transform")));
       assertThat(
@@ -240,7 +218,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           CoreMatchers.containsString("toContextStream"));
       assertThat(
           lineAt(e.getMessage(), ++i),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("anyMatch"),
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("isNull"),
@@ -268,7 +246,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       int i = 0;
       assertThat(
           lineAt(e.getMessage(), ++i),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("hello"),
               CoreMatchers.containsString("toContext"),
               CoreMatchers.containsString("context:[hello]")
@@ -276,13 +254,13 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
 
       assertThat(
           lineAt(e.getMessage(), ++i),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("context:[hello]"),
               CoreMatchers.containsString("check")
           ));
       assertThat(
           lineAt(e.getMessage(), i),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("isNull"),
               CoreMatchers.containsString("0"),
@@ -304,7 +282,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       int i = 0;
       assertThat(
           lineAt(e.getMessage(), ++i),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("\"hello\",\"world\""),
               CoreMatchers.containsString("transform")));
       assertThat(
@@ -312,12 +290,12 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           CoreMatchers.containsString("stream"));
       assertThat(
           lineAt(e.getMessage(), ++i),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("nest"),
               CoreMatchers.containsString("\"1\",\"2\",\"o\"")));
       assertThat(
           lineAt(e.getMessage(), ++i),
-          allOf(
+          CoreMatchers.allOf(
               CoreMatchers.containsString("allMatch"),
               CoreMatchers.containsString("contextPredicate"),
               CoreMatchers.containsString("stringEndsWith"),
@@ -437,93 +415,4 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
         transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toContextPredicate(equalTo("msg-3"), 1))));
   }
 
-  @Test
-  public void parameterizedPredicateTest() {
-    Predicate<String> p = Experimentals.<String>parameterizedPredicate("containsStringIgnoreCase")
-        .factory(args -> v -> v.toUpperCase().contains(args.get(0).toString().toUpperCase()))
-        .create("hello");
-    assertTrue(p.test("hello!"));
-    assertTrue(p.test("Hello!"));
-    assertFalse(p.test("World!"));
-    assertEquals("containsStringIgnoreCase[hello]", p.toString());
-  }
-
-  @Test
-  public void parameterizedPredicate_() {
-
-    Predicate<String> p = Experimentals.<String>parameterizedPredicate("containsStringIgnoreCase")
-        .factory((args) -> predicate(() -> "toUpperCase().contains(" + args.get(0) + ")", (String v) -> v.toUpperCase().contains(args.get(0).toString().toUpperCase())))
-        .create("hello");
-    System.out.println("p:<" + p + ">");
-    assertTrue(p.test("hello!"));
-    assertTrue(p.test("Hello!"));
-    assertFalse(p.test("World!"));
-    assertEquals("containsStringIgnoreCase[hello]", p.toString());
-
-  }
-
-  @Test
-  public void parameterizedFunctionTest() {
-    Function<Object[], Object> f = Experimentals.<Object[], Object>parameterizedFunction("arrayElementAt")
-        .factory(args -> v -> v[(int) args.get(0)])
-        .create(1);
-    assertEquals("HELLO1", f.apply(new Object[] { 0, "HELLO1" }));
-    assertEquals("HELLO2", f.apply(new Object[] { "hello", "HELLO2" }));
-    assertEquals("arrayElementAt[1]", f.toString());
-  }
-
-  @Test
-  public void usageExample() {
-    Function<List<Object>, Function<String, String>> functionFactory = pathToUriFunctionFactory();
-    Function<String, String> pathToUriOnLocalHost = functionFactory.apply(asList("http", "localhost", 80));
-    System.out.println(pathToUriOnLocalHost);
-    System.out.println(pathToUriOnLocalHost.apply("path/to/resource"));
-    System.out.println(pathToUriOnLocalHost.apply("path/to/another/resource"));
-
-    Function<String, String> pathToUriOnRemoteHost = functionFactory.apply(asList("https", "example.com", 8443));
-    System.out.println(pathToUriOnRemoteHost);
-    System.out.println(pathToUriOnRemoteHost.apply("path/to/resource"));
-    System.out.println(pathToUriOnRemoteHost.apply("path/to/another/resource"));
-
-    Function<String, String> pathToUriOnLocalHost_2 = functionFactory.apply(asList("http", "localhost", 80));
-    System.out.println(pathToUriOnLocalHost.hashCode() == pathToUriOnLocalHost_2.hashCode());
-    System.out.println(pathToUriOnLocalHost.equals(pathToUriOnLocalHost_2));
-
-    System.out.println(pathToUriOnLocalHost.hashCode() == pathToUriOnRemoteHost.hashCode());
-    System.out.println(pathToUriOnLocalHost.equals(pathToUriOnRemoteHost));
-  }
-
-  private static Function<List<Object>, Function<String, String>>
-  pathToUriFunctionFactory() {
-    return v -> PrintableFunctionFactory.create(
-        (List<Object> args) -> () -> "buildUri" + args, (List<Object> args) -> (String path) -> String.format("%s://%s:%s/%s", args.get(0), args.get(1), args.get(2), path), v, ExperimentalsTest.class
-    );
-  }
-
-
-  public enum Utils {
-    ;
-
-    public static CurriedFunction<Object, Object> stringEndsWith() {
-      return curry(TargetMethodHolder.class, "stringEndsWith", String.class, String.class);
-    }
-
-    public static CurriedFunction<Object, Object> areEqual() {
-      return curry(TargetMethodHolder.class, "areEqual", Object.class, Object.class);
-    }
-  }
-
-  public enum TargetMethodHolder {
-    ;
-
-    @SuppressWarnings("unused") // Called through reflection
-    public static boolean stringEndsWith(String s, String suffix) {
-      return s.endsWith(suffix);
-    }
-
-    @SuppressWarnings("unused") // Called through reflection
-    public static boolean areEqual(Object object, Object another) {
-      return Objects.equals(object, another);
-    }
-  }
 }

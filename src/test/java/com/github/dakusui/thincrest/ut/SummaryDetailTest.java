@@ -1,22 +1,20 @@
 package com.github.dakusui.thincrest.ut;
 
-import com.github.dakusui.valid8j.Requires;
-import com.github.dakusui.thincrest.TestAssertions;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.utils.ut.TestBase;
-import com.github.dakusui.pcond.validator.exceptions.PreconditionViolationException;
+import com.github.dakusui.thincrest.TestAssertions;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import java.util.Objects;
 
-import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.core.refl.MethodQuery.instanceMethod;
-import static com.github.dakusui.thincrest.TestFluents.assertAll;
 import static com.github.dakusui.pcond.fluent.Fluents.statement;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.forms.Predicates.*;
+import static com.github.dakusui.thincrest.TestAssertions.assertThat;
+import static com.github.dakusui.thincrest.TestFluents.assertAll;
 
 public class SummaryDetailTest extends TestBase {
   @Test
@@ -25,6 +23,7 @@ public class SummaryDetailTest extends TestBase {
     String expected = "helloHELLOhelloHELLOhelloHELLOhelloHELLOhelloHELLO";
     try {
       TestAssertions.assertThat(actual, isEqualTo(expected));
+      throw new Error(); // Make it fail if PC reaches here.
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       assertThat(
@@ -35,37 +34,41 @@ public class SummaryDetailTest extends TestBase {
     }
   }
 
-  @Test(expected = PreconditionViolationException.class)
+  @Test
   public void givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted() {
     String actual = "helloHELLOhelloHELLOhelloXYZHELLOhelloHELLOhelloHELLO";
     String expected = "helloHELLOhelloHELLOhelloHELLOhelloHELLOhelloHELLO";
     try {
-      Requires.require(actual, isEqualTo(expected));
-    } catch (PreconditionViolationException e) {
+      TestAssertions.assertThat(actual, isEqualTo(expected));
+      throw new Error(); // Make it fail if PC reaches here.
+    } catch (ComparisonFailure e) {
       e.printStackTrace();
-      assertThat(
-          e.getMessage(),
-          allOf(
-              containsString(actual),
-              containsString("isEqualTo")));
-      throw e;
+      assertAll(
+          statement(
+              e.getExpected(),
+              allOf(
+                  containsString(expected),
+                  containsString("isEqualTo"))),
+          statement(
+              e.getActual(),
+              containsString(actual)));
     }
   }
 
 
-  @Test(expected = PreconditionViolationException.class)
+  @Test
   public void givenLongString_whenCheckEqualnessUsingCustomPredicateWithSlightlyDifferentString_thenFailWithDetailsArePrinted() {
     String actual = "helloHELLOhelloHELLOhelloXYZHELLOhelloHELLOhelloHELLO";
     String expected = "helloHELLOhelloHELLOhelloHELLOhelloHELLOhelloHELLO";
     try {
-      Requires.require(actual, Printables.predicate("customEquals", v -> Objects.equals(v, expected)));
-    } catch (PreconditionViolationException e) {
+      TestAssertions.assertThat(actual, Printables.predicate("customEquals", v -> Objects.equals(v, expected)));
+      throw new Error(); // Make it fail if PC reaches here.
+    } catch (ComparisonFailure e) {
       assertThat(
           e.getMessage(),
           allOf(
               containsString(actual),
               containsString("customEquals")));
-      throw e;
     }
   }
 
@@ -81,7 +84,7 @@ public class SummaryDetailTest extends TestBase {
           equalTo(actualValue),
           equalTo(expected)
       ));
-      assertThat(null, not(alwaysTrue()));
+      throw new Error(); // Make it fail if PC reaches here.
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       assertAll(

@@ -4,7 +4,7 @@ import com.github.dakusui.pcond.utils.TestClassExpectation;
 import com.github.dakusui.pcond.utils.TestClassExpectation.EnsureJUnitResult;
 import com.github.dakusui.pcond.utils.TestClassExpectation.ResultPredicateFactory.*;
 import com.github.dakusui.pcond.utils.TestMethodExpectation;
-import com.github.dakusui.valid8j.examples.NameUtils;
+import com.github.dakusui.thincrest.examples.sut.NameUtils;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.utils.TestMethodExpectation.Result.*;

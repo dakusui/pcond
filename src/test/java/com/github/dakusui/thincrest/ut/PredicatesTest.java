@@ -1,9 +1,9 @@
 package com.github.dakusui.thincrest.ut;
 
-import com.github.dakusui.thincrest.TestAssertions;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.utils.ut.TestBase;
+import com.github.dakusui.thincrest.TestAssertions;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.valid8j.Requires.requireArgument;
 import static com.github.dakusui.pcond.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
@@ -23,42 +22,42 @@ import static org.junit.Assert.*;
 @RunWith(Enclosed.class)
 public class PredicatesTest {
   public static class MessageTest extends TestBase {
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testFormat() {
       try {
-        requireArgument(100, Predicates.and(Predicates.isNotNull(), Predicates.isInstanceOf(String.class)));
-      } catch (IllegalArgumentException e) {
+        TestAssertions.assertThat(100, Predicates.and(Predicates.isNotNull(), Predicates.isInstanceOf(String.class)));
+        throw new Error(); // Make it fail if PC reaches here.
+      } catch (ComparisonFailure e) {
         e.printStackTrace();
-        String message = e.getMessage().replaceAll(" +", " ");
+        String message = e.getActual().replaceAll(" +", " ");
         System.out.println(message);
         TestAssertions.assertThat(
-            lineAt(message, 1),
+            lineAt(message, 0),
             Predicates.containsString("100->and ->false"));
         TestAssertions.assertThat(
-            lineAt(message, 2),
+            lineAt(message, 1),
             Predicates.containsString("isNotNull ->true"));
         TestAssertions.assertThat(
-            lineAt(message, 3),
+            lineAt(message, 2),
             Predicates.containsString("isInstanceOf[class java.lang.String]->false"));
-        throw e;
       }
     }
   }
 
   public static class IsInstanceOfTest extends TestBase {
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void test() {
       try {
-        requireArgument(100, Predicates.isInstanceOf(String.class));
-      } catch (IllegalArgumentException e) {
+        TestAssertions.assertThat(100, Predicates.isInstanceOf(String.class));
+        throw new Error(); // Make it fail if PC reaches here.
+      } catch (ComparisonFailure e) {
         e.printStackTrace();
-        assertThat(
-            lineAt(e.getMessage(), 1),
-            allOf(
-                containsString("isInstanceOf"),
-                containsString("java.lang.String"),
-                containsString("false")));
-        throw e;
+        TestAssertions.assertThat(
+            lineAt(e.getActual(), 0),
+            Predicates.allOf(
+                Predicates.containsString("isInstanceOf"),
+                Predicates.containsString("java.lang.String"),
+                Predicates.containsString("false")));
       }
     }
   }
@@ -368,6 +367,7 @@ public class PredicatesTest {
         throw e;
       }
     }
+
     @Test
     public void givenAllFound$whenFindRegexes$thenPassed() {
       String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur";
