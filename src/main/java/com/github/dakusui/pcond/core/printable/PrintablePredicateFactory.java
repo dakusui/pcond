@@ -15,7 +15,8 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.identifieable.Identifiable.argsOf;
 import static com.github.dakusui.pcond.core.identifieable.Identifiable.creatorOf;
-import static com.github.dakusui.pcond.internals.InternalUtils.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -32,11 +33,11 @@ public enum PrintablePredicateFactory {
   LEAF,
   ;
 
-  private static <T> PrintablePredicate<T> toPrintablePredicate(Predicate<T> predicate) {
-    return (PrintablePredicate<T>) leaf(predicate);
+  private static <T> PrintablePredicate<T> toPrintablePredicateIfNotPrintable(Predicate<T> predicate) {
+    return (PrintablePredicate<T>) toLeafIfNotPrintable(predicate);
   }
 
-  public static <T> Predicate<T> leaf(Predicate<T> predicate) {
+  public static <T> Predicate<T> toLeafIfNotPrintable(Predicate<T> predicate) {
     if (!(predicate instanceof PrintablePredicate))
       return leaf(Identifiable.formatObjectName(predicate), predicate);
     return predicate;
@@ -96,7 +97,7 @@ public enum PrintablePredicateFactory {
   }
 
   public static <T> Negation<T> not_(Predicate<T> predicate) {
-    return new Negation<T>(toPrintablePredicate(predicate), singletonList(predicate));
+    return new Negation<T>(toPrintablePredicateIfNotPrintable(predicate), singletonList(predicate));
   }
 
   public static <E> Predicate<Stream<E>> allMatch(Predicate<E> predicate) {
@@ -112,7 +113,7 @@ public enum PrintablePredicateFactory {
   }
 
   public static <T> Predicate<Context> contextPredicate(Predicate<T> predicate, int argIndex) {
-    return ContextPredicate.create(toPrintablePredicate(predicate), argIndex);
+    return ContextPredicate.create(toPrintablePredicateIfNotPrintable(predicate), argIndex);
   }
 
   private static RuntimeException noPredicateGiven() {
@@ -120,7 +121,7 @@ public enum PrintablePredicateFactory {
   }
 
   public static <T> Predicate<T> withMessage(Supplier<String> messageSupplier, Predicate<T> predicate) {
-    return new Messaged<T>(messageSupplier, toPrintablePredicate(predicate), singletonList(predicate));
+    return new Messaged<T>(messageSupplier, toPrintablePredicateIfNotPrintable(predicate), singletonList(predicate));
   }
 
   /*
@@ -237,11 +238,6 @@ public enum PrintablePredicateFactory {
     public Object explainActualInput(Object actualInputValue) {
       return actualInputValue;
     }
-
-    @Override
-    public String toString() {
-      return formatter.get();
-    }
   }
 
   static class Negation<T> extends PrintablePredicate<T> implements Evaluable.Negation<T> {
@@ -252,7 +248,7 @@ public enum PrintablePredicateFactory {
       super(
           NEGATION,
           args,
-          () -> format("!%s", predicate),
+          () -> format("!%s", predicateToString(predicate)),
           (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).negate().test(t));
       target = toEvaluableIfNecessary(predicate);
     }
@@ -340,7 +336,7 @@ public enum PrintablePredicateFactory {
 
     static <T> String formatJunction(List<Predicate<? super T>> predicates, String junctionSymbol) {
       return predicates.stream()
-          .map(PrintablePredicateFactory::toPrintablePredicate)
+          .map(PrintablePredicateFactory::toPrintablePredicateIfNotPrintable)
           .map(Object::toString)
           .collect(joining(junctionSymbol, "(", ")"));
     }
@@ -371,8 +367,8 @@ public enum PrintablePredicateFactory {
           TransformingPredicate.class,
           asList(predicate, function),
           () -> mapperName == null ?
-              format("%s %s", function, predicate) :
-              format("%s(%s %s)", mapperName, function, predicate),
+              format("%s %s", function, predicateToString(predicate)) :
+              format("%s(%s %s)", mapperName, function, predicateToString(predicate)),
           v -> predicate.test(function.apply(v)));
       this.mapper = toEvaluableIfNecessary(function);
       this.mapperName = mapperName;
@@ -429,7 +425,7 @@ public enum PrintablePredicateFactory {
       }
 
       static <P, O> Factory<P, O> create(String mapperName, String checkerName, Function<O, P> function) {
-        return cond -> new TransformingPredicate<>(mapperName, checkerName, toPrintablePredicate(cond), function);
+        return cond -> new TransformingPredicate<>(mapperName, checkerName, toPrintablePredicateIfNotPrintable(cond), function);
       }
     }
   }
@@ -558,5 +554,17 @@ public enum PrintablePredicateFactory {
     public boolean valueToCut() {
       return cutOn;
     }
+  }
+
+  private static String predicateToString(Predicate<?> p) {
+    if (isLeafPredicate(p))
+      return formatObject(p);
+    return Objects.toString(p);
+  }
+
+  private static boolean isLeafPredicate(Predicate<?> p) {
+    if (!(p instanceof Evaluable))
+      return true;
+    return p instanceof Evaluable.LeafPred;
   }
 }

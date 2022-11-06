@@ -15,6 +15,7 @@ import static com.github.dakusui.pcond.fluent.Fluents.statement;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.shared.TestUtils.validate;
+import static com.github.dakusui.shared.TestUtils.validateStatement;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 
@@ -33,6 +34,24 @@ public class SummaryDetailTest extends TestBase {
           allOf(
               transform(Functions.<Throwable, String>call(instanceMethod(parameter(), "getActual"))).check(containsString(actual)),
               transform(Functions.<Throwable, String>call(instanceMethod(parameter(), "getExpected"))).check(containsString(expected))));
+    }
+  }
+
+  @Test(expected = TestUtils.IllegalValueException.class)
+  public void givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted$assertThat_usingFluentStyle() {
+    String actual = "helloHELLOhelloHELLOhelloXYZHELLOhelloHELLOhelloHELLO";
+    String expected = "helloHELLOhelloHELLOhelloHELLOhelloHELLOhelloHELLO";
+    try {
+      validateStatement(statement(actual, isEqualTo(expected)));
+      throw new Error(); // Make it fail if PC reaches here.
+    } catch (TestUtils.IllegalValueException e) {
+      e.printStackTrace();
+      assertThat(
+          e,
+          allOf(
+              transform(Functions.<Throwable, String>call(instanceMethod(parameter(), "getMessage"))).check(containsString(actual)),
+              transform(Functions.<Throwable, String>call(instanceMethod(parameter(), "getMessage"))).check(containsString(expected))));
+      throw e;
     }
   }
 
@@ -63,7 +82,7 @@ public class SummaryDetailTest extends TestBase {
     String actual = "helloHELLOhelloHELLOhelloXYZHELLOhelloHELLOhelloHELLO";
     String expected = "helloHELLOhelloHELLOhelloHELLOhelloHELLOhelloHELLO";
     try {
-      TestAssertions.assertThat(actual, Printables.predicate("customEquals", v -> Objects.equals(v, expected)));
+      assertThat(actual, Printables.predicate("customEquals", v -> Objects.equals(v, expected)));
       throw new Error(); // Make it fail if PC reaches here.
     } catch (ComparisonFailure e) {
       assertThat(
@@ -86,7 +105,7 @@ public class SummaryDetailTest extends TestBase {
           equalTo(actualValue),
           equalTo(expected)
       ));
-      throw new Error(); // Make it fail if PC reaches here.
+      throw new Error(); // Make it fail if program counter reaches here.
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       assertAll(
