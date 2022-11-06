@@ -83,27 +83,27 @@ public class DefaultValidatorTest extends TestBase {
       ));
       // expected (2)
       assertThat(lineAt(e.getMessage(), 3), allOf(
-          CoreMatchers.containsString("isEqualTo[\"hello\"]"),
+          CoreMatchers.containsString("isEqualTo[hello]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("true")
 
       ));
       // actual (2)
       assertThat(lineAt(e.getMessage(), 4), allOf(
-          CoreMatchers.containsString("isEqualTo[\"hello\"]"),
+          CoreMatchers.containsString("isEqualTo[hello]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
 
       ));
       // expected (3)
       assertThat(lineAt(e.getMessage(), 5), allOf(
-          CoreMatchers.containsString("  isEqualTo[\"HELLO\"]"),
+          CoreMatchers.containsString("  isEqualTo[HELLO]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("true")
       ));
       // actual (3)
       assertThat(lineAt(e.getMessage(), 6), allOf(
-          CoreMatchers.containsString("  isEqualTo[\"HELLO\"]"),
+          CoreMatchers.containsString("  isEqualTo[HELLO]"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("false")
       ));

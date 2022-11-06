@@ -2,6 +2,7 @@ package com.github.dakusui.thincrest.ut;
 
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.shared.TestUtils;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.thincrest.TestAssertions;
 import org.junit.ComparisonFailure;
@@ -13,6 +14,7 @@ import static com.github.dakusui.pcond.core.refl.MethodQuery.instanceMethod;
 import static com.github.dakusui.pcond.fluent.Fluents.statement;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.forms.Predicates.*;
+import static com.github.dakusui.shared.TestUtils.validate;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 
@@ -92,7 +94,7 @@ public class SummaryDetailTest extends TestBase {
               e.getExpected(),
               allOf(
                   containsString("isNull"),
-                  containsString("containsString[\"XYZ\"]"),
+                  containsString("containsString[XYZ]"),
                   containsString(expected),
                   not(matchesRegex("\n" + actualValue + "\n"))
               )),
@@ -103,4 +105,38 @@ public class SummaryDetailTest extends TestBase {
                   containsString(actualValue))));
     }
   }
+
+  @Test(expected =  TestUtils.IllegalValueException.class)
+  public void givenString_whenFails_then() {
+    String expectedValue = "EXPECTED VALUE, Actual value, expected value.";
+    String actualValue = "ACTUAL VALUE, Expected value, actual value.";
+
+    try {
+      validate(actualValue, isEqualTo(expectedValue));
+    } catch (TestUtils.IllegalValueException e) {
+      System.err.println("================================================");
+      e.printStackTrace();
+      System.err.println("================================================");
+      throw e;
+    }
+  }
+
+  @Test(expected =  ComparisonFailure.class)
+  public void givenString_whenFails_then_2() {
+    String expectedValue = "EXPECTED VALUE, Actual value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, expected value.";
+    String actualValue = "ACTUAL VALUE, Expected value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, actual value.";
+
+    try {
+      assertThat(actualValue,
+          allOf(
+              isEqualTo(expectedValue),
+              findSubstrings("VALUE", "Value")));
+    } catch (TestUtils.IllegalValueException e) {
+      System.err.println("================================================");
+      e.printStackTrace();
+      System.err.println("================================================");
+      throw e;
+    }
+  }
+
 }

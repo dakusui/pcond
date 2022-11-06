@@ -26,8 +26,12 @@ public class BooleanTest extends TestBase {
       // TODO
 //      MatcherAssert.assertThat(e.getExpected(), CoreMatchers.containsString("true->isFalse->true"));
 //      MatcherAssert.assertThat(e.getActual(), CoreMatchers.containsString("true->isFalse->false"));
-      MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("true->isFalse->true"));
-      MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("true->isFalse->false"));
+      MatcherAssert.assertThat(
+          e.getMessage().replaceAll(" +", ""),
+          CoreMatchers.containsString("true->isFalse->true"));
+      MatcherAssert.assertThat(
+          e.getMessage().replaceAll(" +", ""),
+          CoreMatchers.containsString("true->isFalse->false"));
       throw e;
     }
   }

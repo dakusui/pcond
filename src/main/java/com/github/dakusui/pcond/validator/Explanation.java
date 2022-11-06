@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.github.dakusui.pcond.validator.ReportComposer.Utils.composeReport;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
@@ -53,7 +54,7 @@ public class Explanation {
   }
 
   public static Explanation fromMessage(String msg) {
-    return new Explanation(msg, ReportComposer.Utils.composeReport(null, null), ReportComposer.Utils.composeReport(null, null));
+    return new Explanation(msg, composeReport(null, null), composeReport(null, null));
   }
 
   private static String[] splitAndTrim(String expected) {

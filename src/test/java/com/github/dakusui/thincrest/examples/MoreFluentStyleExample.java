@@ -221,23 +221,32 @@ public class MoreFluentStyleExample {
     List<String> list = asList("helloWorld", "HI");
     String s = list.get(0);
     TestFluents.assertAll(
-        value(list).thenVerifyAllOf(
+        value(list).thenVerifyAllOf(asList(
             tx -> tx.size().then().greaterThan(3),
             tx -> tx.elementAt(0).asString().then().isNotNull(),
-            tx -> tx.elementAt(0).asString().length().then().greaterThan(100)
-        ));
+            tx -> tx.elementAt(0).asString().length().then().greaterThan(100))));
   }
 
   @Test
   public void checkTwoAspectsOfOneValue_4() {
     List<String> list = asList("helloWorld", "HI");
     TestFluents.assertThat(
-        value(list).thenVerifyAllOf(
+        value(list).thenVerifyAllOf(asList(
             (ListTransformer<List<String>, String> tx) -> tx.size().then().greaterThan(3),
-            (ListTransformer<List<String>, String> tx) -> tx.elementAt(0).asString().thenVerifyAllOf(
+            (ListTransformer<List<String>, String> tx) -> tx.elementAt(0).asString().thenVerifyAllOf(asList(
                 (StringTransformer<List<String>> ty) -> ty.then().isNotNull(),
-                (StringTransformer<List<String>> ty) -> ty.asString().length().then().greaterThan(100))
-        ));
+                (StringTransformer<List<String>> ty) -> ty.asString().length().then().greaterThan(100))))));
+  }
+
+  @Test
+  public void checkTwoAspectsOfOneValue_5() {
+    List<String> list = asList("helloWorld", "HI");
+    TestFluents.assertThat(
+        value(list).thenVerifyAllOf(asList(
+            tx -> tx.size().then().greaterThan(3),
+            tx -> tx.elementAt(0).thenVerifyAllOf(asList(
+                ty -> ty.then().isNotNull(),
+                ty -> ty.asString().length().then().greaterThan(100))))));
   }
 
 }

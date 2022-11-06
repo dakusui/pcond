@@ -79,7 +79,7 @@ public class NegateTest extends TestBase {
       e.printStackTrace();
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 0)),
-          CoreMatchers.equalTo("Value:'Hello' violated: !=['Hello']"));
+          CoreMatchers.equalTo("Value:'Hello' violated: !=[Hello]"));
       // expected (1)
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 1)),
@@ -102,14 +102,14 @@ public class NegateTest extends TestBase {
           simplifyString(lineAt(e.getMessage(), 3)),
           CoreMatchers.allOf(
               CoreMatchers.containsString("Mismatch<:"),
-              CoreMatchers.containsString("=['Hello']"),
+              CoreMatchers.containsString("=[Hello]"),
               CoreMatchers.containsString("->false")));
       // actual (2)
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 4)),
           CoreMatchers.allOf(
               CoreMatchers.containsString("Mismatch>:"),
-              CoreMatchers.containsString("=['Hello']"),
+              CoreMatchers.containsString("=[Hello]"),
               CoreMatchers.containsString("->true")));
       throw e;
     }
@@ -127,7 +127,7 @@ public class NegateTest extends TestBase {
       e.printStackTrace();
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 0)),
-          CoreMatchers.equalTo("Value:'Hello' violated: (!=['Hello!']&&alwaysFalse)"));
+          CoreMatchers.equalTo("Value:'Hello' violated: (!=[Hello!]&&alwaysFalse)"));
       // expected (1)
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 1)),
@@ -149,7 +149,7 @@ public class NegateTest extends TestBase {
           simplifyString(lineAt(e.getMessage(), 3)),
           CoreMatchers.allOf(
               CoreMatchers.not(CoreMatchers.containsString("Mismatch<:")),
-              CoreMatchers.containsString("not(=['Hello!'])"),
+              CoreMatchers.containsString("not(=[Hello!])"),
               CoreMatchers.containsString("->true")));
       // expected (3)
       MatcherAssert.assertThat(

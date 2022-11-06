@@ -84,7 +84,7 @@ public class FluentStyleTestAssertionTest {
             .asString()
             .isEqualTo("HELLOWORLD"));
       } catch (ComparisonFailure e) {
-        MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("Value:\"helloWorld\" violated: WHEN(stringToLowerCase->castTo[String] stringIsEqualTo[\"HELLOWORLD\"]) "));
+        MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("Value:\"helloWorld\" violated: WHEN(stringToLowerCase->castTo[String] stringIsEqualTo[HELLOWORLD]) "));
         throw e;
       }
     }
@@ -163,10 +163,13 @@ public class FluentStyleTestAssertionTest {
             value("hello").toUpperCase().then().isEqualTo("HELLO"),
             value("world").toLowerCase().then().contains("WORLD"));
       } catch (ComparisonFailure e) {
-        MatcherAssert.assertThat(e.getActual(), CoreMatchers.containsString("stringIsEqualTo[\"HELLO\"]->true"));
-        MatcherAssert.assertThat(e.getActual(), CoreMatchers.containsString("containsString[\"WORLD\"] ->false"));
-        MatcherAssert.assertThat(e.getExpected(), CoreMatchers.containsString("stringIsEqualTo[\"HELLO\"]->true"));
-        MatcherAssert.assertThat(e.getExpected(), CoreMatchers.containsString("containsString[\"WORLD\"] ->true"));
+        e.printStackTrace();
+        System.err.println("actual:" + e.getActual());
+        MatcherAssert.assertThat(e.getActual().replaceAll(" +", ""), CoreMatchers.containsString("stringIsEqualTo[HELLO]->true"));
+        MatcherAssert.assertThat(e.getActual().replaceAll(" +", ""), CoreMatchers.containsString("containsString[WORLD]->false"));
+        System.err.println("expected:" + e.getExpected());
+        MatcherAssert.assertThat(e.getExpected().replaceAll(" +", ""), CoreMatchers.containsString("stringIsEqualTo[HELLO]->true"));
+        MatcherAssert.assertThat(e.getExpected().replaceAll(" +", ""), CoreMatchers.containsString("containsString[WORLD]->true"));
         throw e;
       }
     }
@@ -188,7 +191,8 @@ public class FluentStyleTestAssertionTest {
             .asString()
             .isEqualTo("HELLOWORLD"));
       } catch (AssumptionViolatedException e) {
-        MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("Value:\"helloWorld\" violated: WHEN(stringToLowerCase->castTo[String] stringIsEqualTo[\"HELLOWORLD\"])"));
+        e.printStackTrace();
+        MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("Value:\"helloWorld\" violated: WHEN(stringToLowerCase->castTo[String] stringIsEqualTo[HELLOWORLD])"));
         throw e;
       }
     }
@@ -210,8 +214,9 @@ public class FluentStyleTestAssertionTest {
             value("hello").toUpperCase().then().isEqualTo("HELLO"),
             value("world").toLowerCase().then().contains("WORLD"));
       } catch (AssumptionViolatedException e) {
-        MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("stringIsEqualTo[\"HELLO\"]->true"));
-        MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("containsString[\"WORLD\"] ->false"));
+        e.printStackTrace();
+        MatcherAssert.assertThat(e.getMessage().replaceAll(" +", ""), CoreMatchers.containsString("stringIsEqualTo[HELLO]->true"));
+        MatcherAssert.assertThat(e.getMessage().replaceAll(" +", ""), CoreMatchers.containsString("containsString[WORLD]->false"));
         throw e;
       }
     }

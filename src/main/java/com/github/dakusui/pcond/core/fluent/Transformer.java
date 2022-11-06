@@ -7,13 +7,11 @@ import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
@@ -21,6 +19,7 @@ import static com.github.dakusui.pcond.core.fluent.Transformer.Factory.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * The transformer interface.
@@ -66,16 +65,6 @@ public interface Transformer<
       return isDummyFunction(after) ? (Function<I, O>) func : func.andThen(after);
   }
 
-  @SuppressWarnings("unchecked")
-  default Statement<OIN> thenVerifyAllOf(Function<? super TX, Statement<OIN>>... funcs) {
-    return Fluents.statementAllOf(
-        Transformer.this.originalInputValue(),
-        Arrays.stream(funcs)
-            .map(each -> each.apply((TX) Transformer.this))
-            .collect(Collectors.toList())
-    );
-  }
-
   Function<? super OIN, ? extends OUT> function();
 
   String transformerName();
@@ -88,6 +77,15 @@ public interface Transformer<
       BB extends Transformer<BB, OIN, NOUT>>
   BB transform(Function<? super OUT, NOUT> f, BiFunction<TX, Function<OUT, NOUT>, BB> factory) {
     return transform((TX) this, f, factory);
+  }
+
+  @SuppressWarnings("unchecked")
+  default Statement<OIN> thenVerifyAllOf(List<Function<? super TX, Statement<OIN>>> funcs) {
+    return Fluents.statementAllOf(
+        Transformer.this.originalInputValue(),
+        funcs.stream()
+            .map(each -> each.apply((TX) Transformer.this))
+            .collect(toList()));
   }
 
   @SuppressWarnings("unchecked")

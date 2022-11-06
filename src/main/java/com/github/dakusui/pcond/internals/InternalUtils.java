@@ -121,7 +121,7 @@ public enum InternalUtils {
     return s;
   }
 
-  private static int summarizedStringLength() {
+  public static int summarizedStringLength() {
     return Validator.INSTANCE.configuration().summarizedStringLength();
   }
 
@@ -253,5 +253,14 @@ public enum InternalUtils {
 
   public static boolean isDummyFunction(Function<?, ?> function) {
     return function == DUMMY_FUNCTION;
+  }
+
+  public static Object toNonStringObject(String s) {
+    return new Object() {
+      @Override
+      public String toString() {
+        return s;
+      }
+    };
   }
 }

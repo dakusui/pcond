@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.internals.InternalUtils.toNonStringObject;
 import static java.util.Collections.emptyList;
 
 public abstract class ExplainablePredicate<V> extends PrintablePredicate<V>
@@ -42,7 +43,7 @@ public abstract class ExplainablePredicate<V> extends PrintablePredicate<V>
   }
 
   public static Predicate<String> explainableStringIsEqualTo(String str) {
-    return new ExplainablePredicate<String>(() -> "stringIsEqualTo[" + formatObject(str) + "]", v -> Objects.equals(str, v)) {
+    return new ExplainablePredicate<String>(() -> "stringIsEqualTo[" + formatObject(toNonStringObject(str)) + "]", v -> Objects.equals(str, v)) {
       @Override
       public Object explainExpectation() {
         return str;

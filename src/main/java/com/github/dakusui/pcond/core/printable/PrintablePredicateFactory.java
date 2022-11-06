@@ -153,46 +153,46 @@ public enum PrintablePredicateFactory {
 
   public enum ParameterizedLeafFactory {
     IS_EQUAL_TO(
-        (args) -> () -> format("isEqualTo[%s]", formatObject(args.get(0))),
+        (args) -> () -> format("isEqualTo[%s]", args.get(0)),
         (args) -> v -> Objects.equals(v, args.get(0))),
     @SuppressWarnings("unchecked") GREATER_THAN(
-        (args) -> () -> format(">[%s]", formatObject(args.get(0))),
+        (args) -> () -> format(">[%s]", args.get(0)),
         (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) > 0),
     @SuppressWarnings("unchecked") GREATER_THAN_OR_EQUAL_TO(
-        (args) -> () -> format(">=[%s]", formatObject(args.get(0))),
+        (args) -> () -> format(">=[%s]", args.get(0)),
         (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) >= 0),
     @SuppressWarnings("unchecked") LESS_THAN_OR_EQUAL_TO(
-        (args) -> () -> format("<=[%s]", formatObject(args.get(0))),
+        (args) -> () -> format("<=[%s]", args.get(0)),
         (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) <= 0),
     @SuppressWarnings("unchecked") LESS_THAN(
-        (args) -> () -> format("<[%s]", formatObject(args.get(0))),
+        (args) -> () -> format("<[%s]", args.get(0)),
         (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) < 0),
     @SuppressWarnings("unchecked") EQUAL_TO(
-        (args) -> () -> format("=[%s]", formatObject(args.get(0))),
+        (args) -> () -> format("=[%s]", args.get(0)),
         (args) -> v -> ((Comparable<? super Comparable<?>>) v).compareTo((Comparable<? super Comparable<?>>) args.get(0)) == 0),
     MATCHES_REGEX(
-        (args) -> () -> String.format("matchesRegex[%s]", formatObject(args.get(0))),
+        (args) -> () -> String.format("matchesRegex[%s]", args.get(0)),
         (args) -> (s) -> ((String) s).matches((String) args.get(0))),
     CONTAINS_STRING(
-        (args) -> () -> format("containsString[%s]", formatObject(args.get(0))),
+        (args) -> () -> format("containsString[%s]", args.get(0)),
         (args) -> (s) -> ((String) s).contains((String) args.get(0))),
     STARTS_WITH(
-        (args) -> () -> format("startsWith[%s]", formatObject(args.get(0))),
+        (args) -> () -> format("startsWith[%s]", args.get(0)),
         (args) -> (s) -> ((String) s).startsWith((String) args.get(0))),
     ENDS_WITH(
-        (args) -> () -> format("endsWith[%s]", formatObject(args.get(0))),
+        (args) -> () -> format("endsWith[%s]", args.get(0)),
         (args) -> (s) -> ((String) s).endsWith((String) args.get(0))),
     EQUALS_IGNORE_CASE(
-        (args) -> () -> format("equalsIgnoreCase[%s]", formatObject(args.get(0))),
+        (args) -> () -> format("equalsIgnoreCase[%s]", args.get(0)),
         (args) -> (s) -> {
           System.out.println("equalsIgnoreCase");
           return ((String) s).equalsIgnoreCase((String) args.get(0));
         }),
     OBJECT_IS_SAME_AS(
-        arg -> () -> format("==[%s]", formatObject(arg.get(0))),
+        arg -> () -> format("==[%s]", arg.get(0)),
         args -> v -> v == args.get(0)),
     CONTAINS(
-        (args) -> () -> format("contains[%s]", formatObject(args.get(0))),
+        (args) -> () -> format("contains[%s]", args.get(0)),
         (args) -> (c) -> ((Collection<?>) c).contains(args.get(0)));
     private final Function<List<Object>, Predicate<Object>> predicateFactory;
     private final Function<List<Object>, Supplier<String>>  formatterFactory;
@@ -230,7 +230,7 @@ public enum PrintablePredicateFactory {
 
     @Override
     public Object explainExpectation() {
-      return asList(this.formatter.get(), this.args());
+      return this.formatter.get();
     }
 
     @Override

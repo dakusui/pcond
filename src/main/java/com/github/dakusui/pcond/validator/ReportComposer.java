@@ -14,6 +14,10 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.internals.InternalUtils.summarizedStringLength;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
@@ -59,9 +63,7 @@ public interface ReportComposer {
       List<Object> actualResultDetails = new LinkedList<>();
       String expectation = composeExplanationForExpectations(result, t, expectationDetails);
       String actualResult = composeExplanationForActualResults(result, t, actualResultDetails);
-      //    assert expectationDetails.size() == actualResultDetails.size();
-      return new Explanation(message, composeReport(expectation, expectationDetails), composeReport(actualResult, actualResultDetails)
-      );
+      return new Explanation(message, composeReport(expectation, expectationDetails), composeReport(actualResult, actualResultDetails));
     }
 
     private static String composeExplanationForActualResults(List<Evaluator.Entry> result, Throwable t, List<Object> actualInputDetails) {
@@ -74,24 +76,25 @@ public interface ReportComposer {
           .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
               each,
               () -> each.hasOutput() ?
-                  InternalUtils.formatObject(each.output()) :
-                  InternalUtils.formatObject(t)))
+                  formatObject(each.output()) :
+                  formatObject(t)))
           .collect(toList()));
     }
 
     private static String composeExplanationForExpectations(List<Evaluator.Entry> result, Throwable t, List<Object> expectationDetails) {
-      return composeExplanation(result.stream()
-          .filter((Evaluator.Entry each) -> !each.isTrivial())
-          .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
-              each,
-              () -> (each.hasOutput() ?
-                  InternalUtils.formatObject(each.output() instanceof Boolean ? each.expectedBooleanValue() : each.output()) :
-                  InternalUtils.formatObject(t))))
-          .peek((FormattedEntry each) -> {
-            Optional<Object> formSnapshot = each.mismatchExplanation();
-            formSnapshot.ifPresent(expectationDetails::add);
-          })
-          .collect(toList()));
+      return composeExplanation(
+          result.stream()
+              .filter((Evaluator.Entry each) -> !each.isTrivial())
+              .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
+                  each,
+                  () -> (each.hasOutput() ?
+                      formatObject(each.output() instanceof Boolean ? each.expectedBooleanValue() : each.output()) :
+                      formatObject(t))))
+              .peek((FormattedEntry each) -> {
+                Optional<Object> formSnapshot = each.mismatchExplanation();
+                formSnapshot.ifPresent(expectationDetails::add);
+              })
+              .collect(toList()));
     }
 
     private static String composeExplanation(List<FormattedEntry> formattedEntries) {
@@ -102,13 +105,16 @@ public interface ReportComposer {
       return evaluatorEntriesToString(
           squashFormattedEntriesWherePossible(formattedEntries),
           columnLengths -> formattedEntryToString(
-              columnLengths[0], columnLengths[1], columnLengths[2],
-              mismatchExplanationCount, mismatchExplanationFound));
+              columnLengths[0],
+              columnLengths[1],
+              columnLengths[2],
+              mismatchExplanationCount,
+              mismatchExplanationFound));
     }
 
     private static FormattedEntry evaluatorEntryToFormattedEntry(Evaluator.Entry entry, Supplier<String> outputFormatter) {
       return new FormattedEntry(
-          InternalUtils.formatObject(entry.input()),
+          formatObject(entry.input()),
           entry.formName(),
           entry.level() == 0 ?
               "" :
@@ -120,18 +126,23 @@ public interface ReportComposer {
     }
 
     private static Function<FormattedEntry, String> formattedEntryToString(
-        int inputColumnWidth, int formNameColumnLength, int outputColumnLength,
-        AtomicInteger i, boolean mismatchExplanationFound) {
+        int inputColumnWidth,
+        int formNameColumnLength,
+        int outputColumnLength,
+        AtomicInteger i,
+        boolean mismatchExplanationFound) {
       return (FormattedEntry formattedEntry) ->
           (mismatchExplanationFound ?
               format("%-4s", formattedEntry.mismatchExplanation().isPresent() ?
                   "[" + i.getAndIncrement() + "]" : "") :
               "") +
-              format("%-" + Math.max(2, inputColumnWidth) + "s" +
+              format("%-" + max(2, inputColumnWidth) + "s" +
                       "%-" + (formNameColumnLength + 2) + "s" +
-                      "%-" + Math.max(2, outputColumnLength) + "s",
+                      "%-" + max(2, outputColumnLength) + "s",
                   formattedEntry.input().orElse(""),
-                  formattedEntry.input().map(v -> "->").orElse("  ") + formattedEntry.indent() + formattedEntry.formName(),
+                  formattedEntry.input()
+                      .map(v -> "->")
+                      .orElse("  ") + formatObject(InternalUtils.toNonStringObject(formattedEntry.indent() + formattedEntry.formName()), formNameColumnLength - 2),
                   formattedEntry.output().map(v -> "->" + v).orElse(""));
     }
 
@@ -148,7 +159,9 @@ public interface ReportComposer {
         if (outputLength > maxOutputLength)
           maxOutputLength = outputLength;
       }
-      Function<FormattedEntry, String> formatter = formatterFactory.apply(new int[] { maxInputLength, maxIndentAndFormNameLength, maxOutputLength });
+      int formNameColumnLength = (formNameColumnLength = max(12, min(summarizedStringLength(), maxIndentAndFormNameLength))) + formNameColumnLength % 2;
+      Function<FormattedEntry, String> formatter = formatterFactory.apply(
+          new int[] { maxInputLength, formNameColumnLength, maxOutputLength });
       return formattedEntries
           .stream()
           .map(formatter)

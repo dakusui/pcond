@@ -57,7 +57,7 @@ public class ParameterizedPredicatesTest extends TestBase.ForAssertionEnabledVM 
         } },
         new Object[] { new Object[] {
             Predicates.isEqualTo("X"),
-            "isEqualTo[\"X\"]",
+            "isEqualTo[X]",
             $("X", true),
             $("Y", false),
         } },
@@ -75,19 +75,19 @@ public class ParameterizedPredicatesTest extends TestBase.ForAssertionEnabledVM 
         } },
         new Object[] { new Object[] {
             Predicates.startsWith("hello"),
-            "startsWith[\"hello\"]",
+            "startsWith[hello]",
             $("hello world", true),
             $("world hello", false),
         } },
         new Object[] { new Object[] {
             Predicates.endsWith("hello"),
-            "endsWith[\"hello\"]",
+            "endsWith[hello]",
             $("world hello", true),
             $("hello world", false),
         } },
         new Object[] { new Object[] {
             Predicates.equalsIgnoreCase("hello"),
-            "equalsIgnoreCase[\"hello\"]",
+            "equalsIgnoreCase[hello]",
             $("HELLO", true),
             $("hello", true),
             $("HELLO!", false),
@@ -101,7 +101,7 @@ public class ParameterizedPredicatesTest extends TestBase.ForAssertionEnabledVM 
         } },
         new Object[] { new Object[] {
             Predicates.contains("Hello"),
-            "contains[\"Hello\"]",
+            "contains[Hello]",
             $(Collections.singletonList("Hello"), true),
             $(Collections.singleton("Hello"), true),
             $(Collections.emptySet(), false),
@@ -121,19 +121,19 @@ public class ParameterizedPredicatesTest extends TestBase.ForAssertionEnabledVM 
         } },
         new Object[][] { {
             Predicates.alwaysTrue().and(Predicates.isEqualTo("X")),
-            "(alwaysTrue&&isEqualTo[\"X\"])",
+            "(alwaysTrue&&isEqualTo[X])",
             $("X", true),
             $("Y", false)
         } },
         new Object[][] { {
             Predicates.isEqualTo("Z").or(Predicates.isEqualTo("X")),
-            "(isEqualTo[\"Z\"]||isEqualTo[\"X\"])",
+            "(isEqualTo[Z]||isEqualTo[X])",
             $("X", true),
             $("Y", false)
         } },
         new Object[][] { {
             Predicates.isEqualTo("Y").negate().or(Predicates.isEqualTo("X").and(Predicates.isInstanceOf(String.class))),
-            "(!isEqualTo[\"Y\"]||(isEqualTo[\"X\"]&&isInstanceOf[class java.lang.String]))",
+            "(!isEqualTo[Y]||(isEqualTo[X]&&isInstanceOf[class java.lang.String]))",
             $("Z", true),
             $("X", true),
             $("Y", false)

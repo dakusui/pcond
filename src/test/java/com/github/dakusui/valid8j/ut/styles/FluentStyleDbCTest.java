@@ -28,8 +28,8 @@ public class FluentStyleDbCTest {
       } catch (IllegalArgumentException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
-        MatcherAssert.assertThat(message, CoreMatchers.containsString("stringIsEqualTo[\"HELLO\"]->true"));
-        MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[\"WORLD\"]->false"));
+        MatcherAssert.assertThat(message, CoreMatchers.containsString("stringIsEqualTo[HELLO]->true"));
+        MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[WORLD]->false"));
         throw e;
       }
     }
@@ -43,8 +43,8 @@ public class FluentStyleDbCTest {
       } catch (IllegalStateException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
-        MatcherAssert.assertThat(message, CoreMatchers.containsString("stringIsEqualTo[\"HELLO\"]->true"));
-        MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[\"WORLD\"]->false"));
+        MatcherAssert.assertThat(message, CoreMatchers.containsString("stringIsEqualTo[HELLO]->true"));
+        MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[WORLD]->false"));
         throw e;
       }
 
@@ -60,8 +60,8 @@ public class FluentStyleDbCTest {
       } catch (PreconditionViolationException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
-        MatcherAssert.assertThat(message, CoreMatchers.containsString("stringIsEqualTo[\"HELLO\"]->true"));
-        MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[\"WORLD\"]->false"));
+        MatcherAssert.assertThat(message, CoreMatchers.containsString("stringIsEqualTo[HELLO]->true"));
+        MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[WORLD]->false"));
         throw e;
       }
     }
@@ -111,8 +111,8 @@ public class FluentStyleDbCTest {
       } catch (PostconditionViolationException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
-        MatcherAssert.assertThat(message, CoreMatchers.containsString("stringIsEqualTo[\"HELLO\"]->true"));
-        MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[\"WORLD\"]->false"));
+        MatcherAssert.assertThat(message, CoreMatchers.containsString("stringIsEqualTo[HELLO]->true"));
+        MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[WORLD]->false"));
         throw e;
       }
     }
@@ -126,8 +126,8 @@ public class FluentStyleDbCTest {
       } catch (IllegalStateException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
-        MatcherAssert.assertThat(message, CoreMatchers.containsString("stringIsEqualTo[\"HELLO\"]->true"));
-        MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[\"WORLD\"]->false"));
+        MatcherAssert.assertThat(message, CoreMatchers.containsString("stringIsEqualTo[HELLO]->true"));
+        MatcherAssert.assertThat(message, CoreMatchers.containsString("containsString[WORLD]->false"));
         throw e;
       }
     }

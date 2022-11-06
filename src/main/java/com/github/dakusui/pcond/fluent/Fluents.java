@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.forms.Functions.elementAt;
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
 import static com.github.dakusui.pcond.forms.Predicates.transform;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -179,10 +180,11 @@ public class Fluents {
 
   public static <T> Statement<T> statementAllOf(T value, List<Predicate<? super T>> predicates) {
     class Stmt implements Statement<T>, Evaluable.Conjunction<T> {
+      @SuppressWarnings("unchecked")
       final List<Evaluable<? super T>> children = predicates.stream()
           .map(each -> each instanceof Evaluable ?
               each :
-              PrintablePredicateFactory.leaf(() -> each.toString(), each))
+              PrintablePredicateFactory.leaf(each::toString, each))
           .map(each -> (Evaluable<? super T>) each)
           .collect(toList());
 
@@ -213,6 +215,13 @@ public class Fluents {
       @Override
       public boolean test(T t) {
         return statementPredicate().test(t);
+      }
+
+      @Override
+      public String toString() {
+        return children.stream()
+            .map(Object::toString)
+            .collect(joining("&&"));
       }
     }
     return new Stmt();
