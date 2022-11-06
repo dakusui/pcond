@@ -80,7 +80,7 @@ public class FluentsInternalTest extends TestBase {
                   .then()
                   .asString()
                   // 'not(...)' is added to make the matcher fail.
-                  .testPredicate(not(isEqualTo("returnedStringFromChildMethod")))));
+                  .addPredicate(not(isEqualTo("returnedStringFromChildMethod")))));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       throw e;
@@ -105,7 +105,7 @@ public class FluentsInternalTest extends TestBase {
                       .exercise(function("lambda:Child::childMethod", Child::childMethod))
                       .then().asString()
                       // 'not(...)' is added to make the matcher fail.
-                      .testPredicate(not(isEqualTo("returnedStringFromChildMethod"))))));
+                      .addPredicate(not(isEqualTo("returnedStringFromChildMethod"))))));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       throw e;

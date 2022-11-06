@@ -17,22 +17,22 @@ public interface ComparableNumberChecker<
     Checker<TX, OIN, N>,
     Matcher.ForNumber<OIN, N> {
   default TX equalTo(N v) {
-    return predicate(Predicates.equalTo(v));
+    return addPredicate(Predicates.equalTo(v));
   }
 
   default TX lessThan(N v) {
-    return predicate(Predicates.lessThan(v));
+    return addPredicate(Predicates.lessThan(v));
   }
 
   default TX lessThanOrEqualTo(N v) {
-    return predicate(Predicates.lessThanOrEqualTo(v));
+    return addPredicate(Predicates.lessThanOrEqualTo(v));
   }
 
   default TX greaterThan(N v) {
-    return predicate(Predicates.greaterThan(v));
+    return addPredicate(Predicates.greaterThan(v));
   }
 
   default TX greaterThanOrEqualTo(N v) {
-    return predicate(Predicates.greaterThanOrEqualTo(v));
+    return addPredicate(Predicates.greaterThanOrEqualTo(v));
   }
 }

@@ -1,17 +1,17 @@
 package com.github.dakusui.thincrest.examples;
 
-import com.github.dakusui.thincrest.examples.sut.MemberDatabase;
 import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.shared.FluentTestUtils;
+import com.github.dakusui.thincrest.examples.sut.MemberDatabase;
 import org.junit.Test;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.function;
+import static com.github.dakusui.shared.FluentTestUtils.when;
+import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
@@ -28,7 +28,7 @@ public class FluentStyleExample {
 
     assertThat(
         database,
-        FluentTestUtils.when().asValueOfClass(MemberDatabase.class)
+        when().asValueOfClass(MemberDatabase.class)
             .exercise(lookUpMemberAndGetLastName)
             .then()
             .isNotNull());
@@ -47,7 +47,7 @@ public class FluentStyleExample {
 
     assertThat(
         database,
-        FluentTestUtils.when().asValueOfClass(MemberDatabase.class)
+        when().asValueOfClass(MemberDatabase.class)
             .exercise(lookUpMemberWith.apply(identifier))
             .then()
             .intoStringWith(memberLastName)
@@ -66,12 +66,12 @@ public class FluentStyleExample {
     assertThat(
         asList(lastName, fullName),
         allOf(
-            FluentTestUtils.when().asListOfClass(String.class)
+            when().asListOfClass(String.class)
                 .elementAt(0)
                 .then().verifyWith(allOf(
                     isNotNull(),
                     not(isEmptyString()))),
-            FluentTestUtils.when().asListOfClass(String.class)
+            when().asListOfClass(String.class)
                 .then()
                 .contains(lastName)));
   }

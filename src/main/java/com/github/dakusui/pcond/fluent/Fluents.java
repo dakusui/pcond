@@ -48,7 +48,7 @@ public class Fluents {
   }
 
   public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
-    return value(value).then().predicate(predicate);
+    return value(value).then().addPredicate(predicate);
   }
 
 

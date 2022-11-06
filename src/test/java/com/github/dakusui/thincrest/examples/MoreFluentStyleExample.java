@@ -1,9 +1,11 @@
 package com.github.dakusui.thincrest.examples;
 
-import com.github.dakusui.thincrest.examples.sut.MemberDatabase;
+import com.github.dakusui.pcond.core.fluent.Checker;
+import com.github.dakusui.pcond.core.fluent.checkers.StringChecker;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.utils.TestUtils;
 import com.github.dakusui.thincrest.TestFluents;
+import com.github.dakusui.thincrest.examples.sut.MemberDatabase;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
@@ -11,7 +13,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.fluent.Fluents.*;
+import static com.github.dakusui.pcond.fluent.Fluents.value;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static java.lang.String.format;
@@ -108,6 +110,9 @@ public class MoreFluentStyleExample {
         .isEqualTo("Do"));
   }
 
+  /**
+   * org.junit.ComparisonFailure: Value:["Doe",["John","Doe","PhD"]] violated: (at[0] WHEN(treatAsIs (isNotNull&&!isEmpty))&&at[1] WHEN(treatAsList contains["DOE"]))
+   */
   @Test
   public void givenKnownLastName_whenFindMembersByFullName_thenLastNastIsNotNullAndContainedInFullName() {
     MemberDatabase database = new MemberDatabase();
@@ -126,6 +131,25 @@ public class MoreFluentStyleExample {
             .contains("DOE"));
   }
 
+  /**
+   * org.junit.ComparisonFailure: Value:["Doe",["John","Doe","PhD"]] violated: (at[0] WHEN(DUMMY_FUNCTION:ALWAYSTHROW (isNotNull&&!isEmpty))&&at[1] WHEN(treatAsList contains["DOE"]))
+   */
+  @Test
+  public void givenKnownLastName_whenFindMembersByFullName_thenLastNastIsNotNullAndContainedInFullName_2() {
+    MemberDatabase database = new MemberDatabase();
+    String lastName = database.lookUp("0001")
+        .orElseThrow(NoSuchElementException::new)
+        .lastName();
+    List<String> fullName = database.findMembersByLastName(lastName).get(0).toFullName();
+    TestFluents.assertAll(
+        value(lastName)
+            .then()
+            .with(Checker::isNotNull)
+            .with(StringChecker::isNotEmpty),
+        value(fullName).asListOfClass(String.class)
+            .then()
+            .contains("DOE"));
+  }
   @Test
   public void givenValidName_whenValidatePersonName_thenPass() {
     String s = "John Doe";

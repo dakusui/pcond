@@ -26,11 +26,11 @@ public interface ListChecker<OIN, E> extends
   ListChecker<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue);
 
   default ListChecker<OIN, E> isEmpty() {
-    return predicate(Predicates.isEmpty());
+    return addPredicate(Predicates.isEmpty());
   }
 
   default ListChecker<OIN, E> contains(E element) {
-    return predicate(Predicates.contains(element));
+    return addPredicate(Predicates.contains(element));
   }
 
   @SuppressWarnings("unchecked")
@@ -40,7 +40,7 @@ public interface ListChecker<OIN, E> extends
 
   @SuppressWarnings("unchecked")
   default ListChecker<OIN, E> findElementsInOrderBy(List<Predicate<E>> predicates) {
-    return predicate(Predicates.findElements(predicates.toArray(new Predicate[0])));
+    return addPredicate(Predicates.findElements(predicates.toArray(new Predicate[0])));
   }
 
   @SuppressWarnings("unchecked")

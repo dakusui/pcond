@@ -30,8 +30,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.*;
  * @param <OIN>  The type of the original input value.
  * @param <T>The type of the value to be verified by this object.
  */
-public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
-    extends
+public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     Identifiable,
     Statement<OIN>,
     Evaluable.Transformation<OIN, T>,
@@ -40,7 +39,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
 
   String transformerName();
 
-  V predicate(Predicate<? super T> predicate);
+  V addPredicate(Predicate<? super T> predicate);
 
   Function<? super OIN, ? extends T> function();
 
@@ -48,16 +47,14 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
 
   OIN originalInputValue();
 
+  @Override
   default OIN statementValue() {
     return originalInputValue();
   }
 
+  @Override
   default Predicate<OIN> statementPredicate() {
     return toPredicate();
-  }
-
-  default V testPredicate(Predicate<? super T> predicate) {
-    return this.predicate(predicate);
   }
 
   default Predicate<? super OIN> build() {
@@ -91,7 +88,13 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
     @SuppressWarnings("unchecked") V ret = (V) this;
     if (isDummyFunction(this.function()))
       ret = (V) ret.asObject();
-    return ret.predicate(predicate);
+    return ret.addPredicate(predicate);
+  }
+
+  @SuppressWarnings("unchecked")
+  default V with(Function<V, Predicate<? super T>> predicateFunction) {
+    this.verifyWith(predicateFunction.apply((V) this));
+    return (V) this;
   }
 
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
@@ -197,11 +200,11 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
   }
 
   default V isNotNull() {
-    return this.predicate(Predicates.isNotNull());
+    return this.addPredicate(Predicates.isNotNull());
   }
 
   default V isNull() {
-    return this.predicate(Predicates.isNull());
+    return this.addPredicate(Predicates.isNull());
   }
 
   /**
@@ -210,23 +213,23 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
    * @return the updated object.
    */
   default V isEqualTo(Object anotherObject) {
-    return this.predicate(Predicates.isEqualTo(anotherObject));
+    return this.addPredicate(Predicates.isEqualTo(anotherObject));
   }
 
   default V isSameReferenceAs(Object anotherObject) {
-    return this.predicate(Predicates.isSameReferenceAs(anotherObject));
+    return this.addPredicate(Predicates.isSameReferenceAs(anotherObject));
   }
 
   default V isInstanceOf(Class<?> klass) {
-    return this.predicate(Predicates.isInstanceOf(klass));
+    return this.addPredicate(Predicates.isInstanceOf(klass));
   }
 
   default V invoke(String methodName, Object... args) {
-    return this.predicate(Predicates.callp(MethodQuery.instanceMethod(parameter(), methodName, args)));
+    return this.addPredicate(Predicates.callp(MethodQuery.instanceMethod(parameter(), methodName, args)));
   }
 
   default V invokeStatic(Class<?> klass, String methodName, Object... args) {
-    return this.predicate(Predicates.callp(MethodQuery.classMethod(klass, methodName, args)));
+    return this.addPredicate(Predicates.callp(MethodQuery.classMethod(klass, methodName, args)));
   }
 
   enum Factory {
@@ -314,7 +317,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T>
       return this.transformerName;
     }
 
-    public V predicate(Predicate<? super T> predicate) {
+    public V addPredicate(Predicate<? super T> predicate) {
       if (isDummyPredicate(this.predicate))
         this.predicate = predicate;
       else

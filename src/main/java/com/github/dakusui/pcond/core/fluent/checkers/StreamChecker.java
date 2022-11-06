@@ -22,15 +22,15 @@ public interface StreamChecker<OIN, E> extends
   StreamChecker<OIN, E> create(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue);
 
   default StreamChecker<OIN, E> noneMatch(Predicate<E> p) {
-    return this.predicate(Predicates.noneMatch(p));
+    return this.addPredicate(Predicates.noneMatch(p));
   }
 
   default StreamChecker<OIN, E> anyMatch(Predicate<E> p) {
-    return this.predicate(Predicates.anyMatch(p));
+    return this.addPredicate(Predicates.anyMatch(p));
   }
 
   default StreamChecker<OIN, E> allMatch(Predicate<E> p) {
-    return this.predicate(Predicates.allMatch(p));
+    return this.addPredicate(Predicates.allMatch(p));
   }
 
   class Impl<OIN, E>

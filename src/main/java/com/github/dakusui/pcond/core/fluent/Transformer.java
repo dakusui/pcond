@@ -125,6 +125,22 @@ public interface Transformer<
     return this.transform(f, (TX, func) -> integerTransformer(this, func));
   }
 
+  default IntegerTransformer<OIN> transformToLong(Function<? super OUT, Integer> f) {
+    return this.transform(f, (TX, func) -> integerTransformer(this, func));
+  }
+
+  default ShortTransformer<OIN> transformToShort(Function<? super OUT, Short> f) {
+    return this.transform(f, (TX, func) -> shortTransformer(this, func));
+  }
+
+  default FloatTransformer<OIN> transformToFloat(Function<? super OUT, Float> f) {
+    return this.transform(f, (TX, func) -> floatTransformer(this, func));
+  }
+
+  default DoubleTransformer<OIN> transformToDouble(Function<? super OUT, Double> f) {
+    return this.transform(f, (TX, func) -> doubleTransformer(this, func));
+  }
+
   default BooleanTransformer<OIN> transformToInBoolean(Function<? super OUT, Boolean> f) {
     return this.transform(f, (TX, func) -> booleanTransformer(this, func));
   }

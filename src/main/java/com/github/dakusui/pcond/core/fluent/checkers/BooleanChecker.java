@@ -21,11 +21,11 @@ public interface BooleanChecker<OIN> extends
   BooleanChecker<OIN> create(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue);
 
   default BooleanChecker<OIN> isTrue() {
-    return this.predicate(Predicates.isTrue());
+    return this.addPredicate(Predicates.isTrue());
   }
 
   default BooleanChecker<OIN> isFalse() {
-    return this.predicate(Predicates.isFalse());
+    return this.addPredicate(Predicates.isFalse());
   }
 
   class Impl<OIN> extends Checker.Base<BooleanChecker<OIN>, OIN, Boolean> implements BooleanChecker<OIN> {

@@ -19,47 +19,47 @@ public interface StringChecker<OIN> extends
     Checker<StringChecker<OIN>, OIN, String>,
     Matcher.ForString<OIN> {
   default StringChecker<OIN> contains(String token) {
-    return this.predicate(Predicates.containsString(token));
+    return this.addPredicate(Predicates.containsString(token));
   }
 
   default StringChecker<OIN> startsWith(String prefix) {
-    return this.predicate(Predicates.startsWith(prefix));
+    return this.addPredicate(Predicates.startsWith(prefix));
   }
 
   default StringChecker<OIN> isEmpty() {
-    return this.predicate(Predicates.isEmptyString());
+    return this.addPredicate(Predicates.isEmptyString());
   }
 
   default StringChecker<OIN> isNotEmpty() {
-    return this.predicate(Predicates.isEmptyString().negate());
+    return this.addPredicate(Predicates.isEmptyString().negate());
   }
 
   default StringChecker<OIN> isEqualTo(String string) {
-    return this.predicate(explainableStringIsEqualTo(string));
+    return this.addPredicate(explainableStringIsEqualTo(string));
   }
 
   default StringChecker<OIN> isNullOrEmpty() {
-    return this.predicate(Predicates.isNullOrEmptyString());
+    return this.addPredicate(Predicates.isNullOrEmptyString());
   }
 
   default StringChecker<OIN> matchesRegex(String regex) {
-    return this.predicate(Predicates.matchesRegex(regex));
+    return this.addPredicate(Predicates.matchesRegex(regex));
   }
 
   default StringChecker<OIN> equalsIgnoreCase(String s) {
-    return this.predicate(Predicates.equalsIgnoreCase(s));
+    return this.addPredicate(Predicates.equalsIgnoreCase(s));
   }
 
   default StringChecker<OIN> findRegexes(String... regexes) {
-    return this.predicate(Predicates.findRegexes(regexes));
+    return this.addPredicate(Predicates.findRegexes(regexes));
   }
 
   default StringChecker<OIN> findRegexPatterns(Pattern... patterns) {
-    return this.predicate(Predicates.findRegexPatterns(patterns));
+    return this.addPredicate(Predicates.findRegexPatterns(patterns));
   }
 
   default StringChecker<OIN> findSubstrings(String... tokens) {
-    return this.predicate(Predicates.findSubstrings(tokens));
+    return this.addPredicate(Predicates.findSubstrings(tokens));
   }
 
   class Impl<OIN>
