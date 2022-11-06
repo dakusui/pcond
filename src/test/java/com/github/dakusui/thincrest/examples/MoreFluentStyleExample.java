@@ -2,6 +2,8 @@ package com.github.dakusui.thincrest.examples;
 
 import com.github.dakusui.pcond.core.fluent.Checker;
 import com.github.dakusui.pcond.core.fluent.checkers.StringChecker;
+import com.github.dakusui.pcond.core.fluent.transformers.ListTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.utils.TestUtils;
 import com.github.dakusui.thincrest.TestFluents;
@@ -150,6 +152,7 @@ public class MoreFluentStyleExample {
             .then()
             .contains("DOE"));
   }
+
   @Test
   public void givenValidName_whenValidatePersonName_thenPass() {
     String s = "John Doe";
@@ -184,4 +187,57 @@ public class MoreFluentStyleExample {
             .then()
             .findElementsInOrder("HELLO", "WORLD"));
   }
+
+  @Test
+  public void checkTwoAspectsOfOneValue() {
+    String s = "helloWorld";
+    TestFluents.assertAll(
+        value(s)
+            .then()
+            .isNotNull(),
+        value(s).length()
+            .then()
+            .greaterThan(100));
+  }
+
+  @Test
+  public void checkTwoAspectsOfOneValue_2() {
+    List<String> list = asList("helloWorld", "HI");
+    String s = list.get(0);
+    TestFluents.assertAll(
+        value(list).size()
+            .then()
+            .greaterThan(3),
+        value(list).elementAt(0).asString()
+            .then()
+            .isNotNull(),
+        value(list).elementAt(0).asString().length()
+            .then()
+            .greaterThan(100));
+  }
+
+  @Test
+  public void checkTwoAspectsOfOneValue_3() {
+    List<String> list = asList("helloWorld", "HI");
+    String s = list.get(0);
+    TestFluents.assertAll(
+        value(list).thenVerifyAllOf(
+            tx -> tx.size().then().greaterThan(3),
+            tx -> tx.elementAt(0).asString().then().isNotNull(),
+            tx -> tx.elementAt(0).asString().length().then().greaterThan(100)
+        ));
+  }
+
+  @Test
+  public void checkTwoAspectsOfOneValue_4() {
+    List<String> list = asList("helloWorld", "HI");
+    TestFluents.assertThat(
+        value(list).thenVerifyAllOf(
+            (ListTransformer<List<String>, String> tx) -> tx.size().then().greaterThan(3),
+            (ListTransformer<List<String>, String> tx) -> tx.elementAt(0).asString().thenVerifyAllOf(
+                (StringTransformer<List<String>> ty) -> ty.then().isNotNull(),
+                (StringTransformer<List<String>> ty) -> ty.asString().length().then().greaterThan(100))
+        ));
+  }
+
 }

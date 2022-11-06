@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.core.fluent.Checker;
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.checkers.StringChecker;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.function.Function;
@@ -28,6 +29,10 @@ public interface StringTransformer<OIN> extends
 
   default ListTransformer<OIN, String> split(String regex) {
     return this.transformToList(Printables.function("split[" + regex + "]", (String s) -> asList((s.split(regex)))));
+  }
+
+  default IntegerTransformer<OIN> length() {
+    return this.transformToInteger(Functions.length());
   }
 
   @SuppressWarnings("unchecked")

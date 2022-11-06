@@ -1,21 +1,25 @@
 package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
-import com.github.dakusui.pcond.core.fluent.transformers.LongTransformer;
+import com.github.dakusui.pcond.fluent.Fluents;
+import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 import static com.github.dakusui.pcond.core.fluent.Transformer.Factory.*;
-import static com.github.dakusui.pcond.internals.InternalUtils.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
+import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -29,7 +33,7 @@ public interface Transformer<
     TX extends Transformer<TX, OIN, OUT>,
     OIN,
     OUT> extends
-    Matcher<OIN, OUT>,
+    Matcher<OIN>,
     AsPhraseFactory.ForTransformer<OIN> {
   @SuppressWarnings("unchecked")
   static <
@@ -60,6 +64,16 @@ public interface Transformer<
       return (isDummyFunction(after)) ? dummyFunction() : (Function<I, O>) after;
     else
       return isDummyFunction(after) ? (Function<I, O>) func : func.andThen(after);
+  }
+
+  @SuppressWarnings("unchecked")
+  default Statement<OIN> thenVerifyAllOf(Function<? super TX, Statement<OIN>>... funcs) {
+    return Fluents.statementAllOf(
+        Transformer.this.originalInputValue(),
+        Arrays.stream(funcs)
+            .map(each -> each.apply((TX) Transformer.this))
+            .collect(Collectors.toList())
+    );
   }
 
   Function<? super OIN, ? extends OUT> function();

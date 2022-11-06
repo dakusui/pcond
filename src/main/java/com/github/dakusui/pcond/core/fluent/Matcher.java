@@ -1,39 +1,36 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import java.util.List;
-import java.util.stream.Stream;
-
-public interface Matcher<OIN, OUT> {
-  interface ForString<OIN> extends Matcher<OIN, String> {
+public interface Matcher<OIN> {
+  interface ForString<OIN> extends Matcher<OIN> {
   }
 
-  interface ForInteger<OIN> extends Matcher<OIN, Integer> {
+  interface ForComparableNumber<OIN, N extends Number & Comparable<N>> extends Matcher<OIN> {
   }
 
-  interface ForDouble<OIN> extends Matcher<OIN, Double> {
+  interface ForInteger<OIN> extends ForComparableNumber<OIN, Integer> {
   }
 
-  interface ForLong<OIN> extends Matcher<OIN, Long> {
+  interface ForDouble<OIN> extends ForComparableNumber<OIN, Double> {
   }
 
-  interface ForFloat<OIN> extends Matcher<OIN, Float> {
+  interface ForLong<OIN> extends ForComparableNumber<OIN, Long> {
   }
 
-  interface ForShort<OIN> extends Matcher<OIN, Short> {
+  interface ForFloat<OIN> extends ForComparableNumber<OIN, Float> {
   }
 
-  interface ForBoolean<OIN> extends Matcher<OIN, Boolean> {
+  interface ForShort<OIN> extends ForComparableNumber<OIN, Short> {
   }
 
-  interface ForObject<OIN, E> extends Matcher<OIN, E> {
+  interface ForBoolean<OIN> extends Matcher<OIN> {
   }
 
-  interface ForList<OIN, E> extends Matcher<OIN, List<E>> {
+  interface ForObject<OIN, E> extends Matcher<OIN> {
   }
 
-  interface ForStream<OIN, E> extends Matcher<OIN, Stream<E>> {
+  interface ForList<OIN, E> extends Matcher<OIN> {
   }
 
-  interface ForNumber<OIN, N extends Number & Comparable<N>> extends Matcher<OIN, N> {
+  interface ForStream<OIN, E> extends Matcher<OIN> {
   }
 }

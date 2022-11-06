@@ -15,7 +15,7 @@ public interface ComparableNumberChecker<
     Identifiable, Predicate<OIN>,
     Evaluable.Transformation<OIN, N>,
     Checker<TX, OIN, N>,
-    Matcher.ForNumber<OIN, N> {
+    Matcher.ForComparableNumber<OIN, N> {
   default TX equalTo(N v) {
     return addPredicate(Predicates.equalTo(v));
   }

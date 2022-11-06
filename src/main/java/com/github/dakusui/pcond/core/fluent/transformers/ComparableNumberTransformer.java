@@ -11,7 +11,7 @@ public interface ComparableNumberTransformer<
     N extends Number & Comparable<N>>
     extends
     Transformer<TX, OIN, N>,
-    Matcher.ForNumber<OIN, N> {
+    Matcher.ForComparableNumber<OIN, N> {
   @Override
   V then();
 }

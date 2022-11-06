@@ -1,9 +1,11 @@
 package com.github.dakusui.pcond.fluent;
 
+import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.fluent.Fluent;
 import com.github.dakusui.pcond.core.fluent.transformers.*;
 import com.github.dakusui.pcond.core.printable.PrintableFunction;
 import com.github.dakusui.pcond.core.printable.PrintablePredicate;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +17,7 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.forms.Functions.elementAt;
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
 import static com.github.dakusui.pcond.forms.Predicates.transform;
+import static java.util.stream.Collectors.toList;
 
 /**
  * An "entry-point" class to write a "fluent" style tests.
@@ -172,6 +175,47 @@ public class Fluents {
         .map(e -> makeTrivial(transform(makeTrivial(elementAt(i.getAndIncrement()))).check((Predicate<? super Object>) e.statementPredicate())))
         .toArray(Predicate[]::new);
     return makeTrivial(allOf(predicates));
+  }
+
+  public static <T> Statement<T> statementAllOf(T value, List<Predicate<? super T>> predicates) {
+    class Stmt implements Statement<T>, Evaluable.Conjunction<T> {
+      final List<Evaluable<? super T>> children = predicates.stream()
+          .map(each -> each instanceof Evaluable ?
+              each :
+              PrintablePredicateFactory.leaf(() -> each.toString(), each))
+          .map(each -> (Evaluable<? super T>) each)
+          .collect(toList());
+
+      @Override
+      public T statementValue() {
+        return value;
+      }
+
+      @Override
+      public List<Evaluable<? super T>> children() {
+        return children;
+      }
+
+      @Override
+      public boolean shortcut() {
+        return false;
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public Predicate<T> statementPredicate() {
+        return PrintablePredicateFactory.allOf(predicates
+            .stream()
+            .map(each -> (Predicate<T>) each)
+            .collect(toList()));
+      }
+
+      @Override
+      public boolean test(T t) {
+        return statementPredicate().test(t);
+      }
+    }
+    return new Stmt();
   }
 
   private static <T> Predicate<T> makeTrivial(Predicate<T> predicates) {
