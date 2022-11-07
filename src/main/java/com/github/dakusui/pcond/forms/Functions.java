@@ -28,7 +28,7 @@ import static java.util.Objects.requireNonNull;
 
 /**
  * An entry point for acquiring function objects.
- * Functions retrieved by method in this class are all "printable".
+ * Functions retrieved by methods in this class are all "printable".
  */
 public class Functions {
   private Functions() {
@@ -213,11 +213,14 @@ public class Functions {
    * Returns a {@link Function} created from a method specified by a {@code methodQuery}.
    * If the {@code methodQuery} matches none or more than one methods, a {@code RuntimeException} will be thrown.
    *
+   * To pass an input value given to an entry point method, such as `TestAssertions.assertThat`, to the method, use a place-holder value returned by {@link Functions#parameter()}.
+   *
    * @param methodQuery A query object that specifies a method to be invoked by the returned function.
    * @param <T>         the type of the input to the returned function
    * @return Created function.
    * @see Functions#classMethod(Class, String, Object[])
    * @see Functions#instanceMethod(Object, String, Object[])
+   * @see Functions#parameter()
    */
   public static <T, R> Function<T, R> call(MethodQuery methodQuery) {
     return Printables.function(methodQuery.describe(), t -> invokeMethod(methodQuery.bindActualArguments((o) -> o instanceof Parameter, o -> t)));
@@ -235,6 +238,8 @@ public class Functions {
    * In order to specify a parameter which should be passed to the returned function at applying,
    * you can use an object returned by {@link Functions#parameter} method.
    * This is useful to construct a function from an existing method.
+   *
+   * To pass an input value given to an entry point method, such as `TestAssertions.assertThat`, to the method, use a place-holder value returned by {@link Functions#parameter()}.
    *
    * That is, in order to create a function which computes sin using query a method {@link Math#sin(double)},
    * you can do following
@@ -261,6 +266,7 @@ public class Functions {
    * @param arguments   Arguments
    * @return A method query for static methods specified by arguments.
    * @see com.github.dakusui.pcond.core.refl.ReflUtils#findMethod(Class, String, Object[])
+   * @see Functions#parameter()
    */
   public static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
     return MethodQuery.classMethod(targetClass, methodName, arguments);
@@ -286,6 +292,8 @@ public class Functions {
    * In case the {@code targetObject} is not an instance of {@link Parameter} and {@code arguments}
    * contain no {@code Parameter} object, the function will simply ignore the input passed to it.
    *
+   * To pass an input value given to an entry point method, such as `TestAssertions.assertThat`, to the method, use a place-holder value returned by {@link Functions#parameter()}.
+   *
    * // @formatter:on
    *
    * @param targetObject An object on which methods matching returned query should be invoked.
@@ -293,32 +301,23 @@ public class Functions {
    * @param arguments    Arguments passed to the method.
    * @return A method query for instance methods specified by arguments.
    * @see Functions#classMethod(Class, String, Object[])
+   * @see Functions#parameter()
    */
   public static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
     return MethodQuery.instanceMethod(targetObject, methodName, arguments);
   }
 
   /**
-   * Returns a {@link Parameter} object, which is used in combination with {@link Functions#instanceMethod(Object, String, Object[])}
-   * or {@link Functions#classMethod(Class, String, Object[])}.
-   * This object is replaced with the actual input value passed to a function built
-   * through {@link Functions#call(MethodQuery)} or {@link Predicates#callp(MethodQuery)}
-   * when it is applied.
-   *
-   * @return a {@code Parameter} object
-   */
-  public static Parameter parameter() {
-    return Parameter.INSTANCE;
-  }
-
-  /**
    * // @formatter:off
    * A short hand method to call
+   *
    * [source, java]
    * ---
    * call(instanceMethod(object, methodName, args))
    * ---
    * // @formatter:on
+   *
+   * To pass an input value given to an entry point method, such as `TestAssertions.assertThat`, to the method, use a place-holder value returned by {@link Functions#parameter()}.
    *
    * @param targetObject An object on which methods matching returned query should be invoked.
    * @param methodName   A name of method.
@@ -328,6 +327,7 @@ public class Functions {
    * @return The function that calls a method matching a query built from the given arguments.
    * @see Functions#call(MethodQuery)
    * @see Functions#instanceMethod(Object, String, Object[])
+   * @see Functions#parameter()
    */
   private static <T, R> Function<T, R> callInstanceMethod(Object targetObject, String methodName, Object... arguments) {
     return call(instanceMethod(targetObject, methodName, arguments));
@@ -351,6 +351,9 @@ public class Functions {
    *   }
    * }
    * ----
+   *
+   * To pass an input value given to an entry point method, such as `TestAssertions.assertThat`, to the method, use a place-holder value returned by {@link Functions#parameter()}.
+   *
    * // @formatter:on
    *
    * @param methodName The method name
@@ -358,6 +361,7 @@ public class Functions {
    * @param <T>        The type of input to the returned function
    * @param <R>        The type of output from the returned function
    * @return A function that invokes the method matching the {@code methodName} and {@code args}
+   * @see Functions#parameter()
    */
   public static <T, R> Function<T, R> call(String methodName, Object... arguments) {
     return callInstanceMethod(parameter(), methodName, arguments);
@@ -392,6 +396,27 @@ public class Functions {
               allOf(exceptionThrown(), exceptionClassWas(exceptionClass)));
           throw new AssertionError("A line that shouldn't be reached. File a ticket.");
         });
+  }
+
+  /**
+   * Returns a {@link Parameter} object, which is used in combination with {@link Functions#instanceMethod(Object, String, Object[])},
+   * {@link Functions#classMethod(Class, String, Object[])}, or their shorthand methods.
+   * The object returned by this method is replaced with the actual input value passed to a function built
+   * through {@link Functions#call(MethodQuery)} or {@link Predicates#callp(MethodQuery)}
+   * when it is applied.
+   *
+   * @return a {@code Parameter} object
+   *
+   * @see Functions#classMethod(Class, String, Object[])
+   * @see Functions#instanceMethod(Object, String, Object[])
+   * @see Functions#call(MethodQuery)
+   * @see Functions#call(String, Object[])
+   * @see Predicates#callp(MethodQuery)
+   * @see Predicates#callp(String, Object[])
+   *
+   */
+  public static Parameter parameter() {
+    return Parameter.INSTANCE;
   }
 
   private static Predicate<Object> exceptionThrown() {
