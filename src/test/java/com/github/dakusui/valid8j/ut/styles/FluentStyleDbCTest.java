@@ -54,7 +54,7 @@ public class FluentStyleDbCTest {
     @Test(expected = PreconditionViolationException.class)
     public void requireValuesTest_failing() {
       try {
-        ValidationFluents.require(
+        ValidationFluents.requireAll(
             value("hello").toUpperCase().then().isEqualTo("HELLO"),
             value("world").toLowerCase().then().contains("WORLD").verifyWith(not(containsString("w"))));
       } catch (PreconditionViolationException e) {
@@ -80,7 +80,7 @@ public class FluentStyleDbCTest {
     public void requireValue_passing() {
       String givenValue = "helloWorld";
       MatcherAssert.assertThat(
-          ValidationFluents.require(value(givenValue)
+          ValidationFluents.requireStatement(value(givenValue)
               .exercise(stringToLowerCase())
               .then()
               .asString()
@@ -105,7 +105,7 @@ public class FluentStyleDbCTest {
     @Test(expected = PostconditionViolationException.class)
     public void ensureValuesTest_failing() {
       try {
-        ValidationFluents.ensure(
+        ValidationFluents.ensureAll(
             value("hello").toUpperCase().then().isEqualTo("HELLO"),
             value("world").toLowerCase().then().contains("WORLD").verifyWith(not(containsString("w"))));
       } catch (PostconditionViolationException e) {
@@ -136,7 +136,7 @@ public class FluentStyleDbCTest {
     public void ensureValue_passing() {
       String givenValue = "helloWorld";
       MatcherAssert.assertThat(
-          ValidationFluents.ensure(value(givenValue)
+          ValidationFluents.ensureStatement(value(givenValue)
               .exercise(stringToLowerCase())
               .then()
               .asString()

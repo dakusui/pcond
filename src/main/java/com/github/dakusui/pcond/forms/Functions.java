@@ -238,12 +238,15 @@ public class Functions {
    *
    * That is, in order to create a function which computes sin using query a method {@link Math#sin(double)},
    * you can do following
+   *
    * [source, java]
    * ----
-   * public void buildSinFunction() {
-   * MethodQuery mq = classMethod(Math.class, "sin", parameter());
-   * Function<Double, Double> sin = call(mq);
-   * System.out.println(sin(Math.PI/2));
+   * public class Example
+   *   public void buildSinFunction() {
+   *     MethodQuery mq = classMethod(Math.class, "sin", parameter());
+   *     Function<Double, Double> sin = call(mq);
+   *     System.out.println(sin(Math.PI/2));
+   *   }
    * }
    * ----
    * This prints {@code 1.0}.
@@ -276,7 +279,7 @@ public class Functions {
    * [source, java]
    * ----
    * public void buildLengthFunction() {
-   * Function<String, Integer> length = call(instanceMethod(parameter(), "length"));
+   *   Function<String, Integer> length = call(instanceMethod(parameter(), "length"));
    * }
    * ----
    *
@@ -338,6 +341,17 @@ public class Functions {
    * This means this method does not throw any exception by itself and in case
    * you give wrong {@code methodName} or {@code arguments}, an exception will be
    * thrown when the returned function is applied.
+   *
+   * // @formatter:off
+   * [source, java]
+   * ----
+   * public class Example {
+   *   public void method() {
+   *     assertThat(value, transform(call("toString")).check(isNotNull()));
+   *   }
+   * }
+   * ----
+   * // @formatter:on
    *
    * @param methodName The method name
    * @param arguments  Arguments passed to the method.

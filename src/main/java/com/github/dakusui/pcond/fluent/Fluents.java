@@ -38,19 +38,7 @@ public class Fluents {
   public static <E> E value() {
     return null;
   }
-
-  /**
-   * A function to provide a place-holder for `MoreFluent` style.
-   * So far, no valid usage of this method in `MoreFluent` style and this method might be
-   * dropped from future releases.
-   *
-   * @param <T> The type to which the place-holder is cast.
-   * @return A place-holder variable that can be cast to any type.
-   */
-  public static <T> T $() {
-    return value();
-  }
-
+  
   public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
     return value(value).then().addPredicate(predicate);
   }

@@ -32,7 +32,7 @@ public enum ValidationFluents {
     Requires.requireArgument(values, Fluents.createPredicateForAllOf(statements));
   }
 
-  public static <T> T require(Statement<T> statement) {
+  public static <T> T requireStatement(Statement<T> statement) {
     return Requires.require(statement.statementValue(), statement.statementPredicate());
   }
 
@@ -42,7 +42,7 @@ public enum ValidationFluents {
    *
    * @param statements Statements to be verified
    */
-  public static void require(Statement<?>... statements) {
+  public static void requireAll(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
     Requires.require(values, Fluents.createPredicateForAllOf(statements));
   }
@@ -63,7 +63,7 @@ public enum ValidationFluents {
     Requires.requireState(values, Fluents.createPredicateForAllOf(statements));
   }
 
-  public static <T> T ensure(Statement<T> statement) {
+  public static <T> T ensureStatement(Statement<T> statement) {
     return Ensures.ensure(statement.statementValue(), statement.statementPredicate());
   }
 
@@ -74,7 +74,7 @@ public enum ValidationFluents {
    * @param statements Statements to be verified
    */
   @SafeVarargs
-  public static <T> void ensure(Statement<T>... statements) {
+  public static <T> void ensureAll(Statement<T>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
     Ensures.ensure(values, Fluents.createPredicateForAllOf(statements));
   }

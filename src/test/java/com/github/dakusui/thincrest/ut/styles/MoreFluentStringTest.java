@@ -6,68 +6,68 @@ import org.junit.Test;
 
 import java.util.regex.Pattern;
 
-import static com.github.dakusui.thincrest.TestFluents.assertThat;
+import static com.github.dakusui.thincrest.TestFluents.assertStatemet;
 import static com.github.dakusui.pcond.fluent.Fluents.value;
 
 public class MoreFluentStringTest extends TestBase {
   @Test
   public void test_contains() {
     String var = "world";
-    assertThat(Fluents.value(var).toUpperCase().then().contains("W"));
+    assertStatemet(Fluents.value(var).toUpperCase().then().contains("W"));
   }
 
   @Test
   public void test_startsWith() {
     String var = "Hello, world";
-    assertThat(Fluents.value(var).toUpperCase().then().startsWith("H"));
+    assertStatemet(Fluents.value(var).toUpperCase().then().startsWith("H"));
   }
 
   @Test
   public void test_isEmpty() {
     String var = "";
-    assertThat(Fluents.value(var).then().isEmpty());
+    assertStatemet(Fluents.value(var).then().isEmpty());
   }
 
   @Test
   public void test_isEqualTo() {
     String var = "hello";
-    assertThat(Fluents.value(var).then().isEqualTo("hello"));
+    assertStatemet(Fluents.value(var).then().isEqualTo("hello"));
   }
 
   @Test
   public void test_isNullOrEmpty() {
     String var = "";
-    assertThat(Fluents.value(var).then().isNullOrEmpty());
+    assertStatemet(Fluents.value(var).then().isNullOrEmpty());
   }
 
   @Test
   public void test_matchesRegex() {
     String var = "hello";
-    assertThat(Fluents.value(var).then().matchesRegex("he.+"));
+    assertStatemet(Fluents.value(var).then().matchesRegex("he.+"));
   }
 
   @Test
   public void test_equalsIgnoreCase() {
     String var = "hello";
-    assertThat(Fluents.value(var).then().equalsIgnoreCase("HELLO"));
+    assertStatemet(Fluents.value(var).then().equalsIgnoreCase("HELLO"));
   }
 
   @Test
   public void test_findRegexes() {
     String var = "hello";
-    assertThat(Fluents.value(var).then().findRegexes("he.", "lo"));
+    assertStatemet(Fluents.value(var).then().findRegexes("he.", "lo"));
   }
 
   @Test
   public void test_findRegexPatterns() {
     String var = "hello";
-    assertThat(Fluents.value(var).then().findRegexPatterns(Pattern.compile("he."), Pattern.compile("lo")));
+    assertStatemet(Fluents.value(var).then().findRegexPatterns(Pattern.compile("he."), Pattern.compile("lo")));
   }
 
 
   @Test
   public void test_findSubstrings() {
     String var = "hello";
-    assertThat(Fluents.value(var).then().findSubstrings("hel", "lo"));
+    assertStatemet(Fluents.value(var).then().findSubstrings("hel", "lo"));
   }
 }
