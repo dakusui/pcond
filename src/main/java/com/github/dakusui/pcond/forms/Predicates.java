@@ -34,6 +34,10 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
+/**
+ * An entry point for acquiring predicate objects.
+ * Predicates retrieved by methods in this class are all "printable".
+ */
 public class Predicates {
   ;
   private Predicates() {
@@ -213,22 +217,6 @@ public class Predicates {
   }
 
   /**
-   * Returns a predicate with a message that results in the same value when the
-   * give predicate is tested.
-   * The message is printed as a part of the evaluation result.
-   *
-   * @param message   A message printed as a part of the evaluation result is printed of the `predicate`.
-   * @param predicate A predicate the message is attached to.
-   */
-  public static <T> Predicate<T> withMessage(String message, Predicate<T> predicate) {
-    return withMessage(() -> message, predicate);
-  }
-
-  public static <T> Predicate<T> withMessage(Supplier<String> messageSupplier, Predicate<T> predicate) {
-    return PrintablePredicateFactory.withMessage(messageSupplier, predicate);
-  }
-
-  /**
    * // @formatter:off
    * Returns a {@link Predicate} created from a method specified by a {@code methodQuery}.
    * If the {@code methodQuery} matches none or more than one methods, a {@code RuntimeException} will be thrown.
@@ -243,6 +231,7 @@ public class Predicates {
    * @return Created predicate.
    * @see Functions#classMethod(Class, String, Object[])
    * @see Functions#instanceMethod(Object, String, Object[])
+   * @see Functions#parameter()
    */
   @SuppressWarnings("ConstantConditions")
   public static <T> Predicate<T> callp(MethodQuery methodQuery) {
@@ -269,6 +258,7 @@ public class Predicates {
    * @param arguments  Arguments passed to the method.
    * @param <T>        The type of input to the returned predicate
    * @return A predicate that invokes the method matching the {@code methodName} and {@code args}
+   * @see Functions#parameter()
    */
   public static <T> Predicate<T> callp(String methodName, Object... arguments) {
     return callp(Functions.instanceMethod(Functions.parameter(), methodName, arguments));
@@ -436,6 +426,11 @@ public class Predicates {
       @Override
       public Object explainActualInput(Object actualInputValue) {
         return explainable.explainActualInput(actualInputValue);
+      }
+
+      @Override
+      public String toString() {
+        return formatObject(this.predicate);
       }
     }
 
