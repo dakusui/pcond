@@ -6,6 +6,7 @@ import com.github.dakusui.shared.TestUtils;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.thincrest.TestAssertions;
 import org.junit.ComparisonFailure;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Objects;
@@ -19,7 +20,7 @@ import static com.github.dakusui.shared.TestUtils.validateStatement;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 
-public class SummaryDetailTest extends TestBase {
+public class ReportDetailTest extends TestBase {
   @Test
   public void givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted$assertThat() {
     String actual = "helloHELLOhelloHELLOhelloXYZHELLOhelloHELLOhelloHELLO";
@@ -35,6 +36,14 @@ public class SummaryDetailTest extends TestBase {
               transform(Functions.<Throwable, String>call(instanceMethod(parameter(), "getActual"))).check(containsString(actual)),
               transform(Functions.<Throwable, String>call(instanceMethod(parameter(), "getExpected"))).check(containsString(expected))));
     }
+  }
+
+  @Ignore
+  @Test
+  public void givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted$printed_forSaxbox() {
+    String actual = "helloHELLOhelloHELLOhelloXYZHELLOhelloHELLOhelloHELLO";
+    String expected = "helloHELLOhelloHELLOhelloHELLOhelloHELLOhelloHELLO";
+    validate(actual, isEqualTo(expected));
   }
 
   @Test(expected = TestUtils.IllegalValueException.class)
@@ -125,7 +134,7 @@ public class SummaryDetailTest extends TestBase {
     }
   }
 
-  @Test(expected =  TestUtils.IllegalValueException.class)
+  @Test(expected = TestUtils.IllegalValueException.class)
   public void givenString_whenFails_then() {
     String expectedValue = "EXPECTED VALUE, Actual value, expected value.";
     String actualValue = "ACTUAL VALUE, Expected value, actual value.";
@@ -140,7 +149,7 @@ public class SummaryDetailTest extends TestBase {
     }
   }
 
-  @Test(expected =  ComparisonFailure.class)
+  @Test(expected = ComparisonFailure.class)
   public void givenString_whenFails_then_2() {
     String expectedValue = "EXPECTED VALUE, Actual value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, expected value.";
     String actualValue = "ACTUAL VALUE, Expected value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, actual value.";

@@ -15,8 +15,7 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.identifieable.Identifiable.argsOf;
 import static com.github.dakusui.pcond.core.identifieable.Identifiable.creatorOf;
-import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
-import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
+import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -233,6 +232,11 @@ public enum PrintablePredicateFactory {
     public Object explainActualInput(Object actualInputValue) {
       return actualInputValue;
     }
+
+    @Override
+    public String toString() {
+      return formatObject(toNonStringObject(this.formatter.get()));
+    }
   }
 
   static class Negation<T> extends PrintablePredicate<T> implements Evaluable.Negation<T> {
@@ -243,7 +247,7 @@ public enum PrintablePredicateFactory {
       super(
           NEGATION,
           args,
-          () -> format("!%s", predicateToString(predicate)),
+          () -> format("!%s", predicate),
           (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).negate().test(t));
       target = toEvaluableIfNecessary(predicate);
     }
@@ -337,8 +341,8 @@ public enum PrintablePredicateFactory {
           TransformingPredicate.class,
           asList(predicate, function),
           () -> mapperName == null ?
-              format("%s %s", function, predicateToString(predicate)) :
-              format("%s(%s %s)", mapperName, function, predicateToString(predicate)),
+              format("%s %s", function, predicate) :
+              format("%s(%s %s)", mapperName, function, predicate),
           v -> predicate.test(function.apply(v)));
       this.mapper = toEvaluableIfNecessary(function);
       this.mapperName = mapperName;
@@ -524,17 +528,5 @@ public enum PrintablePredicateFactory {
     public boolean valueToCut() {
       return cutOn;
     }
-  }
-
-  private static String predicateToString(Predicate<?> p) {
-    if (isLeafPredicate(p))
-      return formatObject(p);
-    return Objects.toString(p);
-  }
-
-  private static boolean isLeafPredicate(Predicate<?> p) {
-    if (!(p instanceof Evaluable))
-      return true;
-    return p instanceof Evaluable.LeafPred;
   }
 }
