@@ -62,16 +62,6 @@ public interface Evaluator {
   <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred);
 
   /**
-   * Evaluates `value` with a messaged predicate.
-   *
-   * @param value    A value to be evaluated.
-   * @param messaged A predicate with which `value` is evaluated.
-   * @param <T>      The type of the `value`.
-   * @see com.github.dakusui.pcond.core.Evaluable.Messaged
-   */
-  <T> void evaluate(T value, Evaluable.Messaged<T> messaged);
-
-  /**
    * Evaluates `value` with a context predicate.
    *
    * @param value       A value to be evaluated.
@@ -260,13 +250,6 @@ public interface Evaluator {
     }
 
     @Override
-    public <T> void evaluate(T value, Evaluable.Messaged<T> messaged) {
-      this.enter(Entry.Type.MESSAGED, messaged, messaged.message(), value);
-      messaged.target().accept(value, this);
-      this.leave(this.<Boolean>resultValue(), messaged, false);
-    }
-
-    @Override
     public void evaluate(Context context, Evaluable.ContextPred contextPred) {
       this.enter(LEAF, contextPred, String.format("%s", contextPred), context);
       contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
@@ -449,7 +432,6 @@ public interface Evaluator {
       NOT,
       LEAF,
       FUNCTION,
-      MESSAGED,
     }
 
     static class Finalized extends Entry {

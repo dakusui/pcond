@@ -29,7 +29,6 @@ public enum PrintablePredicateFactory {
   NEGATION,
   CONJUNCTION,
   DISJUNCTION,
-  MESSAGE,
   LEAF,
   ;
 
@@ -118,10 +117,6 @@ public enum PrintablePredicateFactory {
 
   private static RuntimeException noPredicateGiven() {
     throw new IllegalArgumentException("No predicate was given");
-  }
-
-  public static <T> Predicate<T> withMessage(Supplier<String> messageSupplier, Predicate<T> predicate) {
-    return new Messaged<T>(messageSupplier, toPrintablePredicateIfNotPrintable(predicate), singletonList(predicate));
   }
 
   /*
@@ -267,31 +262,6 @@ public enum PrintablePredicateFactory {
           "&&",
           Predicate::and,
           shortcut);
-    }
-  }
-
-  static class Messaged<T> extends PrintablePredicate<T> implements Evaluable.Messaged<T> {
-    private final Evaluable<? super T> target;
-
-    @SuppressWarnings("unchecked")
-    protected Messaged(Supplier<String> messageSupplier, Predicate<T> predicate, List<Object> args) {
-      super(
-          MESSAGE,
-          args,
-          requireNonNull(messageSupplier),
-          (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).test(t));
-      //this.message = requireNonNull(message);
-      this.target = toEvaluableIfNecessary(predicate);
-    }
-
-    @Override
-    public Evaluable<? super T> target() {
-      return this.target;
-    }
-
-    @Override
-    public String message() {
-      return this.formatter.get();
     }
   }
 

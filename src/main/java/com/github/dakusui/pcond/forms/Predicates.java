@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.forms;
 
-import com.github.dakusui.pcond.fluent.FluentsInternal;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.core.printable.PrintablePredicate;
@@ -9,10 +8,14 @@ import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.Leaf;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.ParameterizedLeafFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
+import com.github.dakusui.pcond.fluent.FluentsInternal;
 import com.github.dakusui.pcond.internals.InternalChecks;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -39,7 +42,6 @@ import static java.util.stream.Collectors.toList;
  * Predicates retrieved by methods in this class are all "printable".
  */
 public class Predicates {
-  ;
   private Predicates() {
   }
 

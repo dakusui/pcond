@@ -175,22 +175,6 @@ public interface Evaluable<T> {
   }
 
   /**
-   * An interface to model a predicate that can produce a human-readable message.
-   *
-   * @param <T> The type of the value to be evaluated.
-   */
-  interface Messaged<T> extends Pred<T> {
-    @Override
-    default void accept(T value, Evaluator evaluator) {
-      evaluator.evaluate(value, this);
-    }
-
-    Evaluable<? super T> target();
-
-    String message();
-  }
-
-  /**
    * An interface to model a predicate for {@link Context}.
    *
    * @see Context
