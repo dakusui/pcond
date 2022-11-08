@@ -14,8 +14,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
-import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
-import static com.github.dakusui.pcond.internals.InternalUtils.summarizedStringLength;
+import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.String.format;
@@ -41,6 +40,14 @@ public interface ReportComposer {
   enum Utils {
     ;
 
+    static Explanation composeExplanation(String message, List<Evaluator.Entry> result, Throwable t) {
+      List<Object> expectationDetails = new LinkedList<>();
+      List<Object> actualResultDetails = new LinkedList<>();
+      return new Explanation(message,
+          composeReport(composeSummaryForExpectations(result, t, expectationDetails), expectationDetails),
+          composeReport(composeSummaryForActualResults(result, t, actualResultDetails), actualResultDetails));
+    }
+
     static String composeReport(String summary, List<Object> details) {
       AtomicInteger index = new AtomicInteger(0);
       String ret = summary;
@@ -58,31 +65,24 @@ public interface ReportComposer {
       return ret;
     }
 
-    static Explanation composeExplanation(String message, List<Evaluator.Entry> result, Throwable t) {
-      List<Object> expectationDetails = new LinkedList<>();
-      List<Object> actualResultDetails = new LinkedList<>();
-      String expectation = composeExplanationForExpectations(result, t, expectationDetails);
-      String actualResult = composeExplanationForActualResults(result, t, actualResultDetails);
-      return new Explanation(message, composeReport(expectation, expectationDetails), composeReport(actualResult, actualResultDetails));
+    private static String composeSummaryForActualResults(List<Evaluator.Entry> result, Throwable t, List<Object> actualInputDetails) {
+      return composeSummary(
+          result.stream()
+              .peek((Evaluator.Entry each) -> {
+                if (each.hasActualInputDetail())
+                  actualInputDetails.add(each.actualInputDetail());
+              })
+              .filter((Evaluator.Entry each) -> !each.isTrivial())
+              .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
+                  each,
+                  () -> each.hasOutput() ?
+                      formatObject(each.output()) :
+                      formatObject(t)))
+              .collect(toList()));
     }
 
-    private static String composeExplanationForActualResults(List<Evaluator.Entry> result, Throwable t, List<Object> actualInputDetails) {
-      return composeExplanation(result.stream()
-          .peek((Evaluator.Entry each) -> {
-            if (each.hasActualInputDetail())
-              actualInputDetails.add(each.actualInputDetail());
-          })
-          .filter((Evaluator.Entry each) -> !each.isTrivial())
-          .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
-              each,
-              () -> each.hasOutput() ?
-                  formatObject(each.output()) :
-                  formatObject(t)))
-          .collect(toList()));
-    }
-
-    private static String composeExplanationForExpectations(List<Evaluator.Entry> result, Throwable t, List<Object> expectationDetails) {
-      return composeExplanation(
+    private static String composeSummaryForExpectations(List<Evaluator.Entry> result, Throwable t, List<Object> expectationDetails) {
+      return composeSummary(
           result.stream()
               .filter((Evaluator.Entry each) -> !each.isTrivial())
               .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
@@ -97,7 +97,7 @@ public interface ReportComposer {
               .collect(toList()));
     }
 
-    private static String composeExplanation(List<FormattedEntry> formattedEntries) {
+    private static String composeSummary(List<FormattedEntry> formattedEntries) {
       AtomicInteger mismatchExplanationCount = new AtomicInteger(0);
       boolean mismatchExplanationFound = formattedEntries
           .stream()
@@ -116,13 +116,13 @@ public interface ReportComposer {
       return new FormattedEntry(
           formatObject(entry.input()),
           entry.formName(),
-          entry.level() == 0 ?
-              "" :
-              format("%" + (entry.level() * 2) + "s", ""),
-          !asList(LEAF, AND, OR, NOT, FUNCTION).contains(entry.type()) ?
-              null :
-              outputFormatter.get(),
-          entry.hasExpectationDetail() ? entry.expectationDetail() : null);
+          indent(entry.level()),
+          asList(LEAF, AND, OR, NOT, FUNCTION).contains(entry.type()) ?
+              outputFormatter.get() :
+              null,
+          entry.hasExpectationDetail() ?
+              entry.expectationDetail() :
+              null);
     }
 
     private static Function<FormattedEntry, String> formattedEntryToString(
@@ -207,7 +207,7 @@ public interface ReportComposer {
               String.format("%s:%s", cur.formName(), entry.formName()),
               cur.indent(),
               entry.output().orElse(null),
-              cur.mismatchExplanation().orElse(null)));
+              cur.mismatchExplanation().orElse(entry.mismatchExplanation)));
           return null;
         } else {
           curHolder.set(entry);

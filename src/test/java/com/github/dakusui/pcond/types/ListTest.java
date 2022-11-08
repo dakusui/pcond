@@ -56,7 +56,7 @@ public class ListTest extends TestBase {
   @Test
   public void listCheckerTest_isEmpty_pass() {
     List<String> value = asList("Hello", "world");
-    validate(value, when().asListOf((String) value()).then().isEmpty().negate());
+    validate(value, when().asListOf((String) value()).then().isNotEmpty());
   }
 
   @Test

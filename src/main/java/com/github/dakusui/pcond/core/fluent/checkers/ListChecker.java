@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.core.fluent.checkers;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Checker;
+import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
@@ -27,6 +27,10 @@ public interface ListChecker<OIN, E> extends
 
   default ListChecker<OIN, E> isEmpty() {
     return addPredicate(Predicates.isEmpty());
+  }
+
+  default ListChecker<OIN, E> isNotEmpty() {
+    return addPredicate(Predicates.not(Predicates.isEmpty()));
   }
 
   default ListChecker<OIN, E> contains(E element) {

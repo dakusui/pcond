@@ -85,8 +85,16 @@ public interface Transformer<
         Transformer.this.originalInputValue(),
         funcs.stream()
             .map(each -> each.apply((TX) Transformer.this))
+            .map(Transformer::toPredicateIfChecker)
             .collect(toList()));
   }
+
+  static <T> Predicate<T> toPredicateIfChecker(Statement<T> each) {
+    if (each instanceof Checker)
+      return ((Checker<?, T, ?>)each).toPredicate();
+    return each;
+  }
+
 
   @SuppressWarnings("unchecked")
   default Statement<OIN> thenVerifyAnyOf(List<Function<? super TX, Statement<OIN>>> funcs) {

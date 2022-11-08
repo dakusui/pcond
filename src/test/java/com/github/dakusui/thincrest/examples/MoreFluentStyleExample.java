@@ -18,6 +18,8 @@ import java.util.function.Function;
 import static com.github.dakusui.pcond.fluent.Fluents.value;
 import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
+import static com.github.dakusui.shared.TestUtils.validate;
+import static com.github.dakusui.shared.TestUtils.validateStatement;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
@@ -217,7 +219,7 @@ public class MoreFluentStyleExample {
   }
 
   @Test
-  public void checkTwoAspectsOfOneValue_3() {
+  public void checkTwoAspectsOfOneValue_3a() {
     List<String> list = asList("helloWorld", "HI");
     String s = list.get(0);
     TestFluents.assertAll(
@@ -228,12 +230,46 @@ public class MoreFluentStyleExample {
   }
 
   @Test
+  public void checkTwoAspectsOfOneValue_3aa() {
+    List<String> list = asList("helloWorld", "HI");
+    String s = list.get(0);
+    TestFluents.assertAll(
+        value(list).thenVerifyAllOf(asList(
+            tx -> tx.then().isEmpty(),
+            tx -> tx.elementAt(0).asString().then().isNotNull(),
+            tx -> tx.elementAt(0).asString().length().then().greaterThan(100),
+            tx -> tx.elementAt(0).asString().then().findSubstrings("XYZ"))));
+  }
+
+  @Test
+  public void checkTwoAspectsOfOneValue_3b() {
+    List<String> list = asList("helloWorld", "HI");
+    String s = list.get(0);
+    validateStatement(
+        value(list).thenVerifyAllOf(asList(
+            tx -> tx.size().then().greaterThan(3),
+            tx -> tx.elementAt(0).asString().then().isNotNull(),
+            tx -> tx.elementAt(0).asString().length().then().greaterThan(100))));
+  }
+
+  @Test
+  public void checkTwoAspectsOfOneValue_3c() {
+    List<String> list = asList("helloWorld", "HI");
+    String s = list.get(0);
+    validateStatement(
+        value(list).thenVerifyAllOf(asList(
+            tx -> tx.then().isNull(),
+            tx -> tx.elementAt(0).asString().then().isNotNull(),
+            tx -> tx.elementAt(0).asString().length().then().greaterThan(100))));
+  }
+
+  @Test
   public void checkTwoAspectsOfOneValue_4() {
     List<String> list = asList("helloWorld", "HI");
     TestFluents.assertStatemet(
         value(list).thenVerifyAllOf(asList(
-            (ListTransformer<List<String>, String> tx) -> tx.size().then().greaterThan(3),
-            (ListTransformer<List<String>, String> tx) -> tx.elementAt(0).asString().thenVerifyAllOf(asList(
+             tx -> tx.size().then().greaterThan(3),
+             tx -> tx.elementAt(0).asString().thenVerifyAllOf(asList(
                 (StringTransformer<List<String>> ty) -> ty.then().isNotNull(),
                 (StringTransformer<List<String>> ty) -> ty.asString().length().then().greaterThan(100))))));
   }

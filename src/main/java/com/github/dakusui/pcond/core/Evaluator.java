@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.LEAF;
+import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActualInputIfPossibleOrNull;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainExpectationIfPossibleOrNull;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
@@ -177,7 +177,7 @@ public interface Evaluator {
       boolean shortcut = conjunction.shortcut();
       for (Evaluable<? super T> each : conjunction.children()) {
         if (i == 0)
-          this.enter(Entry.Type.AND, conjunction, conjunction.shortcut() ? "and" : "allOf", value);
+          this.enter(AND, conjunction, conjunction.shortcut() ? "and" : "allOf", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (!cur)
@@ -198,7 +198,7 @@ public interface Evaluator {
       boolean shortcut = disjunction.shortcut();
       for (Evaluable<? super T> each : disjunction.children()) {
         if (i == 0)
-          this.enter(Entry.Type.OR, disjunction, disjunction.shortcut() ? "or" : "anyOf", value);
+          this.enter(OR, disjunction, disjunction.shortcut() ? "or" : "anyOf", value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (cur)
@@ -263,17 +263,18 @@ public interface Evaluator {
         transformation.checker().accept((R) value, this);
         return;
       }
-      this.enter(Entry.Type.TRANSFORM,
+      this.enter(TRANSFORM,
           transformation.mapper(),
           transformation.mapperName()
               .orElse("transform"), value);
       transformation.mapper().accept(value, this);
       this.leave(this.resultValue(), transformation.checker(), false);
-      this.enter(Entry.Type.CHECK,
+      this.enter(CHECK,
           transformation.checker(),
           transformation.checkerName()
               .orElse("check"),
           this.resultValue());
+
       transformation.checker().accept((R) this.currentResult, this);
       this.leave(this.resultValue(), transformation.mapper(), false);
     }
@@ -281,7 +282,7 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T> void evaluate(T value, Evaluable.Func<T> func) {
-      this.enter(Entry.Type.FUNCTION, func, String.format("%s", func.head()), value);
+      this.enter(FUNCTION, func, String.format("%s", func.head()), value);
       Object resultValue = func.head().apply(value);
       this.leave(resultValue, func, false);
       func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(resultValue, this));
@@ -557,14 +558,22 @@ public interface Evaluator {
 
     static Object explainExpectationIfPossibleOrNull(Object value) {
       if (value instanceof Explainable)
-        return explainValue(((Explainable) value).explainExpectation());
+        return explainExpectation((Explainable) value);
       return null;
+    }
+
+    static String explainExpectation(Explainable value) {
+      return explainValue(value.explainExpectation());
     }
 
     static Object explainActualInputIfPossibleOrNull(Object value, Object actualInputValue) {
       if (value instanceof Explainable)
-        return explainValue(((Explainable) value).explainActualInput(actualInputValue));
+        return explainActualValue((Explainable) value, actualInputValue);
       return null;
+    }
+
+    static String explainActualValue(Explainable value, Object actualInputValue) {
+      return explainValue(value.explainActualInput(actualInputValue));
     }
   }
 }

@@ -39,7 +39,9 @@ public enum InternalUtils {
       Collection<?> collection = (Collection<?>) value;
       if (collection.size() < 4)
         return format("[%s]",
-            collection.stream().map(InternalUtils::formatObject).collect(Collectors.joining(",")));
+            collection.stream()
+                .map(InternalUtils::formatObject)
+                .collect(joining(",")));
       Iterator<?> i = collection.iterator();
       return format("[%s,%s,%s...;%s]",
           formatObject(i.next()),
@@ -162,7 +164,7 @@ public enum InternalUtils {
         throw executionFailure("Matching public constructor was found in " + requestedClassName + " but threw an exception", e.getCause());
       }
     } catch (InstantiationException | IllegalAccessException |
-             ClassNotFoundException e) {
+        ClassNotFoundException e) {
       throw executionFailure("The requested class was not found or not accessible.: " + requestedClassName, e);
     }
   }
@@ -262,5 +264,11 @@ public enum InternalUtils {
         return s;
       }
     };
+  }
+
+  public static String indent(int level) {
+    return level == 0 ?
+        "" :
+        format("%" + (level * 2) + "s", "");
   }
 }

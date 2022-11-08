@@ -429,11 +429,6 @@ public class Predicates {
       public Object explainActualInput(Object actualInputValue) {
         return explainable.explainActualInput(actualInputValue);
       }
-
-      @Override
-      public String toString() {
-        return formatObject(this.predicate);
-      }
     }
 
     return new ExplainablePredicate();
