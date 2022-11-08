@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.types;
 
-import com.github.dakusui.shared.TestUtils;
+import com.github.dakusui.shared.IllegalValueException;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import static com.github.dakusui.shared.TestUtils.validate;
 import static java.util.Collections.singletonList;
 
 public class StringTest {
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void testTransformToString() {
     Object obj = new Object() {
       @Override
@@ -24,8 +24,8 @@ public class StringTest {
     };
 
     try {
-      validate(obj, when().asObject().transformToString(Object::toString).then().isEqualTo("Hello, world"));
-    } catch (TestUtils.IllegalValueException e) {
+      validate(obj, when().asObject().toString(Object::toString).then().isEqualTo("Hello, world"));
+    } catch (IllegalValueException e) {
       MatcherAssert.assertThat(
           //e.getExpected(),
           e.getMessage(),

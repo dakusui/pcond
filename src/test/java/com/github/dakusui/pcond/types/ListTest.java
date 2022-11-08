@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.types;
 
 import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.utils.ut.TestBase;
-import com.github.dakusui.shared.TestUtils;
 import org.junit.Test;
 
 import java.util.List;
@@ -20,12 +20,12 @@ public class ListTest extends TestBase {
     validate(value, when().asListOf((String) value()).then().contains("world"));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void listTestFailure() {
     List<String> value = asList("Hello", "world");
     try {
       validate(value, when().asListOf((String) value()).then().contains("World"));
-    } catch (TestUtils.IllegalValueException e) {
+    } catch (IllegalValueException e) {
       e.printStackTrace();
       //      MatcherAssert.assertThat(e.getExpected(), CoreMatchers.containsString("contains[\"World\"]->true"));
       //      MatcherAssert.assertThat(e.getActual(), CoreMatchers.containsString("contains[\"World\"]->false"));
@@ -41,13 +41,13 @@ public class ListTest extends TestBase {
     validate(value, when().asObject().asListOf((String) value()).then().contains("world"));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void listTransformerTestFailure() {
     List<String> value = asList("Hello", "world");
     validate(value, when().asObject().asListOf((String) value()).then().contains("World"));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void listCheckerTest_isEmpty_fail() {
     List<String> value = asList("Hello", "world");
     validate(value, when().asListOf((String) value()).then().isEmpty());

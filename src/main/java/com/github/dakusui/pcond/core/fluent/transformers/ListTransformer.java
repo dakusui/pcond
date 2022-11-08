@@ -17,27 +17,27 @@ public interface ListTransformer<OIN, E> extends Transformer<ListTransformer<OIN
   ListChecker<OIN, E> then();
 
   default ObjectTransformer<OIN, E> elementAt(int i) {
-    return this.transformToObject(Functions.elementAt(i));
+    return this.toObject(Functions.elementAt(i));
   }
 
   default IntegerTransformer<OIN> size() {
-    return this.transformToInteger(Functions.size());
+    return this.toInteger(Functions.size());
   }
 
   default ListTransformer<OIN, E> subList(int begin, int end) {
-    return this.transformToList(Printables.function("subList", v -> v.subList(begin, end)));
+    return this.toList(Printables.function("subList", v -> v.subList(begin, end)));
   }
 
   default ListTransformer<OIN, E> subList(int begin) {
-    return this.transformToList(Printables.function("subList", v -> v.subList(begin, v.size())));
+    return this.toList(Printables.function("subList", v -> v.subList(begin, v.size())));
   }
 
   default StreamTransformer<OIN, E> stream() {
-    return this.transformToStream(Printables.function("listStream", Collection::stream));
+    return this.toStream(Printables.function("listStream", Collection::stream));
   }
 
   default BooleanTransformer<OIN> isEmpty() {
-    return this.transformToInBoolean(Printables.function("listIsEmpty", List::isEmpty));
+    return this.toBoolean(Printables.function("listIsEmpty", List::isEmpty));
   }
 
   class Impl<OIN, E>

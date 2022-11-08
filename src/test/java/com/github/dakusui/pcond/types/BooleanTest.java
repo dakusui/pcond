@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.types;
 
-import com.github.dakusui.shared.TestUtils;
+import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
@@ -16,12 +16,12 @@ public class BooleanTest extends TestBase {
     validate(value, when().asBoolean().then().isTrue());
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void booleanTestFail() {
     boolean value = true;
     try {
       validate(value, when().asBoolean().then().isFalse());
-    } catch (TestUtils.IllegalValueException e) {
+    } catch (IllegalValueException e) {
       e.printStackTrace();
       // TODO
 //      MatcherAssert.assertThat(e.getExpected(), CoreMatchers.containsString("true->isFalse->true"));
@@ -42,7 +42,7 @@ public class BooleanTest extends TestBase {
     validate(value, when().asObject().asBoolean().then().isTrue());
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void booleanTransformerTestFail() {
     boolean value = true;
     validate(value, when().asObject().asBoolean().then().isFalse());

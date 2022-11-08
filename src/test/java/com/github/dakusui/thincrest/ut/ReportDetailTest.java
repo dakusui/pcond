@@ -2,7 +2,7 @@ package com.github.dakusui.thincrest.ut;
 
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.shared.TestUtils;
+import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.thincrest.TestAssertions;
 import org.junit.ComparisonFailure;
@@ -56,14 +56,14 @@ public class ReportDetailTest extends TestBase {
     validate(actual, isEqualTo(expected));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted$assertThat_usingFluentStyle() {
     String actual = "helloHELLOhelloHELLOhelloXYZHELLOhelloHELLOhelloHELLO";
     String expected = "helloHELLOhelloHELLOhelloHELLOhelloHELLOhelloHELLO";
     try {
       validateStatement(statement(actual, isEqualTo(expected)));
       throw new Error(); // Make it fail if PC reaches here.
-    } catch (TestUtils.IllegalValueException e) {
+    } catch (IllegalValueException e) {
       System.err.println(e.getMessage());
       assertThat(
           e,
@@ -144,14 +144,14 @@ public class ReportDetailTest extends TestBase {
     }
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void givenString_whenFails_then() {
     String expectedValue = "EXPECTED VALUE, Actual value, expected value.";
     String actualValue = "ACTUAL VALUE, Expected value, actual value.";
 
     try {
       validate(actualValue, isEqualTo(expectedValue));
-    } catch (TestUtils.IllegalValueException e) {
+    } catch (IllegalValueException e) {
       System.err.println("================================================");
       e.printStackTrace();
       System.err.println("================================================");
@@ -169,7 +169,7 @@ public class ReportDetailTest extends TestBase {
           allOf(
               isEqualTo(expectedValue),
               findSubstrings("VALUE", "Value")));
-    } catch (TestUtils.IllegalValueException e) {
+    } catch (IllegalValueException e) {
       System.err.println("================================================");
       e.printStackTrace();
       System.err.println("================================================");

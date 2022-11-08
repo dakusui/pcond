@@ -2,8 +2,8 @@ package com.github.dakusui.pcond;
 
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.utils.ut.TestBase;
-import com.github.dakusui.shared.TestUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -36,7 +36,7 @@ public class PrintablesFunctionTest {
               not(is(o))));
     }
 
-    @Test(expected = TestUtils.IllegalValueException.class)
+    @Test(expected = IllegalValueException.class)
     public void testHandleNull() {
       Function<String, String> f = Functions.identity();
       String o = null;
@@ -109,7 +109,7 @@ public class PrintablesFunctionTest {
     public void testAndThen$toString() {
       Function<Object, Object> f1 = Functions.identity().andThen(Function.identity());
 
-      System.out.println(f1.toString());
+      System.out.println(f1);
       System.out.println(f1.apply("hello"));
       assertThat(
           f1.toString(),
@@ -121,7 +121,7 @@ public class PrintablesFunctionTest {
     public void testCompose$toString() {
       Function<Object, Object> f1 = Functions.identity().compose(Function.identity());
 
-      System.out.println(f1.toString());
+      System.out.println(f1);
       System.out.println(f1.apply("hello"));
       assertThat(
           f1.toString(),

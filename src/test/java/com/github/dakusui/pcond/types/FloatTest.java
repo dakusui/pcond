@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.types;
 
-import com.github.dakusui.shared.TestUtils;
+import com.github.dakusui.shared.IllegalValueException;
 import org.junit.Test;
 
 import static com.github.dakusui.shared.FluentTestUtils.when;
@@ -15,7 +15,7 @@ public class FloatTest {
         when().asFloat().then().lessThan(1.24f));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void floatTestFail() {
     float v = 1.23f;
     validate(
@@ -29,11 +29,19 @@ public class FloatTest {
     validate(v, when().asObject().asFloat().then().lessThan(1.24f));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void floatTransformerTestFail() {
     float v = 1.23f;
     validate(
         v,
         when().asObject().asFloat().then().lessThan(1.22f));
+  }
+
+  @Test(expected = IllegalValueException.class)
+  public void toFloatTest() {
+    String v = "123";
+    validate(
+        v,
+        when().asString().toFloat(Float::parseFloat).then().lessThan(122.0f));
   }
 }

@@ -381,7 +381,7 @@ public class Predicates {
     }
     //noinspection RedundantTypeArguments
     return FluentsInternal.fluentValue().asString()
-        .transformToObject(function("findTokens" + formatObject(tokens), CursoredString::new))
+        .toObject(function("findTokens" + formatObject(tokens), CursoredString::new))
         .then().verifyWith(Predicates.<CursoredString>allOf(
             Stream.concat(
                     Arrays.stream(tokens).map(CursoredStringPredicate::new),
@@ -519,7 +519,7 @@ public class Predicates {
       return false;
     };
     return FluentsInternal.fluentValue().asListOf((E) FluentsInternal.value())
-        .transformToObject(function("toCursoredList", CursoredList::new))
+        .toObject(function("toCursoredList", CursoredList::new))
         .then()
         .verifyWith(allOf(Stream.concat(
                 Arrays.stream(predicates)

@@ -15,20 +15,20 @@ public interface AbstractObjectTransformer<TX extends AbstractObjectTransformer<
    * @return this object the method appended.
    */
   default StringTransformer<OIN> stringify() {
-    return this.transformToString(Functions.stringify());
+    return this.toString(Functions.stringify());
   }
 
   default <NOUT> ObjectTransformer<OIN, NOUT> cast(Class<NOUT> klass) {
-    return this.transformToObject(Functions.cast(klass));
+    return this.toObject(Functions.cast(klass));
   }
 
   default <NOUT> ObjectTransformer<OIN, NOUT> invoke(String methodName, Object... args) {
-    return this.transformToObject(Functions.call(MethodQuery.instanceMethod(
+    return this.toObject(Functions.call(MethodQuery.instanceMethod(
         Functions.parameter(), methodName, args)));
   }
 
   default <NOUT> ObjectTransformer<OIN, NOUT> invokeStatic(Class<?> klass, String methodName, Object... args) {
-    return this.transformToObject(Functions.call(MethodQuery.classMethod(klass, methodName, args)));
+    return this.toObject(Functions.call(MethodQuery.classMethod(klass, methodName, args)));
   }
 
   @SuppressWarnings("unchecked")

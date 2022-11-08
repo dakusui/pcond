@@ -56,8 +56,6 @@ public interface Transformer<
 
   String transformerName();
 
-  OIN originalInputValue();
-
   @SuppressWarnings("unchecked")
   default <
       NOUT,
@@ -101,7 +99,7 @@ public interface Transformer<
   }
 
   default <O> ObjectTransformer<OIN, O> applyFunction(Function<? super OUT, O> f) {
-    return transformToObject(f);
+    return toObject(f);
   }
 
   default <O extends Throwable> ThrowableTransformer<OIN, O> expectException(Class<O> exceptionClass, Function<? super OUT, ?> f) {
@@ -109,43 +107,43 @@ public interface Transformer<
     return this.transform(Functions.expectingException(exceptionClass, f), (TX, func) -> throwableTransformer(this, func));
   }
 
-  default <O> ObjectTransformer<OIN, O> transformToObject(Function<? super OUT, O> f) {
+  default <O> ObjectTransformer<OIN, O> toObject(Function<? super OUT, O> f) {
     return this.transform(f, (TX, func) -> objectTransformer(this, func));
   }
 
-  default StringTransformer<OIN> transformToString(Function<OUT, String> f) {
+  default StringTransformer<OIN> toString(Function<OUT, String> f) {
     return this.transform(f, (TX, func) -> stringTransformer(this, func));
   }
 
-  default <E> ListTransformer<OIN, E> transformToList(Function<OUT, List<E>> f) {
+  default <E> ListTransformer<OIN, E> toList(Function<OUT, List<E>> f) {
     return this.transform(f, (TX, func) -> listTransformer(this, func));
   }
 
-  default <E> StreamTransformer<OIN, E> transformToStream(Function<OUT, Stream<E>> f) {
+  default <E> StreamTransformer<OIN, E> toStream(Function<OUT, Stream<E>> f) {
     return this.transform(f, (TX, func) -> streamTransformer(this, func));
   }
 
-  default IntegerTransformer<OIN> transformToInteger(Function<? super OUT, Integer> f) {
+  default IntegerTransformer<OIN> toInteger(Function<? super OUT, Integer> f) {
     return this.transform(f, (TX, func) -> integerTransformer(this, func));
   }
 
-  default LongTransformer<OIN> transformToLong(Function<? super OUT, Long> f) {
+  default LongTransformer<OIN> toLong(Function<? super OUT, Long> f) {
     return this.transform(f, (TX, func) -> longTransformer(this, func));
   }
 
-  default ShortTransformer<OIN> transformToShort(Function<? super OUT, Short> f) {
+  default ShortTransformer<OIN> toShort(Function<? super OUT, Short> f) {
     return this.transform(f, (TX, func) -> shortTransformer(this, func));
   }
 
-  default FloatTransformer<OIN> transformToFloat(Function<? super OUT, Float> f) {
+  default FloatTransformer<OIN> toFloat(Function<? super OUT, Float> f) {
     return this.transform(f, (TX, func) -> floatTransformer(this, func));
   }
 
-  default DoubleTransformer<OIN> transformToDouble(Function<? super OUT, Double> f) {
+  default DoubleTransformer<OIN> toDouble(Function<? super OUT, Double> f) {
     return this.transform(f, (TX, func) -> doubleTransformer(this, func));
   }
 
-  default BooleanTransformer<OIN> transformToInBoolean(Function<? super OUT, Boolean> f) {
+  default BooleanTransformer<OIN> toBoolean(Function<? super OUT, Boolean> f) {
     return this.transform(f, (TX, func) -> booleanTransformer(this, func));
   }
 

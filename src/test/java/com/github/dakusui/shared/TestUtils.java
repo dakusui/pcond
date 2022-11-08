@@ -21,10 +21,4 @@ public enum TestUtils {
   public static <T> T validate(T value, Predicate<? super T> predicate, Function<String, Throwable> exceptionFactory) {
     return validator.validate(value, predicate, exceptionFactory);
   }
-
-  public static class IllegalValueException extends RuntimeException {
-    public IllegalValueException(String message) {
-      super(message);
-    }
-  }
 }

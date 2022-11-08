@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.types;
 
-import com.github.dakusui.shared.TestUtils;
+import com.github.dakusui.shared.IllegalValueException;
 import org.junit.Test;
 
 import static com.github.dakusui.shared.FluentTestUtils.when;
@@ -15,7 +15,7 @@ public class ShortTest {
         when().asShort().then().lessThan((short) 124));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void shortTestFail() {
     short v = 123;
     validate(
@@ -31,11 +31,19 @@ public class ShortTest {
         when().asObject().asShort().then().lessThan((short) 124));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void shortTransformerTestFail() {
     short v = 123;
     validate(
         v,
         when().asObject().asShort().then().lessThan((short) 122));
+  }
+
+  @Test(expected = IllegalValueException.class)
+  public void toShortTest() {
+    String v = "123";
+    validate(
+        v,
+        when().asString().toShort(Short::parseShort).then().lessThan((short) 122));
   }
 }

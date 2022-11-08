@@ -16,23 +16,43 @@ public interface StringTransformer<OIN> extends
     Transformer<StringTransformer<OIN>, OIN, String>,
     Matcher.ForString<OIN> {
   default StringTransformer<OIN> substring(int begin) {
-    return this.transformToString(Printables.function(() -> "substring[" + begin + "]", s -> s.substring(begin)));
+    return this.toString(Printables.function(() -> "substring[" + begin + "]", s -> s.substring(begin)));
   }
 
   default StringTransformer<OIN> toUpperCase() {
-    return this.transformToString(Printables.function("toUpperCase", String::toUpperCase));
+    return this.toString(Printables.function("toUpperCase", String::toUpperCase));
   }
 
   default StringTransformer<OIN> toLowerCase() {
-    return this.transformToString(Printables.function("toLowerCase", String::toLowerCase));
+    return this.toString(Printables.function("toLowerCase", String::toLowerCase));
   }
 
   default ListTransformer<OIN, String> split(String regex) {
-    return this.transformToList(Printables.function("split[" + regex + "]", (String s) -> asList((s.split(regex)))));
+    return this.toList(Printables.function("split[" + regex + "]", (String s) -> asList((s.split(regex)))));
   }
 
   default IntegerTransformer<OIN> length() {
-    return this.transformToInteger(Functions.length());
+    return this.toInteger(Functions.length());
+  }
+
+  default ShortTransformer<OIN> toShort() {
+    return this.toShort(Printables.function("toShort", Short::parseShort));
+  }
+
+  default IntegerTransformer<OIN> toInteger() {
+    return this.toInteger(Printables.function("toIntegr", Integer::parseInt));
+  }
+
+  default LongTransformer<OIN> toLong() {
+    return this.toLong(Printables.function("toLong", Long::parseLong));
+  }
+
+  default DoubleTransformer<OIN> toDouble() {
+    return this.toDouble(Printables.function("toDouble", Double::parseDouble));
+  }
+
+  default FloatTransformer<OIN> toFloat() {
+    return this.toFloat(Printables.function("toFloat", Float::parseFloat));
   }
 
   @SuppressWarnings("unchecked")

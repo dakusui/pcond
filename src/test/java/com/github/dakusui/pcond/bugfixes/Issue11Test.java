@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.bugfixes;
 
+import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.utils.TestBase;
-import com.github.dakusui.shared.TestUtils;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.forms.Functions.elementAt;
@@ -14,14 +14,14 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class Issue11Test extends TestBase {
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void whenReproduceIssue() {
     Object[] args = new Object[] { 123 };
     try {
       validate(asList(args),
           and(transform(size()).check(isEqualTo(1)),
               transform(elementAt(0)).check(and(isNotNull(), isInstanceOf(String.class)))));
-    } catch (TestUtils.IllegalValueException e) {
+    } catch (IllegalValueException e) {
       e.printStackTrace();
       int i = 0;
       assertThat(lineAt(e.getMessage(), ++i), containsString("and"));

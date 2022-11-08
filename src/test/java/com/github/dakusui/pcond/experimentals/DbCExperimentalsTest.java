@@ -7,8 +7,8 @@ import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.ut.IntentionalError;
 import com.github.dakusui.shared.ExperimentalsUtils;
+import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.TargetMethodHolder;
-import com.github.dakusui.shared.TestUtils;
 import com.github.dakusui.shared.utils.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -60,7 +60,7 @@ public class DbCExperimentalsTest extends TestBase {
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toContextPredicate(stringEndsWith(), 1, 0))));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void hello_b_e() {
     try {
       validate(
@@ -68,7 +68,7 @@ public class DbCExperimentalsTest extends TestBase {
           transform(stream()
               .andThen(nest(asList("1", "2", "o"))))
               .check(noneMatch(toContextPredicate(stringEndsWith(), 0, 1))));                // (1)
-    } catch (TestUtils.IllegalValueException e) {
+    } catch (IllegalValueException e) {
       /* BEFORE
 com.github.dakusui.pcond.provider.exceptions.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
 ["Hi","hello","world"]          -> =>                                                                  ->     false
@@ -139,7 +139,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
     }
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void hello_b_e2() {
     try {
       validate(
@@ -152,7 +152,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       //              |                  |         |                         |
       //             (1)                (2)       (3)                       (4)
 
-    } catch (TestUtils.IllegalValueException e) {
+    } catch (IllegalValueException e) {
       e.printStackTrace(System.out);
       int i = 3;
       // expected (1)
@@ -240,7 +240,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
         transform(streamOf().andThen(nest(asList("Hello", "HELLO", "hello")))).check(anyMatch(toContextPredicate(areEqual()))));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void givenStreamOfSingleString$hello$_whenRequireNullIsFound_thenPreconditionViolationWithCorrectMessageIsThrown() {
     try {
       validate(
@@ -248,7 +248,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           transform(streamOf()                                        // (1)
               .andThen(toContextStream()))                            // (2)
               .check(anyMatch(toContextPredicate(isNull()))));        // (3)
-    } catch (TestUtils.IllegalValueException e) {
+    } catch (IllegalValueException e) {
       e.printStackTrace();
       int i = 0;
       // (1)
@@ -294,14 +294,14 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
         transform(toContext()).check(toContextPredicate(isNotNull())));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void givenString$hello$_whenTransformToContextAndCheckContextValueIsNull_thenPreconditionViolationWithCorrectMessageThrown() {
     try {
       validate(
           "hello",
           transform(toContext())                              // (1)
               .check(toContextPredicate(isNull())));          // (2) -1,2
-    } catch (TestUtils.IllegalValueException e) {
+    } catch (IllegalValueException e) {
       e.printStackTrace(System.out);
       int i = 0;
       // (1)
@@ -350,7 +350,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
     }
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void given$hello$_$world$_whenRequireNestedStreamImpossibleConditions_thenPreconditionViolationExceptionWithCorrectMessage() {
     try {
       validate(
@@ -358,7 +358,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           transform(stream()                                                        // (1)
               .andThen(nest(asList("1", "2", "o"))))                                // (2)
               .check(allMatch(toContextPredicate(stringEndsWith()))));              // (3)
-    } catch (TestUtils.IllegalValueException e) {
+    } catch (IllegalValueException e) {
       e.printStackTrace(System.out);
       int i = 0;
       // (1)
@@ -459,7 +459,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
         })));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void hello5() {
     validate(
         asList("hello", "world"),
@@ -500,7 +500,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
         transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toContextPredicate(equalTo("msg-2"), 1))));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void nestedLoop_fail() {
     validate(
         asList("hello", "world"),

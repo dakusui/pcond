@@ -3,7 +3,7 @@ package com.github.dakusui.pcond.experimentals;
 import com.github.dakusui.pcond.core.context.Context;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.forms.Experimentals;
-import com.github.dakusui.shared.TestUtils;
+import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 
@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
 
 public class TestAssertionsExperimentalsTest extends TestBase {
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void helloError() {
     validate(
         singletonList("hello"),

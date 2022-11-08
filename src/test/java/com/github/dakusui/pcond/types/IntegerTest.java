@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.types;
 
-import com.github.dakusui.shared.TestUtils;
+import com.github.dakusui.shared.IllegalValueException;
 import org.junit.Test;
 
 import static com.github.dakusui.shared.FluentTestUtils.when;
@@ -13,7 +13,7 @@ public class IntegerTest {
     validate(v, when().asInteger().then().lessThan(124_000_000));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void intTestFail() {
     int v = 123_000_000;
     validate(v, when().asInteger().then().lessThan(122_000_000));
@@ -25,7 +25,7 @@ public class IntegerTest {
     validate(v, when().asObject().asInteger().then().lessThan(124_000_000));
   }
 
-  @Test(expected = TestUtils.IllegalValueException.class)
+  @Test(expected = IllegalValueException.class)
   public void intTransformerTestFail() {
     int v = 123_000_000;
     validate(v, when().asObject().asInteger().then().lessThan(122_000_000));
