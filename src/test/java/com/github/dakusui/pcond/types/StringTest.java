@@ -8,7 +8,7 @@ import org.junit.Test;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.github.dakusui.pcond.fluent.FluentsInternal.value;
+import static com.github.dakusui.pcond.fluent.FluentUtils.value;
 import static com.github.dakusui.shared.FluentTestUtils.when;
 import static com.github.dakusui.shared.TestUtils.validate;
 import static java.util.Collections.singletonList;

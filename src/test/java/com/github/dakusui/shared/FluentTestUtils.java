@@ -4,8 +4,8 @@ import com.github.dakusui.pcond.core.fluent.Fluent;
 
 import java.util.List;
 
-import static com.github.dakusui.pcond.fluent.FluentsInternal.fluent;
-import static com.github.dakusui.pcond.fluent.FluentsInternal.value;
+import static com.github.dakusui.pcond.fluent.FluentUtils.fluent;
+import static com.github.dakusui.pcond.fluent.FluentUtils.value;
 import static java.util.Arrays.asList;
 
 public enum FluentTestUtils {
@@ -34,4 +34,5 @@ public enum FluentTestUtils {
   public static List<?> list(Object... args) {
     return asList(args);
   }
+
 }

@@ -5,15 +5,15 @@ import com.github.dakusui.pcond.core.fluent.Fluent;
 /**
  * Not made this class `enum` in order to provide a method whose name is `valueOf`.
  */
-public class FluentsInternal {
-  private FluentsInternal() {
+public class FluentUtils {
+  private FluentUtils() {
   }
 
   /**
    * A synonym with `valueOf(value())`.
    *
-   * @return Returns a `Fluent<T>` object.
    * @param <T> The type for which returned `Fluent` object is created.
+   * @return Returns a `Fluent<T>` object.
    */
   public static <T> Fluent<T> fluentValue() {
     return valueOf(value());

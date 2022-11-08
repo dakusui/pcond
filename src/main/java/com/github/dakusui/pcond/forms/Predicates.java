@@ -8,7 +8,7 @@ import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.Leaf;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.ParameterizedLeafFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
-import com.github.dakusui.pcond.fluent.FluentsInternal;
+import com.github.dakusui.pcond.fluent.FluentUtils;
 import com.github.dakusui.pcond.internals.InternalChecks;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
@@ -380,7 +380,7 @@ public class Predicates {
       }
     }
     //noinspection RedundantTypeArguments
-    return FluentsInternal.fluentValue().asString()
+    return FluentUtils.fluentValue().asString()
         .toObject(function("findTokens" + formatObject(tokens), CursoredString::new))
         .then().verifyWith(Predicates.<CursoredString>allOf(
             Stream.concat(
@@ -518,7 +518,7 @@ public class Predicates {
       previousPosition.set(cursoredList.position);
       return false;
     };
-    return FluentsInternal.fluentValue().asListOf((E) FluentsInternal.value())
+    return FluentUtils.fluentValue().asListOf((E) FluentUtils.value())
         .toObject(function("toCursoredList", CursoredList::new))
         .then()
         .verifyWith(allOf(Stream.concat(

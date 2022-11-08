@@ -10,8 +10,8 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
 import static com.github.dakusui.pcond.fluent.Fluents.statement;
-import static com.github.dakusui.pcond.fluent.FluentsInternal.value;
-import static com.github.dakusui.pcond.fluent.FluentsInternal.valueOfClass;
+import static com.github.dakusui.pcond.fluent.FluentUtils.value;
+import static com.github.dakusui.pcond.fluent.FluentUtils.valueOfClass;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static com.github.dakusui.shared.FluentTestUtils.*;
@@ -20,7 +20,7 @@ import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
-public class FluentsInternalTest extends TestBase {
+public class FluentUtilsTest extends TestBase {
   @Test
   public void whenPassingValidation_thenPasses$1() {
     assertThat(

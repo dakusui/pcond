@@ -136,7 +136,7 @@ public class Fluents {
    * @see ListTransformer
    */
   public static <E> ListTransformer<List<E>, E> value(List<E> value) {
-    return fluent(value).asListOf(FluentsInternal.value());
+    return fluent(value).asListOf(FluentUtils.value());
   }
 
   /**
@@ -147,7 +147,7 @@ public class Fluents {
    * @see StreamTransformer
    */
   public static <E> StreamTransformer<Stream<E>, E> value(Stream<E> value) {
-    return fluent(value).asStreamOf(FluentsInternal.value());
+    return fluent(value).asStreamOf(FluentUtils.value());
   }
 
   private static <T> Fluent<T> fluent(T value) {
