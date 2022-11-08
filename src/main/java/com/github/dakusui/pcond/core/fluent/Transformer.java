@@ -4,7 +4,6 @@ import com.github.dakusui.pcond.core.fluent.transformers.*;
 import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Functions;
-import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.List;
@@ -14,12 +13,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 import static com.github.dakusui.pcond.core.fluent.Transformer.Factory.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 
 /**
  * The transformer interface.
@@ -55,16 +52,6 @@ public interface Transformer<
     return constructor.apply(parent, (Function<COUT, NOUT>) f);
   }
 
-  @SuppressWarnings("unchecked")
-  static <I, M, O> Function<I, O> chainFunctions(Function<I, ? extends M> func, Function<? super M, O> after) {
-    if (isDummyFunction(func) && isDummyFunction(after))
-      return dummyFunction();
-    if (isDummyFunction(func))
-      return (isDummyFunction(after)) ? dummyFunction() : (Function<I, O>) after;
-    else
-      return isDummyFunction(after) ? (Function<I, O>) func : func.andThen(after);
-  }
-
   Function<? super OIN, ? extends OUT> function();
 
   String transformerName();
@@ -80,46 +67,34 @@ public interface Transformer<
   }
 
   @SuppressWarnings("unchecked")
-  default Statement<OIN> thenVerifyAllOf(List<Function<? super TX, Statement<OIN>>> funcs) {
+  default Statement<OIN> thenAllOf(List<Function<? super TX, Statement<OIN>>> funcs) {
     return Fluents.statementAllOf(
         Transformer.this.originalInputValue(),
         funcs.stream()
             .map(each -> each.apply((TX) Transformer.this))
-            .map(Transformer::toPredicateIfChecker)
-            .collect(toList()));
-  }
-
-  static <T> Predicate<T> toPredicateIfChecker(Statement<T> each) {
-    if (each instanceof Checker)
-      return ((Checker<?, T, ?>)each).toPredicate();
-    return each;
+            .map(Transformer.Utils::toPredicateIfChecker)
+            .toArray(Predicate[]::new));
   }
 
 
   @SuppressWarnings("unchecked")
-  default Statement<OIN> thenVerifyAnyOf(List<Function<? super TX, Statement<OIN>>> funcs) {
-    return this.then().asValueOf((OIN) value()).verifyWith(Fluents.statementAnyOf(
+  default Statement<OIN> thenAnyOf(List<Function<? super TX, Statement<OIN>>> funcs) {
+    return Fluents.statementAnyOf(
         Transformer.this.originalInputValue(),
         funcs.stream()
             .map(each -> each.apply((TX) Transformer.this))
-            .collect(toList())));
+            .map(Transformer.Utils::toPredicateIfChecker)
+            .toArray(Predicate[]::new));
   }
 
   @SuppressWarnings("unchecked")
-  default <NOUT> Checker<?, OIN, NOUT> thenVerifyWithAllOf(List<? extends Predicate<? super NOUT>> predicates) {
-    return this.thenVerifyWith(Predicates.allOf(predicates.toArray(new Predicate[0])));
+  default Statement<OIN> thenWith(Function<? super TX, Statement<OIN>> func) {
+    return func.apply((TX) this);
   }
 
-  @SuppressWarnings("unchecked")
-  default <NOUT> Checker<?, OIN, NOUT> thenVerifyWithAnyOf(List<? extends Predicate<? super NOUT>> predicates) {
-    return this.thenVerifyWith(Predicates.anyOf(predicates.toArray(new Predicate[0])));
+  default Statement<OIN> statement(Predicate<OIN> predicate) {
+    return Fluents.statement(originalInputValue(), predicate);
   }
-
-  @SuppressWarnings("unchecked")
-  default <NOUT> Checker<?, OIN, NOUT> thenVerifyWith(Predicate<? super NOUT> predicate) {
-    return this.then().asValueOf((NOUT) value()).verifyWith(predicate);
-  }
-
 
   default <O> ObjectTransformer<OIN, O> exercise(Function<? super OUT, O> f) {
     return applyFunction(f);
@@ -154,8 +129,8 @@ public interface Transformer<
     return this.transform(f, (TX, func) -> integerTransformer(this, func));
   }
 
-  default IntegerTransformer<OIN> transformToLong(Function<? super OUT, Integer> f) {
-    return this.transform(f, (TX, func) -> integerTransformer(this, func));
+  default LongTransformer<OIN> transformToLong(Function<? super OUT, Long> f) {
+    return this.transform(f, (TX, func) -> longTransformer(this, func));
   }
 
   default ShortTransformer<OIN> transformToShort(Function<? super OUT, Short> f) {
@@ -329,7 +304,7 @@ public interface Transformer<
     @SuppressWarnings("unchecked")
     public <IN> Base(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function, OIN originalInputValue) {
       this.transformerName = transformerName;
-      this.function = (Function<OIN, OUT>) Transformer.chainFunctions(parent == null ? dummyFunction() : parent.function(), function);
+      this.function = (Function<OIN, OUT>) Utils.chainFunctions(parent == null ? dummyFunction() : parent.function(), function);
       this.originalInputValue = originalInputValue;
     }
 
@@ -346,6 +321,26 @@ public interface Transformer<
     @Override
     public OIN originalInputValue() {
       return this.originalInputValue;
+    }
+  }
+
+  enum Utils {
+    ;
+
+    public static <T> Predicate<T> toPredicateIfChecker(Statement<T> each) {
+      if (each instanceof Checker)
+        return ((Checker<?, T, ?>) each).toPredicate();
+      return each;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <I, M, O> Function<I, O> chainFunctions(Function<I, ? extends M> func, Function<? super M, O> after) {
+      if (isDummyFunction(func) && isDummyFunction(after))
+        return dummyFunction();
+      if (isDummyFunction(func))
+        return (isDummyFunction(after)) ? dummyFunction() : (Function<I, O>) after;
+      else
+        return isDummyFunction(after) ? (Function<I, O>) func : func.andThen(after);
     }
   }
 }

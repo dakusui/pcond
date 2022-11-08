@@ -29,13 +29,23 @@ public class ReportDetailTest extends TestBase {
       TestAssertions.assertThat(actual, isEqualTo(expected));
       throw new Error(); // Make it fail if PC reaches here.
     } catch (ComparisonFailure e) {
-      e.printStackTrace();
+      System.out.println("EXPECTED:<" + e.getExpected() + ">");
+      System.out.println("ACTUAL:<" + e.getActual() + ">");
       assertThat(
           e,
           allOf(
               transform(Functions.<Throwable, String>call(instanceMethod(parameter(), "getActual"))).check(containsString(actual)),
               transform(Functions.<Throwable, String>call(instanceMethod(parameter(), "getExpected"))).check(containsString(expected))));
     }
+  }
+
+  @Ignore
+  @Test
+  public void givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted$assertThat_forSandbox() {
+    String actual = "helloHELLOhelloHELLOhelloXYZHELLOhelloHELLOhelloHELLO";
+    String expected = "helloHELLOhelloHELLOhelloHELLOhelloHELLOhelloHELLO";
+
+    TestAssertions.assertThat(actual, isEqualTo(expected));
   }
 
   @Ignore
@@ -54,7 +64,7 @@ public class ReportDetailTest extends TestBase {
       validateStatement(statement(actual, isEqualTo(expected)));
       throw new Error(); // Make it fail if PC reaches here.
     } catch (TestUtils.IllegalValueException e) {
-      e.printStackTrace();
+      System.err.println(e.getMessage());
       assertThat(
           e,
           allOf(

@@ -15,10 +15,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
+import static com.github.dakusui.pcond.fluent.Fluents.statementAllOf;
 import static com.github.dakusui.pcond.fluent.Fluents.value;
-import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
-import static com.github.dakusui.shared.TestUtils.validate;
 import static com.github.dakusui.shared.TestUtils.validateStatement;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -168,11 +167,14 @@ public class MoreFluentStyleExample {
     String s = "John doe";
 
     TestFluents.assertStatemet(
-        value(s).asString().split(" ").thenVerifyWith(allOf(
-            transform(size()).check(isEqualTo(2)),
-            transform(elementAt(0).andThen(cast(String.class))).check(matchesRegex("[A-Z][a-z]+")),
-            transform(elementAt(1).andThen(cast(String.class))).check(matchesRegex("[A-Z][a-z]+"))
-        )));
+        value(s)
+            .asString()
+            .split(" ")
+            .thenWith((ListTransformer<String, String> tx) -> statementAllOf(
+                tx.originalInputValue(),
+                tx.size().then().isEqualTo(2),
+                tx.elementAt(0).asString().then().matchesRegex("[A-Z][a-z]+"),
+                tx.elementAt(1).asString().then().matchesRegex("[A-Z][a-z]+"))));
   }
 
   @Test
@@ -223,7 +225,7 @@ public class MoreFluentStyleExample {
     List<String> list = asList("helloWorld", "HI");
     String s = list.get(0);
     TestFluents.assertAll(
-        value(list).thenVerifyAllOf(asList(
+        value(list).thenAllOf(asList(
             tx -> tx.size().then().greaterThan(3),
             tx -> tx.elementAt(0).asString().then().isNotNull(),
             tx -> tx.elementAt(0).asString().length().then().greaterThan(100))));
@@ -234,7 +236,7 @@ public class MoreFluentStyleExample {
     List<String> list = asList("helloWorld", "HI");
     String s = list.get(0);
     TestFluents.assertAll(
-        value(list).thenVerifyAllOf(asList(
+        value(list).thenAllOf(asList(
             tx -> tx.then().isEmpty(),
             tx -> tx.elementAt(0).asString().then().isNotNull(),
             tx -> tx.elementAt(0).asString().length().then().greaterThan(100),
@@ -246,7 +248,7 @@ public class MoreFluentStyleExample {
     List<String> list = asList("helloWorld", "HI");
     String s = list.get(0);
     validateStatement(
-        value(list).thenVerifyAllOf(asList(
+        value(list).thenAllOf(asList(
             tx -> tx.size().then().greaterThan(3),
             tx -> tx.elementAt(0).asString().then().isNotNull(),
             tx -> tx.elementAt(0).asString().length().then().greaterThan(100))));
@@ -257,7 +259,7 @@ public class MoreFluentStyleExample {
     List<String> list = asList("helloWorld", "HI");
     String s = list.get(0);
     validateStatement(
-        value(list).thenVerifyAllOf(asList(
+        value(list).thenAllOf(asList(
             tx -> tx.then().isNull(),
             tx -> tx.elementAt(0).asString().then().isNotNull(),
             tx -> tx.elementAt(0).asString().length().then().greaterThan(100))));
@@ -267,9 +269,9 @@ public class MoreFluentStyleExample {
   public void checkTwoAspectsOfOneValue_4() {
     List<String> list = asList("helloWorld", "HI");
     TestFluents.assertStatemet(
-        value(list).thenVerifyAllOf(asList(
-             tx -> tx.size().then().greaterThan(3),
-             tx -> tx.elementAt(0).asString().thenVerifyAllOf(asList(
+        value(list).thenAllOf(asList(
+            tx -> tx.size().then().greaterThan(3),
+            tx -> tx.elementAt(0).asString().thenAllOf(asList(
                 (StringTransformer<List<String>> ty) -> ty.then().isNotNull(),
                 (StringTransformer<List<String>> ty) -> ty.asString().length().then().greaterThan(100))))));
   }
@@ -278,9 +280,9 @@ public class MoreFluentStyleExample {
   public void checkTwoAspectsOfOneValue_5() {
     List<String> list = asList("helloWorld", "HI");
     TestFluents.assertStatemet(
-        value(list).thenVerifyAllOf(asList(
+        value(list).thenAllOf(asList(
             tx -> tx.size().then().greaterThan(3),
-            tx -> tx.elementAt(0).thenVerifyAllOf(asList(
+            tx -> tx.elementAt(0).thenAllOf(asList(
                 ty -> ty.then().isNotNull(),
                 ty -> ty.asString().length().then().greaterThan(100))))));
   }

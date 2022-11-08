@@ -7,6 +7,7 @@ import com.github.dakusui.pcond.validator.exceptions.ValidationException;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.github.dakusui.pcond.validator.ExceptionComposer.Utils.createException;
+import static com.github.dakusui.pcond.validator.Explanation.reportToString;
 
 /**
  * An interface to define how an exception is composed based on a given message,
@@ -244,7 +245,7 @@ public interface ExceptionComposer {
         throw (T) createException(
             "org.junit.ComparisonFailure",
             explanation,
-            (c, exp) -> c.getConstructor(String.class, String.class, String.class).newInstance(exp.message(), exp.expected(), exp.actual()));
+            (c, exp) -> c.getConstructor(String.class, String.class, String.class).newInstance(exp.message(), reportToString(exp.expected()), reportToString(exp.actual())));
       }
     }
 

@@ -63,10 +63,6 @@ public interface Statement<T> {
     return create(value, predicateSupplier);
   }
 
-  static void main(String... args) {
-    assert statement("I am happy", () -> isNull().and(isNotNull())).evaluate(inspectionIsEnabled(), isInProduction());
-  }
-
   static boolean isInProduction() {
     return false;
   }

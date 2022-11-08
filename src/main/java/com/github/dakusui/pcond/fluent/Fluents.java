@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.forms.Functions.elementAt;
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
 import static com.github.dakusui.pcond.forms.Predicates.transform;
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -39,11 +40,6 @@ public class Fluents {
     return null;
   }
   
-  public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
-    return value(value).then().addPredicate(predicate);
-  }
-
-
   /**
    * Returns a transformer for a `String` value.
    *
@@ -166,7 +162,13 @@ public class Fluents {
     return makeTrivial(allOf(predicates));
   }
 
-  public static <T> Statement<T> statementAllOf(T value, List<Predicate<? super T>> predicates) {
+  public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
+    return value(value).then().addPredicate(predicate);
+  }
+
+  @SafeVarargs
+  public static <T> Statement<T> statementAllOf(T value, Predicate<? super T>... predicateArray) {
+    List<Predicate<? super T>> predicates = asList(predicateArray);
     class Stmt implements Statement<T>, Evaluable.Conjunction<T> {
       @SuppressWarnings("unchecked")
       final List<Evaluable<? super T>> children = predicates.stream()
@@ -215,7 +217,9 @@ public class Fluents {
     return new Stmt();
   }
 
-  public static <T> Statement<T> statementAnyOf(T value, List<Predicate<? super T>> predicates) {
+  @SafeVarargs
+  public static <T> Statement<T> statementAnyOf(T value, Predicate<? super T>... predicateArray) {
+    List<Predicate<? super T>> predicates = asList(predicateArray);
     class Stmt implements Statement<T>, Evaluable.Disjunction<T> {
       @SuppressWarnings("unchecked")
       final List<Evaluable<? super T>> children = predicates.stream()

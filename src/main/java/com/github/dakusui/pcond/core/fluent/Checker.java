@@ -18,7 +18,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.fluent.Transformer.chainFunctions;
+import static com.github.dakusui.pcond.core.fluent.Transformer.Utils.chainFunctions;
 import static com.github.dakusui.pcond.core.fluent.Checker.Factory.*;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;

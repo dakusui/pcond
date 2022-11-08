@@ -1,19 +1,21 @@
 package com.github.dakusui.thincrest.ut;
 
+import com.github.dakusui.pcond.core.fluent.transformers.ListTransformer;
 import com.github.dakusui.shared.utils.ut.TestBase;
-import com.github.dakusui.shared.FluentTestUtils;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.fluent.FluentsInternal.*;
-import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
+import static com.github.dakusui.pcond.fluent.Fluents.statement;
+import static com.github.dakusui.pcond.fluent.FluentsInternal.*;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.function;
+import static com.github.dakusui.shared.FluentTestUtils.*;
 import static com.github.dakusui.shared.utils.TestForms.objectHashCode;
+import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static java.util.Arrays.asList;
 
 public class FluentsInternalTest extends TestBase {
@@ -21,7 +23,7 @@ public class FluentsInternalTest extends TestBase {
   public void whenPassingValidation_thenPasses$1() {
     assertThat(
         new Parent(),
-        FluentTestUtils.when().as((Parent) value())
+        when().as((Parent) value())
             .exercise(Parent::parentMethod1)
             .then()
             .verifyWith(isEqualTo("returnValueFromParentMethod")).build());
@@ -48,7 +50,7 @@ public class FluentsInternalTest extends TestBase {
   public void example() {
     assertThat(
         asList("Hello", "world"),
-        FluentTestUtils.when().asListOf((String) value())
+        when().asListOf((String) value())
             .elementAt(0)
             .then().asString()
             .findSubstrings("hello", "world")
@@ -69,7 +71,7 @@ public class FluentsInternalTest extends TestBase {
       assertThat(
           new Parent(),
           allOf(
-              FluentTestUtils.whenValueOfClass(Parent.class).<Parent>asObject()
+              whenValueOfClass(Parent.class).asObject()
                   .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                   .then()
                   .asString()
@@ -92,7 +94,7 @@ public class FluentsInternalTest extends TestBase {
     try {
       assertThat(
           (Supplier<Parent>) Parent::new,
-          FluentTestUtils.whenValueOfClass(Supplier.class)
+          whenValueOfClass(Supplier.class)
               .asObject()
               .exercise(Supplier::get)
               .then().verifyWith(allOf(
@@ -131,30 +133,35 @@ public class FluentsInternalTest extends TestBase {
   @Test(expected = ComparisonFailure.class)
   public void multiValueAssertionTest_allOf() {
     assertThat(
-        FluentTestUtils.list(123, FluentTestUtils.list("Hello", "world")),
+        list(123, list("Hello", "world")),
         allOf(
-            FluentTestUtils.when().at(0).asInteger()
+            when().at(0).asInteger()
                 .then().equalTo(122),
-            FluentTestUtils.when().at(1).asListOfClass(String.class).thenVerifyAllOf(asList(
-                b -> b.at(0).asString()
-                    .then().isEqualTo("hello"),
-                b -> b.at(1).asString()
-                    .then().isEqualTo("world")))));
+            when().at(1).asListOfClass(String.class)
+                .thenAllOf(asList(
+                    (ListTransformer<Object, String> b) -> b
+                        .at(0)
+                        .asString()
+                        .then()
+                        .isEqualTo("hello"),
+                    (ListTransformer<Object, String> b) -> b.at(1).asString()
+                        .then().isEqualTo("world")))));
   }
 
   @Test(expected = ComparisonFailure.class)
   public void multiValueAssertionTest_anyOf() {
     try {
       assertThat(
-          FluentTestUtils.list(123, FluentTestUtils.list("Hello", "world")),
+          list(123, list("Hello", "world")),
           allOf(
-              FluentTestUtils.when().at(0).asInteger()
+              when().at(0).asInteger()
                   .then().equalTo(122),
-              FluentTestUtils.when().at(1).asListOfClass(String.class).thenVerifyAnyOf(asList(
-                  b -> b.at(0).asString()
-                      .then().isEqualTo("hello"),
-                  b -> b.at(1).asString()
-                      .then().isEqualTo("world")))));
+              when().at(1).asListOfClass(String.class)
+                  .thenAnyOf(asList(
+                      (ListTransformer<Object, String> b) -> b.at(0).asString()
+                          .then().isEqualTo("hello"),
+                      (ListTransformer<Object, String> b) -> b.at(1).asString()
+                          .then().isEqualTo("world")))));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       throw e;
@@ -166,11 +173,15 @@ public class FluentsInternalTest extends TestBase {
     String hello = "hello";
     assertThat(
         hello,
-        FluentTestUtils.when().asObject().thenVerifyWith(allOf(
-            $().as((String) value())
-                .exercise(objectHashCode())
-                .then().isInstanceOf(Integer.class)))
-    );
+        when()
+            .asObject()
+            .thenWith(b -> statement(
+                b.originalInputValue(),
+                allOf(
+                    b.as((String) value())
+                        .exercise(objectHashCode())
+                        .then()
+                        .isInstanceOf(Integer.class)))));
   }
 
   @Test
@@ -178,7 +189,7 @@ public class FluentsInternalTest extends TestBase {
     String hello = "hello";
     assertThat(
         hello,
-        FluentTestUtils.when().asObject().then().verifyWith(allOf(
+        when().asObject().then().verifyWith(allOf(
             $().as((String) value())
                 .exercise(objectHashCode())
                 .then()

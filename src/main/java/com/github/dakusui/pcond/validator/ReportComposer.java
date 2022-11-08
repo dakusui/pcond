@@ -3,10 +3,7 @@ package com.github.dakusui.pcond.validator;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
@@ -19,6 +16,8 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
@@ -37,6 +36,27 @@ public interface ReportComposer {
   class Default implements ReportComposer {
   }
 
+  interface Report {
+    String summary();
+
+    List<String> details();
+
+    static Report create(String summary, List<String> details) {
+      List<String> detailsCopy = unmodifiableList(new ArrayList<>(details));
+      return new Report() {
+        @Override
+        public String summary() {
+          return summary;
+        }
+
+        @Override
+        public List<String> details() {
+          return detailsCopy;
+        }
+      };
+    }
+  }
+
   enum Utils {
     ;
 
@@ -48,21 +68,13 @@ public interface ReportComposer {
           composeReport(composeSummaryForActualResults(result, t, actualResultDetails), actualResultDetails));
     }
 
-    static String composeReport(String summary, List<Object> details) {
-      AtomicInteger index = new AtomicInteger(0);
-      String ret = summary;
-      ret += format("%n");
-      if (details != null) {
-        ret += format("%n");
-        ret += details.stream()
-            .map(Objects::toString)
-            .map(each -> format(".Detail of failure [%s]%n", index.getAndIncrement())
-                + format("----%n")
-                + each + format("%n")
-                + format("----%n"))
-            .collect(joining(format("%n")));
-      }
-      return ret;
+    static Report composeReport(String summary, List<Object> details) {
+      List<String> stringFormDetails = details != null ?
+          details.stream()
+              .map(Object::toString)
+              .collect(toList()) :
+          emptyList();
+      return ReportComposer.Report.create(summary, stringFormDetails);
     }
 
     private static String composeSummaryForActualResults(List<Evaluator.Entry> result, Throwable t, List<Object> actualInputDetails) {

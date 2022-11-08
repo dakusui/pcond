@@ -271,4 +271,8 @@ public enum InternalUtils {
         "" :
         format("%" + (level * 2) + "s", "");
   }
+
+  public static String newLine() {
+    return format("%n");
+  }
 }
