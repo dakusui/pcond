@@ -5,6 +5,7 @@ import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -17,6 +18,7 @@ import static com.github.dakusui.shared.FluentTestUtils.*;
 import static com.github.dakusui.shared.utils.TestForms.objectHashCode;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
 public class FluentsInternalTest extends TestBase {
   @Test
@@ -97,15 +99,17 @@ public class FluentsInternalTest extends TestBase {
           whenValueOfClass(Supplier.class)
               .asObject()
               .exercise(Supplier::get)
-              .then().verifyWith(allOf(
-                  $().as((Parent) value())
+              .thenAllOf(asList(
+                  tx -> tx.as((Parent) value())
                       .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
-                      .then().asString()
+                      .then()
+                      .asString()
                       .isEqualTo("returnValueFromParentMethod"),
-                  $().asValueOfClass(Parent.class)
+                  tx -> tx.as((Parent) value())
                       .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                       .exercise(function("lambda:Child::childMethod", Child::childMethod))
-                      .then().asString()
+                      .then()
+                      .asString()
                       // 'not(...)' is added to make the matcher fail.
                       .addPredicate(not(isEqualTo("returnedStringFromChildMethod"))))));
     } catch (ComparisonFailure e) {
@@ -189,8 +193,8 @@ public class FluentsInternalTest extends TestBase {
     String hello = "hello";
     assertThat(
         hello,
-        when().asObject().then().verifyWith(allOf(
-            $().as((String) value())
+        when().asObject().thenAllOf(singletonList(
+            tx -> tx.as((String) value())
                 .exercise(objectHashCode())
                 .then()
                 .isInstanceOf(Integer.class))));

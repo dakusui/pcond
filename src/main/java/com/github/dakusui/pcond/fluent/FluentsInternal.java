@@ -15,7 +15,7 @@ public class FluentsInternal {
    * @return Returns a `Fluent<T>` object.
    * @param <T> The type for which returned `Fluent` object is created.
    */
-  public static <T> Fluent<T> $() {
+  public static <T> Fluent<T> fluentValue() {
     return valueOf(value());
   }
 

@@ -380,7 +380,7 @@ public class Predicates {
       }
     }
     //noinspection RedundantTypeArguments
-    return FluentsInternal.$().asString()
+    return FluentsInternal.fluentValue().asString()
         .transformToObject(function("findTokens" + formatObject(tokens), CursoredString::new))
         .then().verifyWith(Predicates.<CursoredString>allOf(
             Stream.concat(
@@ -518,7 +518,7 @@ public class Predicates {
       previousPosition.set(cursoredList.position);
       return false;
     };
-    return FluentsInternal.$().asListOf((E) FluentsInternal.value())
+    return FluentsInternal.fluentValue().asListOf((E) FluentsInternal.value())
         .transformToObject(function("toCursoredList", CursoredList::new))
         .then()
         .verifyWith(allOf(Stream.concat(
