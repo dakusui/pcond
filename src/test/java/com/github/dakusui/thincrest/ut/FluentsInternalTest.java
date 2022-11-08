@@ -5,13 +5,13 @@ import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
 import static com.github.dakusui.pcond.fluent.Fluents.statement;
-import static com.github.dakusui.pcond.fluent.FluentsInternal.*;
+import static com.github.dakusui.pcond.fluent.FluentsInternal.value;
+import static com.github.dakusui.pcond.fluent.FluentsInternal.valueOfClass;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.function;
 import static com.github.dakusui.shared.FluentTestUtils.*;
@@ -100,12 +100,12 @@ public class FluentsInternalTest extends TestBase {
               .asObject()
               .exercise(Supplier::get)
               .thenAllOf(asList(
-                  tx -> tx.as((Parent) value())
+                  tx -> tx.asValueOfClass(Parent.class)
                       .exercise(function("lambda:Parent::parentMethod1", Parent::parentMethod1))
                       .then()
                       .asString()
                       .isEqualTo("returnValueFromParentMethod"),
-                  tx -> tx.as((Parent) value())
+                  tx -> tx.asValueOfClass(Parent.class)
                       .exercise(function("Parent::parentMethod2", Parent::parentMethod2))
                       .exercise(function("lambda:Child::childMethod", Child::childMethod))
                       .then()
