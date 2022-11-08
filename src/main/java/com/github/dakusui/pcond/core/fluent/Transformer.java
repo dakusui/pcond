@@ -164,60 +164,60 @@ public interface Transformer<
 
   @Override
   default StringTransformer<OIN> asString() {
-    return stringTransformer(this, Printables.function("treatAsString", v -> (String) v));
+    return stringTransformer(this, Printables.function("asString", v -> (String) v));
   }
 
   @Override
   default IntegerTransformer<OIN> asInteger() {
-    return integerTransformer(this, Printables.function("treatAsInteger", v -> (Integer) v));
+    return integerTransformer(this, Printables.function("asInteger", v -> (Integer) v));
   }
 
   @Override
   default LongTransformer<OIN> asLong() {
-    return longTransformer(this, Printables.function("treatAsLong", v -> (Long) v));
+    return longTransformer(this, Printables.function("asLong", v -> (Long) v));
   }
 
   @Override
   default ShortTransformer<OIN> asShort() {
-    return shortTransformer(this, Printables.function("treatAsShort", v -> (Short) v));
+    return shortTransformer(this, Printables.function("asShort", v -> (Short) v));
   }
 
   @Override
   default DoubleTransformer<OIN> asDouble() {
-    return doubleTransformer(this, Printables.function("treatAsDouble", v -> (Double) v));
+    return doubleTransformer(this, Printables.function("asDouble", v -> (Double) v));
   }
 
   @Override
   default FloatTransformer<OIN> asFloat() {
-    return floatTransformer(this, Printables.function("treatAsShort", v -> (Float) v));
+    return floatTransformer(this, Printables.function("asFloat", v -> (Float) v));
   }
 
   @Override
   default BooleanTransformer<OIN> asBoolean() {
-    return booleanTransformer(this, Printables.function("treatAsBoolean", v -> (Boolean) v));
+    return booleanTransformer(this, Printables.function("asBoolean", v -> (Boolean) v));
   }
 
   @SuppressWarnings("unchecked")
   default <OUT2 extends Throwable> ThrowableTransformer<OIN, OUT2> asThrowable() {
-    return throwableTransformer(this, Printables.function("treatAsThrowable", v -> (OUT2) v));
+    return throwableTransformer(this, Printables.function("asThrowable", v -> (OUT2) v));
   }
 
   @Override
   @SuppressWarnings("unchecked")
-  default <NOUT> ObjectTransformer<OIN, NOUT> asValueOf(NOUT value) {
-    return objectTransformer(this, Printables.function("treatAs[NOUT]", v -> (NOUT) v));
+  default <E> ObjectTransformer<OIN, E> asValueOf(E value) {
+    return objectTransformer(this, Printables.function("as[NOUT]", v -> (E) v));
   }
 
   @Override
   @SuppressWarnings("unchecked")
   default <E> ListTransformer<OIN, E> asListOf(E value) {
-    return listTransformer(this, Printables.function("treatAsList", v -> (List<E>) v));
+    return listTransformer(this, Printables.function("asList[E]", v -> (List<E>) v));
   }
 
   @SuppressWarnings("unchecked")
   @Override
   default <E> StreamTransformer<OIN, E> asStreamOf(E value) {
-    return streamTransformer(this, Printables.function("treatAsStream[NOUT]", v -> (Stream<E>) v));
+    return streamTransformer(this, Printables.function("asStream[E]", v -> (Stream<E>) v));
   }
 
   enum Factory {

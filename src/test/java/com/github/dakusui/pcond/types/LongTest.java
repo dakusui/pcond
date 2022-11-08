@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.types;
 
+import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.shared.IllegalValueException;
 import org.junit.Test;
 
@@ -45,5 +46,18 @@ public class LongTest {
     validate(
         v,
         when().asString().toLong(Long::parseLong).then().lessThan((long) 122));
+  }
+
+  @Test(expected = InternalException.class)
+  public void longTypeMismatch() {
+    long v = 123L;
+    validate(
+        v,
+        when()
+            .asObject()
+            .asLong()
+            .asDouble()
+            .then()
+            .isNotNull());
   }
 }
