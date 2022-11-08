@@ -6,6 +6,19 @@ import com.github.dakusui.pcond.core.fluent.checkers.*;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 
+/**
+ * An interface that provides methods to treat a given matcher as a matcher for a specified type.
+ * Those methods are often used for {@link ObjectTransformer} or {@link ObjectChecker} to convert them to a more specific transformer or checker, such as {@link StringTransformer} and {@link StringChecker}.
+ *
+ * @param <MS> Type of matcher for {@link String}, that is, {@link StringTransformer} or {@link StringChecker}.
+ * @param <MI> Type of matcher for {@link Integer}.
+ * @param <MD> Type of matcher for {@link Double}.
+ * @param <MF> Type of matcher for {@link Float}.
+ * @param <MSH> Type of matcher for {@link Short}.
+ * @param <ML> Type of matcher for {@link Long}.
+ * @param <MB> Type of matcher for {@link Boolean}.
+ * @param <OIN>
+ */
 public interface AsPhraseFactory<
     MS extends Matcher.ForString<OIN>,
     MI extends Matcher.ForInteger<OIN>,

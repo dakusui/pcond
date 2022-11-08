@@ -1,6 +1,8 @@
 package com.github.dakusui.pcond.core.fluent;
 
 public interface Matcher<OIN> {
+  OIN originalInputValue();
+
   interface ForString<OIN> extends Matcher<OIN> {
   }
 

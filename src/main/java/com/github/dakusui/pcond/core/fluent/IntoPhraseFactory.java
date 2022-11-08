@@ -6,6 +6,12 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+/**
+ * Provides methods to convert a matcher into a checker.
+ *
+ * @param <OIN> A type of original input value.
+ * @param <IN> A type of current input value.
+ */
 public interface IntoPhraseFactory<OIN, IN> {
   default StringChecker<OIN> intoString() {
     return intoStringWith((IN v) -> (String) v);

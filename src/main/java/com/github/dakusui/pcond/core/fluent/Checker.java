@@ -31,11 +31,13 @@ import static com.github.dakusui.pcond.internals.InternalUtils.*;
  * @param <T>The type of the value to be verified by this object.
  */
 public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
-    Identifiable,
+    Matcher<OIN>,
+    IntoPhraseFactory.ForChecker<OIN, T>,
+    AsPhraseFactory.ForChecker<OIN>,
     Statement<OIN>,
     Evaluable.Transformation<OIN, T>,
-    IntoPhraseFactory.ForChecker<OIN, T>,
-    AsPhraseFactory.ForChecker<OIN> {
+    Identifiable
+ {
 
   String transformerName();
 
@@ -44,8 +46,6 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
   Function<? super OIN, ? extends T> function();
 
   Predicate<? super T> predicate();
-
-  OIN originalInputValue();
 
   @Override
   default OIN statementValue() {
