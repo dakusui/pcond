@@ -89,6 +89,15 @@ public interface Transformer<
   }
 
   @SuppressWarnings("unchecked")
+  default Statement<OIN> thenVerifyAnyOf(List<Function<? super TX, Statement<OIN>>> funcs) {
+    return this.then().asValueOf((OIN) value()).verifyWith(Fluents.statementAnyOf(
+        Transformer.this.originalInputValue(),
+        funcs.stream()
+            .map(each -> each.apply((TX) Transformer.this))
+            .collect(toList())));
+  }
+
+  @SuppressWarnings("unchecked")
   default <NOUT> Checker<?, OIN, NOUT> thenVerifyWithAllOf(List<? extends Predicate<? super NOUT>> predicates) {
     return this.thenVerifyWith(Predicates.allOf(predicates.toArray(new Predicate[0])));
   }

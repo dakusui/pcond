@@ -215,6 +215,55 @@ public class Fluents {
     return new Stmt();
   }
 
+  public static <T> Statement<T> statementAnyOf(T value, List<Predicate<? super T>> predicates) {
+    class Stmt implements Statement<T>, Evaluable.Disjunction<T> {
+      @SuppressWarnings("unchecked")
+      final List<Evaluable<? super T>> children = predicates.stream()
+          .map(each -> each instanceof Evaluable ?
+              each :
+              PrintablePredicateFactory.leaf(each::toString, each))
+          .map(each -> (Evaluable<? super T>) each)
+          .collect(toList());
+
+      @Override
+      public T statementValue() {
+        return value;
+      }
+
+      @Override
+      public List<Evaluable<? super T>> children() {
+        return children;
+      }
+
+      @Override
+      public boolean shortcut() {
+        return false;
+      }
+
+      @SuppressWarnings("unchecked")
+      @Override
+      public Predicate<T> statementPredicate() {
+        return PrintablePredicateFactory.allOf(predicates
+            .stream()
+            .map(each -> (Predicate<T>) each)
+            .collect(toList()));
+      }
+
+      @Override
+      public boolean test(T t) {
+        return statementPredicate().test(t);
+      }
+
+      @Override
+      public String toString() {
+        return children.stream()
+            .map(Object::toString)
+            .collect(joining("&&"));
+      }
+    }
+    return new Stmt();
+  }
+
   private static <T> Predicate<T> makeTrivial(Predicate<T> predicates) {
     return ((PrintablePredicate<T>) predicates).makeTrivial();
   }

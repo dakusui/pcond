@@ -135,10 +135,10 @@ public class FluentsInternalTest extends TestBase {
         allOf(
             FluentTestUtils.when().at(0).asInteger()
                 .then().equalTo(122),
-            FluentTestUtils.when().at(1).asListOfClass(String.class).thenVerifyWithAllOf(asList(
-                $().at(0).asString()
+            FluentTestUtils.when().at(1).asListOfClass(String.class).thenVerifyAllOf(asList(
+                b -> b.at(0).asString()
                     .then().isEqualTo("hello"),
-                $().at(1).asString()
+                b -> b.at(1).asString()
                     .then().isEqualTo("world")))));
   }
 
@@ -150,10 +150,10 @@ public class FluentsInternalTest extends TestBase {
           allOf(
               FluentTestUtils.when().at(0).asInteger()
                   .then().equalTo(122),
-              FluentTestUtils.when().at(1).asListOfClass(String.class).thenVerifyWithAnyOf(asList(
-                  $().at(0).asString()
+              FluentTestUtils.when().at(1).asListOfClass(String.class).thenVerifyAnyOf(asList(
+                  b -> b.at(0).asString()
                       .then().isEqualTo("hello"),
-                  $().at(1).asString()
+                  b -> b.at(1).asString()
                       .then().isEqualTo("world")))));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
