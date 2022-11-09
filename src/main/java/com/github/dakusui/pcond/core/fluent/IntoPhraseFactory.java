@@ -13,49 +13,6 @@ import java.util.stream.Stream;
  * @param <IN> A type of current input value.
  */
 public interface IntoPhraseFactory<OIN, IN> {
-  default StringChecker<OIN> intoString() {
-    return intoStringWith((IN v) -> (String) v);
-  }
-
-  default IntegerChecker<OIN> intoInteger() {
-    return intoIntegerWith((IN v) -> (Integer) v);
-  }
-
-  default LongChecker<OIN> intoLong() {
-    return intoLongWith((IN v) -> (Long) v);
-  }
-
-  default FloatChecker<OIN> intoFloat() {
-    return intoFloatWith((IN v) -> (Float) v);
-  }
-
-  default ShortChecker<OIN> intoShort() {
-    return intoShortWith((IN v) -> (Short) v);
-  }
-
-  default DoubleChecker<OIN> intoDouble() {
-    return intoDoubleWith((IN v) -> (Double) v);
-  }
-
-  default BooleanChecker<OIN> intoBoolean() {
-    return intoBooleanWith((IN v) -> (Boolean) v);
-  }
-
-  @SuppressWarnings("unchecked")
-  default <NOUT> ObjectChecker<OIN, NOUT> intoObject() {
-    return intoObjectWith((IN v) -> (NOUT) v);
-  }
-
-  @SuppressWarnings("unchecked")
-  default <E> ListChecker<OIN, E> intoList() {
-    return intoListWith((IN v) -> (List<E>) v);
-  }
-
-  @SuppressWarnings("unchecked")
-  default <E> StreamChecker<OIN, E> intoStream() {
-    return intoStreamWith((IN v) -> (Stream<E>) v);
-  }
-
   StringChecker<OIN> intoStringWith(Function<IN, String> function);
 
   IntegerChecker<OIN> intoIntegerWith(Function<IN, Integer> function);

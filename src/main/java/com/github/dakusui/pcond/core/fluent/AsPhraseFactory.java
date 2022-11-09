@@ -3,12 +3,16 @@ package com.github.dakusui.pcond.core.fluent;
 import com.github.dakusui.pcond.core.fluent.transformers.*;
 import com.github.dakusui.pcond.core.fluent.transformers.LongTransformer;
 import com.github.dakusui.pcond.core.fluent.checkers.*;
+import com.github.dakusui.pcond.fluent.Fluents;
 
 import static com.github.dakusui.pcond.core.fluent.Fluent.value;
 
 /**
  * An interface that provides methods to treat a given matcher as a matcher for a specified type.
  * Those methods are often used for {@link ObjectTransformer} or {@link ObjectChecker} to convert them to a more specific transformer or checker, such as {@link StringTransformer} and {@link StringChecker}.
+ *
+ * If you call a method on a transformer not compatible with the method, a {@link ClassCastException} is caused.
+ * Note that the exception may be wrapped by internal mechanism of `pcond`.
  *
  * @param <MS> Type of matcher for {@link String}, that is, {@link StringTransformer} or {@link StringChecker}.
  * @param <MI> Type of matcher for {@link Integer}.
@@ -111,6 +115,32 @@ public interface AsPhraseFactory<
     @Override
     <E> StreamTransformer<OIN, E> asStreamOf(E value);
 
+    /**
+     * Returns an object transformer pointing at the value
+     *
+     * This method treats the current value as a list of `E`.
+     * If this object is not pointing a list or the element found at `i` is not an instance of `E`,
+     * a {@link ClassCastException} will be thrown.
+     *
+     * For the second argument `value`, you should use a returned value from {@link Fluents#value()} and cast it to the type you want to play with.
+     *
+     * [source, java]
+     * .Example
+     * ----
+     * public class Example {
+     *   public void example(AsPhraseFactory f) {
+     *     f.at(123, (YourClass)value());
+     *   }
+     * }
+     * ----
+     *
+     * @param i a position at which returned object transformer points in the current object, which should be a {@link java.util.List}.
+     * @param value A value place-holder returned by {@link Fluents#value()}.
+     * @return An object transformer, which points at `i` in the current value list.
+     * @param <E> The element type of the current value list.
+     *
+     * @see Fluents#value()
+     */
     default <E> ObjectTransformer<OIN, E> at(int i, E value) {
       return asListOf(value).elementAt(i);
     }

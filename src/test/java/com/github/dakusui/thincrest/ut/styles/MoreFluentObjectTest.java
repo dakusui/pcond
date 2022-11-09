@@ -116,62 +116,62 @@ public class MoreFluentObjectTest {
   @Test
   public void test_intoLong() {
     long var = 123;
-    TestFluents.assertStatemet(Fluents.value(var).then().intoLong().equalTo(123L));
+    TestFluents.assertStatemet(Fluents.value(var).then().asLong().equalTo(123L));
   }
 
   @Test
   public void test_intoInteger() {
     int var = 123;
-    TestFluents.assertStatemet(Fluents.value(var).then().intoInteger().equalTo(123));
+    TestFluents.assertStatemet(Fluents.value(var).then().asInteger().equalTo(123));
   }
 
   @Test
   public void test_intoShort() {
     short var = 123;
-    TestFluents.assertStatemet(Fluents.value(var).then().intoShort().equalTo((short) 123));
+    TestFluents.assertStatemet(Fluents.value(var).then().asShort().equalTo((short) 123));
   }
 
   @Test
   public void test_intoDouble() {
     double var = 123.0;
-    TestFluents.assertStatemet(Fluents.value(var).then().intoDouble().equalTo(123.0));
+    TestFluents.assertStatemet(Fluents.value(var).then().asDouble().equalTo(123.0));
   }
 
   @Test
   public void test_intoFloat() {
     float var = 123.0f;
-    TestFluents.assertStatemet(Fluents.value(var).then().intoFloat().equalTo(123.0f));
+    TestFluents.assertStatemet(Fluents.value(var).then().asFloat().equalTo(123.0f));
   }
 
   @Test
   public void test_intoBoolean() {
     boolean var = false;
-    TestFluents.assertStatemet(Fluents.value(var).then().intoBoolean().isEqualTo(false));
+    TestFluents.assertStatemet(Fluents.value(var).then().asBoolean().isEqualTo(false));
   }
 
 
   @Test
   public void test_intoString() {
     String var = "hello";
-    TestFluents.assertStatemet(value(var).then().intoString().isEqualTo("hello"));
+    TestFluents.assertStatemet(value(var).then().asString().isEqualTo("hello"));
   }
 
   @Test
   public void test_intoObject() {
     String var = "hello";
-    TestFluents.assertStatemet(value(var).then().intoObject().isNotNull());
+    TestFluents.assertStatemet(value(var).then().intoObjectWith(v -> v).isNotNull());
   }
 
   @Test
   public void test_intoList() {
     List<String> var = asList("hello", "world");
-    TestFluents.assertStatemet(value(var).then().intoList().isEqualTo(asList("hello", "world")));
+    TestFluents.assertStatemet(value(var).then().asListOfClass(String.class).isEqualTo(asList("hello", "world")));
   }
 
   @Test
   public void test_intoStream() {
     Stream<String> var = Stream.of("hello", "world");
-    TestFluents.assertStatemet(Fluents.value(var).then().intoStream().allMatch(isNotNull()));
+    TestFluents.assertStatemet(Fluents.value(var).then().asStreamOf((String)value()).allMatch(isNotNull()));
   }
 
   @Test
