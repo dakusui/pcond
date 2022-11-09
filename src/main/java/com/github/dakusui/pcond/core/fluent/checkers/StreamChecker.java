@@ -18,9 +18,6 @@ public interface StreamChecker<OIN, E> extends
     Evaluable.Transformation<OIN, Stream<E>>,
     Checker<StreamChecker<OIN, E>, OIN, Stream<E>>,
     Matcher.ForStream<OIN, E> {
-  @Override
-  StreamChecker<OIN, E> create(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue);
-
   default StreamChecker<OIN, E> noneMatch(Predicate<E> p) {
     return this.addPredicate(Predicates.noneMatch(p));
   }

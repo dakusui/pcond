@@ -14,9 +14,6 @@ public interface ObjectChecker<OIN, OUT> extends
     Evaluable.Transformation<OIN, OUT>,
     Checker<ObjectChecker<OIN, OUT>, OIN, OUT>,
     Matcher.ForObject<OIN, OUT> {
-  @Override
-  ObjectChecker<OIN, OUT> create(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue);
-
   class Impl<OIN, OUT> extends Checker.Base<ObjectChecker<OIN, OUT>, OIN, OUT>
       implements ObjectChecker<OIN, OUT> {
     public Impl(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {

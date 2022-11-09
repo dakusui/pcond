@@ -247,7 +247,7 @@ public class Fluents {
       @SuppressWarnings("unchecked")
       @Override
       public Predicate<T> statementPredicate() {
-        return PrintablePredicateFactory.allOf(predicates
+        return PrintablePredicateFactory.anyOf(predicates
             .stream()
             .map(each -> (Predicate<T>) each)
             .collect(toList()));
@@ -262,7 +262,7 @@ public class Fluents {
       public String toString() {
         return children.stream()
             .map(Object::toString)
-            .collect(joining("&&"));
+            .collect(joining("||"));
       }
     }
     return new Stmt();

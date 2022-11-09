@@ -24,7 +24,7 @@ public class FluentStyleDbCTest {
       try {
         ValidationFluents.requireArguments(
             value("hello").toUpperCase().then().isEqualTo("HELLO"),
-            value("world").toLowerCase().then().contains("WORLD").verifyWith(not(containsString("w"))));
+            value("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
       } catch (IllegalArgumentException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -39,7 +39,7 @@ public class FluentStyleDbCTest {
       try {
         ValidationFluents.requireStates(
             value("hello").toUpperCase().then().isEqualTo("HELLO"),
-            value("world").toLowerCase().then().contains("WORLD").verifyWith(not(containsString("w"))));
+            value("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
       } catch (IllegalStateException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -56,7 +56,7 @@ public class FluentStyleDbCTest {
       try {
         ValidationFluents.requireAll(
             value("hello").toUpperCase().then().isEqualTo("HELLO"),
-            value("world").toLowerCase().then().contains("WORLD").verifyWith(not(containsString("w"))));
+            value("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
       } catch (PreconditionViolationException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -107,7 +107,7 @@ public class FluentStyleDbCTest {
       try {
         ValidationFluents.ensureAll(
             value("hello").toUpperCase().then().isEqualTo("HELLO"),
-            value("world").toLowerCase().then().contains("WORLD").verifyWith(not(containsString("w"))));
+            value("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
       } catch (PostconditionViolationException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -122,7 +122,7 @@ public class FluentStyleDbCTest {
       try {
         ValidationFluents.ensureStates(
             value("hello").toUpperCase().then().isEqualTo("HELLO"),
-            value("world").toLowerCase().then().contains("WORLD").verifyWith(not(containsString("w"))));
+            value("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
       } catch (IllegalStateException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");

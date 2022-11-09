@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.core.fluent.transformers.*;
+import com.github.dakusui.pcond.fluent.FluentUtils;
 import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Functions;
@@ -15,7 +16,6 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.fluent.Transformer.Factory.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
-import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -65,12 +65,12 @@ public interface Transformer<
   }
 
   @SuppressWarnings("unchecked")
-  default Statement<OIN> thenAllOf(List<Function<? super TX, Statement<OIN>>> funcs) {
+  default Statement<OIN> thenAllOf(List<Function<? super TX, Predicate<OIN>>> funcs) {
     return Fluents.statementAllOf(
         Transformer.this.originalInputValue(),
         funcs.stream()
             .map(each -> each.apply((TX) Transformer.this))
-            .map(Transformer.Utils::toPredicateIfChecker)
+            .map(FluentUtils::toPredicateIfChecker)
             .toArray(Predicate[]::new));
   }
 
@@ -81,7 +81,7 @@ public interface Transformer<
         Transformer.this.originalInputValue(),
         funcs.stream()
             .map(each -> each.apply((TX) Transformer.this))
-            .map(Transformer.Utils::toPredicateIfChecker)
+            .map(FluentUtils::toPredicateIfChecker)
             .toArray(Predicate[]::new));
   }
 
@@ -302,7 +302,7 @@ public interface Transformer<
     @SuppressWarnings("unchecked")
     public <IN> Base(String transformerName, Transformer<?, OIN, IN> parent, Function<? super IN, ? extends OUT> function, OIN originalInputValue) {
       this.transformerName = transformerName;
-      this.function = (Function<OIN, OUT>) Utils.chainFunctions(parent == null ? dummyFunction() : parent.function(), function);
+      this.function = (Function<OIN, OUT>) FluentUtils.chainFunctions(parent == null ? dummyFunction() : parent.function(), function);
       this.originalInputValue = originalInputValue;
     }
 
@@ -319,26 +319,6 @@ public interface Transformer<
     @Override
     public OIN originalInputValue() {
       return this.originalInputValue;
-    }
-  }
-
-  enum Utils {
-    ;
-
-    public static <T> Predicate<T> toPredicateIfChecker(Statement<T> each) {
-      if (each instanceof Checker)
-        return ((Checker<?, T, ?>) each).toPredicate();
-      return each;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <I, M, O> Function<I, O> chainFunctions(Function<I, ? extends M> func, Function<? super M, O> after) {
-      if (isDummyFunction(func) && isDummyFunction(after))
-        return dummyFunction();
-      if (isDummyFunction(func))
-        return (isDummyFunction(after)) ? dummyFunction() : (Function<I, O>) after;
-      else
-        return isDummyFunction(after) ? (Function<I, O>) func : func.andThen(after);
     }
   }
 }

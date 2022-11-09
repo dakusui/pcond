@@ -126,7 +126,7 @@ public class MoreFluentStyleExample {
     TestFluents.assertAll(
         value(lastName)
             .then()
-            .verifyWith(allOf(
+            .verify(allOf(
                 isNotNull(),
                 not(isEmptyString()))),
         value(fullName).asListOfClass(String.class)
@@ -147,8 +147,9 @@ public class MoreFluentStyleExample {
     TestFluents.assertAll(
         value(lastName)
             .then()
-            .with(Checker::isNotNull)
-            .with(StringChecker::isNotEmpty),
+            .verifyWith(Checker::isNotNull)
+            .verifyWith(v -> v.anyOf().verifyWith(Checker::isNotNull).verifyWith(StringChecker::isEmpty))
+            .verifyWith(StringChecker::isNotEmpty),
         value(fullName).asListOfClass(String.class)
             .then()
             .contains("DOE"));
@@ -170,11 +171,10 @@ public class MoreFluentStyleExample {
         value(s)
             .asString()
             .split(" ")
-            .thenWith((ListTransformer<String, String> tx) -> statementAllOf(
-                tx.originalInputValue(),
-                tx.size().then().isEqualTo(2),
-                tx.elementAt(0).asString().then().matchesRegex("[A-Z][a-z]+"),
-                tx.elementAt(1).asString().then().matchesRegex("[A-Z][a-z]+"))));
+            .thenAllOf(asList(
+                tx -> tx.size().then().isEqualTo(2),
+                tx -> tx.elementAt(0).asString().then().matchesRegex("[A-Z][a-z]+"),
+                tx -> tx.elementAt(1).asString().then().matchesRegex("[A-Z][a-z]+"))));
   }
 
   @Test

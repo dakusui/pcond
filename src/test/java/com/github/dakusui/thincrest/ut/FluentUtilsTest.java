@@ -9,7 +9,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
-import static com.github.dakusui.pcond.fluent.Fluents.statement;
 import static com.github.dakusui.pcond.fluent.FluentUtils.value;
 import static com.github.dakusui.pcond.fluent.FluentUtils.valueOfClass;
 import static com.github.dakusui.pcond.forms.Predicates.*;
@@ -28,7 +27,7 @@ public class FluentUtilsTest extends TestBase {
         when().as((Parent) value())
             .exercise(Parent::parentMethod1)
             .then()
-            .verifyWith(isEqualTo("returnValueFromParentMethod")).build());
+            .verify(isEqualTo("returnValueFromParentMethod")).toPredicate());
   }
 
 
@@ -179,13 +178,11 @@ public class FluentUtilsTest extends TestBase {
         hello,
         when()
             .asObject()
-            .thenWith(b -> statement(
-                b.originalInputValue(),
-                allOf(
-                    b.as((String) value())
-                        .exercise(objectHashCode())
-                        .then()
-                        .isInstanceOf(Integer.class)))));
+            .thenAllOf(singletonList(
+                b -> b.as((String) value())
+                    .exercise(objectHashCode())
+                    .then()
+                    .isInstanceOf(Integer.class))));
   }
 
   @Test

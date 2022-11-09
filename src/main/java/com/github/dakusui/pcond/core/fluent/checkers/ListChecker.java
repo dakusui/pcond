@@ -22,9 +22,6 @@ public interface ListChecker<OIN, E> extends
     Evaluable.Transformation<OIN, List<E>>,
     Checker<ListChecker<OIN, E>, OIN, List<E>>,
     Matcher.ForList<OIN, E> {
-  @Override
-  ListChecker<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue);
-
   default ListChecker<OIN, E> isEmpty() {
     return addPredicate(Predicates.isEmpty());
   }

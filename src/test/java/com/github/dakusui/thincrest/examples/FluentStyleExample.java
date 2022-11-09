@@ -68,7 +68,7 @@ public class FluentStyleExample {
         allOf(
             when().asListOfClass(String.class)
                 .elementAt(0)
-                .then().verifyWith(allOf(
+                .then().verify(allOf(
                     isNotNull(),
                     not(isEmptyString()))),
             when().asListOfClass(String.class)

@@ -382,12 +382,12 @@ public class Predicates {
     //noinspection RedundantTypeArguments
     return FluentUtils.fluentValue().asString()
         .toObject(function("findTokens" + formatObject(tokens), CursoredString::new))
-        .then().verifyWith(Predicates.<CursoredString>allOf(
+        .then().verify(Predicates.<CursoredString>allOf(
             Stream.concat(
                     Arrays.stream(tokens).map(CursoredStringPredicate::new),
                     Stream.of(endMarkPredicateForString(lastTestedPosition, bExpectation, bActual, result, () -> cursoredStringForSnapshotting.originalString)))
                 .toArray(Predicate[]::new)))
-        .build();
+        .toPredicate();
   }
 
   private static Predicate<Object> endMarkPredicateForString(AtomicInteger lastTestedPosition, StringBuilder ongoingExpectationExplanation, StringBuilder ongoingActualExplanation, AtomicBoolean result, Supplier<String> originalStringSupplier) {
@@ -521,7 +521,7 @@ public class Predicates {
     return FluentUtils.fluentValue().asListOf((E) FluentUtils.value())
         .toObject(function("toCursoredList", CursoredList::new))
         .then()
-        .verifyWith(allOf(Stream.concat(
+        .verify(allOf(Stream.concat(
                 Arrays.stream(predicates)
                     .map((Predicate<? super E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
                 Stream.of(endMarkPredicateForList(result, expectationExplanationList, actualExplanationList, rest)))

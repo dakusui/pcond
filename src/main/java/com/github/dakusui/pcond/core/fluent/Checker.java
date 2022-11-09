@@ -1,13 +1,14 @@
 package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.core.fluent.transformers.ThrowableTransformer;
-import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.checkers.*;
+import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
+import com.github.dakusui.pcond.core.fluent.transformers.ThrowableTransformer;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
+import com.github.dakusui.pcond.fluent.FluentUtils;
+import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
@@ -18,17 +19,19 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.fluent.Transformer.Utils.chainFunctions;
 import static com.github.dakusui.pcond.core.fluent.Checker.Factory.*;
+import static com.github.dakusui.pcond.fluent.FluentUtils.chainFunctions;
+import static com.github.dakusui.pcond.fluent.Fluents.statementAnyOf;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
+import static com.github.dakusui.valid8j.Requires.requireNonNull;
 
 /**
  * A verifier interface.
  *
- * @param <V>    The type of the {@link Checker} implementation.
- * @param <OIN>  The type of the original input value.
- * @param <T>The type of the value to be verified by this object.
+ * @param <V>   The type of the {@link Checker} implementation.
+ * @param <OIN> The type of the original input value.
+ * @param <T>   The type of the value to be verified by this object.
  */
 public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     Matcher<OIN>,
@@ -36,9 +39,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     AsPhraseFactory.ForChecker<OIN>,
     Statement<OIN>,
     Evaluable.Transformation<OIN, T>,
-    Identifiable
- {
-
+    Identifiable {
   String transformerName();
 
   V addPredicate(Predicate<? super T> predicate);
@@ -46,6 +47,10 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
   Function<? super OIN, ? extends T> function();
 
   Predicate<? super T> predicate();
+
+  V anyOf();
+
+  V allOf();
 
   @Override
   default OIN statementValue() {
@@ -57,34 +62,15 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     return toPredicate();
   }
 
-  default Predicate<? super OIN> build() {
-    return PrintablePredicateFactory.TransformingPredicate.Factory.create(
-            this.transformerName(),
-            this.transformerName() != null ?
-                "THEN" :
-                "VERIFY",
-            this.function())
-        .check(this.predicate());
-  }
-
   /**
    * A synonym of `build()` method.
    *
    * @return A predicate of `AS` built from this object.
    */
-  @SuppressWarnings("unchecked")
-  default <AS> Predicate<AS> toPredicate() {
-    return (Predicate<AS>) build();
-  }
-
-  default V create() {
-    return create(this.transformerName(), this.function(), this.predicate(), this.originalInputValue());
-  }
-
-  V create(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue);
+  <AS extends OIN> Predicate<AS> toPredicate();
 
   @SuppressWarnings("unchecked")
-  default V verifyWith(Predicate<? super T> predicate) {
+  default V verify(Predicate<? super T> predicate) {
     @SuppressWarnings("unchecked") V ret = (V) this;
     if (isDummyFunction(this.function()))
       ret = (V) ret.asObject();
@@ -92,15 +78,25 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
   }
 
   @SuppressWarnings("unchecked")
-  default V with(Function<V, Predicate<? super T>> predicateFunction) {
-    this.verifyWith(predicateFunction.apply((V) this));
+  default V verifyWith(Function<V, Predicate<? super T>> predicateFunction) {
+    this.verify(predicateFunction.apply((V) this));
     return (V) this;
   }
 
-  @SuppressWarnings({ "unchecked", "RedundantClassCall" })
+  @SuppressWarnings({ "unchecked" })
+  default V verifyWithAnyOf(List<Function<V, Predicate<? super T>>> predicateFunctions) {
+    return (V) this.verifyWith(
+        (V v) -> statementAnyOf(
+            originalInputValue(),
+            predicateFunctions.stream()
+                .map(each -> each.apply((V) this))
+                .map(FluentUtils::toPredicateIfChecker)
+                .toArray(Predicate[]::new)));
+  }
+
   @Override
   default StringChecker<OIN> asString() {
-    return stringChecker(this, Function.class.cast(Functions.cast(String.class)));
+    return stringChecker(transformerName(), chainFunctions(this.function(), Functions.cast(String.class)), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
@@ -300,10 +296,32 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
   abstract class Base<V extends Checker<V, OIN, T>, OIN, T>
       extends PrintablePredicateFactory.TransformingPredicate<OIN, T>
       implements Checker<V, OIN, T> {
+
+    enum JunctionType {
+      CONJUNCTION {
+        @SuppressWarnings("unchecked")
+        @Override
+        <T> Predicate<T> connect(Predicate<T>... predicates) {
+          return Predicates.allOf(predicates);
+        }
+      },
+      DISJUNCTION {
+        @SuppressWarnings("unchecked")
+        @Override
+        <T> Predicate<T> connect(Predicate<T>... predicates) {
+          return Predicates.anyOf(predicates);
+        }
+      };
+
+      @SuppressWarnings("unchecked")
+      abstract <T> Predicate<T> connect(Predicate<T>... predicates);
+    }
+
     protected final String                             transformerName;
     private final   Function<? super OIN, ? extends T> function;
     private final   OIN                                originalInputValue;
     private         Predicate<? super T>               predicate;
+    private         JunctionType                       junctionType;
 
     protected Base(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue) {
       super(predicate, function);
@@ -311,17 +329,29 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
       this.function = function;
       this.predicate = predicate; // this field can be null, when the first verifier starts building.
       this.originalInputValue = originalInputValue;
+      this.junctionType(JunctionType.CONJUNCTION);
+    }
+
+    JunctionType junctionType() {
+      return this.junctionType;
+    }
+
+    @SuppressWarnings("unchecked")
+    V junctionType(JunctionType junctionType) {
+      this.junctionType = requireNonNull(junctionType);
+      return (V) this;
     }
 
     public String transformerName() {
       return this.transformerName;
     }
 
+    @SuppressWarnings("unchecked")
     public V addPredicate(Predicate<? super T> predicate) {
       if (isDummyPredicate(this.predicate))
         this.predicate = predicate;
       else
-        this.predicate = Predicates.allOf(this.predicate, predicate);
+        this.predicate = junctionType().connect((Predicate<T>) this.predicate, (Predicate<T>) predicate);
       return this.create();
     }
 
@@ -333,9 +363,41 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
       return this.predicate;
     }
 
+    V create() {
+      return create(this.transformerName(), this.function(), this.predicate(), this.originalInputValue());
+    }
+
+    abstract protected V create(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue);
+
+
     @Override
     public OIN originalInputValue() {
       return this.originalInputValue;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <AS extends OIN> Predicate<AS> toPredicate() {
+      return (Predicate<AS>) build();
+    }
+
+    public V anyOf() {
+      junctionType(JunctionType.DISJUNCTION);
+      return this.junctionType(JunctionType.DISJUNCTION);
+    }
+
+    public V allOf() {
+      return this.junctionType(JunctionType.CONJUNCTION);
+    }
+
+    private Predicate<? super OIN> build() {
+      return PrintablePredicateFactory.TransformingPredicate.Factory.create(
+              this.transformerName(),
+              this.transformerName() != null ?
+                  "THEN" :
+                  "VERIFY",
+              this.function())
+          .check(this.predicate());
     }
   }
 }

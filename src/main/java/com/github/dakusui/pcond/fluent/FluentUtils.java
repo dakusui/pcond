@@ -1,6 +1,13 @@
 package com.github.dakusui.pcond.fluent;
 
+import com.github.dakusui.pcond.core.fluent.Checker;
 import com.github.dakusui.pcond.core.fluent.Fluent;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.dummyFunction;
+import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 
 /**
  * Not made this class `enum` in order to provide a method whose name is `valueOf`.
@@ -64,4 +71,19 @@ public class FluentUtils {
     return new Fluent<>(transformerName);
   }
 
+  public static <T> Predicate<T> toPredicateIfChecker(Predicate<T> each) {
+    if (each instanceof Checker)
+      return ((Checker<?, T, ?>) each).toPredicate();
+    return each;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <I, M, O> Function<I, O> chainFunctions(Function<I, ? extends M> func, Function<? super M, O> after) {
+    if (isDummyFunction(func) && isDummyFunction(after))
+      return dummyFunction();
+    if (isDummyFunction(func))
+      return (isDummyFunction(after)) ? dummyFunction() : (Function<I, O>) after;
+    else
+      return isDummyFunction(after) ? (Function<I, O>) func : func.andThen(after);
+  }
 }

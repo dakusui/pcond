@@ -17,9 +17,6 @@ public interface BooleanChecker<OIN> extends
     Evaluable.Transformation<OIN, Boolean>,
     Checker<BooleanChecker<OIN>, OIN, Boolean>,
     Matcher.ForBoolean<OIN> {
-  @Override
-  BooleanChecker<OIN> create(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue);
-
   default BooleanChecker<OIN> isTrue() {
     return this.addPredicate(Predicates.isTrue());
   }
