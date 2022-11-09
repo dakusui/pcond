@@ -7,7 +7,6 @@ import com.github.dakusui.pcond.core.fluent.transformers.ThrowableTransformer;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
-import com.github.dakusui.pcond.fluent.FluentUtils;
 import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Functions;
@@ -21,7 +20,6 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.fluent.Checker.Factory.*;
 import static com.github.dakusui.pcond.fluent.FluentUtils.chainFunctions;
-import static com.github.dakusui.pcond.fluent.Fluents.statementAnyOf;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static com.github.dakusui.valid8j.Requires.requireNonNull;
@@ -81,17 +79,6 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
   default V verifyWith(Function<V, Predicate<? super T>> predicateFunction) {
     this.verify(predicateFunction.apply((V) this));
     return (V) this;
-  }
-
-  @SuppressWarnings({ "unchecked" })
-  default V verifyWithAnyOf(List<Function<V, Predicate<? super T>>> predicateFunctions) {
-    return (V) this.verifyWith(
-        (V v) -> statementAnyOf(
-            originalInputValue(),
-            predicateFunctions.stream()
-                .map(each -> each.apply((V) this))
-                .map(FluentUtils::toPredicateIfChecker)
-                .toArray(Predicate[]::new)));
   }
 
   @Override

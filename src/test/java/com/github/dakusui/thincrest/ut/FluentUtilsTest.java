@@ -24,9 +24,10 @@ public class FluentUtilsTest extends TestBase {
   public void whenPassingValidation_thenPasses$1() {
     assertThat(
         new Parent(),
-        when().as((Parent) value())
+        when().<Parent>as((Parent) value())
             .exercise(Parent::parentMethod1)
             .then()
+            .<Parent>as(value())
             .verify(isEqualTo("returnValueFromParentMethod")).toPredicate());
   }
 
