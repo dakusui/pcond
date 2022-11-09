@@ -87,50 +87,50 @@ public class MoreFluentObjectTest {
   @Test
   public void test_intoLongWith() {
     String var = "123";
-    TestFluents.assertStatemet(value(var).then().intoLongWith(Long::parseLong).equalTo(123L));
+    TestFluents.assertStatemet(value(var).then().toLongWith(Long::parseLong).equalTo(123L));
   }
 
   @Test
   public void test_intoIntegerWith() {
     String var = "123";
-    TestFluents.assertStatemet(value(var).then().intoIntegerWith(Integer::parseInt).equalTo(123));
+    TestFluents.assertStatemet(value(var).then().toIntegerWith(Integer::parseInt).equalTo(123));
   }
 
   @Test
   public void test_intoShortWith() {
     String var = "123";
-    TestFluents.assertStatemet(value(var).then().intoShortWith(Short::parseShort).equalTo((short) 123));
+    TestFluents.assertStatemet(value(var).then().toShortWith(Short::parseShort).equalTo((short) 123));
   }
 
   @Test
   public void test_intoDoubleWith() {
     String var = "123.0";
-    TestFluents.assertStatemet(value(var).then().intoDoubleWith(Double::parseDouble).equalTo(123.0));
+    TestFluents.assertStatemet(value(var).then().toDoubleWith(Double::parseDouble).equalTo(123.0));
   }
 
   @Test
   public void test_intoFloatWith() {
     String var = "123.0f";
-    TestFluents.assertStatemet(value(var).then().intoFloatWith(Float::parseFloat).equalTo(123.0f));
+    TestFluents.assertStatemet(value(var).then().toFloatWith(Float::parseFloat).equalTo(123.0f));
   }
 
   @Test
   public void test_intoBooleanWith() {
     String var = "false";
-    TestFluents.assertStatemet(value(var).then().intoBooleanWith(Boolean::parseBoolean).isEqualTo(false));
+    TestFluents.assertStatemet(value(var).then().toBooleanWith(Boolean::parseBoolean).isEqualTo(false));
   }
 
   @Test
   public void test_intoObject() {
     String var = "hello";
-    TestFluents.assertStatemet(value(var).then().intoObjectWith(v -> v).isNotNull());
+    TestFluents.assertStatemet(value(var).then().toObjectWith(v -> v).isNotNull());
   }
 
   @Test
   public void test_intoList() {
     Stream<String> var = Stream.of("hello", "world");
     TestFluents.assertStatemet(value(var).then()
-        .intoListWith(s -> s.collect(Collectors.toList()))
+        .toListWith(s -> s.collect(Collectors.toList()))
         .isEqualTo(asList("hello", "world")));
   }
 
@@ -140,7 +140,7 @@ public class MoreFluentObjectTest {
     TestFluents.assertStatemet(
         Fluents.value(var)
             .then()
-            .intoStreamWith(Collection::stream)
+            .toStreamWith(Collection::stream)
             .allMatch(
                 and(
                     isNotNull(),

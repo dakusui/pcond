@@ -50,7 +50,7 @@ public class FluentStyleExample {
         when().asValueOfClass(MemberDatabase.class)
             .exercise(lookUpMemberWith.apply(identifier))
             .then()
-            .intoStringWith(memberLastName)
+            .toStringWith(memberLastName)
             .isNotNull()
             .isNotEmpty()
             .isEqualTo("Do"));

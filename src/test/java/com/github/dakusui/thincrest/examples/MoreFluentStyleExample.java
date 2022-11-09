@@ -2,7 +2,6 @@ package com.github.dakusui.thincrest.examples;
 
 import com.github.dakusui.pcond.core.fluent.Checker;
 import com.github.dakusui.pcond.core.fluent.checkers.StringChecker;
-import com.github.dakusui.pcond.core.fluent.transformers.ListTransformer;
 import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.utils.TestUtils;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.fluent.Fluents.statementAllOf;
 import static com.github.dakusui.pcond.fluent.Fluents.value;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.shared.TestUtils.validateStatement;
@@ -107,7 +105,7 @@ public class MoreFluentStyleExample {
     TestFluents.assertStatemet(value(database)
         .exercise(lookUpMemberWith.apply(identifier))
         .then()
-        .intoStringWith(memberLastName)
+        .toStringWith(memberLastName)
         .isNotNull()
         .isNotEmpty()
         .isEqualTo("Do"));

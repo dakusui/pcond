@@ -135,7 +135,7 @@ public class FluentStyleTestAssertionTest {
       };
       TestFluents.assertStatemet(Fluents.value(givenValue)
           .then()
-          .intoStringWith(Object::toString)
+          .toStringWith(Object::toString)
           .isEqualTo("OBJECT"));
     }
 
@@ -152,7 +152,7 @@ public class FluentStyleTestAssertionTest {
       Stream<String> givenValue = Stream.of("hello", "world");
       TestFluents.assertStatemet(Fluents.value(givenValue)
           .then()
-          .intoListWith(v -> v.collect(toList()))
+          .toListWith(v -> v.collect(toList()))
           .isEqualTo(asList("hello", "world")));
     }
 

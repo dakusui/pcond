@@ -33,7 +33,7 @@ import static com.github.dakusui.valid8j.Requires.requireNonNull;
  */
 public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     Matcher<OIN>,
-    IntoPhraseFactory.ForChecker<OIN, T>,
+    toPhraseFactory.ForChecker<OIN, T>,
     AsPhraseFactory.ForChecker<OIN>,
     Statement<OIN>,
     Evaluable.Transformation<OIN, T>,
@@ -133,52 +133,52 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
   }
 
   @Override
-  default StringChecker<OIN> intoStringWith(Function<T, String> function) {
+  default StringChecker<OIN> toStringWith(Function<T, String> function) {
     return stringChecker(this, function);
   }
 
   @Override
-  default IntegerChecker<OIN> intoIntegerWith(Function<T, Integer> function) {
+  default IntegerChecker<OIN> toIntegerWith(Function<T, Integer> function) {
     return integerChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default LongChecker<OIN> intoLongWith(Function<T, Long> function) {
+  default LongChecker<OIN> toLongWith(Function<T, Long> function) {
     return longChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default ShortChecker<OIN> intoShortWith(Function<T, Short> function) {
+  default ShortChecker<OIN> toShortWith(Function<T, Short> function) {
     return shortChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default DoubleChecker<OIN> intoDoubleWith(Function<T, Double> function) {
+  default DoubleChecker<OIN> toDoubleWith(Function<T, Double> function) {
     return doubleChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default FloatChecker<OIN> intoFloatWith(Function<T, Float> function) {
+  default FloatChecker<OIN> toFloatWith(Function<T, Float> function) {
     return floatChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default BooleanChecker<OIN> intoBooleanWith(Function<T, Boolean> function) {
+  default BooleanChecker<OIN> toBooleanWith(Function<T, Boolean> function) {
     return booleanChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default <OUT> ObjectChecker<OIN, OUT> intoObjectWith(Function<T, OUT> function) {
+  default <OUT> ObjectChecker<OIN, OUT> toObjectWith(Function<T, OUT> function) {
     return objectChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default <E> ListChecker<OIN, E> intoListWith(Function<T, List<E>> function) {
+  default <E> ListChecker<OIN, E> toListWith(Function<T, List<E>> function) {
     return listChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
   @Override
-  default <E> StreamChecker<OIN, E> intoStreamWith(Function<T, Stream<E>> function) {
+  default <E> StreamChecker<OIN, E> toStreamWith(Function<T, Stream<E>> function) {
     return streamChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
   }
 
