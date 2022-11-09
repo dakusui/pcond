@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
+import static com.github.dakusui.pcond.fluent.Fluents.statementAllOf;
 import static com.github.dakusui.pcond.fluent.Fluents.value;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.shared.TestUtils.validateStatement;
@@ -236,10 +237,11 @@ public class MoreFluentStyleExample {
     TestFluents.assertAll(
         value(list).thenAllOf(asList(
             tx -> tx.then().isEmpty(),
-            tx -> tx.elementAt(0).asString().then().isNotNull(),
-            tx -> tx.elementAt(0).asString().length().then().greaterThan(100),
-            tx -> tx.elementAt(0).asString().then().findSubstrings("XYZ"))));
+            tx -> tx.elementAt(0).asString().thenAllOf(asList(ty -> ty.asString().then().isNotNull(),
+                ty -> ty.length().then().greaterThan(100),
+                ty -> ty.asString().then().findSubstrings("XYZ"))))));
   }
+
 
   @Test
   public void checkTwoAspectsOfOneValue_3b() {
