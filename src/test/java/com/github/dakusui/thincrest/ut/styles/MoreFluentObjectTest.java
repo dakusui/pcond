@@ -4,16 +4,24 @@ import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.thincrest.TestFluents;
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.fluent.Fluents.value;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
-import static com.github.dakusui.pcond.forms.Predicates.isNotNull;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 import static java.util.Arrays.asList;
 
 public class MoreFluentObjectTest {
+  @Test
+  public void test_asString() {
+    String var = "hello";
+    TestFluents.assertStatemet(value(var).then().asString().isEqualTo("hello"));
+  }
+
   @Test
   public void test_asLong() {
     long var = 123;
@@ -112,50 +120,6 @@ public class MoreFluentObjectTest {
     TestFluents.assertStatemet(value(var).then().intoBooleanWith(Boolean::parseBoolean).isEqualTo(false));
   }
 
-
-  @Test
-  public void test_intoLong() {
-    long var = 123;
-    TestFluents.assertStatemet(Fluents.value(var).then().asLong().equalTo(123L));
-  }
-
-  @Test
-  public void test_intoInteger() {
-    int var = 123;
-    TestFluents.assertStatemet(Fluents.value(var).then().asInteger().equalTo(123));
-  }
-
-  @Test
-  public void test_intoShort() {
-    short var = 123;
-    TestFluents.assertStatemet(Fluents.value(var).then().asShort().equalTo((short) 123));
-  }
-
-  @Test
-  public void test_intoDouble() {
-    double var = 123.0;
-    TestFluents.assertStatemet(Fluents.value(var).then().asDouble().equalTo(123.0));
-  }
-
-  @Test
-  public void test_intoFloat() {
-    float var = 123.0f;
-    TestFluents.assertStatemet(Fluents.value(var).then().asFloat().equalTo(123.0f));
-  }
-
-  @Test
-  public void test_intoBoolean() {
-    boolean var = false;
-    TestFluents.assertStatemet(Fluents.value(var).then().asBoolean().isEqualTo(false));
-  }
-
-
-  @Test
-  public void test_intoString() {
-    String var = "hello";
-    TestFluents.assertStatemet(value(var).then().asString().isEqualTo("hello"));
-  }
-
   @Test
   public void test_intoObject() {
     String var = "hello";
@@ -164,14 +128,23 @@ public class MoreFluentObjectTest {
 
   @Test
   public void test_intoList() {
-    List<String> var = asList("hello", "world");
-    TestFluents.assertStatemet(value(var).then().asListOfClass(String.class).isEqualTo(asList("hello", "world")));
+    Stream<String> var = Stream.of("hello", "world");
+    TestFluents.assertStatemet(value(var).then()
+        .intoListWith(s -> s.collect(Collectors.toList()))
+        .isEqualTo(asList("hello", "world")));
   }
 
   @Test
   public void test_intoStream() {
-    Stream<String> var = Stream.of("hello", "world");
-    TestFluents.assertStatemet(Fluents.value(var).then().asStreamOf((String)value()).allMatch(isNotNull()));
+    List<String> var = asList("hello", "world");
+    TestFluents.assertStatemet(
+        Fluents.value(var)
+            .then()
+            .intoStreamWith(Collection::stream)
+            .allMatch(
+                and(
+                    isNotNull(),
+                    isInstanceOf(String.class))));
   }
 
   @Test
