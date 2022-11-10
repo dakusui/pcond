@@ -4,7 +4,6 @@ import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Checker;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.fluent.Checker.Factory.longChecker;
 
@@ -12,13 +11,13 @@ public interface LongChecker<OIN> extends ComparableNumberChecker<LongChecker<OI
 
   class Impl<OIN> extends Checker.Base<LongChecker<OIN>, OIN, Long> implements LongChecker<OIN> {
 
-    public Impl(String transformerName, Function<? super OIN, ? extends Long> function, Predicate<? super Long> predicate, OIN originalInputValue) {
-      super(originalInputValue, transformerName, function, predicate);
+    public Impl(String transformerName, Function<? super OIN, ? extends Long> function, OIN originalInputValue) {
+      super(originalInputValue, transformerName, function);
     }
 
     @Override
-    public LongChecker<OIN> create(String transformerName, Function<? super OIN, ? extends Long> function, Predicate<? super Long> predicate, OIN originalInputValue) {
-      return longChecker(transformerName, function, predicate, originalInputValue);
+    public LongChecker<OIN> create(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends Long> function) {
+      return longChecker(transformerName, function, originalInputValue);
     }
   }
 }

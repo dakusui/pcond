@@ -9,7 +9,6 @@ import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 import static java.util.Arrays.asList;
 
 public interface StringTransformer<OIN> extends
@@ -61,7 +60,6 @@ public interface StringTransformer<OIN> extends
     return Checker.Factory.stringChecker(
         this.transformerName(),
         (Function<? super OIN, String>) this.function(),
-        dummyPredicate(),
         this.originalInputValue());
   }
 

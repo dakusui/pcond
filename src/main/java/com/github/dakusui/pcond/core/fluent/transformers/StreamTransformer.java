@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.checkers.StreamChecker;
 import com.github.dakusui.pcond.core.fluent.Matcher;
-import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -26,7 +25,7 @@ public interface StreamTransformer<OIN, E> extends Transformer<StreamTransformer
 
     @Override
     public StreamChecker<OIN, E> then() {
-      return streamChecker(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+      return streamChecker(this.transformerName(), this.function(), this.originalInputValue());
     }
   }
 

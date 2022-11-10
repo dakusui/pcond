@@ -7,7 +7,6 @@ import com.github.dakusui.pcond.core.fluent.checkers.LongChecker;
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.core.fluent.Checker.Factory.longChecker;
-import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 
 public interface LongTransformer<OIN> extends ComparableNumberTransformer<LongTransformer<OIN>, LongChecker<OIN>, OIN, Long>, Matcher.ForLong<OIN> {
   class Impl<OIN> extends Base<LongTransformer<OIN>, OIN, Long> implements LongTransformer<OIN> {
@@ -25,7 +24,7 @@ public interface LongTransformer<OIN> extends ComparableNumberTransformer<LongTr
 
     @Override
     public LongChecker<OIN> then() {
-      return longChecker(this.transformerName(), this.function(), dummyPredicate(), this.originalInputValue());
+      return longChecker(this.transformerName(), this.function(), this.originalInputValue());
     }
   }
 }

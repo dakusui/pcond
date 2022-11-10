@@ -65,14 +65,14 @@ public interface StringChecker<OIN> extends
   class Impl<OIN>
       extends Checker.Base<StringChecker<OIN>, OIN, String>
       implements StringChecker<OIN> {
-    public Impl(String transformerName, Function<? super OIN, ? extends String> function, Predicate<? super String> predicate, OIN originalInputValue) {
-      super(originalInputValue, transformerName, function, predicate);
+    public Impl(String transformerName, Function<? super OIN, ? extends String> function, OIN originalInputValue) {
+      super(originalInputValue, transformerName, function);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public StringChecker<OIN> create(String transformerName, Function<? super OIN, ? extends String> function, Predicate<? super String> predicate, OIN originalInputValue) {
-      return Checker.Factory.stringChecker(transformerName, (Function<? super OIN, String>) function, predicate, originalInputValue);
+    public StringChecker<OIN> create(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends String> function) {
+      return Checker.Factory.stringChecker(transformerName, (Function<? super OIN, String>) function, originalInputValue);
     }
   }
 }

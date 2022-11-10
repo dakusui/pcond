@@ -16,13 +16,13 @@ public interface ObjectChecker<OIN, OUT> extends
     Matcher.ForObject<OIN, OUT> {
   class Impl<OIN, OUT> extends Checker.Base<ObjectChecker<OIN, OUT>, OIN, OUT>
       implements ObjectChecker<OIN, OUT> {
-    public Impl(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {
-      super(originalInputValue, transformerName, function, predicate);
+    public Impl(String transformerName, Function<? super OIN, ? extends OUT> function, OIN originalInputValue) {
+      super(originalInputValue, transformerName, function);
     }
 
     @Override
-    public ObjectChecker<OIN, OUT> create(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {
-      return Checker.Factory.objectChecker(transformerName, function, predicate, originalInputValue);
+    public ObjectChecker<OIN, OUT> create(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends OUT> function) {
+      return Checker.Factory.objectChecker(transformerName, function, originalInputValue);
     }
   }
 }

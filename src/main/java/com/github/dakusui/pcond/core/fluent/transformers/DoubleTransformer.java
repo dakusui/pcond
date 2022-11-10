@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.checkers.DoubleChecker;
 import com.github.dakusui.pcond.core.fluent.Matcher;
-import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.function.Function;
 
@@ -20,7 +19,7 @@ public interface DoubleTransformer<OIN> extends ComparableNumberTransformer<Doub
 
     @Override
     public DoubleChecker<OIN> then() {
-      return doubleChecker(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+      return doubleChecker(this.transformerName(), this.function(), this.originalInputValue());
     }
   }
 }

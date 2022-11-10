@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.checkers.ShortChecker;
-import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.function.Function;
 
@@ -35,7 +34,7 @@ public interface ShortTransformer<OIN> extends ComparableNumberTransformer<Short
 
     @Override
     public ShortChecker<OIN> then() {
-      return shortChecker(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+      return shortChecker(this.transformerName(), this.function(), this.originalInputValue());
     }
   }
 }

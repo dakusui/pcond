@@ -87,53 +87,53 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
 
   @Override
   default StringChecker<OIN> asString() {
-    return stringChecker(transformerName(), chainFunctions(this.function(), Functions.cast(String.class)), dummyPredicate(), this.originalInputValue());
+    return stringChecker(transformerName(), chainFunctions(this.function(), Functions.cast(String.class)), this.originalInputValue());
   }
 
   @Override
   default IntegerChecker<OIN> asInteger() {
-    return integerChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Integer.class)), dummyPredicate(), this.originalInputValue());
+    return integerChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Integer.class)), this.originalInputValue());
   }
 
   @Override
   default LongChecker<OIN> asLong() {
-    return longChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Long.class)), dummyPredicate(), this.originalInputValue());
+    return longChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Long.class)), this.originalInputValue());
   }
 
   @Override
   default ShortChecker<OIN> asShort() {
-    return shortChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Short.class)), dummyPredicate(), this.originalInputValue());
+    return shortChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Short.class)), this.originalInputValue());
   }
 
   @Override
   default DoubleChecker<OIN> asDouble() {
-    return doubleChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Double.class)), dummyPredicate(), this.originalInputValue());
+    return doubleChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Double.class)), this.originalInputValue());
   }
 
   @Override
   default FloatChecker<OIN> asFloat() {
-    return floatChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Float.class)), dummyPredicate(), this.originalInputValue());
+    return floatChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Float.class)), this.originalInputValue());
   }
 
   @Override
   default BooleanChecker<OIN> asBoolean() {
-    return booleanChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Boolean.class)), dummyPredicate(), this.originalInputValue());
+    return booleanChecker(transformerName(), chainFunctions(this.function(), Functions.cast(Boolean.class)), this.originalInputValue());
   }
 
   @SuppressWarnings("unchecked")
   @Override
   default <NOUT> ObjectChecker<OIN, NOUT> asValueOf(NOUT value) {
-    return objectChecker(transformerName(), chainFunctions(this.function(), Printables.function("treatAsIs", v -> (NOUT) v)), dummyPredicate(), this.originalInputValue());
+    return objectChecker(transformerName(), chainFunctions(this.function(), Printables.function("treatAsIs", v -> (NOUT) v)), this.originalInputValue());
   }
 
   @Override
   default <E> ListChecker<OIN, E> asListOf(E value) {
-    return listChecker(transformerName(), chainFunctions(this.function(), Functions.castTo(Fluents.value())), dummyPredicate(), this.originalInputValue());
+    return listChecker(transformerName(), chainFunctions(this.function(), Functions.castTo(Fluents.value())), this.originalInputValue());
   }
 
   @Override
   default <E> StreamChecker<OIN, E> asStreamOf(E value) {
-    return streamChecker(transformerName(), chainFunctions(this.function(), Functions.castTo(Fluents.value())), dummyPredicate(), this.originalInputValue());
+    return streamChecker(transformerName(), chainFunctions(this.function(), Functions.castTo(Fluents.value())), this.originalInputValue());
   }
 
   @Override
@@ -143,47 +143,47 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
 
   @Override
   default IntegerChecker<OIN> toIntegerWith(Function<T, Integer> function) {
-    return integerChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return integerChecker(transformerName(), chainFunctions(this.function(), function), this.originalInputValue());
   }
 
   @Override
   default LongChecker<OIN> toLongWith(Function<T, Long> function) {
-    return longChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return longChecker(transformerName(), chainFunctions(this.function(), function), this.originalInputValue());
   }
 
   @Override
   default ShortChecker<OIN> toShortWith(Function<T, Short> function) {
-    return shortChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return shortChecker(transformerName(), chainFunctions(this.function(), function), this.originalInputValue());
   }
 
   @Override
   default DoubleChecker<OIN> toDoubleWith(Function<T, Double> function) {
-    return doubleChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return doubleChecker(transformerName(), chainFunctions(this.function(), function), this.originalInputValue());
   }
 
   @Override
   default FloatChecker<OIN> toFloatWith(Function<T, Float> function) {
-    return floatChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return floatChecker(transformerName(), chainFunctions(this.function(), function), this.originalInputValue());
   }
 
   @Override
   default BooleanChecker<OIN> toBooleanWith(Function<T, Boolean> function) {
-    return booleanChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return booleanChecker(transformerName(), chainFunctions(this.function(), function), this.originalInputValue());
   }
 
   @Override
   default <OUT> ObjectChecker<OIN, OUT> toObjectWith(Function<T, OUT> function) {
-    return objectChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return objectChecker(transformerName(), chainFunctions(this.function(), function), this.originalInputValue());
   }
 
   @Override
   default <E> ListChecker<OIN, E> toListWith(Function<T, List<E>> function) {
-    return listChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return listChecker(transformerName(), chainFunctions(this.function(), function), this.originalInputValue());
   }
 
   @Override
   default <E> StreamChecker<OIN, E> toStreamWith(Function<T, Stream<E>> function) {
-    return streamChecker(transformerName(), chainFunctions(this.function(), function), dummyPredicate(), this.originalInputValue());
+    return streamChecker(transformerName(), chainFunctions(this.function(), function), this.originalInputValue());
   }
 
   default V isNotNull() {
@@ -223,64 +223,63 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     ;
 
     public static <V extends Checker<V, OIN, T>, OIN, T> StringChecker<OIN> stringChecker(Checker<V, OIN, T> checker, Function<T, String> function) {
-      return stringChecker(checker.transformerName(), chainFunctions(checker.function(), function), dummyPredicate(), checker.originalInputValue());
+      return stringChecker(checker.transformerName(), chainFunctions(checker.function(), function), checker.originalInputValue());
     }
 
     public static <OIN> StringChecker<OIN> stringChecker(
         String transformerName,
         Function<? super OIN, String> function,
-        Predicate<? super String> predicate,
         OIN originalInputValue) {
-      return new StringChecker.Impl<>(transformerName, function, predicate, originalInputValue);
+      return new StringChecker.Impl<>(transformerName, function, originalInputValue);
     }
 
     public static <OIN, OUT> ObjectChecker<OIN, OUT> objectChecker(ObjectTransformer<OIN, OUT> objectTransformer) {
-      return objectChecker(objectTransformer.transformerName(), objectTransformer.function(), dummyPredicate(), objectTransformer.originalInputValue());
+      return objectChecker(objectTransformer.transformerName(), objectTransformer.function(), objectTransformer.originalInputValue());
     }
 
-    public static <OIN, OUT> ObjectChecker<OIN, OUT> objectChecker(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInptValue) {
-      return new ObjectChecker.Impl<>(transformerName, function, predicate, originalInptValue);
+    public static <OIN, OUT> ObjectChecker<OIN, OUT> objectChecker(String transformerName, Function<? super OIN, ? extends OUT> function, OIN originalInptValue) {
+      return new ObjectChecker.Impl<>(transformerName, function, originalInptValue);
     }
 
-    public static <OIN, E> ListChecker<OIN, E> listChecker(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
-      return new ListChecker.Impl<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN, E> ListChecker<OIN, E> listChecker(String transformerName, Function<? super OIN, ? extends List<E>> function, OIN originalInputValue) {
+      return new ListChecker.Impl<>(transformerName, function, originalInputValue);
     }
 
-    public static <OIN> IntegerChecker<OIN> integerChecker(String transformerName, Function<? super OIN, ? extends Integer> function, Predicate<? super Integer> predicate, OIN originalInputValue) {
-      return new IntegerChecker.Impl<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN> IntegerChecker<OIN> integerChecker(String transformerName, Function<? super OIN, ? extends Integer> function, OIN originalInputValue) {
+      return new IntegerChecker.Impl<>(transformerName, function, originalInputValue);
     }
 
-    public static <OIN> DoubleChecker<OIN> doubleChecker(String transformerName, Function<? super OIN, ? extends Double> function, Predicate<? super Double> predicate, OIN originalInputValue) {
-      return new DoubleChecker.Impl<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN> DoubleChecker<OIN> doubleChecker(String transformerName, Function<? super OIN, ? extends Double> function, OIN originalInputValue) {
+      return new DoubleChecker.Impl<>(transformerName, function, originalInputValue);
     }
 
-    public static <OIN> LongChecker<OIN> longChecker(String transformerName, Function<? super OIN, ? extends Long> function, Predicate<? super Long> predicate, OIN originalInputValue) {
-      return new LongChecker.Impl<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN> LongChecker<OIN> longChecker(String transformerName, Function<? super OIN, ? extends Long> function, OIN originalInputValue) {
+      return new LongChecker.Impl<>(transformerName, function, originalInputValue);
     }
 
-    public static <OIN> FloatChecker<OIN> floatChecker(String transformerName, Function<? super OIN, ? extends Float> function, Predicate<? super Float> predicate, OIN originalInputValue) {
-      return new FloatChecker.Impl<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN> FloatChecker<OIN> floatChecker(String transformerName, Function<? super OIN, ? extends Float> function, OIN originalInputValue) {
+      return new FloatChecker.Impl<>(transformerName, function, originalInputValue);
     }
 
-    public static <OIN> ShortChecker<OIN> shortChecker(String transformerName, Function<? super OIN, ? extends Short> function, Predicate<? super Short> predicate, OIN originalInputValue) {
-      return new ShortChecker.Impl<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN> ShortChecker<OIN> shortChecker(String transformerName, Function<? super OIN, ? extends Short> function, OIN originalInputValue) {
+      return new ShortChecker.Impl<>(transformerName, function, originalInputValue);
     }
 
-    public static <OIN, E> StreamChecker<OIN, E> streamChecker(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
-      return new StreamChecker.Impl<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN, E> StreamChecker<OIN, E> streamChecker(String transformerName, Function<? super OIN, ? extends Stream<E>> function, OIN originalInputValue) {
+      return new StreamChecker.Impl<>(transformerName, function, originalInputValue);
     }
 
 
-    public static <OIN> BooleanChecker<OIN> booleanChecker(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
-      return new BooleanChecker.Impl<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN> BooleanChecker<OIN> booleanChecker(String transformerName, Function<? super OIN, ? extends Boolean> function, OIN originalInputValue) {
+      return new BooleanChecker.Impl<>(transformerName, function, originalInputValue);
     }
 
     public static <OIN, OUT extends Throwable> ThrowableChecker<OIN, OUT> throwableChecker(ThrowableTransformer<OIN, OUT> throwableTransformer) {
-      return new ThrowableChecker.Impl<>(throwableTransformer.transformerName(), throwableTransformer.function(), dummyPredicate(), throwableTransformer.originalInputValue());
+      return new ThrowableChecker.Impl<>(throwableTransformer.transformerName(), throwableTransformer.function(), throwableTransformer.originalInputValue());
     }
 
-    public static <OIN, OUT extends Throwable> ThrowableChecker<OIN, OUT> throwableChecker(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {
-      return new ThrowableChecker.Impl<>(transformerName, function, predicate, originalInputValue);
+    public static <OIN, OUT extends Throwable> ThrowableChecker<OIN, OUT> throwableChecker(String transformerName, Function<? super OIN, ? extends OUT> function, OIN originalInputValue) {
+      return new ThrowableChecker.Impl<>(transformerName, function, originalInputValue);
     }
   }
 
@@ -296,7 +295,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     TransformingPredicate<OIN, T> transformingPredicate;
     private JunctionType junctionType;
 
-    public Base(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends T> transformerFunction, Predicate<? super T> predicate) {
+    public Base(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends T> transformerFunction) {
       this.originalInputValue = originalInputValue;
       this.transformerName = transformerName;
       this.transformerFunction = transformerFunction;
@@ -355,14 +354,14 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     public V anyOf() {
       this.transformingPredicate = null;
       this.junctionType = JunctionType.CONJUNCTION;
-      return (V) this.create(this.transformerName, this.transformerFunction,  null, this.originalInputValue);
+      return (V) this.create(this.originalInputValue, this.transformerName, this.transformerFunction);
     }
 
     @Override
     public V allOf() {
       this.transformingPredicate = null;
       this.junctionType = JunctionType.CONJUNCTION;
-      return (V) this.create(this.transformerName, this.transformerFunction,  null, this.originalInputValue);
+      return (V) this.create(this.originalInputValue, this.transformerName, this.transformerFunction);
     }
 
     @SuppressWarnings("unchecked")
@@ -398,10 +397,10 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
       return this.transformingPredicate.test(oin);
     }
 
-    public abstract V create(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue);
+    public abstract V create(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends T> function);
 
 
-      private void updateTransformingPredicate() {
+    private void updateTransformingPredicate() {
       if (this.transformingPredicate == null)
         this.transformingPredicate = createTransformingPredicate();
     }
@@ -442,99 +441,6 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
       };
 
       abstract <T> Predicate<T> connect(List<Predicate<T>> predicates);
-    }
-  }
-
-  abstract class BaseX<V extends Checker<V, OIN, T>, OIN, T>
-      extends TransformingPredicate<OIN, T>
-      implements Checker<V, OIN, T> {
-
-    protected final String                    transformerName;
-    private final   Function<? super OIN, ? extends T> function;
-    private final   OIN                                originalInputValue;
-    private         Predicate<? super T>      predicate;
-    private         Checker.Base.JunctionType junctionType;
-
-    protected BaseX(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate) {
-      super(predicate, function);
-      this.transformerName = transformerName;
-      this.function = function;
-      this.predicate = predicate; // this field can be null, when the first verifier starts building.
-      this.originalInputValue = originalInputValue;
-      this.junctionType(Checker.Base.JunctionType.CONJUNCTION);
-    }
-
-    Checker.Base.JunctionType junctionType() {
-      return this.junctionType;
-    }
-
-    @SuppressWarnings("unchecked")
-    V junctionType(Checker.Base.JunctionType junctionType) {
-      this.junctionType = requireNonNull(junctionType);
-      return (V) this;
-    }
-
-    public String transformerName() {
-      return this.transformerName;
-    }
-
-    @SuppressWarnings("unchecked")
-    public V addPredicate(Predicate<? super T> predicate) {
-      if (isDummyPredicate(this.predicate)) {
-        System.out.printf("%s:<%-40s>:<%-90s>:", junctionType(), this.predicate, predicate);
-        this.predicate = predicate;
-        System.out.printf("<%s>%n", this.predicate());
-      } else {
-        System.out.printf("%s:<%-40s>:<%-90s>:", junctionType(), this.predicate, predicate);
-        this.predicate = junctionType().connect(asList((Predicate<T>) this.predicate(), (Predicate<T>) predicate));
-        System.out.printf("<%s>%n", this.predicate());
-      }
-      return this.create();
-    }
-
-    public Function<? super OIN, ? extends T> function() {
-      return this.function;
-    }
-
-    public Predicate<? super T> predicate() {
-      return this.predicate;
-    }
-
-    V create() {
-      return create(this.transformerName(), this.function(), this.predicate(), this.originalInputValue());
-    }
-
-    abstract protected V create(String transformerName, Function<? super OIN, ? extends T> function, Predicate<? super T> predicate, OIN originalInputValue);
-
-
-    @Override
-    public OIN originalInputValue() {
-      return this.originalInputValue;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <AS extends OIN> Predicate<AS> toPredicate() {
-      return (Predicate<AS>) build();
-    }
-
-    @SuppressWarnings("unchecked")
-    public V anyOf() {
-      return ((Checker.BaseX<V, OIN, T>) this.create()).junctionType(Checker.Base.JunctionType.DISJUNCTION);
-    }
-
-    @SuppressWarnings("unchecked")
-    public V allOf() {
-      return ((Checker.BaseX<V, OIN, T>) this.create()).junctionType(Checker.Base.JunctionType.CONJUNCTION);
-
-    }
-
-    private Predicate<? super OIN> build() {
-      return TransformingPredicate.Factory.create(
-              this.transformerName(),
-              "THEN",
-              this.function())
-          .check(this.predicate());
     }
   }
 }

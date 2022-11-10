@@ -6,7 +6,6 @@ import com.github.dakusui.pcond.core.fluent.checkers.ListChecker;
 import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.Collection;
 import java.util.List;
@@ -57,7 +56,7 @@ public interface ListTransformer<OIN, E> extends Transformer<ListTransformer<OIN
 
     @Override
     public ListChecker<OIN, E> then() {
-      return Checker.Factory.listChecker(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+      return Checker.Factory.listChecker(this.transformerName(), this.function(), this.originalInputValue());
     }
   }
 }

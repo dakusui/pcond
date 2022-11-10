@@ -17,13 +17,13 @@ public interface ThrowableChecker<OIN, OUT extends Throwable> extends
 
   class Impl<OIN, OUT extends Throwable> extends Checker.Base<ThrowableChecker<OIN, OUT>, OIN, OUT>
       implements ThrowableChecker<OIN, OUT> {
-    public Impl(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {
-      super(originalInputValue, transformerName, function, predicate);
+    public Impl(String transformerName, Function<? super OIN, ? extends OUT> function, OIN originalInputValue) {
+      super(originalInputValue, transformerName, function);
     }
 
     @Override
-    public ThrowableChecker<OIN, OUT> create(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {
-      return Checker.Factory.throwableChecker(transformerName, function, predicate, originalInputValue);
+    public ThrowableChecker<OIN, OUT> create(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends OUT> function) {
+      return Checker.Factory.throwableChecker(transformerName, function, originalInputValue);
     }
   }
 

@@ -7,7 +7,6 @@ import com.github.dakusui.pcond.core.fluent.checkers.FloatChecker;
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.core.fluent.Checker.Factory.floatChecker;
-import static com.github.dakusui.pcond.internals.InternalUtils.dummyPredicate;
 
 /**
  * A transformer interface for `Integer`(`int`) type.
@@ -35,7 +34,7 @@ public interface FloatTransformer<OIN> extends ComparableNumberTransformer<Float
 
     @Override
     public FloatChecker<OIN> then() {
-      return floatChecker(this.transformerName(), this.function(), dummyPredicate(), this.originalInputValue());
+      return floatChecker(this.transformerName(), this.function(), this.originalInputValue());
     }
   }
 }

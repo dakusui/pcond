@@ -26,13 +26,13 @@ public interface BooleanChecker<OIN> extends
   }
 
   class Impl<OIN> extends Checker.Base<BooleanChecker<OIN>, OIN, Boolean> implements BooleanChecker<OIN> {
-    public Impl(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
-      super(originalInputValue, transformerName, function, predicate);
+    public Impl(String transformerName, Function<? super OIN, ? extends Boolean> function, OIN originalInputValue) {
+      super(originalInputValue, transformerName, function);
     }
 
     @Override
-    public BooleanChecker<OIN> create(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
-      return booleanChecker(transformerName, function, predicate, originalInputValue);
+    public BooleanChecker<OIN> create(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends Boolean> function) {
+      return booleanChecker(transformerName, function, originalInputValue);
     }
   }
 }

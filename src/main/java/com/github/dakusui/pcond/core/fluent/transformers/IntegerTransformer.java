@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.checkers.IntegerChecker;
 import com.github.dakusui.pcond.core.fluent.Matcher;
-import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.function.Function;
 
@@ -20,7 +19,7 @@ public interface IntegerTransformer<OIN> extends Transformer<IntegerTransformer<
 
     @Override
     public IntegerChecker<OIN> then() {
-      return integerChecker(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+      return integerChecker(this.transformerName(), this.function(), this.originalInputValue());
     }
   }
 }

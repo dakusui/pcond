@@ -33,13 +33,13 @@ public interface StreamChecker<OIN, E> extends
   class Impl<OIN, E>
       extends Checker.Base<StreamChecker<OIN, E>, OIN, Stream<E>>
       implements StreamChecker<OIN, E> {
-    public Impl(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
-      super(originalInputValue, transformerName, function, predicate);
+    public Impl(String transformerName, Function<? super OIN, ? extends Stream<E>> function, OIN originalInputValue) {
+      super(originalInputValue, transformerName, function);
     }
 
     @Override
-    public StreamChecker<OIN, E> create(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
-      return streamChecker(transformerName, function, predicate, originalInputValue);
+    public StreamChecker<OIN, E> create(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends Stream<E>> function) {
+      return streamChecker(transformerName, function, originalInputValue);
     }
   }
 }

@@ -3,7 +3,6 @@ package com.github.dakusui.pcond.core.fluent.transformers;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.checkers.BooleanChecker;
 import com.github.dakusui.pcond.core.fluent.Matcher;
-import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.function.Function;
 
@@ -21,7 +20,7 @@ public interface BooleanTransformer<OIN> extends Transformer<BooleanTransformer<
 
     @Override
     public BooleanChecker<OIN> then() {
-      return booleanChecker(this.transformerName(), this.function(), InternalUtils.dummyPredicate(), this.originalInputValue());
+      return booleanChecker(this.transformerName(), this.function(), this.originalInputValue());
     }
   }
 }

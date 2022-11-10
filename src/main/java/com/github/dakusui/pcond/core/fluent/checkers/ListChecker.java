@@ -56,13 +56,13 @@ public interface ListChecker<OIN, E> extends
   class Impl<OIN, E>
       extends Checker.Base<ListChecker<OIN, E>, OIN, List<E>>
       implements ListChecker<OIN, E> {
-    public Impl(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
-      super(originalInputValue, transformerName, function, predicate);
+    public Impl(String transformerName, Function<? super OIN, ? extends List<E>> function, OIN originalInputValue) {
+      super(originalInputValue, transformerName, function);
     }
 
     @Override
-    public ListChecker<OIN, E> create(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
-      return Checker.Factory.listChecker(transformerName, function, predicate, originalInputValue);
+    public ListChecker<OIN, E> create(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends List<E>> function) {
+      return Checker.Factory.listChecker(transformerName, function, originalInputValue);
     }
   }
 }

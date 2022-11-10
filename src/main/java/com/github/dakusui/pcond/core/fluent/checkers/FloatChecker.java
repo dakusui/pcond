@@ -4,20 +4,19 @@ import com.github.dakusui.pcond.core.fluent.Matcher;
 import com.github.dakusui.pcond.core.fluent.Checker;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.fluent.Checker.Factory.floatChecker;
 
 public interface FloatChecker<OIN> extends ComparableNumberChecker<FloatChecker<OIN>, OIN, Float>, Matcher.ForFloat<OIN> {
   class Impl<OIN> extends Checker.Base<FloatChecker<OIN>, OIN, Float> implements FloatChecker<OIN> {
 
-    public Impl(String transformerName, Function<? super OIN, ? extends Float> function, Predicate<? super Float> predicate, OIN originalInputValue) {
-      super(originalInputValue, transformerName, function, predicate);
+    public Impl(String transformerName, Function<? super OIN, ? extends Float> function, OIN originalInputValue) {
+      super(originalInputValue, transformerName, function);
     }
 
     @Override
-    public FloatChecker<OIN> create(String transformerName, Function<? super OIN, ? extends Float> function, Predicate<? super Float> predicate, OIN originalInputValue) {
-      return floatChecker(transformerName, function, predicate, originalInputValue);
+    public FloatChecker<OIN> create(OIN originalInputValue, String transformerName, Function<? super OIN, ? extends Float> function) {
+      return floatChecker(transformerName, function, originalInputValue);
     }
   }
 }
