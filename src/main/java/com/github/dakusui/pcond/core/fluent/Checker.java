@@ -14,6 +14,7 @@ import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -290,19 +291,39 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
         @SuppressWarnings("unchecked")
         @Override
         <T> Predicate<T> connect(Predicate<T>... predicates) {
-          return Predicates.allOf(predicates);
+          return Predicates.allOf(JunctionType.flattenPredicates(
+              p -> {
+                if (p instanceof PrintablePredicateFactory.Conjunction)
+                  return ((PrintablePredicateFactory.Conjunction<T>) p).childPredicates().stream();
+                return Stream.of(p);
+              },
+              predicates));
         }
       },
+
       DISJUNCTION {
         @SuppressWarnings("unchecked")
         @Override
         <T> Predicate<T> connect(Predicate<T>... predicates) {
-          return Predicates.anyOf(predicates);
+          return Predicates.anyOf(JunctionType.flattenPredicates(
+              p -> {
+                if (p instanceof PrintablePredicateFactory.Disjunction)
+                  return ((PrintablePredicateFactory.Disjunction<T>) p).childPredicates().stream();
+                return Stream.of(p);
+              },
+              predicates));
         }
       };
 
       @SuppressWarnings("unchecked")
       abstract <T> Predicate<T> connect(Predicate<T>... predicates);
+
+      @SuppressWarnings("unchecked")
+      static <T> Predicate<T>[] flattenPredicates(Function<Predicate<T>, Stream<Predicate<T>>> flattener, Predicate<T>... predicates) {
+        return Arrays.stream(predicates)
+            .flatMap(flattener)
+            .toArray(Predicate[]::new);
+      }
     }
 
     protected final String                             transformerName;
