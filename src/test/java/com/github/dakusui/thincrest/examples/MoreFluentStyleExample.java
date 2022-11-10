@@ -235,11 +235,17 @@ public class MoreFluentStyleExample {
     List<String> list = asList("helloWorld", "HI");
     String s = list.get(0);
     TestFluents.assertAll(
-        value(list).thenAllOf(asList(
-            tx -> tx.then().isEmpty(),
-            tx -> tx.elementAt(0).asString().thenAllOf(asList(ty -> ty.asString().then().isNotNull(),
-                ty -> ty.length().then().greaterThan(100),
-                ty -> ty.asString().then().findSubstrings("XYZ"))))));
+        value(list)
+            .asListOfClass(String.class)
+            .thenAllOf(asList(
+                tx -> tx.then().isEmpty(),
+                tx -> tx.elementAt(0)
+                    .asString()
+                    .thenAllOf(asList(
+                        ty -> ty.then().isNotNull(),
+                        ty -> ty.thenAnyOf(asList(
+                            tz -> tz.length().then().greaterThan(100),
+                            tz -> tz.then().findSubstrings("hello", "XYZ", "World"))))))));
   }
 
 

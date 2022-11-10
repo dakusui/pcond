@@ -6,6 +6,7 @@ import com.github.dakusui.pcond.core.fluent.transformers.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.transformers.ThrowableTransformer;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.TransformingPredicate;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.fluent.Statement;
@@ -281,7 +282,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
   }
 
   abstract class Base<V extends Checker<V, OIN, T>, OIN, T>
-      extends PrintablePredicateFactory.TransformingPredicate<OIN, T>
+      extends TransformingPredicate<OIN, T>
       implements Checker<V, OIN, T> {
 
     enum JunctionType {
@@ -378,11 +379,9 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     }
 
     private Predicate<? super OIN> build() {
-      return PrintablePredicateFactory.TransformingPredicate.Factory.create(
+      return TransformingPredicate.Factory.create(
               this.transformerName(),
-              this.transformerName() != null ?
-                  "THEN" :
-                  "VERIFY",
+              "THEN",
               this.function())
           .check(this.predicate());
     }
