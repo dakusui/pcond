@@ -145,13 +145,36 @@ public class MoreFluentStyleExample {
     TestFluents.assertAll(
         value(lastName)
             .then()
+            .allOf()
             .verifyWith(Checker::isNotNull)
-            .verifyWith(v -> v.anyOf().verifyWith(Checker::isNotNull).verifyWith(StringChecker::isEmpty))
+            .verifyWith(v -> v.anyOf()
+                .verifyWith(Checker::isNotNull)
+                .verifyWith(StringChecker::isEmpty))
             .verifyWith(StringChecker::isNotEmpty),
         value(fullName).asListOfClass(String.class)
             .then()
             .contains("DOE"));
   }
+
+  @Test
+  public void testAllOf() {
+    MemberDatabase database = new MemberDatabase();
+    String lastName = database.lookUp("0001")
+        .orElseThrow(NoSuchElementException::new)
+        .lastName();
+    TestFluents.assertAll(
+        value(lastName)
+            .then()
+            .allOf()
+            .verifyWith(v -> v.isEqualTo("1"))
+            .verifyWith(v -> v.isEqualTo("2"))
+            .verifyWith(v -> v
+                .anyOf()
+                .verifyWith(w -> w.isEqualTo("3"))
+                .verifyWith(w -> w.isEqualTo("4")))
+            .verifyWith(v -> v.isEqualTo("5")));
+  }
+
 
   @Test
   public void givenValidName_whenValidatePersonName_thenPass() {

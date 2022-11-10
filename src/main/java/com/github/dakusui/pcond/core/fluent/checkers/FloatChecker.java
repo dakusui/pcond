@@ -12,7 +12,7 @@ public interface FloatChecker<OIN> extends ComparableNumberChecker<FloatChecker<
   class Impl<OIN> extends Checker.Base<FloatChecker<OIN>, OIN, Float> implements FloatChecker<OIN> {
 
     public Impl(String transformerName, Function<? super OIN, ? extends Float> function, Predicate<? super Float> predicate, OIN originalInputValue) {
-      super(transformerName, function, predicate, originalInputValue);
+      super(originalInputValue, transformerName, function, predicate);
     }
 
     @Override

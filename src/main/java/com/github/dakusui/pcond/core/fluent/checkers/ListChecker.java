@@ -57,7 +57,7 @@ public interface ListChecker<OIN, E> extends
       extends Checker.Base<ListChecker<OIN, E>, OIN, List<E>>
       implements ListChecker<OIN, E> {
     public Impl(String transformerName, Function<? super OIN, ? extends List<E>> function, Predicate<? super List<E>> predicate, OIN originalInputValue) {
-      super(transformerName, function, predicate, originalInputValue);
+      super(originalInputValue, transformerName, function, predicate);
     }
 
     @Override

@@ -17,7 +17,7 @@ public interface ObjectChecker<OIN, OUT> extends
   class Impl<OIN, OUT> extends Checker.Base<ObjectChecker<OIN, OUT>, OIN, OUT>
       implements ObjectChecker<OIN, OUT> {
     public Impl(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {
-      super(transformerName, function, predicate, originalInputValue);
+      super(originalInputValue, transformerName, function, predicate);
     }
 
     @Override

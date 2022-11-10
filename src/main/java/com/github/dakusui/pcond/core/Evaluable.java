@@ -232,7 +232,8 @@ public interface Evaluable<T> {
   }
 
   /**
-   * An interface to model a "transforming predicate".
+   * An interface to model a "transforming predicate", which models the "transform and check" style of value validation.
+   * The idea of the style is to first  transform a value into a type, which is easy to read for human and to check for machine, such as list, integer, string, etc., in order to validate a value.
    *
    * @param <T> The type of the value to be evaluated.
    * @param <R> The type to which the value (`T`) is transformed and then tested.
@@ -243,12 +244,24 @@ public interface Evaluable<T> {
       evaluator.evaluate(value, this);
     }
 
+    /**
+     * Returns a transformer of this object.
+     * @return A transformer function.
+     */
     Evaluable<? super T> mapper();
 
     Evaluable<? super R> checker();
 
+    /**
+     * Returns a name of a transformer, if any.
+     * @return An optional to store a name of the transformer.
+     */
     Optional<String> mapperName();
 
+    /**
+     * Returns a name of a checker, if any.
+     * @return An optional to store a name of the checker.
+     */
     Optional<String> checkerName();
   }
 

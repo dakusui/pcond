@@ -12,6 +12,7 @@ import java.util.Objects;
 
 import static com.github.dakusui.pcond.forms.Functions.curry;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 public class CurryingTest extends TestBase {

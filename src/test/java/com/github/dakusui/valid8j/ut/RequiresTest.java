@@ -11,8 +11,8 @@ import org.junit.Test;
 import static com.github.dakusui.pcond.forms.Predicates.isNotNull;
 import static com.github.dakusui.shared.utils.TestUtils.firstLineOf;
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 
 public class RequiresTest extends TestBase.ForAssertionEnabledVM {
   @Test(expected = NullPointerException.class)

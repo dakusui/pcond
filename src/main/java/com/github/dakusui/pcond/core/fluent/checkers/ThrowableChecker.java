@@ -18,7 +18,7 @@ public interface ThrowableChecker<OIN, OUT extends Throwable> extends
   class Impl<OIN, OUT extends Throwable> extends Checker.Base<ThrowableChecker<OIN, OUT>, OIN, OUT>
       implements ThrowableChecker<OIN, OUT> {
     public Impl(String transformerName, Function<? super OIN, ? extends OUT> function, Predicate<? super OUT> predicate, OIN originalInputValue) {
-      super(transformerName, function, predicate, originalInputValue);
+      super(originalInputValue, transformerName, function, predicate);
     }
 
     @Override

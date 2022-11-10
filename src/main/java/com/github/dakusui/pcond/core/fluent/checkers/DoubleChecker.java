@@ -11,7 +11,7 @@ import static com.github.dakusui.pcond.core.fluent.Checker.Factory.doubleChecker
 public interface DoubleChecker<OIN> extends ComparableNumberChecker<DoubleChecker<OIN>, OIN, Double>, Matcher.ForDouble<OIN> {
   class Impl<OIN> extends Checker.Base<DoubleChecker<OIN>, OIN, Double> implements DoubleChecker<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends Double> function, Predicate<? super Double> predicate, OIN originalInputValue) {
-      super(transformerName, function, predicate, originalInputValue);
+      super(originalInputValue, transformerName, function, predicate);
     }
 
     @Override

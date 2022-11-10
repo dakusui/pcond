@@ -66,7 +66,7 @@ public interface StringChecker<OIN> extends
       extends Checker.Base<StringChecker<OIN>, OIN, String>
       implements StringChecker<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends String> function, Predicate<? super String> predicate, OIN originalInputValue) {
-      super(transformerName, function, predicate, originalInputValue);
+      super(originalInputValue, transformerName, function, predicate);
     }
 
     @SuppressWarnings("unchecked")

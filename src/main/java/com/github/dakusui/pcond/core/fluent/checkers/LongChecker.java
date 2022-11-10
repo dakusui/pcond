@@ -13,7 +13,7 @@ public interface LongChecker<OIN> extends ComparableNumberChecker<LongChecker<OI
   class Impl<OIN> extends Checker.Base<LongChecker<OIN>, OIN, Long> implements LongChecker<OIN> {
 
     public Impl(String transformerName, Function<? super OIN, ? extends Long> function, Predicate<? super Long> predicate, OIN originalInputValue) {
-      super(transformerName, function, predicate, originalInputValue);
+      super(originalInputValue, transformerName, function, predicate);
     }
 
     @Override

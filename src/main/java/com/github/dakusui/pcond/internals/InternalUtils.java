@@ -10,7 +10,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import java.util.function.Supplier;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -200,13 +200,17 @@ public enum InternalUtils {
     return (Evaluable<T>) Printables.predicate(p::toString, p);
   }
 
-  @SuppressWarnings("unchecked")
   public static <T> Evaluable<T> toEvaluableIfNecessary(Function<? super T, ?> f) {
+    return toEvaluableWithFormatterIfNecessary(f, Object::toString);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> Evaluable<T> toEvaluableWithFormatterIfNecessary(Function<? super T, ?> f, Function<Function<? super T, ?>, String> formatter) {
     requireNonNull(f);
     if (f instanceof Evaluable)
       return (Evaluable<T>) f;
     // We know that Printable.predicate returns a PrintableFunction object, which is an Evaluable.
-    return (Evaluable<T>) Printables.function(f::toString, f);
+    return (Evaluable<T>) Printables.function(() -> formatter.apply(f), f);
   }
 
   public static Class<?> wrapperClassOf(Class<?> clazz) {

@@ -12,7 +12,7 @@ public interface ShortChecker<OIN> extends ComparableNumberChecker<ShortChecker<
   class Impl<OIN> extends Checker.Base<ShortChecker<OIN>, OIN, Short> implements ShortChecker<OIN> {
 
     public Impl(String transformerName, Function<? super OIN, ? extends Short> function, Predicate<? super Short> predicate, OIN originalInputValue) {
-      super(transformerName, function, predicate, originalInputValue);
+      super(originalInputValue, transformerName, function, predicate);
     }
 
     @Override

@@ -27,7 +27,7 @@ public interface BooleanChecker<OIN> extends
 
   class Impl<OIN> extends Checker.Base<BooleanChecker<OIN>, OIN, Boolean> implements BooleanChecker<OIN> {
     public Impl(String transformerName, Function<? super OIN, ? extends Boolean> function, Predicate<? super Boolean> predicate, OIN originalInputValue) {
-      super(transformerName, function, predicate, originalInputValue);
+      super(originalInputValue, transformerName, function, predicate);
     }
 
     @Override

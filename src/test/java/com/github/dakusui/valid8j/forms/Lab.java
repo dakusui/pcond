@@ -38,6 +38,7 @@ enum Lab {
     System.out.println(applyValues(isInstanceOf(), asList("hello", Map.class)) + "");
   }
 
+  @SuppressWarnings("unchecked")
   public static <T> T applyValues(Function<?, ?> func, List<?> args) {
     requireArgument(requireNonNull(args), not(isEmpty()));
     Object ret = func;
@@ -46,8 +47,9 @@ enum Lab {
     return (T) ret;
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   private static Object applyOrTest(Object func, Object arg) {
-    requireArgument(func, or(isInstanceOf(Function.class), isInstanceOf(Predicate.class)));
+    requireArgument(func, (Predicate) or((Predicate) isInstanceOf(Function.class), (Predicate) isInstanceOf(Predicate.class)));
     if (func instanceof Predicate)
       return ((Predicate<Object>) func).test(arg);
     return ((Function<Object, Object>) func).apply(arg);

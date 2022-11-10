@@ -34,7 +34,7 @@ public interface StreamChecker<OIN, E> extends
       extends Checker.Base<StreamChecker<OIN, E>, OIN, Stream<E>>
       implements StreamChecker<OIN, E> {
     public Impl(String transformerName, Function<? super OIN, ? extends Stream<E>> function, Predicate<? super Stream<E>> predicate, OIN originalInputValue) {
-      super(transformerName, function, predicate, originalInputValue);
+      super(originalInputValue, transformerName, function, predicate);
     }
 
     @Override
