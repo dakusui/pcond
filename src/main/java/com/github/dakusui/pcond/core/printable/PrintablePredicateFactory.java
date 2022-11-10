@@ -258,7 +258,7 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  static class Conjunction<T> extends Junction<T> implements Evaluable.Conjunction<T> {
+  public static class Conjunction<T> extends Junction<T> implements Evaluable.Conjunction<T> {
     protected Conjunction(List<Predicate<? super T>> predicates, boolean shortcut) {
       super(
           predicates,
@@ -269,7 +269,7 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  private static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
+  public static class Disjunction<T> extends Junction<T> implements Evaluable.Disjunction<T> {
     protected Disjunction(List<Predicate<? super T>> predicates, boolean shortcut) {
       super(
           predicates,
@@ -308,6 +308,10 @@ public enum PrintablePredicateFactory {
       return this.shortcut;
     }
 
+    public List<Predicate<T>> childPredicates() {
+      return childrenOfJunction(this);
+    }
+
     static <T> String formatJunction(List<Predicate<? super T>> predicates, String junctionSymbol) {
       return predicates.stream()
           .map(PrintablePredicateFactory::toPrintablePredicateIfNotPrintable)
@@ -323,6 +327,20 @@ public enum PrintablePredicateFactory {
           .map(p -> (Predicate<T>) p)
           .reduce(junctionOp)
           .orElseThrow(PrintablePredicateFactory::noPredicateGiven);
+    }
+
+    static <T> List<Predicate<T>> childrenOfJunction(Junction<T> junction) {
+      return evaluablesToPredicates(junction.children);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> List<Predicate<T>> evaluablesToPredicates(List<Evaluable<? super T>> evaluables) {
+      return evaluables.stream()
+          .peek(each -> {
+            assert each instanceof Predicate;
+          })
+          .map(each -> (Predicate<T>) each)
+          .collect(toList());
     }
   }
 
