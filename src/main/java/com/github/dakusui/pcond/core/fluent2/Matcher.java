@@ -5,10 +5,11 @@ import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Objects.requireNonNull;
@@ -23,52 +24,35 @@ public interface Matcher<M extends Matcher<M, OIN, T>, OIN, T> extends Statement
   default <N extends Matcher.Base<N, OIN, R>, R> N chain(Function<T, R> func, Function<? super M, N> conv) {
     requireNonNull(func);
     N next = requireNonNull(conv).apply((M) this);
-    this.appendChild(m -> Predicates.transform(func).check(conv.apply((M) this).toPredicate()));
+    this.appendChild(m -> Predicates.transform(func).check(conv.apply((M) this).connectChildPredicates()));
     return next;
   }
 
-  Predicate<T> toPredicate();
+  Predicate<T> connectChildPredicates();
 
   M allOf();
 
   M anyOf();
 
 
-  M appendChild(Function<M, Predicate<T>> child);
+  M appendChild(Function<M, Predicate<? super T>> child);
 
   OIN originalInputValue();
 
-  interface ForString<OIN> extends Matcher<ForString<OIN>, OIN, String> {
+  Optional<Predicate<OIN>> rootPredicate();
+
+  @Override
+  default OIN statementValue() {
+    return originalInputValue();
   }
 
-  interface ForComparableNumber<OIN, N extends Number & Comparable<N>> extends Matcher<ForComparableNumber<OIN, N>, OIN, N> {
-  }
+  @SuppressWarnings("unchecked")
+  default Predicate<OIN> statementPredicate() {
 
-  interface ForInteger<OIN> extends ForComparableNumber<OIN, Integer> {
-  }
-
-  interface ForDouble<OIN> extends ForComparableNumber<OIN, Double> {
-  }
-
-  interface ForLong<OIN> extends ForComparableNumber<OIN, Long> {
-  }
-
-  interface ForFloat<OIN> extends ForComparableNumber<OIN, Float> {
-  }
-
-  interface ForShort<OIN> extends ForComparableNumber<OIN, Short> {
-  }
-
-  interface ForBoolean<OIN> extends Matcher<ForBoolean<OIN>, OIN, Boolean> {
-  }
-
-  interface ForObject<OIN, E> extends Matcher<ForObject<OIN, E>, OIN, E> {
-  }
-
-  interface ForList<OIN, E> extends Matcher<ForList<OIN, E>, OIN, List<E>> {
-  }
-
-  interface ForStream<OIN, E> extends Matcher<ForStream<OIN, E>, OIN, Stream<E>> {
+    return rootPredicate()
+        .orElseGet(
+            () -> // This cast should be safe, because if the root predicate is missing, this object must be the root.
+                (Predicate<OIN>) connectChildPredicates());
   }
 
 
@@ -77,7 +61,12 @@ public interface Matcher<M extends Matcher<M, OIN, T>, OIN, T> extends Statement
    * @param <OIN>
    * @param <T>
    */
-  class Base<M extends Matcher<M, OIN, T>, OIN, T> implements Matcher<M, OIN, T>, Function<M, Predicate<T>> {
+  class Base<
+      M extends Matcher<M, OIN, T>,
+      OIN,
+      T> implements
+      Matcher<M, OIN, T>,
+      Function<M, Predicate<T>> {
     enum JunctionType {
       CONJUNCTION {
         @SuppressWarnings("unchecked")
@@ -97,33 +86,35 @@ public interface Matcher<M extends Matcher<M, OIN, T>, OIN, T> extends Statement
       public abstract <T> Predicate<T> connect(List<Predicate<T>> collect);
     }
 
-    private final Function<OIN, T> transform;
+    private final Supplier<Predicate<OIN>> rootPredicateSupplier;
+    private final OIN                      rootValue;
 
-    private       JunctionType junctionType;
-    private final OIN          originalInputValue;
 
-    private final List<Function<M, Predicate<T>>> childPredicates = new LinkedList<>();
+    private JunctionType junctionType;
 
-    protected Base(OIN originalInputValue, Function<OIN, T> base) {
-      this.transform = requireNonNull(base);
-      this.originalInputValue = originalInputValue;
+    private final List<Function<M, Predicate<? super T>>> childPredicates = new LinkedList<>();
+
+    protected Base(OIN rootValue, Supplier<Predicate<OIN>> rootPredicateSupplier) {
+      this.rootValue = rootValue;
+      this.rootPredicateSupplier = rootPredicateSupplier;
       this.junctionType(JunctionType.CONJUNCTION);
     }
 
     @Override
-    public M appendChild(Function<M, Predicate<T>> child) {
+    public M appendChild(Function<M, Predicate<? super T>> child) {
       this.childPredicates.add(requireNonNull(child));
       return me();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Predicate<T> toPredicate() {
+    public Predicate<T> connectChildPredicates() {
       Predicate<T> ret;
       requireState(this, v -> !v.childPredicates.isEmpty(), (v) -> "No child has been added yet.: <" + v + ">");
       if (this.childPredicates.size() == 1)
-        ret = childPredicates.get(0).apply(me());
+        ret = (Predicate<T>) childPredicates.get(0).apply(me());
       else {
-        ret = this.junctionType.connect(this.childPredicates.stream().map(each -> each.apply(me())).collect(Collectors.toList()));
+        ret = (Predicate<T>) this.junctionType.connect(this.childPredicates.stream().map(each -> each.apply(me())).collect(Collectors.toList()));
       }
       return ret;
     }
@@ -140,28 +131,35 @@ public interface Matcher<M extends Matcher<M, OIN, T>, OIN, T> extends Statement
 
     @Override
     public OIN originalInputValue() {
-      return this.originalInputValue;
+      return this.rootValue;
+    }
+
+    @Override
+    public Optional<Predicate<OIN>> rootPredicate() {
+      return Optional.ofNullable(rootPredicateSupplier).map(Supplier::get);
     }
 
     @Override
     public Predicate<T> apply(M m) {
-      return toPredicate();
+      return connectChildPredicates();
     }
 
     @Override
     public boolean test(OIN oin) {
-      return Predicates.transform(transform).check(toPredicate()).test(oin);
+      return Optional.ofNullable(this.rootPredicateSupplier).orElseGet(() -> () -> (Predicate<OIN>)connectChildPredicates()).get().test(oin);
     }
 
-    protected Function<OIN, T> transform() {
-      return this.transform;
+    protected Supplier<Predicate<OIN>> rootPredicateSupplier() {
+      return this.rootPredicate().isPresent() ? () -> this.rootPredicate().orElseThrow(RuntimeException::new) : null;
     }
+
 
     private M junctionType(JunctionType junctionType) {
       requireState(this, v -> childPredicates.isEmpty(), v -> "Child predicate(s) are already added.: <" + this + ">");
       this.junctionType = requireNonNull(junctionType);
       return me();
     }
+
 
     private M me() {
       //noinspection unchecked

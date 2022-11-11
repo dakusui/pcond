@@ -18,7 +18,7 @@ public enum TestFluents {
    * @param statement A statement to be verified
    * @param <T>       The type of the value to be verified which a given statement holds.
    */
-  public static <T> void assertStatemet(Statement<T> statement) {
+  public static <T> void assertStatement(Statement<T> statement) {
     TestAssertions.assertThat(statement.statementValue(), statement.statementPredicate());
   }
 

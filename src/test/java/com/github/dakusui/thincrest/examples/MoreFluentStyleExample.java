@@ -24,7 +24,7 @@ public class MoreFluentStyleExample {
   @Test
   public void test() {
     String givenValue = "helloWorld";
-    TestFluents.assertStatemet(value(givenValue)
+    TestFluents.assertStatement(value(givenValue)
         .exercise(TestUtils.stringToLowerCase())
         .then()
         .asString()
@@ -35,7 +35,7 @@ public class MoreFluentStyleExample {
   @Test
   public void testExpectingException() {
     String givenValue = "helloWorld";
-    TestFluents.assertStatemet(value(givenValue)
+    TestFluents.assertStatement(value(givenValue)
         .expectException(Exception.class, TestUtils.stringToLowerCase())
         .then()
         .asString()
@@ -45,7 +45,7 @@ public class MoreFluentStyleExample {
   @Test
   public void testExpectingException2() {
     String givenValue = "helloWorld";
-    TestFluents.assertStatemet(value(givenValue)
+    TestFluents.assertStatement(value(givenValue)
         .expectException(Exception.class, throwRuntimeException())
         .getCause()
         .then()
@@ -62,7 +62,7 @@ public class MoreFluentStyleExample {
   @Test
   public void test2() {
     List<String> givenValues = asList("hello", "world");
-    TestFluents.assertStatemet(value(givenValues).elementAt(0)
+    TestFluents.assertStatement(value(givenValues).elementAt(0)
         .exercise(TestUtils.stringToLowerCase())
         .then()
         .asString()
@@ -72,7 +72,7 @@ public class MoreFluentStyleExample {
   @Test
   public void test3() {
     List<String> givenValues = asList("hello", "world");
-    TestFluents.assertStatemet(value(givenValues).elementAt(0)
+    TestFluents.assertStatement(value(givenValues).elementAt(0)
         .exercise(TestUtils.stringToLowerCase())
         .then()
         .asString()
@@ -102,7 +102,7 @@ public class MoreFluentStyleExample {
     Function<MemberDatabase.Member, String> memberLastName =
         Printables.function("memberLastName", MemberDatabase.Member::lastName);
 
-    TestFluents.assertStatemet(value(database)
+    TestFluents.assertStatement(value(database)
         .exercise(lookUpMemberWith.apply(identifier))
         .then()
         .toStringWith(memberLastName)
@@ -180,7 +180,7 @@ public class MoreFluentStyleExample {
   public void givenValidName_whenValidatePersonName_thenPass() {
     String s = "John Doe";
 
-    TestFluents.assertStatemet(value(s).asString().split(" ").size()
+    TestFluents.assertStatement(value(s).asString().split(" ").size()
         .then().isEqualTo(2));
   }
 
@@ -188,7 +188,7 @@ public class MoreFluentStyleExample {
   public void givenValidName_whenValidatePersonName_thenPass_2() {
     String s = "John doe";
 
-    TestFluents.assertStatemet(
+    TestFluents.assertStatement(
         value(s)
             .asString()
             .split(" ")
@@ -296,7 +296,7 @@ public class MoreFluentStyleExample {
   @Test
   public void checkTwoAspectsOfOneValue_4() {
     List<String> list = asList("helloWorld", "HI");
-    TestFluents.assertStatemet(
+    TestFluents.assertStatement(
         value(list).thenAllOf(asList(
             tx -> tx.size().then().greaterThan(3),
             tx -> tx.elementAt(0).asString().thenAllOf(asList(
@@ -307,7 +307,7 @@ public class MoreFluentStyleExample {
   @Test
   public void checkTwoAspectsOfOneValue_5() {
     List<String> list = asList("helloWorld", "HI");
-    TestFluents.assertStatemet(
+    TestFluents.assertStatement(
         value(list).thenAllOf(asList(
             tx -> tx.size().then().greaterThan(3),
             tx -> tx.elementAt(0).thenAllOf(asList(

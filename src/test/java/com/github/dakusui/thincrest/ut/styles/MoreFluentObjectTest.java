@@ -19,117 +19,117 @@ public class MoreFluentObjectTest {
   @Test
   public void test_asString() {
     String var = "hello";
-    TestFluents.assertStatemet(value(var).then().asString().isEqualTo("hello"));
+    TestFluents.assertStatement(value(var).then().asString().isEqualTo("hello"));
   }
 
   @Test
   public void test_asLong() {
     long var = 123;
-    TestFluents.assertStatemet(Fluents.value((Object) var).asLong().then().asLong().equalTo(123L));
+    TestFluents.assertStatement(Fluents.value((Object) var).asLong().then().asLong().equalTo(123L));
   }
 
   @Test
   public void test_asInteger() {
     int var = 123;
-    TestFluents.assertStatemet(Fluents.value((Object) var).asInteger().then().asInteger().equalTo(123));
+    TestFluents.assertStatement(Fluents.value((Object) var).asInteger().then().asInteger().equalTo(123));
   }
 
   @Test
   public void test_asShort() {
     short var = 123;
-    TestFluents.assertStatemet(Fluents.value((Object) var).asShort().then().asShort().equalTo((short) 123));
+    TestFluents.assertStatement(Fluents.value((Object) var).asShort().then().asShort().equalTo((short) 123));
   }
 
   @Test
   public void test_asDouble() {
     double var = 123.0;
-    TestFluents.assertStatemet(Fluents.value((Object) var).asDouble().then().asDouble().equalTo(123.0));
+    TestFluents.assertStatement(Fluents.value((Object) var).asDouble().then().asDouble().equalTo(123.0));
   }
 
   @Test
   public void test_asFloat() {
     float var = 123.0f;
-    TestFluents.assertStatemet(Fluents.value((Object) var).asFloat().then().asFloat().equalTo(123.0f));
+    TestFluents.assertStatement(Fluents.value((Object) var).asFloat().then().asFloat().equalTo(123.0f));
   }
 
   @Test
   public void test_asBoolean() {
     boolean var = false;
-    TestFluents.assertStatemet(Fluents.value((Object) var).asBoolean().then().asBoolean().isEqualTo(false));
+    TestFluents.assertStatement(Fluents.value((Object) var).asBoolean().then().asBoolean().isEqualTo(false));
   }
 
 
   @Test
   public void test_asListOf() {
     List<String> var = asList("hello", "world");
-    TestFluents.assertStatemet(Fluents.value((Object) var).asListOf((String) value()).then().asListOf((String) value()).isEqualTo(asList("hello", "world")));
+    TestFluents.assertStatement(Fluents.value((Object) var).asListOf((String) value()).then().asListOf((String) value()).isEqualTo(asList("hello", "world")));
   }
 
   @Test
   public void test_asListOfClass() {
     List<String> var = asList("hello", "world");
-    TestFluents.assertStatemet(Fluents.value((Object) var).asListOfClass(String.class).then().isEqualTo(asList("hello", "world")));
+    TestFluents.assertStatement(Fluents.value((Object) var).asListOfClass(String.class).then().isEqualTo(asList("hello", "world")));
   }
 
   @Test
   public void test_asStreamOf() {
     Stream<String> var = Stream.of("hello", "world");
-    TestFluents.assertStatemet(Fluents.value((Object) var).asStreamOf((String) value()).then().asStreamOf((String) value()).allMatch(isNotNull()));
+    TestFluents.assertStatement(Fluents.value((Object) var).asStreamOf((String) value()).then().asStreamOf((String) value()).allMatch(isNotNull()));
   }
 
   @Test
   public void test_asStreamOfClass() {
     Stream<String> var = Stream.of("hello", "world");
-    TestFluents.assertStatemet(Fluents.value((Object) var).asStreamOfClass(String.class).then().allMatch(isNotNull()));
+    TestFluents.assertStatement(Fluents.value((Object) var).asStreamOfClass(String.class).then().allMatch(isNotNull()));
   }
 
 
   @Test
   public void test_intoLongWith() {
     String var = "123";
-    TestFluents.assertStatemet(value(var).then().toLongWith(Long::parseLong).equalTo(123L));
+    TestFluents.assertStatement(value(var).then().toLongWith(Long::parseLong).equalTo(123L));
   }
 
   @Test
   public void test_intoIntegerWith() {
     String var = "123";
-    TestFluents.assertStatemet(value(var).then().toIntegerWith(Integer::parseInt).equalTo(123));
+    TestFluents.assertStatement(value(var).then().toIntegerWith(Integer::parseInt).equalTo(123));
   }
 
   @Test
   public void test_intoShortWith() {
     String var = "123";
-    TestFluents.assertStatemet(value(var).then().toShortWith(Short::parseShort).equalTo((short) 123));
+    TestFluents.assertStatement(value(var).then().toShortWith(Short::parseShort).equalTo((short) 123));
   }
 
   @Test
   public void test_intoDoubleWith() {
     String var = "123.0";
-    TestFluents.assertStatemet(value(var).then().toDoubleWith(Double::parseDouble).equalTo(123.0));
+    TestFluents.assertStatement(value(var).then().toDoubleWith(Double::parseDouble).equalTo(123.0));
   }
 
   @Test
   public void test_intoFloatWith() {
     String var = "123.0f";
-    TestFluents.assertStatemet(value(var).then().toFloatWith(Float::parseFloat).equalTo(123.0f));
+    TestFluents.assertStatement(value(var).then().toFloatWith(Float::parseFloat).equalTo(123.0f));
   }
 
   @Test
   public void test_intoBooleanWith() {
     String var = "false";
-    TestFluents.assertStatemet(value(var).then().toBooleanWith(Boolean::parseBoolean).isEqualTo(false));
+    TestFluents.assertStatement(value(var).then().toBooleanWith(Boolean::parseBoolean).isEqualTo(false));
   }
 
   @Test
   public void test_intoObject() {
     String var = "hello";
-    TestFluents.assertStatemet(value(var).then().toObjectWith(v -> v).isNotNull());
+    TestFluents.assertStatement(value(var).then().toObjectWith(v -> v).isNotNull());
   }
 
   @Test
   public void test_intoList() {
     Stream<String> var = Stream.of("hello", "world");
-    TestFluents.assertStatemet(value(var).then()
+    TestFluents.assertStatement(value(var).then()
         .toListWith(s -> s.collect(Collectors.toList()))
         .isEqualTo(asList("hello", "world")));
   }
@@ -137,7 +137,7 @@ public class MoreFluentObjectTest {
   @Test
   public void test_intoStream() {
     List<String> var = asList("hello", "world");
-    TestFluents.assertStatemet(
+    TestFluents.assertStatement(
         Fluents.value(var)
             .then()
             .toStreamWith(Collection::stream)
@@ -150,25 +150,25 @@ public class MoreFluentObjectTest {
   @Test
   public void test_isNull() {
     String var = null;
-    TestFluents.assertStatemet(value(var).then().isNull());
+    TestFluents.assertStatement(value(var).then().isNull());
   }
 
   @Test
   public void test_sameReferenceAs() {
     Object var = new Object();
-    TestFluents.assertStatemet(value(var).then().isSameReferenceAs(var));
+    TestFluents.assertStatement(value(var).then().isSameReferenceAs(var));
   }
 
   @Test
   public void test_invoke() {
     Object var = new Object();
-    TestFluents.assertStatemet(value(var).invoke("toString").then().invoke("toString").asString().contains("Object"));
+    TestFluents.assertStatement(value(var).invoke("toString").then().invoke("toString").asString().contains("Object"));
   }
 
   @Test
   public void test_invokeStatic() {
     Object var = new Object();
-    TestFluents.assertStatemet(value(var)
+    TestFluents.assertStatement(value(var)
         .invokeStatic(Objects.class, "toString", parameter()).then()
         .invokeStatic(Objects.class, "toString", parameter()).asString().contains("Object"));
   }

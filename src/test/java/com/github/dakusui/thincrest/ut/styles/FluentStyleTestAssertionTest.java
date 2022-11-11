@@ -28,7 +28,7 @@ public class FluentStyleTestAssertionTest {
     public void expectingDifferentException_testFailing() {
       try {
         String givenValue = "helloWorld";
-        TestFluents.assertStatemet(value(givenValue)
+        TestFluents.assertStatement(value(givenValue)
             .expectException(ArrayIndexOutOfBoundsException.class, Printables.function("substring100", (String s) -> s.substring(100)))
             .getMessage()
             .then()
@@ -48,7 +48,7 @@ public class FluentStyleTestAssertionTest {
     public void expectingExceptionButNotThrown_testFailing() {
       try {
         String givenValue = "helloWorld";
-        TestFluents.assertStatemet(value(givenValue)
+        TestFluents.assertStatement(value(givenValue)
             .expectException(StringIndexOutOfBoundsException.class, Printables.function("substring0", (String s) -> s.substring(0)))
             .getMessage()
             .then()
@@ -66,7 +66,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void expectedExceptionThrown_testPassing() {
       String givenValue = "helloWorld";
-      TestFluents.assertStatemet(value(givenValue)
+      TestFluents.assertStatement(value(givenValue)
           .expectException(StringIndexOutOfBoundsException.class, Printables.function("substring100", (String s) -> s.substring(100)))
           .getMessage()
           .then()
@@ -78,7 +78,7 @@ public class FluentStyleTestAssertionTest {
     public void string_assertThatTest_failed() {
       String givenValue = "helloWorld";
       try {
-        TestFluents.assertStatemet(Fluents.value(givenValue)
+        TestFluents.assertStatement(Fluents.value(givenValue)
             .exercise(stringToLowerCase())
             .then()
             .asString()
@@ -92,7 +92,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void string_assertThatTest_passed() {
       String givenValue = "helloWorld";
-      TestFluents.assertStatemet(value(givenValue)
+      TestFluents.assertStatement(value(givenValue)
           .exercise(stringToLowerCase())
           .then()
           .asString()
@@ -102,7 +102,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void string_assertThat_useValue_passed() {
       String givenValue = "helloWorld";
-      TestFluents.assertStatemet(value(givenValue)
+      TestFluents.assertStatement(value(givenValue)
           .exercise(stringToLowerCase())
           .then()
           .asString()
@@ -112,7 +112,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void int_assertThatTest_passed() {
       int givenValue = 1234;
-      TestFluents.assertStatemet(Fluents.value(givenValue)
+      TestFluents.assertStatement(Fluents.value(givenValue)
           .then()
           .isEqualTo(1234));
     }
@@ -120,7 +120,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void boolean_assertThatTest_passed() {
       boolean givenValue = true;
-      TestFluents.assertStatemet(Fluents.value(givenValue)
+      TestFluents.assertStatement(Fluents.value(givenValue)
           .then()
           .isEqualTo(true));
     }
@@ -133,7 +133,7 @@ public class FluentStyleTestAssertionTest {
           return "OBJECT";
         }
       };
-      TestFluents.assertStatemet(Fluents.value(givenValue)
+      TestFluents.assertStatement(Fluents.value(givenValue)
           .then()
           .toStringWith(Object::toString)
           .isEqualTo("OBJECT"));
@@ -142,7 +142,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void list_assertThatTest_passed() {
       List<String> givenValue = asList("hello", "world");
-      TestFluents.assertStatemet(value(givenValue)
+      TestFluents.assertStatement(value(givenValue)
           .then()
           .isEqualTo(asList("hello", "world")));
     }
@@ -150,7 +150,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void stream_assertThatTest_passed() {
       Stream<String> givenValue = Stream.of("hello", "world");
-      TestFluents.assertStatemet(Fluents.value(givenValue)
+      TestFluents.assertStatement(Fluents.value(givenValue)
           .then()
           .toListWith(v -> v.collect(toList()))
           .isEqualTo(asList("hello", "world")));
