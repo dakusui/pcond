@@ -24,7 +24,8 @@ import static com.github.dakusui.pcond.core.fluent.Checker.Factory.*;
 import static com.github.dakusui.pcond.fluent.FluentUtils.chainFunctions;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
-import static com.github.dakusui.pcond.internals.InternalUtils.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableWithFormatterIfNecessary;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
@@ -354,14 +355,14 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     public V anyOf() {
       this.transformingPredicate = null;
       this.junctionType = JunctionType.CONJUNCTION;
-      return (V) this.create(this.originalInputValue, this.transformerName, this.transformerFunction);
+      return this.create(this.originalInputValue, this.transformerName, this.transformerFunction);
     }
 
     @Override
     public V allOf() {
       this.transformingPredicate = null;
       this.junctionType = JunctionType.CONJUNCTION;
-      return (V) this.create(this.originalInputValue, this.transformerName, this.transformerFunction);
+      return this.create(this.originalInputValue, this.transformerName, this.transformerFunction);
     }
 
     @SuppressWarnings("unchecked")
