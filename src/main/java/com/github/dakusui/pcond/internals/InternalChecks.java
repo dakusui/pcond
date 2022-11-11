@@ -48,9 +48,9 @@ public enum InternalChecks {
     return value;
   }
 
-  public static <V> V requireState(V arg, Predicate<? super V> predicate, Supplier<String> messageFormatter) {
+  public static <V> V requireState(V arg, Predicate<? super V> predicate, Function<V, String> messageFormatter) {
     if (!predicate.test(arg))
-      throw new IllegalStateException(messageFormatter.get());
+      throw new IllegalStateException(messageFormatter.apply(arg));
     return arg;
   }
 

@@ -1,5 +1,16 @@
 package com.github.dakusui.pcond.core.fluent;
 
+import com.github.dakusui.pcond.forms.Predicates;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
+import static java.util.Objects.requireNonNull;
+
 public interface Matcher<OIN> {
   OIN originalInputValue();
 

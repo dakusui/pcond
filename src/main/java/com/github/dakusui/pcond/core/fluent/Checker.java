@@ -418,7 +418,7 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     }
 
     private static <T> Predicate<T> junction(List<Predicate<T>> predicates, Function<List<Predicate<T>>, Predicate<T>> connector) {
-      requireState(requireNonNull(predicates), (List<Predicate<T>> l) -> !l.isEmpty(), () -> "No predicate was specified, yet.");
+      requireState(requireNonNull(predicates), (List<Predicate<T>> l) -> !l.isEmpty(), (l) -> "No predicate was specified, yet.: <" + l + ">");
       if (predicates.size() == 1)
         return predicates.get(0);
       return connector.apply(predicates);
