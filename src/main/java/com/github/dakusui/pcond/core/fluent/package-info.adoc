@@ -28,7 +28,7 @@ This is also a key concept of the `pcond` itself.
 
 |3
 |then
-|into
+|to
 |list
 |ofClass
 |`E.class`
@@ -80,8 +80,8 @@ This is also a key concept of the `pcond` itself.
 <AS_PHRASE>    ::= as <ELEMENT_TYPE_ARGUMENT>
                | as <CONTAINER_TYPE> <ELEMENT_TYPE_SPECIFIER>
                | as <ATOM_TYPE>
-<INTO_PHRASE>  ::= into <ATOM_TYPE> (with function)?
-               | into <CONTAINER_TYPE> <ELEMENT_TYPE_SPECIFIER> function?
+<INTO_PHRASE>  ::= to <ATOM_TYPE> (with function)?
+               | to <CONTAINER_TYPE> <ELEMENT_TYPE_SPECIFIER> function?
 
 
 <CONTAINER_TYPE>         ::= value | list | stream
