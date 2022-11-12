@@ -11,7 +11,7 @@ public interface IntegerTransformer<OIN> extends Transformer<IntegerTransformer<
 
     @Override
     public IntegerChecker<OIN> then() {
-      IntegerChecker<OIN> ret = new IntegerChecker.Impl<>(this.originalInputValue(), rootPredicateSupplier());
+      IntegerChecker<OIN> ret = new IntegerChecker.Impl<>(this.originalInputValue(), null);
       this.appendChild(tx -> ret.connectChildPredicates());
       return ret;
     }

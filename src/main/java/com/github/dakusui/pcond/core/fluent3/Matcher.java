@@ -1,31 +1,25 @@
-package com.github.dakusui.pcond.core.fluent2;
+package com.github.dakusui.pcond.core.fluent3;
 
 import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Objects.requireNonNull;
 
-public interface Matcher<M extends Matcher<M, OIN, T>, OIN, T> extends Statement<OIN> {
+public interface Matcher<
+    M extends Matcher<M, OIN, T>,
+    OIN,
+    T>
+    extends Statement<OIN> {
   default M appendPredicateAsChild(Predicate<T> predicate) {
     requireNonNull(predicate);
     return this.appendChild(m -> predicate);
-  }
-
-  @SuppressWarnings("unchecked")
-  default <N extends Matcher.Base<N, OIN, R>, R> N chain(Function<T, R> func, Function<? super M, N> conv) {
-    requireNonNull(func);
-    N next = requireNonNull(conv).apply((M) this);
-    this.appendChild(m -> Predicates.transform(func).check(conv.apply((M) this).connectChildPredicates()));
-    return next;
   }
 
   Predicate<T> connectChildPredicates();
@@ -44,40 +38,23 @@ public interface Matcher<M extends Matcher<M, OIN, T>, OIN, T> extends Statement
     return originalInputValue();
   }
 
-  Predicate<OIN> statementPredicate();
+  abstract Predicate<OIN> statementPredicate();
 
+ Matcher<?,OIN,OIN> root();
 
   /**
    * @param <M>
    * @param <OIN>
    * @param <T>
    */
-  class Base<
+  abstract class Base<
       M extends Matcher<M, OIN, T>,
       OIN,
       T> implements
       Matcher<M, OIN, T>,
       Function<M, Predicate<T>> {
-    enum JunctionType {
-      CONJUNCTION {
-        @SuppressWarnings("unchecked")
-        @Override
-        public <T> Predicate<T> connect(List<Predicate<T>> predicates) {
-          return Predicates.allOf(predicates.toArray(new Predicate[0]));
-        }
-      },
-      DISJUNCTION {
-        @SuppressWarnings("unchecked")
-        @Override
-        public <T> Predicate<T> connect(List<Predicate<T>> predicates) {
-          return Predicates.anyOf(predicates.toArray(new Predicate[0]));
-        }
-      };
+    private final Matcher<?, OIN, OIN> root;
 
-      public abstract <T> Predicate<T> connect(List<Predicate<T>> collect);
-    }
-
-    private final Supplier<Predicate<OIN>> rootPredicateSupplier;
     private final OIN                      rootValue;
 
 
@@ -85,9 +62,10 @@ public interface Matcher<M extends Matcher<M, OIN, T>, OIN, T> extends Statement
 
     private final List<Function<M, Predicate<? super T>>> childPredicates = new LinkedList<>();
 
-    protected Base(OIN rootValue, Supplier<Predicate<OIN>> rootPredicateSupplier) {
+    @SuppressWarnings("unchecked")
+    protected Base(OIN rootValue, Matcher<?, OIN, OIN> root) {
       this.rootValue = rootValue;
-      this.rootPredicateSupplier = rootPredicateSupplier;
+      this.root = root == null ? (Matcher<?, OIN, OIN>) this : root;
       this.junctionType(JunctionType.CONJUNCTION);
     }
 
@@ -125,12 +103,18 @@ public interface Matcher<M extends Matcher<M, OIN, T>, OIN, T> extends Statement
       return this.rootValue;
     }
 
+
+    @SuppressWarnings("unchecked")
     @Override
     public Predicate<OIN> statementPredicate() {
-      return rootPredicateSupplier != null ?
-          rootPredicateSupplier.get() :
-          // This cast should be safe, because if the root predicate is missing, this object must be the root.
-          (Predicate<OIN>) connectChildPredicates();
+      if (this == this.root)
+        return (Predicate<OIN>) connectChildPredicates();
+      return this.root.statementPredicate();
+    }
+
+    @Override
+    public Matcher<?, OIN, OIN> root() {
+      return this.root;
     }
 
     @Override
@@ -154,5 +138,24 @@ public interface Matcher<M extends Matcher<M, OIN, T>, OIN, T> extends Statement
       //noinspection unchecked
       return (M) this;
     }
+  }
+
+  enum JunctionType {
+    CONJUNCTION {
+      @SuppressWarnings("unchecked")
+      @Override
+      public <T> Predicate<T> connect(List<Predicate<T>> predicates) {
+        return Predicates.allOf(predicates.toArray(new Predicate[0]));
+      }
+    },
+    DISJUNCTION {
+      @SuppressWarnings("unchecked")
+      @Override
+      public <T> Predicate<T> connect(List<Predicate<T>> predicates) {
+        return Predicates.anyOf(predicates.toArray(new Predicate[0]));
+      }
+    };
+
+    public abstract <T> Predicate<T> connect(List<Predicate<T>> collect);
   }
 }
