@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.core.fluent3;
 import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Predicates;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 public interface Matcher<
     M extends Matcher<M, OIN, T>,
@@ -90,7 +92,11 @@ public interface Matcher<
       if (this.childPredicates.size() == 1)
         ret = (Predicate<T>) childPredicates.get(0).apply(me());
       else {
-        ret = (Predicate<T>) this.junctionType.connect(this.childPredicates.stream().map(each -> each.apply(me())).collect(Collectors.toList()));
+        ret = (Predicate<T>) this.junctionType.connect(
+            new ArrayList<>(this.childPredicates)
+                .stream()
+                .map(each -> each.apply(me()))
+                .collect(toList()));
       }
       return ret;
     }

@@ -29,19 +29,19 @@ public class Fluent2Example {
   }
 
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = ComparisonFailure.class)
   public void forthExample() {
     assertAll(
         statementForString("Hello").length().then().greaterThan(10));
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = ComparisonFailure.class)
   public void fifth() {
     assertAll(
         statementForString("Hello5").length().then().greaterThan(10).lessThan(1));
   }
 
-  @Test(expected = ConcurrentModificationException.class)
+  @Test(expected = StackOverflowError.class)
   public void test7() {
     assertAll(
         statementForString("Hello5")
@@ -49,7 +49,7 @@ public class Fluent2Example {
             .appendChild(tx -> tx.then().isNull()));
   }
 
-  @Test(expected = ConcurrentModificationException.class)
+  @Test(expected = StackOverflowError.class)
   public void test8() {
     assertAll(
         statementForString("Hello5")

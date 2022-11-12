@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.fluent3;
 
 import com.github.dakusui.pcond.core.fluent3.typesupports.IntegerTransformer;
+import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -22,12 +23,7 @@ public interface Transformer<
   default IntegerTransformer<OIN> toInteger(Function<? super T, Integer> func) {
     requireNonNull(func);
     IntegerTransformer<OIN> ret = new IntegerTransformer.Impl<>(this.originalInputValue(), this.root());
-    this.appendChild(new Function<TX, Predicate<? super T>>() {
-      @Override
-      public Predicate<? super T> apply(TX tx) {
-        return null;
-      }
-    }) ;
+    this.appendChild(tx -> Predicates.transform(func).check(ret.predicateForCurrentType())) ;
     return ret;
   }
 
