@@ -15,7 +15,7 @@ public interface Transformer<
     extends Matcher<TX, OIN, T> {
   default V then() {
     V ret = createCorrespondingChecker(this.root());
-    this.appendChild(tx -> ret.connectChildPredicates());
+    this.appendChild(tx -> ret.predicateForCurrentType());
     return ret;
   }
 

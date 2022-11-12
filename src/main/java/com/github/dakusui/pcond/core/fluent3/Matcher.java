@@ -22,7 +22,7 @@ public interface Matcher<
     return this.appendChild(m -> predicate);
   }
 
-  Predicate<T> connectChildPredicates();
+  Predicate<T> predicateForCurrentType();
 
   M allOf();
 
@@ -40,7 +40,7 @@ public interface Matcher<
 
   abstract Predicate<OIN> statementPredicate();
 
- Matcher<?,OIN,OIN> root();
+  Matcher<?, OIN, OIN> root();
 
   /**
    * @param <M>
@@ -55,12 +55,13 @@ public interface Matcher<
       Function<M, Predicate<T>> {
     private final Matcher<?, OIN, OIN> root;
 
-    private final OIN                      rootValue;
+    private final OIN rootValue;
 
 
     private JunctionType junctionType;
 
     private final List<Function<M, Predicate<? super T>>> childPredicates = new LinkedList<>();
+    private       Predicate<T>                            predicateForCurrentType;
 
     @SuppressWarnings("unchecked")
     protected Base(OIN rootValue, Matcher<?, OIN, OIN> root) {
@@ -75,9 +76,15 @@ public interface Matcher<
       return me();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public Predicate<T> connectChildPredicates() {
+    public Predicate<T> predicateForCurrentType() {
+      if (this.predicateForCurrentType == null)
+        this.predicateForCurrentType = createPredicateForCurrentType();
+      return this.predicateForCurrentType;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Predicate<T> createPredicateForCurrentType() {
       Predicate<T> ret;
       requireState(this, v -> !v.childPredicates.isEmpty(), (v) -> "No child has been added yet.: <" + v + ">");
       if (this.childPredicates.size() == 1)
@@ -108,7 +115,7 @@ public interface Matcher<
     @Override
     public Predicate<OIN> statementPredicate() {
       if (this == this.root)
-        return (Predicate<OIN>) connectChildPredicates();
+        return (Predicate<OIN>) predicateForCurrentType();
       return this.root.statementPredicate();
     }
 
@@ -119,7 +126,7 @@ public interface Matcher<
 
     @Override
     public Predicate<T> apply(M m) {
-      return connectChildPredicates();
+      return predicateForCurrentType();
     }
 
     @Override
