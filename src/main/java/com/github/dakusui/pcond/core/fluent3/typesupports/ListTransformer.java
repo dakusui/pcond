@@ -1,7 +1,6 @@
 package com.github.dakusui.pcond.core.fluent3.typesupports;
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
-import com.github.dakusui.pcond.core.fluent3.Transformer;
 
 import java.util.List;
 
@@ -10,7 +9,7 @@ public interface ListTransformer<
     R extends Matcher<R, R, OIN, OIN>,
     E
     > extends
-    Transformer<ListTransformer<OIN, R, E>, R, ListChecker<OIN, R, E>, OIN, List<E>> {
+    AbstractObjectTransformer<ListTransformer<OIN, R, E>, R, ListChecker<OIN, R, E>, OIN, List<E>> {
   class Impl<
       OIN,
       R  extends Matcher<R, R, OIN, OIN>,

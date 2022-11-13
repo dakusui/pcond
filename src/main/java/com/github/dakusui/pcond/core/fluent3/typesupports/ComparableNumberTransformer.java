@@ -1,7 +1,6 @@
 package com.github.dakusui.pcond.core.fluent3.typesupports;
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
-import com.github.dakusui.pcond.core.fluent3.Transformer;
 
 public interface ComparableNumberTransformer<
     TX extends ComparableNumberTransformer<TX, R, V, OIN, N>,
@@ -9,5 +8,5 @@ public interface ComparableNumberTransformer<
     V extends ComparableNumberChecker<V, R, OIN, N>,
     OIN,
     N extends Number & Comparable<N>> extends
-    Transformer<TX, R, V, OIN, N> {
+    AbstractObjectTransformer<TX, R, V, OIN, N> {
 }

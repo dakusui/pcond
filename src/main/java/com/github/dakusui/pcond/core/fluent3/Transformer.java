@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.fluent3;
 
+import com.github.dakusui.pcond.core.fluent3.typesupports.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent3.typesupports.IntegerTransformer;
 import com.github.dakusui.pcond.core.fluent3.typesupports.ListTransformer;
 import com.github.dakusui.pcond.core.fluent3.typesupports.StringTransformer;
@@ -20,6 +21,13 @@ public interface Transformer<
   default V then() {
     V ret = createCorrespondingChecker(this.root());
     this.appendChild(tx -> ret.toPredicate());
+    return ret;
+  }
+
+  default <EX extends AbstractObjectTransformer<EX, RX, ?, OIN, E>, E> EX toObject(Function<? super T, E> func) {
+    requireNonNull(func);
+    EX ret = null;
+    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate())) ;
     return ret;
   }
 

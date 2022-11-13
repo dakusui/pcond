@@ -31,10 +31,6 @@ public interface AbstractObjectTransformer<TX extends AbstractObjectTransformer<
     return this.toObject(Functions.call(MethodQuery.classMethod(klass, methodName, args)));
   }
 
-  @SuppressWarnings("unchecked")
-  default <T, RTX extends AbstractObjectTransformer<RTX, OIN, T>> RTX castTo(T value) {
-    return (RTX) this.exercise(Functions.castTo(value));
-  }
 
   abstract class Base<TX extends AbstractObjectTransformer<TX, OIN, OUT>, OIN, OUT>
       extends Transformer.Base<TX, OIN, OUT> implements AbstractObjectTransformer<TX, OIN, OUT> {
