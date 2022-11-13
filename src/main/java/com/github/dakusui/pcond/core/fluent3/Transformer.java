@@ -16,14 +16,14 @@ public interface Transformer<
     extends Matcher<TX, RX, OIN, T> {
   default V then() {
     V ret = createCorrespondingChecker(this.root());
-    this.appendChild(tx -> ret.builtPredicate());
+    this.appendChild(tx -> ret.toPredicate());
     return ret;
   }
 
   default IntegerTransformer<OIN, RX> toInteger(Function<? super T, Integer> func) {
     requireNonNull(func);
     IntegerTransformer<OIN, RX> ret = new IntegerTransformer.Impl<>(this.rootValue(), this.root());
-    this.appendChild(tx -> Predicates.transform(func).check(ret.builtPredicate())) ;
+    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate())) ;
     return ret;
   }
 

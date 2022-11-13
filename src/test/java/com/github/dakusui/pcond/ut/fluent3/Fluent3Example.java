@@ -55,7 +55,7 @@ public class Fluent3Example {
       assertAll(
           statementForString("Hello5")
               .then()
-              .appendChild(v -> v.isNull().builtPredicate())
+              .appendChild(v -> v.isNull().toPredicate())
               .toStatement());
     }
 
@@ -63,15 +63,15 @@ public class Fluent3Example {
     public void test7() {
       assertAll(
           statementForString("Hello5")
-              .appendChild(tx -> tx.then().isNotNull().builtPredicate())
-              .appendChild(tx -> tx.then().isNull().builtPredicate()).toStatement());
+              .appendChild(tx -> tx.then().isNotNull().toPredicate())
+              .appendChild(tx -> tx.then().isNull().toPredicate()).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test6b() {
       assertAll(
           statementForString("Hello5")
-              .appendChild(tx -> tx.then().isNull().builtPredicate()).toStatement());
+              .appendChild(tx -> tx.then().isNull().toPredicate()).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -79,15 +79,15 @@ public class Fluent3Example {
       assertAll(
           statementForString("Hello5")
               .anyOf()
-              .appendChild(tx -> tx.then().isNull().builtPredicate()).toStatement());
+              .appendChild(tx -> tx.then().isNull().toPredicate()).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test6d() {
       assertAll(
           statementForString("Hello5")
-              .appendChild(tx -> tx.appendPredicateAsChild(Objects::isNull).builtPredicate())
-              .appendChild(tx -> tx.appendPredicateAsChild(v -> !Objects.isNull(v)).builtPredicate()).toStatement()
+              .appendChild(tx -> tx.appendPredicateAsChild(Objects::isNull).toPredicate())
+              .appendChild(tx -> tx.appendPredicateAsChild(v -> !Objects.isNull(v)).toPredicate()).toStatement()
       );
     }
   }

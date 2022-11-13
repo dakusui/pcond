@@ -31,7 +31,7 @@ public interface Matcher<
     return this.appendChild(m -> predicate);
   }
 
-  Predicate<? super T> builtPredicate();
+  Predicate<? super T> toPredicate();
 
 
   OIN rootValue();
@@ -84,7 +84,7 @@ public interface Matcher<
     }
 
     @Override
-    public Predicate<T> builtPredicate() {
+    public Predicate<T> toPredicate() {
       if (this.builtPredicate == null)
         this.builtPredicate = buildPredicate();
       return this.builtPredicate;
@@ -128,7 +128,7 @@ public interface Matcher<
           @SuppressWarnings("unchecked")
           @Override
           public Predicate<OIN> statementPredicate() {
-            return (Predicate<OIN>) root().builtPredicate();
+            return (Predicate<OIN>) root().toPredicate();
           }
 
         };
