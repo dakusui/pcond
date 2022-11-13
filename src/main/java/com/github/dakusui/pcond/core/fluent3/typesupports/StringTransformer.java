@@ -11,7 +11,7 @@ public interface StringTransformer<
     OIN,
     R extends Matcher<R, R, OIN, OIN>
     > extends
-    AbstractObjectTransformer<StringTransformer<OIN, R>, R, StringChecker<OIN, R>, OIN, String> {
+    AbstractObjectTransformer<StringTransformer<OIN, R>, R, StringChecker<R, OIN>, OIN, String> {
   static <R extends Matcher<R, R, String, String>> StringTransformer<String, R> create(String value) {
     return new Impl<>(value, null);
   }
@@ -31,7 +31,7 @@ public interface StringTransformer<
     }
 
     @Override
-    public StringChecker<OIN, R> createCorrespondingChecker(R root) {
+    public StringChecker<R, OIN> createCorrespondingChecker(R root) {
       return new StringChecker.Impl<>(this.rootValue(), this.root());
     }
   }
@@ -48,11 +48,11 @@ public interface StringTransformer<
     return this.toString(Printables.function("toLowerCase", String::toLowerCase));
   }
 
-  default ListTransformer<OIN, R, String> split(String regex) {
+  default ListTransformer<R, OIN, String> split(String regex) {
     return this.toList(Printables.function("split[" + regex + "]", (String s) -> asList((s.split(regex)))));
   }
 
-  default IntegerTransformer<OIN, R> length() {
+  default IntegerTransformer<R, OIN> length() {
     return toInteger(Functions.length());
   }
 }

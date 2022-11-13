@@ -31,9 +31,9 @@ public interface Transformer<
     return ret;
   }
 
-  default IntegerTransformer<OIN, RX> toInteger(Function<? super T, Integer> func) {
+  default IntegerTransformer<RX, OIN> toInteger(Function<? super T, Integer> func) {
     requireNonNull(func);
-    IntegerTransformer<OIN, RX> ret = new IntegerTransformer.Impl<>(this.rootValue(), this.root());
+    IntegerTransformer<RX, OIN> ret = new IntegerTransformer.Impl<>(this.rootValue(), this.root());
     this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
     return ret;
   }
@@ -45,9 +45,9 @@ public interface Transformer<
     return ret;
   }
 
-  default <E> ListTransformer<OIN, RX, E> toList(Function<? super T, List<E>> func) {
+  default <E> ListTransformer<RX, OIN, E> toList(Function<? super T, List<E>> func) {
     requireNonNull(func);
-    ListTransformer<OIN, RX, E> ret = new ListTransformer.Impl<>(this.rootValue(), this.root());
+    ListTransformer<RX, OIN, E> ret = new ListTransformer.Impl<>(this.rootValue(), this.root());
     this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
     return ret;
   }

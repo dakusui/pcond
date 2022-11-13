@@ -14,34 +14,33 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 
 public interface ListChecker<
-    OIN,
-    R extends Matcher<R, R, OIN, OIN>,
+    R extends Matcher<R, R, OIN, OIN>, OIN,
     E
-    > extends Checker<ListChecker<OIN, R, E>, R, OIN, List<E>> {
-  default ListChecker<OIN, R, E> isEmpty() {
+    > extends Checker<ListChecker<R, OIN, E>, R, OIN, List<E>> {
+  default ListChecker<R, OIN, E> isEmpty() {
     return appendPredicateAsChild(Predicates.isEmpty());
   }
 
-  default ListChecker<OIN, R, E> isNotEmpty() {
+  default ListChecker<R, OIN, E> isNotEmpty() {
     return appendPredicateAsChild(Predicates.not(Predicates.isEmpty()));
   }
 
-  default ListChecker<OIN, R, E> contains(E element) {
+  default ListChecker<R, OIN, E> contains(E element) {
     return appendPredicateAsChild(Predicates.contains(element));
   }
 
   @SuppressWarnings("unchecked")
-  default ListChecker<OIN, R, E> findElementsInOrderBy(Predicate<E>... predicates) {
+  default ListChecker<R, OIN, E> findElementsInOrderBy(Predicate<E>... predicates) {
     return this.findElementsInOrderBy(asList(predicates));
   }
 
   @SuppressWarnings("unchecked")
-  default ListChecker<OIN,R, E> findElementsInOrderBy(List<Predicate<E>> predicates) {
+  default ListChecker<R, OIN, E> findElementsInOrderBy(List<Predicate<E>> predicates) {
     return appendPredicateAsChild(Predicates.findElements(predicates.toArray(new Predicate[0])));
   }
 
   @SuppressWarnings("unchecked")
-  default ListChecker<OIN, R, E> findElementsInOrder(E... elements) {
+  default ListChecker<R, OIN, E> findElementsInOrder(E... elements) {
     return this.findElementsInOrderBy(
         (Predicate<E>) Arrays.stream(elements)
             .map(v -> Printables.predicate("[" + v + "]", e -> Objects.equals(v, e)))
@@ -54,11 +53,11 @@ public interface ListChecker<
       R extends Matcher<R, R, OIN, OIN>,
       E
       > extends Matcher.Base<
-      ListChecker<OIN, R, E>,
+      ListChecker<R, OIN, E>,
       R,
       OIN,
       List<E>>
-      implements ListChecker<OIN, R, E> {
+      implements ListChecker<R, OIN, E> {
     protected Impl(OIN rootValue, R root) {
       super(rootValue, root);
     }

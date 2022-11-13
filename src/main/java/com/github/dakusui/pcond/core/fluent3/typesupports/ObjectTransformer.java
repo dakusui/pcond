@@ -18,12 +18,12 @@ public interface ObjectTransformer<
     AbstractObjectTransformer<
             ObjectTransformer<RX, OIN, E>,
             RX,
-            ObjectChecker<OIN, RX, E>,
+            ObjectChecker<RX, OIN, E>,
             OIN,
             E> {
   class Impl<
-      OIN,
       RX extends Matcher<RX, RX, OIN, OIN>,
+      OIN,
       E> extends
       Matcher.Base<
           ObjectTransformer<RX, OIN, E>,
@@ -36,7 +36,7 @@ public interface ObjectTransformer<
     }
 
     @Override
-    public ObjectChecker<OIN, RX, E> createCorrespondingChecker(RX root) {
+    public ObjectChecker<RX, OIN, E> createCorrespondingChecker(RX root) {
       return new ObjectChecker.Impl<>(this.rootValue(), root);
     }
   }

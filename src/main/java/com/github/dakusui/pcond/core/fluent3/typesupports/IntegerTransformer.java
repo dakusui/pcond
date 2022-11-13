@@ -3,29 +3,30 @@ package com.github.dakusui.pcond.core.fluent3.typesupports;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
 public interface IntegerTransformer<
-    OIN,
-    R extends Matcher<R, R, OIN, OIN>> extends
+    R extends Matcher<R, R, OIN, OIN>, OIN
+    > extends
     ComparableNumberTransformer<
-        IntegerTransformer<OIN, R>,
+        IntegerTransformer<R, OIN>,
         R,
-        IntegerChecker<OIN, R>,
+        IntegerChecker<R, OIN>,
         OIN,
         Integer> {
   class Impl<
-      OIN,
-      R extends Matcher<R, R, OIN, OIN>> extends
+      R extends Matcher<R, R, OIN, OIN>,
+      OIN
+      > extends
       Matcher.Base<
-          IntegerTransformer<OIN, R>,
+          IntegerTransformer<R, OIN>,
           R,
           OIN,
           Integer> implements
-      IntegerTransformer<OIN, R> {
+      IntegerTransformer<R, OIN> {
     public Impl(OIN rootValue, R root) {
       super(rootValue, root);
     }
 
     @Override
-    public IntegerChecker<OIN, R> createCorrespondingChecker(R root) {
+    public IntegerChecker<R, OIN> createCorrespondingChecker(R root) {
       return new IntegerChecker.Impl<>(this.rootValue(), this.root());
     }
   }

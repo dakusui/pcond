@@ -10,11 +10,10 @@ import com.github.dakusui.pcond.core.fluent3.Matcher;
  * Instead, see {@link CustomTransformer}.
  */
 public interface ObjectChecker<
-    OIN,
-    RX extends Matcher<RX, RX, OIN, OIN>,
+    RX extends Matcher<RX, RX, OIN, OIN>, OIN,
     E> extends
     AbstractObjectChecker<
-            ObjectChecker<OIN, RX, E>,
+            ObjectChecker<RX, OIN, E>,
             RX,
             OIN,
             E> {
@@ -23,11 +22,11 @@ public interface ObjectChecker<
       RX extends Matcher<RX, RX, OIN, OIN>,
       E> extends
       Matcher.Base<
-          ObjectChecker<OIN, RX, E>,
+          ObjectChecker<RX, OIN, E>,
           RX,
           OIN,
           E> implements
-      ObjectChecker<OIN, RX, E> {
+      ObjectChecker<RX, OIN, E> {
     public Impl(OIN rootValue, RX root) {
       super(rootValue, root);
     }
