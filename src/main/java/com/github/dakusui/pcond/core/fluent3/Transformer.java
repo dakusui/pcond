@@ -8,23 +8,24 @@ import java.util.function.Function;
 import static java.util.Objects.requireNonNull;
 
 public interface Transformer<
-    TX extends Transformer<TX, V, OIN, T>,
-    V extends Checker<V, OIN, T>,
+    TX extends Transformer<TX, RX, V, OIN, T>,
+    RX extends Matcher<RX, RX, OIN, OIN>,
+    V extends Checker<V, RX, OIN, T>,
     OIN,
     T>
-    extends Matcher<TX, OIN, T> {
+    extends Matcher<TX, RX, OIN, T> {
   default V then() {
     V ret = createCorrespondingChecker(this.root());
     this.appendChild(tx -> ret.cloneEmpty().builtPredicate());
     return ret;
   }
 
-  default IntegerTransformer<OIN> toInteger(Function<? super T, Integer> func) {
+  default IntegerTransformer<OIN, RX> toInteger(Function<? super T, Integer> func) {
     requireNonNull(func);
-    IntegerTransformer<OIN> ret = new IntegerTransformer.Impl<>(this.rootValue(), this.root());
+    IntegerTransformer<OIN, RX> ret = new IntegerTransformer.Impl<>(this.rootValue(), this.root());
     this.appendChild(tx -> Predicates.transform(func).check(ret.builtPredicate())) ;
     return ret;
   }
 
-  V createCorrespondingChecker(Matcher<?, OIN, OIN> root);
+  V createCorrespondingChecker(RX root);
 }

@@ -4,25 +4,29 @@ import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.core.fluent3.Transformer;
 import com.github.dakusui.pcond.forms.Functions;
 
-public interface StringTransformer<OIN> extends Transformer<StringTransformer<OIN>, StringChecker<OIN>, OIN, String> {
-  static StringTransformer<String> create(String value) {
+public interface StringTransformer<
+    OIN,
+    R extends Matcher<R, R, OIN, OIN>
+    > extends
+    Transformer<StringTransformer<OIN, R>, R, StringChecker<OIN, R>, OIN, String> {
+  static <R extends Matcher<R, R, String, String>> StringTransformer<String, R> create(String value) {
     return new Impl<>(value, null);
   }
 
-  class Impl<OIN> extends Matcher.Base<StringTransformer<OIN>, OIN, String> implements StringTransformer<OIN> {
+  class Impl<OIN, R extends Matcher<R, R, OIN, OIN>> extends Matcher.Base<StringTransformer<OIN, R>, R, OIN, String> implements StringTransformer<OIN, R> {
 
-    protected Impl(OIN rootValue, Matcher<?, OIN, OIN> root) {
+    protected Impl(OIN rootValue, R root) {
       super(rootValue, root);
     }
 
     @Override
-    public StringChecker<OIN> createCorrespondingChecker(Matcher<?, OIN, OIN> root) {
+    public StringChecker<OIN, R> createCorrespondingChecker(R root) {
       return new StringChecker.Impl<>(this.rootValue(), this.root());
     }
   }
 
 
-  default IntegerTransformer<OIN> length() {
+  default IntegerTransformer<OIN, R> length() {
     return toInteger(Functions.length());
   }
 }

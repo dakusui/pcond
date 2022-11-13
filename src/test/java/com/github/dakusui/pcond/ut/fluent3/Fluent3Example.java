@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut.fluent3;
 
+import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.core.fluent3.typesupports.StringChecker;
 import com.github.dakusui.pcond.core.fluent3.typesupports.StringTransformer;
 import org.junit.ComparisonFailure;
@@ -11,7 +12,7 @@ import static com.github.dakusui.thincrest.TestFluents.assertAll;
 
 @RunWith(Enclosed.class)
 public class Fluent3Example {
-  static StringTransformer<String> statementForString(String value) {
+  static <R extends Matcher<R, R, String, String>> StringTransformer<String, R> statementForString(String value) {
     return StringTransformer.create(value);
   }
 

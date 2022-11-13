@@ -14,12 +14,19 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
 public interface Matcher<
-    M extends Matcher<M, OIN, T>,
+    M extends Matcher<M, R, OIN, T>,
+    R extends Matcher<R, R, OIN, OIN>,
     OIN,
     T>
     extends
     Statement<OIN>,
     Cloneable {
+  M allOf();
+
+  M anyOf();
+
+  M appendChild(Function<M, Predicate<? super T>> child);
+
   default M appendPredicateAsChild(Predicate<T> predicate) {
     requireNonNull(predicate);
     return this.appendChild(m -> predicate);
@@ -27,15 +34,8 @@ public interface Matcher<
 
   Predicate<T> builtPredicate();
 
-  M allOf();
-
-  M anyOf();
-
-
-  M appendChild(Function<M, Predicate<? super T>> child);
 
   OIN rootValue();
-
   @Override
   default OIN statementValue() {
     return rootValue();
@@ -43,7 +43,7 @@ public interface Matcher<
 
   Predicate<OIN> statementPredicate();
 
-  Matcher<?, OIN, OIN> root();
+  R root();
 
   M cloneEmpty();
 
@@ -53,12 +53,13 @@ public interface Matcher<
    * @param <T>
    */
   abstract class Base<
-      M extends Matcher<M, OIN, T>,
+      M extends Matcher<M, R, OIN, T>,
+      R extends Matcher<R, R, OIN, OIN>,
       OIN,
       T> implements
-      Matcher<M, OIN, T>,
+      Matcher<M, R, OIN, T>,
       Function<M, Predicate<T>> {
-    private final Matcher<?, OIN, OIN> root;
+    private final R root;
 
     private final OIN rootValue;
 
@@ -69,10 +70,20 @@ public interface Matcher<
     private       Predicate<OIN>                          rootPredicate   = null;
 
     @SuppressWarnings("unchecked")
-    protected Base(OIN rootValue, Matcher<?, OIN, OIN> root) {
+    protected Base(OIN rootValue, R root) {
       this.rootValue = rootValue;
-      this.root = root == null ? (Matcher<?, OIN, OIN>) this : root;
-      this.junctionType(JunctionType.CONJUNCTION);
+      this.root = root == null ? (R) this : root;
+      this.allOf();
+    }
+
+    @Override
+    public M allOf() {
+      return junctionType(JunctionType.CONJUNCTION);
+    }
+
+    @Override
+    public M anyOf() {
+      return junctionType(JunctionType.DISJUNCTION);
     }
 
     @Override
@@ -84,12 +95,12 @@ public interface Matcher<
     @Override
     public Predicate<T> builtPredicate() {
       if (this.builtPredicate == null)
-        this.builtPredicate = createPredicateForCurrentType();
+        this.builtPredicate = buildPredicate();
       return this.builtPredicate;
     }
 
     @SuppressWarnings("unchecked")
-    private Predicate<T> createPredicateForCurrentType() {
+    private Predicate<T> buildPredicate() {
       Predicate<T> ret;
       requireState(this, v -> !v.childPredicates.isEmpty(), (v) -> "No child has been added yet.: <" + v + ">");
       if (this.childPredicates.size() == 1)
@@ -105,18 +116,13 @@ public interface Matcher<
     }
 
     @Override
-    public M allOf() {
-      return junctionType(JunctionType.CONJUNCTION);
-    }
-
-    @Override
-    public M anyOf() {
-      return junctionType(JunctionType.DISJUNCTION);
-    }
-
-    @Override
     public OIN rootValue() {
       return this.rootValue;
+    }
+
+    @Override
+    public R root() {
+      return this.root;
     }
 
 
@@ -125,22 +131,10 @@ public interface Matcher<
       return rootPredicate();
     }
 
-    private Predicate<OIN> rootPredicate() {
-      if (rootPredicate == null)
-        rootPredicate = createRootPredicate();
-      return rootPredicate;
-    }
-
     @SuppressWarnings("unchecked")
     private Predicate<OIN> createRootPredicate() {
-      if (this == this.root)
-        return (Predicate<OIN>) builtPredicate();
-      return ((Base<?, OIN, T>)this.root).createRootPredicate();
-    }
-
-    @Override
-    public Matcher<?, OIN, OIN> root() {
-      return this.root;
+      assert this == this.root;
+      return (Predicate<OIN>) builtPredicate();
     }
 
     @Override
@@ -150,11 +144,7 @@ public interface Matcher<
 
     @Override
     public boolean test(OIN oin) {
-      return testRootValue(oin);
-    }
-
-    private boolean testRootValue(OIN oin) {
-      return rootPredicate().test(oin);
+      return testValueWithRootPredicate(oin);
     }
 
     @SuppressWarnings("unchecked")
@@ -167,16 +157,31 @@ public interface Matcher<
       }
     }
 
-    @SuppressWarnings("unchecked")
+    //@SuppressWarnings("unchecked")
     public M cloneEmpty() {
       return clone();
-//      return ((Base<M, OIN, T>) clone()).makeEmpty();
+      //      return ((Base<M, OIN, T>) clone()).makeEmpty();
     }
-
 
     M makeEmpty() {
       this.childPredicates.clear();
       return me();
+    }
+
+    private boolean isRootMatcher() {
+      boolean ret = this == this.root;
+      assert ret || this.rootPredicate == null;
+      return ret;
+    }
+
+    private Predicate<OIN> rootPredicate() {
+      if (isRootMatcher())
+        rootPredicate = createRootPredicate();
+      return this.root().builtPredicate();
+    }
+
+    private boolean testValueWithRootPredicate(OIN oin) {
+      return rootPredicate().test(oin);
     }
 
     private M junctionType(JunctionType junctionType) {
