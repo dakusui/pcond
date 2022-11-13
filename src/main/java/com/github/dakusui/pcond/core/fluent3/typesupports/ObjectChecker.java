@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.fluent3.typesupports;
 
+import com.github.dakusui.pcond.core.fluent3.AbstractObjectChecker;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
 /**
@@ -10,21 +11,23 @@ import com.github.dakusui.pcond.core.fluent3.Matcher;
  */
 public interface ObjectChecker<
     OIN,
-    RX extends Matcher<RX, RX, OIN, OIN>> extends
+    RX extends Matcher<RX, RX, OIN, OIN>,
+    E> extends
     AbstractObjectChecker<
-        ObjectChecker<OIN, RX>,
-        RX,
-        OIN,
-        Object> {
-  class Impl<
+            ObjectChecker<OIN, RX, E>,
+            RX,
+            OIN,
+            E> {
+  public class Impl<
       OIN,
-      RX extends Matcher<RX, RX, OIN, OIN>> extends
+      RX extends Matcher<RX, RX, OIN, OIN>,
+      E> extends
       Matcher.Base<
-          ObjectChecker<OIN, RX>,
+          ObjectChecker<OIN, RX, E>,
           RX,
           OIN,
-          Object> implements
-      ObjectChecker<OIN, RX> {
+          E> implements
+      ObjectChecker<OIN, RX, E> {
     public Impl(OIN rootValue, RX root) {
       super(rootValue, root);
     }

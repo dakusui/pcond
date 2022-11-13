@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.fluent3.typesupports;
 
+import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
 
@@ -10,29 +11,32 @@ import com.github.dakusui.pcond.core.fluent3.Matcher;
  * Instead, see {@link CustomTransformer}.
  */
 public interface ObjectTransformer<
+    RX extends Matcher<RX, RX, OIN, OIN>,
     OIN,
-    RX extends Matcher<RX, RX, OIN, OIN>> extends
+    E
+    > extends
     AbstractObjectTransformer<
-        ObjectTransformer<OIN, RX>,
-        RX,
-        ObjectChecker<OIN, RX>,
-        OIN,
-        Object> {
+            ObjectTransformer<RX, OIN, E>,
+            RX,
+            ObjectChecker<OIN, RX, E>,
+            OIN,
+            E> {
   class Impl<
       OIN,
-      RX extends Matcher<RX, RX, OIN, OIN>> extends
+      RX extends Matcher<RX, RX, OIN, OIN>,
+      E> extends
       Matcher.Base<
-          ObjectTransformer<OIN, RX>,
+          ObjectTransformer<RX, OIN, E>,
           RX,
           OIN,
-          Object> implements
-      ObjectTransformer<OIN, RX> {
+          E> implements
+      ObjectTransformer<RX, OIN, E> {
     public Impl(OIN rootValue, RX root) {
       super(rootValue, root);
     }
 
     @Override
-    public ObjectChecker<OIN, RX> createCorrespondingChecker(RX root) {
+    public ObjectChecker<OIN, RX, E> createCorrespondingChecker(RX root) {
       return new ObjectChecker.Impl<>(this.rootValue(), root);
     }
   }

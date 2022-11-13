@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core.fluent3.typesupports;
 
+import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;

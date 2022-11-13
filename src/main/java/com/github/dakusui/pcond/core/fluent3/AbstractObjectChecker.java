@@ -1,7 +1,5 @@
-package com.github.dakusui.pcond.core.fluent3.typesupports;
+package com.github.dakusui.pcond.core.fluent3;
 
-import com.github.dakusui.pcond.core.fluent3.Checker;
-import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.forms.Predicates;
 

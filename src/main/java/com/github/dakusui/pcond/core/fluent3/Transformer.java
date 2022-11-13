@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.core.fluent3;
 
-import com.github.dakusui.pcond.core.fluent3.typesupports.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent3.typesupports.IntegerTransformer;
 import com.github.dakusui.pcond.core.fluent3.typesupports.ListTransformer;
+import com.github.dakusui.pcond.core.fluent3.typesupports.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent3.typesupports.StringTransformer;
 import com.github.dakusui.pcond.forms.Predicates;
 
@@ -24,34 +24,31 @@ public interface Transformer<
     return ret;
   }
 
-  default <
-      EX extends AbstractObjectTransformer<EX, RX, EV, OIN, E>,
-      EV extends Checker<EV, RX, OIN, E>,
-      E> EX toObject(Function<? super T, E> func) {
+  default <E> ObjectTransformer<RX, OIN, E> toObject(Function<? super T, E> func) {
     requireNonNull(func);
-    EX ret = null;
-    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate())) ;
+    ObjectTransformer<RX, OIN, E> ret = new ObjectTransformer.Impl<>(this.rootValue(), this.root());
+    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
     return ret;
   }
 
   default IntegerTransformer<OIN, RX> toInteger(Function<? super T, Integer> func) {
     requireNonNull(func);
     IntegerTransformer<OIN, RX> ret = new IntegerTransformer.Impl<>(this.rootValue(), this.root());
-    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate())) ;
+    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
     return ret;
   }
 
   default StringTransformer<OIN, RX> toString(Function<? super T, String> func) {
     requireNonNull(func);
     StringTransformer<OIN, RX> ret = new StringTransformer.Impl<>(this.rootValue(), this.root());
-    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate())) ;
+    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
     return ret;
   }
 
   default <E> ListTransformer<OIN, RX, E> toList(Function<? super T, List<E>> func) {
     requireNonNull(func);
     ListTransformer<OIN, RX, E> ret = new ListTransformer.Impl<>(this.rootValue(), this.root());
-    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate())) ;
+    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
     return ret;
   }
 
