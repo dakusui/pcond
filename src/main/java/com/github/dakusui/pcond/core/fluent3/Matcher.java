@@ -26,7 +26,7 @@ public interface Matcher<
 
   M appendChild(Function<M, Predicate<? super T>> child);
 
-  default M appendPredicateAsChild(Predicate<T> predicate) {
+  default M appendPredicateAsChild(Predicate<? super T> predicate) {
     requireNonNull(predicate);
     return this.appendChild(m -> predicate);
   }
