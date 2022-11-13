@@ -6,24 +6,24 @@ import com.github.dakusui.pcond.core.fluent3.Matcher;
 import java.util.stream.Stream;
 
 public interface StreamTransformer<
-    OIN,
-    R extends Matcher<R, R, OIN, OIN>,
+    R extends Matcher<R, R, OIN, OIN>, OIN,
     E> extends
     AbstractObjectTransformer<
-        StreamTransformer<OIN, R, E>,
+        StreamTransformer<R, OIN, E>,
         R,
         StreamChecker<R, OIN, E>,
         OIN,
         Stream<E>
         > {
-  class Impl<OIN,
+  class Impl<
       R extends Matcher<R, R, OIN, OIN>,
+      OIN,
       E> extends
-      Matcher.Base<StreamTransformer<OIN, R, E>,
+      Matcher.Base<StreamTransformer<R, OIN, E>,
           R,
           OIN,
           Stream<E>> implements
-      StreamTransformer<OIN, R, E> {
+      StreamTransformer<R, OIN, E> {
 
     public Impl(OIN rootValue, R root) {
       super(rootValue, root);
