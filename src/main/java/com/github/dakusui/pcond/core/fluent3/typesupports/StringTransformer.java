@@ -16,7 +16,15 @@ public interface StringTransformer<
     return new Impl<>(value, null);
   }
 
-  class Impl<OIN, R extends Matcher<R, R, OIN, OIN>> extends Matcher.Base<StringTransformer<OIN, R>, R, OIN, String> implements StringTransformer<OIN, R> {
+  class Impl<
+      OIN,
+      R extends Matcher<R, R, OIN, OIN>> extends
+      Matcher.Base<
+          StringTransformer<OIN, R>,
+          R,
+          OIN,
+          String> implements
+      StringTransformer<OIN, R> {
 
     public Impl(OIN rootValue, R root) {
       super(rootValue, root);
