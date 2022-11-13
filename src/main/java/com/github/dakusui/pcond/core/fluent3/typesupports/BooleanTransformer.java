@@ -6,13 +6,14 @@ import com.github.dakusui.pcond.core.fluent3.Matcher;
 public interface BooleanTransformer<
     RX extends Matcher<RX, RX, OIN, OIN>,
     OIN
-    > extends AbstractObjectTransformer<
-    BooleanTransformer<RX, OIN>,
-    RX,
-    BooleanChecker<RX, OIN>,
-    OIN,
-    Boolean
-    > {
+    > extends
+    AbstractObjectTransformer<
+        BooleanTransformer<RX, OIN>,
+        RX,
+        BooleanChecker<RX, OIN>,
+        OIN,
+        Boolean
+        > {
   class Impl<
       RX extends Matcher<RX, RX, OIN, OIN>,
       OIN

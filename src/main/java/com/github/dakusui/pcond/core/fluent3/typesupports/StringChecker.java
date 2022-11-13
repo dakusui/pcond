@@ -27,7 +27,8 @@ public interface StringChecker<
       Matcher.Base<
           StringChecker<R, OIN>,
           R,
-          OIN, String> implements
+          OIN,
+          String> implements
       StringChecker<R, OIN> {
     protected Impl(OIN rootValue, R root) {
       super(rootValue, root);

@@ -11,7 +11,12 @@ public interface StringTransformer<
     OIN,
     R extends Matcher<R, R, OIN, OIN>
     > extends
-    AbstractObjectTransformer<StringTransformer<OIN, R>, R, StringChecker<R, OIN>, OIN, String> {
+    AbstractObjectTransformer<
+        StringTransformer<OIN, R>,
+        R,
+        StringChecker<R, OIN>,
+        OIN,
+        String> {
   static <R extends Matcher<R, R, String, String>> StringTransformer<String, R> create(String value) {
     return new Impl<>(value, null);
   }
