@@ -68,15 +68,6 @@ public class Fluent3Example {
     }
 
     @Test(expected = ComparisonFailure.class)
-    public void test8() {
-      assertAll(
-          statementForString("Hello5")
-              .then()
-              .appendChild(v -> v.isNull().toStatement())
-              .appendChild(v -> v.isNotNull().toStatement())
-              .toStatement());
-    }
-    @Test(expected = ComparisonFailure.class)
     public void test6b() {
       assertAll(
           statementForString("Hello5")
@@ -121,6 +112,16 @@ public class Fluent3Example {
       assertAll(
           statementForString("Hello5")
               .appendChild(tx -> tx.length().then().greaterThan(10).root().toStatement()).toStatement());
+    }
+
+    @Test(expected = StackOverflowError.class)
+    public void test8() {
+      assertAll(
+          statementForString("Hello5")
+              .then()
+              .appendChild(v -> v.isNull().toStatement())
+              .appendChild(v -> v.isNotNull().toStatement())
+              .toStatement());
     }
   }
 }

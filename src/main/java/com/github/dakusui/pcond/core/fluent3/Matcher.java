@@ -59,7 +59,6 @@ public interface Matcher<
 
     private final List<Function<M, Predicate<? super T>>> childPredicates = new LinkedList<>();
     private       Predicate<T>                            builtPredicate;
-    private       Predicate<OIN>                          rootPredicate   = null;
 
     @SuppressWarnings("unchecked")
     protected Base(OIN rootValue, R root) {
@@ -129,23 +128,16 @@ public interface Matcher<
           @SuppressWarnings("unchecked")
           @Override
           public Predicate<OIN> statementPredicate() {
-            return (Predicate<OIN>) rootPredicate();
+            return (Predicate<OIN>) root().builtPredicate();
           }
 
           @Override
           public boolean test(OIN oin) {
-            return testValueWithRootPredicate(oin);
+            return root().builtPredicate().test(oin);
           }
         };
       }
       return root.toStatement();
-    }
-
-
-    @SuppressWarnings("unchecked")
-    private Predicate<OIN> createRootPredicate() {
-      assert this == this.root;
-      return (Predicate<OIN>) builtPredicate();
     }
 
     @SuppressWarnings("unchecked")
@@ -174,19 +166,7 @@ public interface Matcher<
     }
 
     private boolean isRootMatcher() {
-      boolean ret = this == this.root;
-      assert ret || this.rootPredicate == null;
-      return ret;
-    }
-
-    private Predicate<? super OIN> rootPredicate() {
-      if (isRootMatcher())
-        rootPredicate = createRootPredicate();
-      return this.root().builtPredicate();
-    }
-
-    private boolean testValueWithRootPredicate(OIN oin) {
-      return rootPredicate().test(oin);
+      return this == this.root;
     }
 
     private M junctionType(JunctionType junctionType) {
