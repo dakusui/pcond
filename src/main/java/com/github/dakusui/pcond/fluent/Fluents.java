@@ -169,7 +169,7 @@ public class Fluents {
   @SafeVarargs
   public static <T> Statement<T> statementAllOf(T value, Predicate<? super T>... predicateArray) {
     List<Predicate<? super T>> predicates = asList(predicateArray);
-    class Stmt implements Statement<T>, Evaluable.Conjunction<T> {
+    class Stmt implements Statement<T>, Evaluable.Conjunction<T>, Predicate<T> {
       @SuppressWarnings("unchecked")
       final List<Evaluable<? super T>> children = predicates.stream()
           .map(each -> each instanceof Evaluable ?
@@ -220,7 +220,7 @@ public class Fluents {
   @SafeVarargs
   public static <T> Statement<T> statementAnyOf(T value, Predicate<? super T>... predicateArray) {
     List<Predicate<? super T>> predicates = asList(predicateArray);
-    class Stmt implements Statement<T>, Evaluable.Disjunction<T> {
+    class Stmt implements Statement<T>, Evaluable.Disjunction<T>, Predicate<T> {
       @SuppressWarnings("unchecked")
       final List<Evaluable<? super T>> children = predicates.stream()
           .map(each -> each instanceof Evaluable ?

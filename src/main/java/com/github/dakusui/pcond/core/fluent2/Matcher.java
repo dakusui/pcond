@@ -5,7 +5,6 @@ import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Objects.requireNonNull;
 
-public interface Matcher<M extends Matcher<M, OIN, T>, OIN, T> extends Statement<OIN> {
+public interface Matcher<M extends Matcher<M, OIN, T>, OIN, T> extends Statement<OIN>, Predicate<OIN> {
   default M appendPredicateAsChild(Predicate<T> predicate) {
     requireNonNull(predicate);
     return this.appendChild(m -> predicate);

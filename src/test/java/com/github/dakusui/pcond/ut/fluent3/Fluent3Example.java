@@ -92,6 +92,7 @@ public class Fluent3Example {
     }
   }
 
+  /*
   public static class OnGoing {
 
     @Test(expected = StackOverflowError.class)
@@ -124,4 +125,5 @@ public class Fluent3Example {
               .toStatement());
     }
   }
+  */
 }

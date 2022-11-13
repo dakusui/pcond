@@ -2,7 +2,6 @@ package com.github.dakusui.thincrest.examples;
 
 import com.github.dakusui.pcond.core.fluent.Checker;
 import com.github.dakusui.pcond.core.fluent.checkers.StringChecker;
-import com.github.dakusui.pcond.core.fluent.transformers.StringTransformer;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.utils.TestUtils;
 import com.github.dakusui.thincrest.TestFluents;
@@ -228,7 +227,6 @@ public class MoreFluentStyleExample {
   @Test
   public void checkTwoAspectsOfOneValue_2() {
     List<String> list = asList("helloWorld", "HI");
-    String s = list.get(0);
     TestFluents.assertAll(
         value(list).size()
             .then()
@@ -244,7 +242,6 @@ public class MoreFluentStyleExample {
   @Test
   public void checkTwoAspectsOfOneValue_3a() {
     List<String> list = asList("helloWorld", "HI");
-    String s = list.get(0);
     TestFluents.assertAll(
         value(list).thenAllOf(asList(
             tx -> tx.size().then().greaterThan(3),
@@ -253,28 +250,8 @@ public class MoreFluentStyleExample {
   }
 
   @Test
-  public void checkTwoAspectsOfOneValue_3aa() {
-    List<String> list = asList("helloWorld", "HI");
-    String s = list.get(0);
-    TestFluents.assertAll(
-        value(list)
-            .asListOfClass(String.class)
-            .thenAllOf(asList(
-                tx -> tx.then().isEmpty(),
-                tx -> tx.elementAt(0)
-                    .asString()
-                    .thenAllOf(asList(
-                        ty -> ty.then().isNotNull(),
-                        ty -> ty.thenAnyOf(asList(
-                            tz -> tz.length().then().greaterThan(100),
-                            tz -> tz.then().findSubstrings("hello", "XYZ", "World"))))))));
-  }
-
-
-  @Test
   public void checkTwoAspectsOfOneValue_3b() {
     List<String> list = asList("helloWorld", "HI");
-    String s = list.get(0);
     validateStatement(
         value(list).thenAllOf(asList(
             tx -> tx.size().then().greaterThan(3),
@@ -285,34 +262,10 @@ public class MoreFluentStyleExample {
   @Test
   public void checkTwoAspectsOfOneValue_3c() {
     List<String> list = asList("helloWorld", "HI");
-    String s = list.get(0);
     validateStatement(
         value(list).thenAllOf(asList(
             tx -> tx.then().isNull(),
             tx -> tx.elementAt(0).asString().then().isNotNull(),
             tx -> tx.elementAt(0).asString().length().then().greaterThan(100))));
   }
-
-  @Test
-  public void checkTwoAspectsOfOneValue_4() {
-    List<String> list = asList("helloWorld", "HI");
-    TestFluents.assertStatement(
-        value(list).thenAllOf(asList(
-            tx -> tx.size().then().greaterThan(3),
-            tx -> tx.elementAt(0).asString().thenAllOf(asList(
-                (StringTransformer<List<String>> ty) -> ty.then().isNotNull(),
-                (StringTransformer<List<String>> ty) -> ty.asString().length().then().greaterThan(100))))));
-  }
-
-  @Test
-  public void checkTwoAspectsOfOneValue_5() {
-    List<String> list = asList("helloWorld", "HI");
-    TestFluents.assertStatement(
-        value(list).thenAllOf(asList(
-            tx -> tx.size().then().greaterThan(3),
-            tx -> tx.elementAt(0).thenAllOf(asList(
-                ty -> ty.then().isNotNull(),
-                ty -> ty.asString().length().then().greaterThan(100))))));
-  }
-
 }

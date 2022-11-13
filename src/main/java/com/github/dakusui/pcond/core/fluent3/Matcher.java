@@ -131,10 +131,6 @@ public interface Matcher<
             return (Predicate<OIN>) root().builtPredicate();
           }
 
-          @Override
-          public boolean test(OIN oin) {
-            return root().builtPredicate().test(oin);
-          }
         };
       }
       return root.toStatement();

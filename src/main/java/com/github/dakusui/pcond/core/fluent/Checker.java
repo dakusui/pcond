@@ -42,7 +42,8 @@ public interface Checker<V extends Checker<V, OIN, T>, OIN, T> extends
     AsPhraseFactory.ForChecker<OIN>,
     Statement<OIN>,
     Evaluable.Transformation<OIN, T>,
-    Identifiable {
+    Identifiable,
+    Predicate<OIN> {
   String transformerName();
 
   V addPredicate(Predicate<? super T> predicate);

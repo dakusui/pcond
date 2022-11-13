@@ -81,7 +81,7 @@ public interface Transformer<
         Transformer.this.originalInputValue(),
         funcs.stream()
             .map(each -> each.apply((TX) Transformer.this))
-            .map(FluentUtils::toPredicateIfChecker)
+            .map((Statement<OIN> v) -> v)
             .toArray(Predicate[]::new));
   }
 
