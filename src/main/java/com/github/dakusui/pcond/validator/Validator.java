@@ -390,7 +390,8 @@ public interface Validator {
    */
   @SuppressWarnings("unchecked")
   default <T> T checkValueAndThrowIfFails(
-      T value, Predicate<? super T> cond,
+      T value,
+      Predicate<? super T> cond,
       BiFunction<T, Predicate<? super T>, String> messageComposerFunction,
       ExceptionFactory<Throwable> exceptionComposerFunction) {
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {

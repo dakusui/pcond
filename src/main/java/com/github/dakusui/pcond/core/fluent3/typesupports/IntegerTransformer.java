@@ -11,7 +11,7 @@ public interface IntegerTransformer<OIN> extends Transformer<IntegerTransformer<
 
     @Override
     public IntegerChecker<OIN> createCorrespondingChecker(Matcher<?, OIN, OIN> root) {
-      return new IntegerChecker.Impl<>(originalInputValue(), root);
+      return new IntegerChecker.Impl<>(rootValue(), root);
     }
   }
 }

@@ -4,8 +4,6 @@ import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.core.fluent3.Transformer;
 import com.github.dakusui.pcond.forms.Functions;
 
-import java.util.function.Function;
-
 public interface StringTransformer<OIN> extends Transformer<StringTransformer<OIN>, StringChecker<OIN>, OIN, String> {
   static StringTransformer<String> create(String value) {
     return new Impl<>(value, null);
@@ -19,7 +17,7 @@ public interface StringTransformer<OIN> extends Transformer<StringTransformer<OI
 
     @Override
     public StringChecker<OIN> createCorrespondingChecker(Matcher<?, OIN, OIN> root) {
-      return new StringChecker.Impl<>(this.originalInputValue(), this.root());
+      return new StringChecker.Impl<>(this.rootValue(), this.root());
     }
   }
 
