@@ -19,7 +19,6 @@ public interface Matcher<
     OIN,
     T>
     extends
-    Statement<OIN>,
     Cloneable {
   M allOf();
 
@@ -32,20 +31,14 @@ public interface Matcher<
     return this.appendChild(m -> predicate);
   }
 
-  Predicate<T> builtPredicate();
+  Predicate<? super T> builtPredicate();
 
 
   OIN rootValue();
-  @Override
-  default OIN statementValue() {
-    return rootValue();
-  }
-
-  Predicate<OIN> statementPredicate();
 
   R root();
 
-  M cloneEmpty();
+  Statement<OIN> toStatement();
 
   /**
    * @param <M>
@@ -57,8 +50,7 @@ public interface Matcher<
       R extends Matcher<R, R, OIN, OIN>,
       OIN,
       T> implements
-      Matcher<M, R, OIN, T>,
-      Function<M, Predicate<T>> {
+      Matcher<M, R, OIN, T> {
     private final R root;
 
     private final OIN rootValue;
@@ -125,26 +117,35 @@ public interface Matcher<
       return this.root;
     }
 
-
     @Override
-    public Predicate<OIN> statementPredicate() {
-      return rootPredicate();
+    public Statement<OIN> toStatement() {
+      if (isRootMatcher()) {
+        return new Statement<OIN>() {
+          @Override
+          public OIN statementValue() {
+            return rootValue();
+          }
+
+          @SuppressWarnings("unchecked")
+          @Override
+          public Predicate<OIN> statementPredicate() {
+            return (Predicate<OIN>) rootPredicate();
+          }
+
+          @Override
+          public boolean test(OIN oin) {
+            return testValueWithRootPredicate(oin);
+          }
+        };
+      }
+      return root().toStatement();
     }
+
 
     @SuppressWarnings("unchecked")
     private Predicate<OIN> createRootPredicate() {
       assert this == this.root;
       return (Predicate<OIN>) builtPredicate();
-    }
-
-    @Override
-    public Predicate<T> apply(M m) {
-      return builtPredicate();
-    }
-
-    @Override
-    public boolean test(OIN oin) {
-      return testValueWithRootPredicate(oin);
     }
 
     @SuppressWarnings("unchecked")
@@ -157,10 +158,14 @@ public interface Matcher<
       }
     }
 
-    //@SuppressWarnings("unchecked")
+    @Override
+    public String toString() {
+      return this.getClass().getSimpleName() + ":" + this.childPredicates;
+    }
+
+    @SuppressWarnings("unchecked")
     public M cloneEmpty() {
-      return clone();
-      //      return ((Base<M, OIN, T>) clone()).makeEmpty();
+      return ((Base<M, R, OIN, T>) clone()).makeEmpty();
     }
 
     M makeEmpty() {
@@ -174,7 +179,7 @@ public interface Matcher<
       return ret;
     }
 
-    private Predicate<OIN> rootPredicate() {
+    private Predicate<? super OIN> rootPredicate() {
       if (isRootMatcher())
         rootPredicate = createRootPredicate();
       return this.root().builtPredicate();
