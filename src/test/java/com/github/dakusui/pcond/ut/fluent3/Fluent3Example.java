@@ -65,6 +65,11 @@ public class Fluent3Example {
           statementForString("Hello5")
               .appendChild(tx -> tx.then().isNotNull().builtPredicate())
               .appendChild(tx -> tx.then().isNull().builtPredicate()).toStatement());
+
+      assertAll(
+          statementForString("Hello5")
+              .appendChild(tx -> tx.then().isNotNull().toStatement())
+              .appendChild(tx -> tx.then().isNull().toStatement()).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)

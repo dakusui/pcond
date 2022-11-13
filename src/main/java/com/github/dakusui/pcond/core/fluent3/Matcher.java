@@ -138,7 +138,7 @@ public interface Matcher<
           }
         };
       }
-      return root().toStatement();
+      return root.toStatement();
     }
 
 
