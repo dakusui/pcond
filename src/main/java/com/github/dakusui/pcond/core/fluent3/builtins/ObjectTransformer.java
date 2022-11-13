@@ -1,6 +1,7 @@
-package com.github.dakusui.pcond.core.fluent3.typesupports;
+package com.github.dakusui.pcond.core.fluent3.builtins;
 
 import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
+import com.github.dakusui.pcond.core.fluent3.CustomTransformer;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
 

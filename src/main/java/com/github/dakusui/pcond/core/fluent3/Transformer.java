@@ -1,9 +1,9 @@
 package com.github.dakusui.pcond.core.fluent3;
 
-import com.github.dakusui.pcond.core.fluent3.typesupports.IntegerTransformer;
-import com.github.dakusui.pcond.core.fluent3.typesupports.ListTransformer;
-import com.github.dakusui.pcond.core.fluent3.typesupports.ObjectTransformer;
-import com.github.dakusui.pcond.core.fluent3.typesupports.StringTransformer;
+import com.github.dakusui.pcond.core.fluent3.builtins.IntegerTransformer;
+import com.github.dakusui.pcond.core.fluent3.builtins.ListTransformer;
+import com.github.dakusui.pcond.core.fluent3.builtins.ObjectTransformer;
+import com.github.dakusui.pcond.core.fluent3.builtins.StringTransformer;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.List;

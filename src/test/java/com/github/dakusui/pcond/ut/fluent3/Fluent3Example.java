@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.ut.fluent3;
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
-import com.github.dakusui.pcond.core.fluent3.typesupports.StringTransformer;
+import com.github.dakusui.pcond.core.fluent3.builtins.StringTransformer;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;

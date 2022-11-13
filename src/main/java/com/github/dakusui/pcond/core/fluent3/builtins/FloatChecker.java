@@ -1,13 +1,13 @@
-package com.github.dakusui.pcond.core.fluent3.typesupports;
+package com.github.dakusui.pcond.core.fluent3.builtins;
 
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
-public interface ShortChecker<
+public interface FloatChecker<
     R extends Matcher<R, R, OIN, OIN>,
     OIN> extends
     ComparableNumberChecker<
-        ShortChecker<R, OIN>,
+        FloatChecker<R, OIN>,
         R,
         OIN,
         Integer> {
@@ -16,11 +16,11 @@ public interface ShortChecker<
       R extends Matcher<R, R, OIN, OIN>,
       OIN> extends
       Base<
-          ShortChecker<R, OIN>,
+          FloatChecker<R, OIN>,
           R,
           OIN,
           Integer>
-      implements ShortChecker<R, OIN> {
+      implements FloatChecker<R, OIN> {
     public Impl(OIN rootValue, R root) {
       super(rootValue, root);
     }

@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core.fluent3;
 
-import com.github.dakusui.pcond.core.fluent3.typesupports.ObjectTransformer;
-import com.github.dakusui.pcond.core.fluent3.typesupports.StringTransformer;
+import com.github.dakusui.pcond.core.fluent3.builtins.ObjectTransformer;
+import com.github.dakusui.pcond.core.fluent3.builtins.StringTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 
 import static com.github.dakusui.pcond.core.refl.MethodQuery.classMethod;

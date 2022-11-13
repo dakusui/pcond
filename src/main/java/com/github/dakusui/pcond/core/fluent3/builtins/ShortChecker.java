@@ -1,14 +1,13 @@
-package com.github.dakusui.pcond.core.fluent3.typesupports;
+package com.github.dakusui.pcond.core.fluent3.builtins;
 
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
-public interface LongChecker<
+public interface ShortChecker<
     R extends Matcher<R, R, OIN, OIN>,
-    OIN
-    > extends
+    OIN> extends
     ComparableNumberChecker<
-        LongChecker<R, OIN>,
+        ShortChecker<R, OIN>,
         R,
         OIN,
         Integer> {
@@ -17,13 +16,11 @@ public interface LongChecker<
       R extends Matcher<R, R, OIN, OIN>,
       OIN> extends
       Base<
-          LongChecker<R, OIN>,
+          ShortChecker<R, OIN>,
           R,
           OIN,
-          Integer> implements
-      LongChecker<
-          R,
-          OIN> {
+          Integer>
+      implements ShortChecker<R, OIN> {
     public Impl(OIN rootValue, R root) {
       super(rootValue, root);
     }
