@@ -33,7 +33,6 @@ public interface Matcher<
 
   Predicate<? super T> toPredicate();
 
-
   OIN rootValue();
 
   R root();

@@ -24,7 +24,10 @@ public interface Transformer<
     return ret;
   }
 
-  default <EX extends AbstractObjectTransformer<EX, RX, ?, OIN, E>, E> EX toObject(Function<? super T, E> func) {
+  default <
+      EX extends AbstractObjectTransformer<EX, RX, EV, OIN, E>,
+      EV extends Checker<EV, RX, OIN, E>,
+      E> EX toObject(Function<? super T, E> func) {
     requireNonNull(func);
     EX ret = null;
     this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate())) ;
