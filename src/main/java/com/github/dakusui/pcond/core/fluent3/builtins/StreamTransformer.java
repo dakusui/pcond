@@ -15,6 +15,9 @@ public interface StreamTransformer<
         OIN,
         Stream<E>
         > {
+  static <R extends Matcher<R, R, E, E>, E> StreamTransformer<R, E, E> create(E value) {
+    return new Impl<>(value, null);
+  }
   class Impl<
       R extends Matcher<R, R, OIN, OIN>,
       OIN,

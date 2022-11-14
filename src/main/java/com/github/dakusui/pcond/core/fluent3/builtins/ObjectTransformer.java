@@ -22,6 +22,9 @@ public interface ObjectTransformer<
             ObjectChecker<RX, OIN, E>,
             OIN,
             E> {
+  static <R extends Matcher<R, R, E, E>, E> ObjectTransformer<R, E, E> create(E value) {
+    return new Impl<>(value, null);
+  }
   class Impl<
       RX extends Matcher<RX, RX, OIN, OIN>,
       OIN,

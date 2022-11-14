@@ -21,6 +21,26 @@ public interface StringTransformer<
     return new Impl<>(value, null);
   }
 
+  default StringTransformer<R, OIN> substring(int begin) {
+    return this.toString(Printables.function(() -> "substring[" + begin + "]", s -> s.substring(begin)));
+  }
+
+  default StringTransformer<R, OIN> toUpperCase() {
+    return this.toString(Printables.function("toUpperCase", String::toUpperCase));
+  }
+
+  default StringTransformer<R, OIN> toLowerCase() {
+    return this.toString(Printables.function("toLowerCase", String::toLowerCase));
+  }
+
+  default ListTransformer<R, OIN, String> split(String regex) {
+    return this.toList(Printables.function("split[" + regex + "]", (String s) -> asList((s.split(regex)))));
+  }
+
+  default IntegerTransformer<R, OIN> length() {
+    return toInteger(Functions.length());
+  }
+
   class Impl<
       R extends Matcher<R, R, OIN, OIN>,
       OIN
@@ -40,25 +60,5 @@ public interface StringTransformer<
     public StringChecker<R, OIN> createCorrespondingChecker(R root) {
       return new StringChecker.Impl<>(this.rootValue(), this.root());
     }
-  }
-
-  default StringTransformer<R, OIN> substring(int begin) {
-    return this.toString(Printables.function(() -> "substring[" + begin + "]", s -> s.substring(begin)));
-  }
-
-  default StringTransformer<R, OIN> toUpperCase() {
-    return this.toString(Printables.function("toUpperCase", String::toUpperCase));
-  }
-
-  default StringTransformer<R, OIN> toLowerCase() {
-    return this.toString(Printables.function("toLowerCase", String::toLowerCase));
-  }
-
-  default ListTransformer<R, OIN, String> split(String regex) {
-    return this.toList(Printables.function("split[" + regex + "]", (String s) -> asList((s.split(regex)))));
-  }
-
-  default IntegerTransformer<R, OIN> length() {
-    return toInteger(Functions.length());
   }
 }
