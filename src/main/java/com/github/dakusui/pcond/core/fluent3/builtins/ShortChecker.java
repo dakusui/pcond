@@ -10,7 +10,7 @@ public interface ShortChecker<
         ShortChecker<R, OIN>,
         R,
         OIN,
-        Integer> {
+        Short> {
 
   class Impl<
       R extends Matcher<R, R, OIN, OIN>,
@@ -19,7 +19,7 @@ public interface ShortChecker<
           ShortChecker<R, OIN>,
           R,
           OIN,
-          Integer>
+          Short>
       implements ShortChecker<R, OIN> {
     public Impl(OIN rootValue, R root) {
       super(rootValue, root);

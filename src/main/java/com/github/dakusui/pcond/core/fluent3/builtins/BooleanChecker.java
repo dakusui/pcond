@@ -11,6 +11,11 @@ public interface BooleanChecker<
         R,
         OIN,
         Boolean> {
+
+  static <R extends Matcher<R, R, Boolean, Boolean>> BooleanChecker<R, Boolean> create(Boolean value) {
+    return new Impl<>(value, null);
+  }
+
   class Impl<
       R extends Matcher<R, R, OIN, OIN>,
       OIN> extends

@@ -14,6 +14,9 @@ public interface BooleanTransformer<
         OIN,
         Boolean
         > {
+  static <R extends Matcher<R, R, Boolean, Boolean>> BooleanTransformer<R, Boolean> create(Boolean value) {
+    return new Impl<>(value, null);
+  }
   class Impl<
       RX extends Matcher<RX, RX, OIN, OIN>,
       OIN

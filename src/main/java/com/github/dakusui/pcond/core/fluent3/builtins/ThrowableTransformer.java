@@ -13,6 +13,9 @@ public interface ThrowableTransformer<
         ThrowableChecker<R, OIN, T>,
         OIN,
         T> {
+  static <R extends Matcher<R, R, T, T>, T extends Throwable> ThrowableTransformer<R, T, T> create(T value) {
+    return new Impl<>(value, null);
+  }
   default <OUT2 extends Throwable> ThrowableTransformer<R, OIN, T> getCause() {
     // TODO
     // return exercise(Printables.function("getCause", Throwable::getCause)).asThrowable();

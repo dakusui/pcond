@@ -24,7 +24,6 @@ public interface ThrowableChecker<
           T
           > implements
       ThrowableChecker<R, OIN, T> {
-
     protected Impl(OIN rootValue, R root) {
       super(rootValue, root);
     }

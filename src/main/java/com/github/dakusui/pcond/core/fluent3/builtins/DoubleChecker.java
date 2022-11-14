@@ -11,7 +11,7 @@ public interface DoubleChecker<
         DoubleChecker<R, OIN>,
         R,
         OIN,
-        Integer> {
+        Double> {
 
   class Impl<
       R extends Matcher<R, R, OIN, OIN>,
@@ -21,7 +21,7 @@ public interface DoubleChecker<
           DoubleChecker<R, OIN>,
           R,
           OIN,
-          Integer> implements
+          Double> implements
       DoubleChecker<
           R,
           OIN> {

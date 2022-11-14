@@ -2,16 +2,16 @@ package com.github.dakusui.pcond.core.fluent3.builtins;
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
-public interface IntegerTransformer<
+public interface DoubleTransformer<
     R extends Matcher<R, R, OIN, OIN>, OIN
     > extends
     ComparableNumberTransformer<
-        IntegerTransformer<R, OIN>,
+        DoubleTransformer<R, OIN>,
         R,
-        IntegerChecker<R, OIN>,
+        DoubleChecker<R, OIN>,
         OIN,
-        Integer> {
-  static <R extends Matcher<R, R, Integer, Integer>> IntegerTransformer<R, Integer> create(Integer value) {
+        Double> {
+  static <R extends Matcher<R, R, Double, Double>> DoubleTransformer<R, Double> create(Double value) {
     return new Impl<>(value, null);
   }
   class Impl<
@@ -19,18 +19,18 @@ public interface IntegerTransformer<
       OIN
       > extends
       Matcher.Base<
-          IntegerTransformer<R, OIN>,
+          DoubleTransformer<R, OIN>,
           R,
           OIN,
-          Integer> implements
-      IntegerTransformer<R, OIN> {
+          Double> implements
+      DoubleTransformer<R, OIN> {
     public Impl(OIN rootValue, R root) {
       super(rootValue, root);
     }
 
     @Override
-    public IntegerChecker<R, OIN> createCorrespondingChecker(R root) {
-      return new IntegerChecker.Impl<>(this.rootValue(), this.root());
+    public DoubleChecker<R, OIN> createCorrespondingChecker(R root) {
+      return new DoubleChecker.Impl<>(this.rootValue(), this.root());
     }
   }
 }

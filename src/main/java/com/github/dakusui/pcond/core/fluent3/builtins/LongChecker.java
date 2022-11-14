@@ -11,7 +11,7 @@ public interface LongChecker<
         LongChecker<R, OIN>,
         R,
         OIN,
-        Integer> {
+        Long> {
 
   class Impl<
       R extends Matcher<R, R, OIN, OIN>,
@@ -20,7 +20,7 @@ public interface LongChecker<
           LongChecker<R, OIN>,
           R,
           OIN,
-          Integer> implements
+          Long> implements
       LongChecker<
           R,
           OIN> {

@@ -10,7 +10,7 @@ public interface FloatChecker<
         FloatChecker<R, OIN>,
         R,
         OIN,
-        Integer> {
+        Float> {
 
   class Impl<
       R extends Matcher<R, R, OIN, OIN>,
@@ -19,7 +19,7 @@ public interface FloatChecker<
           FloatChecker<R, OIN>,
           R,
           OIN,
-          Integer>
+          Float>
       implements FloatChecker<R, OIN> {
     public Impl(OIN rootValue, R root) {
       super(rootValue, root);
