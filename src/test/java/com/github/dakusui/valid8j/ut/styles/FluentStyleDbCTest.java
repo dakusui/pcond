@@ -1,5 +1,6 @@
 package com.github.dakusui.valid8j.ut.styles;
 
+import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.pcond.validator.exceptions.PostconditionViolationException;
 import com.github.dakusui.pcond.validator.exceptions.PreconditionViolationException;
@@ -11,7 +12,6 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
-import static com.github.dakusui.pcond.fluent.Fluents.value;
 import static com.github.dakusui.pcond.forms.Predicates.containsString;
 import static com.github.dakusui.pcond.forms.Predicates.not;
 import static com.github.dakusui.shared.utils.TestUtils.stringToLowerCase;
@@ -23,8 +23,8 @@ public class FluentStyleDbCTest {
     public void requireArgumentsTest_failing() {
       try {
         ValidationFluents.requireArguments(
-            value("hello").toUpperCase().then().isEqualTo("HELLO"),
-            value("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
+            Fluents.stringStatement("hello").toUpperCase().then().isEqualTo("HELLO"),
+            Fluents.stringStatement("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
       } catch (IllegalArgumentException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -38,8 +38,8 @@ public class FluentStyleDbCTest {
     public void requireStatesTest_failing() {
       try {
         ValidationFluents.requireStates(
-            value("hello").toUpperCase().then().isEqualTo("HELLO"),
-            value("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
+            Fluents.stringStatement("hello").toUpperCase().then().isEqualTo("HELLO"),
+            Fluents.stringStatement("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
       } catch (IllegalStateException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -55,8 +55,8 @@ public class FluentStyleDbCTest {
     public void requireValuesTest_failing() {
       try {
         ValidationFluents.requireAll(
-            value("hello").toUpperCase().then().isEqualTo("HELLO"),
-            value("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
+            Fluents.stringStatement("hello").toUpperCase().then().isEqualTo("HELLO"),
+            Fluents.stringStatement("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
       } catch (PreconditionViolationException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -69,7 +69,7 @@ public class FluentStyleDbCTest {
     @Test
     public void requireArgument_passing() {
       String givenValue = "helloWorld";
-      ValidationFluents.requireArgument(value(givenValue)
+      ValidationFluents.requireArgument(Fluents.stringStatement(givenValue)
           .exercise(stringToLowerCase())
           .then()
           .asString()
@@ -80,7 +80,7 @@ public class FluentStyleDbCTest {
     public void requireValue_passing() {
       String givenValue = "helloWorld";
       MatcherAssert.assertThat(
-          ValidationFluents.requireStatement(value(givenValue)
+          ValidationFluents.requireStatement(Fluents.stringStatement(givenValue)
               .exercise(stringToLowerCase())
               .then()
               .asString()
@@ -92,7 +92,7 @@ public class FluentStyleDbCTest {
     public void reqireState_passing() {
       String givenValue = "helloWorld";
       MatcherAssert.assertThat(
-          ValidationFluents.requireState(value(givenValue)
+          ValidationFluents.requireState(Fluents.stringStatement(givenValue)
               .exercise(stringToLowerCase())
               .then()
               .asString()
@@ -106,8 +106,8 @@ public class FluentStyleDbCTest {
     public void ensureValuesTest_failing() {
       try {
         ValidationFluents.ensureAll(
-            value("hello").toUpperCase().then().isEqualTo("HELLO"),
-            value("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
+            Fluents.stringStatement("hello").toUpperCase().then().isEqualTo("HELLO"),
+            Fluents.stringStatement("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
       } catch (PostconditionViolationException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -121,8 +121,8 @@ public class FluentStyleDbCTest {
     public void ensureStatesTest_failing() {
       try {
         ValidationFluents.ensureStates(
-            value("hello").toUpperCase().then().isEqualTo("HELLO"),
-            value("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
+            Fluents.stringStatement("hello").toUpperCase().then().isEqualTo("HELLO"),
+            Fluents.stringStatement("world").toLowerCase().then().contains("WORLD").verify(not(containsString("w"))));
       } catch (IllegalStateException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -136,7 +136,7 @@ public class FluentStyleDbCTest {
     public void ensureValue_passing() {
       String givenValue = "helloWorld";
       MatcherAssert.assertThat(
-          ValidationFluents.ensureStatement(value(givenValue)
+          ValidationFluents.ensureStatement(Fluents.stringStatement(givenValue)
               .exercise(stringToLowerCase())
               .then()
               .asString()
@@ -148,7 +148,7 @@ public class FluentStyleDbCTest {
     public void ensureState_passing() {
       String givenValue = "helloWorld";
       MatcherAssert.assertThat(
-          ValidationFluents.ensureState(value(givenValue)
+          ValidationFluents.ensureState(Fluents.stringStatement(givenValue)
               .exercise(stringToLowerCase())
               .then()
               .asString()

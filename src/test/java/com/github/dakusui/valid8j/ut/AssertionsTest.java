@@ -1,5 +1,6 @@
 package com.github.dakusui.valid8j.ut;
 
+import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.validator.Validator;
 import com.github.dakusui.shared.utils.ut.TestBase;
@@ -11,8 +12,6 @@ import org.junit.runner.RunWith;
 
 import java.util.Properties;
 
-import static com.github.dakusui.pcond.fluent.Fluents.statement;
-import static com.github.dakusui.pcond.fluent.Fluents.value;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Enclosed.class)
@@ -27,13 +26,13 @@ public class AssertionsTest {
     @Test
     public void fluent$testAssertThat$thenPassing() {
       String var = "10";
-      assert ValidationFluents.that(value(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
+      assert ValidationFluents.that(Fluents.stringStatement(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
     }
 
     @Test
     public void fluent$testAssertAll$thenPassing() {
       String var = "10";
-      assert ValidationFluents.all(value(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
+      assert ValidationFluents.all(Fluents.stringStatement(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
     }
 
 
@@ -46,13 +45,13 @@ public class AssertionsTest {
     @Test
     public void fluent$testAssertPrecondition$thenPassing() {
       String var = "10";
-      assert ValidationFluents.precondition(value(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
+      assert ValidationFluents.precondition(Fluents.stringStatement(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
     }
 
     @Test
     public void fluent$testAssertPreconditions$thenPassing() {
       String var = "10";
-      assert ValidationFluents.preconditions(value(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
+      assert ValidationFluents.preconditions(Fluents.stringStatement(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
     }
 
     @Test
@@ -64,13 +63,13 @@ public class AssertionsTest {
     @Test
     public void fluent$testAssertPostcondition$thenPassing() {
       String var = "10";
-      assert ValidationFluents.postcondition(value(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
+      assert ValidationFluents.postcondition(Fluents.stringStatement(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
     }
 
     @Test
     public void fluent$testAssertPostconditions$thenPassing() {
       String var = "10";
-      assert ValidationFluents.postconditions(value(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
+      assert ValidationFluents.postconditions(Fluents.stringStatement(var).thenWith(b -> b.statement(Predicates.ge("10").and(Predicates.lt("20")))));
     }
   }
 

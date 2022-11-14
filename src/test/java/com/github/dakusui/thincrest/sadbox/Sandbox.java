@@ -5,7 +5,6 @@ import org.junit.Test;
 
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.fluent.Fluents.value;
 import static com.github.dakusui.thincrest.TestFluents.assertStatement;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 
@@ -30,6 +29,6 @@ public class Sandbox {
 
   @Test
   public void hello3() {
-    assertStatement(Fluents.value("hello").substring(2).then().isEqualTo("world"));
+    assertStatement(Fluents.stringStatement("hello").substring(2).then().isEqualTo("world"));
   }
 }

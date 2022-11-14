@@ -47,7 +47,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see StringTransformer
    */
-  public static StringTransformer<String> value(String value) {
+  public static StringTransformer<String> stringStatement(String value) {
     return fluent(value).asString();
   }
 
@@ -58,7 +58,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see DoubleTransformer
    */
-  public static DoubleTransformer<Double> value(double value) {
+  public static DoubleTransformer<Double> doubleStatement(double value) {
     return fluent(value).asDouble();
   }
 
@@ -69,7 +69,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see FloatTransformer
    */
-  public static FloatTransformer<Float> value(float value) {
+  public static FloatTransformer<Float> floatStatement(float value) {
     return fluent(value).asFloat();
   }
 
@@ -80,7 +80,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see LongTransformer
    */
-  public static LongTransformer<Long> value(long value) {
+  public static LongTransformer<Long> longStatement(long value) {
     return fluent(value).asLong();
   }
 
@@ -91,7 +91,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see IntegerTransformer
    */
-  public static IntegerTransformer<Integer> value(int value) {
+  public static IntegerTransformer<Integer> integerStatement(int value) {
     return fluent(value).asInteger();
   }
 
@@ -102,7 +102,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see ShortTransformer
    */
-  public static ShortTransformer<Short> value(short value) {
+  public static ShortTransformer<Short> shortStatement(short value) {
     return fluent(value).asShort();
   }
 
@@ -113,7 +113,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see BooleanTransformer
    */
-  public static BooleanTransformer<Boolean> value(boolean value) {
+  public static BooleanTransformer<Boolean> booleanStatement(boolean value) {
     return fluent(value).asBoolean();
   }
 
@@ -124,7 +124,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see ObjectTransformer
    */
-  public static <T> ObjectTransformer<T, T> value(T value) {
+  public static <T> ObjectTransformer<T, T> objectStatement(T value) {
     return fluent(value).asObject();
   }
 
@@ -135,7 +135,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see ListTransformer
    */
-  public static <E> ListTransformer<List<E>, E> value(List<E> value) {
+  public static <E> ListTransformer<List<E>, E> listStatement(List<E> value) {
     return fluent(value).asListOf(FluentUtils.value());
   }
 
@@ -146,7 +146,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see StreamTransformer
    */
-  public static <E> StreamTransformer<Stream<E>, E> value(Stream<E> value) {
+  public static <E> StreamTransformer<Stream<E>, E> streamStatement(Stream<E> value) {
     return fluent(value).asStreamOf(FluentUtils.value());
   }
 
@@ -163,7 +163,7 @@ public class Fluents {
   }
 
   public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
-    return value(value).then().addPredicate(predicate);
+    return objectStatement(value).then().addPredicate(predicate);
   }
 
   @SafeVarargs
