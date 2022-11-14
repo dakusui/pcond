@@ -25,9 +25,8 @@ public class MoreFluentStyleExample {
   public void test() {
     String givenValue = "helloWorld";
     TestFluents.assertStatement(Fluents.stringStatement(givenValue)
-        .exercise(TestUtils.stringToLowerCase())
+        .toString(TestUtils.stringToLowerCase())
         .then()
-        .asString()
         .isEqualTo("HELLOWORLD"));
   }
 
@@ -73,9 +72,8 @@ public class MoreFluentStyleExample {
   public void test3() {
     List<String> givenValues = asList("hello", "world");
     TestFluents.assertStatement(Fluents.listStatement(givenValues).elementAt(0)
-        .exercise(TestUtils.stringToLowerCase())
+        .toString(TestUtils.stringToLowerCase())
         .then()
-        .asString()
         .isEqualTo("HELLO"));
   }
 
