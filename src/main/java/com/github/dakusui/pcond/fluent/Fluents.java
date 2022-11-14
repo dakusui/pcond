@@ -1,11 +1,12 @@
 package com.github.dakusui.pcond.fluent;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.fluent.Fluent;
-import com.github.dakusui.pcond.core.fluent.transformers.*;
+import com.github.dakusui.pcond.core.fluent3.Matcher;
+import com.github.dakusui.pcond.core.fluent3.builtins.*;
 import com.github.dakusui.pcond.core.printable.PrintableFunction;
 import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.util.Arrays;
 import java.util.List;
@@ -47,9 +48,12 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see StringTransformer
    */
-  public static StringTransformer<String> stringStatement(String value) {
-    return fluent(value).asString();
+  public static <R extends Matcher<R, R, String, String>>
+  StringTransformer<R, String>
+  stringStatement(String value) {
+    return StringTransformer.create(value);
   }
+
 
   /**
    * Returns a transformer for a `double` value.
@@ -58,9 +62,12 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see DoubleTransformer
    */
-  public static DoubleTransformer<Double> doubleStatement(double value) {
-    return fluent(value).asDouble();
+  public static <R extends Matcher<R, R, Double, Double>>
+  DoubleTransformer<R, Double>
+  doubleStatement(Double value) {
+    return DoubleTransformer.create(value);
   }
+
 
   /**
    * Returns a transformer for a `float` value.
@@ -69,9 +76,12 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see FloatTransformer
    */
-  public static FloatTransformer<Float> floatStatement(float value) {
-    return fluent(value).asFloat();
+  public static <R extends Matcher<R, R, Float, Float>>
+  FloatTransformer<R, Float>
+  floatStatement(Float value) {
+    return FloatTransformer.create(value);
   }
+
 
   /**
    * Returns a transformer for a `long` value.
@@ -80,8 +90,10 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see LongTransformer
    */
-  public static LongTransformer<Long> longStatement(long value) {
-    return fluent(value).asLong();
+  public static <R extends Matcher<R, R, Long, Long>>
+  LongTransformer<R, Long>
+  longStatement(Long value) {
+    return LongTransformer.create(value);
   }
 
   /**
@@ -91,9 +103,12 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see IntegerTransformer
    */
-  public static IntegerTransformer<Integer> integerStatement(int value) {
-    return fluent(value).asInteger();
+  public static <R extends Matcher<R, R, Integer, Integer>>
+  IntegerTransformer<R, Integer>
+  integerStatement(Integer value) {
+    return IntegerTransformer.create(value);
   }
+
 
   /**
    * Returns a transformer for a `short` value.
@@ -102,8 +117,10 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see ShortTransformer
    */
-  public static ShortTransformer<Short> shortStatement(short value) {
-    return fluent(value).asShort();
+  public static <R extends Matcher<R, R, Short, Short>>
+  ShortTransformer<R, Short>
+  shortStatement(Short value) {
+    return ShortTransformer.create(value);
   }
 
   /**
@@ -113,8 +130,10 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see BooleanTransformer
    */
-  public static BooleanTransformer<Boolean> booleanStatement(boolean value) {
-    return fluent(value).asBoolean();
+  public static <R extends Matcher<R, R, Boolean, Boolean>>
+  BooleanTransformer<R, Boolean>
+  booleanStatement(Boolean value) {
+    return BooleanTransformer.create(value);
   }
 
   /**
@@ -124,8 +143,12 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see ObjectTransformer
    */
-  public static <T> ObjectTransformer<T, T> objectStatement(T value) {
-    return fluent(value).asObject();
+  public static <
+      R extends Matcher<R, R, E, E>,
+      E>
+  ObjectTransformer<R, E, E>
+  objectStatement(E value) {
+    return ObjectTransformer.create(value);
   }
 
   /**
@@ -135,8 +158,11 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see ListTransformer
    */
-  public static <E> ListTransformer<List<E>, E> listStatement(List<E> value) {
-    return fluent(value).asListOf(FluentUtils.value());
+
+  public static <R extends Matcher<R, R, List<E>, List<E>>, E>
+  ListTransformer<R, List<E>, E>
+  listStatement(List<E> value) {
+    return ListTransformer.create(value);
   }
 
   /**
@@ -146,8 +172,10 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see StreamTransformer
    */
-  public static <E> StreamTransformer<Stream<E>, E> streamStatement(Stream<E> value) {
-    return fluent(value).asStreamOf(FluentUtils.value());
+  public static <R extends Matcher<R, R, Stream<E>, Stream<E>>, E>
+  StreamTransformer<R, Stream<E>, E>
+  streamStatement(Stream<E> value) {
+    return StreamTransformer.create(value);
   }
 
   private static <T> Fluent<T> fluent(T value) {
@@ -275,4 +303,5 @@ public class Fluents {
   private static <T, R> Function<T, R> makeTrivial(Function<T, R> predicates) {
     return ((PrintableFunction<T, R>) predicates).makeTrivial();
   }
+
 }

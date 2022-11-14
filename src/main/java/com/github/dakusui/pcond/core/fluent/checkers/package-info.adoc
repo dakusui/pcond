@@ -1,1 +1,0 @@
-A package to provide built-in "verifiers".

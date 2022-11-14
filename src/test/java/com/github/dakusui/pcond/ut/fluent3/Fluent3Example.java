@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 import java.util.Objects;
 
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
-import static com.github.dakusui.thincrest.TestFluents.stringStatement;
+import static com.github.dakusui.pcond.fluent.Fluents.stringStatement;
 
 @RunWith(Enclosed.class)
 public class Fluent3Example {
