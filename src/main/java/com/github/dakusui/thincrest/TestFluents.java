@@ -1,5 +1,7 @@
 package com.github.dakusui.thincrest;
 
+import com.github.dakusui.pcond.core.fluent3.Matcher;
+import com.github.dakusui.pcond.core.fluent3.builtins.StringTransformer;
 import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.fluent.Statement;
 
@@ -51,5 +53,34 @@ public enum TestFluents {
   public static void assumeAll(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
     TestAssertions.assumeThat(values, Fluents.createPredicateForAllOf(statements));
+  }
+
+  public static <R extends Matcher<R, R, String, String>>
+  StringTransformer<R, String> stringStatement(String value) {
+    return StringTransformer.create(value);
+  }
+
+  public static void integerStatement() {
+  }
+
+  public static void longStatement() {
+  }
+
+  public static void shortStatement() {
+  }
+
+  public static void doubleStatement() {
+  }
+
+  public static void floatStatement() {
+  }
+
+  public static void listStatement() {
+  }
+
+  public static void streamStatement() {
+  }
+
+  public static void objectStatement() {
   }
 }

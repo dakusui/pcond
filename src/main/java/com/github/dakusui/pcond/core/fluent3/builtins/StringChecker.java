@@ -36,6 +36,14 @@ public interface StringChecker<
     return this.appendPredicateAsChild(explainableStringIsEqualTo(string));
   }
 
+  default StringChecker<R, OIN> isNull() {
+    return this.appendPredicateAsChild(Predicates.isNull());
+  }
+
+  default StringChecker<R, OIN> isNotNull() {
+    return this.appendPredicateAsChild(Predicates.isNotNull());
+  }
+
   default StringChecker<R, OIN> isNullOrEmpty() {
     return this.appendPredicateAsChild(Predicates.isNullOrEmptyString());
   }
