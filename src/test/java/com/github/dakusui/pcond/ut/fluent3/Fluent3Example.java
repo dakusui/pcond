@@ -1,7 +1,5 @@
 package com.github.dakusui.pcond.ut.fluent3;
 
-import com.github.dakusui.pcond.core.fluent3.Matcher;
-import com.github.dakusui.pcond.core.fluent3.builtins.StringTransformer;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
@@ -10,18 +8,16 @@ import org.junit.runner.RunWith;
 import java.util.Objects;
 
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
+import static com.github.dakusui.thincrest.TestFluents.stringStatement;
 
 @RunWith(Enclosed.class)
 public class Fluent3Example {
-  static <R extends Matcher<R, R, String, String>> StringTransformer<R, String> statementForString(String value) {
-    return StringTransformer.create(value);
-  }
 
   public static class Done {
     @Test(expected = ComparisonFailure.class)
     public void secondExample() {
       assertAll(
-          statementForString("Hello")
+          stringStatement("Hello")
               .then()
               .isNull().toStatement());
     }
@@ -29,7 +25,7 @@ public class Fluent3Example {
     @Test(expected = ComparisonFailure.class)
     public void thirdExample() {
       assertAll(
-          statementForString("Hello")
+          stringStatement("Hello")
               .allOf()
               .then()
               .isNotNull()
@@ -41,28 +37,28 @@ public class Fluent3Example {
     @Test(expected = ComparisonFailure.class)
     public void forthExample() {
       assertAll(
-          statementForString("Hello").length().then().greaterThan(10).toStatement());
+          stringStatement("Hello").length().then().greaterThan(10).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void fifth() {
       assertAll(
-          statementForString("Hello5").length().then().greaterThan(10).lessThan(1).toStatement());
+          stringStatement("Hello5").length().then().greaterThan(10).lessThan(1).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test9() {
       assertAll(
-          statementForString("Hello5")
+          stringStatement("Hello5")
               .then()
               .appendChild(v -> v.isNull().toPredicate())
               .toStatement());
     }
 
-    @Test(expected = ComparisonFailure.class)
+    @Test//(expected = ComparisonFailure.class)
     public void test7() {
       assertAll(
-          statementForString("Hello5")
+          stringStatement("Hello5")
               .appendChild(tx -> tx.then().isNotNull().toPredicate())
               .appendChild(tx -> tx.then().isNull().toPredicate()).toStatement());
     }
@@ -70,14 +66,14 @@ public class Fluent3Example {
     @Test(expected = ComparisonFailure.class)
     public void test6b() {
       assertAll(
-          statementForString("Hello5")
+          stringStatement("Hello5")
               .appendChild(tx -> tx.then().isNull().toPredicate()).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test6c() {
       assertAll(
-          statementForString("Hello5")
+          stringStatement("Hello5")
               .anyOf()
               .appendChild(tx -> tx.then().isNull().toPredicate()).toStatement());
     }
@@ -85,7 +81,7 @@ public class Fluent3Example {
     @Test(expected = ComparisonFailure.class)
     public void test6d() {
       assertAll(
-          statementForString("Hello5")
+          stringStatement("Hello5")
               .appendChild(tx -> tx.appendPredicateAsChild(Objects::isNull).toPredicate())
               .appendChild(tx -> tx.appendPredicateAsChild(v -> !Objects.isNull(v)).toPredicate()).toStatement()
       );
@@ -94,7 +90,15 @@ public class Fluent3Example {
 
   /*
   public static class OnGoing {
-
+    @Test(expected = StackOverflowError.class)
+    public void test8() {
+      assertAll(
+          statementForString("Hello5")
+              .then()
+              .appendChild(v -> v.isNull().$())
+              .appendChild(v -> v.isNotNull().$())
+              .$());
+    }
     @Test(expected = StackOverflowError.class)
     public void firstExample() {
       assertAll(
@@ -104,26 +108,17 @@ public class Fluent3Example {
                   .allOf()
                   .greaterThan(10)
                   .lessThan(100)
-                  .root().toStatement())
-              .toStatement());
+                  .root().$())
+              .$());
     }
 
-    @Test(expected = StackOverflowError.class)
+    @Test//(expected = StackOverflowError.class)
     public void test6() {
       assertAll(
           statementForString("Hello5")
-              .appendChild(tx -> tx.length().then().greaterThan(10).root().toStatement()).toStatement());
-    }
-
-    @Test(expected = StackOverflowError.class)
-    public void test8() {
-      assertAll(
-          statementForString("Hello5")
-              .then()
-              .appendChild(v -> v.isNull().toStatement())
-              .appendChild(v -> v.isNotNull().toStatement())
-              .toStatement());
+              .appendChild(tx -> tx.length().then().greaterThan(10).root().$()).$());
     }
   }
-  */
+
+   */
 }

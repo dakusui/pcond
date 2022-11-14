@@ -37,6 +37,8 @@ public interface Matcher<
 
   R root();
 
+  boolean isRoot();
+
   Statement<OIN> toStatement();
 
   /**
@@ -113,6 +115,11 @@ public interface Matcher<
     @Override
     public R root() {
       return this.root;
+    }
+
+    @Override
+    public boolean isRoot() {
+      return this == this.root;
     }
 
     @Override

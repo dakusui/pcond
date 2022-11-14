@@ -14,7 +14,10 @@ public interface ListTransformer<
     E
     > extends
     AbstractObjectTransformer<ListTransformer<R, OIN, E>, R, ListChecker<R, OIN, E>, OIN, List<E>> {
-  static <R extends Matcher<R, R, E, E>, E> ListTransformer<R, E, E> create(E value) {
+  static <
+      R extends Matcher<R, R, List<E>, List<E>>,
+      E>
+  ListTransformer<R, List<E>, E> create(List<E> value) {
     return new Impl<>(value, null);
   }
   default ObjectTransformer<R,OIN, E> elementAt(int i) {

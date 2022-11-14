@@ -275,5 +275,4 @@ public class Fluents {
   private static <T, R> Function<T, R> makeTrivial(Function<T, R> predicates) {
     return ((PrintableFunction<T, R>) predicates).makeTrivial();
   }
-
 }

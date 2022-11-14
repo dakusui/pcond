@@ -6,7 +6,8 @@ import com.github.dakusui.pcond.core.fluent3.Matcher;
 import java.util.stream.Stream;
 
 public interface StreamTransformer<
-    R extends Matcher<R, R, OIN, OIN>, OIN,
+    R extends Matcher<R, R, OIN, OIN>,
+    OIN,
     E> extends
     AbstractObjectTransformer<
         StreamTransformer<R, OIN, E>,
@@ -15,7 +16,7 @@ public interface StreamTransformer<
         OIN,
         Stream<E>
         > {
-  static <R extends Matcher<R, R, E, E>, E> StreamTransformer<R, E, E> create(E value) {
+  static <R extends Matcher<R, R, Stream<E>, Stream<E>>, E> StreamTransformer<R, Stream<E>, E> create(Stream<E> value) {
     return new Impl<>(value, null);
   }
   class Impl<

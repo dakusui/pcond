@@ -11,6 +11,9 @@ public interface FloatTransformer<
         FloatChecker<R, OIN>,
         OIN,
         Float> {
+  static <R extends Matcher<R, R, Float, Float>> FloatTransformer<R, Float> create(Float value) {
+    return new Impl<>(value, null);
+  }
   class Impl<
       R extends Matcher<R, R, OIN, OIN>,
       OIN

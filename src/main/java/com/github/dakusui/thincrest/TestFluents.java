@@ -1,13 +1,14 @@
 package com.github.dakusui.thincrest;
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
-import com.github.dakusui.pcond.core.fluent3.builtins.StringTransformer;
+import com.github.dakusui.pcond.core.fluent3.builtins.*;
 import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.fluent.Statement;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -56,31 +57,58 @@ public enum TestFluents {
   }
 
   public static <R extends Matcher<R, R, String, String>>
-  StringTransformer<R, String> stringStatement(String value) {
+  StringTransformer<R, String>
+  stringStatement(String value) {
     return StringTransformer.create(value);
   }
 
-  public static void integerStatement() {
+  public static <R extends Matcher<R, R, Integer, Integer>>
+  IntegerTransformer<R, Integer>
+  integerStatement(Integer value) {
+    return IntegerTransformer.create(value);
   }
 
-  public static void longStatement() {
+  public static <R extends Matcher<R, R, Long, Long>>
+  LongTransformer<R, Long>
+  longStatement(Long value) {
+    return LongTransformer.create(value);
   }
 
-  public static void shortStatement() {
+  public static <R extends Matcher<R, R, Short, Short>>
+  ShortTransformer<R, Short>
+  shortStatement(Short value) {
+    return ShortTransformer.create(value);
   }
 
-  public static void doubleStatement() {
+  public static <R extends Matcher<R, R, Double, Double>>
+  DoubleTransformer<R, Double>
+  doubleStatement(Double value) {
+    return DoubleTransformer.create(value);
   }
 
-  public static void floatStatement() {
+  public static <R extends Matcher<R, R, Float, Float>>
+  FloatTransformer<R, Float>
+  floatStatement(Float value) {
+    return FloatTransformer.create(value);
   }
 
-  public static void listStatement() {
+  public static <R extends Matcher<R, R, List<E>, List<E>>, E>
+  ListTransformer<R, List<E>, E>
+  listStatement(List<E> value) {
+    return ListTransformer.create(value);
   }
 
-  public static void streamStatement() {
+  public static <R extends Matcher<R, R, Stream<E>, Stream<E>>, E>
+  StreamTransformer<R, Stream<E>, E>
+  streamStatement(Stream<E> value) {
+    return StreamTransformer.create(value);
   }
 
-  public static void objectStatement() {
+  public static <
+      R extends Matcher<R, R, E, E>,
+      E>
+  ObjectTransformer<R, E, E>
+  objectStatement(E value) {
+    return ObjectTransformer.create(value);
   }
 }

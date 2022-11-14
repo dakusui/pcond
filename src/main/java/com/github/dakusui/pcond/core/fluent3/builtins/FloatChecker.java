@@ -11,11 +11,10 @@ public interface FloatChecker<
         R,
         OIN,
         Float> {
-
   class Impl<
       R extends Matcher<R, R, OIN, OIN>,
       OIN> extends
-      Base<
+      Matcher.Base<
           FloatChecker<R, OIN>,
           R,
           OIN,
