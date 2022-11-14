@@ -8,7 +8,6 @@ import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.Leaf;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.ParameterizedLeafFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
-import com.github.dakusui.pcond.fluent.FluentUtils;
 import com.github.dakusui.pcond.internals.InternalChecks;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
@@ -379,15 +378,13 @@ public class Predicates {
         return ret;
       }
     }
-    //noinspection RedundantTypeArguments
-    return FluentUtils.fluentValue().asString()
-        .toObject(function("findTokens" + formatObject(tokens), CursoredString::new))
-        .then().verify(Predicates.<CursoredString>allOf(
+    return Predicates.transform(function("findTokens" + formatObject(tokens), CursoredString::new))
+        .check(Predicates.allOf(
             Stream.concat(
                     Arrays.stream(tokens).map(CursoredStringPredicate::new),
                     Stream.of(endMarkPredicateForString(lastTestedPosition, bExpectation, bActual, result, () -> cursoredStringForSnapshotting.originalString)))
-                .toArray(Predicate[]::new)))
-        .toPredicate();
+                .toArray(Predicate[]::new)));
+
   }
 
   private static Predicate<Object> endMarkPredicateForString(AtomicInteger lastTestedPosition, StringBuilder ongoingExpectationExplanation, StringBuilder ongoingActualExplanation, AtomicBoolean result, Supplier<String> originalStringSupplier) {
@@ -518,15 +515,12 @@ public class Predicates {
       previousPosition.set(cursoredList.position);
       return false;
     };
-    return FluentUtils.fluentValue().asListOf((E) FluentUtils.value())
-        .toObject(function("toCursoredList", CursoredList::new))
-        .then()
-        .verify(allOf(Stream.concat(
+    return Predicates.transform(function("toCursoredList", (List<E> v)-> new CursoredList<>(v)))
+        .check(allOf(Stream.concat(
                 Arrays.stream(predicates)
                     .map((Predicate<? super E> each) -> predicate("findElementBy[" + each + "]", predicatePredicateFunction.apply(each))),
                 Stream.of(endMarkPredicateForList(result, expectationExplanationList, actualExplanationList, rest)))
-            .toArray(Predicate[]::new)))
-        .toPredicate();
+            .toArray(Predicate[]::new)));
   }
 
   private static <E> void updateExplanationsForFoundElement(List<Object> expectationExplanationList, List<Object> actualExplanationList, E foundElement, Predicate<? super E> matchedPredicate, List<Object> skippedElements) {

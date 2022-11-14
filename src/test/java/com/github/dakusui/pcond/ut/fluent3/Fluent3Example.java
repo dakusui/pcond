@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut.fluent3;
 
 import org.junit.ComparisonFailure;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -33,6 +34,15 @@ public class Fluent3Example {
               .toStatement());
     }
 
+    @Test(expected = ComparisonFailure.class)
+    public void thirdExample_a() {
+      assertAll(
+          stringStatement("Hello")
+              .allOf()
+              .then()
+              .isNotNull()
+              .isNull());
+    }
 
     @Test(expected = ComparisonFailure.class)
     public void forthExample() {
@@ -55,7 +65,7 @@ public class Fluent3Example {
               .toStatement());
     }
 
-    @Test//(expected = ComparisonFailure.class)
+    @Test(expected = ComparisonFailure.class)
     public void test7() {
       assertAll(
           stringStatement("Hello5")
@@ -86,10 +96,22 @@ public class Fluent3Example {
               .appendChild(tx -> tx.appendPredicateAsChild(v -> !Objects.isNull(v)).toPredicate()).toStatement()
       );
     }
+
+    /**
+     * Works without calling `toStatement()` method.
+     */
+    @Test(expected = ComparisonFailure.class)
+    public void test7_a() {
+      assertAll(
+          stringStatement("Hello5")
+              .appendChild(tx -> tx.then().isNotNull().toPredicate())
+              .appendChild(tx -> tx.then().isNull().toPredicate()));
+    }
   }
 
-  /*
+  @Ignore
   public static class OnGoing {
+    /*
     @Test(expected = StackOverflowError.class)
     public void test8() {
       assertAll(
@@ -118,7 +140,6 @@ public class Fluent3Example {
           statementForString("Hello5")
               .appendChild(tx -> tx.length().then().greaterThan(10).root().$()).$());
     }
-  }
-
    */
+  }
 }

@@ -19,6 +19,7 @@ public interface Matcher<
     OIN,
     T>
     extends
+    Statement<OIN>,
     Cloneable {
   M allOf();
 
@@ -40,6 +41,17 @@ public interface Matcher<
   boolean isRoot();
 
   Statement<OIN> toStatement();
+
+  @Override
+  default OIN statementValue() {
+    return rootValue();
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  default Predicate<OIN> statementPredicate() {
+    return (Predicate<OIN>)root().toPredicate();
+  }
 
   /**
    * @param <M>
