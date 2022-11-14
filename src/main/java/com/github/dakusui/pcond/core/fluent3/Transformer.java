@@ -43,9 +43,9 @@ public interface Transformer<
     return ret;
   }
 
-  default StringTransformer<OIN, RX> toString(Function<? super T, String> func) {
+  default StringTransformer<RX, OIN> toString(Function<? super T, String> func) {
     requireNonNull(func);
-    StringTransformer<OIN, RX> ret = new StringTransformer.Impl<>(this.rootValue(), this.root());
+    StringTransformer<RX, OIN> ret = new StringTransformer.Impl<>(this.rootValue(), this.root());
     this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
     return ret;
   }

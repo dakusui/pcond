@@ -13,7 +13,7 @@ import static com.github.dakusui.thincrest.TestFluents.assertAll;
 
 @RunWith(Enclosed.class)
 public class Fluent3Example {
-  static <R extends Matcher<R, R, String, String>> StringTransformer<String, R> statementForString(String value) {
+  static <R extends Matcher<R, R, String, String>> StringTransformer<R, String> statementForString(String value) {
     return StringTransformer.create(value);
   }
 

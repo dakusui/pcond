@@ -8,28 +8,29 @@ import com.github.dakusui.pcond.forms.Printables;
 import static java.util.Arrays.asList;
 
 public interface StringTransformer<
-    OIN,
-    R extends Matcher<R, R, OIN, OIN>
+    R extends Matcher<R, R, OIN, OIN>,
+    OIN
     > extends
     AbstractObjectTransformer<
-        StringTransformer<OIN, R>,
+        StringTransformer<R, OIN>,
         R,
         StringChecker<R, OIN>,
         OIN,
         String> {
-  static <R extends Matcher<R, R, String, String>> StringTransformer<String, R> create(String value) {
+  static <R extends Matcher<R, R, String, String>> StringTransformer<R, String> create(String value) {
     return new Impl<>(value, null);
   }
 
   class Impl<
-      OIN,
-      R extends Matcher<R, R, OIN, OIN>> extends
+      R extends Matcher<R, R, OIN, OIN>,
+      OIN
+      > extends
       Matcher.Base<
-          StringTransformer<OIN, R>,
+          StringTransformer<R, OIN>,
           R,
           OIN,
           String> implements
-      StringTransformer<OIN, R> {
+      StringTransformer<R, OIN> {
 
     public Impl(OIN rootValue, R root) {
       super(rootValue, root);
@@ -41,15 +42,15 @@ public interface StringTransformer<
     }
   }
 
-  default StringTransformer<OIN, R> substring(int begin) {
+  default StringTransformer<R, OIN> substring(int begin) {
     return this.toString(Printables.function(() -> "substring[" + begin + "]", s -> s.substring(begin)));
   }
 
-  default StringTransformer<OIN, R> toUpperCase() {
+  default StringTransformer<R, OIN> toUpperCase() {
     return this.toString(Printables.function("toUpperCase", String::toUpperCase));
   }
 
-  default StringTransformer<OIN, R> toLowerCase() {
+  default StringTransformer<R, OIN> toLowerCase() {
     return this.toString(Printables.function("toLowerCase", String::toLowerCase));
   }
 

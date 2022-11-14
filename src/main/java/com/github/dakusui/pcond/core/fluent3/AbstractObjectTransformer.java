@@ -32,7 +32,7 @@ public interface AbstractObjectTransformer<
    *
    * @return this object the method appended.
    */
-  default StringTransformer<OIN, RX> stringify() {
+  default StringTransformer<RX, OIN> stringify() {
     return this.toString(Functions.stringify());
   }
 
