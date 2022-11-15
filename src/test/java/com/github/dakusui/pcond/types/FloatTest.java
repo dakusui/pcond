@@ -4,8 +4,6 @@ import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.shared.IllegalValueException;
 import org.junit.Test;
 
-import static com.github.dakusui.shared.FluentTestUtils.when;
-import static com.github.dakusui.shared.TestUtils.validate;
 import static com.github.dakusui.shared.TestUtils.validateStatement;
 
 public class FloatTest {

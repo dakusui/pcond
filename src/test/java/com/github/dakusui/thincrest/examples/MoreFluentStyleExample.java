@@ -14,7 +14,6 @@ import java.util.function.Function;
 
 import static com.github.dakusui.pcond.forms.Predicates.isEmptyString;
 import static com.github.dakusui.pcond.forms.Predicates.not;
-import static com.github.dakusui.shared.TestUtils.validateStatement;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
@@ -150,6 +149,7 @@ public class MoreFluentStyleExample {
             .contains("DOE"));
   }
 
+  /*
   @Test
   public void testAllOf() {
     MemberDatabase database = new MemberDatabase();
@@ -168,7 +168,7 @@ public class MoreFluentStyleExample {
                 .appendChild(w -> w.isEqualTo("4")))
             .appendChild(v -> v.isEqualTo("5")));
   }
-
+*/
 
   @Test
   public void givenValidName_whenValidatePersonName_thenPass() {
@@ -178,7 +178,7 @@ public class MoreFluentStyleExample {
         .then()
         .equalTo(2));
   }
-
+/*
   @Test
   public void givenValidName_whenValidatePersonName_thenPass_2() {
     String s = "John doe";
@@ -191,7 +191,7 @@ public class MoreFluentStyleExample {
             .appendChild(tx -> tx.elementAt(0).asString().then().matchesRegex("[A-Z][a-z]+"))
             .appendChild(    tx -> tx.elementAt(1).asString().then().matchesRegex("[A-Z][a-z]+")));
   }
-
+*/
   @Test
   public void checkTwoValues() {
     String s = "HI";
@@ -233,7 +233,7 @@ public class MoreFluentStyleExample {
             .then()
             .greaterThan(100));
   }
-
+/*
   @Test
   public void checkTwoAspectsOfOneValue_3a() {
     List<String> list = asList("helloWorld", "HI");
@@ -264,4 +264,6 @@ public class MoreFluentStyleExample {
             .appendChild(tx -> tx.elementAt(0).asString().then().isNotNull())
             .appendChild(tx -> tx.elementAt(0).asString().length().then().greaterThan(100)));
   }
+
+ */
 }
