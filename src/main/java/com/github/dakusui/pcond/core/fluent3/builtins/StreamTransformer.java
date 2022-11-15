@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.core.fluent3.builtins;
 import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public interface StreamTransformer<
@@ -16,7 +17,7 @@ public interface StreamTransformer<
         OIN,
         Stream<E>
         > {
-  static <R extends Matcher<R, R, Stream<E>, Stream<E>>, E> StreamTransformer<R, Stream<E>, E> create(Stream<E> value) {
+  static <R extends Matcher<R, R, Stream<E>, Stream<E>>, E> StreamTransformer<R, Stream<E>, E> create(Supplier<Stream<E>> value) {
     return new Impl<>(value, null);
   }
   class Impl<
@@ -29,13 +30,13 @@ public interface StreamTransformer<
           Stream<E>> implements
       StreamTransformer<R, OIN, E> {
 
-    public Impl(OIN rootValue, R root) {
+    public Impl(Supplier<OIN> rootValue, R root) {
       super(rootValue, root);
     }
 
     @Override
     public StreamChecker<R, OIN, E> createCorrespondingChecker(R root) {
-      return new StreamChecker.Impl<>(this.rootValue(), root);
+      return new StreamChecker.Impl<>(this::rootValue, root);
     }
   }
 }

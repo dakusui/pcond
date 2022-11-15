@@ -4,6 +4,8 @@ import com.github.dakusui.pcond.core.fluent3.AbstractObjectChecker;
 import com.github.dakusui.pcond.core.fluent3.CustomTransformer;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
+import java.util.function.Supplier;
+
 /**
  * This interface is used for object whose type doesn't have an explicit support.
  * Do not try to extend/implement this class to support your own class.
@@ -28,7 +30,7 @@ public interface ObjectChecker<
           OIN,
           E> implements
       ObjectChecker<RX, OIN, E> {
-    public Impl(OIN rootValue, RX root) {
+    public Impl(Supplier<OIN> rootValue, RX root) {
       super(rootValue, root);
     }
   }

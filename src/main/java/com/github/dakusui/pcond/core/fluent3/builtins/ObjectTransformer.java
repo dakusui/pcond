@@ -3,10 +3,9 @@ package com.github.dakusui.pcond.core.fluent3.builtins;
 import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent3.CustomTransformer;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
-import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.forms.Functions;
 
-import static com.github.dakusui.pcond.forms.Functions.identity;
+import java.util.function.Supplier;
 
 
 /**
@@ -51,7 +50,7 @@ public interface ObjectTransformer<
   }
 
   static
-  <R extends Matcher<R, R, E, E>, E> ObjectTransformer<R, E, E> create(E value) {
+  <R extends Matcher<R, R, E, E>, E> ObjectTransformer<R, E, E> create(Supplier<E> value) {
     return new Impl<>(value, null);
   }
   class Impl<
@@ -64,13 +63,13 @@ public interface ObjectTransformer<
           OIN,
           E> implements
       ObjectTransformer<RX, OIN, E> {
-    public Impl(OIN rootValue, RX root) {
+    public Impl(Supplier<OIN> rootValue, RX root) {
       super(rootValue, root);
     }
 
     @Override
     public ObjectChecker<RX, OIN, E> createCorrespondingChecker(RX root) {
-      return new ObjectChecker.Impl<>(this.rootValue(), root);
+      return new ObjectChecker.Impl<>(this::rootValue, root);
     }
   }
 }

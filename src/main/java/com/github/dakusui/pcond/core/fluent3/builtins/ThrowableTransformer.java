@@ -3,6 +3,8 @@ package com.github.dakusui.pcond.core.fluent3.builtins;
 import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
+import java.util.function.Supplier;
+
 public interface ThrowableTransformer<
     R extends Matcher<R, R, OIN, OIN>,
     OIN,
@@ -13,7 +15,7 @@ public interface ThrowableTransformer<
         ThrowableChecker<R, OIN, T>,
         OIN,
         T> {
-  static <R extends Matcher<R, R, T, T>, T extends Throwable> ThrowableTransformer<R, T, T> create(T value) {
+  static <R extends Matcher<R, R, T, T>, T extends Throwable> ThrowableTransformer<R, T, T> create(Supplier<T> value) {
     return new Impl<>(value, null);
   }
   default <OUT2 extends Throwable> ThrowableTransformer<R, OIN, T> getCause() {
@@ -44,13 +46,13 @@ public interface ThrowableTransformer<
           T
           > {
 
-    public Impl(OIN rootValue, R root) {
+    public Impl(Supplier<OIN> rootValue, R root) {
       super(rootValue, root);
     }
 
     @Override
     public ThrowableChecker<R, OIN, T> createCorrespondingChecker(R root) {
-      return new ThrowableChecker.Impl<>(this.rootValue(), root);
+      return new ThrowableChecker.Impl<>(this::rootValue, root);
     }
   }
 }

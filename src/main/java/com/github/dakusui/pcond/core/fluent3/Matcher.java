@@ -8,6 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Objects.requireNonNull;
@@ -66,7 +67,7 @@ public interface Matcher<
       Matcher<M, R, OIN, T> {
     private final R root;
 
-    private final OIN rootValue;
+    private final Supplier<OIN> rootValue;
 
     private JunctionType junctionType;
 
@@ -74,7 +75,7 @@ public interface Matcher<
     private       Predicate<T>                            builtPredicate;
 
     @SuppressWarnings("unchecked")
-    protected Base(OIN rootValue, R root) {
+    protected Base(Supplier<OIN> rootValue, R root) {
       this.rootValue = rootValue;
       this.root = root == null ? (R) this : root;
       this.allOf();
@@ -121,7 +122,7 @@ public interface Matcher<
 
     @Override
     public OIN rootValue() {
-      return this.rootValue;
+      return this.rootValue.get();
     }
 
     @Override

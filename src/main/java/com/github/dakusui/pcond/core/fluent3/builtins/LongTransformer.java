@@ -2,6 +2,8 @@ package com.github.dakusui.pcond.core.fluent3.builtins;
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
+import java.util.function.Supplier;
+
 public interface LongTransformer<
     R extends Matcher<R, R, OIN, OIN>, OIN
     > extends
@@ -11,7 +13,7 @@ public interface LongTransformer<
         LongChecker<R, OIN>,
         OIN,
         Long> {
-  static <R extends Matcher<R, R, Long, Long>> LongTransformer<R, Long> create(Long value) {
+  static <R extends Matcher<R, R, Long, Long>> LongTransformer<R, Long> create(Supplier<Long> value) {
     return new Impl<>(value, null);
   }
   class Impl<
@@ -24,13 +26,13 @@ public interface LongTransformer<
           OIN,
           Long> implements
       LongTransformer<R, OIN> {
-    public Impl(OIN rootValue, R root) {
+    public Impl(Supplier<OIN> rootValue, R root) {
       super(rootValue, root);
     }
 
     @Override
     public LongChecker<R, OIN> createCorrespondingChecker(R root) {
-      return new LongChecker.Impl<>(this.rootValue(), this.root());
+      return new LongChecker.Impl<>(this::rootValue, this.root());
     }
   }
 }

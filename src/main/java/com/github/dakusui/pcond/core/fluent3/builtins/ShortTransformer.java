@@ -2,6 +2,8 @@ package com.github.dakusui.pcond.core.fluent3.builtins;
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
+import java.util.function.Supplier;
+
 public interface ShortTransformer<
     R extends Matcher<R, R, OIN, OIN>, OIN
     > extends
@@ -11,7 +13,7 @@ public interface ShortTransformer<
         ShortChecker<R, OIN>,
             OIN,
             Short> {
-  static <R extends Matcher<R, R, Short, Short>> ShortTransformer<R, Short> create(Short value) {
+  static <R extends Matcher<R, R, Short, Short>> ShortTransformer<R, Short> create(Supplier<Short> value) {
     return new Impl<>(value, null);
   }
   class Impl<
@@ -24,13 +26,13 @@ public interface ShortTransformer<
           OIN,
           Short> implements
       ShortTransformer<R, OIN> {
-    public Impl(OIN rootValue, R root) {
+    public Impl(Supplier<OIN> rootValue, R root) {
       super(rootValue, root);
     }
 
     @Override
     public ShortChecker<R, OIN> createCorrespondingChecker(R root) {
-      return new ShortChecker.Impl<>(this.rootValue(), this.root());
+      return new ShortChecker.Impl<>(this::rootValue, this.root());
     }
   }
 }

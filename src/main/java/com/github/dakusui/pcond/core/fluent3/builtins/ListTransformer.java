@@ -7,6 +7,7 @@ import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Supplier;
 
 public interface ListTransformer<
     R extends Matcher<R, R, OIN, OIN>,
@@ -17,7 +18,7 @@ public interface ListTransformer<
   static <
       R extends Matcher<R, R, List<E>, List<E>>,
       E>
-  ListTransformer<R, List<E>, E> create(List<E> value) {
+  ListTransformer<R, List<E>, E> create(Supplier<List<E>> value) {
     return new Impl<>(value, null);
   }
   default ObjectTransformer<R,OIN, E> elementAt(int i) {
@@ -52,13 +53,13 @@ public interface ListTransformer<
       OIN,
       List<E>>
       implements ListTransformer<R, OIN, E> {
-    public Impl(OIN rootValue, R root) {
+    public Impl(Supplier<OIN> rootValue, R root) {
       super(rootValue, root);
     }
 
     @Override
     public ListChecker<R, OIN, E> createCorrespondingChecker(R root) {
-      return new ListChecker.Impl<>(rootValue(), root);
+      return new ListChecker.Impl<>(this::rootValue, root);
     }
   }
 }

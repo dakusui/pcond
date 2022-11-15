@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.core.fluent3.Checker;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.forms.Predicates;
 
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
@@ -78,7 +79,7 @@ public interface StringChecker<
           OIN,
           String> implements
       StringChecker<R, OIN> {
-    protected Impl(OIN rootValue, R root) {
+    protected Impl(Supplier<OIN> rootValue, R root) {
       super(rootValue, root);
     }
   }

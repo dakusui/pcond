@@ -5,6 +5,7 @@ import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public interface StreamChecker<
@@ -39,7 +40,7 @@ public interface StreamChecker<
           >
 
       implements StreamChecker<R, OIN, E> {
-    public Impl(OIN rootValue, R root) {
+    public Impl(Supplier<OIN> rootValue, R root) {
       super(rootValue, root);
     }
   }

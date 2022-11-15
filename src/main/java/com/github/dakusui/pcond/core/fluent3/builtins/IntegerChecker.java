@@ -3,6 +3,8 @@ package com.github.dakusui.pcond.core.fluent3.builtins;
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
+import java.util.function.Supplier;
+
 public interface IntegerChecker<
     R extends Matcher<R, R, OIN, OIN>,
     OIN
@@ -22,7 +24,7 @@ public interface IntegerChecker<
           OIN,
           Integer>
       implements IntegerChecker<R, OIN> {
-    public Impl(OIN rootValue, R root) {
+    public Impl(Supplier<OIN> rootValue, R root) {
       super(rootValue, root);
     }
   }

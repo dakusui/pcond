@@ -2,8 +2,11 @@ package com.github.dakusui.pcond.core.fluent3.builtins;
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
+import java.util.function.Supplier;
+
 public interface IntegerTransformer<
-    R extends Matcher<R, R, OIN, OIN>, OIN
+    R extends Matcher<R, R, OIN, OIN>,
+    OIN
     > extends
     ComparableNumberTransformer<
         IntegerTransformer<R, OIN>,
@@ -11,7 +14,7 @@ public interface IntegerTransformer<
         IntegerChecker<R, OIN>,
         OIN,
         Integer> {
-  static <R extends Matcher<R, R, Integer, Integer>> IntegerTransformer<R, Integer> create(Integer value) {
+  static <R extends Matcher<R, R, Integer, Integer>> IntegerTransformer<R, Integer> create(Supplier<Integer> value) {
     return new Impl<>(value, null);
   }
   class Impl<
@@ -24,13 +27,13 @@ public interface IntegerTransformer<
           OIN,
           Integer> implements
       IntegerTransformer<R, OIN> {
-    public Impl(OIN rootValue, R root) {
+    public Impl(Supplier<OIN> rootValue, R root) {
       super(rootValue, root);
     }
 
     @Override
     public IntegerChecker<R, OIN> createCorrespondingChecker(R root) {
-      return new IntegerChecker.Impl<>(this.rootValue(), this.root());
+      return new IntegerChecker.Impl<>(this::rootValue, this.root());
     }
   }
 }

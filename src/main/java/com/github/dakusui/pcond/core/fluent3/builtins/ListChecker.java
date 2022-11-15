@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -58,7 +59,7 @@ public interface ListChecker<
       OIN,
       List<E>>
       implements ListChecker<R, OIN, E> {
-    protected Impl(OIN rootValue, R root) {
+    protected Impl(Supplier<OIN> rootValue, R root) {
       super(rootValue, root);
     }
   }

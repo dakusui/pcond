@@ -3,6 +3,8 @@ package com.github.dakusui.pcond.core.fluent3.builtins;
 import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
+import java.util.function.Supplier;
+
 public interface BooleanTransformer<
     RX extends Matcher<RX, RX, OIN, OIN>,
     OIN
@@ -14,7 +16,7 @@ public interface BooleanTransformer<
         OIN,
         Boolean
         > {
-  static <R extends Matcher<R, R, Boolean, Boolean>> BooleanTransformer<R, Boolean> create(Boolean value) {
+  static <R extends Matcher<R, R, Boolean, Boolean>> BooleanTransformer<R, Boolean> create(Supplier<Boolean> value) {
     return new Impl<>(value, null);
   }
   class Impl<
@@ -28,13 +30,13 @@ public interface BooleanTransformer<
           Boolean
           > implements
       BooleanTransformer<RX, OIN> {
-    public Impl(OIN rootValue, RX root) {
+    public Impl(Supplier<OIN> rootValue, RX root) {
       super(rootValue, root);
     }
 
     @Override
     public BooleanChecker<RX, OIN> createCorrespondingChecker(RX root) {
-      return new BooleanChecker.Impl<>(this.rootValue(), root);
+      return new BooleanChecker.Impl<>(this::rootValue, root);
     }
   }
 }

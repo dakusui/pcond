@@ -5,6 +5,8 @@ import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 
+import java.util.function.Supplier;
+
 import static java.util.Arrays.asList;
 
 public interface StringTransformer<
@@ -17,7 +19,7 @@ public interface StringTransformer<
         StringChecker<R, OIN>,
         OIN,
         String> {
-  static <R extends Matcher<R, R, String, String>> StringTransformer<R, String> create(String value) {
+  static <R extends Matcher<R, R, String, String>> StringTransformer<R, String> create(Supplier<String> value) {
     return new Impl<>(value, null);
   }
 
@@ -52,13 +54,13 @@ public interface StringTransformer<
           String> implements
       StringTransformer<R, OIN> {
 
-    public Impl(OIN rootValue, R root) {
+    public Impl(Supplier<OIN> rootValue, R root) {
       super(rootValue, root);
     }
 
     @Override
     public StringChecker<R, OIN> createCorrespondingChecker(R root) {
-      return new StringChecker.Impl<>(this.rootValue(), this.root());
+      return new StringChecker.Impl<>(this::rootValue, this.root());
     }
   }
 }

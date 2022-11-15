@@ -6,7 +6,6 @@ import com.github.dakusui.pcond.core.fluent3.builtins.*;
 import com.github.dakusui.pcond.core.printable.PrintableFunction;
 import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,7 +50,7 @@ public class Fluents {
   public static <R extends Matcher<R, R, String, String>>
   StringTransformer<R, String>
   stringStatement(String value) {
-    return StringTransformer.create(value);
+    return StringTransformer.create(() ->value);
   }
 
 
@@ -65,7 +64,7 @@ public class Fluents {
   public static <R extends Matcher<R, R, Double, Double>>
   DoubleTransformer<R, Double>
   doubleStatement(Double value) {
-    return DoubleTransformer.create(value);
+    return DoubleTransformer.create(() -> value);
   }
 
 
@@ -79,7 +78,7 @@ public class Fluents {
   public static <R extends Matcher<R, R, Float, Float>>
   FloatTransformer<R, Float>
   floatStatement(Float value) {
-    return FloatTransformer.create(value);
+    return FloatTransformer.create(() -> value);
   }
 
 
@@ -93,7 +92,7 @@ public class Fluents {
   public static <R extends Matcher<R, R, Long, Long>>
   LongTransformer<R, Long>
   longStatement(Long value) {
-    return LongTransformer.create(value);
+    return LongTransformer.create(() -> value);
   }
 
   /**
@@ -106,7 +105,7 @@ public class Fluents {
   public static <R extends Matcher<R, R, Integer, Integer>>
   IntegerTransformer<R, Integer>
   integerStatement(Integer value) {
-    return IntegerTransformer.create(value);
+    return IntegerTransformer.create(() -> value);
   }
 
 
@@ -120,7 +119,7 @@ public class Fluents {
   public static <R extends Matcher<R, R, Short, Short>>
   ShortTransformer<R, Short>
   shortStatement(Short value) {
-    return ShortTransformer.create(value);
+    return ShortTransformer.create(() -> value);
   }
 
   /**
@@ -133,7 +132,7 @@ public class Fluents {
   public static <R extends Matcher<R, R, Boolean, Boolean>>
   BooleanTransformer<R, Boolean>
   booleanStatement(Boolean value) {
-    return BooleanTransformer.create(value);
+    return BooleanTransformer.create(() -> value);
   }
 
   /**
@@ -148,7 +147,7 @@ public class Fluents {
       E>
   ObjectTransformer<R, E, E>
   objectStatement(E value) {
-    return ObjectTransformer.create(value);
+    return ObjectTransformer.create(() -> value);
   }
 
   /**
@@ -162,7 +161,7 @@ public class Fluents {
   public static <R extends Matcher<R, R, List<E>, List<E>>, E>
   ListTransformer<R, List<E>, E>
   listStatement(List<E> value) {
-    return ListTransformer.create(value);
+    return ListTransformer.create(() -> value);
   }
 
   /**
@@ -175,7 +174,7 @@ public class Fluents {
   public static <R extends Matcher<R, R, Stream<E>, Stream<E>>, E>
   StreamTransformer<R, Stream<E>, E>
   streamStatement(Stream<E> value) {
-    return StreamTransformer.create(value);
+    return StreamTransformer.create(() -> value);
   }
 
   public static Predicate<? super List<?>> createPredicateForAllOf(Statement<?>[] statements) {
