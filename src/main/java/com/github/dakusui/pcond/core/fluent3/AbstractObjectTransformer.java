@@ -2,12 +2,16 @@ package com.github.dakusui.pcond.core.fluent3;
 
 import com.github.dakusui.pcond.core.fluent3.builtins.ObjectTransformer;
 import com.github.dakusui.pcond.core.fluent3.builtins.StringTransformer;
+import com.github.dakusui.pcond.core.fluent3.builtins.ThrowableTransformer;
 import com.github.dakusui.pcond.forms.Functions;
+
+import java.util.function.Function;
 
 import static com.github.dakusui.pcond.core.refl.MethodQuery.classMethod;
 import static com.github.dakusui.pcond.core.refl.MethodQuery.instanceMethod;
 import static com.github.dakusui.pcond.forms.Functions.call;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A base interface for all the "transformers".
@@ -42,5 +46,10 @@ public interface AbstractObjectTransformer<
 
   default <E> ObjectTransformer<RX, OIN, E> invokeStatic(Class<?> klass, String methodName, Object... args) {
     return this.toObject(call(classMethod(klass, methodName, args)));
+  }
+
+  default <O extends Throwable> ThrowableTransformer<RX, OIN, O> expectException(Class<O> exceptionClass, Function<? super T, ?> f) {
+    requireNonNull(exceptionClass);
+    return this.toThrowable(Functions.expectingException(exceptionClass, f));
   }
 }

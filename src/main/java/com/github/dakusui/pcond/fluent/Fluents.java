@@ -178,10 +178,6 @@ public class Fluents {
     return StreamTransformer.create(value);
   }
 
-  private static <T> Fluent<T> fluent(T value) {
-    return new Fluent<>("WHEN", value);
-  }
-
   public static Predicate<? super List<?>> createPredicateForAllOf(Statement<?>[] statements) {
     AtomicInteger i = new AtomicInteger(0);
     @SuppressWarnings("unchecked") Predicate<? super List<?>>[] predicates = Arrays.stream(statements)
@@ -191,7 +187,7 @@ public class Fluents {
   }
 
   public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
-    return objectStatement(value).then().addPredicate(predicate);
+    return objectStatement(value).then().appendPredicateAsChild(predicate);
   }
 
   @SafeVarargs

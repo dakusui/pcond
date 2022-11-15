@@ -3,6 +3,10 @@ package com.github.dakusui.pcond.core.fluent3.builtins;
 import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent3.CustomTransformer;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
+import com.github.dakusui.pcond.fluent.Fluents;
+import com.github.dakusui.pcond.forms.Functions;
+
+import static com.github.dakusui.pcond.forms.Functions.identity;
 
 
 /**
@@ -22,7 +26,32 @@ public interface ObjectTransformer<
             ObjectChecker<RX, OIN, E>,
             OIN,
             E> {
-  static <R extends Matcher<R, R, E, E>, E> ObjectTransformer<R, E, E> create(E value) {
+  default StringTransformer<RX, OIN> asString() {
+    return toString(Functions.cast(String.class));
+  }
+
+  default IntegerTransformer<RX, OIN> asInteger() {
+    return toInteger(Functions.cast(Integer.class));
+  }
+
+  default LongTransformer<RX, OIN> asLong() {
+    return toLong(Functions.cast(Long.class));
+  }
+
+  default ShortTransformer<RX, OIN> asShort() {
+    return toShort(Functions.cast(Short.class));
+  }
+
+  default DoubleTransformer<RX, OIN> asDouble() {
+    return toDouble(Functions.cast(Double.class));
+  }
+
+  default FloatTransformer<RX, OIN> asFloat() {
+    return toFloat(Functions.cast(Float.class));
+  }
+
+  static
+  <R extends Matcher<R, R, E, E>, E> ObjectTransformer<R, E, E> create(E value) {
     return new Impl<>(value, null);
   }
   class Impl<

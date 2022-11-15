@@ -43,6 +43,31 @@ public interface Transformer<
     return ret;
   }
 
+  default LongTransformer<RX, OIN> toLong(Function<? super T, Long> func) {
+    requireNonNull(func);
+    LongTransformer<RX, OIN> ret = new LongTransformer.Impl<>(this.rootValue(), this.root());
+    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
+    return ret;
+  }
+
+  default ShortTransformer<RX, OIN> toShort(Function<? super T, Short> func) {
+    requireNonNull(func);
+    ShortTransformer<RX, OIN> ret = new ShortTransformer.Impl<>(this.rootValue(), this.root());
+    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
+    return ret;
+  }
+  default DoubleTransformer<RX, OIN> toDouble(Function<? super T, Double> func) {
+    requireNonNull(func);
+    DoubleTransformer<RX, OIN> ret = new DoubleTransformer.Impl<>(this.rootValue(), this.root());
+    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
+    return ret;
+  }
+  default FloatTransformer<RX, OIN> toFloat(Function<? super T, Float> func) {
+    requireNonNull(func);
+    FloatTransformer<RX, OIN> ret = new FloatTransformer.Impl<>(this.rootValue(), this.root());
+    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
+    return ret;
+  }
   default StringTransformer<RX, OIN> toString(Function<? super T, String> func) {
     requireNonNull(func);
     StringTransformer<RX, OIN> ret = new StringTransformer.Impl<>(this.rootValue(), this.root());
@@ -64,6 +89,12 @@ public interface Transformer<
     return ret;
   }
 
+  default <E extends Throwable> ThrowableTransformer<RX, OIN, E> toThrowable(Function<? super T, E> func) {
+    requireNonNull(func);
+    ThrowableTransformer<RX, OIN, E> ret = new ThrowableTransformer.Impl<>(this.rootValue(), this.root());
+    this.appendChild(tx -> Predicates.transform(func).check(ret.toPredicate()));
+    return ret;
+  }
 
   V createCorrespondingChecker(RX root);
 }
