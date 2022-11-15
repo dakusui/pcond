@@ -16,13 +16,13 @@ public class MoreFluentListTest {
   @Test
   public void test_elementAt() {
     List<String> var = asList("hello", "world");
-    assertStatement(Fluents.listStatement(var).elementAt(0).then().isEqualTo("hello"));
+    assertStatement(Fluents.listValue(var).elementAt(0).then().isEqualTo("hello"));
   }
 
   @Test
   public void test_size() {
     List<String> var = asList("hello", "world");
-    assertStatement(Fluents.listStatement(var).size().then().equalTo(2));
+    assertStatement(Fluents.listValue(var).size().then().equalTo(2));
   }
 
   /*
@@ -41,12 +41,12 @@ public class MoreFluentListTest {
   @Test
   public void test_stream() {
     List<String> var = asList("hello", "world");
-    assertStatement(Fluents.listStatement(var).stream().then().allMatch(isNotNull()));
+    assertStatement(Fluents.listValue(var).stream().then().allMatch(isNotNull()));
   }
 
   @Test
   public void test_isEmpty() {
     List<String> var = asList("hello", "world");
-    assertStatement(Fluents.listStatement(var).isEmpty().then().isFalse());
+    assertStatement(Fluents.listValue(var).isEmpty().then().isFalse());
   }
 }

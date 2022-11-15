@@ -26,11 +26,11 @@ public interface Matcher<
 
   M anyOf();
 
-  M appendChild(Function<M, Predicate<? super T>> child);
+  M check(Function<M, Predicate<? super T>> child);
 
-  default M appendPredicateAsChild(Predicate<? super T> predicate) {
+  default M checkWithPredicate(Predicate<? super T> predicate) {
     requireNonNull(predicate);
-    return this.appendChild(m -> predicate);
+    return this.check(m -> predicate);
   }
 
   Predicate<? super T> toPredicate();
@@ -38,6 +38,11 @@ public interface Matcher<
   OIN rootValue();
 
   R root();
+
+  @SuppressWarnings("unchecked")
+  default Predicate<OIN> done() {
+    return (Predicate<OIN>) root().clone().toPredicate();
+  }
 
   boolean isRoot();
 
@@ -53,6 +58,8 @@ public interface Matcher<
   default Predicate<OIN> statementPredicate() {
     return (Predicate<OIN>)root().toPredicate();
   }
+
+  M clone();
 
   /**
    * @param <M>
@@ -92,7 +99,7 @@ public interface Matcher<
     }
 
     @Override
-    public M appendChild(Function<M, Predicate<? super T>> child) {
+    public M check(Function<M, Predicate<? super T>> child) {
       this.childPredicates.add(requireNonNull(child));
       return me();
     }

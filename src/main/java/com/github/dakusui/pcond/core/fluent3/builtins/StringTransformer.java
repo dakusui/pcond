@@ -24,14 +24,14 @@ public interface StringTransformer<
   }
 
   default StringTransformer<R, OIN> substring(int begin) {
-    return this.toString(Printables.function(() -> "substring[" + begin + "]", s -> s.substring(begin)));
+    return this.toString(Printables.function(() -> "substring[" + begin + "]", (String s) -> s.substring(begin)));
   }
 
   default StringTransformer<R, OIN> toUpperCase() {
     return this.toString(Printables.function("toUpperCase", String::toUpperCase));
   }
 
-  default StringTransformer<R, OIN> toLowerCase() {
+  default StringTransformer<R,OIN> toLowerCase() {
     return this.toString(Printables.function("toLowerCase", String::toLowerCase));
   }
 

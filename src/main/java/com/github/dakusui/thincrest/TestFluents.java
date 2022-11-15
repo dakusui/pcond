@@ -26,7 +26,10 @@ public enum TestFluents {
    * Fluent version of {@link TestAssertions#assertThat(Object, Predicate)}.
    * Use this method when you need to verify multiple values.
    *
+   * You can use {@link TestFluents#assertStatement(Statement)}, if you have only one statement to be verified, for readability's sake.
+   *
    * @param statements Statements to be verified
+   * @see TestFluents#assertStatement(Statement)
    */
   public static void assertAll(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
@@ -46,7 +49,10 @@ public enum TestFluents {
    * Fluent version of {@link TestAssertions#assumeThat(Object, Predicate)}.
    * Use this method when you need to verify multiple values.
    *
+   * You can use {@link TestFluents#assumeStatement(Statement)}}, if you have only one statement to be verified, for readability's sake.
+   *
    * @param statements Statements to be verified
+   * @see TestFluents#assumeStatement(Statement)
    */
   public static void assumeAll(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());

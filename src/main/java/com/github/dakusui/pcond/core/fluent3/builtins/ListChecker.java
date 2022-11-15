@@ -19,15 +19,15 @@ public interface ListChecker<
     E
     > extends Checker<ListChecker<R, OIN, E>, R, OIN, List<E>> {
   default ListChecker<R, OIN, E> isEmpty() {
-    return appendPredicateAsChild(Predicates.isEmpty());
+    return checkWithPredicate(Predicates.isEmpty());
   }
 
   default ListChecker<R, OIN, E> isNotEmpty() {
-    return appendPredicateAsChild(Predicates.not(Predicates.isEmpty()));
+    return checkWithPredicate(Predicates.not(Predicates.isEmpty()));
   }
 
   default ListChecker<R, OIN, E> contains(E element) {
-    return appendPredicateAsChild(Predicates.contains(element));
+    return checkWithPredicate(Predicates.contains(element));
   }
 
   @SuppressWarnings("unchecked")
@@ -37,7 +37,7 @@ public interface ListChecker<
 
   @SuppressWarnings("unchecked")
   default ListChecker<R, OIN, E> findElementsInOrderBy(List<Predicate<E>> predicates) {
-    return appendPredicateAsChild(Predicates.findElements(predicates.toArray(new Predicate[0])));
+    return checkWithPredicate(Predicates.findElements(predicates.toArray(new Predicate[0])));
   }
 
   @SuppressWarnings("unchecked")

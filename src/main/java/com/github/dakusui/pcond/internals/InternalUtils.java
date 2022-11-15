@@ -279,4 +279,10 @@ public enum InternalUtils {
   public static String newLine() {
     return format("%n");
   }
+
+  public static <T> Supplier<T> noSuchElement() {
+    return () -> {
+      throw new NoSuchElementException();
+    };
+  }
 }

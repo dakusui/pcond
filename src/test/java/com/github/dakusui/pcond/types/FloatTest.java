@@ -10,35 +10,35 @@ public class FloatTest {
   @Test
   public void floatTest() {
     float v = 1.23f;
-    validateStatement(Fluents.floatStatement(v).then().lessThan(1.24f));
+    validateStatement(Fluents.floatValue(v).then().lessThan(1.24f));
   }
 
   @Test(expected = IllegalValueException.class)
   public void floatTestFail() {
     float v = 1.23f;
     validateStatement(
-        Fluents.floatStatement(v).then().lessThan(1.22f));
+        Fluents.floatValue(v).then().lessThan(1.22f));
   }
 
   @Test
   public void floatTransformerTest() {
     float v = 1.23f;
     validateStatement(
-        Fluents.floatStatement(v).then().lessThan(1.24f));
+        Fluents.floatValue(v).then().lessThan(1.24f));
   }
 
   @Test(expected = IllegalValueException.class)
   public void floatTransformerTestFail() {
     float v = 1.23f;
     validateStatement(
-        Fluents.floatStatement(v).then().lessThan(1.22f));
+        Fluents.floatValue(v).then().lessThan(1.22f));
   }
 
   @Test(expected = IllegalValueException.class)
   public void toFloatTest() {
     String v = "123";
     validateStatement(
-        Fluents.stringStatement(v)
+        Fluents.stringValue(v)
             .toFloat(Float::parseFloat)
             .then()
             .lessThan(122.0f));

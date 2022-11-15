@@ -1,5 +1,11 @@
 package com.github.dakusui.pcond.ut.fluent3;
 
+import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
+import com.github.dakusui.pcond.core.fluent3.Matcher;
+import com.github.dakusui.pcond.core.fluent3.Transformer;
+import com.github.dakusui.pcond.core.fluent3.builtins.ObjectChecker;
+import com.github.dakusui.pcond.core.fluent3.builtins.StringTransformer;
+import com.github.dakusui.pcond.forms.Printables;
 import org.junit.ComparisonFailure;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -7,9 +13,10 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
-import static com.github.dakusui.pcond.fluent.Fluents.stringStatement;
 
 @RunWith(Enclosed.class)
 public class Fluent3Example {
@@ -18,7 +25,7 @@ public class Fluent3Example {
     @Test(expected = ComparisonFailure.class)
     public void secondExample() {
       assertAll(
-          stringStatement("Hello")
+          stringValue("Hello")
               .then()
               .isNull().toStatement());
     }
@@ -26,7 +33,7 @@ public class Fluent3Example {
     @Test(expected = ComparisonFailure.class)
     public void thirdExample() {
       assertAll(
-          stringStatement("Hello")
+          stringValue("Hello")
               .allOf()
               .then()
               .isNotNull()
@@ -37,7 +44,7 @@ public class Fluent3Example {
     @Test(expected = ComparisonFailure.class)
     public void thirdExample_a() {
       assertAll(
-          stringStatement("Hello")
+          stringValue("Hello")
               .allOf()
               .then()
               .isNotNull()
@@ -47,53 +54,53 @@ public class Fluent3Example {
     @Test(expected = ComparisonFailure.class)
     public void forthExample() {
       assertAll(
-          stringStatement("Hello").length().then().greaterThan(10).toStatement());
+          stringValue("Hello").length().then().greaterThan(10).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void fifth() {
       assertAll(
-          stringStatement("Hello5").length().then().greaterThan(10).lessThan(1).toStatement());
+          stringValue("Hello5").length().then().greaterThan(10).lessThan(1).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test9() {
       assertAll(
-          stringStatement("Hello5")
+          stringValue("Hello5")
               .then()
-              .appendChild(v -> v.isNull().toPredicate())
+              .check(v -> v.isNull().toPredicate())
               .toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test7() {
       assertAll(
-          stringStatement("Hello5")
-              .appendChild(tx -> tx.then().isNotNull().toPredicate())
-              .appendChild(tx -> tx.then().isNull().toPredicate()).toStatement());
+          stringValue("Hello5")
+              .check(tx -> tx.then().isNotNull().toPredicate())
+              .check(tx -> tx.then().isNull().toPredicate()).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test6b() {
       assertAll(
-          stringStatement("Hello5")
-              .appendChild(tx -> tx.then().isNull().toPredicate()).toStatement());
+          stringValue("Hello5")
+              .check(tx -> tx.then().isNull().toPredicate()).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test6c() {
       assertAll(
-          stringStatement("Hello5")
+          stringValue("Hello5")
               .anyOf()
-              .appendChild(tx -> tx.then().isNull().toPredicate()).toStatement());
+              .check(tx -> tx.then().isNull().toPredicate()).toStatement());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test6d() {
       assertAll(
-          stringStatement("Hello5")
-              .appendChild(tx -> tx.appendPredicateAsChild(Objects::isNull).toPredicate())
-              .appendChild(tx -> tx.appendPredicateAsChild(v -> !Objects.isNull(v)).toPredicate()).toStatement()
+          stringValue("Hello5")
+              .check(tx -> tx.checkWithPredicate(Objects::isNull).toPredicate())
+              .check(tx -> tx.checkWithPredicate(v -> !Objects.isNull(v)).toPredicate()).toStatement()
       );
     }
 
@@ -103,9 +110,16 @@ public class Fluent3Example {
     @Test(expected = ComparisonFailure.class)
     public void test7_a() {
       assertAll(
-          stringStatement("Hello5")
-              .appendChild(tx -> tx.then().isNotNull().toPredicate())
-              .appendChild(tx -> tx.then().isNull().toPredicate()));
+          stringValue("Hello5")
+              .check(tx -> tx.then().isNotNull().toPredicate())
+              .check(tx -> tx.then().isNull().toPredicate()));
+    }
+
+    @Test(expected = ComparisonFailure.class)
+    public void test6() {
+      assertAll(
+          stringValue("Hello5")
+              .check(tx -> tx.length().then().greaterThan(10).done()));
     }
   }
 
@@ -133,13 +147,180 @@ public class Fluent3Example {
                   .root().$())
               .$());
     }
+*/
 
-    @Test//(expected = StackOverflowError.class)
+    @Test
+    public void test7_C() {
+      assertAll(
+          stringValue("Hello5")
+              .check(tx -> tx
+                  .check(ty -> ty.length()
+                      .then()
+                      .greaterThanOrEqualTo(800)
+                      .lessThan(1000)
+                      .done())
+                  .check(ty -> ty.then().isNotNull().done()).done())
+              .check(tx -> tx.then().isNull().done()));
+    }
+
+    @Test
+    public void givenBookTitle_whenLength_thenNotNullAndAppropriateLength() {
+      assertAll(
+          stringValue("De Bello Gallico")
+              .check(ty -> ty.then().isNotNull().done())
+              .check(ty -> ty.length().then()
+                  .greaterThanOrEqualTo(10)
+                  .lessThan(40)
+                  .done()));
+    }
+
+    @Test
+    public void givenBookTitleAndAbstract_whenCheckThem_thenTheyAreNotNullAndAppropriateLength() {
+      String bookTitle = "De Bello Gallico";
+      String bookAbstract = "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.";
+      assertAll(
+          stringValue(bookTitle)
+              .check(ty -> ty.then().isNotNull().done())
+              .check(ty -> ty.length().then()
+                  .greaterThanOrEqualTo(10)
+                  .lessThan(40)
+                  .done()),
+          stringValue(bookAbstract)
+              .check(ty -> ty.then().isNotNull().done())
+              .check(ty -> ty.length().then()
+                  .greaterThanOrEqualTo(200)
+                  .lessThan(400)
+                  .done()));
+    }
+
+    @Test
+    public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength() {
+      Book book = new Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
+      assertAll(
+          new BookTransformer(book)
+              .check(b -> b.title()
+                  .check(ty -> ty.then().isNotNull().toPredicate()).done())
+              .check(b -> b.abstractText()
+                  .check(ty -> ty.then().isNotNull().toPredicate()).done()));
+    }
+
+    /*
+    @Test
+    public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength() {
+      Book book = new Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
+      assertAll(
+          new BookTransformer(book)
+              .check(b -> b.title()
+                  .check(ty -> ty.then().isNotNull().done())
+                  .check(ty -> ty.length().then()
+                      .greaterThanOrEqualTo(10)
+                      .lessThan(40)
+                      .done()).done())
+              .check(b -> b.abstractText()
+                  .check(ty -> ty.then().isNotNull().done())
+                  .check(ty -> ty.length().then()
+                      .greaterThanOrEqualTo(200)
+                      .lessThan(400)
+                      .done()));
+    }
+     */
+
+    @Test(expected = ComparisonFailure.class)
     public void test6() {
       assertAll(
-          statementForString("Hello5")
-              .appendChild(tx -> tx.length().then().greaterThan(10).root().$()).$());
+          stringValue("Hello5")
+              .check(tx -> tx.length().then().greaterThanOrEqualTo(10).lessThan(100).done()));
     }
-   */
+
+    @Test(expected = ComparisonFailure.class)
+    public void test6b() {
+      assertAll(stringValue("Hello5")
+          .length()
+          .then()
+          .greaterThanOrEqualTo(10)
+          .lessThan(100));
+    }
+
+
+    @Test
+    public void thirdExample_a() {
+      assertAll(
+          stringValue("Hello")
+              .length()
+              .then()
+              .allOf()
+              .isNotNull()
+              .isNull());
+    }
+
+    @Test
+    public void test7() {
+      assertAll(
+          stringValue("Hello5")
+              .check(tx -> tx.then().isNotNull().done())
+              .check(tx -> tx.then().isNull().done()));
+    }
+
+    static class Book {
+      private final String abstractText;
+      private final String title;
+
+      Book(String abstractText, String title) {
+        this.abstractText = abstractText;
+        this.title = title;
+      }
+
+      String title() {
+        return title;
+      }
+
+      String abstractText() {
+        return abstractText;
+      }
+    }
+
+    static class BookTransformer extends CustomTransformer<BookTransformer, Book> {
+      public BookTransformer(Book rootValue) {
+        super(() -> rootValue);
+      }
+
+      public StringTransformer<BookTransformer, Book> title() {
+        return toString(Printables.function("title", Book::title));
+      }
+
+      public StringTransformer<BookTransformer, Book> abstractText() {
+        return toString(Printables.function("title", Book::abstractText));
+      }
+    }
+
+
+    static abstract class CustomTransformer<
+        TX extends Transformer<
+            TX,
+            TX,
+            ObjectChecker<TX, OIN, OIN>,
+            OIN,
+            OIN>,
+        OIN> extends
+        Matcher.Base<
+            TX,
+            TX,
+            OIN,
+            OIN> implements
+        AbstractObjectTransformer<
+            TX,
+            TX,
+            ObjectChecker<TX, OIN, OIN>,
+            OIN,
+            OIN> {
+      public CustomTransformer(Supplier<OIN> rootValue) {
+        super(rootValue, null);
+      }
+
+      @Override
+      public ObjectChecker<TX, OIN, OIN> createCorrespondingChecker(TX root) {
+        throw new UnsupportedOperationException();
+      }
+    }
   }
 }

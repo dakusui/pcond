@@ -13,18 +13,18 @@ public class MoreFluentStreamTest {
   @Test
   public void test_noneMatche() {
     Stream<String> var = Stream.of("hello", "world");
-    assertStatement(Fluents.streamStatement(var).then().noneMatch(isEqualTo("HELLO")));
+    assertStatement(Fluents.streamValue(var).then().noneMatch(isEqualTo("HELLO")));
   }
 
   @Test
   public void test_anyMatch() {
     Stream<String> var = Stream.of("hello", "world");
-    assertStatement(Fluents.streamStatement(var).then().anyMatch(isEqualTo("world")));
+    assertStatement(Fluents.streamValue(var).then().anyMatch(isEqualTo("world")));
   }
 
   @Test
   public void test_allMatch() {
     Stream<String> var = Stream.of("hello", "world");
-    assertStatement(Fluents.streamStatement(var).then().allMatch(isNotNull()));
+    assertStatement(Fluents.streamValue(var).then().allMatch(isNotNull()));
   }
 }

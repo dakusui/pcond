@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.fluent3.builtins;
 
-import com.github.dakusui.pcond.core.fluent3.Checker;
+import com.github.dakusui.pcond.core.fluent3.AbstractObjectChecker;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.forms.Predicates;
 
@@ -12,61 +12,53 @@ import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.expla
 public interface StringChecker<
     R extends Matcher<R, R, OIN, OIN>,
     OIN> extends
-    Checker<
+    AbstractObjectChecker<
         StringChecker<R, OIN>,
         R,
         OIN,
         String> {
   default StringChecker<R, OIN> contains(String token) {
-    return this.appendPredicateAsChild(Predicates.containsString(token));
+    return this.checkWithPredicate(Predicates.containsString(token));
   }
 
   default StringChecker<R, OIN> startsWith(String prefix) {
-    return this.appendPredicateAsChild(Predicates.startsWith(prefix));
+    return this.checkWithPredicate(Predicates.startsWith(prefix));
   }
 
   default StringChecker<R, OIN> isEmpty() {
-    return this.appendPredicateAsChild(Predicates.isEmptyString());
+    return this.checkWithPredicate(Predicates.isEmptyString());
   }
 
   default StringChecker<R, OIN> isNotEmpty() {
-    return this.appendPredicateAsChild(Predicates.isEmptyString().negate());
+    return this.checkWithPredicate(Predicates.isEmptyString().negate());
   }
 
   default StringChecker<R, OIN> isEqualTo(String string) {
-    return this.appendPredicateAsChild(explainableStringIsEqualTo(string));
-  }
-
-  default StringChecker<R, OIN> isNull() {
-    return this.appendPredicateAsChild(Predicates.isNull());
-  }
-
-  default StringChecker<R, OIN> isNotNull() {
-    return this.appendPredicateAsChild(Predicates.isNotNull());
+    return this.checkWithPredicate(explainableStringIsEqualTo(string));
   }
 
   default StringChecker<R, OIN> isNullOrEmpty() {
-    return this.appendPredicateAsChild(Predicates.isNullOrEmptyString());
+    return this.checkWithPredicate(Predicates.isNullOrEmptyString());
   }
 
   default StringChecker<R, OIN> matchesRegex(String regex) {
-    return this.appendPredicateAsChild(Predicates.matchesRegex(regex));
+    return this.checkWithPredicate(Predicates.matchesRegex(regex));
   }
 
   default StringChecker<R, OIN> equalsIgnoreCase(String s) {
-    return this.appendPredicateAsChild(Predicates.equalsIgnoreCase(s));
+    return this.checkWithPredicate(Predicates.equalsIgnoreCase(s));
   }
 
   default StringChecker<R, OIN> findRegexes(String... regexes) {
-    return this.appendPredicateAsChild(Predicates.findRegexes(regexes));
+    return this.checkWithPredicate(Predicates.findRegexes(regexes));
   }
 
   default StringChecker<R, OIN> findRegexPatterns(Pattern... patterns) {
-    return this.appendPredicateAsChild(Predicates.findRegexPatterns(patterns));
+    return this.checkWithPredicate(Predicates.findRegexPatterns(patterns));
   }
 
   default StringChecker<R, OIN> findSubstrings(String... tokens) {
-    return this.appendPredicateAsChild(Predicates.findSubstrings(tokens));
+    return this.checkWithPredicate(Predicates.findSubstrings(tokens));
   }
 
   class Impl<

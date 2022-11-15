@@ -49,7 +49,7 @@ public class Fluents {
    */
   public static <R extends Matcher<R, R, String, String>>
   StringTransformer<R, String>
-  stringStatement(String value) {
+  stringValue(String value) {
     return StringTransformer.create(() ->value);
   }
 
@@ -63,7 +63,7 @@ public class Fluents {
    */
   public static <R extends Matcher<R, R, Double, Double>>
   DoubleTransformer<R, Double>
-  doubleStatement(Double value) {
+  doubleValue(Double value) {
     return DoubleTransformer.create(() -> value);
   }
 
@@ -77,7 +77,7 @@ public class Fluents {
    */
   public static <R extends Matcher<R, R, Float, Float>>
   FloatTransformer<R, Float>
-  floatStatement(Float value) {
+  floatValue(Float value) {
     return FloatTransformer.create(() -> value);
   }
 
@@ -91,7 +91,7 @@ public class Fluents {
    */
   public static <R extends Matcher<R, R, Long, Long>>
   LongTransformer<R, Long>
-  longStatement(Long value) {
+  longValue(Long value) {
     return LongTransformer.create(() -> value);
   }
 
@@ -104,7 +104,7 @@ public class Fluents {
    */
   public static <R extends Matcher<R, R, Integer, Integer>>
   IntegerTransformer<R, Integer>
-  integerStatement(Integer value) {
+  integerValue(Integer value) {
     return IntegerTransformer.create(() -> value);
   }
 
@@ -118,7 +118,7 @@ public class Fluents {
    */
   public static <R extends Matcher<R, R, Short, Short>>
   ShortTransformer<R, Short>
-  shortStatement(Short value) {
+  shortValue(Short value) {
     return ShortTransformer.create(() -> value);
   }
 
@@ -131,7 +131,7 @@ public class Fluents {
    */
   public static <R extends Matcher<R, R, Boolean, Boolean>>
   BooleanTransformer<R, Boolean>
-  booleanStatement(Boolean value) {
+  booleanValue(Boolean value) {
     return BooleanTransformer.create(() -> value);
   }
 
@@ -146,7 +146,7 @@ public class Fluents {
       R extends Matcher<R, R, E, E>,
       E>
   ObjectTransformer<R, E, E>
-  objectStatement(E value) {
+  objectValue(E value) {
     return ObjectTransformer.create(() -> value);
   }
 
@@ -160,7 +160,7 @@ public class Fluents {
 
   public static <R extends Matcher<R, R, List<E>, List<E>>, E>
   ListTransformer<R, List<E>, E>
-  listStatement(List<E> value) {
+  listValue(List<E> value) {
     return ListTransformer.create(() -> value);
   }
 
@@ -173,7 +173,7 @@ public class Fluents {
    */
   public static <R extends Matcher<R, R, Stream<E>, Stream<E>>, E>
   StreamTransformer<R, Stream<E>, E>
-  streamStatement(Stream<E> value) {
+  streamValue(Stream<E> value) {
     return StreamTransformer.create(() -> value);
   }
 
@@ -186,7 +186,7 @@ public class Fluents {
   }
 
   public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
-    return objectStatement(value).then().appendPredicateAsChild(predicate);
+    return objectValue(value).then().checkWithPredicate(predicate);
   }
 
   @SafeVarargs

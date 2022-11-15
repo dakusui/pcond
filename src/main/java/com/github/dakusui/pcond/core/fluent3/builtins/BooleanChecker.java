@@ -16,11 +16,11 @@ public interface BooleanChecker<
         Boolean> {
 
   default BooleanChecker<R, OIN> isTrue() {
-    return this.appendPredicateAsChild(Predicates.isTrue());
+    return this.checkWithPredicate(Predicates.isTrue());
   }
 
   default BooleanChecker<R, OIN> isFalse() {
-    return this.appendPredicateAsChild(Predicates.isFalse());
+    return this.checkWithPredicate(Predicates.isFalse());
   }
 
   class Impl<

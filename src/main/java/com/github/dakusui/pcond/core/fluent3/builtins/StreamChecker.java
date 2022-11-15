@@ -18,15 +18,15 @@ public interface StreamChecker<
         OIN,
         Stream<E>> {
   default StreamChecker<R, OIN, E> noneMatch(Predicate<E> p) {
-    return this.appendPredicateAsChild(Predicates.noneMatch(p));
+    return this.checkWithPredicate(Predicates.noneMatch(p));
   }
 
   default StreamChecker<R, OIN, E> anyMatch(Predicate<E> p) {
-    return this.appendPredicateAsChild(Predicates.anyMatch(p));
+    return this.checkWithPredicate(Predicates.anyMatch(p));
   }
 
   default StreamChecker<R, OIN, E> allMatch(Predicate<E> p) {
-    return this.appendPredicateAsChild(Predicates.allMatch(p));
+    return this.checkWithPredicate(Predicates.allMatch(p));
   }
 
   class Impl<R extends Matcher<R, R, OIN, OIN>,

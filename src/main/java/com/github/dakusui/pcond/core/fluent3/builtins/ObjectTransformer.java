@@ -25,8 +25,8 @@ public interface ObjectTransformer<
             ObjectChecker<RX, OIN, E>,
             OIN,
             E> {
-  default StringTransformer<RX, OIN> asString() {
-    return toString(Functions.cast(String.class));
+  default <RY extends Matcher<RY, RY, String, String>> StringTransformer<RY, String> asString() {
+    return (StringTransformer<RY, String>) toString(Functions.cast(String.class));
   }
 
   default IntegerTransformer<RX, OIN> asInteger() {

@@ -14,11 +14,11 @@ public interface AbstractObjectChecker<
     > {
 
   default V isNotNull() {
-    return this.appendPredicateAsChild(Predicates.isNotNull());
+    return this.checkWithPredicate(Predicates.isNotNull());
   }
 
   default V isNull() {
-    return this.appendPredicateAsChild(Predicates.isNull());
+    return this.checkWithPredicate(Predicates.isNull());
   }
 
   /**
@@ -27,22 +27,22 @@ public interface AbstractObjectChecker<
    * @return the updated object.
    */
   default V isEqualTo(Object anotherObject) {
-    return this.appendPredicateAsChild(Predicates.isEqualTo(anotherObject));
+    return this.checkWithPredicate(Predicates.isEqualTo(anotherObject));
   }
 
   default V isSameReferenceAs(Object anotherObject) {
-    return this.appendPredicateAsChild(Predicates.isSameReferenceAs(anotherObject));
+    return this.checkWithPredicate(Predicates.isSameReferenceAs(anotherObject));
   }
 
   default V isInstanceOf(Class<?> klass) {
-    return this.appendPredicateAsChild(Predicates.isInstanceOf(klass));
+    return this.checkWithPredicate(Predicates.isInstanceOf(klass));
   }
 
   default V invoke(String methodName, Object... args) {
-    return this.appendPredicateAsChild(Predicates.callp(MethodQuery.instanceMethod(parameter(), methodName, args)));
+    return this.checkWithPredicate(Predicates.callp(MethodQuery.instanceMethod(parameter(), methodName, args)));
   }
 
   default V invokeStatic(Class<?> klass, String methodName, Object... args) {
-    return this.appendPredicateAsChild(Predicates.callp(MethodQuery.classMethod(klass, methodName, args)));
+    return this.checkWithPredicate(Predicates.callp(MethodQuery.classMethod(klass, methodName, args)));
   }
 }
