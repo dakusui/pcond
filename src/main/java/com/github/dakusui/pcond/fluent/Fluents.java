@@ -295,7 +295,7 @@ public class Fluents {
     return ((PrintablePredicate<T>) predicates).makeTrivial();
   }
 
-  private static <T, R> Function<T, R> makeTrivial(Function<T, R> predicates) {
+  public static <T, R> Function<T, R> makeTrivial(Function<T, R> predicates) {
     return ((PrintableFunction<T, R>) predicates).makeTrivial();
   }
 

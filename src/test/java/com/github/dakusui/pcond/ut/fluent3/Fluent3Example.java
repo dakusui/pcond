@@ -15,7 +15,12 @@ import org.junit.runner.RunWith;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.fluent.Fluents.makeTrivial;
 import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
+import static com.github.dakusui.pcond.forms.Functions.identity;
+import static com.github.dakusui.pcond.forms.Predicates.isEqualTo;
+import static com.github.dakusui.pcond.forms.Predicates.transform;
+import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 
 @RunWith(Enclosed.class)
@@ -321,6 +326,11 @@ public class Fluent3Example {
       public ObjectChecker<TX, OIN, OIN> createCorrespondingChecker(TX root) {
         throw new UnsupportedOperationException();
       }
+    }
+
+    @Test
+    public void makeTrivialTest() {
+      assertThat("hello", transform(makeTrivial(identity())).check(transform(makeTrivial(identity())).check(isEqualTo("HELLO"))));
     }
   }
 }

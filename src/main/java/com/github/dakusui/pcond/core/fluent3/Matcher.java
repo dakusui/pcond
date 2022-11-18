@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core.fluent3;
 
+import com.github.dakusui.pcond.core.fluent4.Matcher.JunctionType;
 import com.github.dakusui.pcond.fluent.Statement;
-import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -204,22 +204,4 @@ public interface Matcher<
     }
   }
 
-  enum JunctionType {
-    CONJUNCTION {
-      @SuppressWarnings("unchecked")
-      @Override
-      public <T> Predicate<T> connect(List<Predicate<T>> predicates) {
-        return Predicates.allOf(predicates.toArray(new Predicate[0]));
-      }
-    },
-    DISJUNCTION {
-      @SuppressWarnings("unchecked")
-      @Override
-      public <T> Predicate<T> connect(List<Predicate<T>> predicates) {
-        return Predicates.anyOf(predicates.toArray(new Predicate[0]));
-      }
-    };
-
-    public abstract <T> Predicate<T> connect(List<Predicate<T>> collect);
-  }
 }
