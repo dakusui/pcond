@@ -10,6 +10,11 @@ public interface Transformer<
     V extends Checker<V, T, R>,
     T,
     R> {
+  TX allOf();
+
+  TX anyOf();
+
+  Predicate<T> toPredicate();
 
   default <
       TY extends Transformer<TY, W, T, RR>,
