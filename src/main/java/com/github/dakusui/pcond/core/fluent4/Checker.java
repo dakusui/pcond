@@ -13,7 +13,8 @@ public interface Checker<
     T,
     R> extends
     Matcher<V, T, R>,
-    Statement<T> {
+    Statement<T>,
+    Predicate<T> {
   V addCheckPhrase(Function<Checker<?, R, R>, Predicate<R>> clause);
 
   @SuppressWarnings("unchecked")
@@ -53,6 +54,10 @@ public interface Checker<
     @Override
     public Predicate<T> statementPredicate() {
       return toPredicate();
+    }
+
+    public boolean test(T value) {
+      return statementPredicate().test(value);
     }
   }
 }

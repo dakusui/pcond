@@ -95,6 +95,6 @@ public interface Transformer<
       return toPredicate();
     }
 
-    public abstract V toChecker(Function<T, R> transformFunction);
+    protected abstract V toChecker(Function<T, R> transformFunction);
   }
 }

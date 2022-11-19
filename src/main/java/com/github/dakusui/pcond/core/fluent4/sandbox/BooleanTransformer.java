@@ -41,12 +41,12 @@ public interface BooleanTransformer<T> extends
 
 
     @Override
-    public BooleanChecker<T> toChecker(Function<T, Boolean> transformFunction) {
+    protected BooleanChecker<T> toChecker(Function<T, Boolean> transformFunction) {
       return new BooleanChecker.Impl<>(this::baseValue, requireNonNull(transformFunction));
     }
 
     @Override
-    public Transformer<?, ?, Boolean, Boolean> rebase() {
+    protected Transformer<?, ?, Boolean, Boolean> rebase() {
       return new Impl<>(this::value, makeTrivial(Functions.identity()));
     }
   }

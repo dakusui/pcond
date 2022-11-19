@@ -150,9 +150,9 @@ public class Fluent4Example {
               tx -> tx.toLowerCase()
                   .parseBoolean()
                   .then()
-                  .isTrue()
-                  .toPredicate())
-          .checkWithPredicate(transform(length()).check(isEqualTo(10))));
+                  .isTrue())
+          .checkWithPredicate(transform(length()).check(isEqualTo(10)))
+          .then());
     }
   }
 
