@@ -21,11 +21,9 @@ public interface Transformer<
     TX extends Transformer<TX, V, T, R>,  // SELF
     V extends Checker<V, T, R>,
     T,
-    R> extends Statement<T> {
-  TX allOf();
-
-  TX anyOf();
-
+    R> extends
+    Matcher<TX, T, R>,
+    Statement<T> {
   Predicate<T> toPredicate();
 
   R value();
@@ -143,8 +141,6 @@ public interface Transformer<
                 .map(each -> each.apply(rebase()))
                 .collect(toList()));
       }
-
-      System.out.println(ret);
       return Predicates.transform(this.transformFunction).check(ret);
     }
 

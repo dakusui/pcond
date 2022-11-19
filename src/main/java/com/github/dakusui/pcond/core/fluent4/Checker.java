@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.fluent4;
 
 import com.github.dakusui.pcond.fluent.Statement;
+import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -9,7 +10,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.forms.Predicates.transform;
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -17,17 +17,15 @@ import static java.util.stream.Collectors.toList;
 public interface Checker<
     V extends Checker<V, T, R>,
     T,
-    R> extends Statement<T> {
+    R> extends
+    Matcher<V, T, R>,
+    Statement<T> {
   V addCheckPhrase(Function<Checker<?, R, R>, Predicate<R>> clause);
 
   default V checkWithPredicate(Predicate<R> predicate) {
     requireNonNull(predicate);
     return addCheckPhrase(w -> predicate);
   }
-
-  V allOf();
-
-  V anyOf();
 
   R value();
 
@@ -96,7 +94,7 @@ public interface Checker<
                 .map(each -> each.apply(rebase()))
                 .collect(toList()));
       }
-      return transform(transformFunction).check(ret);
+      return Predicates.transform(transformFunction).check(ret);
     }
 
     private V junctionType(Matcher.JunctionType junctionType) {

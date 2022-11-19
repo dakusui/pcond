@@ -142,7 +142,19 @@ public class Fluent4Example {
   public static class OnGoing {
     @Test
     public void test_allOf_inWhen_6a() {
-      assertStatement(stringTransformer("dummyValue")
+      assertStatement(stringTransformer("helloWorld1")
+          .transformAndCheck(
+              tx -> tx.toLowerCase()
+                  .parseBoolean()
+                  .then()
+                  .isTrue()
+                  .toPredicate())
+          .check(transform(length()).check(isEqualTo(10))));
+    }
+
+    @Test
+    public void test_allOf_inWhen_6b() {
+      assertStatement(stringTransformer("helloWorld2")
           .transformAndCheck(
               tx -> tx.toLowerCase()
                   .parseBoolean()
