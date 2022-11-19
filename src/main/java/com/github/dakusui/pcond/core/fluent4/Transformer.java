@@ -9,6 +9,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 public interface Transformer<
@@ -62,6 +64,7 @@ public interface Transformer<
     }
 
     public V then() {
+      requireState(this, Matcher.Base::hasNoChild, v -> format("Predicate is already added. %s", v.childPredicates()));
       return toChecker(this.transformFunction());
     }
 

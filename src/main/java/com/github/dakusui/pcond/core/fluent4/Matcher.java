@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
+import static java.util.Collections.unmodifiableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 
@@ -74,7 +75,13 @@ public interface Matcher<
       return this.transformFunction;
     }
 
-    ;
+    protected boolean hasNoChild() {
+      return this.childPredicates.isEmpty();
+    }
+
+    protected List<Function<Matcher<?, R, R>, Predicate<R>>> childPredicates() {
+      return unmodifiableList(this.childPredicates);
+    }
 
     @SuppressWarnings("unchecked")
     protected M me() {
