@@ -17,7 +17,8 @@ public interface Transformer<
     T,
     R> extends
     Matcher<TX, T, R>,
-    Statement<T> {
+    Statement<T>,
+    Predicate<T> {
 
   @SuppressWarnings("unchecked")
   default TX checkWithPredicate(Predicate<? super R> predicate) {
@@ -86,6 +87,11 @@ public interface Transformer<
     @Override
     public Predicate<T> statementPredicate() {
       return toPredicate();
+    }
+
+    @Override
+    public boolean test(T value) {
+      return statementPredicate().test(baseValue());
     }
 
     protected abstract V toChecker(Function<T, R> transformFunction);

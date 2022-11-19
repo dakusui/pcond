@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.forms.Functions.length;
@@ -18,6 +19,7 @@ import static com.github.dakusui.pcond.forms.Predicates.transform;
 import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 import static com.github.dakusui.thincrest.TestFluents.assertStatement;
+import static java.util.Objects.requireNonNull;
 
 @RunWith(Enclosed.class)
 public class Fluent4Example {
@@ -165,8 +167,7 @@ public class Fluent4Example {
                   .parseBoolean()
                   .then()
                   .isTrue())
-          .checkWithPredicate(transform(length()).check(isEqualTo(10)))
-          .then());
+          .checkWithPredicate(transform(length()).check(isEqualTo(10))));
     }
 
     @Test
@@ -174,21 +175,20 @@ public class Fluent4Example {
       Book book = new Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
       assertAll(
           new BookTransformer(book)
-              .addTransformAndCheckClause(tx -> ((BookTransformer) tx).title()
+              .transformAndCheck(tx -> tx.title()
                   .transformAndCheck(ty -> ty.then().isNotNull())
                   .transformAndCheck(ty -> ty
                       .length()
                       .then()
                       .greaterThanOrEqualTo(10)
-                      .lessThan(40)).statementPredicate())
-              .addTransformAndCheckClause(tx -> ((BookTransformer) tx).abstractText()
+                      .lessThan(40)))
+              .transformAndCheck(tx -> tx.abstractText()
                   .transformAndCheck(ty -> ty.then().isNotNull())
                   .transformAndCheck(ty -> ty
                       .length()
                       .then()
                       .greaterThanOrEqualTo(200)
-                      .lessThan(400))
-                  .statementPredicate()));
+                      .lessThan(400))));
     }
 
     static class Book {
@@ -223,9 +223,16 @@ public class Fluent4Example {
       }
 
       @Override
+      public BookTransformer transformAndCheck(Function<BookTransformer, Predicate<Book>> clause) {
+        requireNonNull(clause);
+        return this.addTransformAndCheckClause(tx -> clause.apply((BookTransformer) tx));
+      }
+
+      @Override
       protected BookTransformer create(Book value) {
         return new BookTransformer(value);
       }
+
     }
   }
 

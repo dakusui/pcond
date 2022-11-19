@@ -6,6 +6,7 @@ import com.github.dakusui.pcond.core.fluent4.builtins.ObjectChecker;
 import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 abstract class CustomTransformer<
     TX extends AbstractObjectTransformer<
@@ -39,4 +40,6 @@ abstract class CustomTransformer<
   }
 
   abstract protected TX create(T value);
+
+  abstract public TX transformAndCheck(Function<TX, Predicate<T>> clause);
 }
