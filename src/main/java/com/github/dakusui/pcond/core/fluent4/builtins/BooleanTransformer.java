@@ -1,42 +1,46 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
-import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
-import com.github.dakusui.pcond.core.fluent3.Matcher;
 
+import com.github.dakusui.pcond.core.fluent4.AbstractObjectTransformer;
+import com.github.dakusui.pcond.forms.Functions;
+
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-public interface BooleanTransformer<
-    RX extends Matcher<RX, RX, OIN, OIN>,
-    OIN
-    > extends
+import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.valid8j.Requires.requireNonNull;
+
+public interface BooleanTransformer<T> extends
     AbstractObjectTransformer<
-        BooleanTransformer<RX, OIN>,
-        RX,
-        BooleanChecker<RX, OIN>,
-        OIN,
+        BooleanTransformer<T>,
+        BooleanChecker<T>,
+        T,
         Boolean
         > {
-  static <R extends Matcher<R, R, Boolean, Boolean>> BooleanTransformer<R, Boolean> create(Supplier<Boolean> value) {
+  static BooleanTransformer<Boolean> create(Supplier<Boolean> value) {
     return new Impl<>(value, null);
   }
-  class Impl<
-      RX extends Matcher<RX, RX, OIN, OIN>,
-      OIN
-      > extends
+
+  class Impl<T> extends
       Base<
-          BooleanTransformer<RX, OIN>,
-          RX,
-          OIN,
+          BooleanTransformer<T>,
+          BooleanChecker<T>,
+          T,
           Boolean
           > implements
-      BooleanTransformer<RX, OIN> {
-    public Impl(Supplier<OIN> rootValue, RX root) {
-      super(rootValue, root);
+      BooleanTransformer<T> {
+    public Impl(Supplier<T> value, Function<T, Boolean> transfomFunction) {
+      super(value, transfomFunction);
     }
 
     @Override
-    public BooleanChecker<RX, OIN> createCorrespondingChecker(RX root) {
-      return new BooleanChecker.Impl<>(this::rootValue, root);
+    protected BooleanChecker<T> toChecker(Function<T, Boolean> transformFunction) {
+      return new BooleanChecker.Impl<>(this::baseValue, requireNonNull(transformFunction));
+    }
+
+    @Override
+    protected BooleanTransformer<Boolean> rebase() {
+      return new Impl<>(this::value, makeTrivial(Functions.identity()));
     }
   }
 }

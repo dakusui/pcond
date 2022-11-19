@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.internals;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.printable.PrintableFunction;
 import com.github.dakusui.pcond.core.printable.PrintablePredicate;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.validator.Explanation;
 import com.github.dakusui.pcond.validator.Validator;
@@ -311,5 +312,9 @@ public enum InternalUtils {
    */
   public static <T, R> Function<T, R> makeTrivial(Function<T, R> function) {
     return ((PrintableFunction<T, R>) function).makeTrivial();
+  }
+
+  public static <T> Function<T, T> trivialIdentityFunction() {
+    return makeTrivial(Functions.identity());
   }
 }

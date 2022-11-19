@@ -1,38 +1,43 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
-import com.github.dakusui.pcond.core.fluent3.Matcher;
-
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
 public interface ShortTransformer<
-    R extends Matcher<R, R, OIN, OIN>, OIN
+    T
     > extends
     ComparableNumberTransformer<
-                ShortTransformer<R, OIN>,
-                    R,
-        ShortChecker<R, OIN>,
-                    OIN,
-                    Short> {
-  static <R extends Matcher<R, R, Short, Short>> ShortTransformer<R, Short> create(Supplier<Short> value) {
-    return new Impl<>(value, null);
+        ShortTransformer<T>,
+        ShortChecker<T>,
+        T,
+        Short> {
+  static ShortTransformer<Short> create(Supplier<Short> value) {
+    return new Impl<>(value, trivialIdentityFunction());
   }
+
   class Impl<
-      R extends Matcher<R, R, OIN, OIN>,
-      OIN
+      T
       > extends
       Base<
-          ShortTransformer<R, OIN>,
-          R,
-          OIN,
+          ShortTransformer<T>,
+          ShortChecker<T>,
+          T,
           Short> implements
-      ShortTransformer<R, OIN> {
-    public Impl(Supplier<OIN> rootValue, R root) {
-      super(rootValue, root);
+      ShortTransformer<T> {
+    public Impl(Supplier<T> baseValue, Function<T, Short> transformFunction) {
+      super(baseValue, transformFunction);
     }
 
     @Override
-    public ShortChecker<R, OIN> createCorrespondingChecker(R root) {
-      return new ShortChecker.Impl<>(this::rootValue, this.root());
+    protected ShortChecker<T> toChecker(Function<T, Short> transformFunction) {
+      return new ShortChecker.Impl<>(this::baseValue, transformFunction);
+    }
+
+    @Override
+    protected ShortTransformer<Short> rebase() {
+      return new ShortTransformer.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

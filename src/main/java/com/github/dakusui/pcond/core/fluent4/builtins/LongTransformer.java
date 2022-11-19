@@ -2,37 +2,45 @@ package com.github.dakusui.pcond.core.fluent4.builtins;
 
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
 public interface LongTransformer<
-    R extends Matcher<R, R, OIN, OIN>, OIN
+    T
     > extends
     ComparableNumberTransformer<
-                LongTransformer<R, OIN>,
-                R,
-        LongChecker<R, OIN>,
-                OIN,
-                Long> {
-  static <R extends Matcher<R, R, Long, Long>> LongTransformer<R, Long> create(Supplier<Long> value) {
-    return new Impl<>(value, null);
+        LongTransformer<T>,
+        LongChecker<T>,
+        T,
+        Long> {
+  static <R extends Matcher<R, R, Long, Long>> LongTransformer<Long> create(Supplier<Long> value) {
+    return new Impl<>(value, trivialIdentityFunction());
   }
+
   class Impl<
-      R extends Matcher<R, R, OIN, OIN>,
-      OIN
+      T
       > extends
       Base<
-          LongTransformer<R, OIN>,
-          R,
-          OIN,
+          LongTransformer<T>,
+          LongChecker<T>,
+          T,
           Long> implements
-      LongTransformer<R, OIN> {
-    public Impl(Supplier<OIN> rootValue, R root) {
-      super(rootValue, root);
+      LongTransformer<T> {
+    public Impl(Supplier<T> baseValue, Function<T, Long> transformFunction) {
+      super(baseValue, transformFunction);
     }
 
     @Override
-    public LongChecker<R, OIN> createCorrespondingChecker(R root) {
-      return new LongChecker.Impl<>(this::rootValue, this.root());
+    public LongChecker<T> toChecker(Function<T, Long> transformFunction) {
+      return new LongChecker.Impl<>(this::baseValue, transformFunction);
+    }
+
+    @Override
+    protected LongTransformer<Long> rebase() {
+      return new LongTransformer.Impl<>(this::value, trivialIdentityFunction());
     }
   }
+
 }

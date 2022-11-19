@@ -1,38 +1,43 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
-import com.github.dakusui.pcond.core.fluent3.Matcher;
-
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
 public interface DoubleTransformer<
-    R extends Matcher<R, R, OIN, OIN>, OIN
+    OIN
     > extends
     ComparableNumberTransformer<
-                DoubleTransformer<R, OIN>,
-                R,
-        DoubleChecker<R, OIN>,
-                OIN,
-                Double> {
-  static <R extends Matcher<R, R, Double, Double>> DoubleTransformer<R, Double> create(Supplier<Double> value) {
-    return new Impl<>(value, null);
+        DoubleTransformer<OIN>,
+        DoubleChecker<OIN>,
+        OIN,
+        Double> {
+  static DoubleTransformer<Double> create(Supplier<Double> value) {
+    return new Impl<>(value, trivialIdentityFunction());
   }
+
   class Impl<
-      R extends Matcher<R, R, OIN, OIN>,
       OIN
       > extends
       Base<
-          DoubleTransformer<R, OIN>,
-          R,
+          DoubleTransformer<OIN>,
+          DoubleChecker<OIN>,
           OIN,
           Double> implements
-      DoubleTransformer<R, OIN> {
-    public Impl(Supplier<OIN> rootValue, R root) {
-      super(rootValue, root);
+      DoubleTransformer<OIN> {
+    public Impl(Supplier<OIN> baseValue, Function<OIN, Double> transformFunction) {
+      super(baseValue, transformFunction);
     }
 
     @Override
-    public DoubleChecker<R, OIN> createCorrespondingChecker(R root) {
-      return new DoubleChecker.Impl<>(this::rootValue, this.root());
+    protected DoubleChecker<OIN> toChecker(Function<OIN, Double> transformFunction) {
+      return new DoubleChecker.Impl<>(this::baseValue, transformFunction);
+    }
+
+    @Override
+    protected DoubleTransformer<Double> rebase() {
+      return new DoubleTransformer.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

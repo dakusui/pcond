@@ -1,30 +1,32 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
 
-import com.github.dakusui.pcond.core.fluent3.Matcher;
-
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
 public interface ShortChecker<
-    R extends Matcher<R, R, OIN, OIN>,
-    OIN> extends
+    T> extends
     ComparableNumberChecker<
-                ShortChecker<R, OIN>,
-                R,
-                OIN,
-                Short> {
+        ShortChecker<T>,
+        T,
+        Short> {
 
   class Impl<
-      R extends Matcher<R, R, OIN, OIN>,
-      OIN> extends
+      T> extends
       Base<
-          ShortChecker<R, OIN>,
-          R,
-          OIN,
+          ShortChecker<T>,
+          T,
           Short>
-      implements ShortChecker<R, OIN> {
-    public Impl(Supplier<OIN> rootValue, R root) {
-      super(rootValue, root);
+      implements ShortChecker<T> {
+    public Impl(Supplier<T> baseValue, Function<T, Short> transformFunction) {
+      super(baseValue, transformFunction);
+    }
+
+    @Override
+    public ShortChecker<Short> rebase() {
+      return new ShortChecker.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

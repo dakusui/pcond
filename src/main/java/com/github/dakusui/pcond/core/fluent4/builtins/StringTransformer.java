@@ -1,66 +1,73 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
-import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
-import com.github.dakusui.pcond.core.fluent3.Matcher;
+import com.github.dakusui.pcond.core.fluent4.AbstractObjectTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 
-public interface StringTransformer<
-    R extends Matcher<R, R, OIN, OIN>,
-    OIN
-    > extends
+public interface StringTransformer<T> extends
     AbstractObjectTransformer<
-        StringTransformer<R, OIN>,
-        R,
-        StringChecker<R, OIN>,
-        OIN,
-        String> {
-  static <R extends Matcher<R, R, String, String>> StringTransformer<R, String> create(Supplier<String> value) {
-    return new Impl<>(value, null);
+            StringTransformer<T>,
+            StringChecker<T>,
+            T,
+            String> {
+  static StringTransformer<String> create(Supplier<String> value) {
+    return new Impl<>(value::get, null);
   }
 
-  default StringTransformer<R, OIN> substring(int begin) {
+  default StringTransformer<T> substring(int begin) {
     return this.toString(Printables.function(() -> "substring[" + begin + "]", (String s) -> s.substring(begin)));
   }
 
-  default StringTransformer<R, OIN> toUpperCase() {
+  default StringTransformer<T> toUpperCase() {
     return this.toString(Printables.function("toUpperCase", String::toUpperCase));
   }
 
-  default StringTransformer<R,OIN> toLowerCase() {
+  default StringTransformer<T> toLowerCase() {
     return this.toString(Printables.function("toLowerCase", String::toLowerCase));
   }
 
-  default ListTransformer<R, OIN, String> split(String regex) {
+  default ListTransformer<T, String> split(String regex) {
     return this.toList(Printables.function("split[" + regex + "]", (String s) -> asList((s.split(regex)))));
   }
 
-  default IntegerTransformer<R, OIN> length() {
+  default IntegerTransformer<T> length() {
     return toInteger(Functions.length());
   }
 
-  class Impl<
-      R extends Matcher<R, R, OIN, OIN>,
-      OIN
-      > extends
-      Base<
-          StringTransformer<R, OIN>,
-          R,
-          OIN,
-          String> implements
-      StringTransformer<R, OIN> {
 
-    public Impl(Supplier<OIN> rootValue, R root) {
-      super(rootValue, root);
+  @SuppressWarnings("unchecked")
+  default StringTransformer<T> transformAndCheck(Function<StringTransformer<String>, Predicate<String>> clause) {
+    requireNonNull(clause);
+    return this.addTransformAndCheckClause(tx -> clause.apply((StringTransformer<String>) tx));
+  }
+
+  class Impl<T> extends
+      Base<
+          StringTransformer<T>,
+          StringChecker<T>,
+          T,
+          String> implements
+      StringTransformer<T> {
+
+    public Impl(Supplier<T> rootValue, Function<T, String> transformFunction) {
+      super(rootValue, transformFunction);
+    }
+    @Override
+    public StringChecker<T> toChecker(Function<T, String> transformFunction) {
+      return new StringChecker.Impl<>(this::baseValue, requireNonNull(transformFunction));
     }
 
     @Override
-    public StringChecker<R, OIN> createCorrespondingChecker(R root) {
-      return new StringChecker.Impl<>(this::rootValue, this.root());
+    public StringTransformer<String> rebase() {
+      return new StringTransformer.Impl<>(this::value, makeTrivial(Functions.identity()));
     }
   }
 }

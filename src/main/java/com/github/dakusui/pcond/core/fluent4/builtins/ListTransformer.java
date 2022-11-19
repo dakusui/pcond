@@ -1,65 +1,74 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
-import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
-import com.github.dakusui.pcond.core.fluent3.Matcher;
+import com.github.dakusui.pcond.core.fluent4.AbstractObjectTransformer;
+import com.github.dakusui.pcond.core.fluent4.Matcher;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
 public interface ListTransformer<
-    R extends Matcher<R, R, OIN, OIN>,
-    OIN,
+    T,
     E
     > extends
-    AbstractObjectTransformer<ListTransformer<R, OIN, E>, R, ListChecker<R, OIN, E>, OIN, List<E>> {
-  static <
-      R extends Matcher<R, R, List<E>, List<E>>,
-      E>
-  ListTransformer<R, List<E>, E> create(Supplier<List<E>> value) {
-    return new Impl<>(value, null);
+    AbstractObjectTransformer<
+        ListTransformer<T, E>,
+        ListChecker<T, E>,
+        T,
+        List<E>> {
+  static <E> ListTransformer<List<E>, E> create(Supplier<List<E>> value) {
+    return new Impl<>(value, trivialIdentityFunction());
   }
-  default ObjectTransformer<R,OIN, E> elementAt(int i) {
+
+  default ObjectTransformer<T, E> elementAt(int i) {
     return this.toObject(Functions.elementAt(i));
   }
 
-  default IntegerTransformer<R, OIN> size() {
+  default IntegerTransformer<T> size() {
     return this.toInteger(Functions.size());
   }
 
-  default ListTransformer<R, OIN, E> subList(int begin, int end) {
+  default ListTransformer<T, E> subList(int begin, int end) {
     return this.toList(Printables.function("subList[" + begin + "," + end + "]", v -> v.subList(begin, end)));
   }
 
-  default ListTransformer<R, OIN, E> subList(int begin) {
+  default ListTransformer<T, E> subList(int begin) {
     return this.toList(Printables.function("subList[" + begin + "]", v -> v.subList(begin, v.size())));
   }
 
-  default StreamTransformer<R, OIN, E> stream() {
+  default StreamTransformer<T, E> stream() {
     return this.toStream(Printables.function("listStream", Collection::stream));
   }
 
-  default BooleanTransformer<R, OIN> isEmpty() {
+  default BooleanTransformer<T> isEmpty() {
     return this.toBoolean(Printables.function("listIsEmpty", List::isEmpty));
   }
 
-  class Impl<
-      R  extends Matcher<R, R, OIN, OIN>, OIN,
-      E> extends Base<
-      ListTransformer<R, OIN, E>,
-      R,
-      OIN,
-      List<E>>
-      implements ListTransformer<R, OIN, E> {
-    public Impl(Supplier<OIN> rootValue, R root) {
-      super(rootValue, root);
+  class Impl<T, E> extends
+      Base<
+          ListTransformer<T, E>,
+          ListChecker<T, E>,
+          T,
+          List<E>> implements
+      ListTransformer<T, E> {
+    public Impl(Supplier<T> value, Function<T, List<E>> transformFunction) {
+      super(value, transformFunction);
     }
 
     @Override
-    public ListChecker<R, OIN, E> createCorrespondingChecker(R root) {
-      return new ListChecker.Impl<>(this::rootValue, root);
+    protected ListChecker<T, E> toChecker(Function<T, List<E>> transformFunction) {
+      return new ListChecker.Impl<>(this::baseValue, transformFunction);
+    }
+
+    @Override
+    protected Matcher<?, List<E>, List<E>> rebase() {
+      return new Impl<>(this::value, makeTrivial(Functions.identity()));
     }
   }
 }

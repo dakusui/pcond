@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut.fluent4;
 
-import com.github.dakusui.pcond.core.fluent4.sandbox.StringTransformer;
+import com.github.dakusui.pcond.core.fluent4.builtins.StringTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import org.junit.ComparisonFailure;

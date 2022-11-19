@@ -1,31 +1,33 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
 
-import com.github.dakusui.pcond.core.fluent3.Matcher;
-
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
 public interface IntegerChecker<
-    R extends Matcher<R, R, OIN, OIN>,
     OIN
     > extends
     ComparableNumberChecker<
-                IntegerChecker<R, OIN>,
-                R,
-                OIN,
-                Integer> {
+        IntegerChecker<OIN>,
+        OIN,
+        Integer> {
 
   class Impl<
-      R extends Matcher<R, R, OIN, OIN>,
-      OIN> extends
+      T> extends
       Base<
-          IntegerChecker<R, OIN>,
-          R,
-          OIN,
+          IntegerChecker<T>,
+          T,
           Integer>
-      implements IntegerChecker<R, OIN> {
-    public Impl(Supplier<OIN> rootValue, R root) {
-      super(rootValue, root);
+      implements IntegerChecker<T> {
+    public Impl(Supplier<T> baseValue, Function<T, Integer> transformFunction) {
+      super(baseValue, transformFunction);
+    }
+
+    @Override
+    public IntegerChecker<Integer> rebase() {
+      return new IntegerChecker.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

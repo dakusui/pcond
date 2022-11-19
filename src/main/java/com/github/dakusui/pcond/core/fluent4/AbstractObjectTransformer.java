@@ -1,7 +1,17 @@
 package com.github.dakusui.pcond.core.fluent4;
 
-import com.github.dakusui.pcond.core.fluent4.sandbox.StringTransformer;
+import com.github.dakusui.pcond.core.fluent4.builtins.*;
 import com.github.dakusui.pcond.forms.Functions;
+
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.core.refl.MethodQuery.classMethod;
+import static com.github.dakusui.pcond.core.refl.MethodQuery.instanceMethod;
+import static com.github.dakusui.pcond.forms.Functions.call;
+import static com.github.dakusui.pcond.forms.Functions.parameter;
+import static java.util.Objects.requireNonNull;
 
 public interface AbstractObjectTransformer<
     TX extends AbstractObjectTransformer<TX, V, T, R>,
@@ -10,12 +20,75 @@ public interface AbstractObjectTransformer<
     R
     > extends
     Transformer<TX, V, T, R> {
+
   /**
    * Corresponds to {@code toString()} method.
    *
    * @return this object the method appended.
    */
-  default StringTransformer<T> stringify() {
-    return this.toString(Functions.stringify());
+  @SuppressWarnings("unchecked")
+  default StringTransformer<String> stringify() {
+    return (StringTransformer<String>) this.toString(Functions.stringify());
   }
+
+  default <E> ObjectTransformer<T, E> invoke(String methodName, Object... args) {
+    return this.toObject(call(instanceMethod(parameter(), methodName, args)));
+  }
+
+  default <E> ObjectTransformer<T, E> invokeStatic(Class<?> klass, String methodName, Object... args) {
+    return this.toObject(call(classMethod(klass, methodName, args)));
+  }
+
+  default <O extends Throwable> ThrowableTransformer<T, O> expectException(Class<O> exceptionClass, Function<? super R, ?> f) {
+    requireNonNull(exceptionClass);
+    return this.toThrowable(Functions.expectingException(exceptionClass, f));
+  }
+
+  default <E> ObjectTransformer<T, E> toObject(Function<R, E> function) {
+    return this.transform(function, ObjectTransformer.Impl::new);
+  }
+
+
+  default BooleanTransformer<T> toBoolean(Function<? super R, Boolean> function) {
+    return this.transform(function, BooleanTransformer.Impl::new);
+  }
+
+  default IntegerTransformer<T> toInteger(Function<? super R, Integer> function) {
+    return this.transform(function, IntegerTransformer.Impl::new);
+  }
+
+  default LongTransformer<T> toLong(Function<? super R, Long> function) {
+    return this.transform(function, LongTransformer.Impl::new);
+  }
+
+  default ShortTransformer<T> toShort(Function<? super R, Short> function) {
+    return this.transform(function, ShortTransformer.Impl::new);
+  }
+
+  default DoubleTransformer<T> toDouble(Function<? super R, Double> function) {
+    return this.transform(function, DoubleTransformer.Impl::new);
+  }
+
+  default FloatTransformer<T> toFloat(Function<? super R, Float> function) {
+    return this.transform(function, FloatTransformer.Impl::new);
+  }
+
+  default StringTransformer<T> toString(Function<? super R, String> function) {
+    return this.transform(function, StringTransformer.Impl::new);
+  }
+
+
+  default <E> ListTransformer<T, E> toList(Function<? super R, List<E>> function) {
+    return this.transform(function, ListTransformer.Impl::new);
+  }
+
+  default <E> StreamTransformer<T, E> toStream(Function<? super R, Stream<E>> function) {
+    return this.transform(function, StreamTransformer.Impl::new);
+  }
+
+  default <E extends Throwable> ThrowableTransformer<T, E> toThrowable(Function<? super R, E> function) {
+    return this.transform(function, ThrowableTransformer.Impl::new);
+
+  }
+
 }

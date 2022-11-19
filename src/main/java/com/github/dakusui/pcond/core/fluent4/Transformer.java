@@ -1,7 +1,5 @@
 package com.github.dakusui.pcond.core.fluent4;
 
-import com.github.dakusui.pcond.core.fluent4.sandbox.BooleanTransformer;
-import com.github.dakusui.pcond.core.fluent4.sandbox.StringTransformer;
 import com.github.dakusui.pcond.fluent.Statement;
 
 import java.util.function.BiFunction;
@@ -34,15 +32,7 @@ public interface Transformer<
   <TY extends Transformer<TY, W, T, RR>,
       W extends Checker<W, T, RR>,
       RR>
-  TY transform(Function<R, RR> func, BiFunction<Supplier<T>, Function<T, RR>, TY> transformerFactory);
-
-  default BooleanTransformer<T> toBoolean(Function<R, Boolean> function) {
-    return this.transform(function, BooleanTransformer.Impl::new);
-  }
-
-  default StringTransformer<T> toString(Function<R, String> function) {
-    return this.transform(function, StringTransformer.Impl::new);
-  }
+  TY transform(Function<? super R, RR> func, BiFunction<Supplier<T>, Function<T, RR>, TY> transformerFactory);
 
   abstract class Base<
       TX extends Transformer<TX, V, T, R>,  // SELF
@@ -72,7 +62,7 @@ public interface Transformer<
         TY extends Transformer<TY, W, T, RR>,
         W extends Checker<W, T, RR>,
         RR>
-    TY transform(Function<R, RR> func, BiFunction<Supplier<T>, Function<T, RR>, TY> transformerFactory) {
+    TY transform(Function<? super R, RR> func, BiFunction<Supplier<T>, Function<T, RR>, TY> transformerFactory) {
       return transformerFactory.apply(this::baseValue, transformFunction().andThen(func));
     }
 
