@@ -7,6 +7,7 @@ import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 import static java.util.Objects.requireNonNull;
@@ -39,18 +40,18 @@ public interface StringTransformer<T> extends
           > implements
       StringTransformer<T> {
 
-    public Impl(Function<T, String> transformFunction) {
-      super(transformFunction);
+    public Impl(Supplier<T> baseValue, Function<T, String> transformFunction) {
+      super(baseValue, transformFunction);
     }
 
     @Override
     public StringChecker<T> toChecker(Function<T, String> transformFunction) {
-      return new StringChecker.Impl<>(requireNonNull(transformFunction));
+      return new StringChecker.Impl<>(this::baseValue, requireNonNull(transformFunction));
     }
 
     @Override
     public StringTransformer<String> rebase() {
-      return new StringTransformer.Impl<>(makeTrivial(Functions.identity()));
+      return new StringTransformer.Impl<>(this::value, makeTrivial(Functions.identity()));
     }
   }
 }

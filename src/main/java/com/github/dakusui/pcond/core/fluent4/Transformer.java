@@ -7,8 +7,10 @@ import com.github.dakusui.pcond.forms.Predicates;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Objects.requireNonNull;
@@ -25,12 +27,14 @@ public interface Transformer<
 
   Predicate<T> toPredicate();
 
+  R value();
+
   default <
       TY extends Transformer<TY, W, T, RR>,
       W extends Checker<W, T, RR>,
       RR>
-  TY transform(Function<R, RR> func, Function<Function<T, RR>, TY> transformerFactory) {
-    return transformerFactory.apply(transformFunction().andThen(func));
+  TY transform(Function<R, RR> func, BiFunction<Supplier<T>, Function<T, RR>, TY> transformerFactory) {
+    return transformerFactory.apply(this::baseValue, transformFunction().andThen(func));
   }
 
   default BooleanTransformer<T> toBoolean(Function<R, Boolean> function) {
@@ -60,6 +64,8 @@ public interface Transformer<
    */
   Transformer<?, ?, R, R> rebase();
 
+  T baseValue();
+
   abstract class Base<
       TX extends Transformer<TX, V, T, R>,  // SELF
       V extends Checker<V, T, R>,
@@ -71,6 +77,7 @@ public interface Transformer<
           T,
           R> {
     private final Function<T, R> transformFunction;
+    private final Supplier<T>    baseValue;
 
     private Matcher.JunctionType junctionType;
 
@@ -78,8 +85,9 @@ public interface Transformer<
 
     private Predicate<T> builtPredicate;
 
-    protected Base(Function<T, R> transformFunction) {
+    protected Base(Supplier<T> baseValue, Function<T, R> transformFunction) {
       this.transformFunction = requireNonNull(transformFunction);
+      this.baseValue = requireNonNull(baseValue);
       this.allOf();
     }
 
@@ -91,6 +99,11 @@ public interface Transformer<
     @Override
     public TX anyOf() {
       return junctionType(Matcher.JunctionType.DISJUNCTION);
+    }
+
+    @Override
+    public R value() {
+      return this.transformFunction.apply(this.baseValue.get());
     }
 
     @Override
@@ -143,6 +156,11 @@ public interface Transformer<
     @SuppressWarnings("unchecked")
     private TX me() {
       return (TX) this;
+    }
+
+    @Override
+    public T baseValue() {
+      return this.baseValue.get();
     }
   }
 }

@@ -7,6 +7,7 @@ import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 
@@ -28,13 +29,13 @@ public interface StringChecker<T> extends Checker<StringChecker<T>, T, String> {
           String>
       implements StringChecker<T> {
 
-    public Impl(Function<T, String> transformFunction) {
-      super(transformFunction);
+    public Impl(Supplier<T> value, Function<T, String> transformFunction) {
+      super(value, transformFunction);
     }
 
     @Override
     public StringChecker<String> rebase() {
-      return new StringChecker.Impl<>(makeTrivial(Functions.identity()));
+      return new StringChecker.Impl<>(this::value, makeTrivial(Functions.identity()));
     }
   }
 }

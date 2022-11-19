@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.forms.Predicates.transform;
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
@@ -24,7 +25,9 @@ public interface Checker<
 
   V allOf();
 
-  public V anyOf();
+  V anyOf();
+
+  R value();
 
   Function<T, R> transformFunction();
 
@@ -40,14 +43,16 @@ public interface Checker<
       T,
       R> {
     private final Function<T, R> transformFunction;
+    private final Supplier<R>    value;
 
     private Matcher.JunctionType junctionType;
 
     private final List<Function<Checker<?, R, R>, Predicate<R>>> childPredicates = new LinkedList<>();
     private       Predicate<T>                                   builtPredicate;
 
-    public Base(Function<T, R> transformFunction) {
+    public Base(Supplier<T> baseValue, Function<T, R> transformFunction) {
       this.transformFunction = requireNonNull(transformFunction);
+      this.value = () -> this.transformFunction.apply(baseValue.get());
       this.allOf();
     }
 
@@ -59,6 +64,11 @@ public interface Checker<
     @Override
     public V anyOf() {
       return junctionType(Matcher.JunctionType.DISJUNCTION);
+    }
+
+    @Override
+    public R value() {
+      return this.value.get();
     }
 
     @Override

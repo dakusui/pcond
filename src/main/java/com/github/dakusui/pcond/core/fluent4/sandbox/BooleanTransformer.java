@@ -5,6 +5,7 @@ import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 import static java.util.Objects.requireNonNull;
@@ -34,19 +35,19 @@ public interface BooleanTransformer<T> extends
           >
       implements BooleanTransformer<T> {
 
-    public Impl(Function<T, Boolean> transformFunction) {
-      super(transformFunction);
+    public Impl(Supplier<T> baseValue, Function<T, Boolean> transformFunction) {
+      super(baseValue, transformFunction);
     }
 
 
     @Override
     public BooleanChecker<T> toChecker(Function<T, Boolean> transformFunction) {
-      return new BooleanChecker.Impl<>(requireNonNull(transformFunction));
+      return new BooleanChecker.Impl<>(this::baseValue, requireNonNull(transformFunction));
     }
 
     @Override
     public Transformer<?, ?, Boolean, Boolean> rebase() {
-      return new Impl<>(makeTrivial(Functions.identity()));
+      return new Impl<>(this::value, makeTrivial(Functions.identity()));
     }
   }
 }

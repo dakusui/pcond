@@ -139,6 +139,7 @@ public class Fluent4Example {
   }
 
   private static StringTransformer.Impl<String> stringTransformer() {
-    return new StringTransformer.Impl<>(makeTrivial(Functions.identity()));
+    String value = "dummyValue";
+    return new StringTransformer.Impl<>(() -> value, makeTrivial(Functions.identity()));
   }
 }
