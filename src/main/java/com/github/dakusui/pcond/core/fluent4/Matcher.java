@@ -67,6 +67,10 @@ public interface Matcher<
       return me();
     }
 
+    public R value() {
+      return this.transformFunction().apply(this.baseValue());
+    }
+
     /* protected */
     public Function<T, R> transformFunction() {
       return this.transformFunction;

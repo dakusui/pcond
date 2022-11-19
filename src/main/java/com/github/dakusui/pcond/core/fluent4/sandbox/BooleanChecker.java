@@ -34,15 +34,5 @@ public interface BooleanChecker<T> extends Checker<
     public BooleanChecker<Boolean> rebase() {
       return new Impl<>(this::value, makeTrivial(Functions.identity()));
     }
-
-    @Override
-    public T baseValue() {
-      return this.baseValue.get();
-    }
-
-    @Override
-    public Function<T, Boolean> transformFunction() {
-      return this.transformFunction;
-    }
   }
 }

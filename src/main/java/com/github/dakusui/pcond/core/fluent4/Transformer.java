@@ -46,14 +46,6 @@ public interface Transformer<
 
   V toChecker(Function<T, R> transformFunction);
 
-  /**
-   * Override this method so that it returns extending class.
-   *
-   * @return A rebased transformer.
-   */
-  Transformer<?, ?, R, R> rebase();
-
-
   abstract class Base<
       TX extends Transformer<TX, V, T, R>,  // SELF
       V extends Checker<V, T, R>,
@@ -71,11 +63,6 @@ public interface Transformer<
 
     protected Base(Supplier<T> baseValue, Function<T, R> transformFunction) {
       super(baseValue, transformFunction);
-    }
-
-    @Override
-    public R value() {
-      return this.transformFunction().apply(this.baseValue());
     }
 
     @SuppressWarnings("unchecked")
