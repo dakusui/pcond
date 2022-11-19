@@ -2,10 +2,13 @@ package com.github.dakusui.pcond.core.fluent4.sandbox;
 
 
 import com.github.dakusui.pcond.core.fluent4.Transformer;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 import static java.util.Objects.requireNonNull;
 
 public interface StringTransformer<T> extends
@@ -15,6 +18,16 @@ public interface StringTransformer<T> extends
 
   default BooleanTransformer<T> parseBoolean() {
     return toBoolean(Printables.function("parseBoolean", Boolean::parseBoolean));
+  }
+
+  default StringTransformer<T> toLowerCase() {
+    return toString(Printables.function("toLowerCase", String::toLowerCase));
+  }
+
+  @SuppressWarnings("unchecked")
+  default StringTransformer<T> transformAndCheck(Function<StringTransformer<String>, Predicate<String>> clause) {
+    requireNonNull(clause);
+    return this.addTransformAndCheckClause(tx -> clause.apply((StringTransformer<String>) tx));
   }
 
   class Impl<T> extends
@@ -37,7 +50,7 @@ public interface StringTransformer<T> extends
 
     @Override
     public StringTransformer<String> rebase() {
-      return new StringTransformer.Impl<>(Function.identity());
+      return new StringTransformer.Impl<>(makeTrivial(Functions.identity()));
     }
   }
 }

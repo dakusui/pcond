@@ -41,9 +41,9 @@ public interface Transformer<
     return this.transform(function, StringTransformer.Impl::new);
   }
 
-  TX check(Predicate<R> predicate);
+  TX check(Predicate<? super R> predicate);
 
-  public TX addChild(Function<Transformer<?, ?, R, R>, Predicate<R>> nestedClause);
+  TX addTransformAndCheckClause(Function<Transformer<?, ?, R, R>, Predicate<R>> clause);
 
   Function<T, R> transformFunction();
 
@@ -100,14 +100,15 @@ public interface Transformer<
       return this.builtPredicate;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public TX check(Predicate<R> predicate) {
-      return this.addChild(tx -> predicate);
+    public TX check(Predicate<? super R> predicate) {
+      return this.addTransformAndCheckClause(tx -> (Predicate<R>) predicate);
     }
 
     @Override
-    public TX addChild(Function<Transformer<?, ?, R, R>, Predicate<R>> nestedClause) {
-      this.childPredicates.add(nestedClause);
+    public TX addTransformAndCheckClause(Function<Transformer<?, ?, R, R>, Predicate<R>> clause) {
+      this.childPredicates.add(clause);
       return me();
     }
 
@@ -128,6 +129,8 @@ public interface Transformer<
                 .map(each -> each.apply(rebase()))
                 .collect(toList()));
       }
+
+      System.out.println(ret);
       return Predicates.transform(this.transformFunction).check(ret);
     }
 

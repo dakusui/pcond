@@ -15,7 +15,9 @@ public interface Checker<
     V extends Checker<V, T, R>,
     T,
     R> {
-  default V check(Predicate<R> predicate) {
+  V addCheckPhrase(Function<Checker<?, R, R>, Predicate<R>> clause);
+
+  default V checkWithPredicate(Predicate<R> predicate) {
     requireNonNull(predicate);
     return addCheckPhrase(w -> predicate);
   }
@@ -25,8 +27,6 @@ public interface Checker<
   public V anyOf();
 
   Function<T, R> transformFunction();
-
-  V addCheckPhrase(Function<Checker<?, R, R>, Predicate<R>> clause);
 
   Predicate<T> toPredicate();
 
