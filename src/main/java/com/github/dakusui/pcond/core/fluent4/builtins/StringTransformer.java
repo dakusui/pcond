@@ -14,10 +14,10 @@ import static java.util.Objects.requireNonNull;
 
 public interface StringTransformer<T> extends
     AbstractObjectTransformer<
-            StringTransformer<T>,
-            StringChecker<T>,
-            T,
-            String> {
+        StringTransformer<T>,
+        StringChecker<T>,
+        T,
+        String> {
   static StringTransformer<String> create(Supplier<String> value) {
     return new Impl<>(value::get, null);
   }
@@ -42,6 +42,29 @@ public interface StringTransformer<T> extends
     return toInteger(Functions.length());
   }
 
+  default BooleanTransformer<T> parseBoolean() {
+    return toBoolean(Printables.function("parseBoolean", Boolean::parseBoolean));
+  }
+
+  default BooleanTransformer<T> parseInt() {
+    return toBoolean(Printables.function("parseBoolean", Boolean::parseBoolean));
+  }
+
+  default LongTransformer<T> parseLong() {
+    return toLong(Printables.function("parseLong", Long::parseLong));
+  }
+
+  default ShortTransformer<T> parseShort() {
+    return toShort(Printables.function("parseBoolean", Short::parseShort));
+  }
+
+  default DoubleTransformer<T> parseDouble() {
+    return toDouble(Printables.function("parseDouble", Double::parseDouble));
+  }
+
+  default FloatTransformer<T> parseFloat() {
+    return toFloat(Printables.function("parseFloat", Float::parseFloat));
+  }
 
   @SuppressWarnings("unchecked")
   default StringTransformer<T> transformAndCheck(Function<StringTransformer<String>, Predicate<String>> clause) {
@@ -60,6 +83,7 @@ public interface StringTransformer<T> extends
     public Impl(Supplier<T> rootValue, Function<T, String> transformFunction) {
       super(rootValue, transformFunction);
     }
+
     @Override
     public StringChecker<T> toChecker(Function<T, String> transformFunction) {
       return new StringChecker.Impl<>(this::baseValue, requireNonNull(transformFunction));
