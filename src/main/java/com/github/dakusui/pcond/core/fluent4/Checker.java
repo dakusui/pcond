@@ -16,16 +16,11 @@ public interface Checker<
     Statement<T> {
   V addCheckPhrase(Function<Checker<?, R, R>, Predicate<R>> clause);
 
-  default V checkWithPredicate(Predicate<R> predicate) {
+  @SuppressWarnings("unchecked")
+  default V checkWithPredicate(Predicate<? super R> predicate) {
     requireNonNull(predicate);
-    return addCheckPhrase(w -> predicate);
+    return addCheckPhrase(w -> (Predicate<R>) predicate);
   }
-
-  R value();
-
-  Predicate<T> toPredicate();
-
-  Checker<?, R, R> rebase();
 
   abstract class Base<
       V extends Checker<V, T, R>,

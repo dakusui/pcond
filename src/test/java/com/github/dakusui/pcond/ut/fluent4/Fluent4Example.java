@@ -15,7 +15,6 @@ import static com.github.dakusui.pcond.forms.Functions.length;
 import static com.github.dakusui.pcond.forms.Predicates.isEqualTo;
 import static com.github.dakusui.pcond.forms.Predicates.transform;
 import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
-import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.thincrest.TestFluents.assertStatement;
 
 @RunWith(Enclosed.class)
@@ -23,78 +22,71 @@ public class Fluent4Example {
   public static class Done {
     @Test(expected = ComparisonFailure.class)
     public void test() {
-      assertThat("INPUT_VALUE", stringTransformer("dummyValue")
+      assertStatement(stringTransformer("INPUT_VALUE")
           .parseBoolean()
           .then()
-          .isTrue()
-          .toPredicate());
+          .isTrue());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test_b() {
-      assertThat("INPUT_VALUE", stringTransformer("dummyValue")
+      assertStatement(stringTransformer("INPUT_VALUE")
           .toLowerCase()
           .parseBoolean()
           .then()
-          .isTrue()
-          .toPredicate());
+          .isTrue());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen() {
-      assertThat("INPUT_VALUE", stringTransformer("dummyValue")
+      assertStatement(stringTransformer("INPUT_VALUE")
           .parseBoolean()
           .then()
           .isTrue()
-          .isTrue()
-          .toPredicate());
+          .isTrue());
     }
 
 
     @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_2() {
-      assertThat("INPUT_VALUE", stringTransformer("dummyValue")
+      assertStatement(stringTransformer("INPUT_VALUE")
           .parseBoolean()
           .then()
           .addCheckPhrase(v -> v.checkWithPredicate(Predicates.isNotNull()).toPredicate())
-          .addCheckPhrase(v -> v.checkWithPredicate(Predicates.isTrue()).toPredicate())
-          .toPredicate());
+          .addCheckPhrase(v -> v.checkWithPredicate(Predicates.isTrue()).toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_3() {
-      assertThat("INPUT_VALUE", stringTransformer("dummyValue")
+      assertStatement(stringTransformer("INPUT_VALUE")
           .parseBoolean()
           .then()
           .check(v -> v.isTrue().toPredicate())
-          .check(v -> v.isTrue().toPredicate())
-          .toPredicate());
+          .check(v -> v.isTrue().toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_4() {
-      assertThat("INPUT_VALUE", stringTransformer("dummyValue")
+      assertStatement(stringTransformer("INPUT_VALUE")
           .toLowerCase()
           .then()
           .check(v -> v.contains("XYZ1").toPredicate())
-          .check(v -> v.contains("ABC1").toPredicate())
-          .toPredicate());
+          .check(v -> v.contains("ABC1").toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_5() {
-      assertThat("INPUT_VALUE", stringTransformer("dummyValue")
+      assertStatement(stringTransformer("INPUT_VALUE")
           .toLowerCase()
           .parseBoolean()
           .then()
           .check(v -> v.isTrue().toPredicate())
-          .check(v -> v.isTrue().toPredicate())
-          .toPredicate());
+          .check(v -> v.isTrue().toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_7() {
-      assertThat("INPUT_VALUE", stringTransformer("dummyValue")
+      assertStatement(stringTransformer("INPUT_VALUE")
           .transformAndCheck(
               tx -> tx.toLowerCase()
                   .parseBoolean()
@@ -106,12 +98,12 @@ public class Fluent4Example {
                   .parseBoolean()
                   .then()
                   .isTrue()
-                  .toPredicate()).toPredicate());
+                  .toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_6() {
-      assertThat("INPUT_VALUE", stringTransformer("dummyValue")
+      assertStatement(stringTransformer("INPUT_VALUE")
           .transformAndCheck(
               tx -> {
                 Predicate<String> stringPredicate = tx.toLowerCase()
@@ -121,20 +113,19 @@ public class Fluent4Example {
                     .toPredicate();
                 System.out.println(stringPredicate);
                 return stringPredicate;
-              }).toPredicate());
+              }));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_6a() {
-      assertThat("INPUT_VALUE", stringTransformer("dummyValue")
+      assertStatement(stringTransformer("INPUT_VALUE")
           .transformAndCheck(
               tx -> tx.toLowerCase()
                   .parseBoolean()
                   .then()
                   .isTrue()
                   .toPredicate())
-          .check(transform(length()).check(isEqualTo(10)))
-          .toPredicate());
+          .checkWithPredicate(transform(length()).check(isEqualTo(10))));
     }
   }
 
@@ -149,7 +140,7 @@ public class Fluent4Example {
                   .then()
                   .isTrue()
                   .toPredicate())
-          .check(transform(length()).check(isEqualTo(10))));
+          .checkWithPredicate(transform(length()).check(isEqualTo(10))));
     }
 
     @Test
@@ -161,7 +152,7 @@ public class Fluent4Example {
                   .then()
                   .isTrue()
                   .toPredicate())
-          .check(transform(length()).check(isEqualTo(10))));
+          .checkWithPredicate(transform(length()).check(isEqualTo(10))));
     }
   }
 
