@@ -25,6 +25,6 @@ public interface Matcher<
       }
     };
 
-    public abstract <T> Predicate<T> connect(List<Predicate<T>> collect);
+    public abstract <T> Predicate<T> connect(List<Predicate<T>> predicates);
   }
 }

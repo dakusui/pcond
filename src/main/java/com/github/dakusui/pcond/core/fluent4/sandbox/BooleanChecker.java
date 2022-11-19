@@ -1,41 +1,26 @@
 package com.github.dakusui.pcond.core.fluent4.sandbox;
 
 import com.github.dakusui.pcond.core.fluent4.Checker;
+import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public interface BooleanChecker<T> extends Checker<
     BooleanChecker<T>,
     T,
     Boolean> {
-  class Impl<T> implements BooleanChecker<T> {
+  default BooleanChecker<T> isTrue() {
+    return check(Predicates.isTrue());
+  }
 
-
-    private final Function<T, Boolean> transformFunction;
-
+  class Impl<T> extends Checker.Base<BooleanChecker<T>, T, Boolean> implements BooleanChecker<T> {
     public Impl(Function<T, Boolean> transformFunction) {
-      this.transformFunction = transformFunction;
+      super(transformFunction);
     }
 
     @Override
-    public BooleanChecker<T> check(Predicate<Boolean> predicate) {
-      return null;
-    }
-
-    @Override
-    public Function<T, Boolean> transformFunction() {
-      return this.transformFunction;
-    }
-
-    @Override
-    public <W extends Checker<W, T, T>> BooleanChecker<T> addCheckPhrase(Function<W, Predicate<T>> clause) {
-      return null;
-    }
-
-    @Override
-    public Predicate<T> toPredicate() {
-      return null;
+    public BooleanChecker<Boolean> rebase() {
+      return new Impl<>(Function.identity());
     }
   }
 }
