@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core.fluent4.sandbox;
 
 
-import com.github.dakusui.pcond.core.fluent4.Transformer;
+import com.github.dakusui.pcond.core.fluent4.AbstractObjectTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 
@@ -13,7 +13,9 @@ import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 import static java.util.Objects.requireNonNull;
 
 public interface StringTransformer<T> extends
-    Transformer<StringTransformer<T>, StringChecker<T>,
+    AbstractObjectTransformer<
+        StringTransformer<T>,
+        StringChecker<T>,
         T,
         String> {
 
