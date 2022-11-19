@@ -40,8 +40,8 @@ public interface Checker<
       V,
       T,
       R> {
-    private final Function<T, R> transformFunction;
-    private final Supplier<T>    baseValue;
+    protected final Function<T, R> transformFunction;
+    protected final Supplier<T>    baseValue;
 
     private Matcher.JunctionType junctionType;
 

@@ -23,6 +23,10 @@ public interface Matcher<
 
   Predicate<T> toPredicate();
 
+  T baseValue();
+
+  Function<T, R> transformFunction();
+
   abstract class Base<
       M extends Matcher<M, T, R>,
       T,
@@ -63,6 +67,11 @@ public interface Matcher<
       return me();
     }
 
+    /* protected */
+    public Function<T, R> transformFunction() {
+      return this.transformFunction;
+    };
+
     @SuppressWarnings("unchecked")
     protected M me() {
       return (M) this;
@@ -75,7 +84,8 @@ public interface Matcher<
      */
     protected abstract Matcher<?, R, R> rebase();
 
-    protected T baseValue() {
+    /* protected */
+    public T baseValue() {
       return this.baseValue.get();
     }
 

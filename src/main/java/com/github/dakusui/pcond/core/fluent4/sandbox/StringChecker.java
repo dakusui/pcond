@@ -37,5 +37,15 @@ public interface StringChecker<T> extends Checker<StringChecker<T>, T, String> {
     public StringChecker<String> rebase() {
       return new StringChecker.Impl<>(this::value, makeTrivial(Functions.identity()));
     }
+
+    @Override
+    public T baseValue() {
+      return this.baseValue.get();
+    }
+
+    @Override
+    public Function<T, String> transformFunction() {
+      return this.transformFunction;
+    }
   }
 }

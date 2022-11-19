@@ -3,19 +3,11 @@ package com.github.dakusui.pcond.core.fluent4;
 import com.github.dakusui.pcond.core.fluent4.sandbox.BooleanTransformer;
 import com.github.dakusui.pcond.core.fluent4.sandbox.StringTransformer;
 import com.github.dakusui.pcond.fluent.Statement;
-import com.github.dakusui.pcond.forms.Predicates;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-
-import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
 
 public interface Transformer<
     TX extends Transformer<TX, V, T, R>,  // SELF
@@ -48,8 +40,6 @@ public interface Transformer<
 
   TX addTransformAndCheckClause(Function<Transformer<?, ?, R, R>, Predicate<R>> clause);
 
-  Function<T, R> transformFunction();
-
   default V then() {
     return toChecker(this.transformFunction());
   }
@@ -63,53 +53,29 @@ public interface Transformer<
    */
   Transformer<?, ?, R, R> rebase();
 
-  T baseValue();
 
   abstract class Base<
       TX extends Transformer<TX, V, T, R>,  // SELF
       V extends Checker<V, T, R>,
       T,
-      R> implements
+      R> extends
+      Matcher.Base<
+          TX,
+          T,
+          R> implements
       Transformer<
           TX,
           V,
           T,
           R> {
-    private final Function<T, R> transformFunction;
-    private final Supplier<T>    baseValue;
-
-    private Matcher.JunctionType junctionType;
-
-    private final List<Function<Transformer<?, ?, R, R>, Predicate<R>>> childPredicates = new LinkedList<>();
-
-    private Predicate<T> builtPredicate;
 
     protected Base(Supplier<T> baseValue, Function<T, R> transformFunction) {
-      this.transformFunction = requireNonNull(transformFunction);
-      this.baseValue = requireNonNull(baseValue);
-      this.allOf();
-    }
-
-    @Override
-    public TX allOf() {
-      return junctionType(Matcher.JunctionType.CONJUNCTION);
-    }
-
-    @Override
-    public TX anyOf() {
-      return junctionType(Matcher.JunctionType.DISJUNCTION);
+      super(baseValue, transformFunction);
     }
 
     @Override
     public R value() {
-      return this.transformFunction.apply(this.baseValue.get());
-    }
-
-    @Override
-    public Predicate<T> toPredicate() {
-      if (this.builtPredicate == null)
-        this.builtPredicate = buildPredicate();
-      return this.builtPredicate;
+      return this.transformFunction().apply(this.baseValue());
     }
 
     @SuppressWarnings("unchecked")
@@ -118,46 +84,10 @@ public interface Transformer<
       return this.addTransformAndCheckClause(tx -> (Predicate<R>) predicate);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public TX addTransformAndCheckClause(Function<Transformer<?, ?, R, R>, Predicate<R>> clause) {
-      this.childPredicates.add(clause);
-      return me();
-    }
-
-    @Override
-    public Function<T, R> transformFunction() {
-      return this.transformFunction;
-    }
-
-    private Predicate<T> buildPredicate() {
-      Predicate<R> ret;
-      requireState(this, v -> !v.childPredicates.isEmpty(), (v) -> "No child has been added yet.: <" + v + ">");
-      if (this.childPredicates.size() == 1)
-        ret = childPredicates.get(0).apply(rebase());
-      else {
-        ret = this.junctionType.connect(
-            new ArrayList<>(this.childPredicates)
-                .stream()
-                .map(each -> each.apply(rebase()))
-                .collect(toList()));
-      }
-      return Predicates.transform(this.transformFunction).check(ret);
-    }
-
-    private TX junctionType(Matcher.JunctionType junctionType) {
-      requireState(this, v -> childPredicates.isEmpty(), v -> "Child predicate(s) are already added.: <" + this + ">");
-      this.junctionType = requireNonNull(junctionType);
-      return me();
-    }
-
-    @SuppressWarnings("unchecked")
-    private TX me() {
-      return (TX) this;
-    }
-
-    @Override
-    public T baseValue() {
-      return this.baseValue.get();
+      return this.addPredicate(tx -> clause.apply((Transformer<?, ?, R, R>)tx));
     }
 
     @Override
