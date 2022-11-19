@@ -3,6 +3,8 @@ package com.github.dakusui.pcond.ut.fluent4;
 import com.github.dakusui.pcond.core.fluent4.sandbox.StringTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
+import org.junit.ComparisonFailure;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
@@ -15,11 +17,7 @@ import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 @RunWith(Enclosed.class)
 public class Fluent4Example {
   public static class Done {
-
-  }
-
-  public static class OnGoing {
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test() {
       assertThat("INPUT_VALUE", stringTransformer()
           .parseBoolean()
@@ -28,7 +26,7 @@ public class Fluent4Example {
           .toPredicate());
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test_b() {
       assertThat("INPUT_VALUE", stringTransformer()
           .toLowerCase()
@@ -38,7 +36,7 @@ public class Fluent4Example {
           .toPredicate());
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen() {
       assertThat("INPUT_VALUE", stringTransformer()
           .parseBoolean()
@@ -48,7 +46,8 @@ public class Fluent4Example {
           .toPredicate());
     }
 
-    @Test
+
+    @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_2() {
       assertThat("INPUT_VALUE", stringTransformer()
           .parseBoolean()
@@ -58,7 +57,7 @@ public class Fluent4Example {
           .toPredicate());
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_3() {
       assertThat("INPUT_VALUE", stringTransformer()
           .parseBoolean()
@@ -68,7 +67,7 @@ public class Fluent4Example {
           .toPredicate());
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_4() {
       assertThat("INPUT_VALUE", stringTransformer()
           .toLowerCase()
@@ -78,7 +77,7 @@ public class Fluent4Example {
           .toPredicate());
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_5() {
       assertThat("INPUT_VALUE", stringTransformer()
           .toLowerCase()
@@ -89,7 +88,7 @@ public class Fluent4Example {
           .toPredicate());
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_7() {
       assertThat("INPUT_VALUE", stringTransformer()
           .transformAndCheck(
@@ -106,7 +105,7 @@ public class Fluent4Example {
                   .toPredicate()).toPredicate());
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_6() {
       assertThat("INPUT_VALUE", stringTransformer()
           .transformAndCheck(
@@ -121,25 +120,25 @@ public class Fluent4Example {
               }).toPredicate());
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test_allOf_inWhen_6a() {
       assertThat("INPUT_VALUE", stringTransformer()
           .transformAndCheck(
-              tx -> {
-                Predicate<String> stringPredicate = tx.toLowerCase()
-                    .parseBoolean()
-                    .then()
-                    .isTrue()
-                    .toPredicate();
-                System.out.println(stringPredicate);
-                return stringPredicate;
-              })
+              tx -> tx.toLowerCase()
+                  .parseBoolean()
+                  .then()
+                  .isTrue()
+                  .toPredicate())
           .check(Predicates.transform(Functions.length()).check(Predicates.isEqualTo(10)))
           .toPredicate());
     }
+  }
 
-    private static StringTransformer.Impl<String> stringTransformer() {
-      return new StringTransformer.Impl<>(makeTrivial(Functions.identity()));
-    }
+  @Ignore
+  public static class OnGoing {
+  }
+
+  private static StringTransformer.Impl<String> stringTransformer() {
+    return new StringTransformer.Impl<>(makeTrivial(Functions.identity()));
   }
 }
