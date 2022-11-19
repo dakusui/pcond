@@ -1,6 +1,8 @@
 package com.github.dakusui.pcond.internals;
 
 import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.printable.PrintableFunction;
+import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.validator.Explanation;
 import com.github.dakusui.pcond.validator.Validator;
@@ -284,5 +286,30 @@ public enum InternalUtils {
     return () -> {
       throw new NoSuchElementException();
     };
+  }
+
+  /**
+   * Marks "trivial" a given function.
+   * A predicate marked trivial will not appear in an execution report.
+   *
+   * @param predicate A predicate to be marked.
+   * @param <T>      Input type of the function.
+   * @return A predicate marked trivial.
+   */
+  public static <T> Predicate<T> makeTrivial(Predicate<T> predicate) {
+    return ((PrintablePredicate<T>) predicate).makeTrivial();
+  }
+
+  /**
+   * Marks "trivial" given function.
+   * A function marked trivial will not appear in an execution report.
+   *
+   * @param function A function to marked.
+   * @param <T>      Input type of the function.
+   * @param <R>      Output type of the function.
+   * @return A function marked trivial.
+   */
+  public static <T, R> Function<T, R> makeTrivial(Function<T, R> function) {
+    return ((PrintableFunction<T, R>) function).makeTrivial();
   }
 }

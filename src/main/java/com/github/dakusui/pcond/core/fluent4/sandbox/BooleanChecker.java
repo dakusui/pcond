@@ -1,9 +1,12 @@
 package com.github.dakusui.pcond.core.fluent4.sandbox;
 
 import com.github.dakusui.pcond.core.fluent4.Checker;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 
 public interface BooleanChecker<T> extends Checker<
     BooleanChecker<T>,
@@ -20,7 +23,7 @@ public interface BooleanChecker<T> extends Checker<
 
     @Override
     public BooleanChecker<Boolean> rebase() {
-      return new Impl<>(Function.identity());
+      return new Impl<>(makeTrivial(Functions.identity()));
     }
   }
 }

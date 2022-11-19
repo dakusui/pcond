@@ -15,7 +15,7 @@ import org.junit.runner.RunWith;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.fluent.Fluents.makeTrivial;
+import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
 import static com.github.dakusui.pcond.forms.Functions.identity;
 import static com.github.dakusui.pcond.forms.Predicates.isEqualTo;

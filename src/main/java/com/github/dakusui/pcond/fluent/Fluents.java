@@ -3,14 +3,12 @@ package com.github.dakusui.pcond.fluent;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.core.fluent3.builtins.*;
-import com.github.dakusui.pcond.core.printable.PrintableFunction;
-import com.github.dakusui.pcond.core.printable.PrintablePredicate;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
+import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -39,7 +37,7 @@ public class Fluents {
   public static <E> E value() {
     return null;
   }
-  
+
   /**
    * Returns a transformer for a `String` value.
    *
@@ -50,7 +48,7 @@ public class Fluents {
   public static <R extends Matcher<R, R, String, String>>
   StringTransformer<R, String>
   stringValue(String value) {
-    return StringTransformer.create(() ->value);
+    return StringTransformer.create(() -> value);
   }
 
 
@@ -180,9 +178,9 @@ public class Fluents {
   public static Predicate<? super List<?>> createPredicateForAllOf(Statement<?>[] statements) {
     AtomicInteger i = new AtomicInteger(0);
     @SuppressWarnings("unchecked") Predicate<? super List<?>>[] predicates = Arrays.stream(statements)
-        .map(e -> makeTrivial(transform(makeTrivial(elementAt(i.getAndIncrement()))).check((Predicate<? super Object>) e.statementPredicate())))
+        .map(e -> InternalUtils.makeTrivial(transform(InternalUtils.makeTrivial(elementAt(i.getAndIncrement()))).check((Predicate<? super Object>) e.statementPredicate())))
         .toArray(Predicate[]::new);
-    return makeTrivial(allOf(predicates));
+    return InternalUtils.makeTrivial(allOf(predicates));
   }
 
   public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
@@ -290,13 +288,4 @@ public class Fluents {
     }
     return new Stmt();
   }
-
-  private static <T> Predicate<T> makeTrivial(Predicate<T> predicates) {
-    return ((PrintablePredicate<T>) predicates).makeTrivial();
-  }
-
-  public static <T, R> Function<T, R> makeTrivial(Function<T, R> predicates) {
-    return ((PrintableFunction<T, R>) predicates).makeTrivial();
-  }
-
 }

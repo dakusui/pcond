@@ -2,9 +2,12 @@ package com.github.dakusui.pcond.core.fluent4.sandbox;
 
 
 import com.github.dakusui.pcond.core.fluent4.Checker;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 
 public interface StringChecker<T> extends Checker<StringChecker<T>, T, String> {
 
@@ -25,7 +28,7 @@ public interface StringChecker<T> extends Checker<StringChecker<T>, T, String> {
 
     @Override
     public StringChecker<String> rebase() {
-      return new StringChecker.Impl<>(Function.identity());
+      return new StringChecker.Impl<>(makeTrivial(Functions.identity()));
     }
   }
 }
