@@ -5,6 +5,7 @@ import com.github.dakusui.pcond.core.fluent4.AbstractObjectTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
@@ -21,6 +22,10 @@ public interface BooleanTransformer<T> extends
     return new Impl<>(value, null);
   }
 
+  @SuppressWarnings("unchecked")
+  default BooleanTransformer<T> transformAndCheck(Function<BooleanTransformer<Boolean>, Predicate<Boolean>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((BooleanTransformer<Boolean>) tx));
+  }
   class Impl<T> extends
       Base<
           BooleanTransformer<T>,

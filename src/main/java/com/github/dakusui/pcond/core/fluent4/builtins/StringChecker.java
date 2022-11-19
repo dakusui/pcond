@@ -5,6 +5,7 @@ import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -58,6 +59,11 @@ public interface StringChecker<T> extends
 
   default StringChecker<T> findSubstrings(String... tokens) {
     return this.checkWithPredicate(Predicates.findSubstrings(tokens));
+  }
+
+  @SuppressWarnings("unchecked")
+  default StringChecker<T> check(Function<StringChecker<String>, Predicate<String>> phrase) {
+    return this.addCheckPhrase(v -> phrase.apply((StringChecker<String>) v));
   }
 
   class Impl<T>
