@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core.fluent4;
 
 import com.github.dakusui.pcond.core.fluent4.sandbox.BooleanTransformer;
 import com.github.dakusui.pcond.core.fluent4.sandbox.StringTransformer;
+import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ public interface Transformer<
     TX extends Transformer<TX, V, T, R>,  // SELF
     V extends Checker<V, T, R>,
     T,
-    R> {
+    R> extends Statement<T> {
   TX allOf();
 
   TX anyOf();
@@ -161,6 +162,16 @@ public interface Transformer<
     @Override
     public T baseValue() {
       return this.baseValue.get();
+    }
+
+    @Override
+    public T statementValue() {
+      return baseValue();
+    }
+
+    @Override
+    public Predicate<T> statementPredicate() {
+      return toPredicate();
     }
   }
 }

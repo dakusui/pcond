@@ -32,9 +32,7 @@ public interface BooleanChecker<T> extends Checker<
 
     @Override
     public BooleanChecker<Boolean> rebase() {
-      return new Impl<>(
-          this::value,
-          makeTrivial(Functions.identity()));
+      return new Impl<>(this::value, makeTrivial(Functions.identity()));
     }
   }
 }

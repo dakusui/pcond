@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.core.fluent4;
 
+import com.github.dakusui.pcond.fluent.Statement;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +17,7 @@ import static java.util.stream.Collectors.toList;
 public interface Checker<
     V extends Checker<V, T, R>,
     T,
-    R> {
+    R> extends Statement<T> {
   V addCheckPhrase(Function<Checker<?, R, R>, Predicate<R>> clause);
 
   default V checkWithPredicate(Predicate<R> predicate) {
@@ -29,8 +31,6 @@ public interface Checker<
 
   R value();
 
-  Function<T, R> transformFunction();
-
   Predicate<T> toPredicate();
 
   Checker<?, R, R> rebase();
@@ -43,7 +43,7 @@ public interface Checker<
       T,
       R> {
     private final Function<T, R> transformFunction;
-    private final Supplier<R>    value;
+    private final Supplier<T>    baseValue;
 
     private Matcher.JunctionType junctionType;
 
@@ -52,7 +52,7 @@ public interface Checker<
 
     public Base(Supplier<T> baseValue, Function<T, R> transformFunction) {
       this.transformFunction = requireNonNull(transformFunction);
-      this.value = () -> this.transformFunction.apply(baseValue.get());
+      this.baseValue = requireNonNull(baseValue);
       this.allOf();
     }
 
@@ -68,12 +68,7 @@ public interface Checker<
 
     @Override
     public R value() {
-      return this.value.get();
-    }
-
-    @Override
-    public Function<T, R> transformFunction() {
-      return this.transformFunction;
+      return this.transformFunction.apply(baseValue.get());
     }
 
     @Override
@@ -113,6 +108,16 @@ public interface Checker<
     @SuppressWarnings("unchecked")
     private V me() {
       return (V) this;
+    }
+
+    @Override
+    public T statementValue() {
+      return this.baseValue.get();
+    }
+
+    @Override
+    public Predicate<T> statementPredicate() {
+      return toPredicate();
     }
   }
 }
