@@ -1,21 +1,7 @@
 package com.github.dakusui.thincrest.examples;
 
-import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.thincrest.examples.sut.MemberDatabase;
-import org.junit.Test;
-
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.function.Function;
-
-import static com.github.dakusui.pcond.forms.Predicates.*;
-import static com.github.dakusui.pcond.forms.Printables.function;
-import static com.github.dakusui.shared.FluentTestUtils.when;
-import static com.github.dakusui.thincrest.TestAssertions.assertThat;
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
-
 public class FluentStyleExample {
+  /*
   @Test
   public void test1() {
     String id = "0001";
@@ -33,7 +19,6 @@ public class FluentStyleExample {
             .then()
             .isNotNull());
   }
-
   @Test
   public void test2() {
     String identifier = "0001";
@@ -55,7 +40,8 @@ public class FluentStyleExample {
             .isNotEmpty()
             .isEqualTo("Do"));
   }
-
+*/
+/*
   @Test
   public void givenKnownLastName_whenFindMembersByFullName_thenLastNastIsNotNullAndContainedInFullName() {
     MemberDatabase database = new MemberDatabase();
@@ -75,4 +61,6 @@ public class FluentStyleExample {
                 .then()
                 .contains(lastName)));
   }
+
+ */
 }

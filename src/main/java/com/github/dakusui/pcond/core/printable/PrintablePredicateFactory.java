@@ -401,7 +401,7 @@ public enum PrintablePredicateFactory {
      * @param <O> Input parameter type.
      */
     public interface Factory<P, O> {
-      default TransformingPredicate<O, P> check(String condName, Predicate<? super P> cond) {
+      default Predicate<O> check(String condName, Predicate<? super P> cond) {
         return check(leaf(condName, cond));
       }
 
@@ -410,7 +410,7 @@ public enum PrintablePredicateFactory {
         return (Factory<P, OO>) this;
       }
 
-      TransformingPredicate<O, P> check(Predicate<? super P> cond);
+      Predicate<O> check(Predicate<? super P> cond);
 
       static <P, O> Factory<P, O> create(Function<O, P> function) {
         return create(null, null, function);

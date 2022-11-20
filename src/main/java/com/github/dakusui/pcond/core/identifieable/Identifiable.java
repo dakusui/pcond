@@ -30,7 +30,7 @@ public interface Identifiable {
   }
 
   static <T> String formatObjectName(Object object) {
-    return "noname:" + object.toString();
+    return "noname:" + (object == null ? "null" : object.toString());
   }
 
   Object creator();

@@ -1,6 +1,9 @@
 package com.github.dakusui.pcond.internals;
 
 import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.printable.PrintableFunction;
+import com.github.dakusui.pcond.core.printable.PrintablePredicate;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.validator.Explanation;
 import com.github.dakusui.pcond.validator.Validator;
@@ -10,7 +13,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -253,10 +255,6 @@ public enum InternalUtils {
     return (Function<T, R>) DUMMY_FUNCTION;
   }
 
-  public static boolean isDummyPredicate(Predicate<?> predicate) {
-    return predicate == DUMMY_PREDICATE;
-  }
-
   public static boolean isDummyFunction(Function<?, ?> function) {
     return function == DUMMY_FUNCTION;
   }
@@ -278,5 +276,34 @@ public enum InternalUtils {
 
   public static String newLine() {
     return format("%n");
+  }
+
+  /**
+   * Marks "trivial" a given function.
+   * A predicate marked trivial will not appear in an execution report.
+   *
+   * @param predicate A predicate to be marked.
+   * @param <T>      Input type of the function.
+   * @return A predicate marked trivial.
+   */
+  public static <T> Predicate<T> makeTrivial(Predicate<T> predicate) {
+    return ((PrintablePredicate<T>) predicate).makeTrivial();
+  }
+
+  /**
+   * Marks "trivial" given function.
+   * A function marked trivial will not appear in an execution report.
+   *
+   * @param function A function to marked.
+   * @param <T>      Input type of the function.
+   * @param <R>      Output type of the function.
+   * @return A function marked trivial.
+   */
+  public static <T, R> Function<T, R> makeTrivial(Function<T, R> function) {
+    return ((PrintableFunction<T, R>) function).makeTrivial();
+  }
+
+  public static <T> Function<T, T> trivialIdentityFunction() {
+    return Functions.identity();
   }
 }
