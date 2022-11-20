@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut.fluent4;
 
-import com.github.dakusui.pcond.core.fluent4.builtins.StringTransformer;
+import com.github.dakusui.pcond.core.fluent.builtins.StringTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
@@ -200,11 +200,11 @@ public class Fluent4Example {
                   .done()));
     }
 
-    static class Book {
+    public static class Book {
       private final String abstractText;
       private final String title;
 
-      Book(String title, String abstractText) {
+      public Book(String title, String abstractText) {
         this.abstractText = abstractText;
         this.title = title;
       }
@@ -223,7 +223,7 @@ public class Fluent4Example {
       }
     }
 
-    static class BookTransformer extends CustomTransformer<BookTransformer, Book> {
+    public static class BookTransformer extends CustomTransformer<BookTransformer, Book> {
       public BookTransformer(Book rootValue) {
         super(rootValue);
       }

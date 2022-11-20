@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.ut.fluent4;
 
-import com.github.dakusui.pcond.core.fluent4.AbstractObjectTransformer;
-import com.github.dakusui.pcond.core.fluent4.Transformer;
-import com.github.dakusui.pcond.core.fluent4.builtins.ObjectChecker;
+import com.github.dakusui.pcond.core.fluent.AbstractObjectTransformer;
+import com.github.dakusui.pcond.core.fluent.Transformer;
+import com.github.dakusui.pcond.core.fluent.builtins.ObjectChecker;
 import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.function.Function;
