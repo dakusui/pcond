@@ -1,33 +1,36 @@
 package com.github.dakusui.pcond.core.fluent3.builtins;
 
 import com.github.dakusui.pcond.core.fluent3.AbstractObjectChecker;
-import com.github.dakusui.pcond.core.fluent3.Matcher;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
 public interface ThrowableChecker<
-    R extends Matcher<R, R, OIN, OIN>,
-    OIN,
-    T extends Throwable> extends
+    T,
+    E extends Throwable> extends
     AbstractObjectChecker<
-        ThrowableChecker<R, OIN, T>,
-        R,
-        OIN,
-        T> {
+        ThrowableChecker<T, E>,
+        T,
+        E> {
   class Impl<
-      R extends Matcher<R, R, OIN, OIN>,
-      OIN,
-      T extends Throwable
+      T,
+      E extends Throwable
       > extends
-      Matcher.Base<
-          ThrowableChecker<R, OIN, T>,
-          R,
-          OIN,
-          T
+      Base<
+          ThrowableChecker<T, E>,
+          T,
+          E
           > implements
-      ThrowableChecker<R, OIN, T> {
-    protected Impl(Supplier<OIN> rootValue, R root) {
-      super(rootValue, root);
+      ThrowableChecker<T, E> {
+    protected Impl(Supplier<T> baseValue, Function<T, E> transformFunction) {
+      super(baseValue, transformFunction);
+    }
+
+    @Override
+    protected ThrowableChecker<E, E> rebase() {
+      return new ThrowableChecker.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

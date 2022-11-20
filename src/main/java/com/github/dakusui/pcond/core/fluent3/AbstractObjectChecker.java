@@ -6,13 +6,10 @@ import com.github.dakusui.pcond.forms.Predicates;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 
 public interface AbstractObjectChecker<
-    V extends Checker<V, R, OIN, T>,
-    R extends Matcher<R, R, OIN, OIN>,
-    OIN,
-    T> extends Checker<
-    V, R, OIN, T
-    > {
-
+    V extends Checker<V, T, R>,
+    T,
+    R> extends
+    Checker<V, T, R> {
   default V isNotNull() {
     return this.checkWithPredicate(Predicates.isNotNull());
   }

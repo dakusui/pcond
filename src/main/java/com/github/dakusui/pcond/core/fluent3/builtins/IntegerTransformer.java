@@ -1,39 +1,48 @@
 package com.github.dakusui.pcond.core.fluent3.builtins;
 
-import com.github.dakusui.pcond.core.fluent3.Matcher;
-
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
 public interface IntegerTransformer<
-    R extends Matcher<R, R, OIN, OIN>,
-    OIN
+    T
     > extends
     ComparableNumberTransformer<
-        IntegerTransformer<R, OIN>,
-        R,
-        IntegerChecker<R, OIN>,
-        OIN,
+        IntegerTransformer<T>,
+        IntegerChecker<T>,
+        T,
         Integer> {
-  static <R extends Matcher<R, R, Integer, Integer>> IntegerTransformer<R, Integer> create(Supplier<Integer> value) {
-    return new Impl<>(value, null);
+  static IntegerTransformer<Integer> create(Supplier<Integer> value) {
+    return new Impl<>(value, trivialIdentityFunction());
+  }
+
+  @SuppressWarnings("unchecked")
+  default IntegerTransformer<T> transform(Function<IntegerTransformer<Integer>, Predicate<Integer>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((IntegerTransformer<Integer>) tx));
   }
   class Impl<
-      R extends Matcher<R, R, OIN, OIN>,
-      OIN
+      T
       > extends
-      Matcher.Base<
-          IntegerTransformer<R, OIN>,
-          R,
-          OIN,
+      Base<
+          IntegerTransformer<T>,
+          IntegerChecker<T>,
+          T,
           Integer> implements
-      IntegerTransformer<R, OIN> {
-    public Impl(Supplier<OIN> rootValue, R root) {
-      super(rootValue, root);
+      IntegerTransformer<T> {
+    public Impl(Supplier<T> baseValue, Function<T, Integer> transformFunction) {
+      super(baseValue, transformFunction);
     }
 
     @Override
-    public IntegerChecker<R, OIN> createCorrespondingChecker(R root) {
-      return new IntegerChecker.Impl<>(this::rootValue, this.root());
+    public IntegerChecker<T> toChecker(Function<T, Integer> transformFunction) {
+      return new IntegerChecker.Impl<>(this::baseValue, transformFunction);
+    }
+
+    @Override
+    public IntegerTransformer<Integer> rebase() {
+      return new IntegerTransformer.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

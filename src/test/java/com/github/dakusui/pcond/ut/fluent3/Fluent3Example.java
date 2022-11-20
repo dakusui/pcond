@@ -1,11 +1,6 @@
 package com.github.dakusui.pcond.ut.fluent3;
 
-import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
-import com.github.dakusui.pcond.core.fluent3.Matcher;
-import com.github.dakusui.pcond.core.fluent3.Transformer;
-import com.github.dakusui.pcond.core.fluent3.builtins.ObjectChecker;
-import com.github.dakusui.pcond.core.fluent3.builtins.StringTransformer;
-import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.pcond.ut.fluent4.Fluent4Example;
 import org.junit.ComparisonFailure;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -13,13 +8,12 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
 import java.util.Objects;
-import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
 import static com.github.dakusui.pcond.forms.Functions.identity;
 import static com.github.dakusui.pcond.forms.Predicates.isEqualTo;
 import static com.github.dakusui.pcond.forms.Predicates.transform;
+import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 
@@ -32,7 +26,7 @@ public class Fluent3Example {
       assertAll(
           stringValue("Hello")
               .then()
-              .isNull().toStatement());
+              .isNull());
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -42,8 +36,7 @@ public class Fluent3Example {
               .allOf()
               .then()
               .isNotNull()
-              .isNull()
-              .toStatement());
+              .isNull());
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -59,13 +52,13 @@ public class Fluent3Example {
     @Test(expected = ComparisonFailure.class)
     public void forthExample() {
       assertAll(
-          stringValue("Hello").length().then().greaterThan(10).toStatement());
+          stringValue("Hello").length().then().greaterThan(10));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void fifth() {
       assertAll(
-          stringValue("Hello5").length().then().greaterThan(10).lessThan(1).toStatement());
+          stringValue("Hello5").length().then().greaterThan(10).lessThan(1));
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -74,22 +67,22 @@ public class Fluent3Example {
           stringValue("Hello5")
               .then()
               .check(v -> v.isNull().toPredicate())
-              .toStatement());
+      );
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test7() {
       assertAll(
           stringValue("Hello5")
-              .check(tx -> tx.then().isNotNull().toPredicate())
-              .check(tx -> tx.then().isNull().toPredicate()).toStatement());
+              .transform(tx -> tx.then().isNotNull().toPredicate())
+              .transform(tx -> tx.then().isNull().toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test6b() {
       assertAll(
           stringValue("Hello5")
-              .check(tx -> tx.then().isNull().toPredicate()).toStatement());
+              .transform(tx -> tx.then().isNull().toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -97,15 +90,15 @@ public class Fluent3Example {
       assertAll(
           stringValue("Hello5")
               .anyOf()
-              .check(tx -> tx.then().isNull().toPredicate()).toStatement());
+              .transform(tx -> tx.then().isNull().toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test6d() {
       assertAll(
           stringValue("Hello5")
-              .check(tx -> tx.checkWithPredicate(Objects::isNull).toPredicate())
-              .check(tx -> tx.checkWithPredicate(v -> !Objects.isNull(v)).toPredicate()).toStatement()
+              .transform(tx -> tx.checkWithPredicate(Objects::isNull).toPredicate())
+              .transform(tx -> tx.checkWithPredicate(v -> !Objects.isNull(v)).toPredicate())
       );
     }
 
@@ -116,15 +109,15 @@ public class Fluent3Example {
     public void test7_a() {
       assertAll(
           stringValue("Hello5")
-              .check(tx -> tx.then().isNotNull().toPredicate())
-              .check(tx -> tx.then().isNull().toPredicate()));
+              .transform(tx -> tx.then().isNotNull().toPredicate())
+              .transform(tx -> tx.then().isNull().toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test6() {
       assertAll(
           stringValue("Hello5")
-              .check(tx -> tx.length().then().greaterThan(10).done()));
+              .transform(tx -> tx.length().then().greaterThan(10).done()));
     }
   }
 
@@ -158,22 +151,22 @@ public class Fluent3Example {
     public void test7_C() {
       assertAll(
           stringValue("Hello5")
-              .check(tx -> tx
-                  .check(ty -> ty.length()
+              .transform(tx -> tx
+                  .transform(ty -> ty.length()
                       .then()
                       .greaterThanOrEqualTo(800)
                       .lessThan(1000)
                       .done())
-                  .check(ty -> ty.then().isNotNull().done()).done())
-              .check(tx -> tx.then().isNull().done()));
+                  .transform(ty -> ty.then().isNotNull().done()).done())
+              .transform(tx -> tx.then().isNull().done()));
     }
 
     @Test
     public void givenBookTitle_whenLength_thenNotNullAndAppropriateLength() {
       assertAll(
           stringValue("De Bello Gallico")
-              .check(ty -> ty.then().isNotNull().done())
-              .check(ty -> ty.length().then()
+              .transform(ty -> ty.then().isNotNull().done())
+              .transform(ty -> ty.length().then()
                   .greaterThanOrEqualTo(10)
                   .lessThan(40)
                   .done()));
@@ -185,14 +178,14 @@ public class Fluent3Example {
       String bookAbstract = "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.";
       assertAll(
           stringValue(bookTitle)
-              .check(ty -> ty.then().isNotNull().done())
-              .check(ty -> ty.length().then()
+              .transform(ty -> ty.then().isNotNull().done())
+              .transform(ty -> ty.length().then()
                   .greaterThanOrEqualTo(10)
                   .lessThan(40)
                   .done()),
           stringValue(bookAbstract)
-              .check(ty -> ty.then().isNotNull().done())
-              .check(ty -> ty.length().then()
+              .transform(ty -> ty.then().isNotNull().done())
+              .transform(ty -> ty.length().then()
                   .greaterThanOrEqualTo(200)
                   .lessThan(400)
                   .done()));
@@ -200,13 +193,13 @@ public class Fluent3Example {
 
     @Test
     public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength() {
-      Book book = new Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
+      Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
       assertAll(
-          new BookTransformer(book)
-              .check(b -> b.title()
-                  .check(ty -> ty.then().isNotNull().toPredicate()).done())
-              .check(b -> b.abstractText()
-                  .check(ty -> ty.then().isNotNull().toPredicate()).done()));
+          new Fluent4Example.OnGoing.BookTransformer(book)
+              .transform(b -> b.title()
+                  .transform(ty -> ty.then().isNotNull().toPredicate()).done())
+              .transform(b -> b.abstractText()
+                  .transform(ty -> ty.then().isNotNull().toPredicate()).done()));
     }
 
     /*
@@ -234,7 +227,7 @@ public class Fluent3Example {
     public void test6() {
       assertAll(
           stringValue("Hello5")
-              .check(tx -> tx.length().then().greaterThanOrEqualTo(10).lessThan(100).done()));
+              .transform(tx -> tx.length().then().greaterThanOrEqualTo(10).lessThan(100).done()));
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -262,70 +255,8 @@ public class Fluent3Example {
     public void test7() {
       assertAll(
           stringValue("Hello5")
-              .check(tx -> tx.then().isNotNull().done())
-              .check(tx -> tx.then().isNull().done()));
-    }
-
-    static class Book {
-      private final String abstractText;
-      private final String title;
-
-      Book(String abstractText, String title) {
-        this.abstractText = abstractText;
-        this.title = title;
-      }
-
-      String title() {
-        return title;
-      }
-
-      String abstractText() {
-        return abstractText;
-      }
-    }
-
-    static class BookTransformer extends CustomTransformer<BookTransformer, Book> {
-      public BookTransformer(Book rootValue) {
-        super(() -> rootValue);
-      }
-
-      public StringTransformer<BookTransformer, Book> title() {
-        return toString(Printables.function("title", Book::title));
-      }
-
-      public StringTransformer<BookTransformer, Book> abstractText() {
-        return toString(Printables.function("title", Book::abstractText));
-      }
-    }
-
-
-    static abstract class CustomTransformer<
-        TX extends Transformer<
-            TX,
-            TX,
-            ObjectChecker<TX, OIN, OIN>,
-            OIN,
-            OIN>,
-        OIN> extends
-        Matcher.Base<
-            TX,
-            TX,
-            OIN,
-            OIN> implements
-        AbstractObjectTransformer<
-            TX,
-            TX,
-            ObjectChecker<TX, OIN, OIN>,
-            OIN,
-            OIN> {
-      public CustomTransformer(Supplier<OIN> rootValue) {
-        super(rootValue, null);
-      }
-
-      @Override
-      public ObjectChecker<TX, OIN, OIN> createCorrespondingChecker(TX root) {
-        throw new UnsupportedOperationException();
-      }
+              .transform(tx -> tx.then().isNotNull().done())
+              .transform(tx -> tx.then().isNull().done()));
     }
 
     @Test

@@ -1,9 +1,6 @@
 package com.github.dakusui.pcond.fluent;
 
-import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.core.fluent3.builtins.*;
-import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.Arrays;
@@ -15,9 +12,6 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.forms.Functions.elementAt;
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
 import static com.github.dakusui.pcond.forms.Predicates.transform;
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 /**
  * An "entry-point" class to write a "fluent" style tests.
@@ -45,8 +39,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see StringTransformer
    */
-  public static <R extends Matcher<R, R, String, String>>
-  StringTransformer<R, String>
+  public static StringTransformer<String>
   stringValue(String value) {
     return StringTransformer.create(() -> value);
   }
@@ -59,8 +52,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see DoubleTransformer
    */
-  public static <R extends Matcher<R, R, Double, Double>>
-  DoubleTransformer<R, Double>
+  public static DoubleTransformer<Double>
   doubleValue(Double value) {
     return DoubleTransformer.create(() -> value);
   }
@@ -73,8 +65,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see FloatTransformer
    */
-  public static <R extends Matcher<R, R, Float, Float>>
-  FloatTransformer<R, Float>
+  public static FloatTransformer<Float>
   floatValue(Float value) {
     return FloatTransformer.create(() -> value);
   }
@@ -87,8 +78,8 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see LongTransformer
    */
-  public static <R extends Matcher<R, R, Long, Long>>
-  LongTransformer<R, Long>
+  public static
+  LongTransformer<Long>
   longValue(Long value) {
     return LongTransformer.create(() -> value);
   }
@@ -100,8 +91,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see IntegerTransformer
    */
-  public static <R extends Matcher<R, R, Integer, Integer>>
-  IntegerTransformer<R, Integer>
+  public static IntegerTransformer<Integer>
   integerValue(Integer value) {
     return IntegerTransformer.create(() -> value);
   }
@@ -114,8 +104,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see ShortTransformer
    */
-  public static <R extends Matcher<R, R, Short, Short>>
-  ShortTransformer<R, Short>
+  public static ShortTransformer<Short>
   shortValue(Short value) {
     return ShortTransformer.create(() -> value);
   }
@@ -127,8 +116,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see BooleanTransformer
    */
-  public static <R extends Matcher<R, R, Boolean, Boolean>>
-  BooleanTransformer<R, Boolean>
+  public static BooleanTransformer<Boolean>
   booleanValue(Boolean value) {
     return BooleanTransformer.create(() -> value);
   }
@@ -140,10 +128,8 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see ObjectTransformer
    */
-  public static <
-      R extends Matcher<R, R, E, E>,
-      E>
-  ObjectTransformer<R, E, E>
+  public static <E>
+  ObjectTransformer<E, E>
   objectValue(E value) {
     return ObjectTransformer.create(() -> value);
   }
@@ -156,8 +142,8 @@ public class Fluents {
    * @see ListTransformer
    */
 
-  public static <R extends Matcher<R, R, List<E>, List<E>>, E>
-  ListTransformer<R, List<E>, E>
+  public static <E>
+  ListTransformer<List<E>, E>
   listValue(List<E> value) {
     return ListTransformer.create(() -> value);
   }
@@ -169,8 +155,8 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see StreamTransformer
    */
-  public static <R extends Matcher<R, R, Stream<E>, Stream<E>>, E>
-  StreamTransformer<R, Stream<E>, E>
+  public static <E>
+  StreamTransformer<Stream<E>, E>
   streamValue(Stream<E> value) {
     return StreamTransformer.create(() -> value);
   }
@@ -185,107 +171,5 @@ public class Fluents {
 
   public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
     return objectValue(value).then().checkWithPredicate(predicate);
-  }
-
-  @SafeVarargs
-  public static <T> Statement<T> statementAllOf(T value, Predicate<? super T>... predicateArray) {
-    List<Predicate<? super T>> predicates = asList(predicateArray);
-    class Stmt implements Statement<T>, Evaluable.Conjunction<T>, Predicate<T> {
-      @SuppressWarnings("unchecked")
-      final List<Evaluable<? super T>> children = predicates.stream()
-          .map(each -> each instanceof Evaluable ?
-              each :
-              PrintablePredicateFactory.leaf(each::toString, each))
-          .map(each -> (Evaluable<? super T>) each)
-          .collect(toList());
-
-      @Override
-      public T statementValue() {
-        return value;
-      }
-
-      @Override
-      public List<Evaluable<? super T>> children() {
-        return children;
-      }
-
-      @Override
-      public boolean shortcut() {
-        return false;
-      }
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public Predicate<T> statementPredicate() {
-        return PrintablePredicateFactory.allOf(predicates
-            .stream()
-            .map(each -> (Predicate<T>) each)
-            .collect(toList()));
-      }
-
-      @Override
-      public boolean test(T t) {
-        return statementPredicate().test(t);
-      }
-
-      @Override
-      public String toString() {
-        return children.stream()
-            .map(Object::toString)
-            .collect(joining("&&"));
-      }
-    }
-    return new Stmt();
-  }
-
-  @SafeVarargs
-  public static <T> Statement<T> statementAnyOf(T value, Predicate<? super T>... predicateArray) {
-    List<Predicate<? super T>> predicates = asList(predicateArray);
-    class Stmt implements Statement<T>, Evaluable.Disjunction<T>, Predicate<T> {
-      @SuppressWarnings("unchecked")
-      final List<Evaluable<? super T>> children = predicates.stream()
-          .map(each -> each instanceof Evaluable ?
-              each :
-              PrintablePredicateFactory.leaf(each::toString, each))
-          .map(each -> (Evaluable<? super T>) each)
-          .collect(toList());
-
-      @Override
-      public T statementValue() {
-        return value;
-      }
-
-      @Override
-      public List<Evaluable<? super T>> children() {
-        return children;
-      }
-
-      @Override
-      public boolean shortcut() {
-        return false;
-      }
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public Predicate<T> statementPredicate() {
-        return PrintablePredicateFactory.anyOf(predicates
-            .stream()
-            .map(each -> (Predicate<T>) each)
-            .collect(toList()));
-      }
-
-      @Override
-      public boolean test(T t) {
-        return statementPredicate().test(t);
-      }
-
-      @Override
-      public String toString() {
-        return children.stream()
-            .map(Object::toString)
-            .collect(joining("||"));
-      }
-    }
-    return new Stmt();
   }
 }

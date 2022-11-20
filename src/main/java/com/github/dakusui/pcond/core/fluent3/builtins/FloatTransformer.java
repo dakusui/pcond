@@ -1,38 +1,48 @@
 package com.github.dakusui.pcond.core.fluent3.builtins;
 
-import com.github.dakusui.pcond.core.fluent3.Matcher;
-
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
 public interface FloatTransformer<
-    R extends Matcher<R, R, OIN, OIN>, OIN
+    T
     > extends
     ComparableNumberTransformer<
-        FloatTransformer<R, OIN>,
-        R,
-        FloatChecker<R, OIN>,
-        OIN,
+        FloatTransformer<T>,
+        FloatChecker<T>,
+        T,
         Float> {
-  static <R extends Matcher<R, R, Float, Float>> FloatTransformer<R, Float> create(Supplier<Float> value) {
-    return new Impl<>(value, null);
+  static FloatTransformer<Float> create(Supplier<Float> value) {
+    return new Impl<>(value, trivialIdentityFunction());
+  }
+
+  @SuppressWarnings("unchecked")
+  default FloatTransformer<T> transform(Function<FloatTransformer<Float>, Predicate<Float>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((FloatTransformer<Float>) tx));
   }
   class Impl<
-      R extends Matcher<R, R, OIN, OIN>,
-      OIN
+      T
       > extends
       Base<
-          FloatTransformer<R, OIN>,
-          R,
-          OIN,
+          FloatTransformer<T>,
+          FloatChecker<T>,
+          T,
           Float> implements
-      FloatTransformer<R, OIN> {
-    public Impl(Supplier<OIN> rootValue, R root) {
+      FloatTransformer<T> {
+    public Impl(Supplier<T> rootValue, Function<T, Float> root) {
       super(rootValue, root);
     }
 
     @Override
-    public FloatChecker<R, OIN> createCorrespondingChecker(R root) {
-      return new FloatChecker.Impl<>(this::rootValue, this.root());
+    protected FloatChecker<T> toChecker(Function<T, Float> transformFunction) {
+      return new FloatChecker.Impl<>(this::baseValue, transformFunction);
+    }
+
+    @Override
+    protected FloatTransformer<Float> rebase() {
+      return new FloatTransformer.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

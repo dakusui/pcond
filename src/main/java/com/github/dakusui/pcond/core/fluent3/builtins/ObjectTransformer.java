@@ -1,75 +1,85 @@
 package com.github.dakusui.pcond.core.fluent3.builtins;
 
 import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
-import com.github.dakusui.pcond.core.fluent3.CustomTransformer;
-import com.github.dakusui.pcond.core.fluent3.Matcher;
+import com.github.dakusui.pcond.core.fluent3.Transformer;
 import com.github.dakusui.pcond.forms.Functions;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
 
 
 /**
  * This interface is used for object whose type doesn't have an explicit support.
  * Do not try to extend/implement this class to support your own class.
- *
- * Instead, see {@link CustomTransformer}.
  */
 public interface ObjectTransformer<
-    RX extends Matcher<RX, RX, OIN, OIN>,
-    OIN,
+    T,
     E
     > extends
     AbstractObjectTransformer<
-            ObjectTransformer<RX, OIN, E>,
-            RX,
-            ObjectChecker<RX, OIN, E>,
-            OIN,
-            E> {
-  default <RY extends Matcher<RY, RY, String, String>> StringTransformer<RY, String> asString() {
-    return (StringTransformer<RY, String>) toString(Functions.cast(String.class));
+        ObjectTransformer<T, E>,
+        ObjectChecker<T, E>,
+        T,
+        E> {
+
+  @SuppressWarnings("unchecked")
+  default ObjectTransformer<T, E> transform(Function<ObjectTransformer<T, E>, Predicate<E>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((ObjectTransformer<T, E>) tx));
   }
 
-  default IntegerTransformer<RX, OIN> asInteger() {
+  default StringTransformer<T> asString() {
+    return toString(Functions.cast(String.class));
+  }
+
+  default IntegerTransformer<T> asInteger() {
     return toInteger(Functions.cast(Integer.class));
   }
 
-  default LongTransformer<RX, OIN> asLong() {
+  default LongTransformer<T> asLong() {
     return toLong(Functions.cast(Long.class));
   }
 
-  default ShortTransformer<RX, OIN> asShort() {
+  default ShortTransformer<T> asShort() {
     return toShort(Functions.cast(Short.class));
   }
 
-  default DoubleTransformer<RX, OIN> asDouble() {
+  default DoubleTransformer<T> asDouble() {
     return toDouble(Functions.cast(Double.class));
   }
 
-  default FloatTransformer<RX, OIN> asFloat() {
+  default FloatTransformer<T> asFloat() {
     return toFloat(Functions.cast(Float.class));
   }
 
-  static
-  <R extends Matcher<R, R, E, E>, E> ObjectTransformer<R, E, E> create(Supplier<E> value) {
+  static <E> ObjectTransformer<E, E> create(Supplier<E> value) {
     return new Impl<>(value, null);
   }
+
   class Impl<
-      RX extends Matcher<RX, RX, OIN, OIN>,
-      OIN,
+      T,
       E> extends
-      Matcher.Base<
-          ObjectTransformer<RX, OIN, E>,
-          RX,
-          OIN,
+      Transformer.Base<
+          ObjectTransformer<T, E>,
+          ObjectChecker<T, E>,
+          T,
           E> implements
-      ObjectTransformer<RX, OIN, E> {
-    public Impl(Supplier<OIN> rootValue, RX root) {
+      ObjectTransformer<T, E> {
+    public Impl(Supplier<T> rootValue, Function<T, E> root) {
       super(rootValue, root);
     }
 
     @Override
-    public ObjectChecker<RX, OIN, E> createCorrespondingChecker(RX root) {
-      return new ObjectChecker.Impl<>(this::rootValue, root);
+    protected ObjectChecker<T, E> toChecker(Function<T, E> transformFunction) {
+      return new ObjectChecker.Impl<>(this::baseValue, transformFunction);
     }
+
+    @Override
+    protected ObjectTransformer<E, E> rebase() {
+      return new ObjectTransformer.Impl<>(this::value, trivialIdentityFunction());
+    }
+
   }
 }

@@ -1,33 +1,33 @@
 package com.github.dakusui.pcond.core.fluent3.builtins;
 
 
-import com.github.dakusui.pcond.core.fluent3.Matcher;
-
+import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
 public interface LongChecker<
-    R extends Matcher<R, R, OIN, OIN>,
     OIN
     > extends
     ComparableNumberChecker<
-        LongChecker<R, OIN>,
-        R,
+        LongChecker<OIN>,
         OIN,
         Long> {
 
-  class Impl<
-      R extends Matcher<R, R, OIN, OIN>,
-      OIN> extends
+  class Impl<T> extends
       Base<
-          LongChecker<R, OIN>,
-          R,
-          OIN,
+          LongChecker<T>,
+          T,
           Long> implements
       LongChecker<
-          R,
-          OIN> {
-    public Impl(Supplier<OIN> rootValue, R root) {
-      super(rootValue, root);
+          T> {
+    public Impl(Supplier<T> baseValue, Function<T, Long> transformFunction) {
+      super(baseValue, transformFunction);
+    }
+
+    @Override
+    protected LongChecker<Long> rebase() {
+      return new LongChecker.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

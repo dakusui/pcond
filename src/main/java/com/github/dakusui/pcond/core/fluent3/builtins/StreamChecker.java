@@ -1,47 +1,51 @@
 package com.github.dakusui.pcond.core.fluent3.builtins;
 
 import com.github.dakusui.pcond.core.fluent3.AbstractObjectChecker;
-import com.github.dakusui.pcond.core.fluent3.Matcher;
 import com.github.dakusui.pcond.forms.Predicates;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
 public interface StreamChecker<
-    R extends Matcher<R, R, OIN, OIN>,
-    OIN,
+    T,
     E> extends
     AbstractObjectChecker<
-        StreamChecker<R, OIN, E>,
-        R,
-        OIN,
+        StreamChecker<T, E>,
+        T,
         Stream<E>> {
-  default StreamChecker<R, OIN, E> noneMatch(Predicate<E> p) {
+  default StreamChecker<T, E> noneMatch(Predicate<E> p) {
     return this.checkWithPredicate(Predicates.noneMatch(p));
   }
 
-  default StreamChecker<R, OIN, E> anyMatch(Predicate<E> p) {
+  default StreamChecker<T, E> anyMatch(Predicate<E> p) {
     return this.checkWithPredicate(Predicates.anyMatch(p));
   }
 
-  default StreamChecker<R, OIN, E> allMatch(Predicate<E> p) {
+  default StreamChecker<T, E> allMatch(Predicate<E> p) {
     return this.checkWithPredicate(Predicates.allMatch(p));
   }
 
-  class Impl<R extends Matcher<R, R, OIN, OIN>,
-      OIN,
+  class Impl<
+      T,
       E> extends
-      Matcher.Base<
-          StreamChecker<R, OIN, E>,
-          R,
-          OIN,
+      Base<
+          StreamChecker<T, E>,
+          T,
           Stream<E>
           >
 
-      implements StreamChecker<R, OIN, E> {
-    public Impl(Supplier<OIN> rootValue, R root) {
+      implements StreamChecker<T, E> {
+    public Impl(Supplier<T> rootValue, Function<T, Stream<E>> root) {
       super(rootValue, root);
+    }
+
+    @Override
+    protected StreamChecker<Stream<E>, E> rebase() {
+      return new Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }
