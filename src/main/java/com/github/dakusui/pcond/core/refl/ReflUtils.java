@@ -5,10 +5,7 @@ import com.github.dakusui.pcond.internals.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collector;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;
@@ -21,6 +18,7 @@ import static java.util.stream.Collectors.*;
  * This class consists of {@code static} utility methods for creating printable functions and predicate
  * on objects.
  */
+@SuppressWarnings("JavadocLinkAsPlainText")
 public enum ReflUtils {
   ;
 
@@ -77,6 +75,8 @@ public enum ReflUtils {
    */
   @SuppressWarnings("unchecked")
   public static <R> R invokeMethod(Method method, Object obj, Object[] arguments) {
+    BiFunction<Method, Throwable, MethodInvocationException> exception = (m, e) -> new MethodInvocationException(
+        format("Method invocation failed: %n  method: '%s'%n  with:   '%s'", m, e), e);
     boolean wasAccessible = method.isAccessible();
     try {
       ////
@@ -85,8 +85,10 @@ public enum ReflUtils {
       // overriding a public method cannot be invoked.
       method.setAccessible(true);
       return (R) method.invoke(obj, arguments);
-    } catch (IllegalAccessException | InvocationTargetException e) {
-      throw new MethodInvocationException(format("Method invocation of '%s' was failed", method), e.getCause());
+    } catch (IllegalAccessException e) {
+      throw exception.apply(method, e.getCause());
+    } catch (InvocationTargetException e) {
+      throw exception.apply(method, e.getTargetException());
     } finally {
       method.setAccessible(wasAccessible);
     }
