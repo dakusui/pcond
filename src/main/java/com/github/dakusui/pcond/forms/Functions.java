@@ -81,7 +81,7 @@ public class Functions {
   }
 
   /**
-   * Returns a function that returns a stream for a given given collection.
+   * Returns a function that returns a stream for a given collection.
    *
    * @param <E> Type of elements in the given collection.
    * @return The function.
@@ -91,7 +91,7 @@ public class Functions {
   }
 
   /**
-   * Returns a function that returns a stream for a given given collection.
+   * Returns a function that returns a stream for a given collection.
    *
    * @param <E> Type of elements in the given collection.
    * @return The function.
@@ -367,6 +367,28 @@ public class Functions {
     return callInstanceMethod(parameter(), methodName, arguments);
   }
 
+
+  /**
+   * Returns a {@link Parameter} object, which is used in combination with {@link Functions#instanceMethod(Object, String, Object[])},
+   * {@link Functions#classMethod(Class, String, Object[])}, or their shorthand methods.
+   * The object returned by this method is replaced with the actual input value passed to a function built
+   * through {@link Functions#call(MethodQuery)} or {@link Predicates#callp(MethodQuery)}
+   * when it is applied.
+   *
+   * @return a {@code Parameter} object
+   *
+   * @see Functions#classMethod(Class, String, Object[])
+   * @see Functions#instanceMethod(Object, String, Object[])
+   * @see Functions#call(MethodQuery)
+   * @see Functions#call(String, Object[])
+   * @see Predicates#callp(MethodQuery)
+   * @see Predicates#callp(String, Object[])
+   *
+   */
+  public static Parameter parameter() {
+    return Parameter.INSTANCE;
+  }
+
   /**
    * Returns a function that converts an input value to an exception object, which is thrown by `func`, when it is applied.
    * If it does not throw an exception, or even if thrown, it is not an instance of {@code exceptionClass}, an assertion executed inside this method will fail and an exception
@@ -397,28 +419,6 @@ public class Functions {
           throw new AssertionError("A line that shouldn't be reached. File a ticket.");
         });
   }
-
-  /**
-   * Returns a {@link Parameter} object, which is used in combination with {@link Functions#instanceMethod(Object, String, Object[])},
-   * {@link Functions#classMethod(Class, String, Object[])}, or their shorthand methods.
-   * The object returned by this method is replaced with the actual input value passed to a function built
-   * through {@link Functions#call(MethodQuery)} or {@link Predicates#callp(MethodQuery)}
-   * when it is applied.
-   *
-   * @return a {@code Parameter} object
-   *
-   * @see Functions#classMethod(Class, String, Object[])
-   * @see Functions#instanceMethod(Object, String, Object[])
-   * @see Functions#call(MethodQuery)
-   * @see Functions#call(String, Object[])
-   * @see Predicates#callp(MethodQuery)
-   * @see Predicates#callp(String, Object[])
-   *
-   */
-  public static Parameter parameter() {
-    return Parameter.INSTANCE;
-  }
-
   private static Predicate<Object> exceptionThrown() {
     return Printables.predicate("exceptionThrown", v -> false);
   }
