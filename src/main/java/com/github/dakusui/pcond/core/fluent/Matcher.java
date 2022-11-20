@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.core.fluent3;
+package com.github.dakusui.pcond.core.fluent;
 
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;

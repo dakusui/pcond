@@ -1,7 +1,7 @@
-package com.github.dakusui.pcond.core.fluent3.builtins;
+package com.github.dakusui.pcond.core.fluent.builtins;
 
-import com.github.dakusui.pcond.core.fluent3.AbstractObjectTransformer;
-import com.github.dakusui.pcond.core.fluent3.Transformer;
+import com.github.dakusui.pcond.core.fluent.AbstractObjectTransformer;
+import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.function.Function;

@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut.fluent4;
 
-import com.github.dakusui.pcond.core.fluent3.builtins.StringTransformer;
+import com.github.dakusui.pcond.core.fluent.builtins.StringTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;

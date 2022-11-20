@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.fluent;
 
-import com.github.dakusui.pcond.core.fluent3.builtins.*;
+import com.github.dakusui.pcond.core.fluent.builtins.*;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.Arrays;

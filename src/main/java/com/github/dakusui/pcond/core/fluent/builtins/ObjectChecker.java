@@ -1,6 +1,6 @@
-package com.github.dakusui.pcond.core.fluent3.builtins;
+package com.github.dakusui.pcond.core.fluent.builtins;
 
-import com.github.dakusui.pcond.core.fluent3.AbstractObjectChecker;
+import com.github.dakusui.pcond.core.fluent.AbstractObjectChecker;
 
 import java.util.function.Function;
 import java.util.function.Supplier;

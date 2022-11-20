@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.core.fluent3.builtins;
+package com.github.dakusui.pcond.core.fluent.builtins;
 
 
 import java.util.function.Function;

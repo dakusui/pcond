@@ -1,6 +1,6 @@
-package com.github.dakusui.pcond.core.fluent3;
+package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.core.fluent3.builtins.*;
+import com.github.dakusui.pcond.core.fluent.builtins.*;
 import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.List;
