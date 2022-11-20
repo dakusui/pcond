@@ -2,13 +2,12 @@ package com.github.dakusui.pcond.core.fluent4.builtins;
 
 
 import com.github.dakusui.pcond.core.fluent4.AbstractObjectTransformer;
-import com.github.dakusui.pcond.forms.Functions;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
 import static com.github.dakusui.valid8j.Requires.requireNonNull;
 
 public interface BooleanTransformer<T> extends
@@ -23,7 +22,7 @@ public interface BooleanTransformer<T> extends
   }
 
   @SuppressWarnings("unchecked")
-  default BooleanTransformer<T> transformAndCheck(Function<BooleanTransformer<Boolean>, Predicate<Boolean>> clause) {
+  default BooleanTransformer<T> transform(Function<BooleanTransformer<Boolean>, Predicate<Boolean>> clause) {
     return this.addTransformAndCheckClause(tx -> clause.apply((BooleanTransformer<Boolean>) tx));
   }
   class Impl<T> extends
@@ -45,7 +44,7 @@ public interface BooleanTransformer<T> extends
 
     @Override
     protected BooleanTransformer<Boolean> rebase() {
-      return new Impl<>(this::value, makeTrivial(Functions.identity()));
+      return new Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

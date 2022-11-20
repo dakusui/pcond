@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.core.fluent4.builtins;
 import com.github.dakusui.pcond.core.fluent4.AbstractObjectTransformer;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -19,6 +20,11 @@ public interface StreamTransformer<
         > {
   static <E> StreamTransformer<Stream<E>, E> create(Supplier<Stream<E>> value) {
     return new Impl<>(value, trivialIdentityFunction());
+  }
+
+  @SuppressWarnings("unchecked")
+  default StreamTransformer<T, E> transform(Function<StreamTransformer<T, E>, Predicate<Stream<E>>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((StreamTransformer<T, E>) tx));
   }
 
   class Impl<

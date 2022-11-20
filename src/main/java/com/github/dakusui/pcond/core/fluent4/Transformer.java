@@ -1,7 +1,9 @@
 package com.github.dakusui.pcond.core.fluent4;
 
 import com.github.dakusui.pcond.fluent.Statement;
+import com.github.dakusui.pcond.forms.Functions;
 
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -17,8 +19,7 @@ public interface Transformer<
     T,
     R> extends
     Matcher<TX, T, R>,
-    Statement<T>,
-    Predicate<T> {
+    Statement<T> {
 
   @SuppressWarnings("unchecked")
   default TX checkWithPredicate(Predicate<? super R> predicate) {
@@ -30,10 +31,14 @@ public interface Transformer<
 
   V then();
 
+  default Predicate<T> done() {
+    return this.statementPredicate();
+  }
+
   <TY extends Transformer<TY, W, T, RR>,
       W extends Checker<W, T, RR>,
       RR>
-  TY transform(Function<? super R, RR> func, BiFunction<Supplier<T>, Function<T, RR>, TY> transformerFactory);
+  TY transformValueWith(Function<? super R, RR> func, BiFunction<Supplier<T>, Function<T, RR>, TY> transformerFactory);
 
   abstract class Base<
       TX extends Transformer<TX, V, T, R>,  // SELF
@@ -63,8 +68,12 @@ public interface Transformer<
         TY extends Transformer<TY, W, T, RR>,
         W extends Checker<W, T, RR>,
         RR>
-    TY transform(Function<? super R, RR> func, BiFunction<Supplier<T>, Function<T, RR>, TY> transformerFactory) {
-      return transformerFactory.apply(this::baseValue, transformFunction().andThen(func));
+    TY transformValueWith(Function<? super R, RR> func, BiFunction<Supplier<T>, Function<T, RR>, TY> transformerFactory) {
+      Function<T, R> tf = transformFunction();
+      @SuppressWarnings("unchecked") Function<T, RR> transformFunction = Objects.equals(tf, Functions.identity()) ?
+          (Function<T, RR>) func :
+          tf.andThen(func);
+      return transformerFactory.apply(this::baseValue, transformFunction);
     }
 
     @SuppressWarnings("unchecked")
@@ -87,11 +96,6 @@ public interface Transformer<
     @Override
     public Predicate<T> statementPredicate() {
       return toPredicate();
-    }
-
-    @Override
-    public boolean test(T value) {
-      return statementPredicate().test(baseValue());
     }
 
     protected abstract V toChecker(Function<T, R> transformFunction);

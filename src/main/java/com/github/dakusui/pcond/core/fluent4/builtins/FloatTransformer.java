@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
@@ -17,6 +18,10 @@ public interface FloatTransformer<
     return new Impl<>(value, trivialIdentityFunction());
   }
 
+  @SuppressWarnings("unchecked")
+  default FloatTransformer<T> transform(Function<FloatTransformer<Float>, Predicate<Float>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((FloatTransformer<Float>) tx));
+  }
   class Impl<
       T
       > extends

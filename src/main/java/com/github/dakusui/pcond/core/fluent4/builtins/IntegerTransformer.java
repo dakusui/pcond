@@ -1,22 +1,27 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
 
 public interface IntegerTransformer<
-    OIN
+    T
     > extends
     ComparableNumberTransformer<
-        IntegerTransformer<OIN>,
-        IntegerChecker<OIN>,
-        OIN,
+        IntegerTransformer<T>,
+        IntegerChecker<T>,
+        T,
         Integer> {
   static IntegerTransformer<Integer> create(Supplier<Integer> value) {
     return new Impl<>(value, trivialIdentityFunction());
   }
 
+  @SuppressWarnings("unchecked")
+  default IntegerTransformer<T> transform(Function<IntegerTransformer<Integer>, Predicate<Integer>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((IntegerTransformer<Integer>) tx));
+  }
   class Impl<
       T
       > extends

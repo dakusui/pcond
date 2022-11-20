@@ -2,8 +2,10 @@ package com.github.dakusui.pcond.core.fluent4.builtins;
 
 
 import com.github.dakusui.pcond.core.fluent4.AbstractObjectTransformer;
+import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
@@ -20,16 +22,18 @@ public interface ThrowableTransformer<
     return new Impl<>(value, trivialIdentityFunction());
   }
 
+  @SuppressWarnings("unchecked")
+  default ThrowableTransformer<T, E> transform(Function<ThrowableTransformer<T, E>, Predicate<E>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((ThrowableTransformer<T, E>) tx));
+  }
+
+  @SuppressWarnings("unchecked")
   default <OUT2 extends Throwable> ThrowableTransformer<T, OUT2> getCause() {
-    // TODO
-    // return exercise(Printables.function("getCause", Throwable::getCause)).asThrowable();
-    return null;
+    return this.toThrowable(Printables.function("getCause", e -> (OUT2) e.getCause()));
   }
 
   default StringTransformer<T> getMessage() {
-    //return appendPredicateAsChild(Printables.function("getMessage", Throwable::getMessage));
-    // TODO
-    return null;
+    return this.toString(Printables.function("getMessage", Throwable::getMessage));
   }
 
   class Impl<
@@ -59,6 +63,5 @@ public interface ThrowableTransformer<
     protected ThrowableTransformer<E, E> rebase() {
       return new ThrowableTransformer.Impl<>(this::value, trivialIdentityFunction());
     }
-
   }
 }

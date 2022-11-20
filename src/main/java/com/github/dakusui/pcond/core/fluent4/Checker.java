@@ -13,14 +13,16 @@ public interface Checker<
     T,
     R> extends
     Matcher<V, T, R>,
-    Statement<T>,
-    Predicate<T> {
+    Statement<T> {
   V addCheckPhrase(Function<Checker<?, R, R>, Predicate<R>> clause);
 
   @SuppressWarnings("unchecked")
   default V checkWithPredicate(Predicate<? super R> predicate) {
     requireNonNull(predicate);
     return addCheckPhrase(w -> (Predicate<R>) predicate);
+  }
+  default Predicate<T> done() {
+    return statementPredicate();
   }
 
   abstract class Base<
@@ -54,10 +56,6 @@ public interface Checker<
     @Override
     public Predicate<T> statementPredicate() {
       return toPredicate();
-    }
-
-    public boolean test(T value) {
-      return statementPredicate().test(value);
     }
   }
 }

@@ -1,12 +1,11 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
 import com.github.dakusui.pcond.core.fluent4.AbstractObjectTransformer;
-import com.github.dakusui.pcond.core.fluent4.Checker;
 import com.github.dakusui.pcond.core.fluent4.Transformer;
 import com.github.dakusui.pcond.forms.Functions;
 
-import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
@@ -25,8 +24,14 @@ public interface ObjectTransformer<
         ObjectChecker<T, E>,
         T,
         E> {
-  default StringTransformer<String> asString() {
-    return (StringTransformer<String>) toString(Functions.cast(String.class));
+
+  @SuppressWarnings("unchecked")
+  default ObjectTransformer<T, E> transform(Function<ObjectTransformer<T, E>, Predicate<E>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((ObjectTransformer<T, E>) tx));
+  }
+
+  default StringTransformer<T> asString() {
+    return toString(Functions.cast(String.class));
   }
 
   default IntegerTransformer<T> asInteger() {

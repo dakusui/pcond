@@ -1,7 +1,6 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
 import com.github.dakusui.pcond.core.fluent4.AbstractObjectChecker;
-import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 
@@ -13,7 +12,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
 import static java.util.Arrays.asList;
 
 public interface ListChecker<
@@ -69,7 +68,7 @@ public interface ListChecker<
 
     @Override
     protected ListChecker<List<E>, E> rebase() {
-      return new ListChecker.Impl<>(this::value, makeTrivial(Functions.identity()));
+      return new ListChecker.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

@@ -1,7 +1,6 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
 import com.github.dakusui.pcond.core.fluent4.AbstractObjectChecker;
-import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
@@ -10,7 +9,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
 
 public interface StringChecker<T> extends
     AbstractObjectChecker<
@@ -77,7 +76,7 @@ public interface StringChecker<T> extends
 
     @Override
     public StringChecker<String> rebase() {
-      return new StringChecker.Impl<>(this::value, makeTrivial(Functions.identity()));
+      return new StringChecker.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

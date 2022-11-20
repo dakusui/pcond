@@ -1,12 +1,10 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
 
-import com.github.dakusui.pcond.forms.Functions;
-
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
 
 public interface DoubleChecker<
     T
@@ -31,7 +29,7 @@ public interface DoubleChecker<
 
     @Override
     protected DoubleChecker<Double> rebase() {
-      return new DoubleChecker.Impl<>(this::value, makeTrivial(Functions.identity()));
+      return new DoubleChecker.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

@@ -1,12 +1,10 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
 
-import com.github.dakusui.pcond.forms.Functions;
-
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
 
 public interface FloatChecker<
     T> extends
@@ -27,7 +25,7 @@ public interface FloatChecker<
 
     @Override
     public FloatChecker<Float> rebase() {
-      return new FloatChecker.Impl<>(this::value, makeTrivial(Functions.identity()));
+      return new FloatChecker.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

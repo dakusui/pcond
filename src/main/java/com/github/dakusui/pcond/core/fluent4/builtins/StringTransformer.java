@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
@@ -67,7 +67,7 @@ public interface StringTransformer<T> extends
   }
 
   @SuppressWarnings("unchecked")
-  default StringTransformer<T> transformAndCheck(Function<StringTransformer<String>, Predicate<String>> clause) {
+  default StringTransformer<T> transform(Function<StringTransformer<String>, Predicate<String>> clause) {
     requireNonNull(clause);
     return this.addTransformAndCheckClause(tx -> clause.apply((StringTransformer<String>) tx));
   }
@@ -91,7 +91,7 @@ public interface StringTransformer<T> extends
 
     @Override
     public StringTransformer<String> rebase() {
-      return new StringTransformer.Impl<>(this::value, makeTrivial(Functions.identity()));
+      return new StringTransformer.Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

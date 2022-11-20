@@ -45,49 +45,49 @@ public interface AbstractObjectTransformer<
   }
 
   default <E> ObjectTransformer<T, E> toObject(Function<R, E> function) {
-    return this.transform(function, ObjectTransformer.Impl::new);
+    return this.transformValueWith(function, ObjectTransformer.Impl::new);
   }
 
 
   default BooleanTransformer<T> toBoolean(Function<? super R, Boolean> function) {
-    return this.transform(function, BooleanTransformer.Impl::new);
+    return this.transformValueWith(function, BooleanTransformer.Impl::new);
   }
 
   default IntegerTransformer<T> toInteger(Function<? super R, Integer> function) {
-    return this.transform(function, IntegerTransformer.Impl::new);
+    return this.transformValueWith(function, IntegerTransformer.Impl::new);
   }
 
   default LongTransformer<T> toLong(Function<? super R, Long> function) {
-    return this.transform(function, LongTransformer.Impl::new);
+    return this.transformValueWith(function, LongTransformer.Impl::new);
   }
 
   default ShortTransformer<T> toShort(Function<? super R, Short> function) {
-    return this.transform(function, ShortTransformer.Impl::new);
+    return this.transformValueWith(function, ShortTransformer.Impl::new);
   }
 
   default DoubleTransformer<T> toDouble(Function<? super R, Double> function) {
-    return this.transform(function, DoubleTransformer.Impl::new);
+    return this.transformValueWith(function, DoubleTransformer.Impl::new);
   }
 
   default FloatTransformer<T> toFloat(Function<? super R, Float> function) {
-    return this.transform(function, FloatTransformer.Impl::new);
+    return this.transformValueWith(function, FloatTransformer.Impl::new);
   }
 
   default StringTransformer<T> toString(Function<? super R, String> function) {
-    return this.transform(function, StringTransformer.Impl::new);
+    return this.transformValueWith(function, StringTransformer.Impl::new);
   }
 
 
   default <E> ListTransformer<T, E> toList(Function<? super R, List<E>> function) {
-    return this.transform(function, ListTransformer.Impl::new);
+    return this.transformValueWith(function, ListTransformer.Impl::new);
   }
 
   default <E> StreamTransformer<T, E> toStream(Function<? super R, Stream<E>> function) {
-    return this.transform(function, StreamTransformer.Impl::new);
+    return this.transformValueWith(function, StreamTransformer.Impl::new);
   }
 
   default <E extends Throwable> ThrowableTransformer<T, E> toThrowable(Function<? super R, E> function) {
-    return this.transform(function, ThrowableTransformer.Impl::new);
+    return this.transformValueWith(function, ThrowableTransformer.Impl::new);
 
   }
 

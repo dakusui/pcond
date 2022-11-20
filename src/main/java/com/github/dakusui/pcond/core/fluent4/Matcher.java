@@ -1,10 +1,12 @@
 package com.github.dakusui.pcond.core.fluent4;
 
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -106,6 +108,7 @@ public interface Matcher<
       return me();
     }
 
+    @SuppressWarnings("unchecked")
     private Predicate<T> buildPredicate() {
       Predicate<R> ret;
       requireState(this, v -> !v.childPredicates.isEmpty(), (v) -> "No child has been added yet.: <" + v + ">");
@@ -118,6 +121,8 @@ public interface Matcher<
                 .map(each -> each.apply(rebase()))
                 .collect(toList()));
       }
+      if (Objects.equals(transformFunction, Functions.identity()))
+        return (Predicate<T>) ret;
       return Predicates.transform(transformFunction).check(ret);
     }
   }

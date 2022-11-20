@@ -41,5 +41,5 @@ abstract class CustomTransformer<
 
   abstract protected TX create(T value);
 
-  abstract public TX transformAndCheck(Function<TX, Predicate<T>> clause);
+  abstract public TX transform(Function<TX, Predicate<T>> clause);
 }

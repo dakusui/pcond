@@ -1,8 +1,7 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
-import com.github.dakusui.pcond.core.fluent3.Matcher;
-
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
@@ -15,10 +14,14 @@ public interface LongTransformer<
         LongChecker<T>,
         T,
         Long> {
-  static <R extends Matcher<R, R, Long, Long>> LongTransformer<Long> create(Supplier<Long> value) {
+  static LongTransformer<Long> create(Supplier<Long> value) {
     return new Impl<>(value, trivialIdentityFunction());
   }
 
+  @SuppressWarnings("unchecked")
+  default LongTransformer<T> transform(Function<LongTransformer<Long>, Predicate<Long>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((LongTransformer<Long>) tx));
+  }
   class Impl<
       T
       > extends

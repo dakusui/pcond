@@ -13,7 +13,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -256,10 +255,6 @@ public enum InternalUtils {
     return (Function<T, R>) DUMMY_FUNCTION;
   }
 
-  public static boolean isDummyPredicate(Predicate<?> predicate) {
-    return predicate == DUMMY_PREDICATE;
-  }
-
   public static boolean isDummyFunction(Function<?, ?> function) {
     return function == DUMMY_FUNCTION;
   }
@@ -281,12 +276,6 @@ public enum InternalUtils {
 
   public static String newLine() {
     return format("%n");
-  }
-
-  public static <T> Supplier<T> noSuchElement() {
-    return () -> {
-      throw new NoSuchElementException();
-    };
   }
 
   /**
@@ -315,6 +304,6 @@ public enum InternalUtils {
   }
 
   public static <T> Function<T, T> trivialIdentityFunction() {
-    return makeTrivial(Functions.identity());
+    return Functions.identity();
   }
 }

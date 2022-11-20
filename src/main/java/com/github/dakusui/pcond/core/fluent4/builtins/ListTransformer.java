@@ -8,9 +8,9 @@ import com.github.dakusui.pcond.forms.Printables;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
 
 public interface ListTransformer<
@@ -24,6 +24,11 @@ public interface ListTransformer<
         List<E>> {
   static <E> ListTransformer<List<E>, E> create(Supplier<List<E>> value) {
     return new Impl<>(value, trivialIdentityFunction());
+  }
+
+  @SuppressWarnings("unchecked")
+  default ListTransformer<T, E> transform(Function<ListTransformer<T, E>, Predicate<List<E>>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((ListTransformer<T, E>) tx));
   }
 
   default ObjectTransformer<T, E> elementAt(int i) {
@@ -68,7 +73,7 @@ public interface ListTransformer<
 
     @Override
     protected Matcher<?, List<E>, List<E>> rebase() {
-      return new Impl<>(this::value, makeTrivial(Functions.identity()));
+      return new Impl<>(this::value, trivialIdentityFunction());
     }
   }
 }

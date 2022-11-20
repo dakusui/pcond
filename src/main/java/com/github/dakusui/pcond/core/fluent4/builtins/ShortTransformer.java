@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.fluent4.builtins;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
@@ -15,6 +16,11 @@ public interface ShortTransformer<
         Short> {
   static ShortTransformer<Short> create(Supplier<Short> value) {
     return new Impl<>(value, trivialIdentityFunction());
+  }
+
+  @SuppressWarnings("unchecked")
+  default ShortTransformer<T> transform(Function<ShortTransformer<Short>, Predicate<Short>> clause) {
+    return this.addTransformAndCheckClause(tx -> clause.apply((ShortTransformer<Short>) tx));
   }
 
   class Impl<
