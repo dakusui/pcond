@@ -146,8 +146,8 @@ public class ReportDetailTest extends TestBase {
 
   @Test(expected = IllegalValueException.class)
   public void givenString_whenFails_then() {
-    String expectedValue = "EXPECTED VALUE, Actual value, expected value.";
-    String actualValue = "ACTUAL VALUE, Expected value, actual value.";
+    String expectedValue = "EXPECTED VALUE, Expected value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, expected value.";
+    String actualValue = "ACTUAL VALUE, actual value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, actual value.";
 
     try {
       validate(actualValue, isEqualTo(expectedValue));
@@ -161,8 +161,8 @@ public class ReportDetailTest extends TestBase {
 
   @Test//(expected = ComparisonFailure.class)
   public void givenString_whenFails_then_2() {
-    String expectedValue = "EXPECTED VALUE, Actual value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, expected value.";
-    String actualValue = "ACTUAL VALUE, Expected value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, actual value.";
+    String expectedValue = "EXPECTED VALUE, Expected value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, expected value.";
+    String actualValue = "ACTUAL VALUE, actual value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, actual value.";
 
     try {
       assertThat(actualValue,

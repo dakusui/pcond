@@ -19,7 +19,7 @@ public interface StringTransformer<T> extends
         T,
         String> {
   static StringTransformer<String> create(Supplier<String> value) {
-    return new Impl<>(value, Functions.identity());
+    return new Impl<>(value, trivialIdentityFunction());
   }
 
   default StringTransformer<T> substring(int begin) {
