@@ -159,7 +159,7 @@ public class ReportDetailTest extends TestBase {
     }
   }
 
-  @Test//(expected = ComparisonFailure.class)
+  @Test(expected = ComparisonFailure.class)
   public void givenString_whenFails_then_2() {
     String expectedValue = "EXPECTED VALUE, Expected value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, expected value.";
     String actualValue = "ACTUAL VALUE, actual value, xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz,xyz, actual value.";
