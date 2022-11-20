@@ -55,7 +55,7 @@ public interface ObjectTransformer<
   }
 
   static <E> ObjectTransformer<E, E> create(Supplier<E> value) {
-    return new Impl<>(value, null);
+    return new Impl<>(value, trivialIdentityFunction());
   }
 
   class Impl<
