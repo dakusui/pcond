@@ -37,6 +37,11 @@ public class ReportParser {
     return Detail.parseDetails(copyOfRange(lines, summaryText().size(), lines.length));
   }
 
+  @Override
+  public String toString() {
+    return summary().toString();
+  }
+
   private static List<String> extractSummaryFrom(String[] lines) {
     List<String> ret = new ArrayList<>(lines.length);
     for (String each : lines) {
@@ -121,6 +126,10 @@ public class ReportParser {
       return asList(this.text);
     }
 
+    public String toString() {
+      return records().toString().replaceAll(" +", "");
+    }
+
     public static class Record {
       private final String line;
       private final String in;
@@ -156,6 +165,11 @@ public class ReportParser {
 
       String line() {
         return this.line;
+      }
+
+      @Override
+      public String toString() {
+        return String.format("in:%s; op:%s:out;%s", in(), op(), out());
       }
     }
   }

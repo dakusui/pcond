@@ -120,6 +120,37 @@ public class Fluent3Example {
           stringValue("Hello5")
               .transform(tx -> tx.length().then().greaterThan(10).done()));
     }
+
+    @Test(expected = ComparisonFailure.class)
+    public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength_2() {
+      Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
+      try {
+        assertAll(
+            new Fluent4Example.OnGoing.BookTransformer(book)
+                .transform(b -> b.title()
+                    .transform(ty -> ty.then().isNotNull().done())
+                    .transform(ty -> ty.length().then()
+                        .greaterThanOrEqualTo(10)
+                        .lessThan(40)
+                        .done()).done())
+                .transform(b -> b.abstractText()
+                    .transform(ty -> ty.then().isNotNull().done())
+                    .transform(ty -> ty.length().then()
+                        .greaterThanOrEqualTo(200)
+                        .lessThan(400)
+                        .done()).done()));
+      } catch (ComparisonFailure e) {
+        ReportParser reportParser = new ReportParser(e.getActual());
+        System.out.println("summary=" + reportParser.summary());
+        reportParser.details().forEach(
+            each -> {
+              System.out.println(each.subject());
+              System.out.println(each.body());
+            }
+        );
+        throw e;
+      }
+    }
   }
 
   @Ignore
@@ -199,36 +230,6 @@ public class Fluent3Example {
               .transform(b -> b.abstractText()
                   .transform(ty -> ty.then().isNotNull().toPredicate()).done()));
     }
-
-    @Test
-    public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength_2() {
-      Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
-      try {
-        assertAll(
-            new Fluent4Example.OnGoing.BookTransformer(book)
-                .transform(b -> b.title()
-                    .transform(ty -> ty.then().isNotNull().done())
-                    .transform(ty -> ty.length().then()
-                        .greaterThanOrEqualTo(10)
-                        .lessThan(40)
-                        .done()).done())
-                .transform(b -> b.abstractText()
-                    .transform(ty -> ty.then().isNotNull().done())
-                    .transform(ty -> ty.length().then()
-                        .greaterThanOrEqualTo(200)
-                        .lessThan(400)
-                        .done()).done()));
-      } catch (ComparisonFailure e) {
-        new ReportParser(e.getActual()).details().forEach(
-            each -> {
-              System.out.println(each.subject());
-              System.out.println(each.body());
-            }
-        );
-        throw e;
-      }
-    }
-
 
     @Test(expected = ComparisonFailure.class)
     public void test6() {
