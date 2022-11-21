@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
+import com.github.dakusui.pcond.core.ContextVariable;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Printables;
@@ -18,7 +19,7 @@ public class EvaluatorTest extends TestBase {
     Evaluator evaluator = new Evaluator.Impl();
     try {
       evaluator.evaluate(
-          "hello",
+          ContextVariable.forValue("hello"),
           (Evaluable.Conjunction<String>) and(isNotNull(), errorThrowingPredicate()));
     } catch (EvaluationFailure e) {
       assertFalse(evaluator.resultEntries().get(0).hasOutput());

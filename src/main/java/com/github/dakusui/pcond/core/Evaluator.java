@@ -29,7 +29,7 @@ public interface Evaluator {
    * @param <T>         The type of the `value`.
    * @see com.github.dakusui.pcond.core.Evaluable.Conjunction
    */
-  <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction);
+  <T> void evaluate(ContextVariable<? extends T> value, Evaluable.Conjunction<T> conjunction);
 
   /**
    * Evaluates `value` with a `disjunction` predicate ("or").
@@ -39,7 +39,7 @@ public interface Evaluator {
    * @param <T>         The type of the `value`.
    * @see com.github.dakusui.pcond.core.Evaluable.Disjunction
    */
-  <T> void evaluate(T value, Evaluable.Disjunction<T> disjunction);
+  <T> void evaluate(ContextVariable<T> value, Evaluable.Disjunction<T> disjunction);
 
   /**
    * Evaluates `value` with a `negation` predicate ("not").
@@ -49,7 +49,7 @@ public interface Evaluator {
    * @param <T>      The type of the `value`.
    * @see com.github.dakusui.pcond.core.Evaluable.Negation
    */
-  <T> void evaluate(T value, Evaluable.Negation<T> negation);
+  <T> void evaluate(ContextVariable<T> value, Evaluable.Negation<T> negation);
 
   /**
    * Evaluates `value` with a leaf predicate.
@@ -59,7 +59,7 @@ public interface Evaluator {
    * @param <T>      The type of the `value`.
    * @see com.github.dakusui.pcond.core.Evaluable.LeafPred
    */
-  <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred);
+  <T> void evaluate(ContextVariable<T> value, Evaluable.LeafPred<T> leafPred);
 
   /**
    * Evaluates `value` with a context predicate.
@@ -68,7 +68,7 @@ public interface Evaluator {
    * @param contextPred A predicate with which `value` is evaluated.
    * @see com.github.dakusui.pcond.core.Evaluable.ContextPred
    */
-  void evaluate(Context value, Evaluable.ContextPred contextPred);
+  void evaluate(ContextVariable<Context> value, Evaluable.ContextPred contextPred);
 
   /**
    * Evaluates `value` with a "transformatioin" predicate.
@@ -77,7 +77,7 @@ public interface Evaluator {
    * @param transformation A predicate with which `value` is evaluated.
    * @see com.github.dakusui.pcond.core.Evaluable.Transformation
    */
-  <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation);
+  <T, R> void evaluate(ContextVariable<T> value, Evaluable.Transformation<T, R> transformation);
 
   /**
    * Evaluates `value` with a "function" predicate.
@@ -86,7 +86,7 @@ public interface Evaluator {
    * @param func  A predicate with which `value` is evaluated.
    * @see com.github.dakusui.pcond.core.Evaluable.Func
    */
-  <T> void evaluate(T value, Evaluable.Func<T> func);
+  <T> void evaluate(ContextVariable<T> value, Evaluable.Func<T> func);
 
   /**
    * Evaluates `value` with a predicate for a stream.
@@ -95,7 +95,7 @@ public interface Evaluator {
    * @param streamPred A predicate with which `value` is evaluated.
    * @see com.github.dakusui.pcond.core.Evaluable.StreamPred
    */
-  <E> void evaluate(Stream<? extends E> value, Evaluable.StreamPred<E> streamPred);
+  <E> void evaluate(ContextVariable<Stream<E>> value, Evaluable.StreamPred<E> streamPred);
 
   /**
    * The last evaluated value by an `evaluate` method defined in this interface.
@@ -171,7 +171,7 @@ public interface Evaluator {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction) {
+    public <T> void evaluate(ContextVariable<? extends T> value, Evaluable.Conjunction<T> conjunction) {
       int i = 0;
       boolean finalValue = true;
       boolean shortcut = conjunction.shortcut();
@@ -192,7 +192,7 @@ public interface Evaluator {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public <T> void evaluate(T value, Evaluable.Disjunction<T> disjunction) {
+    public <T> void evaluate(ContextVariable<T> value, Evaluable.Disjunction<T> disjunction) {
       int i = 0;
       boolean finalValue = false;
       boolean shortcut = disjunction.shortcut();
@@ -212,7 +212,7 @@ public interface Evaluator {
     }
 
     @Override
-    public <T> void evaluate(T value, Evaluable.Negation<T> negation) {
+    public <T> void evaluate(ContextVariable<T> value, Evaluable.Negation<T> negation) {
       this.enter(Entry.Type.NOT, negation, "not", value);
       negation.target().accept(value, this);
       this.leave(!this.<Boolean>resultValue(), negation, false);
@@ -243,24 +243,26 @@ public interface Evaluator {
     }
 
     @Override
-    public <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred) {
+    public <T> void evaluate(ContextVariable<T> value, Evaluable.LeafPred<T> leafPred) {
       this.enter(LEAF, leafPred, String.format("%s", leafPred), value);
-      boolean result = leafPred.predicate().test(value);
+      // TODO: Issue-#59: Need exception handling
+      boolean result = leafPred.predicate().test(value.value());
       this.leave(result, leafPred, this.currentlyExpectedBooleanValue != result);
     }
 
     @Override
-    public void evaluate(Context context, Evaluable.ContextPred contextPred) {
+    public void evaluate(ContextVariable<Context> context, Evaluable.ContextPred contextPred) {
       this.enter(LEAF, contextPred, String.format("%s", contextPred), context);
-      contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
+      // TODO: Issue-#59: Need exception handling
+      contextPred.enclosed().accept(context.value().valueAt(contextPred.argIndex()), this);
       this.leave(this.resultValue(), contextPred, false);
     }
 
     @SuppressWarnings({ "unchecked" })
     @Override
-    public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
+    public <T, R> void evaluate(ContextVariable<T> value, Evaluable.Transformation<T, R> transformation) {
       if (isDummyFunction((Function<?, ?>) transformation.mapper())) {
-        transformation.checker().accept((R) value, this);
+        transformation.checker().accept(ContextVariable.forValue((R) value), this);
         return;
       }
       this.enter(TRANSFORM,
@@ -275,21 +277,21 @@ public interface Evaluator {
               .orElse("check"),
           this.resultValue());
 
-      transformation.checker().accept((R) this.currentResult, this);
+      transformation.checker().accept(ContextVariable.forValue((R) this.currentResult), this);
       this.leave(this.resultValue(), transformation.mapper(), false);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> void evaluate(T value, Evaluable.Func<T> func) {
+    public <T> void evaluate(ContextVariable<T> value, Evaluable.Func<T> func) {
       this.enter(FUNCTION, func, String.format("%s", func.head()), value);
-      Object resultValue = func.head().apply(value);
+      Object resultValue = func.head().apply(value.value());
       this.leave(resultValue, func, false);
-      func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(resultValue, this));
+      func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(ContextVariable.forValue(resultValue), this));
     }
 
     @Override
-    public <E> void evaluate(Stream<? extends E> value, Evaluable.StreamPred<E> streamPred) {
+    public <E> void evaluate(ContextVariable<Stream<E>> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
       this.enter(LEAF, streamPred, String.format("%s", streamPred), value);
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
@@ -297,7 +299,8 @@ public interface Evaluator {
       // Although NULL_VALUE is an ordinary Object, not a value of E, this works
       // because either way we will just return a boolean and during the execution,
       // type information is erased.
-      this.leave(value
+      // TODO: Issue-#59: Need exception handling
+      this.leave(value.value()
           .filter(valueChecker(streamPred))
           .map(v -> v != null ? v : NULL_VALUE)
           .findFirst()
@@ -313,7 +316,7 @@ public interface Evaluator {
         boolean ret = false;
         Object throwable = "<<OUTPUT MISSING>>";
         try {
-          streamPred.cut().accept(e, evaluator);
+          streamPred.cut().accept(ContextVariable.forValue(e), evaluator);
           succeeded = true;
         } catch (Error error) {
           throw error;
