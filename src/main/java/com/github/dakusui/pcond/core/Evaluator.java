@@ -177,7 +177,7 @@ public interface Evaluator {
       boolean shortcut = conjunction.shortcut();
       for (Evaluable<? super T> each : conjunction.children()) {
         if (i == 0)
-          this.enter(AND, conjunction, conjunction.shortcut() ? "and" : "allOf", value);
+          this.enter(AND, conjunction, conjunction.shortcut() ? "and" : "allOf", value.value());
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (!cur)
@@ -198,7 +198,7 @@ public interface Evaluator {
       boolean shortcut = disjunction.shortcut();
       for (Evaluable<? super T> each : disjunction.children()) {
         if (i == 0)
-          this.enter(OR, disjunction, disjunction.shortcut() ? "or" : "anyOf", value);
+          this.enter(OR, disjunction, disjunction.shortcut() ? "or" : "anyOf", value.value());
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (cur)
@@ -213,7 +213,7 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(ContextVariable<T> value, Evaluable.Negation<T> negation) {
-      this.enter(Entry.Type.NOT, negation, "not", value);
+      this.enter(Entry.Type.NOT, negation, "not", value.value());
       negation.target().accept(value, this);
       this.leave(!this.<Boolean>resultValue(), negation, false);
       if (Objects.equals(this.resultValue(), this.currentlyExpectedBooleanValue))
@@ -244,7 +244,7 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(ContextVariable<T> value, Evaluable.LeafPred<T> leafPred) {
-      this.enter(LEAF, leafPred, String.format("%s", leafPred), value);
+      this.enter(LEAF, leafPred, String.format("%s", leafPred), value.value());
       // TODO: Issue-#59: Need exception handling
       boolean result = leafPred.predicate().test(value.value());
       this.leave(result, leafPred, this.currentlyExpectedBooleanValue != result);
@@ -252,9 +252,9 @@ public interface Evaluator {
 
     @Override
     public void evaluate(ContextVariable<Context> context, Evaluable.ContextPred contextPred) {
-      this.enter(LEAF, contextPred, String.format("%s", contextPred), context);
+      this.enter(LEAF, contextPred, String.format("%s", contextPred), context.value());
       // TODO: Issue-#59: Need exception handling
-      contextPred.enclosed().accept(context.value().valueAt(contextPred.argIndex()), this);
+      contextPred.enclosed().accept(ContextVariable.forValue(context.value().valueAt(contextPred.argIndex())), this);
       this.leave(this.resultValue(), contextPred, false);
     }
 
@@ -268,7 +268,7 @@ public interface Evaluator {
       this.enter(TRANSFORM,
           transformation.mapper(),
           transformation.mapperName()
-              .orElse("transform"), value);
+              .orElse("transform"), value.value());
       transformation.mapper().accept(value, this);
       this.leave(this.resultValue(), transformation.checker(), false);
       this.enter(CHECK,
@@ -284,7 +284,7 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T> void evaluate(ContextVariable<T> value, Evaluable.Func<T> func) {
-      this.enter(FUNCTION, func, String.format("%s", func.head()), value);
+      this.enter(FUNCTION, func, String.format("%s", func.head()), value.value());
       Object resultValue = func.head().apply(value.value());
       this.leave(resultValue, func, false);
       func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(ContextVariable.forValue(resultValue), this));
@@ -293,7 +293,7 @@ public interface Evaluator {
     @Override
     public <E> void evaluate(ContextVariable<Stream<E>> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
-      this.enter(LEAF, streamPred, String.format("%s", streamPred), value);
+      this.enter(LEAF, streamPred, String.format("%s", streamPred), value.value());
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
       // on 'findFirst()'.
       // Although NULL_VALUE is an ordinary Object, not a value of E, this works

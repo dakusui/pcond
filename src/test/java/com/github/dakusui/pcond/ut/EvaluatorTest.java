@@ -30,7 +30,7 @@ public class EvaluatorTest extends TestBase {
   public void testDisjShortcut_withTrue() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(isNull(), alwaysTrue());
-    evaluable.accept(null, evaluator);
+    evaluable.accept(ContextVariable.forValue(null), evaluator);
     assertTrue(evaluator.resultValue());
   }
 
@@ -38,7 +38,7 @@ public class EvaluatorTest extends TestBase {
   public void testDisjShortcut_withFalse() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(isNull(), alwaysTrue().negate());
-    evaluable.accept(null, evaluator);
+    evaluable.accept(ContextVariable.forValue(null), evaluator);
     assertTrue(evaluator.resultValue());
   }
 
@@ -46,7 +46,7 @@ public class EvaluatorTest extends TestBase {
   public void testDisjNonShortcut() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(alwaysTrue().negate(), isNull());
-    evaluable.accept(null, evaluator);
+    evaluable.accept(ContextVariable.forValue(null), evaluator);
     assertTrue(evaluator.resultValue());
   }
 
@@ -54,7 +54,7 @@ public class EvaluatorTest extends TestBase {
   public void testConjShortcut_withTrue() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(isNotNull(), alwaysTrue());
-    evaluable.accept(null, evaluator);
+    evaluable.accept(ContextVariable.forValue(null), evaluator);
     assertFalse(evaluator.resultValue());
   }
 
@@ -62,7 +62,7 @@ public class EvaluatorTest extends TestBase {
   public void testConjShortcut_withFalse() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(isNotNull(), alwaysTrue().negate());
-    evaluable.accept(null, evaluator);
+    evaluable.accept(ContextVariable.forValue(null), evaluator);
     assertFalse(evaluator.resultValue());
   }
 
@@ -70,7 +70,7 @@ public class EvaluatorTest extends TestBase {
   public void testConjNonShortcut() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(alwaysTrue(), isNotNull());
-    evaluable.accept(null, evaluator);
+    evaluable.accept(ContextVariable.forValue(null), evaluator);
     assertFalse(evaluator.resultValue());
   }
 
