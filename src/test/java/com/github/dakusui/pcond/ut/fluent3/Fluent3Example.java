@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut.fluent3;
 
 import com.github.dakusui.pcond.ut.fluent4.Fluent4Example;
+import com.github.dakusui.shared.ReportParser;
 import org.junit.ComparisonFailure;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -202,20 +203,30 @@ public class Fluent3Example {
     @Test
     public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength_2() {
       Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
-      assertAll(
-          new Fluent4Example.OnGoing.BookTransformer(book)
-              .transform(b -> b.title()
-                  .transform(ty -> ty.then().isNotNull().done())
-                  .transform(ty -> ty.length().then()
-                      .greaterThanOrEqualTo(10)
-                      .lessThan(40)
-                      .done()).done())
-              .transform(b -> b.abstractText()
-                  .transform(ty -> ty.then().isNotNull().done())
-                  .transform(ty -> ty.length().then()
-                      .greaterThanOrEqualTo(200)
-                      .lessThan(400)
-                      .done()).done()));
+      try {
+        assertAll(
+            new Fluent4Example.OnGoing.BookTransformer(book)
+                .transform(b -> b.title()
+                    .transform(ty -> ty.then().isNotNull().done())
+                    .transform(ty -> ty.length().then()
+                        .greaterThanOrEqualTo(10)
+                        .lessThan(40)
+                        .done()).done())
+                .transform(b -> b.abstractText()
+                    .transform(ty -> ty.then().isNotNull().done())
+                    .transform(ty -> ty.length().then()
+                        .greaterThanOrEqualTo(200)
+                        .lessThan(400)
+                        .done()).done()));
+      } catch (ComparisonFailure e) {
+        new ReportParser(e.getActual()).details().forEach(
+            each -> {
+              System.out.println(each.subject());
+              System.out.println(each.body());
+            }
+        );
+        throw e;
+      }
     }
 
 
