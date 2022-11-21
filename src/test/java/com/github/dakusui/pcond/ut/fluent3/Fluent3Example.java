@@ -123,31 +123,28 @@ public class Fluent3Example {
 
   @Ignore
   public static class OnGoing {
-    /*
-    @Test(expected = StackOverflowError.class)
+    @Test(expected = ComparisonFailure.class)
     public void test8() {
       assertAll(
-          statementForString("Hello5")
+          stringValue("Hello5")
               .then()
-              .appendChild(v -> v.isNull().$())
-              .appendChild(v -> v.isNotNull().$())
-              .$());
+              .check(v -> v.isNull().done())
+              .check(v -> v.isNotNull().done()));
     }
-    @Test(expected = StackOverflowError.class)
+
+    @Test(expected = ComparisonFailure.class)
     public void firstExample() {
       assertAll(
-          statementForString("Hello").allOf()
-              .appendChild(tx -> tx.length()
+          stringValue("Hello").allOf()
+              .transform(tx -> tx.length()
                   .then()
                   .allOf()
                   .greaterThan(10)
                   .lessThan(100)
-                  .root().$())
-              .$());
+                  .done()));
     }
-*/
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test7_C() {
       assertAll(
           stringValue("Hello5")
@@ -172,7 +169,7 @@ public class Fluent3Example {
                   .done()));
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void givenBookTitleAndAbstract_whenCheckThem_thenTheyAreNotNullAndAppropriateLength() {
       String bookTitle = "De Bello Gallico";
       String bookAbstract = "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.";
@@ -202,26 +199,25 @@ public class Fluent3Example {
                   .transform(ty -> ty.then().isNotNull().toPredicate()).done()));
     }
 
-    /*
     @Test
-    public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength() {
-      Book book = new Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
+    public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength_2() {
+      Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
       assertAll(
-          new BookTransformer(book)
-              .check(b -> b.title()
-                  .check(ty -> ty.then().isNotNull().done())
-                  .check(ty -> ty.length().then()
+          new Fluent4Example.OnGoing.BookTransformer(book)
+              .transform(b -> b.title()
+                  .transform(ty -> ty.then().isNotNull().done())
+                  .transform(ty -> ty.length().then()
                       .greaterThanOrEqualTo(10)
                       .lessThan(40)
                       .done()).done())
-              .check(b -> b.abstractText()
-                  .check(ty -> ty.then().isNotNull().done())
-                  .check(ty -> ty.length().then()
+              .transform(b -> b.abstractText()
+                  .transform(ty -> ty.then().isNotNull().done())
+                  .transform(ty -> ty.length().then()
                       .greaterThanOrEqualTo(200)
                       .lessThan(400)
-                      .done()));
+                      .done()).done()));
     }
-     */
+
 
     @Test(expected = ComparisonFailure.class)
     public void test6() {
@@ -240,7 +236,7 @@ public class Fluent3Example {
     }
 
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void thirdExample_a() {
       assertAll(
           stringValue("Hello")
@@ -251,7 +247,7 @@ public class Fluent3Example {
               .isNull());
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test7() {
       assertAll(
           stringValue("Hello5")
@@ -259,7 +255,7 @@ public class Fluent3Example {
               .transform(tx -> tx.then().isNull().done()));
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void makeTrivialTest() {
       assertThat("hello", transform(makeTrivial(identity())).check(transform(makeTrivial(identity())).check(isEqualTo("HELLO"))));
     }
