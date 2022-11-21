@@ -100,7 +100,13 @@ public interface ReportComposer {
               .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
                   each,
                   () -> (each.hasOutput() ?
-                      formatObject(each.output() instanceof Boolean ? each.expectedBooleanValue() : each.output()) :
+                      formatObject(
+                          // Issue-#59: This is not a good idea to check if the output is an instance of Throwable.
+                          //   Because for a function that returns a Throwable, this logic will not print an expected value properly.
+                          //   (For such a function, printing the throwable itself is a desired behavior.)
+                          (each.output() instanceof Boolean || each.output() instanceof Throwable) ?
+                              each.expectedBooleanValue() :
+                              each.output()) :
                       formatObject(t))))
               .peek((FormattedEntry each) -> {
                 Optional<Object> formSnapshot = each.mismatchExplanation();
@@ -155,7 +161,9 @@ public interface ReportComposer {
                   formattedEntry.input()
                       .map(v -> "->")
                       .orElse("  ") + formatObject(InternalUtils.toNonStringObject(formattedEntry.indent() + formattedEntry.formName()), formNameColumnLength - 2),
-                  formattedEntry.output().map(v -> "->" + v).orElse(""));
+                  formattedEntry
+                      .output()
+                      .map(v -> "->" + v).orElse(""));
     }
 
     private static String evaluatorEntriesToString(List<FormattedEntry> formattedEntries, Function<int[], Function<FormattedEntry, String>> formatterFactory) {

@@ -268,11 +268,12 @@ public interface Evaluator {
       this.enter(LEAF, leafPred, format("%s", leafPred), value.value());
       // TODO: Issue-#59: Need exception handling
       try {
+        System.out.println("LEAF:<" + value + ">");
         boolean result = leafPred.predicate().test(value.value());
         this.leave(result, leafPred, this.currentlyExpectedBooleanValue != result);
       } catch (Error e) {
         throw e;
-      } catch (Exception e) {
+      } catch (Throwable e) {
         this.leave(e, leafPred, true);
       }
     }
@@ -597,12 +598,16 @@ public interface Evaluator {
 
     Object explainActual(Object actualValue);
 
-    static Object explainExpectation(Evaluable<?> evaluable) {
-      return explainValue(((Explainable) evaluable).explainExpectation());
+    static Object explainExpectation(Object evaluable) {
+      if (evaluable instanceof Explainable)
+        return explainValue(((Explainable) evaluable).explainExpectation());
+      return null;
     }
 
-    static Object explainActual(Evaluable<?> value, Object actualValue) {
-      return explainValue(((Explainable) value).explainActual(actualValue));
+    static Object explainActual(Object evaluable, Object actualValue) {
+      if (evaluable instanceof Explainable)
+        return explainValue(((Explainable) evaluable).explainActual(actualValue));
+      return null;
     }
   }
 }

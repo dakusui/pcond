@@ -55,4 +55,8 @@ public class ContextVariable<V> {
   public static <V> ContextVariable<V> forException(Throwable exception) {
     return new ContextVariable<>(Type.VALUE, null, exception);
   }
+
+  public String toString() {
+    return String.format("type:%s, value:%s, exception:%s", type, value, exception);
+  }
 }
