@@ -402,7 +402,7 @@ public interface Validator {
       } catch (Error error) {
         throw error;
       } catch (Throwable t) {
-        String message = format("An exception(%s) was thrown during evaluation of value: %s: %s", t, value, cond);
+        String message = format("An exception (%s) was thrown during evaluation of value: %s: %s", t, value.value(), cond);
         throw executionFailure(configuration().reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
       }
       if (evaluator.resultValue())

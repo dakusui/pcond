@@ -229,8 +229,8 @@ public enum PrintablePredicateFactory {
     }
 
     @Override
-    public Object explainActualInput(Object actualInputValue) {
-      return actualInputValue;
+    public Object explainActual(Object actualValue) {
+      return actualValue;
     }
 
     @Override

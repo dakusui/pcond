@@ -30,7 +30,7 @@ public abstract class ExplainablePredicate<V> extends PrintablePredicate<V>
   }
 
   @Override
-  public Object explainActualInput(Object actualInputValue) {
+  public Object explainActual(Object actualValue) {
     return actualInput();
   }
 

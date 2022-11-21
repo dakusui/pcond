@@ -11,10 +11,11 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
-import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActualInputIfPossibleOrNull;
-import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainExpectationIfPossibleOrNull;
+import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActual;
+import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainExpectation;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
+import static java.lang.String.format;
 import static java.util.Collections.unmodifiableList;
 
 /**
@@ -157,12 +158,32 @@ public interface Evaluator {
           current.positionInEntries,
           current.result(
               toSnapshotIfPossible(result),
-              unexpected ? explainExpectationIfPossibleOrNull(evaluable) : null,
-              unexpected ? explainActualInputIfPossibleOrNull(evaluable, current.input()) : null));
+              unexpected ? explainExpectation(evaluable) : null,
+              unexpected ? explainActual(evaluable, composeActualValue(current.input(), result)) : null));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult = result;
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
+    }
+
+    private static Object composeActualValue(Object input, Object output) {
+      if (output instanceof Throwable)
+        return composeActualValueFromInputAndThrowable(input, (Throwable) output);
+      return input;
+    }
+
+    private static String composeActualValueFromInputAndThrowable(Object input, Throwable throwable) {
+      StringBuilder b = new StringBuilder();
+      b.append("Input: '").append(input).append("'").append(format("%n"));
+      b.append("Input Type: ").append(input == null ? "(null)" : input.getClass().getName()).append(format("%n"));
+      b.append("Thrown Exception: '").append(throwable.getClass().getName()).append("'").append(format("%n"));
+      b.append("Exception Message: ").append(throwable.getMessage()).append(format("%n"));
+      for (StackTraceElement each : throwable.getStackTrace()) {
+        b.append("\t");
+        b.append(each);
+        b.append(format("%n"));
+      }
+      return b.toString();
     }
 
     void flipCurrentlyExpectedBooleanValue() {
@@ -179,7 +200,7 @@ public interface Evaluator {
         if (i == 0)
           this.enter(AND, conjunction, conjunction.shortcut() ? "and" : "allOf", value.value());
         each.accept(value, this);
-        boolean cur = this.<Boolean>resultValue();
+        boolean cur = this.resultValueAsBooleanIfBooleanOtherwise(!this.currentlyExpectedBooleanValue);
         if (!cur)
           finalValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !finalValue) || i == conjunction.children().size() - 1) {
@@ -234,7 +255,7 @@ public interface Evaluator {
           negate.level(),
           negate.input(),
           negate.output(),
-          String.format("not(%s)", predicate.formName()),
+          format("not(%s)", predicate.formName()),
           negate.expectedBooleanValue(),
           negate.expectationDetail(),
           negate.actualInputDetail(),
@@ -244,15 +265,21 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(ContextVariable<T> value, Evaluable.LeafPred<T> leafPred) {
-      this.enter(LEAF, leafPred, String.format("%s", leafPred), value.value());
+      this.enter(LEAF, leafPred, format("%s", leafPred), value.value());
       // TODO: Issue-#59: Need exception handling
-      boolean result = leafPred.predicate().test(value.value());
-      this.leave(result, leafPred, this.currentlyExpectedBooleanValue != result);
+      try {
+        boolean result = leafPred.predicate().test(value.value());
+        this.leave(result, leafPred, this.currentlyExpectedBooleanValue != result);
+      } catch (Error e) {
+        throw e;
+      } catch (Exception e) {
+        this.leave(e, leafPred, true);
+      }
     }
 
     @Override
     public void evaluate(ContextVariable<Context> context, Evaluable.ContextPred contextPred) {
-      this.enter(LEAF, contextPred, String.format("%s", contextPred), context.value());
+      this.enter(LEAF, contextPred, format("%s", contextPred), context.value());
       // TODO: Issue-#59: Need exception handling
       contextPred.enclosed().accept(ContextVariable.forValue(context.value().valueAt(contextPred.argIndex())), this);
       this.leave(this.resultValue(), contextPred, false);
@@ -284,16 +311,23 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T> void evaluate(ContextVariable<T> value, Evaluable.Func<T> func) {
-      this.enter(FUNCTION, func, String.format("%s", func.head()), value.value());
-      Object resultValue = func.head().apply(value.value());
-      this.leave(resultValue, func, false);
-      func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(ContextVariable.forValue(resultValue), this));
+      this.enter(FUNCTION, func, format("%s", func.head()), value.value());
+      try {
+        Object resultValue = func.head().apply(value.value());
+        this.leave(resultValue, func, false);
+        func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(ContextVariable.forValue(resultValue), this));
+      } catch (Error e) {
+        throw e;
+      } catch (Throwable e) {
+        this.leave(e, func, true);
+        func.tail().ifPresent(tailSide -> tailSide.accept(ContextVariable.forException(e), this));
+      }
     }
 
     @Override
     public <E> void evaluate(ContextVariable<Stream<E>> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
-      this.enter(LEAF, streamPred, String.format("%s", streamPred), value.value());
+      this.enter(LEAF, streamPred, format("%s", streamPred), value.value());
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
       // on 'findFirst()'.
       // Although NULL_VALUE is an ordinary Object, not a value of E, this works
@@ -337,6 +371,10 @@ public interface Evaluator {
     @Override
     public <T> T resultValue() {
       return (T) currentResult;
+    }
+
+    public boolean resultValueAsBooleanIfBooleanOtherwise(boolean otherwiseValue) {
+      return resultValue() instanceof Boolean ? resultValue() : otherwiseValue;
     }
 
     @Override
@@ -557,26 +595,14 @@ public interface Evaluator {
   interface Explainable {
     Object explainExpectation();
 
-    Object explainActualInput(Object actualInputValue);
+    Object explainActual(Object actualValue);
 
-    static Object explainExpectationIfPossibleOrNull(Object value) {
-      if (value instanceof Explainable)
-        return explainExpectation((Explainable) value);
-      return null;
+    static Object explainExpectation(Evaluable<?> evaluable) {
+      return explainValue(((Explainable) evaluable).explainExpectation());
     }
 
-    static String explainExpectation(Explainable value) {
-      return explainValue(value.explainExpectation());
-    }
-
-    static Object explainActualInputIfPossibleOrNull(Object value, Object actualInputValue) {
-      if (value instanceof Explainable)
-        return explainActualValue((Explainable) value, actualInputValue);
-      return null;
-    }
-
-    static String explainActualValue(Explainable value, Object actualInputValue) {
-      return explainValue(value.explainActualInput(actualInputValue));
+    static Object explainActual(Evaluable<?> value, Object actualValue) {
+      return explainValue(((Explainable) value).explainActual(actualValue));
     }
   }
 }
