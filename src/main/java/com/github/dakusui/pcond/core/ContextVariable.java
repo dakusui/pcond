@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.core;
 
+import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
+
 public class ContextVariable<V> {
   enum Type {
     VALUE {
@@ -40,12 +42,22 @@ public class ContextVariable<V> {
     return this.type;
   }
 
-  public V value() {
+  public V returnedValue() {
     return this.type.value(this);
   }
 
-  public Throwable exception() {
+  public Throwable thrownException() {
     return this.type.exception(this);
+  }
+
+  public Object value() {
+    if (this.type() == Type.VALUE)
+      return this.returnedValue();
+    return this.thrownException();
+  }
+
+  public Object toSnapshot() {
+    return toSnapshotIfPossible(this.value());
   }
 
   public static <V> ContextVariable<V> forValue(V value) {

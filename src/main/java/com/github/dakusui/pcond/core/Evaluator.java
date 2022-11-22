@@ -136,6 +136,21 @@ public interface Evaluator {
     public Impl() {
     }
 
+    void enter(EvaluableDesc evaluableDesc, ContextVariable<?> input) {
+      Entry.OnGoing newEntry = new Entry.OnGoing(
+          evaluableDesc.type(),
+          (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
+          entries.size(),
+          evaluableDesc.name,
+          input.toSnapshot(),
+          this.currentlyExpectedBooleanValue,
+          evaluableDesc.isTrivial());
+      onGoingEntries.add(newEntry);
+      entries.add(newEntry);
+      if (evaluableDesc.requestExpectationFlip())
+        this.flipCurrentlyExpectedBooleanValue();
+    }
+
     void enter(Entry.Type type, Evaluable<?> evaluable, String name, Object input) {
       Entry.OnGoing newEntry = new Entry.OnGoing(
           type,
@@ -198,7 +213,7 @@ public interface Evaluator {
       boolean shortcut = conjunction.shortcut();
       for (Evaluable<? super T> each : conjunction.children()) {
         if (i == 0)
-          this.enter(AND, conjunction, conjunction.shortcut() ? "and" : "allOf", value.value());
+          this.enter(AND, conjunction, conjunction.shortcut() ? "and" : "allOf", value.returnedValue());
         each.accept(value, this);
         boolean cur = this.resultValueAsBooleanIfBooleanOtherwise(!this.currentlyExpectedBooleanValue);
         if (!cur)
@@ -219,7 +234,7 @@ public interface Evaluator {
       boolean shortcut = disjunction.shortcut();
       for (Evaluable<? super T> each : disjunction.children()) {
         if (i == 0)
-          this.enter(OR, disjunction, disjunction.shortcut() ? "or" : "anyOf", value.value());
+          this.enter(OR, disjunction, disjunction.shortcut() ? "or" : "anyOf", value.returnedValue());
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (cur)
@@ -234,7 +249,7 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(ContextVariable<T> value, Evaluable.Negation<T> negation) {
-      this.enter(Entry.Type.NOT, negation, "not", value.value());
+      this.enter(Entry.Type.NOT, negation, "not", value.returnedValue());
       negation.target().accept(value, this);
       this.leave(!this.<Boolean>resultValue(), negation, false);
       if (Objects.equals(this.resultValue(), this.currentlyExpectedBooleanValue))
@@ -265,11 +280,11 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(ContextVariable<T> value, Evaluable.LeafPred<T> leafPred) {
-      this.enter(LEAF, leafPred, format("%s", leafPred), value.value());
+      this.enter(EvaluableDesc.fromEvaluable(leafPred), value);
       // TODO: Issue-#59: Need exception handling
       try {
         System.out.println("LEAF:<" + value + ">");
-        boolean result = leafPred.predicate().test(value.value());
+        boolean result = leafPred.predicate().test(value.returnedValue());
         this.leave(result, leafPred, this.currentlyExpectedBooleanValue != result);
       } catch (Error e) {
         throw e;
@@ -279,10 +294,10 @@ public interface Evaluator {
     }
 
     @Override
-    public void evaluate(ContextVariable<Context> context, Evaluable.ContextPred contextPred) {
-      this.enter(LEAF, contextPred, format("%s", contextPred), context.value());
+    public void evaluate(ContextVariable<Context> value, Evaluable.ContextPred contextPred) {
+      this.enter(EvaluableDesc.fromEvaluable(contextPred), value);
       // TODO: Issue-#59: Need exception handling
-      contextPred.enclosed().accept(ContextVariable.forValue(context.value().valueAt(contextPred.argIndex())), this);
+      contextPred.enclosed().accept(ContextVariable.forValue(value.returnedValue().valueAt(contextPred.argIndex())), this);
       this.leave(this.resultValue(), contextPred, false);
     }
 
@@ -296,7 +311,7 @@ public interface Evaluator {
       this.enter(TRANSFORM,
           transformation.mapper(),
           transformation.mapperName()
-              .orElse("transform"), value.value());
+              .orElse("transform"), value.returnedValue());
       transformation.mapper().accept(value, this);
       this.leave(this.resultValue(), transformation.checker(), false);
       this.enter(CHECK,
@@ -312,9 +327,9 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T> void evaluate(ContextVariable<T> value, Evaluable.Func<T> func) {
-      this.enter(FUNCTION, func, format("%s", func.head()), value.value());
+      this.enter(FUNCTION, func, format("%s", func.head()), value.returnedValue());
       try {
-        Object resultValue = func.head().apply(value.value());
+        Object resultValue = func.head().apply(value.returnedValue());
         this.leave(resultValue, func, false);
         func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(ContextVariable.forValue(resultValue), this));
       } catch (Error e) {
@@ -328,14 +343,14 @@ public interface Evaluator {
     @Override
     public <E> void evaluate(ContextVariable<Stream<E>> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
-      this.enter(LEAF, streamPred, format("%s", streamPred), value.value());
+      this.enter(LEAF, streamPred, format("%s", streamPred), value.returnedValue());
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
       // on 'findFirst()'.
       // Although NULL_VALUE is an ordinary Object, not a value of E, this works
       // because either way we will just return a boolean and during the execution,
       // type information is erased.
       // TODO: Issue-#59: Need exception handling
-      this.leave(value.value()
+      this.leave(value.returnedValue()
           .filter(valueChecker(streamPred))
           .map(v -> v != null ? v : NULL_VALUE)
           .findFirst()
@@ -408,16 +423,80 @@ public interface Evaluator {
     }
   }
 
+  class EvaluableDesc {
+    final Entry.Type type;
+    final String     name;
+    final boolean    requestsExpectationFlip;
+    final boolean    trivial;
+
+    public EvaluableDesc(Entry.Type type, String name, boolean requestsExpectationFlip, boolean trivial) {
+      this.type = type;
+      this.name = name;
+      this.requestsExpectationFlip = requestsExpectationFlip;
+      this.trivial = trivial;
+    }
+
+    public Entry.Type type() {
+      return this.type;
+    }
+
+    public boolean isTrivial() {
+      return this.trivial;
+    }
+
+    public boolean requestExpectationFlip() {
+      return this.requestsExpectationFlip;
+    }
+
+    static <T> EvaluableDesc fromEvaluable(Evaluable.LeafPred<T> leafEvaluable) {
+      return new EvaluableDesc(
+          LEAF,
+          String.format("%s", leafEvaluable),
+          leafEvaluable.requestExpectationFlip(),
+          leafEvaluable.isTrivial()
+      );
+    }
+
+    static <T> EvaluableDesc fromEvaluable(Evaluable.ContextPred contextEvaluable) {
+      return new EvaluableDesc(
+          LEAF,
+          String.format("%s", contextEvaluable),
+          contextEvaluable.requestExpectationFlip(),
+          contextEvaluable.isTrivial()
+      );
+    }
+  }
+
   /**
-   * A class to hold an entry of an execution history of the {@link Evaluator}.
+   * A class to hold an entry of execution history of the {@link Evaluator}.
+   * When an evaluator enters into one {@link Evaluable} (actually a predicate or a function),
+   * an {@link OnGoing} entry is created and held by the evaluator as a current
+   * one.
+   * Since one evaluate can have its children and only one child can be evaluated at once,
+   * on-going entries are held as a list (stack).
    */
   abstract class Entry {
-    private final Type    type;
-    private final int     level;
-    private final Object  input;
-    private final String  name;
+    private final Type   type;
+    private final int    level;
+    /**
+     * A field to store an input value to an {@code Evaluable}.
+     * This may be
+     */
+    private final Object input;
+
+    /**
+     * A name of a form (evaluable; function, predicate)
+     */
+    private final String name;
+
+    /**
+     * A name of an evaluable.
+     */
     private final boolean expectedBooleanValue;
 
+    /**
+     * A flag to let the framework know this entry should be printed in a less outstanding form.
+     */
     final boolean trivial;
 
     Entry(Type type, int level, Object input, String name, boolean expectedBooleanValue, boolean trivial) {
@@ -475,6 +554,7 @@ public interface Evaluator {
       NOT,
       LEAF,
       FUNCTION,
+      ;
     }
 
     static class Finalized extends Entry {

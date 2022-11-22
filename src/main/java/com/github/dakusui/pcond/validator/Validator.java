@@ -402,17 +402,17 @@ public interface Validator {
       } catch (Error error) {
         throw error;
       } catch (Throwable t) {
-        String message = format("An exception (%s) was thrown during evaluation of value: %s: %s", t, value.value(), cond);
+        String message = format("An exception (%s) was thrown during evaluation of value: %s: %s", t, value.returnedValue(), cond);
         throw executionFailure(configuration().reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
       }
       if (evaluator.resultValue())
-        return value.value();
+        return value.returnedValue();
       List<Evaluator.Entry> entries = evaluator.resultEntries();
-      throw exceptionComposerFunction.create(configuration().reportComposer().composeExplanation(messageComposerFunction.apply(value.value(), cond), entries, null));
+      throw exceptionComposerFunction.create(configuration().reportComposer().composeExplanation(messageComposerFunction.apply(value.returnedValue(), cond), entries, null));
     } else {
-      if (!cond.test(value.value()))
-        throw exceptionComposerFunction.create(configuration().reportComposer().composeExplanation(messageComposerFunction.apply(value.value(), cond), emptyList(), null));
-      return value.value();
+      if (!cond.test(value.returnedValue()))
+        throw exceptionComposerFunction.create(configuration().reportComposer().composeExplanation(messageComposerFunction.apply(value.returnedValue(), cond), emptyList(), null));
+      return value.returnedValue();
     }
   }
 
