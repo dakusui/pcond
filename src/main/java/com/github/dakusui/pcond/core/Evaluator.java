@@ -167,21 +167,6 @@ public interface Evaluator {
         this.flipCurrentlyExpectedBooleanValue();
     }
 
-    void leave(Evaluable<?> evaluable, Object result, boolean unexpected) {
-      int positionInOngoingEntries = onGoingEntries.size() - 1;
-      Entry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
-      entries.set(
-          current.positionInEntries,
-          current.result(
-              toSnapshotIfPossible(result),
-              unexpected ? explainExpectation(evaluable) : null,
-              unexpected ? explainActual(evaluable, composeActualValue(current.input(), result)) : null));
-      onGoingEntries.remove(positionInOngoingEntries);
-      this.currentResult = ContextVariable.forValue(result);
-      if (evaluable.requestExpectationFlip())
-        this.flipCurrentlyExpectedBooleanValue();
-    }
-
     private static Object composeActualValue(Object input, Object output) {
       if (output instanceof Throwable)
         return composeActualValueFromInputAndThrowable(input, (Throwable) output);
@@ -299,7 +284,7 @@ public interface Evaluator {
       this.enter(EvaluableDesc.fromEvaluable(contextPred), value);
       // TODO: Issue-#59: Need exception handling
       contextPred.enclosed().accept(ContextVariable.forValue(value.returnedValue().valueAt(contextPred.argIndex())), this);
-      this.leave(contextPred, this.resultValue(), false);
+      this.leave(contextPred, ContextVariable.forValue(this.resultValue()), false);
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -311,11 +296,11 @@ public interface Evaluator {
       }
       this.enter(EvaluableDesc.forMapperFromEvaluable(transformation), value);
       transformation.mapper().accept(value, this);
-      this.leave(transformation.checker(), this.resultValue(), false);
+      this.leave(transformation.checker(), ContextVariable.forValue(this.resultValue()), false);
       this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), ContextVariable.forValue(this.resultValue()));
 
       transformation.checker().accept(ContextVariable.forValue((R) this.resultValue()), this);
-      this.leave(transformation.mapper(), this.resultValue(), false);
+      this.leave(transformation.mapper(), ContextVariable.forValue(this.resultValue()), false);
     }
 
     @SuppressWarnings("unchecked")
@@ -324,12 +309,12 @@ public interface Evaluator {
       this.enter(EvaluableDesc.fromEvaluable(func), value);
       try {
         Object resultValue = func.head().apply(value.returnedValue());
-        this.leave(func, resultValue, false);
+        this.leave(func, ContextVariable.forValue(resultValue), false);
         func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(ContextVariable.forValue(resultValue), this));
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        this.leave(func, e, true);
+        this.leave(func, ContextVariable.forException(e), true);
         func.tail().ifPresent(tailSide -> tailSide.accept(ContextVariable.forException(e), this));
       }
     }
@@ -344,12 +329,14 @@ public interface Evaluator {
       // because either way we will just return a boolean and during the execution,
       // type information is erased.
       // TODO: Issue-#59: Need exception handling
-      this.leave(streamPred, value.returnedValue()
+      this.leave(
+          streamPred,
+          ContextVariable.forValue(value.returnedValue()
               .filter(valueChecker(streamPred))
               .map(v -> v != null ? v : NULL_VALUE)
               .findFirst()
               .map(each -> !ret)
-              .orElse(ret),
+              .orElse(ret)),
           false);
     }
 
