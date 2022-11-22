@@ -273,7 +273,7 @@ public interface Evaluator {
           boolean result = leafPred.predicate().test(value.returnedValue());
           this.leave(leafPred, ContextVariable.forValue(result), this.currentlyExpectedBooleanValue != result);
         } else {
-          this.leave(leafPred, ContextVariable.forValue("(not evaluated)"), false);
+          this.leave(leafPred,  value, true);
         }
       } catch (Error e) {
         throw e;
