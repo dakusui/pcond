@@ -299,7 +299,7 @@ public interface Evaluator {
       this.leave(transformation.checker(), this.resultValue(), false);
       this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), ContextVariable.forValue(this.resultValue()));
 
-      transformation.checker().accept(ContextVariable.forValue((R) this.currentResult), this);
+      transformation.checker().accept(ContextVariable.forValue((R) this.resultValue()), this);
       this.leave(transformation.mapper(), this.resultValue(), false);
     }
 
