@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.core.ContextVariable;
+import com.github.dakusui.pcond.core.EvaluationContext;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Printables;
@@ -19,7 +19,7 @@ public class EvaluatorTest extends TestBase {
     Evaluator evaluator = new Evaluator.Impl();
     try {
       evaluator.evaluate(
-          ContextVariable.forValue("hello"),
+          EvaluationContext.forValue("hello"),
           (Evaluable.Conjunction<String>) and(isNotNull(), errorThrowingPredicate()));
     } catch (EvaluationFailure e) {
       assertFalse(evaluator.resultEntries().get(0).hasOutput());
@@ -30,7 +30,7 @@ public class EvaluatorTest extends TestBase {
   public void testDisjShortcut_withTrue() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(isNull(), alwaysTrue());
-    evaluable.accept(ContextVariable.forValue(null), evaluator);
+    evaluable.accept(EvaluationContext.forValue(null), evaluator);
     assertTrue(evaluator.resultValueAsBoolean());
   }
 
@@ -38,7 +38,7 @@ public class EvaluatorTest extends TestBase {
   public void testDisjShortcut_withFalse() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(isNull(), alwaysTrue().negate());
-    evaluable.accept(ContextVariable.forValue(null), evaluator);
+    evaluable.accept(EvaluationContext.forValue(null), evaluator);
     assertTrue(evaluator.resultValueAsBoolean());
   }
 
@@ -46,7 +46,7 @@ public class EvaluatorTest extends TestBase {
   public void testDisjNonShortcut() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(alwaysTrue().negate(), isNull());
-    evaluable.accept(ContextVariable.forValue(null), evaluator);
+    evaluable.accept(EvaluationContext.forValue(null), evaluator);
     assertTrue(evaluator.resultValueAsBoolean());
   }
 
@@ -54,7 +54,7 @@ public class EvaluatorTest extends TestBase {
   public void testConjShortcut_withTrue() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(isNotNull(), alwaysTrue());
-    evaluable.accept(ContextVariable.forValue(null), evaluator);
+    evaluable.accept(EvaluationContext.forValue(null), evaluator);
     assertFalse(evaluator.resultValueAsBoolean());
   }
 
@@ -62,7 +62,7 @@ public class EvaluatorTest extends TestBase {
   public void testConjShortcut_withFalse() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(isNotNull(), alwaysTrue().negate());
-    evaluable.accept(ContextVariable.forValue(null), evaluator);
+    evaluable.accept(EvaluationContext.forValue(null), evaluator);
     assertFalse(evaluator.resultValueAsBoolean());
   }
 
@@ -70,7 +70,7 @@ public class EvaluatorTest extends TestBase {
   public void testConjNonShortcut() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(alwaysTrue(), isNotNull());
-    evaluable.accept(ContextVariable.forValue(null), evaluator);
+    evaluable.accept(EvaluationContext.forValue(null), evaluator);
     assertFalse(evaluator.resultValueAsBoolean());
   }
 

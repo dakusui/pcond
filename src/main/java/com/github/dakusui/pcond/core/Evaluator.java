@@ -29,7 +29,7 @@ public interface Evaluator {
    * @param <T>         The type of the `value`.
    * @see com.github.dakusui.pcond.core.Evaluable.Conjunction
    */
-  <T> void evaluate(ContextVariable<? extends T> value, Evaluable.Conjunction<T> conjunction);
+  <T> void evaluate(EvaluationContext<? extends T> value, Evaluable.Conjunction<T> conjunction);
 
   /**
    * Evaluates `value` with a `disjunction` predicate ("or").
@@ -39,7 +39,7 @@ public interface Evaluator {
    * @param <T>         The type of the `value`.
    * @see com.github.dakusui.pcond.core.Evaluable.Disjunction
    */
-  <T> void evaluate(ContextVariable<T> value, Evaluable.Disjunction<T> disjunction);
+  <T> void evaluate(EvaluationContext<T> value, Evaluable.Disjunction<T> disjunction);
 
   /**
    * Evaluates `value` with a `negation` predicate ("not").
@@ -49,7 +49,7 @@ public interface Evaluator {
    * @param <T>      The type of the `value`.
    * @see com.github.dakusui.pcond.core.Evaluable.Negation
    */
-  <T> void evaluate(ContextVariable<T> value, Evaluable.Negation<T> negation);
+  <T> void evaluate(EvaluationContext<T> value, Evaluable.Negation<T> negation);
 
   /**
    * Evaluates `value` with a leaf predicate.
@@ -59,7 +59,7 @@ public interface Evaluator {
    * @param <T>      The type of the `value`.
    * @see com.github.dakusui.pcond.core.Evaluable.LeafPred
    */
-  <T> void evaluate(ContextVariable<T> value, Evaluable.LeafPred<T> leafPred);
+  <T> void evaluate(EvaluationContext<T> value, Evaluable.LeafPred<T> leafPred);
 
   /**
    * Evaluates `value` with a context predicate.
@@ -68,7 +68,7 @@ public interface Evaluator {
    * @param contextPred A predicate with which `value` is evaluated.
    * @see com.github.dakusui.pcond.core.Evaluable.ContextPred
    */
-  void evaluate(ContextVariable<VariableBundle> value, Evaluable.ContextPred contextPred);
+  void evaluate(EvaluationContext<VariableBundle> value, Evaluable.ContextPred contextPred);
 
   /**
    * Evaluates `value` with a "transformatioin" predicate.
@@ -77,7 +77,7 @@ public interface Evaluator {
    * @param transformation A predicate with which `value` is evaluated.
    * @see com.github.dakusui.pcond.core.Evaluable.Transformation
    */
-  <T, R> void evaluate(ContextVariable<T> value, Evaluable.Transformation<T, R> transformation);
+  <T, R> void evaluate(EvaluationContext<T> value, Evaluable.Transformation<T, R> transformation);
 
   /**
    * Evaluates `value` with a "function" predicate.
@@ -86,7 +86,7 @@ public interface Evaluator {
    * @param func  A predicate with which `value` is evaluated.
    * @see com.github.dakusui.pcond.core.Evaluable.Func
    */
-  <T> void evaluate(ContextVariable<T> value, Evaluable.Func<T> func);
+  <T> void evaluate(EvaluationContext<T> value, Evaluable.Func<T> func);
 
   /**
    * Evaluates `value` with a predicate for a stream.
@@ -95,7 +95,7 @@ public interface Evaluator {
    * @param streamPred A predicate with which `value` is evaluated.
    * @see com.github.dakusui.pcond.core.Evaluable.StreamPred
    */
-  <E> void evaluate(ContextVariable<Stream<E>> value, Evaluable.StreamPred<E> streamPred);
+  <E> void evaluate(EvaluationContext<Stream<E>> value, Evaluable.StreamPred<E> streamPred);
 
   /**
    * The last evaluated value by an `evaluate` method defined in this interface.
@@ -129,14 +129,14 @@ public interface Evaluator {
   class Impl implements Evaluator {
     private static final Object NULL_VALUE = new Object();
     List<Entry.OnGoing> onGoingEntries                = new LinkedList<>();
-    List<Entry>         entries                       = new ArrayList<>();
-    ContextVariable<?>  currentResult;
-    boolean             currentlyExpectedBooleanValue = true;
+    List<Entry>          entries                       = new ArrayList<>();
+    EvaluationContext<?> currentResult;
+    boolean              currentlyExpectedBooleanValue = true;
 
     public Impl() {
     }
 
-    void enter(EvaluableDesc evaluableDesc, ContextVariable<?> input) {
+    void enter(EvaluableDesc evaluableDesc, EvaluationContext<?> input) {
       Entry.OnGoing newEntry = new Entry.OnGoing(
           evaluableDesc.type(),
           (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
@@ -151,7 +151,7 @@ public interface Evaluator {
         this.flipCurrentlyExpectedBooleanValue();
     }
 
-    void leave(Evaluable<?> evaluable, ContextVariable<?> result, boolean unexpected) {
+    void leave(Evaluable<?> evaluable, EvaluationContext<?> result, boolean unexpected) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       Entry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
@@ -192,7 +192,7 @@ public interface Evaluator {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public <T> void evaluate(ContextVariable<? extends T> value, Evaluable.Conjunction<T> conjunction) {
+    public <T> void evaluate(EvaluationContext<? extends T> value, Evaluable.Conjunction<T> conjunction) {
       int i = 0;
       boolean finalValue = true;
       boolean shortcut = conjunction.shortcut();
@@ -204,7 +204,7 @@ public interface Evaluator {
         if (!cur)
           finalValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !finalValue) || i == conjunction.children().size() - 1) {
-          this.leave(conjunction, ContextVariable.forValue(finalValue), false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+          this.leave(conjunction, EvaluationContext.forValue(finalValue), false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
           return;
         }
         i++;
@@ -213,7 +213,7 @@ public interface Evaluator {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public <T> void evaluate(ContextVariable<T> value, Evaluable.Disjunction<T> disjunction) {
+    public <T> void evaluate(EvaluationContext<T> value, Evaluable.Disjunction<T> disjunction) {
       int i = 0;
       boolean finalValue = false;
       boolean shortcut = disjunction.shortcut();
@@ -225,7 +225,7 @@ public interface Evaluator {
         if (cur)
           finalValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && finalValue) || i == disjunction.children().size() - 1) {
-          this.leave(disjunction, ContextVariable.forValue(finalValue), false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+          this.leave(disjunction, EvaluationContext.forValue(finalValue), false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
           return;
         }
         i++;
@@ -233,10 +233,10 @@ public interface Evaluator {
     }
 
     @Override
-    public <T> void evaluate(ContextVariable<T> value, Evaluable.Negation<T> negation) {
+    public <T> void evaluate(EvaluationContext<T> value, Evaluable.Negation<T> negation) {
       this.enter(EvaluableDesc.fromEvaluable(negation), value);
       negation.target().accept(value, this);
-      this.leave(negation, ContextVariable.forValue(!this.resultValueAsBoolean()), false);
+      this.leave(negation, EvaluationContext.forValue(!this.resultValueAsBoolean()), false);
       if (Objects.equals(this.resultValue(), this.currentlyExpectedBooleanValue))
         mergeLastTwoEntriesIfPossible(this.entries);
     }
@@ -264,34 +264,34 @@ public interface Evaluator {
     }
 
     @Override
-    public <T> void evaluate(ContextVariable<T> value, Evaluable.LeafPred<T> leafPred) {
+    public <T> void evaluate(EvaluationContext<T> value, Evaluable.LeafPred<T> leafPred) {
       this.enter(EvaluableDesc.fromEvaluable(leafPred), value);
       // TODO: Issue-#59: Need exception handling
       try {
         System.out.println("LEAF:<" + value + ">");
-        if (value.type() == ContextVariable.Type.VALUE) {
+        if (value.state() == EvaluationContext.State.VALUE_RETURNED) {
           boolean result = leafPred.predicate().test(value.returnedValue());
-          this.leave(leafPred, ContextVariable.forValue(result), this.currentlyExpectedBooleanValue != result);
+          this.leave(leafPred, EvaluationContext.forValue(result), this.currentlyExpectedBooleanValue != result);
         } else {
           this.leave(leafPred,  value, true);
         }
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        this.leave(leafPred, ContextVariable.forException(e), true);
+        this.leave(leafPred, this.currentResult().exceptionThrown(e), true);
       }
     }
 
     @Override
-    public void evaluate(ContextVariable<VariableBundle> value, Evaluable.ContextPred contextPred) {
+    public void evaluate(EvaluationContext<VariableBundle> value, Evaluable.ContextPred contextPred) {
       this.enter(EvaluableDesc.fromEvaluable(contextPred), value);
       // TODO: Issue-#59: Need exception handling
-      contextPred.enclosed().accept(ContextVariable.forValue(value.returnedValue().valueAt(contextPred.argIndex())), this);
-      this.leave(contextPred, ContextVariable.forValue(this.resultValue()), false);
+      contextPred.enclosed().accept(EvaluationContext.forValue(value.returnedValue().valueAt(contextPred.argIndex())), this);
+      this.leave(contextPred, EvaluationContext.forValue(this.resultValue()), false);
     }
 
     @Override
-    public <T, R> void evaluate(ContextVariable<T> value, Evaluable.Transformation<T, R> transformation) {
+    public <T, R> void evaluate(EvaluationContext<T> value, Evaluable.Transformation<T, R> transformation) {
       if (isDummyFunction((Function<?, ?>) transformation.mapper())) {
         transformation.checker().accept(currentResult(), this);
         return;
@@ -306,28 +306,28 @@ public interface Evaluator {
     }
 
     @SuppressWarnings("unchecked")
-    private <T> ContextVariable<T> currentResult() {
-      return (ContextVariable<T>) this.currentResult;
+    private <T> EvaluationContext<T> currentResult() {
+      return (EvaluationContext<T>) this.currentResult;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> void evaluate(ContextVariable<T> value, Evaluable.Func<T> func) {
+    public <T> void evaluate(EvaluationContext<T> value, Evaluable.Func<T> func) {
       this.enter(EvaluableDesc.fromEvaluable(func), value);
       try {
         Object resultValue = func.head().apply(value.returnedValue());
-        this.leave(func, ContextVariable.forValue(resultValue), false);
-        func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(ContextVariable.forValue(resultValue), this));
+        this.leave(func, EvaluationContext.forValue(resultValue), false);
+        func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(EvaluationContext.forValue(resultValue), this));
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        this.leave(func, ContextVariable.forException(e), true);
-        func.tail().ifPresent(tailSide -> tailSide.accept(ContextVariable.forException(e), this));
+        this.leave(func, this.currentResult().exceptionThrown(e), true);
+        func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) this.currentResult().exceptionThrown(e), this));
       }
     }
 
     @Override
-    public <E> void evaluate(ContextVariable<Stream<E>> value, Evaluable.StreamPred<E> streamPred) {
+    public <E> void evaluate(EvaluationContext<Stream<E>> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
       this.enter(EvaluableDesc.fromEvaluable(streamPred), value);
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
@@ -338,7 +338,7 @@ public interface Evaluator {
       // TODO: Issue-#59: Need exception handling
       this.leave(
           streamPred,
-          ContextVariable.forValue(value.returnedValue()
+          EvaluationContext.forValue(value.returnedValue()
               .filter(valueChecker(streamPred))
               .map(v -> v != null ? v : NULL_VALUE)
               .findFirst()
@@ -355,7 +355,7 @@ public interface Evaluator {
         boolean ret = false;
         Object throwable = "<<OUTPUT MISSING>>";
         try {
-          streamPred.cut().accept(ContextVariable.forValue(e), evaluator);
+          streamPred.cut().accept(EvaluationContext.forValue(e), evaluator);
           succeeded = true;
         } catch (Error error) {
           throw error;

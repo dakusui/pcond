@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.validator;
 
-import com.github.dakusui.pcond.core.ContextVariable;
+import com.github.dakusui.pcond.core.EvaluationContext;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Predicates;
@@ -114,7 +114,7 @@ public interface Validator {
    */
   default <T> T require(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionFactory) {
     return checkValueAndThrowIfFails(
-        ContextVariable.forValue(value),
+        EvaluationContext.forValue(value),
         cond,
         this.configuration().messageComposer()::composeMessageForPrecondition,
         explanation -> exceptionFactory.apply(explanation.toString()));
@@ -210,7 +210,7 @@ public interface Validator {
 
   default <T> T validate_2(T value, Predicate<? super T> cond, ExceptionFactory<Throwable> exceptionFactory) {
     return checkValueAndThrowIfFails(
-        ContextVariable.forValue(value),
+        EvaluationContext.forValue(value),
         cond,
         configuration().messageComposer()::composeMessageForValidation,
         exceptionFactory);
@@ -275,7 +275,7 @@ public interface Validator {
    */
   default <T> T ensure(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionComposer) {
     return checkValueAndThrowIfFails(
-        ContextVariable.forValue(value),
+        EvaluationContext.forValue(value),
         cond,
         configuration().messageComposer()::composeMessageForPostcondition,
         explanation -> exceptionComposer.apply(explanation.toString()));
@@ -294,7 +294,7 @@ public interface Validator {
    */
   default <T> void checkInvariant(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
-        ContextVariable.forValue(value),
+        EvaluationContext.forValue(value),
         cond,
         configuration().messageComposer()::composeMessageForAssertion,
         explanation -> configuration().exceptionComposer().forAssert().exceptionInvariantConditionViolation(explanation.toString()));
@@ -313,7 +313,7 @@ public interface Validator {
    */
   default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
-        ContextVariable.forValue(value),
+        EvaluationContext.forValue(value),
         cond,
         configuration().messageComposer()::composeMessageForPrecondition,
         explanation -> configuration().exceptionComposer().forAssert().exceptionPreconditionViolation(explanation.toString()));
@@ -332,7 +332,7 @@ public interface Validator {
    */
   default <T> void checkPostcondition(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
-        ContextVariable.forValue(value),
+        EvaluationContext.forValue(value),
         cond,
         configuration().messageComposer()::composeMessageForPostcondition,
         explanation -> configuration().exceptionComposer().forAssert().exceptionPostconditionViolation(explanation.toString()));
@@ -349,7 +349,7 @@ public interface Validator {
    */
   default <T> void assertThat(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
-        ContextVariable.forValue(value),
+        EvaluationContext.forValue(value),
         cond,
         configuration().messageComposer()::composeMessageForAssertion,
         explanation -> configuration().exceptionComposer().forAssertThat().testFailedException(explanation, configuration().reportComposer()));
@@ -366,7 +366,7 @@ public interface Validator {
    */
   default <T> void assumeThat(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
-        ContextVariable.forValue(value),
+        EvaluationContext.forValue(value),
         cond,
         configuration().messageComposer()::composeMessageForAssertion,
         explantion -> configuration().exceptionComposer().forAssertThat().testSkippedException(explantion, configuration().reportComposer()));
@@ -391,7 +391,7 @@ public interface Validator {
    */
   @SuppressWarnings("unchecked")
   default <T> T checkValueAndThrowIfFails(
-      ContextVariable<T> value,
+      EvaluationContext<T> value,
       Predicate<? super T> cond,
       BiFunction<T, Predicate<? super T>, String> messageComposerFunction,
       ExceptionFactory<Throwable> exceptionComposerFunction) {

@@ -36,7 +36,7 @@ public interface Evaluable<T> {
    * @param value     The value to be evaluated.
    * @param evaluator An evaluator with which the `value` is evaluated.
    */
-  void accept(ContextVariable<? extends T> value, Evaluator evaluator);
+  void accept(EvaluationContext<? extends T> value, Evaluator evaluator);
 
   /**
    * In order to generate an informative report, the framework needs information
@@ -114,7 +114,7 @@ public interface Evaluable<T> {
    */
   interface Conjunction<T> extends Composite<T> {
     @Override
-    default void accept(ContextVariable<? extends T> value, Evaluator evaluator) {
+    default void accept(EvaluationContext<? extends T> value, Evaluator evaluator) {
       evaluator.evaluate(value, this);
     }
   }
@@ -127,8 +127,8 @@ public interface Evaluable<T> {
   interface Disjunction<T> extends Composite<T> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(ContextVariable<? extends T> value, Evaluator evaluator) {
-      evaluator.evaluate((ContextVariable<T>) value, this);
+    default void accept(EvaluationContext<? extends T> value, Evaluator evaluator) {
+      evaluator.evaluate((EvaluationContext<T>) value, this);
     }
   }
 
@@ -140,8 +140,8 @@ public interface Evaluable<T> {
   interface Negation<T> extends Pred<T> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(ContextVariable<? extends T> value, Evaluator evaluator) {
-      evaluator.evaluate((ContextVariable<T>) value, this);
+    default void accept(EvaluationContext<? extends T> value, Evaluator evaluator) {
+      evaluator.evaluate((EvaluationContext<T>) value, this);
     }
 
     /**
@@ -165,8 +165,8 @@ public interface Evaluable<T> {
   interface LeafPred<T> extends Pred<T> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(ContextVariable<? extends T> value, Evaluator evaluator) {
-      evaluator.evaluate((ContextVariable<T>) value, this);
+    default void accept(EvaluationContext<? extends T> value, Evaluator evaluator) {
+      evaluator.evaluate((EvaluationContext<T>) value, this);
     }
 
     /**
@@ -185,8 +185,8 @@ public interface Evaluable<T> {
   interface ContextPred extends Pred<VariableBundle> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(ContextVariable<? extends VariableBundle> value, Evaluator evaluator) {
-      evaluator.evaluate((ContextVariable<VariableBundle>) value, this);
+    default void accept(EvaluationContext<? extends VariableBundle> value, Evaluator evaluator) {
+      evaluator.evaluate((EvaluationContext<VariableBundle>) value, this);
     }
 
     <T> Evaluable<? super T> enclosed();
@@ -202,8 +202,8 @@ public interface Evaluable<T> {
   interface StreamPred<E> extends Pred<Stream<E>> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(ContextVariable<? extends Stream<E>> value, Evaluator evaluator) {
-      evaluator.evaluate((ContextVariable<Stream<E>>) value, this);
+    default void accept(EvaluationContext<? extends Stream<E>> value, Evaluator evaluator) {
+      evaluator.evaluate((EvaluationContext<Stream<E>>) value, this);
     }
 
     /**
@@ -246,8 +246,8 @@ public interface Evaluable<T> {
   interface Transformation<T, R> extends Pred<T> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(ContextVariable<? extends T> value, Evaluator evaluator) {
-      evaluator.evaluate((ContextVariable<T>) value, this);
+    default void accept(EvaluationContext<? extends T> value, Evaluator evaluator) {
+      evaluator.evaluate((EvaluationContext<T>) value, this);
     }
 
     /**
@@ -283,8 +283,8 @@ public interface Evaluable<T> {
   interface Func<T> extends Evaluable<T> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(ContextVariable<? extends T> value, Evaluator evaluator) {
-      evaluator.evaluate((ContextVariable<T>) value, this);
+    default void accept(EvaluationContext<? extends T> value, Evaluator evaluator) {
+      evaluator.evaluate((EvaluationContext<T>) value, this);
     }
 
     Function<? super T, ?> head();
