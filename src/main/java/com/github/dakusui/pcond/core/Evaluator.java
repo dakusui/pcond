@@ -131,7 +131,7 @@ public interface Evaluator {
     private static final Object NULL_VALUE = new Object();
     List<Entry.OnGoing> onGoingEntries                = new LinkedList<>();
     List<Entry>         entries                       = new ArrayList<>();
-    Object              currentResult;
+    ContextVariable<?>  currentResult;
     boolean             currentlyExpectedBooleanValue = true;
 
     public Impl() {
@@ -162,7 +162,7 @@ public interface Evaluator {
               unexpected ? explainExpectation(evaluable) : null,
               unexpected ? explainActual(evaluable, composeActualValue(current.input(), result)) : null));
       onGoingEntries.remove(positionInOngoingEntries);
-      this.currentResult = result;
+      this.currentResult = ContextVariable.forValue(result);
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
     }
@@ -365,7 +365,7 @@ public interface Evaluator {
 
     @Override
     public Object resultValue() {
-      return currentResult;
+      return currentResult.value();
     }
 
     @Override
