@@ -151,22 +151,7 @@ public interface Evaluator {
         this.flipCurrentlyExpectedBooleanValue();
     }
 
-    void enter(Entry.Type type, Evaluable<?> evaluable, String name, Object input) {
-      Entry.OnGoing newEntry = new Entry.OnGoing(
-          type,
-          (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
-          entries.size(),
-          name,
-          toSnapshotIfPossible(input),
-          this.currentlyExpectedBooleanValue,
-          evaluable.isTrivial());
-      onGoingEntries.add(newEntry);
-      entries.add(newEntry);
-      if (evaluable.requestExpectationFlip())
-        this.flipCurrentlyExpectedBooleanValue();
-    }
-
-    void leave(Object result, Evaluable<?> evaluable, boolean unexpected) {
+    void leave(Evaluable<?> evaluable, Object result, boolean unexpected) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       Entry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
@@ -213,13 +198,13 @@ public interface Evaluator {
       boolean shortcut = conjunction.shortcut();
       for (Evaluable<? super T> each : conjunction.children()) {
         if (i == 0)
-          this.enter(AND, conjunction, conjunction.shortcut() ? "and" : "allOf", value.returnedValue());
+          this.enter(EvaluableDesc.fromEvaluable(conjunction), value);
         each.accept(value, this);
         boolean cur = this.resultValueAsBooleanIfBooleanOtherwise(!this.currentlyExpectedBooleanValue);
         if (!cur)
           finalValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !finalValue) || i == conjunction.children().size() - 1) {
-          this.leave(finalValue, conjunction, false);
+          this.leave(conjunction, finalValue, false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
           return;
         }
         i++;
@@ -234,13 +219,13 @@ public interface Evaluator {
       boolean shortcut = disjunction.shortcut();
       for (Evaluable<? super T> each : disjunction.children()) {
         if (i == 0)
-          this.enter(OR, disjunction, disjunction.shortcut() ? "or" : "anyOf", value.returnedValue());
+          this.enter(EvaluableDesc.fromEvaluable(disjunction), value);
         each.accept(value, this);
         boolean cur = this.<Boolean>resultValue();
         if (cur)
           finalValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && finalValue) || i == disjunction.children().size() - 1) {
-          this.leave(finalValue, disjunction, false);
+          this.leave(disjunction, finalValue, false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
           return;
         }
         i++;
@@ -249,9 +234,9 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluate(ContextVariable<T> value, Evaluable.Negation<T> negation) {
-      this.enter(Entry.Type.NOT, negation, "not", value.returnedValue());
+      this.enter(EvaluableDesc.fromEvaluable(negation), value);
       negation.target().accept(value, this);
-      this.leave(!this.<Boolean>resultValue(), negation, false);
+      this.leave(negation, !this.<Boolean>resultValue(), false);
       if (Objects.equals(this.resultValue(), this.currentlyExpectedBooleanValue))
         mergeLastTwoEntriesIfPossible(this.entries);
     }
@@ -285,11 +270,11 @@ public interface Evaluator {
       try {
         System.out.println("LEAF:<" + value + ">");
         boolean result = leafPred.predicate().test(value.returnedValue());
-        this.leave(result, leafPred, this.currentlyExpectedBooleanValue != result);
+        this.leave(leafPred, result, this.currentlyExpectedBooleanValue != result);
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        this.leave(e, leafPred, true);
+        this.leave(leafPred, e, true);
       }
     }
 
@@ -298,7 +283,7 @@ public interface Evaluator {
       this.enter(EvaluableDesc.fromEvaluable(contextPred), value);
       // TODO: Issue-#59: Need exception handling
       contextPred.enclosed().accept(ContextVariable.forValue(value.returnedValue().valueAt(contextPred.argIndex())), this);
-      this.leave(this.resultValue(), contextPred, false);
+      this.leave(contextPred, this.resultValue(), false);
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -308,34 +293,27 @@ public interface Evaluator {
         transformation.checker().accept(ContextVariable.forValue((R) value), this);
         return;
       }
-      this.enter(TRANSFORM,
-          transformation.mapper(),
-          transformation.mapperName()
-              .orElse("transform"), value.returnedValue());
+      this.enter(EvaluableDesc.forMapperFromEvaluable(transformation), value);
       transformation.mapper().accept(value, this);
-      this.leave(this.resultValue(), transformation.checker(), false);
-      this.enter(CHECK,
-          transformation.checker(),
-          transformation.checkerName()
-              .orElse("check"),
-          this.resultValue());
+      this.leave(transformation.checker(), this.resultValue(), false);
+      this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), ContextVariable.forValue(this.resultValue()));
 
       transformation.checker().accept(ContextVariable.forValue((R) this.currentResult), this);
-      this.leave(this.resultValue(), transformation.mapper(), false);
+      this.leave(transformation.mapper(), this.resultValue(), false);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T> void evaluate(ContextVariable<T> value, Evaluable.Func<T> func) {
-      this.enter(FUNCTION, func, format("%s", func.head()), value.returnedValue());
+      this.enter(EvaluableDesc.fromEvaluable(func), value);
       try {
         Object resultValue = func.head().apply(value.returnedValue());
-        this.leave(resultValue, func, false);
+        this.leave(func, resultValue, false);
         func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(ContextVariable.forValue(resultValue), this));
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        this.leave(e, func, true);
+        this.leave(func, e, true);
         func.tail().ifPresent(tailSide -> tailSide.accept(ContextVariable.forException(e), this));
       }
     }
@@ -343,19 +321,20 @@ public interface Evaluator {
     @Override
     public <E> void evaluate(ContextVariable<Stream<E>> value, Evaluable.StreamPred<E> streamPred) {
       boolean ret = streamPred.defaultValue();
-      this.enter(LEAF, streamPred, format("%s", streamPred), value.returnedValue());
+      this.enter(EvaluableDesc.fromEvaluable(streamPred), value);
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
       // on 'findFirst()'.
       // Although NULL_VALUE is an ordinary Object, not a value of E, this works
       // because either way we will just return a boolean and during the execution,
       // type information is erased.
       // TODO: Issue-#59: Need exception handling
-      this.leave(value.returnedValue()
-          .filter(valueChecker(streamPred))
-          .map(v -> v != null ? v : NULL_VALUE)
-          .findFirst()
-          .map(each -> !ret)
-          .orElse(ret), streamPred, false);
+      this.leave(streamPred, value.returnedValue()
+              .filter(valueChecker(streamPred))
+              .map(v -> v != null ? v : NULL_VALUE)
+              .findFirst()
+              .map(each -> !ret)
+              .orElse(ret),
+          false);
     }
 
     private <E> Predicate<E> valueChecker(Evaluable.StreamPred<E> streamPred) {
@@ -457,12 +436,75 @@ public interface Evaluator {
       );
     }
 
-    static <T> EvaluableDesc fromEvaluable(Evaluable.ContextPred contextEvaluable) {
+    static EvaluableDesc fromEvaluable(Evaluable.ContextPred contextEvaluable) {
       return new EvaluableDesc(
           LEAF,
           String.format("%s", contextEvaluable),
           contextEvaluable.requestExpectationFlip(),
           contextEvaluable.isTrivial()
+      );
+    }
+
+    static <T> EvaluableDesc fromEvaluable(Evaluable.StreamPred<T> streamEvaluable) {
+      return new EvaluableDesc(
+          LEAF,
+          String.format("%s", streamEvaluable),
+          streamEvaluable.requestExpectationFlip(),
+          streamEvaluable.isTrivial()
+      );
+    }
+
+    static <T> EvaluableDesc fromEvaluable(Evaluable.Func<T> funcEvaluable) {
+      return new EvaluableDesc(
+          FUNCTION,
+          String.format("%s", funcEvaluable.head()),
+          funcEvaluable.requestExpectationFlip(),
+          funcEvaluable.isTrivial()
+      );
+    }
+
+    static <T> EvaluableDesc fromEvaluable(Evaluable.Conjunction<T> conjunctionEvaluable) {
+      return new EvaluableDesc(
+          FUNCTION,
+          String.format("%s", conjunctionEvaluable.shortcut() ? "and" : "allOf"),
+          conjunctionEvaluable.requestExpectationFlip(),
+          conjunctionEvaluable.isTrivial()
+      );
+    }
+
+    static <T> EvaluableDesc fromEvaluable(Evaluable.Disjunction<T> disjunctionEvaluable) {
+      return new EvaluableDesc(
+          FUNCTION,
+          String.format("%s", disjunctionEvaluable.shortcut() ? "or" : "anyOf"),
+          disjunctionEvaluable.requestExpectationFlip(),
+          disjunctionEvaluable.isTrivial()
+      );
+    }
+
+    static <T> EvaluableDesc fromEvaluable(Evaluable.Negation<T> negationEvaluable) {
+      return new EvaluableDesc(
+          FUNCTION,
+          "not",
+          negationEvaluable.requestExpectationFlip(),
+          negationEvaluable.isTrivial()
+      );
+    }
+
+    static <T, R> EvaluableDesc forMapperFromEvaluable(Evaluable.Transformation<T, R> transformationEvaluable) {
+      return new EvaluableDesc(
+          TRANSFORM,
+          transformationEvaluable.mapperName().orElse("transform"),
+          transformationEvaluable.mapper().requestExpectationFlip(),
+          transformationEvaluable.mapper().isTrivial()
+      );
+    }
+
+    static <T, R> EvaluableDesc forCheckerFromEvaluable(Evaluable.Transformation<T, R> transformationEvaluable) {
+      return new EvaluableDesc(
+          CHECK,
+          transformationEvaluable.checkerName().orElse("check"),
+          transformationEvaluable.checker().requestExpectationFlip(),
+          transformationEvaluable.checker().isTrivial()
       );
     }
   }
