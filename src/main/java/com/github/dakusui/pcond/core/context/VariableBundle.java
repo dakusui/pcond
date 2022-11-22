@@ -11,7 +11,7 @@ import static java.util.Collections.singletonList;
 /**
  * `Context` is a concept to handle multiple values in the `pcond`.
  */
-public interface Context extends Formattable {
+public interface VariableBundle extends Formattable {
   /**
    * Returns the number of context values.
    * @return The number of context values.
@@ -37,7 +37,7 @@ public interface Context extends Formattable {
    * @param o A value to appended
    * @return A new context with the appended value.
    */
-  default Context append(Object o) {
+  default VariableBundle append(Object o) {
     return () -> InternalUtils.append(values(), o);
   }
 
@@ -58,7 +58,7 @@ public interface Context extends Formattable {
    * @param o The value for which a new context is created.
    * @return A new context.
    */
-  static Context from(Object o) {
+  static VariableBundle from(Object o) {
     return () -> singletonList(o);
   }
 }

@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
-import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.context.VariableBundle;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
@@ -110,7 +110,7 @@ public enum PrintablePredicateFactory {
     return AnyMatch.create(predicate);
   }
 
-  public static <T> Predicate<Context> contextPredicate(Predicate<T> predicate, int argIndex) {
+  public static <T> Predicate<VariableBundle> contextPredicate(Predicate<T> predicate, int argIndex) {
     return ContextPredicate.create(toPrintablePredicateIfNotPrintable(predicate), argIndex);
   }
 
@@ -422,7 +422,7 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  static class ContextPredicate extends PrintablePredicate<Context> implements Evaluable.ContextPred {
+  static class ContextPredicate extends PrintablePredicate<VariableBundle> implements Evaluable.ContextPred {
     private final Evaluable<?> enclosed;
     private final int          argIndex;
 

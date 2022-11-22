@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.context.VariableBundle;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -68,7 +68,7 @@ public interface Evaluator {
    * @param contextPred A predicate with which `value` is evaluated.
    * @see com.github.dakusui.pcond.core.Evaluable.ContextPred
    */
-  void evaluate(ContextVariable<Context> value, Evaluable.ContextPred contextPred);
+  void evaluate(ContextVariable<VariableBundle> value, Evaluable.ContextPred contextPred);
 
   /**
    * Evaluates `value` with a "transformatioin" predicate.
@@ -283,7 +283,7 @@ public interface Evaluator {
     }
 
     @Override
-    public void evaluate(ContextVariable<Context> value, Evaluable.ContextPred contextPred) {
+    public void evaluate(ContextVariable<VariableBundle> value, Evaluable.ContextPred contextPred) {
       this.enter(EvaluableDesc.fromEvaluable(contextPred), value);
       // TODO: Issue-#59: Need exception handling
       contextPred.enclosed().accept(ContextVariable.forValue(value.returnedValue().valueAt(contextPred.argIndex())), this);

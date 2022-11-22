@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.experimentals;
 
-import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.context.VariableBundle;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.shared.IllegalValueException;
@@ -34,8 +34,8 @@ public class TestAssertionsExperimentalsTest extends TestBase {
 
   @Test
   public void toContextPredicateTest() {
-    assertFalse(toContextPredicate(isNotNull()).test(Context.from(null)));
-    assertTrue(toContextPredicate(isNotNull()).test(Context.from(new Object())));
+    assertFalse(toContextPredicate(isNotNull()).test(VariableBundle.from(null)));
+    assertTrue(toContextPredicate(isNotNull()).test(VariableBundle.from(new Object())));
   }
 
   @Test

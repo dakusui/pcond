@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.context.VariableBundle;
 
 import java.util.List;
 import java.util.Optional;
@@ -178,15 +178,15 @@ public interface Evaluable<T> {
   }
 
   /**
-   * An interface to model a predicate for {@link Context}.
+   * An interface to model a predicate for {@link VariableBundle}.
    *
-   * @see Context
+   * @see VariableBundle
    */
-  interface ContextPred extends Pred<Context> {
+  interface ContextPred extends Pred<VariableBundle> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(ContextVariable<? extends Context> value, Evaluator evaluator) {
-      evaluator.evaluate((ContextVariable<Context>) value, this);
+    default void accept(ContextVariable<? extends VariableBundle> value, Evaluator evaluator) {
+      evaluator.evaluate((ContextVariable<VariableBundle>) value, this);
     }
 
     <T> Evaluable<? super T> enclosed();
