@@ -152,6 +152,21 @@ public interface Evaluator {
         this.flipCurrentlyExpectedBooleanValue();
     }
 
+    void leave(Evaluable<?> evaluable, ContextVariable<?> result, boolean unexpected) {
+      int positionInOngoingEntries = onGoingEntries.size() - 1;
+      Entry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
+      entries.set(
+          current.positionInEntries,
+          current.result(
+              result.toSnapshot(),
+              unexpected ? explainExpectation(evaluable) : null,
+              unexpected ? explainActual(evaluable, composeActualValue(current.input(), result.value())) : null));
+      onGoingEntries.remove(positionInOngoingEntries);
+      this.currentResult = result;
+      if (evaluable.requestExpectationFlip())
+        this.flipCurrentlyExpectedBooleanValue();
+    }
+
     void leave(Evaluable<?> evaluable, Object result, boolean unexpected) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       Entry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
@@ -205,7 +220,7 @@ public interface Evaluator {
         if (!cur)
           finalValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !finalValue) || i == conjunction.children().size() - 1) {
-          this.leave(conjunction, finalValue, false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+          this.leave(conjunction, ContextVariable.forValue(finalValue), false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
           return;
         }
         i++;
@@ -226,7 +241,7 @@ public interface Evaluator {
         if (cur)
           finalValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && finalValue) || i == disjunction.children().size() - 1) {
-          this.leave(disjunction, finalValue, false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+          this.leave(disjunction, ContextVariable.forValue(finalValue), false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
           return;
         }
         i++;
@@ -237,7 +252,7 @@ public interface Evaluator {
     public <T> void evaluate(ContextVariable<T> value, Evaluable.Negation<T> negation) {
       this.enter(EvaluableDesc.fromEvaluable(negation), value);
       negation.target().accept(value, this);
-      this.leave(negation, !this.resultValueAsBoolean(), false);
+      this.leave(negation, ContextVariable.forValue(!this.resultValueAsBoolean()), false);
       if (Objects.equals(this.resultValue(), this.currentlyExpectedBooleanValue))
         mergeLastTwoEntriesIfPossible(this.entries);
     }
@@ -271,11 +286,11 @@ public interface Evaluator {
       try {
         System.out.println("LEAF:<" + value + ">");
         boolean result = leafPred.predicate().test(value.returnedValue());
-        this.leave(leafPred, result, this.currentlyExpectedBooleanValue != result);
+        this.leave(leafPred, ContextVariable.forValue(result), this.currentlyExpectedBooleanValue != result);
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        this.leave(leafPred, e, true);
+        this.leave(leafPred, ContextVariable.forException(e), true);
       }
     }
 
