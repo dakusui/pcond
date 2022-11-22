@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core;
 
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
+import static java.lang.String.format;
 
 public class ContextVariable<V> {
   enum Type {
@@ -65,7 +66,7 @@ public class ContextVariable<V> {
   }
 
   public static <V> ContextVariable<V> forException(Throwable exception) {
-    return new ContextVariable<>(Type.VALUE, null, exception);
+    return new ContextVariable<>(Type.EXCEPTION, null, exception);
   }
 
   public String toString() {

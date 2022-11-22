@@ -182,7 +182,7 @@ public class Fluent4Example {
                       .then()
                       .isNotNull().done())
                   .transform(ty -> ty
-                      .length()
+                      .parseInt()
                       .then()
                       .greaterThanOrEqualTo(10)
                       .lessThan(40)

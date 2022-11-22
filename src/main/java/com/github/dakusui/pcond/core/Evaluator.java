@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActual;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainExpectation;
-import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.lang.String.format;
 import static java.util.Collections.unmodifiableList;
@@ -270,8 +269,12 @@ public interface Evaluator {
       // TODO: Issue-#59: Need exception handling
       try {
         System.out.println("LEAF:<" + value + ">");
-        boolean result = leafPred.predicate().test(value.returnedValue());
-        this.leave(leafPred, ContextVariable.forValue(result), this.currentlyExpectedBooleanValue != result);
+        if (value.type() == ContextVariable.Type.VALUE) {
+          boolean result = leafPred.predicate().test(value.returnedValue());
+          this.leave(leafPred, ContextVariable.forValue(result), this.currentlyExpectedBooleanValue != result);
+        } else {
+          this.leave(leafPred, ContextVariable.forValue("(not evaluated)"), false);
+        }
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
@@ -287,20 +290,24 @@ public interface Evaluator {
       this.leave(contextPred, ContextVariable.forValue(this.resultValue()), false);
     }
 
-    @SuppressWarnings({ "unchecked" })
     @Override
     public <T, R> void evaluate(ContextVariable<T> value, Evaluable.Transformation<T, R> transformation) {
       if (isDummyFunction((Function<?, ?>) transformation.mapper())) {
-        transformation.checker().accept(ContextVariable.forValue((R) value), this);
+        transformation.checker().accept(currentResult(), this);
         return;
       }
       this.enter(EvaluableDesc.forMapperFromEvaluable(transformation), value);
       transformation.mapper().accept(value, this);
-      this.leave(transformation.checker(), ContextVariable.forValue(this.resultValue()), false);
-      this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), ContextVariable.forValue(this.resultValue()));
+      this.leave(transformation.checker(), this.currentResult(), false);
+      this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), currentResult());
 
-      transformation.checker().accept(ContextVariable.forValue((R) this.resultValue()), this);
-      this.leave(transformation.mapper(), ContextVariable.forValue(this.resultValue()), false);
+      transformation.checker().accept(this.currentResult(), this);
+      this.leave(transformation.mapper(), this.currentResult(), false);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> ContextVariable<T> currentResult() {
+      return (ContextVariable<T>) this.currentResult;
     }
 
     @SuppressWarnings("unchecked")
