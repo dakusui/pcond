@@ -103,10 +103,11 @@ public interface Evaluator {
    * This method is expected to be called from inside an `evaluated` method, not
    * to be called by a user.
    *
-   * @param <T> The type of the last value evaluated by this object.
    * @return The evaluated result value.
    */
-  <T> T resultValue();
+  Object resultValue();
+
+  boolean resultValueAsBoolean();
 
   /**
    * Returns a list of result entries.
@@ -221,7 +222,7 @@ public interface Evaluator {
         if (i == 0)
           this.enter(EvaluableDesc.fromEvaluable(disjunction), value);
         each.accept(value, this);
-        boolean cur = this.<Boolean>resultValue();
+        boolean cur = this.resultValueAsBoolean();
         if (cur)
           finalValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && finalValue) || i == disjunction.children().size() - 1) {
@@ -236,7 +237,7 @@ public interface Evaluator {
     public <T> void evaluate(ContextVariable<T> value, Evaluable.Negation<T> negation) {
       this.enter(EvaluableDesc.fromEvaluable(negation), value);
       negation.target().accept(value, this);
-      this.leave(negation, !this.<Boolean>resultValue(), false);
+      this.leave(negation, !this.resultValueAsBoolean(), false);
       if (Objects.equals(this.resultValue(), this.currentlyExpectedBooleanValue))
         mergeLastTwoEntriesIfPossible(this.entries);
     }
@@ -353,7 +354,7 @@ public interface Evaluator {
           throwable = t;
           throw wrapIfNecessary(t);
         } finally {
-          if (!succeeded || evaluator.<Boolean>resultValue() == streamPred.valueToCut()) {
+          if (!succeeded || evaluator.resultValueAsBoolean() == streamPred.valueToCut()) {
             importResultEntries(evaluator.resultEntries(), throwable);
             ret = true;
           }
@@ -362,14 +363,18 @@ public interface Evaluator {
       };
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> T resultValue() {
-      return (T) currentResult;
+    public Object resultValue() {
+      return currentResult;
+    }
+
+    @Override
+    public boolean resultValueAsBoolean() {
+      return (boolean) resultValue();
     }
 
     public boolean resultValueAsBooleanIfBooleanOtherwise(boolean otherwiseValue) {
-      return resultValue() instanceof Boolean ? resultValue() : otherwiseValue;
+      return resultValue() instanceof Boolean ? resultValueAsBoolean() : otherwiseValue;
     }
 
     @Override

@@ -31,7 +31,7 @@ public class EvaluatorTest extends TestBase {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(isNull(), alwaysTrue());
     evaluable.accept(ContextVariable.forValue(null), evaluator);
-    assertTrue(evaluator.resultValue());
+    assertTrue(evaluator.resultValueAsBoolean());
   }
 
   @Test
@@ -39,7 +39,7 @@ public class EvaluatorTest extends TestBase {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(isNull(), alwaysTrue().negate());
     evaluable.accept(ContextVariable.forValue(null), evaluator);
-    assertTrue(evaluator.resultValue());
+    assertTrue(evaluator.resultValueAsBoolean());
   }
 
   @Test
@@ -47,7 +47,7 @@ public class EvaluatorTest extends TestBase {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(alwaysTrue().negate(), isNull());
     evaluable.accept(ContextVariable.forValue(null), evaluator);
-    assertTrue(evaluator.resultValue());
+    assertTrue(evaluator.resultValueAsBoolean());
   }
 
   @Test
@@ -55,7 +55,7 @@ public class EvaluatorTest extends TestBase {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(isNotNull(), alwaysTrue());
     evaluable.accept(ContextVariable.forValue(null), evaluator);
-    assertFalse(evaluator.resultValue());
+    assertFalse(evaluator.resultValueAsBoolean());
   }
 
   @Test
@@ -63,7 +63,7 @@ public class EvaluatorTest extends TestBase {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(isNotNull(), alwaysTrue().negate());
     evaluable.accept(ContextVariable.forValue(null), evaluator);
-    assertFalse(evaluator.resultValue());
+    assertFalse(evaluator.resultValueAsBoolean());
   }
 
   @Test
@@ -71,7 +71,7 @@ public class EvaluatorTest extends TestBase {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(alwaysTrue(), isNotNull());
     evaluable.accept(ContextVariable.forValue(null), evaluator);
-    assertFalse(evaluator.resultValue());
+    assertFalse(evaluator.resultValueAsBoolean());
   }
 
   public Predicate<String> errorThrowingPredicate() {

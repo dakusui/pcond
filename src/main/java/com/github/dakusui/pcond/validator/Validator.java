@@ -405,7 +405,7 @@ public interface Validator {
         String message = format("An exception (%s) was thrown during evaluation of value: %s: %s", t, value.returnedValue(), cond);
         throw executionFailure(configuration().reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
       }
-      if (evaluator.resultValue())
+      if (evaluator.resultValueAsBoolean())
         return value.returnedValue();
       List<Evaluator.Entry> entries = evaluator.resultEntries();
       throw exceptionComposerFunction.create(configuration().reportComposer().composeExplanation(messageComposerFunction.apply(value.returnedValue(), cond), entries, null));
