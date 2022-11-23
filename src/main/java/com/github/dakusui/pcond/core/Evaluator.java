@@ -140,9 +140,7 @@ public interface Evaluator {
 
     void enter(EvaluableDesc evaluableDesc, EvaluationContext<?> input) {
       EvaluationEntry.OnGoing newEntry = new EvaluationEntry.OnGoing(
-          input.toSnapshot(), evaluableDesc.type(),
-          (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
-          evaluableDesc.name,
+          evaluableDesc.name, evaluableDesc.type(), (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(), input.toSnapshot(),
           this.currentlyExpectedBooleanValue,
           evaluableDesc.isTrivial(),
           entries.size()
@@ -281,8 +279,8 @@ public interface Evaluator {
       return new EvaluationEntry.Finalized(
           format("not(%s)", predicate.formName()), predicate.type(),
           negate.level(),
-          negate.expectedBooleanValue(), negate.expectationDetail(), negate.actualInput(),
-          negate.actualInputDetail(), negate.output(),
+          negate.outputExpectation(), negate.detailOutputExpectation(), negate.actualInput(),
+          negate.actualInputDetail(), negate.outputActualValue(),
           "detailOutputActualValue",
           false
       );
@@ -438,8 +436,8 @@ public interface Evaluator {
       return new EvaluationEntry.Finalized(
           each.formName(), each.type(),
           this.onGoingEntries.size() + each.level(),
-          each.outputExpectation, each.expectationDetail(), each.actualInput(),
-          each.hasActualInputDetail() ? each.actualInputDetail() : null, each.evaluationFinished() ? each.output() : other,
+          each.outputExpectation, each.detailOutputExpectation(), each.actualInput(),
+          each.hasDetailInputActualValue() ? each.actualInputDetail() : null, each.evaluationFinished() ? each.outputActualValue() : other,
           "detailOutputActualValue",
           each.trivial
       );

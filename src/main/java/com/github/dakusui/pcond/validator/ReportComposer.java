@@ -81,14 +81,14 @@ public interface ReportComposer {
       return composeSummary(
           result.stream()
               .peek((EvaluationEntry each) -> {
-                if (each.hasActualInputDetail())
+                if (each.hasDetailInputActualValue())
                   actualInputDetails.add(each.actualInputDetail());
               })
               .filter((EvaluationEntry each) -> !each.isTrivial())
               .map((EvaluationEntry each) -> evaluatorEntryToFormattedEntry(
                   each,
                   () -> each.evaluationFinished() ?
-                      formatObject(each.output()) :
+                      formatObject(each.outputActualValue()) :
                       formatObject(t)))
               .collect(toList()));
     }
@@ -110,10 +110,10 @@ public interface ReportComposer {
     private static String composeExpectationSummaryRecordForEntry(EvaluationEntry entry, Throwable t) {
       return entry.evaluationFinished() ?
           formatObject(
-              (entry.output() instanceof Boolean || entry.output() instanceof Throwable) ?
+              (entry.outputActualValue() instanceof Boolean || entry.outputActualValue() instanceof Throwable) ?
                   //              !asList(FUNCTION, TRANSFORM).contains(entry.type()) ?
-                  entry.expectedBooleanValue() :
-                  entry.output()) :
+                  entry.outputExpectation() :
+                  entry.outputActualValue()) :
           formatObject(t);
     }
 
@@ -140,7 +140,7 @@ public interface ReportComposer {
           asList(LEAF, AND, OR, NOT, FUNCTION).contains(entry.type()) ?
               outputFormatter.get() :
               null,
-          entry.expectationDetail());
+          entry.detailOutputExpectation());
     }
 
     private static Function<FormattedEntry, String> formattedEntryToString(

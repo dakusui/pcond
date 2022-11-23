@@ -79,13 +79,14 @@ public abstract class EvaluationEntry {
    */
   final boolean trivial;
 
-  EvaluationEntry(String formName, Type type, int level, boolean outputExpectation, Object detailOutputExpectation, Object inputActualValue, boolean trivial) {
+  EvaluationEntry(String formName, Type type, int level, boolean outputExpectation, Object detailOutputExpectation, Object inputActualValue, Object detailInputActualValue, boolean trivial) {
     this.type = type;
     this.level = level;
     this.formName = formName;
     this.outputExpectation = outputExpectation;
     this.detailOutputExpectation = detailOutputExpectation;
     this.inputActualValue = inputActualValue;
+    this.detailInputActualValue = detailInputActualValue;
     this.detailInputActualValue = "(Not available)";
     this.trivial = trivial;
   }
@@ -96,8 +97,8 @@ public abstract class EvaluationEntry {
     this.formName = base.formName();
     this.inputActualValue = base.actualInput();
     this.detailInputActualValue = base.actualInputDetail();
-    this.detailOutputExpectation = base.expectationDetail();
-    this.outputExpectation = base.expectedBooleanValue();
+    this.detailOutputExpectation = base.detailOutputExpectation();
+    this.outputExpectation = base.outputExpectation();
     this.trivial = base.isTrivial();
   }
 
@@ -118,19 +119,19 @@ public abstract class EvaluationEntry {
     return this.type;
   }
 
-  public boolean expectedBooleanValue() {
+  public boolean outputExpectation() {
     return this.outputExpectation;
   }
 
   public abstract boolean evaluationFinished();
 
-  public abstract <T> T output();
+  public abstract <T> T outputActualValue();
 
-  public Object expectationDetail() {
+  public Object detailOutputExpectation() {
     return this.detailOutputExpectation;
   }
 
-  public abstract boolean hasActualInputDetail();
+  public abstract boolean hasDetailInputActualValue();
 
   final public Object actualInputDetail() {
     return this.detailInputActualValue;
@@ -163,18 +164,17 @@ public abstract class EvaluationEntry {
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
         boolean trivial) {
-      super(formName, type, level, outputExpectation, detailOutputExpectation, inputActualValue, trivial);
+      super(formName, type, level, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, trivial);
       this.outputActualValue = outputActualValue;
       this.detailOutputActualValue = detailOutputActualValue;
-      this.detailInputActualValue = detailInputActualValue;
     }
 
-    Finalized(OnGoing onGoing, Object outputActualValue, Object detailOutputExpectation, Object detailInputActualValue, Object detailOutputActualValue) {
+    Finalized(OnGoing onGoing, Object detailOutputExpectation, Object detailInputActualValue, Object outputActualValue, Object detailOutputActualValue) {
       super(onGoing);
-      this.outputActualValue = outputActualValue;
-      this.detailOutputActualValue = detailOutputActualValue;
       this.detailOutputExpectation = detailOutputExpectation;
       this.detailInputActualValue = detailInputActualValue;
+      this.outputActualValue = outputActualValue;
+      this.detailOutputActualValue = detailOutputActualValue;
     }
 
     @Override
@@ -184,12 +184,12 @@ public abstract class EvaluationEntry {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T output() {
+    public <T> T outputActualValue() {
       return (T) outputActualValue;
     }
 
     @Override
-    public boolean hasActualInputDetail() {
+    public boolean hasDetailInputActualValue() {
       return this.detailInputActualValue != null;
     }
   }
@@ -197,13 +197,13 @@ public abstract class EvaluationEntry {
   static class OnGoing extends EvaluationEntry {
     final int positionInEntries;
 
-    OnGoing(Object input, Type type, int level, String formName, boolean outputExpectation, boolean trivial, int positionInEntries) {
-      super(formName, type, level, outputExpectation, outputExpectation, input, trivial);
+    OnGoing(String formName, Type type, int level, Object inputActualValue, boolean outputExpectation, boolean trivial, int positionInEntries) {
+      super(formName, type, level, outputExpectation, outputExpectation, inputActualValue, "detailInputActualValue", trivial);
       this.positionInEntries = positionInEntries;
     }
 
     Finalized result(Object result, Object expectationDetail, Object actualInputDetail) {
-      return new Finalized(this, result, expectationDetail, actualInputDetail, "detailOutputActualValue");
+      return new Finalized(this, expectationDetail, actualInputDetail, result, "detailOutputActualValue");
     }
 
     @Override
@@ -212,12 +212,12 @@ public abstract class EvaluationEntry {
     }
 
     @Override
-    public <T> T output() {
+    public <T> T outputActualValue() {
       throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean hasActualInputDetail() {
+    public boolean hasDetailInputActualValue() {
       return false;
     }
   }
