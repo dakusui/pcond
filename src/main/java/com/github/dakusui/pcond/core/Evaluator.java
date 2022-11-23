@@ -301,7 +301,7 @@ public interface Evaluator {
           boolean result = leafPred.predicate().test(evaluationContext.returnedValue());
           this.leaveWithReturnedValue(leafPred, result, this.currentlyExpectedBooleanValue != result);
         } else {
-          this.leave(leafPred, (EvaluationContext<Object>) evaluationContext, true);
+          this.leaveWithReturnedValue(leafPred, "(not evaluated)", false);
         }
       } catch (Error e) {
         throw e;

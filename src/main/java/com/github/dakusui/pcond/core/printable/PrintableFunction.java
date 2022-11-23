@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 
@@ -10,7 +11,12 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class PrintableFunction<T, R> extends Identifiable.Base implements Evaluable.Func<T>, CurriedFunction<T, R>, Cloneable {
+public class PrintableFunction<T, R> extends
+    Identifiable.Base implements
+    Evaluable.Func<T>,
+    CurriedFunction<T, R>,
+    Evaluator.Explainable,
+    Cloneable {
   final         Function<? super T, ? extends R> function;
   private final Function<? super T, ?>           head;
   private final Evaluable<?>                     tail;
@@ -81,6 +87,16 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
     return function instanceof CurriedFunction ?
         (Class<? extends R>) ((CurriedFunction<? super T, ? extends R>) function).returnType() :
         (Class<? extends R>) Object.class;
+  }
+
+  @Override
+  public Object explainExpectation() {
+    return this.formatter.get();
+  }
+
+  @Override
+  public Object explainActual(Object actualValue) {
+    return actualValue;
   }
 
   @SuppressWarnings("unchecked")

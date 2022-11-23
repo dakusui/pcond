@@ -369,10 +369,6 @@ public enum PrintablePredicateFactory {
       this.trivial = true;
     }
 
-    protected TransformingPredicate(Predicate<? super R> predicate, Function<? super T, ? extends R> function) {
-      this(null, null, predicate, function);
-    }
-
     @Override
     public Evaluable<? super T> mapper() {
       return this.mapper;
