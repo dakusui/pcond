@@ -13,7 +13,7 @@ public class EvaluationContext<V> {
         throw new UnsupportedOperationException();
       }
     },
-    EXCEPTION {
+    EXCEPTION_THROWN {
       <V> V value(EvaluationContext<V> vContextVariable) {
         throw new UnsupportedOperationException();
       }
@@ -58,9 +58,9 @@ public class EvaluationContext<V> {
   }
 
   public EvaluationContext<V> exceptionThrown(Throwable thrownException) {
-    this.state = State.VALUE_RETURNED;
+    this.state = State.EXCEPTION_THROWN;
     this.exception = thrownException;
-    this.value = null;
+    //this.value = null;
     return this;
   }
 
