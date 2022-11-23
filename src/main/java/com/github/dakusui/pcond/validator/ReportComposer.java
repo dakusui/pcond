@@ -134,15 +134,13 @@ public interface ReportComposer {
 
     private static FormattedEntry evaluatorEntryToFormattedEntry(Evaluator.Entry entry, Supplier<String> outputFormatter) {
       return new FormattedEntry(
-          formatObject(entry.input()),
+          formatObject(entry.actualInput()),
           entry.formName(),
           indent(entry.level()),
           asList(LEAF, AND, OR, NOT, FUNCTION).contains(entry.type()) ?
               outputFormatter.get() :
               null,
-          entry.hasExpectationDetail() ?
-              entry.expectationDetail() :
-              null);
+          entry.expectationDetail());
     }
 
     private static Function<FormattedEntry, String> formattedEntryToString(

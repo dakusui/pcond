@@ -140,13 +140,13 @@ public interface Evaluator {
 
     void enter(EvaluableDesc evaluableDesc, EvaluationContext<?> input) {
       Entry.OnGoing newEntry = new Entry.OnGoing(
-          evaluableDesc.type(),
+          input.toSnapshot(), evaluableDesc.type(),
           (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
-          entries.size(),
           evaluableDesc.name,
-          input.toSnapshot(),
           this.currentlyExpectedBooleanValue,
-          evaluableDesc.isTrivial());
+          evaluableDesc.isTrivial(),
+          entries.size()
+      );
       onGoingEntries.add(newEntry);
       entries.add(newEntry);
       if (evaluableDesc.requestExpectationFlip())
@@ -168,7 +168,7 @@ public interface Evaluator {
           current.result(
               toSnapshotIfPossible(returnedValue),
               unexpected ? explainExpectation(evaluable) : null,
-              unexpected ? explainActual(evaluable, composeActualValue(current.input(), returnedValue)) : null));
+              unexpected ? explainActual(evaluable, composeActualValue(current.actualInput(), returnedValue)) : null));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.valueReturned(returnedValue);
       if (evaluable.requestExpectationFlip())
@@ -183,7 +183,7 @@ public interface Evaluator {
           current.result(
               toSnapshotIfPossible(thrownException),
               explainExpectation(evaluable),
-              explainActual(evaluable, composeActualValue(current.input(), thrownException))));
+              explainActual(evaluable, composeActualValue(current.actualInput(), thrownException))));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.exceptionThrown(thrownException);
       if (evaluable.requestExpectationFlip())
@@ -279,14 +279,11 @@ public interface Evaluator {
 
     public static Entry.Finalized mergeNegateAndLeafEntries(Entry negate, Entry predicate) {
       return new Entry.Finalized(
-          predicate.type(),
+          format("not(%s)", predicate.formName()), predicate.type(),
           negate.level(),
-          negate.input(),
-          negate.output(),
-          format("not(%s)", predicate.formName()),
-          negate.expectedBooleanValue(),
-          negate.expectationDetail(),
-          negate.actualInputDetail(),
+          negate.expectedBooleanValue(), negate.expectationDetail(), negate.actualInput(),
+          negate.actualInputDetail(), negate.output(),
+          "detailOutputActualValue",
           false
       );
     }
@@ -439,14 +436,13 @@ public interface Evaluator {
 
     private Entry.Finalized createEntryForImport(Entry each, Object other) {
       return new Entry.Finalized(
-          each.type,
+          each.formName(), each.type,
           this.onGoingEntries.size() + each.level(),
-          each.input(),
-          each.evaluationFinished() ? each.output() : other, each.formName(),
-          each.expectedBooleanValue,
-          each.hasExpectationDetail() ? each.expectationDetail() : null,
-          each.hasActualInputDetail() ? each.actualInputDetail() : null,
-          each.trivial);
+          each.outputExpectation, each.expectationDetail(), each.actualInput(),
+          each.hasActualInputDetail() ? each.actualInputDetail() : null, each.evaluationFinished() ? each.output() : other,
+          "detailOutputActualValue",
+          each.trivial
+      );
     }
   }
 
@@ -576,21 +572,21 @@ public interface Evaluator {
    * |  |                                            |                           +- Output
    * |  |                                            |                           |
    * V  V                                            V                           V
-   *     Book:[title:<De Bello G...i appellantur.>]->check:allOf               ->false
-   *                                                     transform:title       ->"De Bello Gallico"
-   *     "De Bello Gallico"                        ->    check:allOf           ->false
-   *                                                         isNotNull         ->true
+   * Book:[title:<De Bello G...i appellantur.>]->check:allOf               ->false
+   * transform:title       ->"De Bello Gallico"
+   * "De Bello Gallico"                        ->    check:allOf           ->false
+   * isNotNull         ->true
    * [0]                                                     transform:parseInt->NumberFormatException:"For input s...ico""
-   *     null                                      ->        check:allOf       ->false
-   *                                                             >=[10]        ->true
-   *                                                             <[40]         ->true
-   *     Book:[title:<De Bello G...i appellantur.>]->    transform:title       ->"Gallia est omnis divis...li appellantur."
-   *     "Gallia est omnis divis...li appellantur."->    check:allOf           ->false
-   *                                                         isNotNull         ->true
-   *                                                         transform:length  ->145
-   *     145                                       ->        check:allOf       ->false
+   * null                                      ->        check:allOf       ->false
+   * >=[10]        ->true
+   * <[40]         ->true
+   * Book:[title:<De Bello G...i appellantur.>]->    transform:title       ->"Gallia est omnis divis...li appellantur."
+   * "Gallia est omnis divis...li appellantur."->    check:allOf           ->false
+   * isNotNull         ->true
+   * transform:length  ->145
+   * 145                                       ->        check:allOf       ->false
    * [1]                                                         >=[200]       ->true
-   *                                                             <[400]        ->true
+   * <[400]        ->true
    * ----
    *
    * Failure Detail Index::
@@ -606,39 +602,56 @@ public interface Evaluator {
    * For predicates, expected boolean value is printed.
    * For functions, if a function does not throw an exception during its evaluation, the result will be printed here both for expectation and actual behavior summary.
    * If it throws an exception, the exception will be printed here in actual behavior summary.
-   *
    */
   abstract class Entry {
     private final Type   type;
-    private final int    level;
+    /**
+     * A name of a form (evaluable; function, predicate)
+     */
+    private final String formName;
+
+    private final int level;
+
+
     /**
      * A field to store an input value to an {@code Evaluable}.
      * This may be
      */
-    private final Object input;
-
-    /**
-     * A name of a form (evaluable; function, predicate)
-     */
-    private final String name;
+    private final Object inputActualValue;
+    Object detailInputActualValue;
 
     /**
      * A name of an evaluable.
      */
-    private final boolean expectedBooleanValue;
+    private final boolean outputExpectation;
+
+    Object detailOutputExpectation;
 
     /**
      * A flag to let the framework know this entry should be printed in a less outstanding form.
      */
     final boolean trivial;
 
-    Entry(Type type, int level, Object input, String name, boolean expectedBooleanValue, boolean trivial) {
+    Entry(String formName, Type type, int level, boolean outputExpectation, Object detailOutputExpectation, Object inputActualValue, boolean trivial) {
       this.type = type;
       this.level = level;
-      this.input = input;
-      this.name = name;
-      this.expectedBooleanValue = expectedBooleanValue;
+      this.formName = formName;
+      this.outputExpectation = outputExpectation;
+      this.detailOutputExpectation = detailOutputExpectation;
+      this.inputActualValue = inputActualValue;
+      this.detailInputActualValue = "(Not available)";
       this.trivial = trivial;
+    }
+
+    Entry(Entry base) {
+      this.type = base.type();
+      this.level = base.level();
+      this.formName = base.formName();
+      this.inputActualValue = base.actualInput();
+      this.detailInputActualValue = base.actualInputDetail();
+      this.detailOutputExpectation = base.expectationDetail();
+      this.outputExpectation = base.expectedBooleanValue();
+      this.trivial = base.isTrivial();
     }
 
     public int level() {
@@ -646,12 +659,12 @@ public interface Evaluator {
     }
 
     @SuppressWarnings({ "unchecked" })
-    public <T> T input() {
-      return (T) this.input;
+    public <T> T actualInput() {
+      return (T) this.inputActualValue;
     }
 
     public String formName() {
-      return name;
+      return formName;
     }
 
     public Type type() {
@@ -659,20 +672,22 @@ public interface Evaluator {
     }
 
     public boolean expectedBooleanValue() {
-      return this.expectedBooleanValue;
+      return this.outputExpectation;
     }
 
     public abstract boolean evaluationFinished();
 
     public abstract <T> T output();
 
-    public abstract boolean hasExpectationDetail();
-
-    public abstract Object expectationDetail();
+    public Object expectationDetail() {
+      return this.detailOutputExpectation;
+    }
 
     public abstract boolean hasActualInputDetail();
 
-    public abstract Object actualInputDetail();
+    final public Object actualInputDetail() {
+      return this.detailInputActualValue;
+    }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public boolean isTrivial() {
@@ -691,37 +706,28 @@ public interface Evaluator {
     }
 
     static class Finalized extends Entry {
-      final         Object output;
-      final         Object expectationDetail;
-      private final Object actualInputDetail;
+      final Object outputActualValue;
+      final Object detailOutputActualValue;
 
       Finalized(
-          Type type,
+          String formName, Type type,
           int level,
-          Object input,
-          Object output,
-          String name,
-          boolean expectedBooleanValue,
-          Object expectationDetail,
-          Object actualInputDetail,
+          boolean outputExpectation, Object detailOutputExpectation,
+          Object inputActualValue, Object detailInputActualValue,
+          Object outputActualValue, Object detailOutputActualValue,
           boolean trivial) {
-        super(type, level, input, name, expectedBooleanValue, trivial);
-        this.output = output;
-        this.expectationDetail = expectationDetail;
-        this.actualInputDetail = actualInputDetail;
+        super(formName, type, level, outputExpectation, detailOutputExpectation, inputActualValue, trivial);
+        this.outputActualValue = outputActualValue;
+        this.detailOutputActualValue = detailOutputActualValue;
+        this.detailInputActualValue = detailInputActualValue;
       }
 
-      Finalized(OnGoing onGoing, Object output, Object expectationDetail, Object actualInputDetail) {
-        super(
-            onGoing.type(),
-            onGoing.level(),
-            onGoing.input(),
-            onGoing.formName(),
-            onGoing.expectedBooleanValue(),
-            onGoing.isTrivial());
-        this.output = output;
-        this.expectationDetail = expectationDetail;
-        this.actualInputDetail = actualInputDetail;
+      Finalized(OnGoing onGoing, Object outputActualValue, Object detailOutputExpectation, Object detailInputActualValue, Object detailOutputActualValue) {
+        super(onGoing);
+        this.outputActualValue = outputActualValue;
+        this.detailOutputActualValue = detailOutputActualValue;
+        this.detailOutputExpectation = detailOutputExpectation;
+        this.detailInputActualValue = detailInputActualValue;
       }
 
       @Override
@@ -732,40 +738,25 @@ public interface Evaluator {
       @SuppressWarnings("unchecked")
       @Override
       public <T> T output() {
-        return (T) output;
-      }
-
-      @Override
-      public boolean hasExpectationDetail() {
-        return this.expectationDetail != null;
-      }
-
-      @Override
-      public Object expectationDetail() {
-        return this.expectationDetail;
+        return (T) outputActualValue;
       }
 
       @Override
       public boolean hasActualInputDetail() {
-        return this.actualInputDetail != null;
-      }
-
-      @Override
-      public Object actualInputDetail() {
-        return this.actualInputDetail;
+        return this.detailInputActualValue != null;
       }
     }
 
     static class OnGoing extends Entry {
       final int positionInEntries;
 
-      OnGoing(Type type, int level, int positionInEntries, String name, Object input, boolean expectedBooleanValue, boolean trivial) {
-        super(type, level, input, name, expectedBooleanValue, trivial);
+      OnGoing(Object input, Type type, int level, String formName, boolean outputExpectation, boolean trivial, int positionInEntries) {
+        super(formName, type, level, outputExpectation, outputExpectation, input, trivial);
         this.positionInEntries = positionInEntries;
       }
 
       Finalized result(Object result, Object expectationDetail, Object actualInputDetail) {
-        return new Finalized(this.type(), this.level(), this.input(), result, this.formName(), this.expectedBooleanValue(), expectationDetail, actualInputDetail, this.trivial);
+        return new Finalized(this, result, expectationDetail, actualInputDetail, "detailOutputActualValue");
       }
 
       @Override
@@ -779,23 +770,8 @@ public interface Evaluator {
       }
 
       @Override
-      public boolean hasExpectationDetail() {
-        return false;
-      }
-
-      @Override
-      public Object expectationDetail() {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
       public boolean hasActualInputDetail() {
         return false;
-      }
-
-      @Override
-      public Object actualInputDetail() {
-        throw new UnsupportedOperationException();
       }
     }
   }
