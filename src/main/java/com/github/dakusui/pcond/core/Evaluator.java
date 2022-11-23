@@ -276,15 +276,15 @@ public interface Evaluator {
       }
     }
 
-    public static EvaluationEntry.Finalized mergeNegateAndLeafEntries(EvaluationEntry negate, EvaluationEntry predicate) {
+    public static EvaluationEntry.Finalized mergeNegateAndLeafEntries(EvaluationEntry entry, EvaluationEntry anotherEntry) {
       return new EvaluationEntry.Finalized(
-          format("not(%s)", predicate.formName()), predicate.type(),
-          negate.level(),
-          negate.outputExpectation(),
-          negate.detailOutputExpectation(),
-          negate.inputActualValue(),
-          negate.detailInputActualValue(),
-          negate.outputActualValue(),
+          format("not(%s)", anotherEntry.formName()), anotherEntry.type(),
+          entry.level(),
+          entry.outputExpectation(),
+          entry.detailOutputExpectation(),
+          entry.inputActualValue(),
+          entry.detailInputActualValue(),
+          entry.outputActualValue(),
           "detailOutputActualValue",
           false
       );
@@ -372,7 +372,7 @@ public interface Evaluator {
       this.leaveWithReturnedValue(
           streamPred,
           value.returnedValue()
-              .filter(valueChecker(streamPred))
+              .filter(createValueCheckingPredicateForStream(streamPred))
               .map(v -> v != null ? v : NULL_VALUE)
               .findFirst()
               .map(each -> !ret)
@@ -380,7 +380,7 @@ public interface Evaluator {
           false);
     }
 
-    private <E> Predicate<E> valueChecker(Evaluable.StreamPred<E> streamPred) {
+    private <E> Predicate<E> createValueCheckingPredicateForStream(Evaluable.StreamPred<E> streamPredicate) {
       return e -> {
         Evaluator evaluator = this.copyEvaluator();
 
@@ -388,7 +388,7 @@ public interface Evaluator {
         boolean ret = false;
         Object throwable = "<<OUTPUT MISSING>>";
         try {
-          streamPred.cut().accept(EvaluationContext.forValue(e), evaluator);
+          streamPredicate.cut().accept(EvaluationContext.forValue(e), evaluator);
           succeeded = true;
         } catch (Error error) {
           throw error;
@@ -396,8 +396,8 @@ public interface Evaluator {
           throwable = t;
           throw wrapIfNecessary(t);
         } finally {
-          if (!succeeded || evaluator.resultValueAsBoolean() == streamPred.valueToCut()) {
-            importResultEntries(evaluator.resultEntries(), throwable);
+          if (!succeeded || evaluator.resultValueAsBoolean() == streamPredicate.valueToCut()) {
+            importEvaluationEntries(evaluator.resultEntries(), throwable);
             ret = true;
           }
         }
@@ -432,24 +432,23 @@ public interface Evaluator {
       return impl;
     }
 
-    public void importResultEntries(List<EvaluationEntry> resultEntries, Object other) {
+    public void importEvaluationEntries(List<EvaluationEntry> resultEntries, Object other) {
       resultEntries.stream()
           .map(each -> createEntryForImport(each, other))
           .forEach(each -> this.entries.add(each));
     }
 
     private EvaluationEntry.Finalized createEntryForImport(EvaluationEntry entry, Object other) {
-      //      assert entry instanceof EvaluationEntry.Finalized;
+      assert entry instanceof EvaluationEntry.Finalized;
       return new EvaluationEntry.Finalized(
-          entry.formName(), entry.type(),
+          entry.formName(),
+          entry.type(),
           this.onGoingEntries.size() + entry.level(),
           entry.outputExpectation(),
           entry.detailOutputExpectation(),
           entry.inputActualValue(),
           entry.detailInputActualValue(),
-          entry.evaluationFinished() ?
-              entry.outputActualValue() :
-              other,
+          entry.evaluationFinished() ? entry.outputActualValue() : other,
           "detailOutputActualValue",
           entry.trivial
       );
