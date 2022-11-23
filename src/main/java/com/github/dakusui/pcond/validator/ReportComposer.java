@@ -87,7 +87,7 @@ public interface ReportComposer {
               .filter((Evaluator.Entry each) -> !each.isTrivial())
               .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
                   each,
-                  () -> each.hasOutput() ?
+                  () -> each.evaluationFinished() ?
                       formatObject(each.output()) :
                       formatObject(t)))
               .collect(toList()));
@@ -99,20 +99,22 @@ public interface ReportComposer {
               .filter((Evaluator.Entry each) -> !each.isTrivial())
               .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
                   each,
-                  () -> (each.hasOutput() ?
-                      formatObject(
-                          // Issue-#59: This is not a good idea to check if the output is an instance of Throwable.
-                          //   Because for a function that returns a Throwable, this logic will not print an expected value properly.
-                          //   (For such a function, printing the throwable itself is a desired behavior.)
-                          (each.output() instanceof Boolean || each.output() instanceof Throwable) ?
-                              each.expectedBooleanValue() :
-                              each.output()) :
-                      formatObject(t))))
+                  () -> composeExpectationSummaryRecordForEntry(each, t)))
               .peek((FormattedEntry each) -> {
                 Optional<Object> formSnapshot = each.mismatchExplanation();
                 formSnapshot.ifPresent(expectationDetails::add);
               })
               .collect(toList()));
+    }
+
+    private static String composeExpectationSummaryRecordForEntry(Evaluator.Entry entry, Throwable t) {
+      return entry.evaluationFinished() ?
+          formatObject(
+              (entry.output() instanceof Boolean || entry.output() instanceof Throwable) ?
+                  //              !asList(FUNCTION, TRANSFORM).contains(entry.type()) ?
+                  entry.expectedBooleanValue() :
+                  entry.output()) :
+          formatObject(t);
     }
 
     private static String composeSummary(List<FormattedEntry> formattedEntries) {

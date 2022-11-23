@@ -403,15 +403,31 @@ public interface Validator {
         throw error;
       } catch (Throwable t) {
         String message = format("An exception (%s) was thrown during evaluation of value: %s: %s", t, value.returnedValue(), cond);
-        throw executionFailure(configuration().reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
+        throw executionFailure(configuration()
+            .reportComposer()
+            .composeExplanation(
+                message,
+                evaluator.resultEntries(),
+                t),
+            t);
       }
       if (evaluator.resultValueAsBoolean())
         return value.returnedValue();
       List<Evaluator.Entry> entries = evaluator.resultEntries();
-      throw exceptionComposerFunction.create(configuration().reportComposer().composeExplanation(messageComposerFunction.apply(value.returnedValue(), cond), entries, null));
+      throw exceptionComposerFunction.create(configuration()
+          .reportComposer()
+          .composeExplanation(
+              messageComposerFunction.apply(value.returnedValue(), cond),
+              entries,
+              null));
     } else {
       if (!cond.test(value.returnedValue()))
-        throw exceptionComposerFunction.create(configuration().reportComposer().composeExplanation(messageComposerFunction.apply(value.returnedValue(), cond), emptyList(), null));
+        throw exceptionComposerFunction.create(configuration()
+            .reportComposer()
+            .composeExplanation(
+                messageComposerFunction.apply(value.returnedValue(), cond),
+                emptyList(),
+                null));
       return value.returnedValue();
     }
   }
@@ -517,9 +533,9 @@ public interface Validator {
 
       MessageComposer messageComposer;
       ReportComposer  reportComposer;
-      private ExceptionComposer.ForRequire  exceptionComposerForRequire;
-      private ExceptionComposer.ForEnsure   exceptionComposerForEnsure;
-      private ExceptionComposer.ForValidate defaultExceptionComposerForValidate;
+      private ExceptionComposer.ForRequire       exceptionComposerForRequire;
+      private ExceptionComposer.ForEnsure        exceptionComposerForEnsure;
+      private ExceptionComposer.ForValidate      defaultExceptionComposerForValidate;
       private ExceptionComposer.ForAssertion     exceptionComposerForAssert;
       private ExceptionComposer.ForTestAssertion exceptionComposerForAssertThat;
 

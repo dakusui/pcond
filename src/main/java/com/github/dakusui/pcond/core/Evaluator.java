@@ -442,7 +442,7 @@ public interface Evaluator {
           each.type,
           this.onGoingEntries.size() + each.level(),
           each.input(),
-          each.hasOutput() ? each.output() : other, each.formName(),
+          each.evaluationFinished() ? each.output() : other, each.formName(),
           each.expectedBooleanValue,
           each.hasExpectationDetail() ? each.expectationDetail() : null,
           each.hasActualInputDetail() ? each.actualInputDetail() : null,
@@ -619,7 +619,7 @@ public interface Evaluator {
       return this.expectedBooleanValue;
     }
 
-    public abstract boolean hasOutput();
+    public abstract boolean evaluationFinished();
 
     public abstract <T> T output();
 
@@ -668,8 +668,21 @@ public interface Evaluator {
         this.actualInputDetail = actualInputDetail;
       }
 
+      Finalized(OnGoing onGoing, Object output, Object expectationDetail, Object actualInputDetail) {
+        super(
+            onGoing.type(),
+            onGoing.level(),
+            onGoing.input(),
+            onGoing.formName(),
+            onGoing.expectedBooleanValue(),
+            onGoing.isTrivial());
+        this.output = output;
+        this.expectationDetail = expectationDetail;
+        this.actualInputDetail = actualInputDetail;
+      }
+
       @Override
-      public boolean hasOutput() {
+      public boolean evaluationFinished() {
         return true;
       }
 
@@ -713,7 +726,7 @@ public interface Evaluator {
       }
 
       @Override
-      public boolean hasOutput() {
+      public boolean evaluationFinished() {
         return false;
       }
 

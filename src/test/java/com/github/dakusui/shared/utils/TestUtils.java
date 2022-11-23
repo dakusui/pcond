@@ -64,6 +64,12 @@ public enum TestUtils {
     return function("stringToLowerCase", String::toLowerCase);
   }
 
+  /**
+   * Transform a given string into an easy to check form, where double quotates are replaced with single quotes and continuing spaces into single space.
+   *
+   * @param str A string to be converted.
+   * @return Simplified string.
+   */
   public static String simplifyString(String str) {
     return str.replaceAll(" +", " ").replaceAll("\"", "'");
   }

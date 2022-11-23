@@ -22,7 +22,7 @@ public class EvaluatorTest extends TestBase {
           EvaluationContext.forValue("hello"),
           (Evaluable.Conjunction<String>) and(isNotNull(), errorThrowingPredicate()));
     } catch (EvaluationFailure e) {
-      assertFalse(evaluator.resultEntries().get(0).hasOutput());
+      assertFalse(evaluator.resultEntries().get(0).evaluationFinished());
     }
   }
 
