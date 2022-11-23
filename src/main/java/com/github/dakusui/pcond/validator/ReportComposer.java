@@ -108,7 +108,7 @@ public interface ReportComposer {
     private static String composeExpectationSummaryRecordForEntry(EvaluationEntry entry, Throwable t) {
       return entry.evaluationFinished() ?
           formatObject(
-              (entry.outputActualValue() instanceof Boolean || entry.outputActualValue() instanceof Throwable) ?
+              (entry.outputExpectation() instanceof Boolean || entry.outputActualValue() instanceof Throwable) ?
                   //              !asList(FUNCTION, TRANSFORM).contains(entry.type()) ?
                   entry.outputExpectation() :
                   entry.outputActualValue()) :

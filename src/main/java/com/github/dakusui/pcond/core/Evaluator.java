@@ -11,7 +11,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
-import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActual;
+import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActualValue;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainExpectation;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
@@ -165,7 +165,7 @@ public interface Evaluator {
           current.finalizeEntry(
               toSnapshotIfPossible(returnedValue),
               unexpected ? explainExpectation(evaluable) : null,
-              unexpected ? explainActual(evaluable, composeActualValue(current.inputActualValue(), returnedValue)) : null,
+              unexpected ? explainActualValue(evaluable, composeActualValue(current.inputActualValue(), returnedValue)) : null,
               "detailOutputActualValue"));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.valueReturned(returnedValue);
@@ -181,7 +181,7 @@ public interface Evaluator {
           current.finalizeEntry(
               toSnapshotIfPossible(thrownException),
               explainExpectation(evaluable),
-              explainActual(evaluable, composeActualValue(current.inputActualValue(), thrownException)),
+              explainActualValue(evaluable, composeActualValue(current.inputActualValue(), thrownException)),
               "detailOutputActualValue"));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.exceptionThrown(thrownException);
@@ -592,7 +592,7 @@ public interface Evaluator {
       return null;
     }
 
-    static Object explainActual(Object evaluable, Object actualValue) {
+    static Object explainActualValue(Object evaluable, Object actualValue) {
       if (evaluable instanceof Explainable)
         return explainValue(((Explainable) evaluable).explainActual(actualValue));
       return null;
