@@ -162,10 +162,11 @@ public interface Evaluator {
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
           current.positionInEntries,
-          current.result(
+          current.finalizeEntry(
               toSnapshotIfPossible(returnedValue),
               unexpected ? explainExpectation(evaluable) : null,
-              unexpected ? explainActual(evaluable, composeActualValue(current.actualInput(), returnedValue)) : null, "detailOutputActualValue"));
+              unexpected ? explainActual(evaluable, composeActualValue(current.inputActualValue(), returnedValue)) : null,
+              "detailOutputActualValue"));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.valueReturned(returnedValue);
       if (evaluable.requestExpectationFlip())
@@ -177,10 +178,11 @@ public interface Evaluator {
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
           current.positionInEntries,
-          current.result(
+          current.finalizeEntry(
               toSnapshotIfPossible(thrownException),
               explainExpectation(evaluable),
-              explainActual(evaluable, composeActualValue(current.actualInput(), thrownException)), "detailOutputActualValue"));
+              explainActual(evaluable, composeActualValue(current.inputActualValue(), thrownException)),
+              "detailOutputActualValue"));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.exceptionThrown(thrownException);
       if (evaluable.requestExpectationFlip())
@@ -278,8 +280,11 @@ public interface Evaluator {
       return new EvaluationEntry.Finalized(
           format("not(%s)", predicate.formName()), predicate.type(),
           negate.level(),
-          negate.outputExpectation(), negate.detailOutputExpectation(), negate.actualInput(),
-          negate.actualInputDetail(), negate.outputActualValue(),
+          negate.outputExpectation(),
+          negate.detailOutputExpectation(),
+          negate.inputActualValue(),
+          negate.detailInputActualValue(),
+          negate.outputActualValue(),
           "detailOutputActualValue",
           false
       );
@@ -407,7 +412,9 @@ public interface Evaluator {
 
     @Override
     public boolean resultValueAsBoolean() {
-      return (boolean) resultValue();
+      if (this.resultValue() instanceof Boolean)
+        return (boolean) resultValue();
+      return false;
     }
 
     public boolean resultValueAsBooleanIfBooleanOtherwise(boolean otherwiseValue) {
@@ -431,17 +438,20 @@ public interface Evaluator {
           .forEach(each -> this.entries.add(each));
     }
 
-    private EvaluationEntry.Finalized createEntryForImport(EvaluationEntry each, Object other) {
+    private EvaluationEntry.Finalized createEntryForImport(EvaluationEntry entry, Object other) {
+      //      assert entry instanceof EvaluationEntry.Finalized;
       return new EvaluationEntry.Finalized(
-          each.formName(), each.type(),
-          this.onGoingEntries.size() + each.level(),
-          each.outputExpectation, each.detailOutputExpectation(), each.actualInput(),
-          each.actualInputDetail(),
-          each.evaluationFinished() ?
-              each.outputActualValue() :
+          entry.formName(), entry.type(),
+          this.onGoingEntries.size() + entry.level(),
+          entry.outputExpectation(),
+          entry.detailOutputExpectation(),
+          entry.inputActualValue(),
+          entry.detailInputActualValue(),
+          entry.evaluationFinished() ?
+              entry.outputActualValue() :
               other,
           "detailOutputActualValue",
-          each.trivial
+          entry.trivial
       );
     }
   }

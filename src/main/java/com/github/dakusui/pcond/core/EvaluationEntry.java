@@ -59,20 +59,16 @@ public abstract class EvaluationEntry {
 
   private final int level;
 
+  Object inputExpectation;
+  Object detailInputExpectation;
 
-  /**
-   * A field to store an input value to an {@code Evaluable}.
-   * This may be
-   */
-  private final Object inputActualValue;
+  Object inputActualValue;
   Object detailInputActualValue;
 
-  /**
-   * A name of an evaluable.
-   */
-  final boolean outputExpectation;
+  boolean outputExpectation;
 
   Object detailOutputExpectation;
+
 
   /**
    * A flag to let the framework know this entry should be printed in a less outstanding form.
@@ -83,6 +79,8 @@ public abstract class EvaluationEntry {
     this.type = type;
     this.level = level;
     this.formName = formName;
+    this.inputExpectation = inputActualValue;
+    this.detailInputExpectation = detailInputActualValue;
     this.outputExpectation = outputExpectation;
     this.detailOutputExpectation = detailOutputExpectation;
     this.inputActualValue = inputActualValue;
@@ -94,20 +92,13 @@ public abstract class EvaluationEntry {
     this.type = base.type();
     this.level = base.level();
     this.formName = base.formName();
-    this.inputActualValue = base.actualInput();
-    this.detailInputActualValue = base.actualInputDetail();
+    this.inputExpectation = base.inputExpectation();
+    this.detailInputExpectation = base.detailInputExpectation();
+    this.inputActualValue = base.inputActualValue();
+    this.detailInputActualValue = base.detailInputActualValue();
     this.detailOutputExpectation = base.detailOutputExpectation();
     this.outputExpectation = base.outputExpectation();
     this.trivial = base.isTrivial();
-  }
-
-  public int level() {
-    return level;
-  }
-
-  @SuppressWarnings({ "unchecked" })
-  public <T> T actualInput() {
-    return (T) this.inputActualValue;
   }
 
   public String formName() {
@@ -118,26 +109,44 @@ public abstract class EvaluationEntry {
     return this.type;
   }
 
-  public boolean outputExpectation() {
-    return this.outputExpectation;
-  }
-
   public abstract boolean evaluationFinished();
-
-  public abstract <T> T outputActualValue();
-
-  public Object detailOutputExpectation() {
-    return this.detailOutputExpectation;
-  }
-
-  final public Object actualInputDetail() {
-    return this.detailInputActualValue;
-  }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean isTrivial() {
     return this.trivial;
   }
+
+  public int level() {
+    return level;
+  }
+
+  public Object inputExpectation() {
+    return this.inputExpectation;
+  }
+
+  public Object detailInputExpectation() {
+    return this.detailInputExpectation;
+  }
+
+  public boolean outputExpectation() {
+    return this.outputExpectation;
+  }
+
+  public Object detailOutputExpectation() {
+    return this.detailOutputExpectation;
+  }
+
+  public Object inputActualValue() {
+    return this.inputActualValue;
+  }
+
+  final public Object detailInputActualValue() {
+    return this.detailInputActualValue;
+  }
+
+  public abstract Object outputActualValue();
+
+  public abstract Object detailOutputActualValue();
 
   public enum Type {
     TRANSFORM,
@@ -179,10 +188,14 @@ public abstract class EvaluationEntry {
       return true;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> T outputActualValue() {
-      return (T) outputActualValue;
+    public Object outputActualValue() {
+      return outputActualValue;
+    }
+
+    @Override
+    public Object detailOutputActualValue() {
+      return this.detailOutputActualValue;
     }
   }
 
@@ -194,8 +207,8 @@ public abstract class EvaluationEntry {
       this.positionInEntries = positionInEntries;
     }
 
-    Finalized result(Object result, Object expectationDetail, Object actualInputDetail, Object detailOutputActualValue) {
-      return new Finalized(this, expectationDetail, actualInputDetail, result, detailOutputActualValue);
+    Finalized finalizeEntry(Object result, Object detailOutputExpectation, Object detailInputActualValue, Object detailOutputActualValue) {
+      return new Finalized(this, detailOutputExpectation, detailInputActualValue, result, detailOutputActualValue);
     }
 
     @Override
@@ -204,7 +217,12 @@ public abstract class EvaluationEntry {
     }
 
     @Override
-    public <T> T outputActualValue() {
+    public Object outputActualValue() {
+      throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Object detailOutputActualValue() {
       throw new UnsupportedOperationException();
     }
   }

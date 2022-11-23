@@ -81,7 +81,7 @@ public interface ReportComposer {
     private static String composeSummaryForActualResults(List<EvaluationEntry> result, Throwable t, List<Object> actualInputDetails) {
       return composeSummary(
           result.stream()
-              .peek((EvaluationEntry each) -> actualInputDetails.add(each.actualInputDetail()))
+              .peek((EvaluationEntry each) -> actualInputDetails.add(each.detailInputActualValue()))
               .filter((EvaluationEntry each) -> !each.isTrivial())
               .map((EvaluationEntry each) -> evaluatorEntryToFormattedEntry(
                   each,
@@ -132,7 +132,7 @@ public interface ReportComposer {
 
     private static FormattedEntry evaluatorEntryToFormattedEntry(EvaluationEntry entry, Supplier<String> outputFormatter) {
       return new FormattedEntry(
-          formatObject(entry.actualInput()),
+          formatObject(entry.inputActualValue()),
           entry.formName(),
           indent(entry.level()),
           asList(LEAF, AND, OR, NOT, FUNCTION).contains(entry.type()) ?
