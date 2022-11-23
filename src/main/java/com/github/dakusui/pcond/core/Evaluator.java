@@ -564,6 +564,49 @@ public interface Evaluator {
    * one.
    * Since one evaluate can have its children and only one child can be evaluated at once,
    * on-going entries are held as a list (stack).
+   *
+   * When the evaluator leaves the evaluable, the entry is "finalized".
+   * From the data held by an entry, "expectation" and "actual behavior" reports are generated.
+   *
+   * .Evaluation Summary Format
+   * ----
+   * +----------------------------------------------------------------------------- Failure Detail Index
+   * |  +-------------------------------------------------------------------------- Input
+   * |  |                                            +----------------------------- Form (Function/Predicate)
+   * |  |                                            |                           +- Output
+   * |  |                                            |                           |
+   * V  V                                            V                           V
+   *     Book:[title:<De Bello G...i appellantur.>]->check:allOf               ->false
+   *                                                     transform:title       ->"De Bello Gallico"
+   *     "De Bello Gallico"                        ->    check:allOf           ->false
+   *                                                         isNotNull         ->true
+   * [0]                                                     transform:parseInt->NumberFormatException:"For input s...ico""
+   *     null                                      ->        check:allOf       ->false
+   *                                                             >=[10]        ->true
+   *                                                             <[40]         ->true
+   *     Book:[title:<De Bello G...i appellantur.>]->    transform:title       ->"Gallia est omnis divis...li appellantur."
+   *     "Gallia est omnis divis...li appellantur."->    check:allOf           ->false
+   *                                                         isNotNull         ->true
+   *                                                         transform:length  ->145
+   *     145                                       ->        check:allOf       ->false
+   * [1]                                                         >=[200]       ->true
+   *                                                             <[400]        ->true
+   * ----
+   *
+   * Failure Detail Index::
+   * In the full format of a failure report, detailed descriptions of mismatching forms are provided if the form is {@link Explainable}.
+   * This index points an item in the detail part of the full report.
+   * Input::
+   * Values given to forms are printed here.
+   * If the previous line uses the same value, the value will not be printed.
+   * Form (Function/Predicate)::
+   * This part displays names of forms (predicates and functions).
+   * If a form is marked trivial, the framework may merge the form with the next line.
+   * Output::
+   * For predicates, expected boolean value is printed.
+   * For functions, if a function does not throw an exception during its evaluation, the result will be printed here both for expectation and actual behavior summary.
+   * If it throws an exception, the exception will be printed here in actual behavior summary.
+   *
    */
   abstract class Entry {
     private final Type   type;
