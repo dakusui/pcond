@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.validator;
 
-import com.github.dakusui.pcond.core.Evaluator;
+import com.github.dakusui.pcond.core.EvaluationEntry;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.*;
@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
@@ -26,7 +26,7 @@ public interface ReportComposer {
     return Explanation.fromMessage(msg);
   }
 
-  default Explanation composeExplanation(String message, List<Evaluator.Entry> result, Throwable t) {
+  default Explanation composeExplanation(String message, List<EvaluationEntry> result, Throwable t) {
     return Utils.composeExplanation(message, result, t);
   }
 
@@ -60,7 +60,7 @@ public interface ReportComposer {
   enum Utils {
     ;
 
-    static Explanation composeExplanation(String message, List<Evaluator.Entry> result, Throwable t) {
+    static Explanation composeExplanation(String message, List<EvaluationEntry> result, Throwable t) {
       List<Object> expectationDetails = new LinkedList<>();
       List<Object> actualResultDetails = new LinkedList<>();
       return new Explanation(message,
@@ -77,15 +77,15 @@ public interface ReportComposer {
       return ReportComposer.Report.create(summary, stringFormDetails);
     }
 
-    private static String composeSummaryForActualResults(List<Evaluator.Entry> result, Throwable t, List<Object> actualInputDetails) {
+    private static String composeSummaryForActualResults(List<EvaluationEntry> result, Throwable t, List<Object> actualInputDetails) {
       return composeSummary(
           result.stream()
-              .peek((Evaluator.Entry each) -> {
+              .peek((EvaluationEntry each) -> {
                 if (each.hasActualInputDetail())
                   actualInputDetails.add(each.actualInputDetail());
               })
-              .filter((Evaluator.Entry each) -> !each.isTrivial())
-              .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
+              .filter((EvaluationEntry each) -> !each.isTrivial())
+              .map((EvaluationEntry each) -> evaluatorEntryToFormattedEntry(
                   each,
                   () -> each.evaluationFinished() ?
                       formatObject(each.output()) :
@@ -93,11 +93,11 @@ public interface ReportComposer {
               .collect(toList()));
     }
 
-    private static String composeSummaryForExpectations(List<Evaluator.Entry> result, Throwable t, List<Object> expectationDetails) {
+    private static String composeSummaryForExpectations(List<EvaluationEntry> result, Throwable t, List<Object> expectationDetails) {
       return composeSummary(
           result.stream()
-              .filter((Evaluator.Entry each) -> !each.isTrivial())
-              .map((Evaluator.Entry each) -> evaluatorEntryToFormattedEntry(
+              .filter((EvaluationEntry each) -> !each.isTrivial())
+              .map((EvaluationEntry each) -> evaluatorEntryToFormattedEntry(
                   each,
                   () -> composeExpectationSummaryRecordForEntry(each, t)))
               .peek((FormattedEntry each) -> {
@@ -107,7 +107,7 @@ public interface ReportComposer {
               .collect(toList()));
     }
 
-    private static String composeExpectationSummaryRecordForEntry(Evaluator.Entry entry, Throwable t) {
+    private static String composeExpectationSummaryRecordForEntry(EvaluationEntry entry, Throwable t) {
       return entry.evaluationFinished() ?
           formatObject(
               (entry.output() instanceof Boolean || entry.output() instanceof Throwable) ?
@@ -132,7 +132,7 @@ public interface ReportComposer {
               mismatchExplanationFound));
     }
 
-    private static FormattedEntry evaluatorEntryToFormattedEntry(Evaluator.Entry entry, Supplier<String> outputFormatter) {
+    private static FormattedEntry evaluatorEntryToFormattedEntry(EvaluationEntry entry, Supplier<String> outputFormatter) {
       return new FormattedEntry(
           formatObject(entry.actualInput()),
           entry.formName(),

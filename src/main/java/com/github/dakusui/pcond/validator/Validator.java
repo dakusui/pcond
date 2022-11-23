@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.validator;
 
 import com.github.dakusui.pcond.core.EvaluationContext;
 import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.EvaluationEntry;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Predicates;
 
@@ -413,7 +414,7 @@ public interface Validator {
       }
       if (evaluator.resultValueAsBoolean())
         return value.returnedValue();
-      List<Evaluator.Entry> entries = evaluator.resultEntries();
+      List<EvaluationEntry> entries = evaluator.resultEntries();
       throw exceptionComposerFunction.create(configuration()
           .reportComposer()
           .composeExplanation(

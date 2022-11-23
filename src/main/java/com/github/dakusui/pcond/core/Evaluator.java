@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActual;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainExpectation;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
@@ -113,9 +113,9 @@ public interface Evaluator {
    * Returns a list of result entries.
    *
    * @return A list of result entries.
-   * @see Entry
+   * @see EvaluationEntry
    */
-  List<Entry> resultEntries();
+  List<EvaluationEntry> resultEntries();
 
 
   /**
@@ -129,8 +129,8 @@ public interface Evaluator {
 
   class Impl implements Evaluator {
     private static final Object NULL_VALUE = new Object();
-    List<Entry.OnGoing> onGoingEntries = new LinkedList<>();
-    List<Entry>         entries        = new ArrayList<>();
+    List<EvaluationEntry.OnGoing> onGoingEntries = new LinkedList<>();
+    List<EvaluationEntry>         entries        = new ArrayList<>();
     final EvaluationContext<Object> currentResult;
     boolean currentlyExpectedBooleanValue = true;
 
@@ -139,7 +139,7 @@ public interface Evaluator {
     }
 
     void enter(EvaluableDesc evaluableDesc, EvaluationContext<?> input) {
-      Entry.OnGoing newEntry = new Entry.OnGoing(
+      EvaluationEntry.OnGoing newEntry = new EvaluationEntry.OnGoing(
           input.toSnapshot(), evaluableDesc.type(),
           (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
           evaluableDesc.name,
@@ -153,16 +153,16 @@ public interface Evaluator {
         this.flipCurrentlyExpectedBooleanValue();
     }
 
-    void leave(Evaluable<?> evaluable, EvaluationContext<Object> evaluationContext, boolean unexpected) {
+    void leave(Evaluable<?> evaluable, EvaluationContext<Object> evaluationContext) {
       if (evaluationContext.state() == EvaluationContext.State.VALUE_RETURNED)
-        leaveWithReturnedValue(evaluable, evaluationContext.returnedValue(), unexpected);
+        leaveWithReturnedValue(evaluable, evaluationContext.returnedValue(), false);
       else if (evaluationContext.state() == EvaluationContext.State.EXCEPTION_THROWN)
         leaveWithThrownException(evaluable, evaluationContext.thrownException());
     }
 
     void leaveWithReturnedValue(Evaluable<?> evaluable, Object returnedValue, boolean unexpected) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
-      Entry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
+      EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
           current.positionInEntries,
           current.result(
@@ -177,7 +177,7 @@ public interface Evaluator {
 
     void leaveWithThrownException(Evaluable<?> evaluable, Throwable thrownException) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
-      Entry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
+      EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
           current.positionInEntries,
           current.result(
@@ -269,16 +269,16 @@ public interface Evaluator {
         mergeLastTwoEntriesIfPossible(this.entries);
     }
 
-    private static void mergeLastTwoEntriesIfPossible(List<Entry> entries) {
+    private static void mergeLastTwoEntriesIfPossible(List<EvaluationEntry> entries) {
       if (LEAF.equals(entries.get(entries.size() - 1).type())) {
-        Entry entryForLeaf = entries.remove(entries.size() - 1);
-        Entry entryForNegate = entries.remove(entries.size() - 1);
+        EvaluationEntry entryForLeaf = entries.remove(entries.size() - 1);
+        EvaluationEntry entryForNegate = entries.remove(entries.size() - 1);
         entries.add(mergeNegateAndLeafEntries(entryForNegate, entryForLeaf));
       }
     }
 
-    public static Entry.Finalized mergeNegateAndLeafEntries(Entry negate, Entry predicate) {
-      return new Entry.Finalized(
+    public static EvaluationEntry.Finalized mergeNegateAndLeafEntries(EvaluationEntry negate, EvaluationEntry predicate) {
+      return new EvaluationEntry.Finalized(
           format("not(%s)", predicate.formName()), predicate.type(),
           negate.level(),
           negate.expectedBooleanValue(), negate.expectationDetail(), negate.actualInput(),
@@ -325,8 +325,8 @@ public interface Evaluator {
       transformation.mapper().accept(value, this);
       this.leave(
           transformation.checker(),
-          this.currentResult(),
-          false);
+          this.currentResult()
+      );
       this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), currentResult());
 
       transformation.checker().accept(this.currentResult(), this);
@@ -418,7 +418,7 @@ public interface Evaluator {
     }
 
     @Override
-    public List<Entry> resultEntries() {
+    public List<EvaluationEntry> resultEntries() {
       return unmodifiableList(this.entries);
     }
 
@@ -428,15 +428,15 @@ public interface Evaluator {
       return impl;
     }
 
-    public void importResultEntries(List<Entry> resultEntries, Object other) {
+    public void importResultEntries(List<EvaluationEntry> resultEntries, Object other) {
       resultEntries.stream()
           .map(each -> createEntryForImport(each, other))
           .forEach(each -> this.entries.add(each));
     }
 
-    private Entry.Finalized createEntryForImport(Entry each, Object other) {
-      return new Entry.Finalized(
-          each.formName(), each.type,
+    private EvaluationEntry.Finalized createEntryForImport(EvaluationEntry each, Object other) {
+      return new EvaluationEntry.Finalized(
+          each.formName(), each.type(),
           this.onGoingEntries.size() + each.level(),
           each.outputExpectation, each.expectationDetail(), each.actualInput(),
           each.hasActualInputDetail() ? each.actualInputDetail() : null, each.evaluationFinished() ? each.output() : other,
@@ -447,19 +447,19 @@ public interface Evaluator {
   }
 
   class EvaluableDesc {
-    final Entry.Type type;
-    final String     name;
+    final EvaluationEntry.Type type;
+    final String               name;
     final boolean    requestsExpectationFlip;
     final boolean    trivial;
 
-    public EvaluableDesc(Entry.Type type, String name, boolean requestsExpectationFlip, boolean trivial) {
+    public EvaluableDesc(EvaluationEntry.Type type, String name, boolean requestsExpectationFlip, boolean trivial) {
       this.type = type;
       this.name = name;
       this.requestsExpectationFlip = requestsExpectationFlip;
       this.trivial = trivial;
     }
 
-    public Entry.Type type() {
+    public EvaluationEntry.Type type() {
       return this.type;
     }
 
@@ -554,231 +554,8 @@ public interface Evaluator {
   }
 
   /**
-   * A class to hold an entry of execution history of the {@link Evaluator}.
-   * When an evaluator enters into one {@link Evaluable} (actually a predicate or a function),
-   * an {@link OnGoing} entry is created and held by the evaluator as a current
-   * one.
-   * Since one evaluate can have its children and only one child can be evaluated at once,
-   * on-going entries are held as a list (stack).
-   *
-   * When the evaluator leaves the evaluable, the entry is "finalized".
-   * From the data held by an entry, "expectation" and "actual behavior" reports are generated.
-   *
-   * .Evaluation Summary Format
-   * ----
-   * +----------------------------------------------------------------------------- Failure Detail Index
-   * |  +-------------------------------------------------------------------------- Input
-   * |  |                                            +----------------------------- Form (Function/Predicate)
-   * |  |                                            |                           +- Output
-   * |  |                                            |                           |
-   * V  V                                            V                           V
-   * Book:[title:<De Bello G...i appellantur.>]->check:allOf               ->false
-   * transform:title       ->"De Bello Gallico"
-   * "De Bello Gallico"                        ->    check:allOf           ->false
-   * isNotNull         ->true
-   * [0]                                                     transform:parseInt->NumberFormatException:"For input s...ico""
-   * null                                      ->        check:allOf       ->false
-   * >=[10]        ->true
-   * <[40]         ->true
-   * Book:[title:<De Bello G...i appellantur.>]->    transform:title       ->"Gallia est omnis divis...li appellantur."
-   * "Gallia est omnis divis...li appellantur."->    check:allOf           ->false
-   * isNotNull         ->true
-   * transform:length  ->145
-   * 145                                       ->        check:allOf       ->false
-   * [1]                                                         >=[200]       ->true
-   * <[400]        ->true
-   * ----
-   *
-   * Failure Detail Index::
-   * In the full format of a failure report, detailed descriptions of mismatching forms are provided if the form is {@link Explainable}.
-   * This index points an item in the detail part of the full report.
-   * Input::
-   * Values given to forms are printed here.
-   * If the previous line uses the same value, the value will not be printed.
-   * Form (Function/Predicate)::
-   * This part displays names of forms (predicates and functions).
-   * If a form is marked trivial, the framework may merge the form with the next line.
-   * Output::
-   * For predicates, expected boolean value is printed.
-   * For functions, if a function does not throw an exception during its evaluation, the result will be printed here both for expectation and actual behavior summary.
-   * If it throws an exception, the exception will be printed here in actual behavior summary.
-   */
-  abstract class Entry {
-    private final Type   type;
-    /**
-     * A name of a form (evaluable; function, predicate)
-     */
-    private final String formName;
-
-    private final int level;
-
-
-    /**
-     * A field to store an input value to an {@code Evaluable}.
-     * This may be
-     */
-    private final Object inputActualValue;
-    Object detailInputActualValue;
-
-    /**
-     * A name of an evaluable.
-     */
-    private final boolean outputExpectation;
-
-    Object detailOutputExpectation;
-
-    /**
-     * A flag to let the framework know this entry should be printed in a less outstanding form.
-     */
-    final boolean trivial;
-
-    Entry(String formName, Type type, int level, boolean outputExpectation, Object detailOutputExpectation, Object inputActualValue, boolean trivial) {
-      this.type = type;
-      this.level = level;
-      this.formName = formName;
-      this.outputExpectation = outputExpectation;
-      this.detailOutputExpectation = detailOutputExpectation;
-      this.inputActualValue = inputActualValue;
-      this.detailInputActualValue = "(Not available)";
-      this.trivial = trivial;
-    }
-
-    Entry(Entry base) {
-      this.type = base.type();
-      this.level = base.level();
-      this.formName = base.formName();
-      this.inputActualValue = base.actualInput();
-      this.detailInputActualValue = base.actualInputDetail();
-      this.detailOutputExpectation = base.expectationDetail();
-      this.outputExpectation = base.expectedBooleanValue();
-      this.trivial = base.isTrivial();
-    }
-
-    public int level() {
-      return level;
-    }
-
-    @SuppressWarnings({ "unchecked" })
-    public <T> T actualInput() {
-      return (T) this.inputActualValue;
-    }
-
-    public String formName() {
-      return formName;
-    }
-
-    public Type type() {
-      return this.type;
-    }
-
-    public boolean expectedBooleanValue() {
-      return this.outputExpectation;
-    }
-
-    public abstract boolean evaluationFinished();
-
-    public abstract <T> T output();
-
-    public Object expectationDetail() {
-      return this.detailOutputExpectation;
-    }
-
-    public abstract boolean hasActualInputDetail();
-
-    final public Object actualInputDetail() {
-      return this.detailInputActualValue;
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean isTrivial() {
-      return this.trivial;
-    }
-
-    public enum Type {
-      TRANSFORM,
-      CHECK,
-      AND,
-      OR,
-      NOT,
-      LEAF,
-      FUNCTION,
-      ;
-    }
-
-    static class Finalized extends Entry {
-      final Object outputActualValue;
-      final Object detailOutputActualValue;
-
-      Finalized(
-          String formName, Type type,
-          int level,
-          boolean outputExpectation, Object detailOutputExpectation,
-          Object inputActualValue, Object detailInputActualValue,
-          Object outputActualValue, Object detailOutputActualValue,
-          boolean trivial) {
-        super(formName, type, level, outputExpectation, detailOutputExpectation, inputActualValue, trivial);
-        this.outputActualValue = outputActualValue;
-        this.detailOutputActualValue = detailOutputActualValue;
-        this.detailInputActualValue = detailInputActualValue;
-      }
-
-      Finalized(OnGoing onGoing, Object outputActualValue, Object detailOutputExpectation, Object detailInputActualValue, Object detailOutputActualValue) {
-        super(onGoing);
-        this.outputActualValue = outputActualValue;
-        this.detailOutputActualValue = detailOutputActualValue;
-        this.detailOutputExpectation = detailOutputExpectation;
-        this.detailInputActualValue = detailInputActualValue;
-      }
-
-      @Override
-      public boolean evaluationFinished() {
-        return true;
-      }
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public <T> T output() {
-        return (T) outputActualValue;
-      }
-
-      @Override
-      public boolean hasActualInputDetail() {
-        return this.detailInputActualValue != null;
-      }
-    }
-
-    static class OnGoing extends Entry {
-      final int positionInEntries;
-
-      OnGoing(Object input, Type type, int level, String formName, boolean outputExpectation, boolean trivial, int positionInEntries) {
-        super(formName, type, level, outputExpectation, outputExpectation, input, trivial);
-        this.positionInEntries = positionInEntries;
-      }
-
-      Finalized result(Object result, Object expectationDetail, Object actualInputDetail) {
-        return new Finalized(this, result, expectationDetail, actualInputDetail, "detailOutputActualValue");
-      }
-
-      @Override
-      public boolean evaluationFinished() {
-        return false;
-      }
-
-      @Override
-      public <T> T output() {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public boolean hasActualInputDetail() {
-        return false;
-      }
-    }
-  }
-
-  /**
    * If an input or an output value object of a form implements this interface,
-   * The value returned by `snapshot` method is stored in a {@link Evaluator.Entry}
+   * The value returned by `snapshot` method is stored in a {@link EvaluationEntry}
    * record, instead of the value itself.
    */
   interface Snapshottable {
