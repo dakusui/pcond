@@ -1,9 +1,8 @@
 package com.github.dakusui.shared;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.copyOfRange;
@@ -131,14 +130,19 @@ public class ReportParser {
     }
 
     public static class Record {
-      private final String line;
-      private final String in;
-      private final String op;
-      private final String out;
+      static final  Pattern INDEX_PATTERN = Pattern.compile("^\\[(\\d+)].+");
+      private final String  line;
+      private final String  in;
+      private final String  op;
+      private final String  out;
+
+      private final int detailIndex;
 
       Record(String line) {
         this.line = line;
-        String[] fields = this.line().split("->");
+        this.detailIndex = extractIndex(this.line());
+        String[] fields = Arrays.stream(this.line().replaceAll("^\\[\\d+]", "").split("->")).map(String::trim).toArray(String[]::new);
+        System.out.println(Arrays.toString(fields));
         assert fields.length == 2 || fields.length == 3;
         if (fields.length == 2) {
           this.in = null;
@@ -149,6 +153,13 @@ public class ReportParser {
           this.op = fields[1];
           this.out = fields[0];
         }
+      }
+
+      private int extractIndex(String line) {
+        Matcher m = INDEX_PATTERN.matcher(line);
+        if (m.matches())
+          return Integer.parseInt(m.group(1));
+        return -1;
       }
 
       Optional<String> in() {
@@ -167,9 +178,13 @@ public class ReportParser {
         return this.line;
       }
 
+      OptionalInt detailIndex() {
+        return detailIndex >= 0 ? OptionalInt.of(detailIndex) : OptionalInt.empty();
+      }
+
       @Override
       public String toString() {
-        return String.format("in:%s; op:%s:out;%s", in(), op(), out());
+        return String.format("Summary.Record:[in:%s; op:%s; out:%s; detailIndex:%s]", in(), op(), out(), detailIndex());
       }
     }
   }

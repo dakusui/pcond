@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.core.fluent.builtins.StringTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.shared.ReportParser;
 import org.junit.ComparisonFailure;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -171,33 +172,39 @@ public class Fluent4Example {
 
     @Test
     public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength() {
-      Book book = new Book(
-          "De Bello Gallico",
-          "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, "
-              + "aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
-      assertAll(
-          new BookTransformer(book)
-              .transform(tx -> tx.title()
-                  .transform(ty -> ty
-                      .then()
-                      .isNotNull().done())
-                  .transform(ty -> ty
-                      .parseInt()
-                      .then()
-                      .greaterThanOrEqualTo(10)
-                      .lessThan(40)
-                      .done())
-                  .done())
-              .transform(tx -> tx.abstractText()
-                  .transform(ty -> ty
-                      .then()
-                      .isNotNull().done())
-                  .transform(ty -> ty
-                      .length()
-                      .then()
-                      .greaterThanOrEqualTo(200)
-                      .lessThan(400).done())
-                  .done()));
+      try {
+        Book book = new Book(
+            "De Bello Gallico",
+            "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, "
+                + "aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
+        assertAll(
+            new BookTransformer(book)
+                .transform(tx -> tx.title()
+                    .transform(ty -> ty
+                        .then()
+                        .isNotNull().done())
+                    .transform(ty -> ty
+                        .parseInt()
+                        .then()
+                        .greaterThanOrEqualTo(10)
+                        .lessThan(40)
+                        .done())
+                    .done())
+                .transform(tx -> tx.abstractText()
+                    .transform(ty -> ty
+                        .then()
+                        .isNotNull().done())
+                    .transform(ty -> ty
+                        .length()
+                        .then()
+                        .greaterThanOrEqualTo(200)
+                        .lessThan(400).done())
+                    .done()));
+      } catch (ComparisonFailure e) {
+        ReportParser reportParser = new ReportParser(e.getActual());
+        reportParser.summary().records().forEach(each -> System.out.println(each.toString()));
+        throw e;
+      }
     }
 
     public static class Book {
