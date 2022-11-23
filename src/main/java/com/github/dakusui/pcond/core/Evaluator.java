@@ -140,9 +140,8 @@ public interface Evaluator {
 
     void enter(EvaluableDesc evaluableDesc, EvaluationContext<?> input) {
       EvaluationEntry.OnGoing newEntry = new EvaluationEntry.OnGoing(
-          evaluableDesc.name, evaluableDesc.type(), (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(), input.toSnapshot(),
-          this.currentlyExpectedBooleanValue,
-          evaluableDesc.isTrivial(),
+          evaluableDesc.name, evaluableDesc.type(), (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(), this.currentlyExpectedBooleanValue, input.toSnapshot(),
+          "detailInputActualValue", evaluableDesc.isTrivial(),
           entries.size()
       );
       onGoingEntries.add(newEntry);
@@ -166,7 +165,7 @@ public interface Evaluator {
           current.result(
               toSnapshotIfPossible(returnedValue),
               unexpected ? explainExpectation(evaluable) : null,
-              unexpected ? explainActual(evaluable, composeActualValue(current.actualInput(), returnedValue)) : null));
+              unexpected ? explainActual(evaluable, composeActualValue(current.actualInput(), returnedValue)) : null, "detailOutputActualValue"));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.valueReturned(returnedValue);
       if (evaluable.requestExpectationFlip())
@@ -181,7 +180,7 @@ public interface Evaluator {
           current.result(
               toSnapshotIfPossible(thrownException),
               explainExpectation(evaluable),
-              explainActual(evaluable, composeActualValue(current.actualInput(), thrownException))));
+              explainActual(evaluable, composeActualValue(current.actualInput(), thrownException)), "detailOutputActualValue"));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.exceptionThrown(thrownException);
       if (evaluable.requestExpectationFlip())
@@ -437,7 +436,10 @@ public interface Evaluator {
           each.formName(), each.type(),
           this.onGoingEntries.size() + each.level(),
           each.outputExpectation, each.detailOutputExpectation(), each.actualInput(),
-          each.hasDetailInputActualValue() ? each.actualInputDetail() : null, each.evaluationFinished() ? each.outputActualValue() : other,
+          each.actualInputDetail(),
+          each.evaluationFinished() ?
+              each.outputActualValue() :
+              other,
           "detailOutputActualValue",
           each.trivial
       );
@@ -447,8 +449,8 @@ public interface Evaluator {
   class EvaluableDesc {
     final EvaluationEntry.Type type;
     final String               name;
-    final boolean    requestsExpectationFlip;
-    final boolean    trivial;
+    final boolean              requestsExpectationFlip;
+    final boolean              trivial;
 
     public EvaluableDesc(EvaluationEntry.Type type, String name, boolean requestsExpectationFlip, boolean trivial) {
       this.type = type;

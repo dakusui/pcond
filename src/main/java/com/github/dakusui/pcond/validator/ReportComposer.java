@@ -71,7 +71,8 @@ public interface ReportComposer {
     static Report composeReport(String summary, List<Object> details) {
       List<String> stringFormDetails = details != null ?
           details.stream()
-              .map(Object::toString)
+              .filter(Objects::nonNull)
+              .map(Objects::toString)
               .collect(toList()) :
           emptyList();
       return ReportComposer.Report.create(summary, stringFormDetails);
@@ -80,10 +81,7 @@ public interface ReportComposer {
     private static String composeSummaryForActualResults(List<EvaluationEntry> result, Throwable t, List<Object> actualInputDetails) {
       return composeSummary(
           result.stream()
-              .peek((EvaluationEntry each) -> {
-                if (each.hasDetailInputActualValue())
-                  actualInputDetails.add(each.actualInputDetail());
-              })
+              .peek((EvaluationEntry each) -> actualInputDetails.add(each.actualInputDetail()))
               .filter((EvaluationEntry each) -> !each.isTrivial())
               .map((EvaluationEntry each) -> evaluatorEntryToFormattedEntry(
                   each,

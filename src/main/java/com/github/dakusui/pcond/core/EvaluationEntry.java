@@ -87,7 +87,6 @@ public abstract class EvaluationEntry {
     this.detailOutputExpectation = detailOutputExpectation;
     this.inputActualValue = inputActualValue;
     this.detailInputActualValue = detailInputActualValue;
-    this.detailInputActualValue = "(Not available)";
     this.trivial = trivial;
   }
 
@@ -130,8 +129,6 @@ public abstract class EvaluationEntry {
   public Object detailOutputExpectation() {
     return this.detailOutputExpectation;
   }
-
-  public abstract boolean hasDetailInputActualValue();
 
   final public Object actualInputDetail() {
     return this.detailInputActualValue;
@@ -187,23 +184,18 @@ public abstract class EvaluationEntry {
     public <T> T outputActualValue() {
       return (T) outputActualValue;
     }
-
-    @Override
-    public boolean hasDetailInputActualValue() {
-      return this.detailInputActualValue != null;
-    }
   }
 
   static class OnGoing extends EvaluationEntry {
     final int positionInEntries;
 
-    OnGoing(String formName, Type type, int level, Object inputActualValue, boolean outputExpectation, boolean trivial, int positionInEntries) {
-      super(formName, type, level, outputExpectation, outputExpectation, inputActualValue, "detailInputActualValue", trivial);
+    OnGoing(String formName, Type type, int level, boolean outputExpectation, Object inputActualValue, Object detailInputActualValue1, boolean trivial, int positionInEntries) {
+      super(formName, type, level, outputExpectation, outputExpectation, inputActualValue, detailInputActualValue1, trivial);
       this.positionInEntries = positionInEntries;
     }
 
-    Finalized result(Object result, Object expectationDetail, Object actualInputDetail) {
-      return new Finalized(this, expectationDetail, actualInputDetail, result, "detailOutputActualValue");
+    Finalized result(Object result, Object expectationDetail, Object actualInputDetail, Object detailOutputActualValue) {
+      return new Finalized(this, expectationDetail, actualInputDetail, result, detailOutputActualValue);
     }
 
     @Override
@@ -214,11 +206,6 @@ public abstract class EvaluationEntry {
     @Override
     public <T> T outputActualValue() {
       throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean hasDetailInputActualValue() {
-      return false;
     }
   }
 }
