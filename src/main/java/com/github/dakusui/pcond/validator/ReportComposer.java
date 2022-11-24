@@ -60,12 +60,49 @@ public interface ReportComposer {
   enum Utils {
     ;
 
-    static Explanation composeExplanation(String message, List<EvaluationEntry> result, Throwable t) {
-      List<Object> expectationDetails = new LinkedList<>();
-      List<Object> actualResultDetails = new LinkedList<>();
+    /**
+     * Note that an exception thrown during an evaluation is normally caught by the framework.
+     *
+     * @param message A message to be prepended to a summary.
+     * @param evaluationHistory An "evaluation history" object represented as a list of evaluation entries.
+     * @param t An exception thrown during an evaluation.
+     * @return An explanation object.
+     */
+    static Explanation composeExplanation(String message, List<EvaluationEntry> evaluationHistory, Throwable t) {
+      List<Object> detailsForExpectation = new LinkedList<>();
+      List<FormattedEntry> summaryDataForExpectations = evaluationHistory.stream()
+          .filter((EvaluationEntry each) -> !each.isTrivial())
+          .map((EvaluationEntry each) -> createFormattedEntryFromExpectation(t, each))
+          .peek((FormattedEntry each) -> {
+            Optional<Object> formSnapshot = each.mismatchExplanation();
+            formSnapshot.ifPresent(detailsForExpectation::add);
+          })
+          .collect(toList());
+      String textSummaryForExpectations = composeSummaryForExpectations(summaryDataForExpectations);
+      List<Object> detailsForActual = new LinkedList<>();
+      List<FormattedEntry> summaryForActual = evaluationHistory.stream()
+          .peek((EvaluationEntry each) -> detailsForActual.add(each.detailInputActualValue()))
+          .filter((EvaluationEntry each) -> !each.isTrivial())
+          .map((EvaluationEntry each) -> createFormattedEntryForActualValue(t, each))
+          .collect(toList());
+      String textSummaryForActualResult = composeSummaryForActualResults(summaryForActual);
       return new Explanation(message,
-          composeReport(composeSummaryForExpectations(result, t, expectationDetails), expectationDetails),
-          composeReport(composeSummaryForActualResults(result, t, actualResultDetails), actualResultDetails));
+          composeReport(textSummaryForExpectations, detailsForExpectation),
+          composeReport(textSummaryForActualResult, detailsForActual));
+    }
+
+    private static FormattedEntry createFormattedEntryFromExpectation(Throwable t, EvaluationEntry each) {
+      return evaluatorEntryToFormattedEntry(
+          each,
+          () -> composeExpectationSummaryRecordForEntry(each, t));
+    }
+
+    private static FormattedEntry createFormattedEntryForActualValue(Throwable t, EvaluationEntry each) {
+      return evaluatorEntryToFormattedEntry(
+          each,
+          () -> each.evaluationFinished() ?
+              formatObject(each.outputActualValue()) :
+              formatObject(t));
     }
 
     static Report composeReport(String summary, List<Object> details) {
@@ -78,31 +115,12 @@ public interface ReportComposer {
       return ReportComposer.Report.create(summary, stringFormDetails);
     }
 
-    private static String composeSummaryForActualResults(List<EvaluationEntry> result, Throwable t, List<Object> actualInputDetails) {
-      return composeSummary(
-          result.stream()
-              .peek((EvaluationEntry each) -> actualInputDetails.add(each.detailInputActualValue()))
-              .filter((EvaluationEntry each) -> !each.isTrivial())
-              .map((EvaluationEntry each) -> evaluatorEntryToFormattedEntry(
-                  each,
-                  () -> each.evaluationFinished() ?
-                      formatObject(each.outputActualValue()) :
-                      formatObject(t)))
-              .collect(toList()));
+    private static String composeSummaryForActualResults(List<FormattedEntry> formattedEntries) {
+      return composeSummary(formattedEntries);
     }
 
-    private static String composeSummaryForExpectations(List<EvaluationEntry> result, Throwable t, List<Object> expectationDetails) {
-      return composeSummary(
-          result.stream()
-              .filter((EvaluationEntry each) -> !each.isTrivial())
-              .map((EvaluationEntry each) -> evaluatorEntryToFormattedEntry(
-                  each,
-                  () -> composeExpectationSummaryRecordForEntry(each, t)))
-              .peek((FormattedEntry each) -> {
-                Optional<Object> formSnapshot = each.mismatchExplanation();
-                formSnapshot.ifPresent(expectationDetails::add);
-              })
-              .collect(toList()));
+    private static String composeSummaryForExpectations(List<FormattedEntry> formattedEntries) {
+      return composeSummaryForActualResults(formattedEntries);
     }
 
     private static String composeExpectationSummaryRecordForEntry(EvaluationEntry entry, Throwable t) {

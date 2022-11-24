@@ -449,8 +449,8 @@ public interface Evaluator {
           entry.inputActualValue(),
           entry.detailInputActualValue(),
           entry.evaluationFinished() ? entry.outputActualValue() : other,
-          "detailOutputActualValue",
-          entry.trivial,
+          entry.detailOutputActualValue(),
+          entry.isTrivial(),
           entry.wasExceptionThrown()
       );
     }
