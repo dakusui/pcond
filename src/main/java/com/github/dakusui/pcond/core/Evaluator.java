@@ -141,11 +141,11 @@ public interface Evaluator {
     };
     List<EvaluationEntry.OnGoing> onGoingEntries = new LinkedList<>();
     List<EvaluationEntry>         entries        = new ArrayList<>();
-    final EvaluationContext<Object> currentResult;
+    final EvaluationContext<Object> currentEvaluationContext;
     boolean currentlyExpectedBooleanValue = true;
 
     public Impl() {
-      this.currentResult = EvaluationContext.forValue(null);
+      this.currentEvaluationContext = EvaluationContext.forValue(null);
     }
 
     void enter(EvaluableDesc evaluableDesc, EvaluationContext<?> input) {
@@ -162,7 +162,13 @@ public interface Evaluator {
         this.flipCurrentlyExpectedBooleanValue();
     }
 
-    void leaveWithReturnedValue(Evaluable<?> evaluable, Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean unexpected) {
+    void leaveWithReturnedValue(
+        Evaluable<?> evaluable,
+        Object inputExpectation,
+        Object outputExpectation,
+        Object inputActualValue,
+        Object outputActualValue,
+        boolean unexpected) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
@@ -175,12 +181,17 @@ public interface Evaluator {
               outputActualValue,
               toSnapshotIfPossible(inputActualValue), false, unexpected));
       onGoingEntries.remove(positionInOngoingEntries);
-      this.currentResult.valueReturned(outputActualValue);
+      this.currentEvaluationContext.valueReturned(outputActualValue);
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
     }
 
-    void leaveWithThrownException(Evaluable<?> evaluable, Object inputExpectation, Object outputExpectation, Object inputActualValue, Throwable thrownException) {
+    void leaveWithThrownException(
+        Evaluable<?> evaluable,
+        Object inputExpectation,
+        Object outputExpectation,
+        Object inputActualValue,
+        Throwable thrownException) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
@@ -192,7 +203,7 @@ public interface Evaluator {
               thrownException,
               composeActualValueFromInputAndThrowable(inputActualValue, thrownException), true, true));
       onGoingEntries.remove(positionInOngoingEntries);
-      this.currentResult.exceptionThrown(thrownException);
+      this.currentEvaluationContext.exceptionThrown(thrownException);
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
     }
@@ -217,7 +228,13 @@ public interface Evaluator {
         if (!cur)
           actualOutputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !actualOutputValue) || i == conjunction.children().size() - 1) {
-          this.leaveWithReturnedValue(conjunction, clonedContext.value(), conjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, clonedContext.value(), actualOutputValue, false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+          this.leaveWithReturnedValue(
+              conjunction,
+              clonedContext.value(),
+              conjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
+              clonedContext.value(),
+              clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? "(not available)" : actualOutputValue,
+              false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
           return;
         }
         i++;
@@ -372,7 +389,7 @@ public interface Evaluator {
 
     @Override
     public Object resultValue() {
-      return currentResult.value();
+      return currentEvaluationContext.value();
     }
 
     @Override
@@ -393,7 +410,7 @@ public interface Evaluator {
 
     @SuppressWarnings("unchecked")
     private <T> EvaluationContext<T> currentEvaluationContext() {
-      return (EvaluationContext<T>) this.currentResult;
+      return (EvaluationContext<T>) this.currentEvaluationContext;
     }
 
     private <E> Predicate<E> createValueCheckingPredicateForStream(Evaluable.StreamPred<E> streamPredicate) {

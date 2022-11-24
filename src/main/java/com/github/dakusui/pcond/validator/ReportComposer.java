@@ -102,7 +102,8 @@ public interface ReportComposer {
             EvaluationEntry first = squashedItems.get(0);
             EvaluationEntry last = squashedItems.get(squashedItems.size() - 1);
             ret.add(EvaluationEntry.create(
-                squashedItems.stream().map(EvaluationEntry::formName).collect(joining(":")), first.type(),
+                squashedItems.stream().map(EvaluationEntry::formName).collect(joining(":")),
+                first.type(),
                 first.level(),
                 first.inputExpectation(), first.detailInputExpectation(),
                 last.outputExpectation(), last.detailOutputExpectation(),
