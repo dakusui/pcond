@@ -207,7 +207,7 @@ public abstract class EvaluationEntry {
       this.positionInEntries = positionInEntries;
     }
 
-    Finalized finalizeEntry(Object outputActualValue, Object detailOutputExpectation, Object detailInputActualValue, Object detailOutputActualValue) {
+    Finalized finalizeEntry(Object detailOutputExpectation, Object detailInputActualValue, Object outputActualValue, Object detailOutputActualValue) {
       return new Finalized(this, detailOutputExpectation, detailInputActualValue, outputActualValue, detailOutputActualValue);
     }
 

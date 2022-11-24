@@ -163,9 +163,9 @@ public interface Evaluator {
       entries.set(
           current.positionInEntries,
           current.finalizeEntry(
-              toSnapshotIfPossible(returnedValue),
               unexpected ? explainExpectation(evaluable) : null,
               unexpected ? explainActualValue(evaluable, composeActualValue(current.inputActualValue(), returnedValue)) : null,
+              toSnapshotIfPossible(returnedValue),
               "detailOutputActualValue"));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.valueReturned(returnedValue);
@@ -179,9 +179,9 @@ public interface Evaluator {
       entries.set(
           current.positionInEntries,
           current.finalizeEntry(
-              toSnapshotIfPossible(thrownException),
               explainExpectation(evaluable),
               explainActualValue(evaluable, composeActualValue(current.inputActualValue(), thrownException)),
+              toSnapshotIfPossible(thrownException),
               "detailOutputActualValue"));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.exceptionThrown(thrownException);
