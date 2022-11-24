@@ -244,9 +244,8 @@ public abstract class EvaluationEntry {
     }
 
     Finalized finalizeEntry(
-        boolean outputExpectation, Object detailOutputExpectation,
-        Object inputActualValue, Object detailInputActualValue,
-        Object outputActualValue, Object detailOutputActualValue,
+        Object outputExpectation, Object detailOutputExpectation,
+        Object inputActualValue, Object detailInputActualValue, Object outputActualValue, Object detailOutputActualValue,
         boolean wasExceptionThrown, boolean requiresExplanation) {
       return new Finalized(this, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, outputActualValue, detailOutputActualValue, wasExceptionThrown, requiresExplanation);
     }

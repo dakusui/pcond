@@ -151,11 +151,11 @@ public interface Evaluator {
         this.flipCurrentlyExpectedBooleanValue();
     }
 
-    void leave(Evaluable<?> evaluable, EvaluationContext<Object> evaluationContext) {
+    void leave(Evaluable<?> evaluable, Object inputActualValue, EvaluationContext<Object> evaluationContext) {
       if (evaluationContext.state() == EvaluationContext.State.VALUE_RETURNED)
-        leaveWithReturnedValue(evaluable, evaluationContext.value(), evaluationContext.returnedValue(), false);
+        leaveWithReturnedValue(evaluable, inputActualValue, evaluationContext.value(), false);
       else if (evaluationContext.state() == EvaluationContext.State.EXCEPTION_THROWN)
-        leaveWithThrownException(evaluable, evaluationContext.thrownException());
+        this.leaveWithThrownException(evaluable, evaluationContext.value(), evaluationContext.thrownException());
     }
 
     void leaveWithReturnedValue(Evaluable<?> evaluable, Object inputActualValue, Object outputActualValue, boolean unexpected) {
@@ -166,8 +166,7 @@ public interface Evaluator {
           current.finalizeEntry(
               // evaluable
               evaluable.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, explainOutputExpectation(evaluable),
-              inputActualValue, explainInputActualValue(evaluable, composeActualValue(inputActualValue, outputActualValue)),
-              outputActualValue, toSnapshotIfPossible(outputActualValue),
+              inputActualValue, explainInputActualValue(evaluable, inputActualValue), outputActualValue, toSnapshotIfPossible(outputActualValue),
               false,
               unexpected));
       onGoingEntries.remove(positionInOngoingEntries);
@@ -176,7 +175,7 @@ public interface Evaluator {
         this.flipCurrentlyExpectedBooleanValue();
     }
 
-    void leaveWithThrownException(Evaluable<?> evaluable, Throwable thrownException) {
+    void leaveWithThrownException(Evaluable<?> evaluable, Object inputActualValue, Throwable thrownException) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
@@ -184,20 +183,14 @@ public interface Evaluator {
           current.finalizeEntry(
               // evaluable,
               currentlyExpectedBooleanValue, explainOutputExpectation(evaluable),
-              current.inputActualValue(), explainInputActualValue(evaluable, composeActualValue(current.inputActualValue(), thrownException)),
-              thrownException, toSnapshotIfPossible(thrownException),
+              inputActualValue, explainInputActualValue(evaluable, inputActualValue),
+              thrownException, composeActualValueFromInputAndThrowable(inputActualValue, thrownException),
               true,
               true));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.exceptionThrown(thrownException);
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
-    }
-
-    private static Object composeActualValue(Object input, Object output) {
-      if (output instanceof Throwable)
-        return composeActualValueFromInputAndThrowable(input, (Throwable) output);
-      return input;
     }
 
     private static String composeActualValueFromInputAndThrowable(Object input, Throwable throwable) {
@@ -234,7 +227,7 @@ public interface Evaluator {
         if (!cur)
           actualOutputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !actualOutputValue) || i == conjunction.children().size() - 1) {
-          this.leaveWithReturnedValue(conjunction, evaluationContext.value(), actualOutputValue, false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+          this.leaveWithReturnedValue(conjunction, clonedContext.value(), actualOutputValue, false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
           return;
         }
         i++;
@@ -252,12 +245,13 @@ public interface Evaluator {
         this.currentResult().valueReturned(currentValue);
         if (i == 0)
           this.enter(EvaluableDesc.fromEvaluable(disjunction), evaluationContext);
+        Object inputActualValue = evaluationContext.value();
         each.accept(evaluationContext, this);
         boolean cur = this.resultValueAsBoolean();
         if (cur)
           finalValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && finalValue) || i == disjunction.children().size() - 1) {
-          this.leaveWithReturnedValue(disjunction, evaluationContext.value(), finalValue, false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+          this.leaveWithReturnedValue(disjunction, inputActualValue, finalValue, false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
           return;
         }
         i++;
@@ -267,8 +261,9 @@ public interface Evaluator {
     @Override
     public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.Negation<T> negation) {
       this.enter(EvaluableDesc.fromEvaluable(negation), evaluationContext);
+      Object inputActualValue = evaluationContext.value();
       negation.target().accept(evaluationContext, this);
-      this.leaveWithReturnedValue(negation, evaluationContext.value(), !this.resultValueAsBoolean(), false);
+      this.leaveWithReturnedValue(negation, inputActualValue, !this.resultValueAsBoolean(), false);
     }
 
     @Override
@@ -277,16 +272,17 @@ public interface Evaluator {
       // TODO: Issue-#59: Need exception handling
       try {
         System.out.println("LEAF:<" + evaluationContext + ">");
+        T inputActualValue = evaluationContext.returnedValue();
         if (evaluationContext.state() == EvaluationContext.State.VALUE_RETURNED) {
-          boolean result = leafPred.predicate().test(evaluationContext.returnedValue());
-          this.leaveWithReturnedValue(leafPred, evaluationContext.value(), result, this.currentlyExpectedBooleanValue != result);
+          boolean result = leafPred.predicate().test(inputActualValue);
+          this.leaveWithReturnedValue(leafPred, inputActualValue, result, this.currentlyExpectedBooleanValue != result);
         } else {
-          this.leaveWithReturnedValue(leafPred, evaluationContext.value(), "(not evaluated)", false);
+          this.leaveWithReturnedValue(leafPred, inputActualValue, "(not evaluated)", false);
         }
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        this.leaveWithThrownException(leafPred, e);
+        this.leaveWithThrownException(leafPred, evaluationContext.value(), e);
       }
     }
 
@@ -294,29 +290,31 @@ public interface Evaluator {
     public void evaluate(EvaluationContext<VariableBundle> evaluationContext, Evaluable.ContextPred contextPred) {
       this.enter(EvaluableDesc.fromEvaluable(contextPred), evaluationContext);
       // TODO: Issue-#59: Need exception handling
-      contextPred.enclosed().accept(EvaluationContext.forValue(evaluationContext.returnedValue().valueAt(contextPred.argIndex())), this);
-      this.leaveWithReturnedValue(contextPred, evaluationContext.value() , this.resultValue(), false);
+      VariableBundle inputActualValue = evaluationContext.returnedValue();
+      contextPred.enclosed().accept(EvaluationContext.forValue(inputActualValue.valueAt(contextPred.argIndex())), this);
+      this.leaveWithReturnedValue(contextPred, inputActualValue, this.resultValue(), false);
     }
 
     @Override
-    public <T, R> void evaluate(EvaluationContext<T> value, Evaluable.Transformation<T, R> transformation) {
+    public <T, R> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.Transformation<T, R> transformation) {
       if (isDummyFunction((Function<?, ?>) transformation.mapper())) {
         transformation.checker().accept(currentResult(), this);
         return;
       }
-      this.enter(EvaluableDesc.forMapperFromEvaluable(transformation), value);
-      transformation.mapper().accept(value, this);
+      this.enter(EvaluableDesc.forMapperFromEvaluable(transformation), evaluationContext);
+      Object inputActualValue = evaluationContext.returnedValue();
+      transformation.mapper().accept(evaluationContext, this);
       this.leave(
           transformation.checker(),
-          this.currentResult()
+          inputActualValue, this.currentResult()
       );
       this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), currentResult());
 
       transformation.checker().accept(this.currentResult(), this);
       this.leaveWithReturnedValue(
           transformation.mapper(),
-          this.currentResult().value(),
-          this.currentResult().returnedValue(), false);
+          inputActualValue,
+          this.currentResult().value(), false);
     }
 
     @SuppressWarnings("unchecked")
@@ -330,12 +328,12 @@ public interface Evaluator {
       this.enter(EvaluableDesc.fromEvaluable(func), evaluationContext);
       try {
         Object resultValue = func.head().apply(evaluationContext.returnedValue());
-        this.leaveWithReturnedValue(func, evaluationContext.value(), resultValue, false);
+        this.leaveWithReturnedValue(func, evaluationContext.returnedValue(), resultValue, false);
         func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(EvaluationContext.forValue(resultValue), this));
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        this.leaveWithThrownException(func, e);
+        this.leaveWithThrownException(func, evaluationContext.returnedValue(), e);
         func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) this.currentResult().exceptionThrown(e), this));
       }
     }
@@ -351,7 +349,8 @@ public interface Evaluator {
       // type information is erased.
       // TODO: Issue-#59: Need exception handling
       this.leaveWithReturnedValue(
-          streamPred, evaluationContext.value(),
+          streamPred,
+          evaluationContext.value(),
           evaluationContext.returnedValue()
               .filter(createValueCheckingPredicateForStream(streamPred))
               .map(v -> v != null ? v : NULL_VALUE)
