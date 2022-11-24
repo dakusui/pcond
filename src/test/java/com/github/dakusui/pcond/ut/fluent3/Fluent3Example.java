@@ -13,8 +13,7 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
 import static com.github.dakusui.pcond.forms.Functions.identity;
-import static com.github.dakusui.pcond.forms.Predicates.isEqualTo;
-import static com.github.dakusui.pcond.forms.Predicates.transform;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
@@ -253,7 +252,7 @@ public class Fluent3Example {
                         .lessThan(40)
                         .done()).done())
                 .transform(b -> b.abstractText()
-                    .transform(ty -> ty.then().isNotNull().done())
+                    .transform(ty -> ty.then().checkWithPredicate(isNull().negate()).done())
                     .transform(ty -> ty.length().then()
                         .greaterThanOrEqualTo(200)
                         .lessThan(400)

@@ -140,9 +140,11 @@ public interface Evaluator {
 
     void enter(EvaluableDesc evaluableDesc, EvaluationContext<?> input) {
       EvaluationEntry.OnGoing newEntry = new EvaluationEntry.OnGoing(
-          evaluableDesc.name, evaluableDesc.type(), (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(), this.currentlyExpectedBooleanValue, input.toSnapshot(),
-          "detailInputActualValue", evaluableDesc.isTrivial(),
-          entries.size()
+          evaluableDesc.name, evaluableDesc.type(), (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
+          "(unknwon)", "(unknown)",
+          this.currentlyExpectedBooleanValue,
+          input, "detailInputActualValue",
+          evaluableDesc.isTrivial(), entries.size()
       );
       onGoingEntries.add(newEntry);
       entries.add(newEntry);
@@ -164,9 +166,10 @@ public interface Evaluator {
           current.positionInEntries,
           current.finalizeEntry(
               // evaluable
-              currentlyExpectedBooleanValue, unexpected ? explainOutputExpectation(evaluable) : null,
-              current.inputActualValue(), unexpected ? explainInputActualValue(evaluable, composeActualValue(current.inputActualValue(), returnedValue)) : null,
+              currentlyExpectedBooleanValue, explainOutputExpectation(evaluable),
+              current.inputActualValue(), explainInputActualValue(evaluable, composeActualValue(current.inputActualValue(), returnedValue)),
               returnedValue, toSnapshotIfPossible(returnedValue),
+              false,
               false));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.valueReturned(returnedValue);
@@ -184,6 +187,7 @@ public interface Evaluator {
               currentlyExpectedBooleanValue, explainOutputExpectation(evaluable),
               current.inputActualValue(), explainInputActualValue(evaluable, composeActualValue(current.inputActualValue(), thrownException)),
               thrownException, toSnapshotIfPossible(thrownException),
+              true,
               true));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.exceptionThrown(thrownException);
@@ -282,12 +286,13 @@ public interface Evaluator {
       return new EvaluationEntry.Finalized(
           format("not(%s)", anotherEntry.formName()), anotherEntry.type(),
           entry.level(),
+          entry.inputExpectation(), entry.detailInputExpectation(),
           entry.outputExpectation(), entry.detailOutputExpectation(),
           entry.inputActualValue(), entry.detailInputActualValue(),
           entry.outputActualValue(), entry.detailOutputActualValue(),
           false,
-          entry.wasExceptionThrown() || anotherEntry.wasExceptionThrown()
-      );
+          entry.wasExceptionThrown() || anotherEntry.wasExceptionThrown(),
+          entry.requiresExplanation() || anotherEntry.requiresExplanation());
     }
 
     @Override
@@ -444,15 +449,15 @@ public interface Evaluator {
           entry.formName(),
           entry.type(),
           this.onGoingEntries.size() + entry.level(),
-          entry.outputExpectation(),
-          entry.detailOutputExpectation(),
+          entry.inputExpectation(), entry.detailInputExpectation(),
+          entry.outputExpectation(), entry.detailOutputExpectation(),
           entry.inputActualValue(),
           entry.detailInputActualValue(),
           entry.evaluationFinished() ? entry.outputActualValue() : other,
           entry.detailOutputActualValue(),
           entry.isTrivial(),
-          entry.wasExceptionThrown()
-      );
+          entry.wasExceptionThrown(),
+          entry.requiresExplanation());
     }
   }
 
@@ -547,9 +552,10 @@ public interface Evaluator {
     static <T, R> EvaluableDesc forMapperFromEvaluable(Evaluable.Transformation<T, R> transformationEvaluable) {
       return new EvaluableDesc(
           TRANSFORM,
-          transformationEvaluable.mapperName().orElse("transform"),
+          transformationEvaluable.mapperName().orElse("transform:" + String.format("%s", transformationEvaluable.mapper())),
           transformationEvaluable.mapper().requestExpectationFlip(),
-          transformationEvaluable.mapper().isTrivial()
+          true
+          //transformationEvaluable.mapper().isTrivial()
       );
     }
 
@@ -558,7 +564,7 @@ public interface Evaluator {
           CHECK,
           transformationEvaluable.checkerName().orElse("check"),
           transformationEvaluable.checker().requestExpectationFlip(),
-          transformationEvaluable.checker().isTrivial()
+          true //transformationEvaluable.checker().isTrivial()
       );
     }
   }

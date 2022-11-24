@@ -65,8 +65,7 @@ public abstract class EvaluationEntry {
   Object inputActualValue;
   Object detailInputActualValue;
 
-  boolean outputExpectation;
-
+  Object outputExpectation;
   Object detailOutputExpectation;
 
 
@@ -75,12 +74,12 @@ public abstract class EvaluationEntry {
    */
   final boolean trivial;
 
-  EvaluationEntry(String formName, Type type, int level, boolean outputExpectation, Object detailOutputExpectation, Object inputActualValue, Object detailInputActualValue, boolean trivial) {
+  EvaluationEntry(String formName, Type type, int level, Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object detailOutputExpectation, Object inputActualValue, Object detailInputActualValue, boolean trivial) {
     this.type = type;
     this.level = level;
     this.formName = formName;
-    this.inputExpectation = inputActualValue;
-    this.detailInputExpectation = detailInputActualValue;
+    this.inputExpectation = inputExpectation_;
+    this.detailInputExpectation = detailInputExpectation_;
     this.outputExpectation = outputExpectation;
     this.detailOutputExpectation = detailOutputExpectation;
     this.inputActualValue = inputActualValue;
@@ -120,6 +119,8 @@ public abstract class EvaluationEntry {
     return this.trivial;
   }
 
+  public abstract boolean requiresExplanation();
+
   public int level() {
     return level;
   }
@@ -132,7 +133,7 @@ public abstract class EvaluationEntry {
     return this.detailInputExpectation;
   }
 
-  public boolean outputExpectation() {
+  public Object outputExpectation() {
     return this.outputExpectation;
   }
 
@@ -160,34 +161,40 @@ public abstract class EvaluationEntry {
     NOT,
     LEAF,
     FUNCTION,
-    ;
   }
 
   static class Finalized extends EvaluationEntry {
     final         Object  outputActualValue;
     final         Object  detailOutputActualValue;
     private final boolean wasExceptionThrown;
+    private final boolean requiresExplanation;
 
     Finalized(
         String formName, Type type,
         int level,
-        boolean outputExpectation, Object detailOutputExpectation,
+        Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object detailOutputExpectation,
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
-        boolean trivial, boolean wasExceptionThrown) {
-      super(formName, type, level, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, trivial);
+        boolean trivial, boolean wasExceptionThrown, boolean requiresExplanation) {
+      super(
+          formName, type, level,
+          inputExpectation_, detailInputExpectation_,
+          outputExpectation, detailOutputExpectation,
+          inputActualValue, detailInputActualValue, trivial);
       this.outputActualValue = outputActualValue;
       this.detailOutputActualValue = detailOutputActualValue;
       this.wasExceptionThrown = wasExceptionThrown;
+      this.requiresExplanation = requiresExplanation;
     }
 
     Finalized(
         OnGoing onGoing,
-        boolean outputExpectation, Object detailOutputExpectation,
+        Object outputExpectation, Object detailOutputExpectation,
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
-        boolean wasExceptionThrown) {
+        boolean wasExceptionThrown, boolean requiresExplanation) {
       super(onGoing);
+      this.requiresExplanation = requiresExplanation;
       this.outputExpectation = outputExpectation;
       this.detailOutputExpectation = detailOutputExpectation;
       this.inputActualValue = inputActualValue;
@@ -217,13 +224,18 @@ public abstract class EvaluationEntry {
     public Object detailOutputActualValue() {
       return this.detailOutputActualValue;
     }
+
+    @Override
+    public boolean requiresExplanation() {
+      return this.requiresExplanation;
+    }
   }
 
   static class OnGoing extends EvaluationEntry {
     final int positionInEntries;
 
-    OnGoing(String formName, Type type, int level, boolean outputExpectation, Object inputActualValue, Object detailInputActualValue1, boolean trivial, int positionInEntries) {
-      super(formName, type, level, outputExpectation, outputExpectation, inputActualValue, detailInputActualValue1, trivial);
+    OnGoing(String formName, Type type, int level, Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object inputActualValue, Object detailInputActualValue1, boolean trivial, int positionInEntries) {
+      super(formName, type, level, inputExpectation_, detailInputExpectation_, outputExpectation, outputExpectation, inputActualValue, detailInputActualValue1, trivial);
       this.positionInEntries = positionInEntries;
     }
 
@@ -231,8 +243,8 @@ public abstract class EvaluationEntry {
         boolean outputExpectation, Object detailOutputExpectation,
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
-        boolean wasExceptioinThrown) {
-      return new Finalized(this, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, outputActualValue, detailOutputActualValue, wasExceptioinThrown);
+        boolean wasExceptionThrown, boolean requiresExplanation) {
+      return new Finalized(this, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, outputActualValue, detailOutputActualValue, wasExceptionThrown, requiresExplanation);
     }
 
     @Override
@@ -249,5 +261,29 @@ public abstract class EvaluationEntry {
     public Object detailOutputActualValue() {
       throw new UnsupportedOperationException();
     }
+
+    @Override
+    public boolean requiresExplanation() {
+      throw new UnsupportedOperationException();
+    }
+  }
+
+  public static EvaluationEntry create(
+      String formName, Type type,
+      int level,
+      Object inputExpectation_, Object detailInputExpectation_,
+      Object outputExpectation, Object detailOutputExpectation,
+      Object inputActualValue, Object detailInputActualValue,
+      Object outputActualValue, Object detailOutputActualValue,
+      boolean trivial, boolean wasExceptionThrown, boolean requiresExplanation) {
+    return new Finalized(
+        formName, type,
+        level,
+        inputExpectation_, detailInputExpectation_,
+        outputExpectation, detailOutputExpectation,
+        inputActualValue, detailInputActualValue,
+        outputActualValue, detailOutputActualValue,
+        trivial, wasExceptionThrown, requiresExplanation
+    );
   }
 }

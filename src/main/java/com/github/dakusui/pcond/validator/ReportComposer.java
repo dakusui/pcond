@@ -10,12 +10,10 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.joining;
@@ -27,7 +25,7 @@ public interface ReportComposer {
   }
 
   default Explanation composeExplanation(String message, List<EvaluationEntry> result, Throwable t) {
-    return Utils.composeExplanation(message, result, t);
+    return Utils.composeExplanation(message, result);
   }
 
   /**
@@ -63,27 +61,25 @@ public interface ReportComposer {
     /**
      * Note that an exception thrown during an evaluation is normally caught by the framework.
      *
-     * @param message A message to be prepended to a summary.
+     * @param message           A message to be prepended to a summary.
      * @param evaluationHistory An "evaluation history" object represented as a list of evaluation entries.
-     * @param t An exception thrown during an evaluation.
      * @return An explanation object.
      */
-    static Explanation composeExplanation(String message, List<EvaluationEntry> evaluationHistory, Throwable t) {
+    static Explanation composeExplanation(String message, List<EvaluationEntry> evaluationHistory) {
       List<Object> detailsForExpectation = new LinkedList<>();
-      List<FormattedEntry> summaryDataForExpectations = evaluationHistory.stream()
+      List<FormattedEntry> summaryDataForExpectations = squashTrivialEntries(evaluationHistory)
+          .stream()
           .filter((EvaluationEntry each) -> !each.isTrivial())
-          .map((EvaluationEntry each) -> createFormattedEntryFromExpectation(t, each))
-          .peek((FormattedEntry each) -> {
-            Optional<Object> formSnapshot = each.mismatchExplanation();
-            formSnapshot.ifPresent(detailsForExpectation::add);
-          })
+          .peek((EvaluationEntry each) -> addToDetailsListIfExplanationIsRequired(detailsForExpectation, each, each::detailOutputExpectation))
+          .map(Utils::createFormattedEntryForExpectation)
           .collect(toList());
       String textSummaryForExpectations = composeSummaryForExpectations(summaryDataForExpectations);
       List<Object> detailsForActual = new LinkedList<>();
-      List<FormattedEntry> summaryForActual = evaluationHistory.stream()
-          .peek((EvaluationEntry each) -> detailsForActual.add(each.detailInputActualValue()))
+      List<FormattedEntry> summaryForActual = squashTrivialEntries(evaluationHistory)
+          .stream()
           .filter((EvaluationEntry each) -> !each.isTrivial())
-          .map((EvaluationEntry each) -> createFormattedEntryForActualValue(t, each))
+          .peek((EvaluationEntry each) -> addToDetailsListIfExplanationIsRequired(detailsForActual, each, each::detailOutputActualValue))
+          .map(Utils::createFormattedEntryForActualValue)
           .collect(toList());
       String textSummaryForActualResult = composeSummaryForActualResults(summaryForActual);
       return new Explanation(message,
@@ -91,18 +87,61 @@ public interface ReportComposer {
           composeReport(textSummaryForActualResult, detailsForActual));
     }
 
-    private static FormattedEntry createFormattedEntryFromExpectation(Throwable t, EvaluationEntry each) {
-      return evaluatorEntryToFormattedEntry(
-          each,
-          () -> composeExpectationSummaryRecordForEntry(each, t));
+    private static List<EvaluationEntry> squashTrivialEntries(List<EvaluationEntry> evaluationHistory) {
+      List<EvaluationEntry> ret = new LinkedList<>();
+      List<EvaluationEntry> squashedItems = new LinkedList<>();
+      for (EvaluationEntry each : evaluationHistory) {
+        if (squashedItems.isEmpty()) {
+          if (each.isTrivial()) {
+            squashedItems.add(each);
+          } else {
+            ret.add(each);
+          }
+        } else {
+          if (each.isTrivial()) {
+            squashedItems.add(each);
+          } else {
+            EvaluationEntry first = squashedItems.get(0);
+            EvaluationEntry last = squashedItems.get(squashedItems.size() - 1);
+            ret.add(EvaluationEntry.create(
+                squashedItems.stream().map(EvaluationEntry::formName).collect(joining(":")), first.type(),
+                first.level(),
+                first.inputExpectation(), first.detailInputExpectation(),
+                first.outputExpectation(), first.detailOutputExpectation(),
+                first.inputActualValue(), first.detailInputActualValue(),
+                last.outputActualValue(), last.detailOutputActualValue(),
+                false,
+                squashedItems.stream().anyMatch(EvaluationEntry::wasExceptionThrown),
+                squashedItems.stream().anyMatch(EvaluationEntry::requiresExplanation)));
+            squashedItems.clear();
+          }
+        }
+      }
+      ret.addAll(squashedItems);
+      return ret;
     }
 
-    private static FormattedEntry createFormattedEntryForActualValue(Throwable t, EvaluationEntry each) {
-      return evaluatorEntryToFormattedEntry(
-          each,
-          () -> each.evaluationFinished() ?
-              formatObject(each.outputActualValue()) :
-              formatObject(t));
+    private static FormattedEntry createFormattedEntryForExpectation(EvaluationEntry each) {
+      return new FormattedEntry(
+          formatObject(each.inputExpectation()),
+          each.formName(),
+          indent(each.level()),
+          formatObject(each.outputExpectation()),
+          each.requiresExplanation());
+    }
+
+    private static FormattedEntry createFormattedEntryForActualValue(EvaluationEntry each) {
+      return new FormattedEntry(
+          formatObject(each.inputActualValue()),
+          each.formName(),
+          indent(each.level()),
+          formatObject(each.outputActualValue()),
+          each.requiresExplanation());
+    }
+
+    private static void addToDetailsListIfExplanationIsRequired(List<Object> detailsForExpectation, EvaluationEntry each, Supplier<Object> detailOutput) {
+      if (each.requiresExplanation())
+        detailsForExpectation.add(detailOutput.get());
     }
 
     static Report composeReport(String summary, List<Object> details) {
@@ -123,21 +162,11 @@ public interface ReportComposer {
       return composeSummaryForActualResults(formattedEntries);
     }
 
-    private static String composeExpectationSummaryRecordForEntry(EvaluationEntry entry, Throwable t) {
-      return entry.evaluationFinished() ?
-          formatObject(
-              (entry.outputActualValue() instanceof Boolean || entry.outputActualValue() instanceof Throwable) ?
-                  //              !asList(FUNCTION, TRANSFORM).contains(entry.type()) ?
-                  entry.outputExpectation() :
-                  entry.outputActualValue()) :
-          formatObject(t);
-    }
-
     private static String composeSummary(List<FormattedEntry> formattedEntries) {
       AtomicInteger mismatchExplanationCount = new AtomicInteger(0);
       boolean mismatchExplanationFound = formattedEntries
           .stream()
-          .anyMatch(e -> e.mismatchExplanation().isPresent());
+          .anyMatch(FormattedEntry::requiresExplanation);
       return evaluatorEntriesToString(
           squashFormattedEntriesWherePossible(formattedEntries),
           columnLengths -> formattedEntryToString(
@@ -148,17 +177,6 @@ public interface ReportComposer {
               mismatchExplanationFound));
     }
 
-    private static FormattedEntry evaluatorEntryToFormattedEntry(EvaluationEntry entry, Supplier<String> outputFormatter) {
-      return new FormattedEntry(
-          formatObject(entry.inputActualValue()),
-          entry.formName(),
-          indent(entry.level()),
-          asList(LEAF, AND, OR, NOT, FUNCTION).contains(entry.type()) ?
-              outputFormatter.get() :
-              null,
-          entry.detailOutputExpectation());
-    }
-
     private static Function<FormattedEntry, String> formattedEntryToString(
         int inputColumnWidth,
         int formNameColumnLength,
@@ -167,7 +185,7 @@ public interface ReportComposer {
         boolean mismatchExplanationFound) {
       return (FormattedEntry formattedEntry) ->
           (mismatchExplanationFound ?
-              format("%-4s", formattedEntry.mismatchExplanation().isPresent() ?
+              format("%-4s", formattedEntry.requiresExplanation ?
                   "[" + i.getAndIncrement() + "]" : "") :
               "") +
               format("%-" + max(2, inputColumnWidth) + "s" +
@@ -243,7 +261,7 @@ public interface ReportComposer {
               String.format("%s:%s", cur.formName(), entry.formName()),
               cur.indent(),
               entry.output().orElse(null),
-              cur.mismatchExplanation().orElse(entry.mismatchExplanation)));
+              cur.requiresExplanation()));
           return null;
         } else {
           curHolder.set(entry);
@@ -258,24 +276,24 @@ public interface ReportComposer {
       if (lastEntry == null)
         return eachEntry;
       if (Objects.equals(lastEntry.input, eachEntry.input))
-        return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.mismatchExplanation);
+        return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.requiresExplanation);
       return eachEntry;
     }
 
     public static class FormattedEntry {
-      private static final FormattedEntry SENTINEL = new FormattedEntry(null, null, null, null, null);
+      private static final FormattedEntry SENTINEL = new FormattedEntry(null, null, null, null, false);
       private final        String         input;
       private final        String         formName;
       private final        String         indent;
       private final        String         output;
-      private final        Object         mismatchExplanation;
+      private final        boolean        requiresExplanation;
 
-      FormattedEntry(String input, String formName, String indent, String output, Object mismatchExplanation) {
+      FormattedEntry(String input, String formName, String indent, String output, boolean requiresExplanation) {
         this.input = input;
         this.formName = formName;
         this.indent = indent;
         this.output = output;
-        this.mismatchExplanation = mismatchExplanation;
+        this.requiresExplanation = requiresExplanation;
       }
 
       Optional<String> input() {
@@ -290,12 +308,12 @@ public interface ReportComposer {
         return this.formName;
       }
 
-      Optional<Object> mismatchExplanation() {
-        return Optional.ofNullable(this.mismatchExplanation);
-      }
-
       Optional<String> output() {
         return Optional.ofNullable(this.output);
+      }
+
+      public boolean requiresExplanation() {
+        return this.requiresExplanation;
       }
     }
   }
