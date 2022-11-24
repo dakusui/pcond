@@ -224,7 +224,7 @@ public enum PrintablePredicateFactory {
     }
 
     @Override
-    public Object explainExpectation() {
+    public Object explainOutputExpectation() {
       return this.formatter.get();
     }
 

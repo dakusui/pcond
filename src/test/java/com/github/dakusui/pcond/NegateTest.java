@@ -3,6 +3,7 @@ package com.github.dakusui.pcond;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.shared.ApplicationException;
+import com.github.dakusui.thincrest.TestAssertions;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
@@ -118,11 +119,14 @@ public class NegateTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void whenInvertedTrasformingPredicateFails_thenPrintDesignedMessage$mergedWhenNotMismatch() {
     try {
-      validate("Hello",
+      //validate(
+      TestAssertions.assertThat(
+          "Hello",
           and(                                      // (1)
               not(equalTo("Hello!")),         // (2)
-              alwaysFalse()),                       // (3)
-          ApplicationException::new);
+              alwaysFalse())                        // (3)
+      );
+//          ApplicationException::new);
     } catch (ApplicationException e) {
       e.printStackTrace();
       MatcherAssert.assertThat(

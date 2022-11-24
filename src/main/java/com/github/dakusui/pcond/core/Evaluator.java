@@ -11,8 +11,8 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
-import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActualValue;
-import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainExpectation;
+import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainInputActualValue;
+import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainOutputExpectation;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.lang.String.format;
@@ -163,10 +163,11 @@ public interface Evaluator {
       entries.set(
           current.positionInEntries,
           current.finalizeEntry(
-              unexpected ? explainExpectation(evaluable) : null,
-              unexpected ? explainActualValue(evaluable, composeActualValue(current.inputActualValue(), returnedValue)) : null,
-              toSnapshotIfPossible(returnedValue),
-              "detailOutputActualValue"));
+              // evaluable
+              currentlyExpectedBooleanValue, unexpected ? explainOutputExpectation(evaluable) : null,
+              current.inputActualValue(), unexpected ? explainInputActualValue(evaluable, composeActualValue(current.inputActualValue(), returnedValue)) : null,
+              returnedValue, toSnapshotIfPossible(returnedValue),
+              false));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.valueReturned(returnedValue);
       if (evaluable.requestExpectationFlip())
@@ -179,10 +180,11 @@ public interface Evaluator {
       entries.set(
           current.positionInEntries,
           current.finalizeEntry(
-              explainExpectation(evaluable),
-              explainActualValue(evaluable, composeActualValue(current.inputActualValue(), thrownException)),
-              toSnapshotIfPossible(thrownException),
-              "detailOutputActualValue"));
+              // evaluable,
+              currentlyExpectedBooleanValue, explainOutputExpectation(evaluable),
+              current.inputActualValue(), explainInputActualValue(evaluable, composeActualValue(current.inputActualValue(), thrownException)),
+              thrownException, toSnapshotIfPossible(thrownException),
+              true));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.exceptionThrown(thrownException);
       if (evaluable.requestExpectationFlip())
@@ -280,13 +282,11 @@ public interface Evaluator {
       return new EvaluationEntry.Finalized(
           format("not(%s)", anotherEntry.formName()), anotherEntry.type(),
           entry.level(),
-          entry.outputExpectation(),
-          entry.detailOutputExpectation(),
-          entry.inputActualValue(),
-          entry.detailInputActualValue(),
-          entry.outputActualValue(),
-          "detailOutputActualValue",
-          false
+          entry.outputExpectation(), entry.detailOutputExpectation(),
+          entry.inputActualValue(), entry.detailInputActualValue(),
+          entry.outputActualValue(), entry.detailOutputActualValue(),
+          false,
+          entry.wasExceptionThrown() || anotherEntry.wasExceptionThrown()
       );
     }
 
@@ -434,11 +434,11 @@ public interface Evaluator {
 
     public void importEvaluationEntries(List<EvaluationEntry> resultEntries, Object other) {
       resultEntries.stream()
-          .map(each -> createEntryForImport(each, other))
+          .map(each -> createEvaluationEntryForImport(each, other))
           .forEach(each -> this.entries.add(each));
     }
 
-    private EvaluationEntry.Finalized createEntryForImport(EvaluationEntry entry, Object other) {
+    private EvaluationEntry.Finalized createEvaluationEntryForImport(EvaluationEntry entry, Object other) {
       assert entry instanceof EvaluationEntry.Finalized;
       return new EvaluationEntry.Finalized(
           entry.formName(),
@@ -450,7 +450,8 @@ public interface Evaluator {
           entry.detailInputActualValue(),
           entry.evaluationFinished() ? entry.outputActualValue() : other,
           "detailOutputActualValue",
-          entry.trivial
+          entry.trivial,
+          entry.wasExceptionThrown()
       );
     }
   }
@@ -582,17 +583,17 @@ public interface Evaluator {
    * An interface to define methods that make a predicate "explainable" to humans.
    */
   interface Explainable {
-    Object explainExpectation();
+    Object explainOutputExpectation();
 
     Object explainActual(Object actualValue);
 
-    static Object explainExpectation(Object evaluable) {
+    static Object explainOutputExpectation(Object evaluable) {
       if (evaluable instanceof Explainable)
-        return explainValue(((Explainable) evaluable).explainExpectation());
+        return explainValue(((Explainable) evaluable).explainOutputExpectation());
       return null;
     }
 
-    static Object explainActualValue(Object evaluable, Object actualValue) {
+    static Object explainInputActualValue(Object evaluable, Object actualValue) {
       if (evaluable instanceof Explainable)
         return explainValue(((Explainable) evaluable).explainActual(actualValue));
       return null;

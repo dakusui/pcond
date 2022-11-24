@@ -363,7 +363,7 @@ public class Predicates {
 
 
       @Override
-      public Object explainExpectation() {
+      public Object explainOutputExpectation() {
         return formatExplanation(bExpectation, "SHOULD BE FOUND AFTER THIS POSITION");
       }
 
@@ -391,7 +391,7 @@ public class Predicates {
     return makeExplainable((PrintablePredicate<? super Object>) predicate("(end)", v -> result.get()), new Evaluator.Explainable() {
 
       @Override
-      public Object explainExpectation() {
+      public Object explainOutputExpectation() {
         return ongoingExpectationExplanation.toString() + originalStringSupplier.get().substring(lastTestedPosition.get());
       }
 
@@ -418,8 +418,8 @@ public class Predicates {
       }
 
       @Override
-      public Object explainExpectation() {
-        return explainable.explainExpectation();
+      public Object explainOutputExpectation() {
+        return explainable.explainOutputExpectation();
       }
 
       @Override
@@ -548,7 +548,7 @@ public class Predicates {
     return makeExplainable((PrintablePredicate<? super Object>) predicate("(end)", v -> result.get()), new Evaluator.Explainable() {
 
       @Override
-      public Object explainExpectation() {
+      public Object explainOutputExpectation() {
         return renderExplanationString(expectationExplanationList);
       }
 

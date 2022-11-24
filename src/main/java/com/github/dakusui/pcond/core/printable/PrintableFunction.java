@@ -90,7 +90,7 @@ public class PrintableFunction<T, R> extends
   }
 
   @Override
-  public Object explainExpectation() {
+  public Object explainOutputExpectation() {
     return this.formatter.get();
   }
 

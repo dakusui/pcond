@@ -45,7 +45,7 @@ public abstract class ExplainablePredicate<V> extends PrintablePredicate<V>
   public static Predicate<String> explainableStringIsEqualTo(String str) {
     return new ExplainablePredicate<String>(() -> "stringIsEqualTo[" + formatObject(toNonStringObject(str)) + "]", v -> Objects.equals(str, v)) {
       @Override
-      public Object explainExpectation() {
+      public Object explainOutputExpectation() {
         return str;
       }
     };

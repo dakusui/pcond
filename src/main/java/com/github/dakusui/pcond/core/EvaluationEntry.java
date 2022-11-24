@@ -111,6 +111,10 @@ public abstract class EvaluationEntry {
 
   public abstract boolean evaluationFinished();
 
+  public boolean wasExceptionThrown() {
+    return false;
+  }
+
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean isTrivial() {
     return this.trivial;
@@ -160,8 +164,9 @@ public abstract class EvaluationEntry {
   }
 
   static class Finalized extends EvaluationEntry {
-    final Object outputActualValue;
-    final Object detailOutputActualValue;
+    final         Object  outputActualValue;
+    final         Object  detailOutputActualValue;
+    private final boolean wasExceptionThrown;
 
     Finalized(
         String formName, Type type,
@@ -169,24 +174,39 @@ public abstract class EvaluationEntry {
         boolean outputExpectation, Object detailOutputExpectation,
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
-        boolean trivial) {
+        boolean trivial, boolean wasExceptionThrown) {
       super(formName, type, level, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, trivial);
       this.outputActualValue = outputActualValue;
       this.detailOutputActualValue = detailOutputActualValue;
+      this.wasExceptionThrown = wasExceptionThrown;
     }
 
-    Finalized(OnGoing onGoing, Object detailOutputExpectation, Object detailInputActualValue, Object outputActualValue, Object detailOutputActualValue) {
+    Finalized(
+        OnGoing onGoing,
+        boolean outputExpectation, Object detailOutputExpectation,
+        Object inputActualValue, Object detailInputActualValue,
+        Object outputActualValue, Object detailOutputActualValue,
+        boolean wasExceptionThrown) {
       super(onGoing);
+      this.outputExpectation = outputExpectation;
       this.detailOutputExpectation = detailOutputExpectation;
+      this.inputActualValue = inputActualValue;
       this.detailInputActualValue = detailInputActualValue;
       this.outputActualValue = outputActualValue;
       this.detailOutputActualValue = detailOutputActualValue;
+      this.wasExceptionThrown = wasExceptionThrown;
     }
 
     @Override
     public boolean evaluationFinished() {
       return true;
     }
+
+    @Override
+    public boolean wasExceptionThrown() {
+      return this.wasExceptionThrown;
+    }
+
 
     @Override
     public Object outputActualValue() {
@@ -207,8 +227,12 @@ public abstract class EvaluationEntry {
       this.positionInEntries = positionInEntries;
     }
 
-    Finalized finalizeEntry(Object detailOutputExpectation, Object detailInputActualValue, Object outputActualValue, Object detailOutputActualValue) {
-      return new Finalized(this, detailOutputExpectation, detailInputActualValue, outputActualValue, detailOutputActualValue);
+    Finalized finalizeEntry(
+        boolean outputExpectation, Object detailOutputExpectation,
+        Object inputActualValue, Object detailInputActualValue,
+        Object outputActualValue, Object detailOutputActualValue,
+        boolean wasExceptioinThrown) {
+      return new Finalized(this, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, outputActualValue, detailOutputActualValue, wasExceptioinThrown);
     }
 
     @Override
