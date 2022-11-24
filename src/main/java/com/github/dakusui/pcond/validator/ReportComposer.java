@@ -69,7 +69,6 @@ public interface ReportComposer {
       List<Object> detailsForExpectation = new LinkedList<>();
       List<FormattedEntry> summaryDataForExpectations = squashTrivialEntries(evaluationHistory)
           .stream()
-          .filter((EvaluationEntry each) -> !each.isTrivial())
           .peek((EvaluationEntry each) -> addToDetailsListIfExplanationIsRequired(detailsForExpectation, each, each::detailOutputExpectation))
           .map(Utils::createFormattedEntryForExpectation)
           .collect(toList());
@@ -77,7 +76,6 @@ public interface ReportComposer {
       List<Object> detailsForActual = new LinkedList<>();
       List<FormattedEntry> summaryForActual = squashTrivialEntries(evaluationHistory)
           .stream()
-          .filter((EvaluationEntry each) -> !each.isTrivial())
           .peek((EvaluationEntry each) -> addToDetailsListIfExplanationIsRequired(detailsForActual, each, each::detailOutputActualValue))
           .map(Utils::createFormattedEntryForActualValue)
           .collect(toList());
@@ -101,6 +99,7 @@ public interface ReportComposer {
           if (each.isTrivial()) {
             squashedItems.add(each);
           } else {
+            squashedItems.add(each);
             EvaluationEntry first = squashedItems.get(0);
             EvaluationEntry last = squashedItems.get(squashedItems.size() - 1);
             ret.add(EvaluationEntry.create(

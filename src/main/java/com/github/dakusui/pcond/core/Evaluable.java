@@ -105,6 +105,11 @@ public interface Evaluable<T> {
      * @return `true` if the "shortcut" evaluation is enabled.
      */
     boolean shortcut();
+
+    @Override
+    default boolean isTrivial() {
+      return children().size() <= 1;
+    }
   }
 
   /**
@@ -153,6 +158,11 @@ public interface Evaluable<T> {
 
     @Override
     default boolean requestExpectationFlip() {
+      return true;
+    }
+
+    @Override
+    default boolean isTrivial() {
       return true;
     }
   }

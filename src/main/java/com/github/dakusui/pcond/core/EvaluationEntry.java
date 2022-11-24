@@ -234,8 +234,12 @@ public abstract class EvaluationEntry {
   static class OnGoing extends EvaluationEntry {
     final int positionInEntries;
 
-    OnGoing(String formName, Type type, int level, Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object inputActualValue, Object detailInputActualValue1, boolean trivial, int positionInEntries) {
-      super(formName, type, level, inputExpectation_, detailInputExpectation_, outputExpectation, outputExpectation, inputActualValue, detailInputActualValue1, trivial);
+    OnGoing(String formName, Type type, int level,
+        Object inputExpectation_, Object detailInputExpectation_,
+        Object outputExpectation, Object detailOutputExpectation,
+        Object inputActualValue, Object detailInputActualValue,
+        boolean trivial, int positionInEntries) {
+      super(formName, type, level, inputExpectation_, detailInputExpectation_, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, trivial);
       this.positionInEntries = positionInEntries;
     }
 
