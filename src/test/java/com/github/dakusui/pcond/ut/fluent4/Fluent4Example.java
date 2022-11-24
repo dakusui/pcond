@@ -240,7 +240,7 @@ public class Fluent4Example {
       }
 
       public StringTransformer<Book> abstractText() {
-        return toString(Printables.function("title", Book::abstractText));
+        return toString(Printables.function("abstractText", Book::abstractText));
       }
 
       @Override

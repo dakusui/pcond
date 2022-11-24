@@ -83,9 +83,7 @@ public class Explanation {
     ret += newLine();
     ret += newLine();
     ret += IntStream.range(0, report.details().size())
-        .mapToObj(i -> {
-          return formatDetailItem(i, report.details().get(i));
-        })
+        .mapToObj(i -> formatDetailItem(i, report.details().get(i)))
         .collect(joining(newLine()));
     return ret;
   }

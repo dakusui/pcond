@@ -105,7 +105,7 @@ public interface ReportComposer {
                 squashedItems.stream().map(EvaluationEntry::formName).collect(joining(":")), first.type(),
                 first.level(),
                 first.inputExpectation(), first.detailInputExpectation(),
-                first.outputExpectation(), first.detailOutputExpectation(),
+                last.outputExpectation(), last.detailOutputExpectation(),
                 first.inputActualValue(), first.detailInputActualValue(),
                 last.outputActualValue(), last.detailOutputActualValue(),
                 false,

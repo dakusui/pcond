@@ -5,7 +5,6 @@ import com.github.dakusui.pcond.core.context.VariableBundle;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -129,6 +128,17 @@ public interface Evaluator {
 
   class Impl implements Evaluator {
     private static final Object NULL_VALUE = new Object();
+    public static final  Object UNKNOWN    = new Snapshottable() {
+      @Override
+      public Object snapshot() {
+        return this.toString();
+      }
+
+      @Override
+      public String toString() {
+        return "(unknown)";
+      }
+    };
     List<EvaluationEntry.OnGoing> onGoingEntries = new LinkedList<>();
     List<EvaluationEntry>         entries        = new ArrayList<>();
     final EvaluationContext<Object> currentResult;
@@ -163,7 +173,7 @@ public interface Evaluator {
               outputExpectation, explainOutputExpectation(evaluable),
               inputActualValue, explainInputActualValue(evaluable, inputActualValue),
               outputActualValue,
-              toSnapshotIfPossible(outputActualValue), false, unexpected));
+              toSnapshotIfPossible(inputActualValue), false, unexpected));
       onGoingEntries.remove(positionInOngoingEntries);
       this.currentResult.valueReturned(outputActualValue);
       if (evaluable.requestExpectationFlip())
@@ -176,7 +186,7 @@ public interface Evaluator {
       entries.set(
           current.positionInEntries,
           current.finalizeEntry(
-              inputExpectation, Objects.toString(inputExpectation),
+              inputExpectation, (Snapshottable) () -> inputExpectation,
               outputExpectation, explainOutputExpectation(evaluable),
               inputActualValue, explainInputActualValue(evaluable, inputActualValue),
               thrownException,
@@ -249,7 +259,6 @@ public interface Evaluator {
     @Override
     public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.LeafPred<T> leafPred) {
       this.enter(EvaluableDesc.fromEvaluable(leafPred), evaluationContext);
-      // TODO: Issue-#59: Need exception handling
       try {
         System.out.println("LEAF:<" + evaluationContext + ">");
         if (evaluationContext.state() == EvaluationContext.State.VALUE_RETURNED) {
@@ -299,7 +308,7 @@ public interface Evaluator {
         this.leaveWithThrownException(
             evaluable,
             inputActualValue,
-            "(unknown)",
+            UNKNOWN,
             inputActualValue,
             currentEvaluationContext.thrownException());
       this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), currentEvaluationContext());
@@ -334,7 +343,7 @@ public interface Evaluator {
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        this.leaveWithThrownException(func, evaluationContext.returnedValue(), "(unknown)", evaluationContext.returnedValue(), e);
+        this.leaveWithThrownException(func, evaluationContext.returnedValue(), UNKNOWN, evaluationContext.returnedValue(), e);
         func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) this.currentEvaluationContext().exceptionThrown(e), this));
       }
     }
