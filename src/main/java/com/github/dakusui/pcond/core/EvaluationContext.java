@@ -34,9 +34,9 @@ public class EvaluationContext<V> implements Cloneable {
     abstract <V> Throwable exception(EvaluationContext<V> vContextVariable);
   }
 
-  State state;
-  V     value;
-  Throwable exception;
+  private State     state;
+  private V         value;
+  private Throwable exception;
 
   private EvaluationContext(State state, V value, Throwable exception) {
     this.state = state;

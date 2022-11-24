@@ -189,12 +189,15 @@ public abstract class EvaluationEntry {
 
     Finalized(
         OnGoing onGoing,
+        Object inputExpectation, Object detailInputExpectation,
         Object outputExpectation, Object detailOutputExpectation,
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
         boolean wasExceptionThrown, boolean requiresExplanation) {
       super(onGoing);
       this.requiresExplanation = requiresExplanation;
+      this.inputExpectation = inputExpectation;
+      this.detailInputExpectation = detailInputExpectation;
       this.outputExpectation = outputExpectation;
       this.detailOutputExpectation = detailOutputExpectation;
       this.inputActualValue = inputActualValue;
@@ -244,10 +247,12 @@ public abstract class EvaluationEntry {
     }
 
     Finalized finalizeEntry(
+        Object inputExpectation, Object detailInputExpectation,
         Object outputExpectation, Object detailOutputExpectation,
-        Object inputActualValue, Object detailInputActualValue, Object outputActualValue, Object detailOutputActualValue,
+        Object inputActualValue, Object detailInputActualValue,
+        Object outputActualValue, Object detailOutputActualValue,
         boolean wasExceptionThrown, boolean requiresExplanation) {
-      return new Finalized(this, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, outputActualValue, detailOutputActualValue, wasExceptionThrown, requiresExplanation);
+      return new Finalized(this, inputExpectation, detailInputExpectation, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, outputActualValue, detailOutputActualValue, wasExceptionThrown, requiresExplanation);
     }
 
     @Override

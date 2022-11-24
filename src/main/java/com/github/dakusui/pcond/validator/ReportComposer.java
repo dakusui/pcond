@@ -86,6 +86,8 @@ public interface ReportComposer {
     }
 
     private static List<EvaluationEntry> squashTrivialEntries(List<EvaluationEntry> evaluationHistory) {
+      if (false)
+        return evaluationHistory;
       List<EvaluationEntry> ret = new LinkedList<>();
       List<EvaluationEntry> squashedItems = new LinkedList<>();
       for (EvaluationEntry each : evaluationHistory) {
@@ -223,6 +225,8 @@ public interface ReportComposer {
     }
 
     private static List<FormattedEntry> squashFormattedEntriesWherePossible(List<FormattedEntry> formattedEntries) {
+      if (true)
+        return formattedEntries;
       AtomicReference<FormattedEntry> lastFormattedEntry = new AtomicReference<>();
       AtomicReference<FormattedEntry> curHolder = new AtomicReference<>();
       return Stream.concat(
