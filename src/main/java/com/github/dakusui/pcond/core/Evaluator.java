@@ -309,14 +309,14 @@ public interface Evaluator {
             transformation.checker(),
             currentEvaluationContext.value(),
             transformation.mapper().requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
-            inputActualValue,
+            currentEvaluationContext.value(),
             this.currentEvaluationContext().value(), false);
       } else if (currentEvaluationContext.state() == EvaluationContext.State.EXCEPTION_THROWN) {
         this.leaveWithReturnedValue(
             transformation.checker(),
             currentEvaluationContext.value(),
             transformation.mapper().requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
-            inputActualValue,
+            currentEvaluationContext.value(),
             this.currentEvaluationContext().value(), false);
       } else {
         assert false;

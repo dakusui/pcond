@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.lang.Math.max;
@@ -86,8 +85,6 @@ public interface ReportComposer {
     }
 
     private static List<EvaluationEntry> squashTrivialEntries(List<EvaluationEntry> evaluationHistory) {
-      if (false)
-        return evaluationHistory;
       List<EvaluationEntry> ret = new LinkedList<>();
       List<EvaluationEntry> squashedItems = new LinkedList<>();
       for (EvaluationEntry each : evaluationHistory) {
@@ -118,7 +115,6 @@ public interface ReportComposer {
           }
         }
       }
-      ret.addAll(squashedItems);
       return ret;
     }
 
@@ -225,66 +221,21 @@ public interface ReportComposer {
     }
 
     private static List<FormattedEntry> squashFormattedEntriesWherePossible(List<FormattedEntry> formattedEntries) {
-      if (true)
-        return formattedEntries;
-      AtomicReference<FormattedEntry> lastFormattedEntry = new AtomicReference<>();
-      AtomicReference<FormattedEntry> curHolder = new AtomicReference<>();
-      return Stream.concat(
-              formattedEntries
-                  .stream()
-                  .map((FormattedEntry eachEntry) -> hideRedundantInputValues(lastFormattedEntry, eachEntry)),
-              Stream.of(FormattedEntry.SENTINEL))
-          .map(each -> squashFormattedEntries(curHolder, each))
-          .map(each -> flushRemainder(curHolder, each))
-          .filter(Objects::nonNull)
+      AtomicReference<Object> previousInput = new AtomicReference<>();
+      return formattedEntries.stream()
+          .map(each -> {
+            if (!Objects.equals(previousInput.get(), each.input())) {
+              previousInput.set(each.input());
+              return each;
+            } else {
+              return new FormattedEntry("", each.formName(), each.indent(), each.output().orElse(null), each.requiresExplanation());
+            }
+          })
           .collect(toList());
     }
 
-    private static FormattedEntry flushRemainder(AtomicReference<FormattedEntry> curHolder, FormattedEntry each) {
-      if (each == FormattedEntry.SENTINEL)
-        return curHolder.get();
-      else
-        return each;
-    }
-
-    private static FormattedEntry squashFormattedEntries(AtomicReference<FormattedEntry> curHolder, FormattedEntry entry) {
-      final FormattedEntry cur = curHolder.get();
-      if (cur == null) {
-        if (!entry.output().isPresent()) {
-          curHolder.set(entry);
-          // null will be filtered out by the caller.
-          return null;
-        } else {
-          return entry;
-        }
-      } else {
-        if (!cur.output().isPresent() && !entry.input().isPresent()) {
-          curHolder.set(new FormattedEntry(
-              cur.input().orElse(null),
-              String.format("%s:%s", cur.formName(), entry.formName()),
-              cur.indent(),
-              entry.output().orElse(null),
-              cur.requiresExplanation()));
-          return null;
-        } else {
-          curHolder.set(entry);
-          return cur;
-        }
-      }
-    }
-
-    private static FormattedEntry hideRedundantInputValues(AtomicReference<FormattedEntry> lastFormattedEntry, FormattedEntry eachEntry) {
-      FormattedEntry lastEntry = lastFormattedEntry.get();
-      lastFormattedEntry.set(eachEntry);
-      if (lastEntry == null)
-        return eachEntry;
-      if (Objects.equals(lastEntry.input, eachEntry.input))
-        return new FormattedEntry(null, eachEntry.formName, eachEntry.indent(), eachEntry.output, eachEntry.requiresExplanation);
-      return eachEntry;
-    }
 
     public static class FormattedEntry {
-      private static final FormattedEntry SENTINEL = new FormattedEntry(null, null, null, null, false);
       private final        String         input;
       private final        String         formName;
       private final        String         indent;
