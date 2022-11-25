@@ -4,9 +4,13 @@ import com.github.dakusui.pcond.core.fluent.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.builtins.ObjectChecker;
 import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.internals.InternalException;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import static java.util.Objects.requireNonNull;
 
 abstract class CustomTransformer<
     TX extends AbstractObjectTransformer<
@@ -39,7 +43,17 @@ abstract class CustomTransformer<
     return new ObjectChecker.Impl<>(this::value, transformFunction);
   }
 
-  abstract protected TX create(T value);
+  public TX transform(Function<TX, Predicate<T>> clause) {
+    requireNonNull(clause);
+    return this.addTransformAndCheckClause(tx -> clause.apply((TX) tx));
+  }
 
-  abstract public TX transform(Function<TX, Predicate<T>> clause);
+  @SuppressWarnings("unchecked")
+  protected TX create(T value) {
+    try {
+      return (TX) this.getClass().getConstructor(value.getClass()).newInstance(value);
+    } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+      throw new InternalException(String.format("Failed to create an instance of this class: <%s>", this.getClass()), e);
+    }
+  }
 }

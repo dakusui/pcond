@@ -72,9 +72,9 @@ public abstract class EvaluationEntry {
   /**
    * A flag to let the framework know this entry should be printed in a less outstanding form.
    */
-  final boolean trivial;
+  final boolean squashable;
 
-  EvaluationEntry(String formName, Type type, int level, Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object detailOutputExpectation, Object inputActualValue, Object detailInputActualValue, boolean trivial) {
+  EvaluationEntry(String formName, Type type, int level, Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object detailOutputExpectation, Object inputActualValue, Object detailInputActualValue, boolean squashable) {
     this.type = type;
     this.level = level;
     this.formName = formName;
@@ -84,7 +84,7 @@ public abstract class EvaluationEntry {
     this.detailOutputExpectation = detailOutputExpectation;
     this.inputActualValue = inputActualValue;
     this.detailInputActualValue = detailInputActualValue;
-    this.trivial = trivial;
+    this.squashable = squashable;
   }
 
   EvaluationEntry(EvaluationEntry base) {
@@ -97,7 +97,7 @@ public abstract class EvaluationEntry {
     this.detailInputActualValue = base.detailInputActualValue();
     this.detailOutputExpectation = base.detailOutputExpectation();
     this.outputExpectation = base.outputExpectation();
-    this.trivial = base.isTrivial();
+    this.squashable = base.isSquashable();
   }
 
   public String formName() {
@@ -115,8 +115,8 @@ public abstract class EvaluationEntry {
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  public boolean isTrivial() {
-    return this.trivial;
+  public boolean isSquashable() {
+    return this.squashable;
   }
 
   public abstract boolean requiresExplanation();
@@ -175,12 +175,12 @@ public abstract class EvaluationEntry {
         Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object detailOutputExpectation,
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
-        boolean trivial, boolean wasExceptionThrown, boolean requiresExplanation) {
+        boolean squashable, boolean wasExceptionThrown, boolean requiresExplanation) {
       super(
           formName, type, level,
           inputExpectation_, detailInputExpectation_,
           outputExpectation, detailOutputExpectation,
-          inputActualValue, detailInputActualValue, trivial);
+          inputActualValue, detailInputActualValue, squashable);
       this.outputActualValue = outputActualValue;
       this.detailOutputActualValue = detailOutputActualValue;
       this.wasExceptionThrown = wasExceptionThrown;

@@ -54,7 +54,7 @@ public interface Evaluable<T> {
     return false;
   }
 
-  default boolean isTrivial() {
+  default boolean isSquashable() {
     return false;
   }
 
@@ -107,7 +107,7 @@ public interface Evaluable<T> {
     boolean shortcut();
 
     @Override
-    default boolean isTrivial() {
+    default boolean isSquashable() {
       return children().size() <= 1;
     }
   }
@@ -162,7 +162,7 @@ public interface Evaluable<T> {
     }
 
     @Override
-    default boolean isTrivial() {
+    default boolean isSquashable() {
       return true;
     }
   }

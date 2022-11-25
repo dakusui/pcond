@@ -89,13 +89,13 @@ public interface ReportComposer {
       List<EvaluationEntry> squashedItems = new LinkedList<>();
       for (EvaluationEntry each : evaluationHistory) {
         if (squashedItems.isEmpty()) {
-          if (each.isTrivial()) {
+          if (each.isSquashable()) {
             squashedItems.add(each);
           } else {
             ret.add(each);
           }
         } else {
-          if (each.isTrivial()) {
+          if (each.isSquashable()) {
             squashedItems.add(each);
           } else {
             squashedItems.add(each);

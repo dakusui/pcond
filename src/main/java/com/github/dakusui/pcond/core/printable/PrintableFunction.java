@@ -121,7 +121,7 @@ public class PrintableFunction<T, R> extends
   }
 
 
-  public boolean isTrivial() {
+  public boolean isSquashable() {
     return this.trivial;
   }
 

@@ -150,11 +150,11 @@ public interface Evaluator {
 
     void enter(EvaluableDesc evaluableDesc, EvaluationContext<?> input) {
       EvaluationEntry.OnGoing newEntry = new EvaluationEntry.OnGoing(
-          evaluableDesc.name, evaluableDesc.type(), (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
+          evaluableDesc.name, evaluableDesc.type(), (int) onGoingEntries.stream().filter(each -> !each.isSquashable()).count(),
           input.currentValue(), toSnapshotIfPossible(input.currentValue()),
           this.currentlyExpectedBooleanValue, toSnapshotIfPossible(this.currentlyExpectedBooleanValue),
           input, toSnapshotIfPossible(input.currentValue()),
-          evaluableDesc.isTrivial(), entries.size()
+          evaluableDesc.isSquashable(), entries.size()
       );
       onGoingEntries.add(newEntry);
       entries.add(newEntry);
@@ -462,7 +462,7 @@ public interface Evaluator {
           entry.detailInputActualValue(),
           entry.evaluationFinished() ? entry.outputActualValue() : other,
           entry.detailOutputActualValue(),
-          entry.isTrivial(),
+          entry.isSquashable(),
           entry.wasExceptionThrown(),
           entry.requiresExplanation());
     }
@@ -485,22 +485,22 @@ public interface Evaluator {
   class EvaluableDesc {
     final EvaluationEntry.Type type;
     final String               name;
-    final boolean              requestsExpectationFlip;
-    final boolean              trivial;
+    final boolean requestsExpectationFlip;
+    final boolean squashable;
 
-    public EvaluableDesc(EvaluationEntry.Type type, String name, boolean requestsExpectationFlip, boolean trivial) {
+    public EvaluableDesc(EvaluationEntry.Type type, String name, boolean requestsExpectationFlip, boolean squashable) {
       this.type = type;
       this.name = name;
       this.requestsExpectationFlip = requestsExpectationFlip;
-      this.trivial = trivial;
+      this.squashable = squashable;
     }
 
     public EvaluationEntry.Type type() {
       return this.type;
     }
 
-    public boolean isTrivial() {
-      return this.trivial;
+    public boolean isSquashable() {
+      return this.squashable;
     }
 
     public boolean requestExpectationFlip() {
@@ -512,7 +512,7 @@ public interface Evaluator {
           LEAF,
           String.format("%s", leafEvaluable),
           leafEvaluable.requestExpectationFlip(),
-          leafEvaluable.isTrivial()
+          leafEvaluable.isSquashable()
       );
     }
 
@@ -521,7 +521,7 @@ public interface Evaluator {
           LEAF,
           String.format("%s", contextEvaluable),
           contextEvaluable.requestExpectationFlip(),
-          contextEvaluable.isTrivial()
+          contextEvaluable.isSquashable()
       );
     }
 
@@ -530,7 +530,7 @@ public interface Evaluator {
           LEAF,
           String.format("%s", streamEvaluable),
           streamEvaluable.requestExpectationFlip(),
-          streamEvaluable.isTrivial()
+          streamEvaluable.isSquashable()
       );
     }
 
@@ -539,7 +539,7 @@ public interface Evaluator {
           FUNCTION,
           String.format("%s", funcEvaluable.head()),
           funcEvaluable.requestExpectationFlip(),
-          funcEvaluable.isTrivial()
+          funcEvaluable.isSquashable()
       );
     }
 
@@ -548,7 +548,7 @@ public interface Evaluator {
           FUNCTION,
           String.format("%s", conjunctionEvaluable.shortcut() ? "and" : "allOf"),
           conjunctionEvaluable.requestExpectationFlip(),
-          conjunctionEvaluable.isTrivial()
+          conjunctionEvaluable.isSquashable()
       );
     }
 
@@ -557,7 +557,7 @@ public interface Evaluator {
           FUNCTION,
           String.format("%s", disjunctionEvaluable.shortcut() ? "or" : "anyOf"),
           disjunctionEvaluable.requestExpectationFlip(),
-          disjunctionEvaluable.isTrivial()
+          disjunctionEvaluable.isSquashable()
       );
     }
 

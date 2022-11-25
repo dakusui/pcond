@@ -366,7 +366,7 @@ public enum PrintablePredicateFactory {
       this.mapperName = mapperName;
       this.checker = toEvaluableIfNecessary(predicate);
       this.checkerName = checkerName;
-      this.trivial = true;
+      this.squashable = true;
     }
 
     @Override

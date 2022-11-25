@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.forms.Functions.elementAt;
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
 import static com.github.dakusui.pcond.forms.Predicates.transform;
+import static com.github.dakusui.pcond.internals.InternalUtils.makeSquashable;
 
 /**
  * An "entry-point" class to write a "fluent" style tests.
@@ -164,9 +165,9 @@ public class Fluents {
   public static Predicate<? super List<?>> createPredicateForAllOf(Statement<?>[] statements) {
     AtomicInteger i = new AtomicInteger(0);
     @SuppressWarnings("unchecked") Predicate<? super List<?>>[] predicates = Arrays.stream(statements)
-        .map(e -> InternalUtils.makeTrivial(transform(InternalUtils.makeTrivial(elementAt(i.getAndIncrement()))).check((Predicate<? super Object>) e.statementPredicate())))
+        .map(e -> makeSquashable(transform(makeSquashable(elementAt(i.getAndIncrement()))).check((Predicate<? super Object>) e.statementPredicate())))
         .toArray(Predicate[]::new);
-    return InternalUtils.makeTrivial(allOf(predicates));
+    return makeSquashable(allOf(predicates));
   }
 
   public static <T> Statement<T> statement(T value, Predicate<T> predicate) {

@@ -11,12 +11,11 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.forms.Functions.length;
-import static com.github.dakusui.pcond.forms.Predicates.isEqualTo;
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.pcond.forms.Predicates.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.makeSquashable;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 import static com.github.dakusui.thincrest.TestFluents.assertStatement;
 import static java.util.Objects.requireNonNull;
@@ -182,7 +181,7 @@ public class Fluent4Example {
                 .transform(tx -> tx.title()
                     .transform(ty -> ty
                         .then()
-                        .isNotNull().done())
+                        .checkWithPredicate(not(isNotNull())).done())
                     .transform(ty -> ty
                         .parseInt()
                         .then()
@@ -242,22 +241,10 @@ public class Fluent4Example {
       public StringTransformer<Book> abstractText() {
         return toString(Printables.function("abstractText", Book::abstractText));
       }
-
-      @Override
-      public BookTransformer transform(Function<BookTransformer, Predicate<Book>> clause) {
-        requireNonNull(clause);
-        return this.addTransformAndCheckClause(tx -> clause.apply((BookTransformer) tx));
-      }
-
-      @Override
-      protected BookTransformer create(Book value) {
-        return new BookTransformer(value);
-      }
-
     }
   }
 
   private static StringTransformer.Impl<String> stringTransformer(String value) {
-    return new StringTransformer.Impl<>(() -> value, makeTrivial(Functions.identity()));
+    return new StringTransformer.Impl<>(() -> value, makeSquashable(Functions.identity()));
   }
 }

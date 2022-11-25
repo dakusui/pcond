@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 public abstract class PrintablePredicate<T> extends Identifiable.Base implements Predicate<T>, Evaluable<T>, Cloneable {
   protected final Predicate<? super T> predicate;
   final           Supplier<String>     formatter;
-  boolean trivial = false;
+  boolean squashable = false;
 
   protected PrintablePredicate(Object creator, List<Object> args, Supplier<String> formatter, Predicate<? super T> predicate) {
     super(creator, args);
@@ -66,14 +66,14 @@ public abstract class PrintablePredicate<T> extends Identifiable.Base implements
   }
 
 
-  public boolean isTrivial() {
-    return this.trivial;
+  public boolean isSquashable() {
+    return this.squashable;
   }
 
   @Override
   public PrintablePredicate<T> makeTrivial() {
     PrintablePredicate<T> ret = this.clone();
-    ret.trivial = true;
+    ret.squashable = true;
     return ret;
   }
 

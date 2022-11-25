@@ -15,7 +15,7 @@ import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
 import static com.github.dakusui.pcond.forms.Functions.identity;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.pcond.internals.InternalUtils.makeSquashable;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 
@@ -309,7 +309,7 @@ public class Fluent3Example {
 
     @Test(expected = ComparisonFailure.class)
     public void makeTrivialTest() {
-      assertThat("hello", transform(makeTrivial(identity())).check(transform(makeTrivial(identity())).check(isEqualTo("HELLO"))));
+      assertThat("hello", transform(makeSquashable(identity())).check(transform(makeSquashable(identity())).check(isEqualTo("HELLO"))));
     }
   }
 }
