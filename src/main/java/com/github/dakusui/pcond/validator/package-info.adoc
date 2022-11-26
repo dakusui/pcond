@@ -1,7 +1,16 @@
 :ditaa-option-separation: false
 :toc:
 
-= Report Format
+== Evaluator Mechanism
+
+(t.b.d.)
+
+== Message Formatting Mechanism
+
+(t.b.d.)
+
+
+== Report Format
 
 A package to provide a value checker mechanism.
 The `ValueChecker` consists of three parts.
@@ -39,7 +48,7 @@ The Figure. <<ReportFormat>> illustrates a high-level format of a failure report
 +----------------------------+----------------------------+
 ----
 
-== Summary Format
+=== Summary Format
 
 Each line of summary section follows this format
 
@@ -58,7 +67,7 @@ If the same value is repeated more than once, this field will be left blank.
 `OutputSummary`::
 A summary of output value.
 
-=== Expectation Side
+==== Expectation Side
 
 Following is an example of a summary part of a report for expectation side.
 
@@ -85,12 +94,12 @@ Note that some forms are marked "squashable" internally and such forms are squas
 For instance a predicate `not` is marked squashable.
 See <<SummarySquashing>> Section for more details.
 
-==== `InputSummary` in Expectation Side
+===== `InputSummary` in Expectation Side
 
 `InputSummary` in Expectation side always shows an actual value given to the form as input unless an exception is thrown.
 If an exception is thrown by forms corresponding to the previous line, the thrown exception will be printed as `InputSummary`.
 
-==== OutputSummary in Expectation Side
+===== OutputSummary in Expectation Side
 
 For predicates, expected boolean values are printed unless an exception is thrown.
 If a direct input of a predicate or a function is not available because of an exception, a string "(not evaluable)" is printed.
@@ -100,7 +109,7 @@ If one of those child predicates throws an exception, the parent will print a st
 
 For functions, its *actual input value* will be printed even in expectation side unless it throws an exception.
 
-=== Actual Value Side
+==== Actual Value Side
 
 [[SummaryFormatActualValue]]
 ----
@@ -122,7 +131,7 @@ For functions, its *actual input value* will be printed even in expectation side
 ----
 
 [[SummarySquashing]]
-=== Summary Squashing
+==== Summary Squashing
 
 
 Results of some predicates are determined by other predicates like `allOf`, `not`.
@@ -165,14 +174,30 @@ Note that if a predicate marked `squashable` has more than one child, the squash
 
 
 [[ExplanationFormat]]
-== Explanation Format
+=== Explanation Format
 
-When a leaf predicate or a function "fails", an explanation will be generated.
+When a leaf predicate or a function is actually evaluated, and it "fails", an explanation will be generated.
 
 
-=== Expectation Side
+==== Expectation Side
 
-In the expectation
+In the expectation side, just a form name is printed for predicates:
+
+[[DetailFormatExpectation_predicate]]
+.Expectation Explanation for a Predicate
+----
+ .Detail of failure [1]
+ ----
+ >=[200]
+ ----
+----
+
+This is because the predicate, which is a leaf, itself describes the expectation for the input value.
+
+Note that this feature has limitations as of `4.0.0-alpha2`.
+See <<SquashedNameNotShown>> in the <<Limitations>> section.
+
+For a function, a fixed string `-> returns a value` is appended additionally.
 
 [[DetailFormatExpectation_function]]
 .Expectation Explanation for a Function
@@ -184,22 +209,11 @@ In the expectation
  ----
 ----
 
-Note that this feature has limitations as of `4.0.0-alpha2`.
+Also note that this feature has limitations as of `4.0.0-alpha2`.
 See <<SquashedNameNotShown>> in the <<Limitations>> section.
 
-[[DetailFormatExpectation_predicate]]
-.Expectation Explanation for a Predicate
-----
- .Detail of failure [1]
- ----
- >=[200]
- ----
-----
 
-Note that this feature has limitations as of `4.0.0-alpha2`.
-See <<SquashedNameNotShown>> in the <<Limitations>> section.
-
-=== Actual Value Side
+==== Actual Value Side
 
 In the actual value side, the input value that broke the expectation of a form is explained.
 
@@ -235,7 +249,7 @@ If the form throws an exception, its stacktrace will be printed additionally.
 
 
 [[Limitations]]
-== Limitations
+=== Limitations
 
 - [[ExpectedValueNotShown]] Expected Value is not shown in an explanation.
 - [[SquashedNameNotShown]] Squashed form name is not shown in an explanation.
