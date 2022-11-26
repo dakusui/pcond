@@ -172,19 +172,24 @@ public interface Evaluator {
         Object inputActualValue,
         Object outputActualValue,
         boolean unexpected) {
+      leaveWithReturnedValue(evaluable, new Io(inputExpectation, outputExpectation, inputActualValue, outputActualValue, unexpected));
+    }
+
+    void leaveWithReturnedValue(
+        Evaluable<?> evaluable, Io io) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
           current.positionInEntries,
           current.finalizeEntry(
               // evaluable
-              inputExpectation, inputExpectation,
-              outputExpectation, explainOutputExpectation(evaluable),
-              inputActualValue, explainInputActualValue(evaluable, inputActualValue),
-              outputActualValue,
-              toSnapshotIfPossible(inputActualValue), false, unexpected));
+              io.getInputExpectation(), io.getInputExpectation(),
+              io.getOutputExpectation(), explainOutputExpectation(evaluable),
+              io.getInputActualValue(), explainInputActualValue(evaluable, io.getInputActualValue()),
+              io.getOutputActualValue(),
+              toSnapshotIfPossible(io.getInputActualValue()), false, io.isUnexpected()));
       onGoingEntries.remove(positionInOngoingEntries);
-      this.currentEvaluationContext.valueReturned(outputActualValue);
+      this.currentEvaluationContext.valueReturned(io.getOutputActualValue());
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
     }
@@ -195,18 +200,23 @@ public interface Evaluator {
         Object outputExpectation,
         Object inputActualValue,
         Throwable thrownException) {
+      leaveWithThrownException(evaluable, new Io(inputExpectation, outputExpectation, inputActualValue, thrownException, true));
+    }
+
+    void leaveWithThrownException(
+        Evaluable<?> evaluable, Io io) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       entries.set(
           current.positionInEntries,
           current.finalizeEntry(
-              inputExpectation, (Snapshottable) () -> inputExpectation,
-              outputExpectation, explainOutputExpectation(evaluable),
-              inputActualValue, explainInputActualValue(evaluable, inputActualValue),
-              thrownException,
-              composeActualValueFromInputAndThrowable(inputActualValue, thrownException), true, true));
+              io.getInputExpectation(), (Snapshottable) io::getInputExpectation,
+              io.getOutputExpectation(), explainOutputExpectation(evaluable),
+              io.getInputActualValue(), explainInputActualValue(evaluable, io.getInputActualValue()),
+              io.getOutputActualValue(),
+              composeActualValueFromInputAndThrowable(io.getInputActualValue(), (Throwable) io.getOutputActualValue()), true, true));
       onGoingEntries.remove(positionInOngoingEntries);
-      this.currentEvaluationContext.exceptionThrown(thrownException);
+      this.currentEvaluationContext.exceptionThrown((Throwable) io.getOutputActualValue());
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
     }
@@ -289,7 +299,7 @@ public interface Evaluator {
       negation.target().accept(evaluationContext, this);
       if (this.currentEvaluationContext().state() == EvaluationContext.State.VALUE_RETURNED) {
         this.leaveWithReturnedValue(negation, inputActualValue, negation.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, !this.resultValueAsBoolean(), false);
-      } else  {
+      } else {
         this.leaveWithThrownException(negation, inputActualValue, negation.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, this.currentEvaluationContext().thrownException());
       }
     }
