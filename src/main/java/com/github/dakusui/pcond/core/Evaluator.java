@@ -621,11 +621,21 @@ public interface Evaluator {
    * record, instead of the value itself.
    */
   interface Snapshottable {
+
+    Object NULL = new Object() {
+      @Override
+      public String toString() {
+        return "null";
+      }
+    };
+
     Object snapshot();
 
     static Object toSnapshotIfPossible(Object value) {
       if (value instanceof Snapshottable)
         return ((Snapshottable) value).snapshot();
+      if (value == null)
+        return NULL;
       else
         return value;
     }

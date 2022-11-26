@@ -57,8 +57,7 @@ public class NegateTest extends TestBase {
   public void whenInvertedTrasformingPredicateFails_thenPrintDesignedMessage$notMergedWhenMismatch() {
     try {
       validate("Hello",
-          not(                                     // (1)
-              equalTo("Hello")),             // (2)
+          not(equalTo("Hello")),                 // (1)
           ApplicationException::new);
     } catch (ApplicationException e) {
       e.printStackTrace();

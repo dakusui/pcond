@@ -58,10 +58,13 @@ public class Explanation {
       }
     }
     b.add(newLine());
-    return b.stream().collect(joining(newLine()))
-        + IntStream.range(0, expected.details().size())
-        .mapToObj(i -> formatDetailItemPair(i, expected.details().get(i), actual.details().get(i)))
-        .collect(joining(newLine()));
+    assert expected.details().size() == actual.details().size();
+    return !expected.details().isEmpty() ?
+        b.stream().collect(joining(newLine()))
+            + IntStream.range(0, expected.details().size())
+            .mapToObj(i -> formatDetailItemPair(i, expected.details().get(i), actual.details().get(i)))
+            .collect(joining(newLine())) :
+        "";
   }
 
   private static String formatDetailItemPair(int i, String detailItemForExpectation, String detailItemForActual) {
