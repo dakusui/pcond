@@ -287,7 +287,7 @@ public class DefaultValidatorTest extends TestBase {
       // (3)
       assertThat(lineAt(e.getMessage(), 4), allOf(
           CoreMatchers.not(CoreMatchers.containsString("Mismatch:")),
-          CoreMatchers.containsString("not(isEmpty)"),
+          CoreMatchers.containsString("not:isEmpty"),
           CoreMatchers.containsString("->true")
 
       ));

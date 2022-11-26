@@ -94,7 +94,7 @@ public class StringTest extends TestBase {
   public void testIsInstanceOf() {
     String var = "hello";
     requireArgument(var, isInstanceOf(String.class));
-    requireArgument(var, and(
+    requireArgument(var, Predicates.<Object>and(
         isInstanceOf(String.class),
         isInstanceOf(Serializable.class),
         isInstanceOf(Comparable.class),

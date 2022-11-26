@@ -97,15 +97,6 @@ public interface Evaluator {
    */
   <E> void evaluate(EvaluationContext<Stream<E>> value, Evaluable.StreamPred<E> streamPred);
 
-  /**
-   * The last evaluated value by an `evaluate` method defined in this interface.
-   * This method is expected to be called from inside an `evaluated` method, not
-   * to be called by a user.
-   *
-   * @return The evaluated result value.
-   */
-  Object resultValue();
-
   boolean resultValueAsBoolean();
 
   /**
@@ -231,7 +222,7 @@ public interface Evaluator {
       boolean actualOutputValue = true;
       Throwable thrownException = null;
       boolean shortcut = conjunction.shortcut();
-      EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
+      @SuppressWarnings("unchecked") EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
       for (Evaluable<? super T> each : conjunction.children()) {
         this.currentEvaluationContext().resetTo(clonedContext);
         if (i == 0)
@@ -266,12 +257,11 @@ public interface Evaluator {
       boolean actualOutputValue = false;
       boolean shortcut = disjunction.shortcut();
       Object currentValue = this.currentEvaluationContext().currentValue();
-      EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
+      @SuppressWarnings("unchecked") EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
       for (Evaluable<? super T> each : disjunction.children()) {
         this.currentEvaluationContext().valueReturned(currentValue);
         if (i == 0)
           this.enter(EvaluableDesc.fromEvaluable(disjunction), evaluationContext);
-        Object inputActualValue = evaluationContext.value();
         each.accept(evaluationContext, this);
         boolean cur = this.resultValueAsBoolean();
         if (cur)
@@ -297,7 +287,11 @@ public interface Evaluator {
       this.enter(EvaluableDesc.fromEvaluable(negation), evaluationContext);
       Object inputActualValue = evaluationContext.value();
       negation.target().accept(evaluationContext, this);
-      this.leaveWithReturnedValue(negation, inputActualValue, negation.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, !this.resultValueAsBoolean(), false);
+      if (this.currentEvaluationContext().state() == EvaluationContext.State.VALUE_RETURNED) {
+        this.leaveWithReturnedValue(negation, inputActualValue, negation.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, !this.resultValueAsBoolean(), false);
+      } else  {
+        this.leaveWithThrownException(negation, inputActualValue, negation.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, this.currentEvaluationContext().thrownException());
+      }
     }
 
     @Override
@@ -329,6 +323,7 @@ public interface Evaluator {
       this.leaveWithReturnedValue(contextPred, inputActualValue, contextPred.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, this.resultValue(), false);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T, R> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.Transformation<T, R> transformation) {
       if (isDummyFunction((Function<?, ?>) transformation.mapper())) {
@@ -376,7 +371,7 @@ public interface Evaluator {
       }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.Func<T> func) {
       this.enter(EvaluableDesc.fromEvaluable(func), evaluationContext);
@@ -414,7 +409,6 @@ public interface Evaluator {
               .orElse(ret), false);
     }
 
-    @Override
     public Object resultValue() {
       return currentEvaluationContext.value();
     }

@@ -4,12 +4,12 @@ import com.github.dakusui.pcond.core.context.VariableBundle;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.pcond.forms.Functions;
-import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.ut.IntentionalError;
 import com.github.dakusui.shared.ExperimentalsUtils;
 import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.TargetMethodHolder;
 import com.github.dakusui.shared.utils.TestBase;
+import com.github.dakusui.thincrest.TestAssertions;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
@@ -20,11 +20,10 @@ import static com.github.dakusui.pcond.forms.Experimentals.*;
 import static com.github.dakusui.pcond.forms.Functions.stream;
 import static com.github.dakusui.pcond.forms.Functions.streamOf;
 import static com.github.dakusui.pcond.forms.Predicates.*;
-import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
-import static com.github.dakusui.shared.utils.TestUtils.lineAt;
 import static com.github.dakusui.shared.ExperimentalsUtils.areEqual;
 import static com.github.dakusui.shared.ExperimentalsUtils.stringEndsWith;
 import static com.github.dakusui.shared.TestUtils.validate;
+import static com.github.dakusui.shared.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 
@@ -108,15 +107,15 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   }
 
 
-  @Test(expected = NullPointerException.class)
+  @Test(expected = IllegalValueException.class)
   public void givenStreamContainingNull_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
     try {
-      validate(
+      TestAssertions.assertThat(
           asList(null, "Hi", "hello", "world", null),
           transform(stream().andThen(nest(asList("1", "2", "o"))))
               .check(noneMatch(
                   toContextPredicate(transform(Functions.length()).check(gt(3))))));
-    } catch (InternalException e) {
+    } catch (IllegalValueException e) {
       e.printStackTrace(System.out);
       assertThat(
           lineAt(e.getMessage(), 3),
@@ -135,7 +134,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
               CoreMatchers.containsString("length"),
               CoreMatchers.containsString("NullPointerException")
           ));
-      throw wrapIfNecessary(e.getCause());
+      throw e;
     }
   }
 
