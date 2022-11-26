@@ -229,6 +229,7 @@ public interface Evaluator {
     public <T> void evaluate(EvaluationContext<? extends T> evaluationContext, Evaluable.Conjunction<T> conjunction) {
       int i = 0;
       boolean actualOutputValue = true;
+      Throwable thrownException = null;
       boolean shortcut = conjunction.shortcut();
       EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
       for (Evaluable<? super T> each : conjunction.children()) {
@@ -237,28 +238,22 @@ public interface Evaluator {
           this.enter(EvaluableDesc.fromEvaluable(conjunction), evaluationContext);
         each.accept(evaluationContext, this);
         boolean cur = this.resultValueAsBooleanIfBooleanOtherwise(!this.currentlyExpectedBooleanValue);
+        if (clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN && thrownException == null) {
+          thrownException = clonedContext.thrownException();
+        }
         if (!cur)
           actualOutputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !actualOutputValue) || i == conjunction.children().size() - 1) {
-          if (clonedContext.state() == EvaluationContext.State.VALUE_RETURNED) {
-            this.leaveWithReturnedValue(
-                conjunction,
-                clonedContext.value(),
-                conjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
-                clonedContext.value(),
-                clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? NOT_AVAILABLE : actualOutputValue,
-                false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
-            return;
-          } else if (clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN) {
-            this.leaveWithReturnedValue(
-                conjunction,
-                clonedContext.value(),
-                conjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
-                clonedContext.value(),
-                NOT_AVAILABLE,
-                false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
-          } else
-            assert false;
+          boolean outputExpectation = conjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue;
+          this.leaveWithReturnedValue(
+              conjunction,
+              clonedContext.value(),
+              outputExpectation,
+              clonedContext.value(),
+              actualOutputValue,
+              outputExpectation == actualOutputValue
+          );
+          return;
         }
         i++;
       }
@@ -282,24 +277,15 @@ public interface Evaluator {
         if (cur)
           actualOutputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && actualOutputValue) || i == disjunction.children().size() - 1) {
-          if (clonedContext.state() == EvaluationContext.State.VALUE_RETURNED) {
-            this.leaveWithReturnedValue(
-                disjunction,
-                clonedContext.value(),
-                disjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
-                clonedContext.value(),
-                clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? NOT_AVAILABLE : actualOutputValue,
-                false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
-          } else if (clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN) {
-            this.leaveWithReturnedValue(
-                disjunction,
-                clonedContext.value(),
-                disjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
-                clonedContext.value(),
-                NOT_AVAILABLE,
-                false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
-          } else
-            assert false;
+          boolean outputExpectation = disjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue;
+          this.leaveWithReturnedValue(
+              disjunction,
+              clonedContext.value(),
+              outputExpectation,
+              clonedContext.value(),
+              clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? NOT_AVAILABLE : actualOutputValue,
+              outputExpectation == actualOutputValue
+          );
           return;
         }
         i++;
