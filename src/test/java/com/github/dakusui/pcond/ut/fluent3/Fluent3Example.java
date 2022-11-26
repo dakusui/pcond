@@ -244,6 +244,7 @@ public class Fluent3Example {
       Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
       try {
         assertAll(
+            stringValue("hello").length().then().greaterThan(1),
             new Fluent4Example.OnGoing.BookTransformer(book)
                 .transform(b -> b.title()
                     .transform(ty -> ty.then().isNotNull().done())

@@ -85,6 +85,8 @@ public interface ReportComposer {
     }
 
     private static List<EvaluationEntry> squashTrivialEntries(List<EvaluationEntry> evaluationHistory) {
+      if (false)
+        return evaluationHistory;
       List<EvaluationEntry> ret = new LinkedList<>();
       List<EvaluationEntry> squashedItems = new LinkedList<>();
       for (EvaluationEntry each : evaluationHistory) {
@@ -166,7 +168,7 @@ public interface ReportComposer {
           .stream()
           .anyMatch(FormattedEntry::requiresExplanation);
       return evaluatorEntriesToString(
-          squashFormattedEntriesWherePossible(formattedEntries),
+          hideInputValuesWhenRepeated(formattedEntries),
           columnLengths -> formattedEntryToString(
               columnLengths[0],
               columnLengths[1],
@@ -221,7 +223,7 @@ public interface ReportComposer {
           .collect(joining(format("%n")));
     }
 
-    private static List<FormattedEntry> squashFormattedEntriesWherePossible(List<FormattedEntry> formattedEntries) {
+    private static List<FormattedEntry> hideInputValuesWhenRepeated(List<FormattedEntry> formattedEntries) {
       AtomicReference<Object> previousInput = new AtomicReference<>();
       return formattedEntries.stream()
           .map(each -> {

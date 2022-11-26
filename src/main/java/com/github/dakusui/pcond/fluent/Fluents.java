@@ -1,7 +1,6 @@
 package com.github.dakusui.pcond.fluent;
 
 import com.github.dakusui.pcond.core.fluent.builtins.*;
-import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -79,8 +78,7 @@ public class Fluents {
    * @return A transformer for a {@code value}.
    * @see LongTransformer
    */
-  public static
-  LongTransformer<Long>
+  public static LongTransformer<Long>
   longValue(Long value) {
     return LongTransformer.create(() -> value);
   }
