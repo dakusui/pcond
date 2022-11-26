@@ -159,27 +159,17 @@ public interface Evaluator {
           input, toSnapshotIfPossible(input.currentValue()),
           evaluableDesc.isSquashable(), entries.size()
       );
-      onGoingEntries.add(newEntry);
-      entries.add(newEntry);
+      this.onGoingEntries.add(newEntry);
+      this.entries.add(newEntry);
       if (evaluableDesc.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
-    }
-
-    void leaveWithReturnedValue(
-        Evaluable<?> evaluable,
-        Object inputExpectation,
-        Object outputExpectation,
-        Object inputActualValue,
-        Object outputActualValue,
-        boolean unexpected) {
-      leaveWithReturnedValue(evaluable, new Io(inputExpectation, outputExpectation, inputActualValue, outputActualValue, unexpected));
     }
 
     void leaveWithReturnedValue(
         Evaluable<?> evaluable, Io io) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
-      entries.set(
+      this.entries.set(
           current.positionInEntries,
           current.finalizeEntry(
               // evaluable
@@ -188,26 +178,17 @@ public interface Evaluator {
               io.getInputActualValue(), explainInputActualValue(evaluable, io.getInputActualValue()),
               io.getOutputActualValue(),
               toSnapshotIfPossible(io.getInputActualValue()), false, io.isUnexpected()));
-      onGoingEntries.remove(positionInOngoingEntries);
+      this.onGoingEntries.remove(positionInOngoingEntries);
       this.currentEvaluationContext.valueReturned(io.getOutputActualValue());
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
     }
 
     void leaveWithThrownException(
-        Evaluable<?> evaluable,
-        Object inputExpectation,
-        Object outputExpectation,
-        Object inputActualValue,
-        Throwable thrownException) {
-      leaveWithThrownException(evaluable, new Io(inputExpectation, outputExpectation, inputActualValue, thrownException, true));
-    }
-
-    void leaveWithThrownException(
         Evaluable<?> evaluable, Io io) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
-      entries.set(
+      this.entries.set(
           current.positionInEntries,
           current.finalizeEntry(
               io.getInputExpectation(), (Snapshottable) io::getInputExpectation,
@@ -215,7 +196,7 @@ public interface Evaluator {
               io.getInputActualValue(), explainInputActualValue(evaluable, io.getInputActualValue()),
               io.getOutputActualValue(),
               composeActualValueFromInputAndThrowable(io.getInputActualValue(), (Throwable) io.getOutputActualValue()), true, true));
-      onGoingEntries.remove(positionInOngoingEntries);
+      this.onGoingEntries.remove(positionInOngoingEntries);
       this.currentEvaluationContext.exceptionThrown((Throwable) io.getOutputActualValue());
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
@@ -245,15 +226,10 @@ public interface Evaluator {
         if (!cur)
           actualOutputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !actualOutputValue) || i == conjunction.children().size() - 1) {
-          boolean outputExpectation = conjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue;
-          this.leaveWithReturnedValue(
+          boolean outputExpectation = outputExpectationFor(conjunction);
+          leaveWithReturnedValue(
               conjunction,
-              clonedContext.value(),
-              outputExpectation,
-              clonedContext.value(),
-              actualOutputValue,
-              outputExpectation == actualOutputValue
-          );
+              new Io(clonedContext.value(), outputExpectation, clonedContext.value(), actualOutputValue, outputExpectation == actualOutputValue));
           return;
         }
         i++;
@@ -277,15 +253,9 @@ public interface Evaluator {
         if (cur)
           actualOutputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && actualOutputValue) || i == disjunction.children().size() - 1) {
-          boolean outputExpectation = disjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue;
-          this.leaveWithReturnedValue(
-              disjunction,
-              clonedContext.value(),
-              outputExpectation,
-              clonedContext.value(),
-              clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? NOT_AVAILABLE : actualOutputValue,
-              outputExpectation == actualOutputValue
-          );
+          boolean outputExpectation = outputExpectationFor(disjunction);
+          Object outputActualValue = clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? NOT_AVAILABLE : actualOutputValue;
+          leaveWithReturnedValue(disjunction, new Io(clonedContext.value(), outputExpectation, clonedContext.value(), outputActualValue, outputExpectation == actualOutputValue));
           return;
         }
         i++;
@@ -298,9 +268,14 @@ public interface Evaluator {
       Object inputActualValue = evaluationContext.value();
       negation.target().accept(evaluationContext, this);
       if (this.currentEvaluationContext().state() == EvaluationContext.State.VALUE_RETURNED) {
-        this.leaveWithReturnedValue(negation, inputActualValue, negation.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, !this.resultValueAsBoolean(), false);
+        boolean outputActualValue = !this.resultValueAsBoolean();
+        this.leaveWithReturnedValue(
+            negation,
+            new Io(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, this.outputExpectationFor(negation) == outputActualValue));
       } else {
-        this.leaveWithThrownException(negation, inputActualValue, negation.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, this.currentEvaluationContext().thrownException());
+        leaveWithThrownException(
+            negation,
+            new Io(inputActualValue, outputExpectationFor(negation), inputActualValue, this.currentEvaluationContext().thrownException(), true));
       }
     }
 
@@ -308,20 +283,38 @@ public interface Evaluator {
     public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.LeafPred<T> leafPred) {
       this.enter(EvaluableDesc.fromEvaluable(leafPred), evaluationContext);
       try {
-        System.out.println("LEAF:<" + evaluationContext + ">");
         if (evaluationContext.state() == EvaluationContext.State.VALUE_RETURNED) {
           T inputActualValue = evaluationContext.returnedValue();
           boolean result = leafPred.predicate().test(inputActualValue);
-          this.leaveWithReturnedValue(leafPred, inputActualValue, leafPred.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, result, this.currentlyExpectedBooleanValue != result);
+          leaveWithReturnedValue(leafPred, new Io(
+              inputActualValue,
+              outputExpectationFor(leafPred),
+              inputActualValue,
+              result,
+              this.currentlyExpectedBooleanValue != result));
         } else {
           Object inputActualValue = evaluationContext.thrownException();
-          this.leaveWithReturnedValue(leafPred, inputActualValue, leafPred.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, NOT_EVALUATED, false);
+          leaveWithReturnedValue(leafPred, new Io(
+              inputActualValue,
+              outputExpectationFor(leafPred),
+              inputActualValue,
+              NOT_EVALUATED,
+              false));
         }
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        this.leaveWithThrownException(leafPred, evaluationContext.value(), leafPred.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, evaluationContext.value(), e);
+        leaveWithThrownException(leafPred, new Io(
+            evaluationContext.value(),
+            outputExpectationFor(leafPred),
+            evaluationContext.value(),
+            e,
+            true));
       }
+    }
+
+    private <T> boolean outputExpectationFor(Evaluable<T> predicateEvaluable) {
+      return predicateEvaluable.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue;
     }
 
     @Override
@@ -330,7 +323,13 @@ public interface Evaluator {
       // TODO: Issue-#59: Need exception handling
       VariableBundle inputActualValue = evaluationContext.returnedValue();
       contextPred.enclosed().accept(EvaluationContext.forValue(inputActualValue.valueAt(contextPred.argIndex())), this);
-      this.leaveWithReturnedValue(contextPred, inputActualValue, contextPred.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, this.resultValue(), false);
+      leaveWithReturnedValue(
+          contextPred, new Io(
+              inputActualValue,
+              outputExpectationFor(contextPred),
+              inputActualValue,
+              this.resultValue(),
+              false));
     }
 
     @SuppressWarnings("unchecked")
@@ -346,36 +345,15 @@ public interface Evaluator {
       Evaluable<?> evaluable = transformation.checker();
       EvaluationContext<?> currentEvaluationContext = this.currentEvaluationContext().clone();
       if (currentEvaluationContext.state() == EvaluationContext.State.VALUE_RETURNED) {
-        this.leaveWithReturnedValue(
-            evaluable,
-            inputActualValue,
-            currentEvaluationContext.currentValue(),
-            inputActualValue,
-            currentEvaluationContext.value(),
-            false);
+        leaveWithReturnedValue(evaluable, new Io(inputActualValue, currentEvaluationContext.currentValue(), inputActualValue, currentEvaluationContext.value(), false));
       } else if (currentEvaluationContext.state() == EvaluationContext.State.EXCEPTION_THROWN)
-        this.leaveWithThrownException(
-            evaluable,
-            inputActualValue,
-            UNKNOWN,
-            inputActualValue,
-            currentEvaluationContext.thrownException());
+        leaveWithThrownException(evaluable, new Io(inputActualValue, UNKNOWN, inputActualValue, currentEvaluationContext.thrownException(), true));
       this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), currentEvaluationContext());
       transformation.checker().accept((EvaluationContext<R>) currentEvaluationContext, this);
       if (currentEvaluationContext.state() == EvaluationContext.State.VALUE_RETURNED) {
-        this.leaveWithReturnedValue(
-            transformation.checker(),
-            currentEvaluationContext.value(),
-            transformation.mapper().requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
-            currentEvaluationContext.value(),
-            this.currentEvaluationContext().value(), false);
+        leaveWithReturnedValue(transformation.checker(), new Io(currentEvaluationContext.value(), outputExpectationFor(transformation.mapper()), currentEvaluationContext.value(), this.currentEvaluationContext().value(), false));
       } else if (currentEvaluationContext.state() == EvaluationContext.State.EXCEPTION_THROWN) {
-        this.leaveWithReturnedValue(
-            transformation.checker(),
-            currentEvaluationContext.value(),
-            transformation.mapper().requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
-            currentEvaluationContext.value(),
-            this.currentEvaluationContext().value(), false);
+        leaveWithReturnedValue(transformation.checker(), new Io(currentEvaluationContext.value(), outputExpectationFor(transformation.mapper()), currentEvaluationContext.value(), this.currentEvaluationContext().value(), false));
       } else {
         assert false;
       }
@@ -387,12 +365,12 @@ public interface Evaluator {
       this.enter(EvaluableDesc.fromEvaluable(func), evaluationContext);
       try {
         Object resultValue = func.head().apply(evaluationContext.returnedValue());
-        this.leaveWithReturnedValue(func, evaluationContext.returnedValue(), resultValue, evaluationContext.returnedValue(), resultValue, false);
+        leaveWithReturnedValue(func, new Io(evaluationContext.returnedValue(), resultValue, evaluationContext.returnedValue(), resultValue, false));
         func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(EvaluationContext.forValue(resultValue), this));
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        this.leaveWithThrownException(func, evaluationContext.returnedValue(), UNKNOWN, evaluationContext.returnedValue(), e);
+        leaveWithThrownException(func, new Io(evaluationContext.returnedValue(), UNKNOWN, evaluationContext.returnedValue(), e, true));
         func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) this.currentEvaluationContext().exceptionThrown(e), this));
       }
     }
@@ -407,16 +385,12 @@ public interface Evaluator {
       // because either way we will just return a boolean and during the execution,
       // type information is erased.
       // TODO: Issue-#59: Need exception handling
-      this.leaveWithReturnedValue(
-          streamPred,
-          evaluationContext.value(),
-          streamPred.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, evaluationContext.value(),
-          evaluationContext.returnedValue()
-              .filter(createValueCheckingPredicateForStream(streamPred))
-              .map(v -> v != null ? v : NULL_VALUE)
-              .findFirst()
-              .map(each -> !ret)
-              .orElse(ret), false);
+      leaveWithReturnedValue(streamPred, new Io(evaluationContext.value(), outputExpectationFor(streamPred), evaluationContext.value(), evaluationContext.returnedValue()
+          .filter(createValueCheckingPredicateForStream(streamPred))
+          .map(v -> v != null ? v : NULL_VALUE)
+          .findFirst()
+          .map(each -> !ret)
+          .orElse(ret), false));
     }
 
     public Object resultValue() {
