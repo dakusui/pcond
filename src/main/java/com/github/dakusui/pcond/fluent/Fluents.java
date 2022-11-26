@@ -2,7 +2,9 @@ package com.github.dakusui.pcond.fluent;
 
 import com.github.dakusui.pcond.core.fluent.builtins.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
@@ -163,12 +165,25 @@ public class Fluents {
   public static Predicate<? super List<?>> createPredicateForAllOf(Statement<?>[] statements) {
     AtomicInteger i = new AtomicInteger(0);
     @SuppressWarnings("unchecked") Predicate<? super List<?>>[] predicates = Arrays.stream(statements)
-        .map(e -> makeSquashable(transform(elementAt(i.getAndIncrement())).check((Predicate<? super Object>) e.statementPredicate())))
+        .map(e -> makeSquashable(transform(elementAt(i.getAndIncrement())).check("WHEN", (Predicate<? super Object>) e.statementPredicate())))
         .toArray(Predicate[]::new);
     return makeSquashable(allOf(predicates));
   }
 
   public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
     return objectValue(value).then().checkWithPredicate(predicate);
+  }
+
+  public interface DummyValue {
+  }
+
+  public static class DummyList<E> extends ArrayList<E> implements DummyValue {
+    public DummyList(Collection<E> collection) {
+      this.addAll(collection);
+    }
+
+    public static <E> List<E> fromList(List<E> list) {
+      return new DummyList<>(list);
+    }
   }
 }

@@ -397,9 +397,7 @@ public enum PrintablePredicateFactory {
      * @param <O> Input parameter type.
      */
     public interface Factory<P, O> {
-      default Predicate<O> check(String condName, Predicate<? super P> cond) {
-        return check(leaf(condName, cond));
-      }
+      Predicate<O> check(String condName, Predicate<? super P> cond);
 
       @SuppressWarnings("unchecked")
       default <OO> Factory<P, OO> castTo(@SuppressWarnings("unused") Class<OO> ooClass) {
@@ -413,7 +411,17 @@ public enum PrintablePredicateFactory {
       }
 
       static <P, O> Factory<P, O> create(String mapperName, String checkerName, Function<O, P> function) {
-        return cond -> new TransformingPredicate<>(mapperName, checkerName, toPrintablePredicateIfNotPrintable(cond), function);
+        return new Factory<P, O>() {
+          @Override
+          public Predicate<O> check(String condName, Predicate<? super P> cond) {
+            return new TransformingPredicate<>(mapperName, condName, cond, function);
+          }
+
+          @Override
+          public Predicate<O> check(Predicate<? super P> cond) {
+            return new TransformingPredicate<>(mapperName, checkerName, toPrintablePredicateIfNotPrintable(cond), function);
+          }
+        };
       }
     }
   }

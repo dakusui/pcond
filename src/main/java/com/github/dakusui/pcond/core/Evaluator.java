@@ -127,8 +127,20 @@ public interface Evaluator {
   }
 
   class Impl implements Evaluator {
-    private static final Object NULL_VALUE = new Object();
-    public static final  Object UNKNOWN    = new Snapshottable() {
+    public static final  Object NOT_AVAILABLE = new Object() {
+      @Override
+      public String toString() {
+        return "(not available)";
+      }
+    };
+    public static final  Object NOT_EVALUATED = new Object() {
+      @Override
+      public String toString() {
+        return "(not evaluated)";
+      }
+    };
+    private static final Object NULL_VALUE    = new Object();
+    public static final  Object UNKNOWN       = new Snapshottable() {
       @Override
       public Object snapshot() {
         return this.toString();
@@ -150,7 +162,7 @@ public interface Evaluator {
 
     void enter(EvaluableDesc evaluableDesc, EvaluationContext<?> input) {
       EvaluationEntry.OnGoing newEntry = new EvaluationEntry.OnGoing(
-          evaluableDesc.name, evaluableDesc.type(), (int) onGoingEntries.stream().filter(each -> !each.isSquashable()).count(),
+          evaluableDesc.formName, evaluableDesc.type(), (int) onGoingEntries.stream().filter(each -> !each.isSquashable()).count(),
           input.currentValue(), toSnapshotIfPossible(input.currentValue()),
           this.currentlyExpectedBooleanValue, toSnapshotIfPossible(this.currentlyExpectedBooleanValue),
           input, toSnapshotIfPossible(input.currentValue()),
@@ -228,14 +240,25 @@ public interface Evaluator {
         if (!cur)
           actualOutputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !actualOutputValue) || i == conjunction.children().size() - 1) {
-          this.leaveWithReturnedValue(
-              conjunction,
-              clonedContext.value(),
-              conjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
-              clonedContext.value(),
-              clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? "(not available)" : actualOutputValue,
-              false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
-          return;
+          if (clonedContext.state() == EvaluationContext.State.VALUE_RETURNED) {
+            this.leaveWithReturnedValue(
+                conjunction,
+                clonedContext.value(),
+                conjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
+                clonedContext.value(),
+                clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? NOT_AVAILABLE : actualOutputValue,
+                false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+            return;
+          } else if (clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN) {
+            this.leaveWithReturnedValue(
+                conjunction,
+                clonedContext.value(),
+                conjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
+                clonedContext.value(),
+                NOT_AVAILABLE,
+                false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+          } else
+            assert false;
         }
         i++;
       }
@@ -245,9 +268,10 @@ public interface Evaluator {
     @Override
     public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.Disjunction<T> disjunction) {
       int i = 0;
-      boolean finalValue = false;
+      boolean actualOutputValue = false;
       boolean shortcut = disjunction.shortcut();
       Object currentValue = this.currentEvaluationContext().currentValue();
+      EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
       for (Evaluable<? super T> each : disjunction.children()) {
         this.currentEvaluationContext().valueReturned(currentValue);
         if (i == 0)
@@ -256,9 +280,26 @@ public interface Evaluator {
         each.accept(evaluationContext, this);
         boolean cur = this.resultValueAsBoolean();
         if (cur)
-          finalValue = cur; // This is constant, but keeping it for readability
-        if ((shortcut && finalValue) || i == disjunction.children().size() - 1) {
-          this.leaveWithReturnedValue(disjunction, currentValue, disjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, finalValue, false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+          actualOutputValue = cur; // This is constant, but keeping it for readability
+        if ((shortcut && actualOutputValue) || i == disjunction.children().size() - 1) {
+          if (clonedContext.state() == EvaluationContext.State.VALUE_RETURNED) {
+            this.leaveWithReturnedValue(
+                disjunction,
+                clonedContext.value(),
+                disjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
+                clonedContext.value(),
+                clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? NOT_AVAILABLE : actualOutputValue,
+                false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+          } else if (clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN) {
+            this.leaveWithReturnedValue(
+                disjunction,
+                clonedContext.value(),
+                disjunction.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue,
+                clonedContext.value(),
+                NOT_AVAILABLE,
+                false); // Is this "false" ok? When the finalValue != expected, shouldn't it be true?
+          } else
+            assert false;
           return;
         }
         i++;
@@ -284,7 +325,7 @@ public interface Evaluator {
           this.leaveWithReturnedValue(leafPred, inputActualValue, leafPred.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, result, this.currentlyExpectedBooleanValue != result);
         } else {
           Object inputActualValue = evaluationContext.thrownException();
-          this.leaveWithReturnedValue(leafPred, inputActualValue, leafPred.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, "(not evaluated)", false);
+          this.leaveWithReturnedValue(leafPred, inputActualValue, leafPred.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue, inputActualValue, NOT_EVALUATED, false);
         }
       } catch (Error e) {
         throw e;
@@ -484,13 +525,13 @@ public interface Evaluator {
 
   class EvaluableDesc {
     final EvaluationEntry.Type type;
-    final String               name;
-    final boolean requestsExpectationFlip;
-    final boolean squashable;
+    final String               formName;
+    final boolean              requestsExpectationFlip;
+    final boolean              squashable;
 
-    public EvaluableDesc(EvaluationEntry.Type type, String name, boolean requestsExpectationFlip, boolean squashable) {
+    public EvaluableDesc(EvaluationEntry.Type type, String formName, boolean requestsExpectationFlip, boolean squashable) {
       this.type = type;
-      this.name = name;
+      this.formName = formName;
       this.requestsExpectationFlip = requestsExpectationFlip;
       this.squashable = squashable;
     }

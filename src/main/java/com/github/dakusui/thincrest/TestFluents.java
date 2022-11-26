@@ -33,7 +33,7 @@ public enum TestFluents {
    */
   public static void assertAll(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    TestAssertions.assertThat(values, Fluents.createPredicateForAllOf(statements));
+    TestAssertions.assertThat(Fluents.DummyList.fromList(values), Fluents.createPredicateForAllOf(statements));
   }
 
   /**
