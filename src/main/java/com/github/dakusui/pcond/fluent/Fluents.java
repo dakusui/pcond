@@ -163,7 +163,7 @@ public class Fluents {
   public static Predicate<? super List<?>> createPredicateForAllOf(Statement<?>[] statements) {
     AtomicInteger i = new AtomicInteger(0);
     @SuppressWarnings("unchecked") Predicate<? super List<?>>[] predicates = Arrays.stream(statements)
-        .map(e -> makeSquashable(transform(makeSquashable(elementAt(i.getAndIncrement()))).check((Predicate<? super Object>) e.statementPredicate())))
+        .map(e -> makeSquashable(transform(elementAt(i.getAndIncrement())).check((Predicate<? super Object>) e.statementPredicate())))
         .toArray(Predicate[]::new);
     return makeSquashable(allOf(predicates));
   }
