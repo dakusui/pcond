@@ -1,9 +1,8 @@
 package com.github.dakusui.pcond;
 
 import com.github.dakusui.pcond.forms.Printables;
-import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.shared.ApplicationException;
-import com.github.dakusui.thincrest.TestAssertions;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
@@ -12,55 +11,40 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.forms.Functions.length;
 import static com.github.dakusui.pcond.forms.Predicates.*;
+import static com.github.dakusui.shared.TestUtils.validate;
 import static com.github.dakusui.shared.utils.TestUtils.lineAt;
 import static com.github.dakusui.shared.utils.TestUtils.simplifyString;
-import static com.github.dakusui.shared.TestUtils.validate;
 
 public class NegateTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void whenInvertedTrasformingPredicateFails_thenPrintDesignedMessage$transformIsntLeafAndNotMerged() {
     try {
       validate("",
-          not(                                             // (1)
-              transform(length())                          // (2)
-                  .check(lt(100))),                  // (3)
+          not(transform(length())                           // (1)
+              .check(lt(100))),                       // (2)
           ApplicationException::new);
     } catch (ApplicationException e) {
       e.printStackTrace();
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 0)),
           CoreMatchers.equalTo("Value:'' violated: !length <[100]"));
-      // expected (1)
+      // (1)
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 1)),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch<:"),
-              CoreMatchers.containsString("not"),
-              CoreMatchers.containsString("->true")));
-      // actual (1)
+              CoreMatchers.containsString("''"),
+              CoreMatchers.containsString("not:transform:length"),
+              CoreMatchers.containsString("->0")));
+      // expected (2)
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 2)),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch>:"),
-              CoreMatchers.containsString("not"),
-              CoreMatchers.containsString("->false")));
-      // (2)
-      MatcherAssert.assertThat(
-          simplifyString(lineAt(e.getMessage(), 3)),
-          CoreMatchers.allOf(
-              CoreMatchers.not(CoreMatchers.containsString("Mismatch:")),
-              CoreMatchers.containsString("transform:length"),
-              CoreMatchers.containsString("->0")));
-      // expected (3)
-      MatcherAssert.assertThat(
-          simplifyString(lineAt(e.getMessage(), 4)),
           CoreMatchers.allOf(
               CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("check:<[100]"),
               CoreMatchers.containsString("->false")));
-      // actual (3)
+      // actual (2)
       MatcherAssert.assertThat(
-          simplifyString(lineAt(e.getMessage(), 5)),
+          simplifyString(lineAt(e.getMessage(), 3)),
           CoreMatchers.allOf(
               CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("check:<[100]"),
@@ -87,8 +71,8 @@ public class NegateTest extends TestBase {
           CoreMatchers.allOf(
               CoreMatchers.containsString("Mismatch<:"),
               CoreMatchers.containsString("'Hello'"),
-              CoreMatchers.containsString("->not"),
-              CoreMatchers.containsString("->true")
+              CoreMatchers.containsString("->not:=[Hello]"),
+              CoreMatchers.containsString("->false")
           ));
       // actual (1)
       MatcherAssert.assertThat(
@@ -96,21 +80,7 @@ public class NegateTest extends TestBase {
           CoreMatchers.allOf(
               CoreMatchers.containsString("Mismatch>:"),
               CoreMatchers.containsString("'Hello'"),
-              CoreMatchers.containsString("->not"),
-              CoreMatchers.containsString("->false")));
-      // expected (2)
-      MatcherAssert.assertThat(
-          simplifyString(lineAt(e.getMessage(), 3)),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch<:"),
-              CoreMatchers.containsString("=[Hello]"),
-              CoreMatchers.containsString("->false")));
-      // actual (2)
-      MatcherAssert.assertThat(
-          simplifyString(lineAt(e.getMessage(), 4)),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("Mismatch>:"),
-              CoreMatchers.containsString("=[Hello]"),
+              CoreMatchers.containsString("->not:=[Hello]"),
               CoreMatchers.containsString("->true")));
       throw e;
     }
@@ -119,14 +89,12 @@ public class NegateTest extends TestBase {
   @Test(expected = ApplicationException.class)
   public void whenInvertedTrasformingPredicateFails_thenPrintDesignedMessage$mergedWhenNotMismatch() {
     try {
-      //validate(
-      TestAssertions.assertThat(
+      validate(
           "Hello",
           and(                                      // (1)
               not(equalTo("Hello!")),         // (2)
-              alwaysFalse())                        // (3)
-      );
-//          ApplicationException::new);
+              alwaysFalse()),                       // (3)
+          ApplicationException::new);
     } catch (ApplicationException e) {
       e.printStackTrace();
       MatcherAssert.assertThat(
@@ -153,8 +121,8 @@ public class NegateTest extends TestBase {
           simplifyString(lineAt(e.getMessage(), 3)),
           CoreMatchers.allOf(
               CoreMatchers.not(CoreMatchers.containsString("Mismatch<:")),
-              CoreMatchers.containsString("not(=[Hello!])"),
-              CoreMatchers.containsString("->true")));
+              CoreMatchers.containsString("not:=[Hello!]"),
+              CoreMatchers.containsString("->false")));
       // expected (3)
       MatcherAssert.assertThat(
           simplifyString(lineAt(e.getMessage(), 4)),
