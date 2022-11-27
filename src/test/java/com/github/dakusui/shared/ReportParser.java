@@ -162,23 +162,23 @@ public class ReportParser {
         return -1;
       }
 
-      Optional<String> in() {
+      public Optional<String> in() {
         return Optional.ofNullable(this.in);
       }
 
-      String op() {
+      public String op() {
         return this.op;
       }
 
-      String out() {
+      public String out() {
         return this.out;
       }
 
-      String line() {
+      public String line() {
         return this.line;
       }
 
-      OptionalInt detailIndex() {
+      public OptionalInt detailIndex() {
         return detailIndex >= 0 ? OptionalInt.of(detailIndex) : OptionalInt.empty();
       }
 
