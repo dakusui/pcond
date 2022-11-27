@@ -285,10 +285,10 @@ public interface Evaluator {
     public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.LeafPred<T> leafPred) {
       this.enter(EvaluableDesc.fromEvaluable(leafPred), evaluationContext);
       try {
-        if (evaluationContext.state() == EvaluationContext.State.VALUE_RETURNED) {
+        if (isValueReturned(evaluationContext)) {
           T inputActualValue = evaluationContext.returnedValue();
-          boolean result = leafPred.predicate().test(inputActualValue);
-          leaveWithReturnedValue(leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, result));
+          boolean outputActualValue = leafPred.predicate().test(inputActualValue);
+          leaveWithReturnedValue(leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, outputActualValue));
         } else {
           Object inputActualValue = evaluationContext.thrownException();
           leaveWithReturnedValue(leafPred, ioEntryForLeafWhenSkipped(leafPred, inputActualValue));
@@ -297,6 +297,31 @@ public interface Evaluator {
         throw e;
       } catch (Throwable e) {
         leaveWithThrownException(leafPred, ioEntryForLeafWhenExceptionThrown(evaluationContext, leafPred, e));
+      }
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @Override
+    public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.Func<T> func) {
+      this.enter(EvaluableDesc.fromEvaluable(func), evaluationContext);
+      try {
+        Object outputActualValue;
+        if (isValueReturned(evaluationContext)) {
+          T inputActualValue = evaluationContext.returnedValue();
+          outputActualValue = func.head().apply(inputActualValue);
+          leaveWithReturnedValue(func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue));
+          func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(EvaluationContext.forValue(outputActualValue), this));
+        } else {
+          Throwable inputActualValue = evaluationContext.thrownException();
+          outputActualValue = inputActualValue;
+          leaveWithReturnedValue(func, ioEntryForFuncWhenSkipped(func, inputActualValue));
+          func.tail().ifPresent(tailSide -> tailSide.accept(EvaluationContext.forException((Throwable) outputActualValue), this));
+        }
+      } catch (Error e) {
+        throw e;
+      } catch (Throwable e) {
+        leaveWithThrownException(func, ioEntryForFuncWhenExceptionThrown(evaluationContext.returnedValue(), e));
+        func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) this.currentEvaluationContext().exceptionThrown(e), this));
       }
     }
 
@@ -339,22 +364,6 @@ public interface Evaluator {
         leaveWithReturnedValue(transformation.checker(), new EvaluableIo(currentEvaluationContext.value(), outputExpectationFor(transformation.mapper()), currentEvaluationContext.value(), this.currentEvaluationContext().value(), false));
       } else {
         assert false;
-      }
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    @Override
-    public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.Func<T> func) {
-      this.enter(EvaluableDesc.fromEvaluable(func), evaluationContext);
-      try {
-        Object resultValue = func.head().apply(evaluationContext.returnedValue());
-        leaveWithReturnedValue(func, new EvaluableIo(evaluationContext.returnedValue(), resultValue, evaluationContext.returnedValue(), resultValue, false));
-        func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(EvaluationContext.forValue(resultValue), this));
-      } catch (Error e) {
-        throw e;
-      } catch (Throwable e) {
-        leaveWithThrownException(func, new EvaluableIo(evaluationContext.returnedValue(), UNKNOWN, evaluationContext.returnedValue(), e, true));
-        func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) this.currentEvaluationContext().exceptionThrown(e), this));
       }
     }
 
@@ -429,10 +438,30 @@ public interface Evaluator {
           false);
     }
 
+    private <T> EvaluableIo ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
+    }
+
+    private <T> EvaluableIo ioEntryForFuncWhenSkipped(Evaluable.Func<T> func, Throwable inputActualValue) {
+      return new EvaluableIo(
+          inputActualValue,
+          outputExpectationFor(func),
+          inputActualValue,
+          NOT_EVALUATED,
+          false);
+    }
+
+    private <T> EvaluableIo ioEntryForFuncWhenExceptionThrown(T inputActualValue, Throwable outputActualValue) {
+      return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, true);
+    }
+
     private <T> boolean outputExpectationFor(Evaluable<T> predicateEvaluable) {
       return predicateEvaluable.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue;
     }
 
+    private static <T> boolean isValueReturned(EvaluationContext<T> evaluationContext) {
+      return evaluationContext.state() == EvaluationContext.State.VALUE_RETURNED;
+    }
 
     private <E> Predicate<E> createValueCheckingPredicateForStream(Evaluable.StreamPred<E> streamPredicate) {
       return e -> {

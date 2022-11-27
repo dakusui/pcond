@@ -1,7 +1,5 @@
 package com.github.dakusui.pcond.core;
 
-import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
-
 public class EvaluationContext<V> implements Cloneable {
   public void resetTo(EvaluationContext<V> clonedContext) {
     this.state = clonedContext.state();
@@ -89,13 +87,14 @@ public class EvaluationContext<V> implements Cloneable {
     return this.value;
   }
 
-  public Object toSnapshot() {
-    return toSnapshotIfPossible(this.currentValue());
-  }
-
   public static <V> EvaluationContext<V> forValue(V value) {
     return new EvaluationContext<>(State.VALUE_RETURNED, value, null);
   }
+
+  public static <V> EvaluationContext<V> forException(Throwable exception) {
+    return new EvaluationContext<>(State.EXCEPTION_THROWN, null, exception);
+  }
+
 
   public String toString() {
     return String.format("state:%s, value:%s, exception:%s", state, value, exception);
