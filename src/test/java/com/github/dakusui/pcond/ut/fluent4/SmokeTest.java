@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut.fluent4;
 
 import com.github.dakusui.shared.ReportParser;
+import com.github.dakusui.shared.utils.TestBase;
 import com.github.dakusui.shared.utils.TestUtils;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
@@ -18,7 +19,7 @@ import static com.github.dakusui.pcond.forms.Predicates.isNull;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 import static java.util.Arrays.asList;
 
-public class SmokeTest {
+public class SmokeTest extends TestBase {
   @Test(expected = ComparisonFailure.class)
   public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength_2() throws Throwable {
     smoke();
