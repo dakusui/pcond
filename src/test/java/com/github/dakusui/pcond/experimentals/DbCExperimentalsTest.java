@@ -142,6 +142,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   public void hello_b_e2() {
     try {
       validate(
+      //TestAssertions.assertThat(
           asList("Hi", "hello", "world", null),
           transform(stream().andThen(nest(asList("1", "2", "o"))))
               .check(
@@ -152,13 +153,14 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       //             (1)                (2)       (3)                       (4)
 
     } catch (IllegalValueException e) {
+      System.err.println(e.getMessage());
       e.printStackTrace(System.out);
       int i = 3;
       // expected (1)
       assertThat(
           lineAt(e.getMessage(), i),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("contex..."),
+              CoreMatchers.containsString("context:[hello, 1]"),
               CoreMatchers.containsString("length >[3]"),
               CoreMatchers.containsString(",0"),
               CoreMatchers.containsString("true")
@@ -167,7 +169,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       assertThat(
           lineAt(e.getMessage(), ++i),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("contex..."),
+              CoreMatchers.containsString("context:[hello, 1]"),
               CoreMatchers.containsString("length >[3]"),
               CoreMatchers.containsString(",0"),
               CoreMatchers.containsString("false")
