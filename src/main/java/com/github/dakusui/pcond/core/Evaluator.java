@@ -212,7 +212,7 @@ public interface Evaluator {
     @Override
     public <T> void evaluate(EvaluationContext<? extends T> evaluationContext, Evaluable.Conjunction<T> conjunction) {
       int i = 0;
-      boolean actualOutputValue = true;
+      boolean outputValue = true;
       Throwable thrownException = null;
       boolean shortcut = conjunction.shortcut();
       @SuppressWarnings("unchecked") EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
@@ -226,12 +226,12 @@ public interface Evaluator {
           thrownException = clonedContext.thrownException();
         }
         if (!cur)
-          actualOutputValue = cur; // This is constant, but keeping it for readability
-        if ((shortcut && !actualOutputValue) || i == conjunction.children().size() - 1) {
+          outputValue = cur; // This is constant, but keeping it for readability
+        if ((shortcut && !outputValue) || i == conjunction.children().size() - 1) {
           boolean outputExpectation = outputExpectationFor(conjunction);
           leaveWithReturnedValue(
               conjunction,
-              new EvaluableIo(clonedContext.value(), outputExpectation, clonedContext.value(), actualOutputValue, false));
+              ioEntryForConjunctionWhenEvaluationFinished(outputExpectation, clonedContext.value(), outputValue));
           return;
         }
         i++;
@@ -242,7 +242,7 @@ public interface Evaluator {
     @Override
     public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.Disjunction<T> disjunction) {
       int i = 0;
-      boolean actualOutputValue = false;
+      boolean outputValue = false;
       boolean shortcut = disjunction.shortcut();
       Object currentValue = this.currentEvaluationContext().currentValue();
       @SuppressWarnings("unchecked") EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
@@ -253,11 +253,11 @@ public interface Evaluator {
         each.accept(evaluationContext, this);
         boolean cur = this.resultValueAsBoolean();
         if (cur)
-          actualOutputValue = cur; // This is constant, but keeping it for readability
-        if ((shortcut && actualOutputValue) || i == disjunction.children().size() - 1) {
+          outputValue = cur; // This is constant, but keeping it for readability
+        if ((shortcut && outputValue) || i == disjunction.children().size() - 1) {
           boolean outputExpectation = outputExpectationFor(disjunction);
-          Object outputActualValue = clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? NOT_AVAILABLE : actualOutputValue;
-          leaveWithReturnedValue(disjunction, new EvaluableIo(clonedContext.value(), outputExpectation, clonedContext.value(), outputActualValue, false));
+          Object outputActualValue = clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? NOT_AVAILABLE : outputValue;
+          leaveWithReturnedValue(disjunction, ioEntryForDisjunctionWhenEvaluationFinished(outputExpectation, clonedContext.value(), outputActualValue));
           return;
         }
         i++;
@@ -455,6 +455,14 @@ public interface Evaluator {
 
     private <T> EvaluableIo ioEntryForFuncWhenExceptionThrown(T inputActualValue, Throwable outputActualValue) {
       return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, true);
+    }
+
+    private static EvaluableIo ioEntryForConjunctionWhenEvaluationFinished(boolean outputExpectation, Object inputActualValue, boolean outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
+    }
+
+    private static EvaluableIo ioEntryForDisjunctionWhenEvaluationFinished(boolean outputExpectation, Object inputActualValue, Object outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
     private <T> boolean outputExpectationFor(Evaluable<T> predicateEvaluable) {

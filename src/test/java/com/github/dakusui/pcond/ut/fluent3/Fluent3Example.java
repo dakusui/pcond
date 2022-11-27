@@ -364,7 +364,7 @@ public class Fluent3Example {
                 },
                 () -> MatcherAssert.assertThat(
                     countDetailIndicesInSummary(reportParserForExpectation),
-                    CoreMatchers.equalTo(3L))
+                    CoreMatchers.equalTo(2L))
             ),
             () -> assertAllRunnables(
                 () -> {
@@ -376,22 +376,30 @@ public class Fluent3Example {
                   ));
                 },
                 () -> {
+                  MatcherAssert.assertThat(detailSubjectFor(reportParserForActualValue, 1), CoreMatchers.containsString("[1]"));
+                  MatcherAssert.assertThat(detailBodyFor(reportParserForActualValue, 1), CoreMatchers.containsString("145"));
+                },
+                () -> {
                   MatcherAssert.assertThat(
                       countDetailIndicesInSummary(reportParserForActualValue),
-                      CoreMatchers.equalTo(3L));
-                },
-                () -> {
-                  MatcherAssert.assertThat(detailSubjectFor(reportParserForActualValue, 1), CoreMatchers.containsString("[1]"));
-                  MatcherAssert.assertThat(detailBodyFor(reportParserForActualValue, 1), CoreMatchers.containsString(abstractText));
-                }),
+                      CoreMatchers.equalTo(2L));
+                }
+            ),
             () -> assertAllRunnables(
                 () -> {
-                  MatcherAssert.assertThat(detailSubjectFor(reportParserForActualValue, 2), CoreMatchers.containsString("[2]"));
-                  MatcherAssert.assertThat(Integer.parseInt(detailBodyFor(reportParserForActualValue, 2)), CoreMatchers.equalTo(abstractText.length()));
+                  MatcherAssert.assertThat(detailSubjectFor(reportParserForExpectation, 0), CoreMatchers.containsString("[0]"));
+                  MatcherAssert.assertThat(detailBodyFor(reportParserForExpectation, 0), CoreMatchers.equalTo("parseInt"));
                 },
-                () -> MatcherAssert.assertThat(reportParserForActualValue.details().size(), CoreMatchers.allOf(
-                    CoreMatchers.equalTo(reportParserForExpectation.details().size()),
-                    CoreMatchers.equalTo(3)))));
+                () -> {
+                  MatcherAssert.assertThat(detailSubjectFor(reportParserForExpectation, 1), CoreMatchers.containsString("[1]"));
+                  MatcherAssert.assertThat(detailBodyFor(reportParserForExpectation, 1), CoreMatchers.containsString(">=[200]"));
+                },
+                () -> {
+                  MatcherAssert.assertThat(
+                      countDetailIndicesInSummary(reportParserForActualValue),
+                      CoreMatchers.equalTo(2L));
+                }
+            ));
         throw e;
       }
     }
