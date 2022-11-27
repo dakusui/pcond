@@ -118,12 +118,6 @@ public interface Evaluator {
   }
 
   class Impl implements Evaluator {
-    public static final  Object NOT_AVAILABLE = new Object() {
-      @Override
-      public String toString() {
-        return "(not available)";
-      }
-    };
     public static final  Object NOT_EVALUATED = new Object() {
       @Override
       public String toString() {
@@ -284,10 +278,11 @@ public interface Evaluator {
           T inputActualValue = evaluationContext.returnedValue();
           boolean outputActualValue = leafPred.predicate().test(inputActualValue);
           leaveWithReturnedValue(leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, outputActualValue));
-        } else {
+        } else if (isExceptionThrown(evaluationContext)){
           Object inputActualValue = evaluationContext.thrownException();
           leaveWithReturnedValue(leafPred, ioEntryForLeafWhenSkipped(leafPred, inputActualValue));
-        }
+        } else
+          assert false;
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
@@ -306,12 +301,13 @@ public interface Evaluator {
           outputActualValue = func.head().apply(inputActualValue);
           leaveWithReturnedValue(func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue));
           func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(EvaluationContext.forValue(outputActualValue), this));
-        } else {
+        } else if (isExceptionThrown(evaluationContext)){
           Throwable inputActualValue = evaluationContext.thrownException();
           outputActualValue = inputActualValue;
           leaveWithReturnedValue(func, ioEntryForFuncWhenSkipped(func, inputActualValue));
           func.tail().ifPresent(tailSide -> tailSide.accept(EvaluationContext.forException((Throwable) outputActualValue), this));
-        }
+        } else
+          assert false;
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
@@ -411,7 +407,7 @@ public interface Evaluator {
           this.currentlyExpectedBooleanValue != outputActualValue);
     }
 
-    private <T> EvaluableIo ioEntryForLeafWhenExceptionThrown(Object inputExpectation, boolean outputExpectation, Throwable outputActualValue) {
+    private EvaluableIo ioEntryForLeafWhenExceptionThrown(Object inputExpectation, boolean outputExpectation, Throwable outputActualValue) {
       return new EvaluableIo(
           inputExpectation,
           outputExpectation,
@@ -478,7 +474,7 @@ public interface Evaluator {
       return evaluationContext.state() == EvaluationContext.State.EXCEPTION_THROWN;
     }
 
-    private <T, R> EvaluableIo ioEntryForCheckerPredicateWhenSkipped(Object inputActualValue, Object outputActualValue) {
+    private EvaluableIo ioEntryForCheckerPredicateWhenSkipped(Object inputActualValue, Object outputActualValue) {
       return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
     }
 
@@ -486,7 +482,7 @@ public interface Evaluator {
       return new EvaluableIo(inputActualValue, outputExpectationFor(transformation.mapper()), inputActualValue, outputActualValue, false);
     }
 
-    private static EvaluableIo ioEntryForTransformingFunctionWhenSkipped(Object inputActualValue, Throwable outputActualValue) {
+    private static EvaluableIo ioEntryForTransformingFunctionWhenSkipped(Object inputActualValue, Object outputActualValue) {
       return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
     }
 
