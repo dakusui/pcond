@@ -9,7 +9,6 @@ import com.github.dakusui.shared.ExperimentalsUtils;
 import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.TargetMethodHolder;
 import com.github.dakusui.shared.utils.TestBase;
-import com.github.dakusui.thincrest.TestAssertions;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
@@ -110,11 +109,12 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   @Test(expected = IllegalValueException.class)
   public void givenStreamContainingNull_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
     try {
-      TestAssertions.assertThat(
+      validate(
           asList(null, "Hi", "hello", "world", null),
           transform(stream().andThen(nest(asList("1", "2", "o"))))
               .check(noneMatch(
-                  toContextPredicate(transform(Functions.length()).check(gt(3))))));
+                  toContextPredicate(transform(Functions.length()).check(gt(3))))),
+          IllegalValueException::new);
     } catch (IllegalValueException e) {
       e.printStackTrace(System.out);
       assertThat(
