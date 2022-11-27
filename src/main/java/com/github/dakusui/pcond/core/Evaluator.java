@@ -177,7 +177,8 @@ public interface Evaluator {
               io.getOutputExpectation(), explainOutputExpectation(evaluable),
               io.getInputActualValue(), explainInputActualValue(evaluable, io.getInputActualValue()),
               io.getOutputActualValue(),
-              toSnapshotIfPossible(io.getInputActualValue()), false, io.isUnexpected()));
+              toSnapshotIfPossible(io.getInputActualValue()),
+              io.requiresExplanation()));
       this.onGoingEntries.remove(positionInOngoingEntries);
       this.currentEvaluationContext.valueReturned(io.getOutputActualValue());
       if (evaluable.requestExpectationFlip())
@@ -195,7 +196,8 @@ public interface Evaluator {
               io.getOutputExpectation(), explainOutputExpectation(evaluable),
               io.getInputActualValue(), explainInputActualValue(evaluable, io.getInputActualValue()),
               io.getOutputActualValue(),
-              composeActualValueFromInputAndThrowable(io.getInputActualValue(), (Throwable) io.getOutputActualValue()), true, true));
+              composeActualValueFromInputAndThrowable(io.getInputActualValue(), (Throwable) io.getOutputActualValue()),
+              true));
       this.onGoingEntries.remove(positionInOngoingEntries);
       this.currentEvaluationContext.exceptionThrown((Throwable) io.getOutputActualValue());
       if (evaluable.requestExpectationFlip())
@@ -229,7 +231,7 @@ public interface Evaluator {
           boolean outputExpectation = outputExpectationFor(conjunction);
           leaveWithReturnedValue(
               conjunction,
-              new EvaluableIo(clonedContext.value(), outputExpectation, clonedContext.value(), actualOutputValue, outputExpectation == actualOutputValue));
+              new EvaluableIo(clonedContext.value(), outputExpectation, clonedContext.value(), actualOutputValue, false));
           return;
         }
         i++;
@@ -255,7 +257,7 @@ public interface Evaluator {
         if ((shortcut && actualOutputValue) || i == disjunction.children().size() - 1) {
           boolean outputExpectation = outputExpectationFor(disjunction);
           Object outputActualValue = clonedContext.state() == EvaluationContext.State.EXCEPTION_THROWN ? NOT_AVAILABLE : actualOutputValue;
-          leaveWithReturnedValue(disjunction, new EvaluableIo(clonedContext.value(), outputExpectation, clonedContext.value(), outputActualValue, outputExpectation == actualOutputValue));
+          leaveWithReturnedValue(disjunction, new EvaluableIo(clonedContext.value(), outputExpectation, clonedContext.value(), outputActualValue, false));
           return;
         }
         i++;
@@ -271,7 +273,7 @@ public interface Evaluator {
         boolean outputActualValue = !this.resultValueAsBoolean();
         this.leaveWithReturnedValue(
             negation,
-            new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, this.outputExpectationFor(negation) == outputActualValue));
+            new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, this.outputExpectationFor(negation) != outputActualValue));
       } else {
         leaveWithThrownException(
             negation,
@@ -468,7 +470,6 @@ public interface Evaluator {
           entry.evaluationFinished() ? entry.outputActualValue() : other,
           entry.detailOutputActualValue(),
           entry.isSquashable(),
-          entry.wasExceptionThrown(),
           entry.requiresExplanation());
     }
 
@@ -645,14 +646,14 @@ public interface Evaluator {
     private final Object  outputExpectation;
     private final Object  inputActualValue;
     private final Object  outputActualValue;
-    private final boolean unexpected;
+    private final boolean requiresExplanation;
 
-    public EvaluableIo(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean unexpected) {
+    public EvaluableIo(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
       this.inputExpectation = inputExpectation;
       this.outputExpectation = outputExpectation;
       this.inputActualValue = inputActualValue;
       this.outputActualValue = outputActualValue;
-      this.unexpected = unexpected;
+      this.requiresExplanation = requiresExplanation;
     }
 
     public Object getInputExpectation() {
@@ -671,8 +672,8 @@ public interface Evaluator {
       return outputActualValue;
     }
 
-    public boolean isUnexpected() {
-      return unexpected;
+    public boolean requiresExplanation() {
+      return requiresExplanation;
     }
   }
 }

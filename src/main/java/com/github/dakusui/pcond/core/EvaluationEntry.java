@@ -110,10 +110,6 @@ public abstract class EvaluationEntry {
 
   public abstract boolean evaluationFinished();
 
-  public boolean wasExceptionThrown() {
-    return false;
-  }
-
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean isSquashable() {
     return this.squashable;
@@ -166,7 +162,6 @@ public abstract class EvaluationEntry {
   static class Finalized extends EvaluationEntry {
     final         Object  outputActualValue;
     final         Object  detailOutputActualValue;
-    private final boolean wasExceptionThrown;
     private final boolean requiresExplanation;
 
     Finalized(
@@ -175,7 +170,7 @@ public abstract class EvaluationEntry {
         Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object detailOutputExpectation,
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
-        boolean squashable, boolean wasExceptionThrown, boolean requiresExplanation) {
+        boolean squashable, boolean requiresExplanation) {
       super(
           formName, type, level,
           inputExpectation_, detailInputExpectation_,
@@ -183,7 +178,6 @@ public abstract class EvaluationEntry {
           inputActualValue, detailInputActualValue, squashable);
       this.outputActualValue = outputActualValue;
       this.detailOutputActualValue = detailOutputActualValue;
-      this.wasExceptionThrown = wasExceptionThrown;
       this.requiresExplanation = requiresExplanation;
     }
 
@@ -193,7 +187,7 @@ public abstract class EvaluationEntry {
         Object outputExpectation, Object detailOutputExpectation,
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
-        boolean wasExceptionThrown, boolean requiresExplanation) {
+        boolean requiresExplanation) {
       super(onGoing);
       this.requiresExplanation = requiresExplanation;
       this.inputExpectation = inputExpectation;
@@ -204,19 +198,12 @@ public abstract class EvaluationEntry {
       this.detailInputActualValue = detailInputActualValue;
       this.outputActualValue = outputActualValue;
       this.detailOutputActualValue = detailOutputActualValue;
-      this.wasExceptionThrown = wasExceptionThrown;
     }
 
     @Override
     public boolean evaluationFinished() {
       return true;
     }
-
-    @Override
-    public boolean wasExceptionThrown() {
-      return this.wasExceptionThrown;
-    }
-
 
     @Override
     public Object outputActualValue() {
@@ -251,8 +238,8 @@ public abstract class EvaluationEntry {
         Object outputExpectation, Object detailOutputExpectation,
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
-        boolean wasExceptionThrown, boolean requiresExplanation) {
-      return new Finalized(this, inputExpectation, detailInputExpectation, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, outputActualValue, detailOutputActualValue, wasExceptionThrown, requiresExplanation);
+        boolean requiresExplanation) {
+      return new Finalized(this, inputExpectation, detailInputExpectation, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, outputActualValue, detailOutputActualValue, requiresExplanation);
     }
 
     @Override
@@ -283,7 +270,7 @@ public abstract class EvaluationEntry {
       Object outputExpectation, Object detailOutputExpectation,
       Object inputActualValue, Object detailInputActualValue,
       Object outputActualValue, Object detailOutputActualValue,
-      boolean trivial, boolean wasExceptionThrown, boolean requiresExplanation) {
+      boolean trivial, boolean requiresExplanation) {
     return new Finalized(
         formName, type,
         level,
@@ -291,7 +278,7 @@ public abstract class EvaluationEntry {
         outputExpectation, detailOutputExpectation,
         inputActualValue, detailInputActualValue,
         outputActualValue, detailOutputActualValue,
-        trivial, wasExceptionThrown, requiresExplanation
+        trivial, requiresExplanation
     );
   }
 }

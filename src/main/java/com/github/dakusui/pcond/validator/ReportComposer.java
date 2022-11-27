@@ -111,7 +111,6 @@ public interface ReportComposer {
                 first.inputActualValue(), first.detailInputActualValue(),
                 last.outputActualValue(), last.detailOutputActualValue(),
                 false,
-                squashedItems.stream().anyMatch(EvaluationEntry::wasExceptionThrown),
                 squashedItems.stream().anyMatch(EvaluationEntry::requiresExplanation)));
             squashedItems.clear();
           }
