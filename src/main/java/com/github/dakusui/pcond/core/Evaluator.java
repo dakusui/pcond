@@ -273,11 +273,11 @@ public interface Evaluator {
         boolean outputActualValue = !this.resultValueAsBoolean();
         this.leaveWithReturnedValue(
             negation,
-            new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, this.outputExpectationFor(negation) != outputActualValue));
+            ioEntryForNegationWhenValueReturned(negation, inputActualValue, outputActualValue));
       } else {
         leaveWithThrownException(
             negation,
-            new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, this.currentEvaluationContext().thrownException(), true));
+            ioEntryForNegationWhenExceptionThrown(negation, inputActualValue));
       }
     }
 
@@ -463,6 +463,14 @@ public interface Evaluator {
 
     private static EvaluableIo ioEntryForDisjunctionWhenEvaluationFinished(boolean outputExpectation, Object inputActualValue, Object outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
+    }
+
+    private <T> EvaluableIo ioEntryForNegationWhenValueReturned(Evaluable.Negation<T> negation, Object inputActualValue, boolean outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, this.outputExpectationFor(negation) != outputActualValue);
+    }
+
+    private <T> EvaluableIo ioEntryForNegationWhenExceptionThrown(Evaluable.Negation<T> negation, Object inputActualValue) {
+      return new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, this.currentEvaluationContext().thrownException(), true);
     }
 
     private <T> boolean outputExpectationFor(Evaluable<T> predicateEvaluable) {
