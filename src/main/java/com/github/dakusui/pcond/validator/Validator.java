@@ -375,61 +375,61 @@ public interface Validator {
 
   /**
    * The core method of the `ValueChecker`.
-   * This method checks if the given `value` satisfies a condition, passed as `cond`.
-   * If it does, the `value` itself will be returned.
-   * If not, an appropriate message will be composed based on the `value` and `cond` by the `messageComposerFunction`.
+   * This method checks if the given `evaluationContext` satisfies a condition, passed as `cond`.
+   * If it does, the `evaluationContext` itself will be returned.
+   * If not, an appropriate message will be composed based on the `evaluationContext` and `cond` by the `messageComposerFunction`.
    * Internally in this method, an `Explanation` of the failure is created by a {@link ReportComposer}
    * object returned by `configuration().reportComposer()` method.
    * The `Explanation` is passed to the `exceptionComposerFunction` and the exception
    * created by the function will be thrown.
    *
-   * @param value                     A `value` to be checked.
-   * @param cond                      A predicate that checks the `value`.
-   * @param messageComposerFunction   A function that composes an error message from the `value` and the predicate `cond`.
+   * @param evaluationContext         A `evaluationContext` to be checked.
+   * @param cond                      A predicate that checks the `evaluationContext`.
+   * @param messageComposerFunction   A function that composes an error message from the `evaluationContext` and the predicate `cond`.
    * @param exceptionComposerFunction A function that creates an exception from a failure report created inside this method.
-   * @param <T>                       The type of the `value`.
-   * @return The `value` itself.
+   * @param <T>                       The type of the `evaluationContext`.
+   * @return The `evaluationContext` itself.
    */
   @SuppressWarnings("unchecked")
   default <T> T checkValueAndThrowIfFails(
-      EvaluationContext<T> value,
+      EvaluationContext<T> evaluationContext,
       Predicate<? super T> cond,
       BiFunction<T, Predicate<? super T>, String> messageComposerFunction,
       ExceptionFactory<Throwable> exceptionComposerFunction) {
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
-        ((Evaluable<T>) cond).accept(value, evaluator);
+        ((Evaluable<T>) cond).accept(evaluationContext, evaluator);
       } catch (Error error) {
         throw error;
       } catch (Throwable t) {
-        String message = format("An exception (%s) was thrown during evaluation of value: %s: %s", t, value.returnedValue(), cond);
+        String message = format("An exception (%s) was thrown during evaluation of evaluationContext: %s: %s", t, evaluationContext.returnedValue(), cond);
         throw executionFailure(configuration()
-            .reportComposer()
-            .composeExplanation(
-                message,
-                evaluator.resultEntries(),
-                t),
+                .reportComposer()
+                .composeExplanation(
+                    message,
+                    evaluator.resultEntries(),
+                    t),
             t);
       }
       if (evaluator.resultValueAsBoolean())
-        return value.returnedValue();
+        return evaluationContext.returnedValue();
       List<EvaluationEntry> entries = evaluator.resultEntries();
       throw exceptionComposerFunction.create(configuration()
           .reportComposer()
           .composeExplanation(
-              messageComposerFunction.apply(value.returnedValue(), cond),
+              messageComposerFunction.apply(evaluationContext.returnedValue(), cond),
               entries,
               null));
     } else {
-      if (!cond.test(value.returnedValue()))
+      if (!cond.test(evaluationContext.returnedValue()))
         throw exceptionComposerFunction.create(configuration()
             .reportComposer()
             .composeExplanation(
-                messageComposerFunction.apply(value.returnedValue(), cond),
+                messageComposerFunction.apply(evaluationContext.returnedValue(), cond),
                 emptyList(),
                 null));
-      return value.returnedValue();
+      return evaluationContext.returnedValue();
     }
   }
 
