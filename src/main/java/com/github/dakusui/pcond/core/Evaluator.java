@@ -348,25 +348,29 @@ public interface Evaluator {
         return;
       }
       this.enter(EvaluableDesc.forMapperFromEvaluable(transformation), evaluationContext);
-      Object inputActualValue = evaluationContext.returnedValue();
-      transformation.mapper().accept(evaluationContext, this);
-      Evaluable<?> evaluable = transformation.checker();
-      EvaluationContext<?> contextBeforeMapper = this.currentEvaluationContext().clone();
-      if (isValueReturned(contextBeforeMapper)) {
-        leaveWithReturnedValue(evaluable, ioEntryForTransformingFunctionWhenValueRetuened(inputActualValue, contextBeforeMapper));
-      } else if (isExceptionThrown(evaluationContext))
-        leaveWithThrownException(evaluable, ioEntryForTransformingFunctionWhenSkipped(inputActualValue, contextBeforeMapper.thrownException()));
-      else
-        assert false;
-      this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), currentEvaluationContext());
-      EvaluationContext<?> contextBeforeChecker = this.currentEvaluationContext().clone();
-      transformation.checker().accept((EvaluationContext<R>) contextBeforeMapper, this);
-      if (isValueReturned(contextBeforeMapper)) {
-        leaveWithReturnedValue(transformation.checker(), ioEntryForCheckerFunctionWhenValueReturned(transformation, contextBeforeChecker.value(), this.currentEvaluationContext().value()));
-      } else if (isExceptionThrown(contextBeforeMapper)) {
-        leaveWithReturnedValue(transformation.checker(), ioEntryForCheckerFunctionWhenSkipped(contextBeforeChecker.value(), this.currentEvaluationContext().value()));
-      } else
-        assert false;
+      {
+        Object inputActualValue = evaluationContext.returnedValue();
+        transformation.mapper().accept(evaluationContext, this);
+        Evaluable<?> checkerEvaluable = transformation.checker();
+        EvaluationContext<?> contextAfterMapper = this.currentEvaluationContext().clone();
+        if (isValueReturned(contextAfterMapper)) {
+          leaveWithReturnedValue(checkerEvaluable, ioEntryForTransformingFunctionWhenValueReturned(inputActualValue, contextAfterMapper.value(), contextAfterMapper.currentValue()));
+        } else if (isExceptionThrown(evaluationContext))
+          leaveWithThrownException(checkerEvaluable, ioEntryForTransformingFunctionWhenSkipped(inputActualValue, contextAfterMapper.thrownException()));
+        else
+          assert false;
+        this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), currentEvaluationContext());
+        {
+          EvaluationContext<?> contextBeforeChecker = this.currentEvaluationContext().clone();
+          transformation.checker().accept((EvaluationContext<R>) contextAfterMapper, this);
+          if (isValueReturned(contextAfterMapper)) {
+            leaveWithReturnedValue(transformation.checker(), ioEntryForCheckerFunctionWhenValueReturned(transformation, contextBeforeChecker.value(), this.currentEvaluationContext().value()));
+          } else if (isExceptionThrown(contextAfterMapper)) {
+            leaveWithReturnedValue(transformation.checker(), ioEntryForCheckerFunctionWhenSkipped(contextBeforeChecker.value(), this.currentEvaluationContext().value()));
+          } else
+            assert false;
+        }
+      }
     }
 
     private <T, R> EvaluableIo ioEntryForCheckerFunctionWhenSkipped(Object inputActualValue, Object outputActualValue) {
@@ -381,8 +385,8 @@ public interface Evaluator {
       return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
     }
 
-    private static EvaluableIo ioEntryForTransformingFunctionWhenValueRetuened(Object inputActualValue, EvaluationContext<?> currentEvaluationContext) {
-      return new EvaluableIo(inputActualValue, currentEvaluationContext.currentValue(), inputActualValue, currentEvaluationContext.value(), false);
+    private static EvaluableIo ioEntryForTransformingFunctionWhenValueReturned(Object inputActualValue, Object outputActualValue, Object outputExpectation) {
+      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
     @Override
