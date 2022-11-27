@@ -288,35 +288,16 @@ public interface Evaluator {
         if (evaluationContext.state() == EvaluationContext.State.VALUE_RETURNED) {
           T inputActualValue = evaluationContext.returnedValue();
           boolean result = leafPred.predicate().test(inputActualValue);
-          leaveWithReturnedValue(leafPred, new EvaluableIo(
-              inputActualValue,
-              outputExpectationFor(leafPred),
-              inputActualValue,
-              result,
-              this.currentlyExpectedBooleanValue != result));
+          leaveWithReturnedValue(leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, result));
         } else {
           Object inputActualValue = evaluationContext.thrownException();
-          leaveWithReturnedValue(leafPred, new EvaluableIo(
-              inputActualValue,
-              outputExpectationFor(leafPred),
-              inputActualValue,
-              NOT_EVALUATED,
-              false));
+          leaveWithReturnedValue(leafPred, ioEntryForLeafWhenSkipped(leafPred, inputActualValue));
         }
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        leaveWithThrownException(leafPred, new EvaluableIo(
-            evaluationContext.value(),
-            outputExpectationFor(leafPred),
-            evaluationContext.value(),
-            e,
-            true));
+        leaveWithThrownException(leafPred, ioEntryForLeafWhenExceptionThrown(evaluationContext, leafPred, e));
       }
-    }
-
-    private <T> boolean outputExpectationFor(Evaluable<T> predicateEvaluable) {
-      return predicateEvaluable.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue;
     }
 
     @Override
@@ -406,9 +387,6 @@ public interface Evaluator {
       return false;
     }
 
-    public boolean resultValueAsBooleanIfBooleanOtherwise(boolean otherwiseValue) {
-      return resultValue() instanceof Boolean ? resultValueAsBoolean() : otherwiseValue;
-    }
 
     @Override
     public List<EvaluationEntry> resultEntries() {
@@ -419,6 +397,42 @@ public interface Evaluator {
     private <T> EvaluationContext<T> currentEvaluationContext() {
       return (EvaluationContext<T>) this.currentEvaluationContext;
     }
+
+    public boolean resultValueAsBooleanIfBooleanOtherwise(boolean otherwiseValue) {
+      return resultValue() instanceof Boolean ? resultValueAsBoolean() : otherwiseValue;
+    }
+
+    private <T> EvaluableIo ioEntryForLeafWhenValueReturned(Evaluable.LeafPred<T> leafPred, T inputActualValue, boolean outputActualValue) {
+      return new EvaluableIo(
+          inputActualValue,
+          outputExpectationFor(leafPred),
+          inputActualValue,
+          outputActualValue,
+          this.currentlyExpectedBooleanValue != outputActualValue);
+    }
+
+    private <T> EvaluableIo ioEntryForLeafWhenExceptionThrown(EvaluationContext<T> evaluationContext, Evaluable.LeafPred<T> leafPred, Throwable e) {
+      return new EvaluableIo(
+          evaluationContext.value(),
+          outputExpectationFor(leafPred),
+          evaluationContext.value(),
+          e,
+          true);
+    }
+
+    private <T> EvaluableIo ioEntryForLeafWhenSkipped(Evaluable.LeafPred<T> leafPred, Object inputActualValue) {
+      return new EvaluableIo(
+          inputActualValue,
+          outputExpectationFor(leafPred),
+          inputActualValue,
+          NOT_EVALUATED,
+          false);
+    }
+
+    private <T> boolean outputExpectationFor(Evaluable<T> predicateEvaluable) {
+      return predicateEvaluable.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue;
+    }
+
 
     private <E> Predicate<E> createValueCheckingPredicateForStream(Evaluable.StreamPred<E> streamPredicate) {
       return e -> {
