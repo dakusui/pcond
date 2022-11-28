@@ -344,8 +344,7 @@ public interface Evaluator {
           assert false;
         this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), evaluationContext);
         {
-          EvaluationContext<?> evaluationContextForChecker = ((EvaluationContext<Object>) evaluationContext).clone();
-          Object inputActualValueForChecker = evaluationContextForChecker.value();
+          Object inputActualValueForChecker = evaluationContext.value();
           Evaluable<? super R> checkerEvaluable = transformation.checker();
           checkerEvaluable.accept((EvaluationContext<R>) evaluationContext, this);
           if (isValueReturned(evaluationContext)) {
