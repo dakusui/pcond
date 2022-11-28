@@ -138,11 +138,9 @@ public interface Evaluator {
     };
     List<EvaluationEntry.OnGoing> onGoingEntries = new LinkedList<>();
     List<EvaluationEntry>         entries        = new ArrayList<>();
-    final EvaluationContext<Object> currentEvaluationContext;
     boolean currentlyExpectedBooleanValue = true;
 
     public Impl() {
-      this.currentEvaluationContext = EvaluationContext.forValue(null);
     }
 
     void enter(EvaluableDesc evaluableDesc, EvaluationContext<?> evaluationContext) {
