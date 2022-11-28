@@ -174,7 +174,7 @@ public interface Evaluator {
               toSnapshotIfPossible(io.getInputActualValue()),
               io.requiresExplanation()));
       this.onGoingEntries.remove(positionInOngoingEntries);
-      this.currentEvaluationContext.valueReturned(io.getOutputActualValue());
+      this.currentEvaluationContext().valueReturned(io.getOutputActualValue());
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
     }
@@ -193,7 +193,7 @@ public interface Evaluator {
               composeActualValueFromInputAndThrowable(io.getInputActualValue(), (Throwable) io.getOutputActualValue()),
               true));
       this.onGoingEntries.remove(positionInOngoingEntries);
-      this.currentEvaluationContext.exceptionThrown((Throwable) io.getOutputActualValue());
+      this.currentEvaluationContext().exceptionThrown((Throwable) io.getOutputActualValue());
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
     }
@@ -209,10 +209,9 @@ public interface Evaluator {
       boolean outputValue = true;
       boolean shortcut = conjunction.shortcut();
       @SuppressWarnings("unchecked") EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
+      this.enter(EvaluableDesc.fromEvaluable(conjunction), evaluationContext);
       for (Evaluable<? super T> each : conjunction.children()) {
         this.currentEvaluationContext().resetTo(clonedContext);
-        if (i == 0)
-          this.enter(EvaluableDesc.fromEvaluable(conjunction), evaluationContext);
         each.accept(evaluationContext, this);
         boolean cur = this.resultValueAsBooleanIfBooleanOtherwise(!this.currentlyExpectedBooleanValue);
         if (!cur)
@@ -236,10 +235,9 @@ public interface Evaluator {
       boolean shortcut = disjunction.shortcut();
       Object currentValue = this.currentEvaluationContext().currentValue();
       @SuppressWarnings("unchecked") EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
+      this.enter(EvaluableDesc.fromEvaluable(disjunction), evaluationContext);
       for (Evaluable<? super T> each : disjunction.children()) {
         this.currentEvaluationContext().valueReturned(currentValue);
-        if (i == 0)
-          this.enter(EvaluableDesc.fromEvaluable(disjunction), evaluationContext);
         each.accept(evaluationContext, this);
         boolean cur = this.resultValueAsBoolean();
         if (cur)
@@ -278,7 +276,7 @@ public interface Evaluator {
           T inputActualValue = evaluationContext.returnedValue();
           boolean outputActualValue = leafPred.predicate().test(inputActualValue);
           leaveWithReturnedValue(leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, outputActualValue));
-        } else if (isExceptionThrown(evaluationContext)){
+        } else if (isExceptionThrown(evaluationContext)) {
           Object inputActualValue = evaluationContext.thrownException();
           leaveWithReturnedValue(leafPred, ioEntryForLeafWhenSkipped(leafPred, inputActualValue));
         } else
@@ -301,7 +299,7 @@ public interface Evaluator {
           outputActualValue = func.head().apply(inputActualValue);
           leaveWithReturnedValue(func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue));
           func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(EvaluationContext.forValue(outputActualValue), this));
-        } else if (isExceptionThrown(evaluationContext)){
+        } else if (isExceptionThrown(evaluationContext)) {
           Throwable inputActualValue = evaluationContext.thrownException();
           outputActualValue = inputActualValue;
           leaveWithReturnedValue(func, ioEntryForFuncWhenSkipped(func, inputActualValue));
@@ -373,7 +371,7 @@ public interface Evaluator {
     }
 
     public Object resultValue() {
-      return currentEvaluationContext.value();
+      return currentEvaluationContext().value();
     }
 
     @Override
