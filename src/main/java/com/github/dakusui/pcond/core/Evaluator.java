@@ -136,9 +136,9 @@ public interface Evaluator {
         return "(unknown)";
       }
     };
-    List<EvaluationEntry.OnGoing> onGoingEntries = new LinkedList<>();
-    List<EvaluationEntry>         entries        = new ArrayList<>();
-    boolean currentlyExpectedBooleanValue = true;
+    List<EvaluationEntry.OnGoing> onGoingEntries                = new LinkedList<>();
+    List<EvaluationEntry>         entries                       = new ArrayList<>();
+    boolean                       currentlyExpectedBooleanValue = true;
 
     public Impl() {
     }
@@ -353,7 +353,7 @@ public interface Evaluator {
                 ioEntryForCheckerPredicateWhenValueReturned(checkerEvaluable, inputActualValueForChecker, evaluationContext.value()),
                 (EvaluationContext<Object>) evaluationContext);
           } else if (isExceptionThrown(evaluationContext)) {
-            leaveWithReturnedValue((Evaluable<Object>)checkerEvaluable, ioEntryForCheckerPredicateWhenSkipped(inputActualValueForChecker, evaluationContext.value()), (EvaluationContext<Object>) evaluationContext);
+            leaveWithReturnedValue((Evaluable<Object>) checkerEvaluable, ioEntryForCheckerPredicateWhenSkipped(inputActualValueForChecker, evaluationContext.value()), (EvaluationContext<Object>) evaluationContext);
           } else
             assert false;
         }
@@ -370,14 +370,13 @@ public interface Evaluator {
       // because either way we will just return a boolean and during the execution,
       // type information is erased.
       // TODO: Issue-#59: Need exception handling
-      Boolean outputActualValue = evaluationContext
-          .returnedValue()
+      Stream<E> inputActualValue = evaluationContext.returnedValue();
+      Boolean outputActualValue = inputActualValue
           .filter(createValueCheckingPredicateForStream(streamPred))
           .map(v -> v != null ? v : NULL_VALUE)
           .findFirst()
           .map(each -> !ret)
           .orElse(ret);
-      Object inputActualValue = evaluationContext.value();
       leaveWithReturnedValue(
           (Evaluable) streamPred,
           ioEntryForStreamPredicateWhenValueReturned(streamPred, outputActualValue, inputActualValue),

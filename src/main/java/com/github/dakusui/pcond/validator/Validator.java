@@ -404,6 +404,7 @@ public interface Validator {
       } catch (Error error) {
         throw error;
       } catch (Throwable t) {
+        t.printStackTrace();
         String message = format("An exception (%s) was thrown during evaluation of evaluationContext: %s: %s", t, value, cond);
         throw executionFailure(configuration()
                 .reportComposer()
