@@ -107,6 +107,8 @@ public class SmokeTest extends TestBase {
                       .lessThan(400)
                       .done()).done()));
     } catch (ComparisonFailure e) {
+      if (true)
+        throw e;
       e.printStackTrace();
       ReportParser reportParserForActualValue = new ReportParser(e.getActual());
       ReportParser reportParserForExpectation = new ReportParser(e.getExpected());
