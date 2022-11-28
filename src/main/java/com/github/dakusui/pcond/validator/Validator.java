@@ -115,7 +115,7 @@ public interface Validator {
    */
   default <T> T require(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionFactory) {
     return checkValueAndThrowIfFails(
-        EvaluationContext.forValue(value),
+        value,
         cond,
         this.configuration().messageComposer()::composeMessageForPrecondition,
         explanation -> exceptionFactory.apply(explanation.toString()));
@@ -127,7 +127,7 @@ public interface Validator {
    * Otherwise, an exception created by `forValidate.exceptionForGeneralViolation()`
    * will be thrown.
    * This method is intended to be used by {@code Validates#validate(Object, Predicate, Function)}
-   * method in valid8j library.
+   * method in `valid8j` library.
    *
    * @param value       The value to be checked.
    * @param cond        A condition to validate the `value`.
@@ -211,7 +211,7 @@ public interface Validator {
 
   default <T> T validate_2(T value, Predicate<? super T> cond, ExceptionFactory<Throwable> exceptionFactory) {
     return checkValueAndThrowIfFails(
-        EvaluationContext.forValue(value),
+        value,
         cond,
         configuration().messageComposer()::composeMessageForValidation,
         exceptionFactory);
@@ -276,7 +276,7 @@ public interface Validator {
    */
   default <T> T ensure(T value, Predicate<? super T> cond, Function<String, Throwable> exceptionComposer) {
     return checkValueAndThrowIfFails(
-        EvaluationContext.forValue(value),
+        value,
         cond,
         configuration().messageComposer()::composeMessageForPostcondition,
         explanation -> exceptionComposer.apply(explanation.toString()));
@@ -295,7 +295,7 @@ public interface Validator {
    */
   default <T> void checkInvariant(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
-        EvaluationContext.forValue(value),
+        value,
         cond,
         configuration().messageComposer()::composeMessageForAssertion,
         explanation -> configuration().exceptionComposer().forAssert().exceptionInvariantConditionViolation(explanation.toString()));
@@ -314,7 +314,7 @@ public interface Validator {
    */
   default <T> void checkPrecondition(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
-        EvaluationContext.forValue(value),
+        value,
         cond,
         configuration().messageComposer()::composeMessageForPrecondition,
         explanation -> configuration().exceptionComposer().forAssert().exceptionPreconditionViolation(explanation.toString()));
@@ -333,7 +333,7 @@ public interface Validator {
    */
   default <T> void checkPostcondition(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
-        EvaluationContext.forValue(value),
+        value,
         cond,
         configuration().messageComposer()::composeMessageForPostcondition,
         explanation -> configuration().exceptionComposer().forAssert().exceptionPostconditionViolation(explanation.toString()));
@@ -350,7 +350,7 @@ public interface Validator {
    */
   default <T> void assertThat(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
-        EvaluationContext.forValue(value),
+        value,
         cond,
         configuration().messageComposer()::composeMessageForAssertion,
         explanation -> configuration().exceptionComposer().forAssertThat().testFailedException(explanation, configuration().reportComposer()));
@@ -367,7 +367,7 @@ public interface Validator {
    */
   default <T> void assumeThat(T value, Predicate<? super T> cond) {
     checkValueAndThrowIfFails(
-        EvaluationContext.forValue(value),
+        value,
         cond,
         configuration().messageComposer()::composeMessageForAssertion,
         explantion -> configuration().exceptionComposer().forAssertThat().testSkippedException(explantion, configuration().reportComposer()));
@@ -383,20 +383,20 @@ public interface Validator {
    * The `Explanation` is passed to the `exceptionComposerFunction` and the exception
    * created by the function will be thrown.
    *
-   * @param evaluationContext         A `evaluationContext` to be checked.
+   * @param <T>                       The type of the `evaluationContext`.
+   * @param value                     A value to be checked.
    * @param cond                      A predicate that checks the `evaluationContext`.
    * @param messageComposerFunction   A function that composes an error message from the `evaluationContext` and the predicate `cond`.
    * @param exceptionComposerFunction A function that creates an exception from a failure report created inside this method.
-   * @param <T>                       The type of the `evaluationContext`.
    * @return The `evaluationContext` itself.
    */
   @SuppressWarnings("unchecked")
   default <T> T checkValueAndThrowIfFails(
-      EvaluationContext<T> evaluationContext,
+      T value,
       Predicate<? super T> cond,
       BiFunction<T, Predicate<? super T>, String> messageComposerFunction,
       ExceptionFactory<Throwable> exceptionComposerFunction) {
-    EvaluationContext<T> kept = evaluationContext.clone();
+    EvaluationContext<T> evaluationContext = EvaluationContext.forValue(value);
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
@@ -404,7 +404,7 @@ public interface Validator {
       } catch (Error error) {
         throw error;
       } catch (Throwable t) {
-        String message = format("An exception (%s) was thrown during evaluation of evaluationContext: %s: %s", t, kept.returnedValue(), cond);
+        String message = format("An exception (%s) was thrown during evaluation of evaluationContext: %s: %s", t, value, cond);
         throw executionFailure(configuration()
                 .reportComposer()
                 .composeExplanation(
@@ -414,12 +414,12 @@ public interface Validator {
             t);
       }
       if (evaluator.resultValueAsBoolean((EvaluationContext<Object>) evaluationContext))
-        return kept.returnedValue();
+        return value;
       List<EvaluationEntry> entries = evaluator.resultEntries();
       throw exceptionComposerFunction.create(configuration()
           .reportComposer()
           .composeExplanation(
-              messageComposerFunction.apply(kept.returnedValue(), cond),
+              messageComposerFunction.apply(value, cond),
               entries,
               null));
     } else {
@@ -427,10 +427,10 @@ public interface Validator {
         throw exceptionComposerFunction.create(configuration()
             .reportComposer()
             .composeExplanation(
-                messageComposerFunction.apply(kept.returnedValue(), cond),
+                messageComposerFunction.apply(value, cond),
                 emptyList(),
                 null));
-      return kept.returnedValue();
+      return value;
     }
   }
 
