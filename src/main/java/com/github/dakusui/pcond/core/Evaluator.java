@@ -257,7 +257,7 @@ public interface Evaluator {
       Object inputActualValue = evaluationContext.value();
       negation.target().accept(evaluationContext, this);
       if (isValueReturned(this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext))) {
-        boolean outputActualValue = !this.resultValueAsBoolean(currentEvaluationContext);
+        boolean outputActualValue = !this.resultValueAsBoolean((EvaluationContext<Object>) evaluationContext);
         this.leaveWithReturnedValue(
             (Evaluable<Object>) negation,
             ioEntryForNegationWhenValueReturned(negation, inputActualValue, outputActualValue), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
@@ -400,7 +400,7 @@ public interface Evaluator {
     }
 
     public <T> EvaluationContext<T> currentEvaluationContext(EvaluationContext<T> evaluationContext) {
-      return (EvaluationContext<T>) this.currentEvaluationContext;
+      return evaluationContext;
     }
 
     public boolean resultValueAsBooleanIfBooleanOtherwise(EvaluationContext<Object> evaluationContext, boolean otherwiseValue) {
@@ -515,8 +515,9 @@ public interface Evaluator {
         boolean succeeded = false;
         boolean ret = false;
         Object throwable = "<<OUTPUT MISSING>>";
+        EvaluationContext<E> evaluationContext = EvaluationContext.forValue(e);
         try {
-          streamPredicate.cut().accept(EvaluationContext.forValue(e), evaluator);
+          streamPredicate.cut().accept(evaluationContext, evaluator);
           succeeded = true;
         } catch (Error error) {
           throw error;
@@ -524,7 +525,7 @@ public interface Evaluator {
           throwable = t;
           throw wrapIfNecessary(t);
         } finally {
-          if (!succeeded || evaluator.resultValueAsBoolean(currentEvaluationContext) == streamPredicate.valueToCut()) {
+          if (!succeeded || evaluator.resultValueAsBoolean((EvaluationContext<Object>) evaluationContext) == streamPredicate.valueToCut()) {
             importEvaluationEntries(evaluator.resultEntries(), throwable);
             ret = true;
           }
