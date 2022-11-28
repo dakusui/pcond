@@ -362,12 +362,18 @@ public interface Evaluator {
       // because either way we will just return a boolean and during the execution,
       // type information is erased.
       // TODO: Issue-#59: Need exception handling
-      leaveWithReturnedValue(streamPred, new EvaluableIo(evaluationContext.value(), outputExpectationFor(streamPred), evaluationContext.value(), evaluationContext.returnedValue()
+      Boolean outputActualValue = evaluationContext
+          .returnedValue()
           .filter(createValueCheckingPredicateForStream(streamPred))
           .map(v -> v != null ? v : NULL_VALUE)
           .findFirst()
           .map(each -> !ret)
-          .orElse(ret), false), this.currentEvaluationContext());
+          .orElse(ret);
+      Object inputActualValue = evaluationContext.value();
+      leaveWithReturnedValue(
+          streamPred,
+          ioEntryForStreamPredicateWhenValueReturned(streamPred, outputActualValue, inputActualValue),
+          this.currentEvaluationContext());
     }
 
     public Object resultValue() {
@@ -486,6 +492,15 @@ public interface Evaluator {
 
     private static EvaluableIo ioEntryForTransformingFunctionWhenValueReturned(Object inputActualValue, Object outputActualValue, Object outputExpectation) {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
+    }
+
+    private <E> EvaluableIo ioEntryForStreamPredicateWhenValueReturned(Evaluable.StreamPred<E> streamPred, Boolean outputActualValue, Object inputActualValue) {
+      return new EvaluableIo(
+          inputActualValue,
+          outputExpectationFor(streamPred),
+          inputActualValue,
+          outputActualValue,
+          false);
     }
 
     private <E> Predicate<E> createValueCheckingPredicateForStream(Evaluable.StreamPred<E> streamPredicate) {
