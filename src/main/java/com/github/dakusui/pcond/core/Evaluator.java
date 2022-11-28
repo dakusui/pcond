@@ -231,18 +231,19 @@ public interface Evaluator {
       int i = 0;
       boolean outputValue = false;
       boolean shortcut = disjunction.shortcut();
-      Object currentValue = this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext).currentValue();
-      @SuppressWarnings("unchecked") EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
       this.enter(EvaluableDesc.fromEvaluable(disjunction), evaluationContext);
+      Object inputActualValue = evaluationContext.value();
       for (Evaluable<? super T> each : disjunction.children()) {
-        this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext).valueReturned(currentValue);
-        each.accept(evaluationContext, this);
-        boolean cur = this.resultValueAsBoolean((EvaluationContext<Object>) evaluationContext);
+        @SuppressWarnings("unchecked") EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
+        each.accept((EvaluationContext) clonedContext, this);
+        boolean cur = this.resultValueAsBooleanIfBooleanOtherwise((EvaluationContext<Object>) clonedContext, !this.currentlyExpectedBooleanValue);
         if (cur)
           outputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && outputValue) || i == disjunction.children().size() - 1) {
           boolean outputExpectation = outputExpectationFor(disjunction);
-          leaveWithReturnedValue((Evaluable<Object>) disjunction, ioEntryForDisjunctionWhenEvaluationFinished(outputExpectation, clonedContext.value(), outputValue), (EvaluationContext<Object>) this.currentEvaluationContext(evaluationContext));
+          leaveWithReturnedValue(
+              (Evaluable<Object>) disjunction,
+              ioEntryForDisjunctionWhenEvaluationFinished(outputExpectation, inputActualValue, outputValue), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
           return;
         }
         i++;
