@@ -347,13 +347,13 @@ public interface Evaluator {
           EvaluationContext<?> evaluationContextForChecker = ((EvaluationContext<Object>) evaluationContext).clone();
           Object inputActualValueForChecker = evaluationContextForChecker.value();
           Evaluable<? super R> checkerEvaluable = transformation.checker();
-          checkerEvaluable.accept((EvaluationContext<R>) evaluationContextForChecker, this);
-          if (isValueReturned(evaluationContextForChecker)) {
+          checkerEvaluable.accept((EvaluationContext<R>) evaluationContext, this);
+          if (isValueReturned(evaluationContext)) {
             leaveWithReturnedValue(
                 (Evaluable<Object>) checkerEvaluable,
                 ioEntryForCheckerPredicateWhenValueReturned(checkerEvaluable, inputActualValueForChecker, evaluationContext.value()),
                 (EvaluationContext<Object>) evaluationContext);
-          } else if (isExceptionThrown(evaluationContextForChecker)) {
+          } else if (isExceptionThrown(evaluationContext)) {
             leaveWithReturnedValue((Evaluable<Object>)checkerEvaluable, ioEntryForCheckerPredicateWhenSkipped(inputActualValueForChecker, evaluationContext.value()), (EvaluationContext<Object>) evaluationContext);
           } else
             assert false;

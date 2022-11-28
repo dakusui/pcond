@@ -17,7 +17,7 @@ import static com.github.dakusui.shared.utils.TestUtils.simplifyString;
 
 public class NegateTest extends TestBase {
   @Test(expected = ApplicationException.class)
-  public void whenInvertedTrasformingPredicateFails_thenPrintDesignedMessage$transformIsntLeafAndNotMerged() {
+  public void whenInvertedTransformingPredicateFails_thenPrintDesignedMessage$transformIsntLeafAndNotMerged() {
     try {
       validate("",
           not(transform(length())                           // (1)
