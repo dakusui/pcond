@@ -97,7 +97,7 @@ public interface Evaluator {
    */
   <E> void evaluate(EvaluationContext<Stream<E>> value, Evaluable.StreamPred<E> streamPred);
 
-  boolean resultValueAsBoolean();
+  boolean resultValueAsBoolean(EvaluationContext<Object> evaluationContext);
 
   /**
    * Returns a list of result entries.
@@ -160,7 +160,7 @@ public interface Evaluator {
     }
 
     void leaveWithReturnedValue(
-        Evaluable<?> evaluable, EvaluableIo io, EvaluationContext<Object> evaluationContext) {
+        Evaluable<Object> evaluable, EvaluableIo io, EvaluationContext<Object> evaluationContext) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       this.entries.set(
@@ -211,16 +211,16 @@ public interface Evaluator {
       @SuppressWarnings("unchecked") EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
       this.enter(EvaluableDesc.fromEvaluable(conjunction), evaluationContext);
       for (Evaluable<? super T> each : conjunction.children()) {
-        this.currentEvaluationContext().resetTo(clonedContext);
+        this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext).resetTo(clonedContext);
         each.accept(evaluationContext, this);
-        boolean cur = this.resultValueAsBooleanIfBooleanOtherwise(!this.currentlyExpectedBooleanValue);
+        boolean cur = this.resultValueAsBooleanIfBooleanOtherwise((EvaluationContext<Object>) evaluationContext, !this.currentlyExpectedBooleanValue);
         if (!cur)
           outputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !outputValue) || i == conjunction.children().size() - 1) {
           boolean outputExpectation = outputExpectationFor(conjunction);
           leaveWithReturnedValue(
-              conjunction,
-              ioEntryForConjunctionWhenEvaluationFinished(outputExpectation, clonedContext.value(), outputValue), this.currentEvaluationContext());
+              (Evaluable<Object>) conjunction,
+              ioEntryForConjunctionWhenEvaluationFinished(outputExpectation, clonedContext.value(), outputValue), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
           return;
         }
         i++;
@@ -233,18 +233,18 @@ public interface Evaluator {
       int i = 0;
       boolean outputValue = false;
       boolean shortcut = disjunction.shortcut();
-      Object currentValue = this.currentEvaluationContext().currentValue();
+      Object currentValue = this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext).currentValue();
       @SuppressWarnings("unchecked") EvaluationContext<Object> clonedContext = (EvaluationContext<Object>) evaluationContext.clone();
       this.enter(EvaluableDesc.fromEvaluable(disjunction), evaluationContext);
       for (Evaluable<? super T> each : disjunction.children()) {
-        this.currentEvaluationContext().valueReturned(currentValue);
+        this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext).valueReturned(currentValue);
         each.accept(evaluationContext, this);
-        boolean cur = this.resultValueAsBoolean();
+        boolean cur = this.resultValueAsBoolean((EvaluationContext<Object>) evaluationContext);
         if (cur)
           outputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && outputValue) || i == disjunction.children().size() - 1) {
           boolean outputExpectation = outputExpectationFor(disjunction);
-          leaveWithReturnedValue(disjunction, ioEntryForDisjunctionWhenEvaluationFinished(outputExpectation, clonedContext.value(), outputValue), this.currentEvaluationContext());
+          leaveWithReturnedValue((Evaluable<Object>) disjunction, ioEntryForDisjunctionWhenEvaluationFinished(outputExpectation, clonedContext.value(), outputValue), (EvaluationContext<Object>) this.currentEvaluationContext(evaluationContext));
           return;
         }
         i++;
@@ -256,15 +256,15 @@ public interface Evaluator {
       this.enter(EvaluableDesc.fromEvaluable(negation), evaluationContext);
       Object inputActualValue = evaluationContext.value();
       negation.target().accept(evaluationContext, this);
-      if (isValueReturned(this.currentEvaluationContext())) {
-        boolean outputActualValue = !this.resultValueAsBoolean();
+      if (isValueReturned(this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext))) {
+        boolean outputActualValue = !this.resultValueAsBoolean(currentEvaluationContext);
         this.leaveWithReturnedValue(
-            negation,
-            ioEntryForNegationWhenValueReturned(negation, inputActualValue, outputActualValue), this.currentEvaluationContext());
+            (Evaluable<Object>) negation,
+            ioEntryForNegationWhenValueReturned(negation, inputActualValue, outputActualValue), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
       } else {
         leaveWithThrownException(
             negation,
-            ioEntryForNegationWhenExceptionThrown(negation, inputActualValue), this.currentEvaluationContext());
+            ioEntryForNegationWhenExceptionThrown(negation, inputActualValue, this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext).thrownException()), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
       }
     }
 
@@ -275,16 +275,16 @@ public interface Evaluator {
         if (isValueReturned(evaluationContext)) {
           T inputActualValue = evaluationContext.returnedValue();
           boolean outputActualValue = leafPred.predicate().test(inputActualValue);
-          leaveWithReturnedValue(leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, outputActualValue), this.currentEvaluationContext());
+          leaveWithReturnedValue((Evaluable<Object>) leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, outputActualValue), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
         } else if (isExceptionThrown(evaluationContext)) {
           Object inputActualValue = evaluationContext.thrownException();
-          leaveWithReturnedValue(leafPred, ioEntryForLeafWhenSkipped(leafPred, inputActualValue), this.currentEvaluationContext());
+          leaveWithReturnedValue((Evaluable<Object>) leafPred, ioEntryForLeafWhenSkipped(leafPred, inputActualValue), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
         } else
           assert false;
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        leaveWithThrownException(leafPred, ioEntryForLeafWhenExceptionThrown(evaluationContext.value(), outputExpectationFor(leafPred), e), this.currentEvaluationContext());
+        leaveWithThrownException(leafPred, ioEntryForLeafWhenExceptionThrown(evaluationContext.value(), outputExpectationFor(leafPred), e), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
       }
     }
 
@@ -297,20 +297,20 @@ public interface Evaluator {
         if (isValueReturned(evaluationContext)) {
           T inputActualValue = evaluationContext.returnedValue();
           outputActualValue = func.head().apply(inputActualValue);
-          leaveWithReturnedValue(func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue), this.currentEvaluationContext());
+          leaveWithReturnedValue((Evaluable<Object>) func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
           func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(EvaluationContext.forValue(outputActualValue), this));
         } else if (isExceptionThrown(evaluationContext)) {
           Throwable inputActualValue = evaluationContext.thrownException();
           outputActualValue = inputActualValue;
-          leaveWithReturnedValue(func, ioEntryForFuncWhenSkipped(func, inputActualValue), this.currentEvaluationContext());
+          leaveWithReturnedValue((Evaluable<Object>) func, ioEntryForFuncWhenSkipped(func, inputActualValue), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
           func.tail().ifPresent(tailSide -> tailSide.accept(EvaluationContext.forException((Throwable) outputActualValue), this));
         } else
           assert false;
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        leaveWithThrownException(func, ioEntryForFuncWhenExceptionThrown(evaluationContext.returnedValue(), e), this.currentEvaluationContext());
-        func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) this.currentEvaluationContext().exceptionThrown(e), this));
+        leaveWithThrownException(func, ioEntryForFuncWhenExceptionThrown(evaluationContext.returnedValue(), e), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
+        func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext).exceptionThrown(e), this));
       }
     }
 
@@ -320,7 +320,13 @@ public interface Evaluator {
       // TODO: Issue-#59: Need exception handling
       VariableBundle inputActualValue = evaluationContext.returnedValue();
       contextPred.enclosed().accept(EvaluationContext.forValue(inputActualValue.valueAt(contextPred.argIndex())), this);
-      leaveWithReturnedValue(contextPred, ioEntryForContextPredicateWhenValueReturned(this.outputExpectationFor(contextPred), inputActualValue, this.resultValue()), this.currentEvaluationContext());
+      leaveWithReturnedValue(
+          (Evaluable) contextPred,
+          ioEntryForContextPredicateWhenValueReturned(
+              this.outputExpectationFor(contextPred),
+              inputActualValue,
+              this.resultValue((EvaluationContext) evaluationContext)),
+          (EvaluationContext<Object>) this.currentEvaluationContext((EvaluationContext)evaluationContext));
     }
 
     @SuppressWarnings("unchecked")
@@ -331,21 +337,21 @@ public interface Evaluator {
         Object inputActualValue = evaluationContext.returnedValue();
         Evaluable<T> mapperEvaluable = (Evaluable<T>) transformation.mapper();
         mapperEvaluable.accept(evaluationContext, this);
-        if (isValueReturned(currentEvaluationContext())) {
-          leaveWithReturnedValue(mapperEvaluable, ioEntryForTransformingFunctionWhenValueReturned(inputActualValue, currentEvaluationContext().returnedValue(), currentEvaluationContext().value()), this.currentEvaluationContext());
-        } else if (isExceptionThrown(currentEvaluationContext()))
-          leaveWithThrownException(mapperEvaluable, ioEntryForTransformingFunctionWhenSkipped(inputActualValue, currentEvaluationContext().thrownException()), this.currentEvaluationContext());
+        if (isValueReturned(currentEvaluationContext((EvaluationContext<Object>) evaluationContext))) {
+          leaveWithReturnedValue((Evaluable<Object>) mapperEvaluable, ioEntryForTransformingFunctionWhenValueReturned(inputActualValue, currentEvaluationContext((EvaluationContext<Object>) evaluationContext).returnedValue(), currentEvaluationContext((EvaluationContext<Object>) evaluationContext).value()), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
+        } else if (isExceptionThrown(currentEvaluationContext((EvaluationContext<Object>) evaluationContext)))
+          leaveWithThrownException(mapperEvaluable, ioEntryForTransformingFunctionWhenSkipped(inputActualValue, currentEvaluationContext((EvaluationContext<Object>) evaluationContext).thrownException()), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
         else
           assert false;
-        this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), currentEvaluationContext());
+        this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
         {
-          EvaluationContext<?> contextBeforeChecker = this.currentEvaluationContext().clone();
-          Evaluable<? super R> checkerEvaluable = transformation.checker();
+          EvaluationContext<?> contextBeforeChecker = this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext).clone();
+          Evaluable<R> checkerEvaluable = (Evaluable<R>) transformation.checker();
           checkerEvaluable.accept((EvaluationContext<R>) contextBeforeChecker, this);
           if (isValueReturned(contextBeforeChecker)) {
-            leaveWithReturnedValue(checkerEvaluable, ioEntryForCheckerPredicateWhenValueReturned(transformation, contextBeforeChecker.value(), this.currentEvaluationContext().value()), this.currentEvaluationContext());
+            leaveWithReturnedValue((Evaluable<Object>) checkerEvaluable, ioEntryForCheckerPredicateWhenValueReturned(transformation, contextBeforeChecker.value(), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext).value()), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
           } else if (isExceptionThrown(contextBeforeChecker)) {
-            leaveWithReturnedValue(checkerEvaluable, ioEntryForCheckerPredicateWhenSkipped(contextBeforeChecker.value(), this.currentEvaluationContext().value()), this.currentEvaluationContext());
+            leaveWithReturnedValue((Evaluable<Object>)checkerEvaluable, ioEntryForCheckerPredicateWhenSkipped(contextBeforeChecker.value(), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext).value()), this.currentEvaluationContext((EvaluationContext<Object>) evaluationContext));
           } else
             assert false;
         }
@@ -371,19 +377,19 @@ public interface Evaluator {
           .orElse(ret);
       Object inputActualValue = evaluationContext.value();
       leaveWithReturnedValue(
-          streamPred,
+          (Evaluable) streamPred,
           ioEntryForStreamPredicateWhenValueReturned(streamPred, outputActualValue, inputActualValue),
-          this.currentEvaluationContext());
+          (EvaluationContext) this.currentEvaluationContext(evaluationContext));
     }
 
-    public Object resultValue() {
-      return currentEvaluationContext().value();
+    public Object resultValue(EvaluationContext<Object> evaluationContext) {
+      return currentEvaluationContext(evaluationContext).value();
     }
 
     @Override
-    public boolean resultValueAsBoolean() {
-      if (this.resultValue() instanceof Boolean)
-        return (boolean) resultValue();
+    public boolean resultValueAsBoolean(EvaluationContext<Object> evaluationContext) {
+      if (evaluationContext.value() instanceof Boolean)
+        return (boolean) resultValue(evaluationContext);
       return false;
     }
 
@@ -393,13 +399,12 @@ public interface Evaluator {
       return unmodifiableList(this.entries);
     }
 
-    @SuppressWarnings("unchecked")
-    private <T> EvaluationContext<T> currentEvaluationContext() {
+    public <T> EvaluationContext<T> currentEvaluationContext(EvaluationContext<T> evaluationContext) {
       return (EvaluationContext<T>) this.currentEvaluationContext;
     }
 
-    public boolean resultValueAsBooleanIfBooleanOtherwise(boolean otherwiseValue) {
-      return resultValue() instanceof Boolean ? resultValueAsBoolean() : otherwiseValue;
+    public boolean resultValueAsBooleanIfBooleanOtherwise(EvaluationContext<Object> evaluationContext, boolean otherwiseValue) {
+      return resultValue(evaluationContext) instanceof Boolean ? resultValueAsBoolean(currentEvaluationContext(evaluationContext)) : otherwiseValue;
     }
 
     private <T> EvaluableIo ioEntryForLeafWhenValueReturned(Evaluable.LeafPred<T> leafPred, T inputActualValue, boolean outputActualValue) {
@@ -462,8 +467,8 @@ public interface Evaluator {
       return new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, this.outputExpectationFor(negation) != outputActualValue);
     }
 
-    private <T> EvaluableIo ioEntryForNegationWhenExceptionThrown(Evaluable.Negation<T> negation, Object inputActualValue) {
-      return new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, this.currentEvaluationContext().thrownException(), true);
+    private <T> EvaluableIo ioEntryForNegationWhenExceptionThrown(Evaluable.Negation<T> negation, Object inputActualValue, Throwable outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, true);
     }
 
     private <T> boolean outputExpectationFor(Evaluable<T> predicateEvaluable) {
@@ -519,7 +524,7 @@ public interface Evaluator {
           throwable = t;
           throw wrapIfNecessary(t);
         } finally {
-          if (!succeeded || evaluator.resultValueAsBoolean() == streamPredicate.valueToCut()) {
+          if (!succeeded || evaluator.resultValueAsBoolean(currentEvaluationContext) == streamPredicate.valueToCut()) {
             importEvaluationEntries(evaluator.resultEntries(), throwable);
             ret = true;
           }

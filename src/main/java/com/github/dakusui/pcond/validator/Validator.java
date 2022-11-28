@@ -412,7 +412,7 @@ public interface Validator {
                     t),
             t);
       }
-      if (evaluator.resultValueAsBoolean())
+      if (evaluator.resultValueAsBoolean((EvaluationContext<Object>) evaluationContext))
         return evaluationContext.returnedValue();
       List<EvaluationEntry> entries = evaluator.resultEntries();
       throw exceptionComposerFunction.create(configuration()
