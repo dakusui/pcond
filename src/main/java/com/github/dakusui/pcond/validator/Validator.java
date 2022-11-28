@@ -396,6 +396,7 @@ public interface Validator {
       Predicate<? super T> cond,
       BiFunction<T, Predicate<? super T>, String> messageComposerFunction,
       ExceptionFactory<Throwable> exceptionComposerFunction) {
+    EvaluationContext<T> kept = evaluationContext.clone();
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
@@ -403,7 +404,7 @@ public interface Validator {
       } catch (Error error) {
         throw error;
       } catch (Throwable t) {
-        String message = format("An exception (%s) was thrown during evaluation of evaluationContext: %s: %s", t, evaluationContext.returnedValue(), cond);
+        String message = format("An exception (%s) was thrown during evaluation of evaluationContext: %s: %s", t, kept.returnedValue(), cond);
         throw executionFailure(configuration()
                 .reportComposer()
                 .composeExplanation(
@@ -413,12 +414,12 @@ public interface Validator {
             t);
       }
       if (evaluator.resultValueAsBoolean((EvaluationContext<Object>) evaluationContext))
-        return evaluationContext.returnedValue();
+        return kept.returnedValue();
       List<EvaluationEntry> entries = evaluator.resultEntries();
       throw exceptionComposerFunction.create(configuration()
           .reportComposer()
           .composeExplanation(
-              messageComposerFunction.apply(evaluationContext.returnedValue(), cond),
+              messageComposerFunction.apply(kept.returnedValue(), cond),
               entries,
               null));
     } else {
@@ -426,10 +427,10 @@ public interface Validator {
         throw exceptionComposerFunction.create(configuration()
             .reportComposer()
             .composeExplanation(
-                messageComposerFunction.apply(evaluationContext.returnedValue(), cond),
+                messageComposerFunction.apply(kept.returnedValue(), cond),
                 emptyList(),
                 null));
-      return evaluationContext.returnedValue();
+      return kept.returnedValue();
     }
   }
 
