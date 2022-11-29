@@ -413,14 +413,15 @@ public interface Evaluator {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
+    private <T> EvaluableIo ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
+    }
+
     private <T> EvaluableIo ioEntryForLeafWhenValueReturned(boolean outputExpectation, T inputActualValue,
         boolean outputActualValue) {
       return EvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, this.currentlyExpectedBooleanValue != outputActualValue);
     }
 
-    private <T> EvaluableIo ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
-    }
 
     private <T> EvaluableIo ioEntryForNegationWhenValueReturned(boolean outputExpectation, Object inputActualValue, boolean outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, outputExpectation != outputActualValue);
