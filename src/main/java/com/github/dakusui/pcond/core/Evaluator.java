@@ -339,7 +339,7 @@ public interface Evaluator {
         if (isValueReturned((EvaluationContext<Object>) evaluationContext)) {
           leave((Evaluable<Object>) mapperEvaluable, ioEntryForTransformingFunctionWhenValueReturned(inputActualValue, evaluationContext.returnedValue(), evaluationContext.returnedValue()), (EvaluationContext<Object>) evaluationContext);
         } else if (isExceptionThrown((EvaluationContext<Object>) evaluationContext))
-          leave(mapperEvaluable, ioEntryForTransformingFunctionWhenSkipped(inputActualValue, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
+          leave(mapperEvaluable, ioEntryWhenSkipped(inputActualValue, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
         else
           assert false;
         this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), evaluationContext);
@@ -353,7 +353,7 @@ public interface Evaluator {
                 ioEntryForCheckerPredicateWhenValueReturned(checkerEvaluable, inputActualValueForChecker, evaluationContext.returnedValue()),
                 (EvaluationContext<Object>) evaluationContext);
           } else if (isExceptionThrown(evaluationContext)) {
-            leave((Evaluable<Object>) checkerEvaluable, ioEntryForCheckerPredicateWhenSkipped(inputActualValueForChecker, evaluationContext.value()), (EvaluationContext<Object>) evaluationContext);
+            leave((Evaluable<Object>) checkerEvaluable, ioEntryWhenSkipped(inputActualValueForChecker, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
           } else
             assert false;
         }
@@ -378,7 +378,7 @@ public interface Evaluator {
           .orElse(ret);
       leave(
           (Evaluable) streamPred,
-          ioEntryForStreamPredicateWhenValueReturned(streamPred, outputActualValue, evaluationContext.value()),
+          ioEntryForStreamPredicateWhenValueReturned(outputActualValue, evaluationContext.value(), outputExpectationFor(streamPred)),
           (EvaluationContext) evaluationContext);
     }
 
@@ -453,34 +453,28 @@ public interface Evaluator {
       return evaluationContext.state() == EvaluationContext.State.EXCEPTION_THROWN;
     }
 
-    private EvaluableIo ioEntryForCheckerPredicateWhenSkipped(Object
-        inputActualValue, Object outputActualValue) {
-      return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
-    }
-
     private <T, R> EvaluableIo
     ioEntryForCheckerPredicateWhenValueReturned(Evaluable<? super R> checker, Object inputActualValue, Object outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputExpectationFor(checker), inputActualValue, outputActualValue, false);
-    }
-
-    private static EvaluableIo ioEntryForTransformingFunctionWhenSkipped
-        (Object inputActualValue, Throwable outputActualValue) {
-      return EvaluableIo.exceptionThrown(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
+      return EvaluableIo.valueReturned(inputActualValue, outputExpectationFor(checker), inputActualValue, outputActualValue, false);
     }
 
     private static EvaluableIo ioEntryForTransformingFunctionWhenValueReturned
         (Object inputActualValue, Object outputActualValue, Object outputExpectation) {
-      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
+      return EvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
     private <E> EvaluableIo
-    ioEntryForStreamPredicateWhenValueReturned(Evaluable.StreamPred<E> streamPred, Boolean outputActualValue, Object inputActualValue) {
+    ioEntryForStreamPredicateWhenValueReturned(Boolean outputActualValue, Object inputActualValue, boolean outputExpectation) {
       return new EvaluableIo(
           inputActualValue,
-          outputExpectationFor(streamPred),
+          outputExpectation,
           inputActualValue,
           outputActualValue,
           false);
+    }
+
+    private EvaluableIo ioEntryWhenSkipped(Object inputActualValue, Throwable outputActualValue) {
+      return EvaluableIo.exceptionThrown(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
     }
 
     private <E> Predicate<E> createValueCheckingPredicateForStream(Evaluable.StreamPred<E> streamPredicate) {
