@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
@@ -281,8 +280,8 @@ public interface Evaluator {
           boolean outputActualValue = leafPred.predicate().test(inputActualValue);
           leaveWithReturnedValue((Evaluable<Object>) leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
         } else if (isExceptionThrown(evaluationContext)) {
-          Object inputActualValue = evaluationContext.thrownException();
-          leaveWithReturnedValue((Evaluable<Object>) leafPred, ioEntryForLeafWhenSkipped(leafPred, inputActualValue), (EvaluationContext<Object>) evaluationContext);
+          Throwable inputActualValue = evaluationContext.thrownException();
+          leaveWithReturnedValue((Evaluable<Object>) leafPred, ioEntryWhenSkipped(leafPred, inputActualValue), (EvaluationContext<Object>) evaluationContext);
         } else
           assert false;
       } catch (Error e) {
@@ -301,13 +300,13 @@ public interface Evaluator {
         if (isValueReturned(evaluationContext)) {
           T inputActualValue = evaluationContext.returnedValue();
           outputActualValue = func.head().apply(inputActualValue);
-          leaveWithReturnedValue((Evaluable<Object>) (Evaluable)func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
-          func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(evaluationContext.valueReturned((T)outputActualValue), this));
+          leaveWithReturnedValue((Evaluable<Object>) (Evaluable) func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
+          func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(evaluationContext.valueReturned((T) outputActualValue), this));
         } else if (isExceptionThrown(evaluationContext)) {
           Throwable inputActualValue = evaluationContext.thrownException();
           outputActualValue = inputActualValue;
-          leaveWithReturnedValue((Evaluable<Object>) func, ioEntryForFuncWhenSkipped(func, inputActualValue), (EvaluationContext<Object>) evaluationContext);
-          func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext)evaluationContext.exceptionThrown((Throwable) outputActualValue), this));
+          leaveWithReturnedValue((Evaluable<Object>) func, ioEntryWhenSkipped(func, inputActualValue), (EvaluationContext<Object>) evaluationContext);
+          func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) evaluationContext.exceptionThrown((Throwable) outputActualValue), this));
         } else
           assert false;
       } catch (Error e) {
@@ -405,17 +404,6 @@ public interface Evaluator {
       return evaluationContext.value() instanceof Boolean ? resultValueAsBoolean(evaluationContext) : otherwiseValue;
     }
 
-    private <T> EvaluableIo
-    ioEntryForLeafWhenValueReturned(Evaluable.LeafPred<T> leafPred, T inputActualValue,
-        boolean outputActualValue) {
-      return new EvaluableIo(
-          inputActualValue,
-          outputExpectationFor(leafPred),
-          inputActualValue,
-          outputActualValue,
-          this.currentlyExpectedBooleanValue != outputActualValue);
-    }
-
     private EvaluableIo ioEntryForLeafWhenExceptionThrown(Object
         inputExpectation, boolean outputExpectation, Throwable outputActualValue) {
       return new EvaluableIo(
@@ -437,18 +425,24 @@ public interface Evaluator {
     }
 
     private <T> EvaluableIo
-    ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
-    }
-
-    private <T> EvaluableIo
-    ioEntryForFuncWhenSkipped(Evaluable.Func<T> func, Throwable inputActualValue) {
+    ioEntryWhenSkipped(Evaluable<T> evaluable, Throwable inputActualValue) {
       return new EvaluableIo(
           inputActualValue,
-          outputExpectationFor(func),
+          outputExpectationFor(evaluable),
           inputActualValue,
           NOT_EVALUATED,
           false);
+    }
+
+    private <T> EvaluableIo
+    ioEntryForLeafWhenValueReturned(Evaluable.LeafPred<T> leafPred, T inputActualValue,
+        boolean outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputExpectationFor(leafPred), inputActualValue, outputActualValue, this.currentlyExpectedBooleanValue != outputActualValue);
+    }
+
+    private <T> EvaluableIo
+    ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
     }
 
     private <T> EvaluableIo
