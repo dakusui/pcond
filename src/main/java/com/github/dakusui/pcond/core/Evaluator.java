@@ -272,7 +272,6 @@ public interface Evaluator {
       try {
         if (isValueReturned(evaluationContext)) {
           T inputActualValue = evaluationContext.returnedValue();
-          System.out.println(inputActualValue + ":" + inputActualValue);
           boolean outputActualValue = leafPred.predicate().test(inputActualValue);
           io = ioEntryForLeafWhenValueReturned(outputExpectationFor(leafPred), inputActualValue, outputActualValue);
         } else if (isExceptionThrown(evaluationContext)) {
@@ -298,20 +297,25 @@ public interface Evaluator {
         if (isValueReturned(evaluationContext)) {
           T inputActualValue = evaluationContext.returnedValue();
           outputActualValue = func.head().apply(inputActualValue);
-          leave((Evaluable<Object>) (Evaluable) func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
+          EvaluableIo io = ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue);
+          leave((Evaluable<Object>) func, io, (EvaluationContext<Object>) evaluationContext);
           func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(evaluationContext.valueReturned((T) outputActualValue), this));
         } else if (isExceptionThrown(evaluationContext)) {
           Throwable inputActualValue = evaluationContext.thrownException();
           outputActualValue = inputActualValue;
-          leave((Evaluable<Object>) func, ioEntryWhenSkipped(func, inputActualValue), (EvaluationContext<Object>) evaluationContext);
-          func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) evaluationContext.exceptionThrown((Throwable) outputActualValue), this));
+          EvaluableIo io = ioEntryWhenSkipped(func, inputActualValue);
+          leave((Evaluable<Object>) func, io, (EvaluationContext<Object>) evaluationContext);
+          func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(evaluationContext.exceptionThrown((Throwable) outputActualValue), this));
         } else
           assert false;
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        leave(func, ioEntryWhenExceptionThrown(UNKNOWN, evaluationContext.returnedValue(), e), (EvaluationContext<Object>) evaluationContext);
-        func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) ((EvaluationContext<Object>) evaluationContext).exceptionThrown(e), this));
+        EvaluableIo io = ioEntryWhenExceptionThrown(UNKNOWN, evaluationContext.returnedValue(), e);
+        leave(func, io, (EvaluationContext<Object>) evaluationContext);
+        func.tail().ifPresent(tailSide -> {
+          ((Evaluable<Object>) tailSide).accept(((EvaluationContext<Object>) evaluationContext).exceptionThrown(e), this);
+        });
       }
     }
 
