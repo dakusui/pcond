@@ -268,21 +268,24 @@ public interface Evaluator {
     @Override
     public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.LeafPred<T> leafPred) {
       this.enter(EvaluableDesc.fromEvaluable(leafPred), evaluationContext);
+      EvaluableIo io = null;
       try {
         if (isValueReturned(evaluationContext)) {
           T inputActualValue = evaluationContext.returnedValue();
           System.out.println(inputActualValue + ":" + inputActualValue);
           boolean outputActualValue = leafPred.predicate().test(inputActualValue);
-          leave((Evaluable<Object>) leafPred, ioEntryForLeafWhenValueReturned(outputExpectationFor(leafPred), inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
+          io = ioEntryForLeafWhenValueReturned(outputExpectationFor(leafPred), inputActualValue, outputActualValue);
         } else if (isExceptionThrown(evaluationContext)) {
           Throwable inputActualValue = evaluationContext.thrownException();
-          leave((Evaluable<Object>) leafPred, ioEntryWhenSkipped(leafPred, inputActualValue), (EvaluationContext<Object>) evaluationContext);
+          io = ioEntryWhenSkipped(leafPred, inputActualValue);
         } else
           assert false;
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        leave(leafPred, ioEntryWhenExceptionThrown(outputExpectationFor(leafPred), evaluationContext.value(), e), (EvaluationContext<Object>) evaluationContext);
+        io = ioEntryWhenExceptionThrown(outputExpectationFor(leafPred), evaluationContext.value(), e);
+      } finally {
+        leave((Evaluable<Object>) leafPred, io, (EvaluationContext<Object>) evaluationContext);
       }
     }
 
@@ -417,11 +420,9 @@ public interface Evaluator {
       return new EvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
     }
 
-    private <T> EvaluableIo ioEntryForLeafWhenValueReturned(boolean outputExpectation, T inputActualValue,
-        boolean outputActualValue) {
+    private <T> EvaluableIo ioEntryForLeafWhenValueReturned(boolean outputExpectation, T inputActualValue, boolean outputActualValue) {
       return EvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, this.currentlyExpectedBooleanValue != outputActualValue);
     }
-
 
     private <T> EvaluableIo ioEntryForNegationWhenValueReturned(boolean outputExpectation, Object inputActualValue, boolean outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, outputExpectation != outputActualValue);
