@@ -110,8 +110,8 @@ public enum PrintablePredicateFactory {
     return AnyMatch.create(predicate);
   }
 
-  public static <T> Predicate<VariableBundle> contextPredicate(Predicate<T> predicate, int argIndex) {
-    return ContextPredicate.create(toPrintablePredicateIfNotPrintable(predicate), argIndex);
+  public static <T> Predicate<VariableBundle> variableBundlePredicate(Predicate<T> predicate, int argIndex) {
+    return VariableBundlePredicate.create(toPrintablePredicateIfNotPrintable(predicate), argIndex);
   }
 
   private static RuntimeException noPredicateGiven() {
@@ -426,11 +426,11 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  static class ContextPredicate extends PrintablePredicate<VariableBundle> implements Evaluable.ContextPred {
+  static class VariableBundlePredicate extends PrintablePredicate<VariableBundle> implements Evaluable.VariableBundlePred {
     private final Evaluable<?> enclosed;
     private final int          argIndex;
 
-    private <T> ContextPredicate(Object creator, List<Object> args, Predicate<T> predicate, int argIndex) {
+    private <T> VariableBundlePredicate(Object creator, List<Object> args, Predicate<T> predicate, int argIndex) {
       super(
           creator,
           args,
@@ -452,8 +452,8 @@ public enum PrintablePredicateFactory {
       return argIndex;
     }
 
-    public static <T> ContextPredicate create(Predicate<T> predicate, int argIndex) {
-      return new ContextPredicate(ContextPredicate.class, asList(predicate, argIndex), predicate, argIndex);
+    public static <T> VariableBundlePredicate create(Predicate<T> predicate, int argIndex) {
+      return new VariableBundlePredicate(VariableBundlePredicate.class, asList(predicate, argIndex), predicate, argIndex);
     }
   }
 

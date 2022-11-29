@@ -22,14 +22,17 @@ public enum VariableBundleUtils {
   ;
 
   public static Stream<VariableBundle> nest(Stream<?> stream, Collection<?> inner) {
-    return toContextStream(stream).flatMap(context -> inner.stream().map((Function<Object, VariableBundle>) context::append));
+    System.out.println("stream:" + stream);
+    Stream<VariableBundle> ret = toVariableBundleStream(stream).flatMap((VariableBundle variableBundle) -> inner.stream().map((Function<Object, VariableBundle>) variableBundle::append));
+    System.out.println("ret:" + ret);
+    return ret;
   }
 
-  public static Stream<VariableBundle> toContextStream(Stream<?> stream) {
-    return stream.map(VariableBundleUtils::toContext);
+  public static Stream<VariableBundle> toVariableBundleStream(Stream<?> stream) {
+    return stream.map(VariableBundleUtils::toVariableBundle);
   }
 
-  public static <T> VariableBundle toContext(T t) {
+  public static <T> VariableBundle toVariableBundle(T t) {
     return t instanceof VariableBundle ? (VariableBundle) t : VariableBundle.from(t);
   }
 

@@ -292,11 +292,11 @@ public class EqualnessTest extends TestBase {
             .nonEqualObjectFactory(args -> Predicates.not(Predicates.not(Predicates.isNotNull())))
             .cached(false)
             .$(),
-        define(args -> Experimentals.toContextPredicate(Predicates.isNotNull()))
+        define(args -> Experimentals.toVariableBundlePredicate(Predicates.isNotNull()))
             .nonEqualObjectFactory(args -> Predicates.isNull())
-            .nonEqualObjectFactory(args -> Experimentals.toContextPredicate(Predicates.isNull()))
-            .nonEqualObjectFactory(args -> Experimentals.toContextPredicate(Predicates.isNotNull(), 1))
-            .equalObjectFactory(args -> Experimentals.toContextPredicate(Predicates.isNotNull()))
+            .nonEqualObjectFactory(args -> Experimentals.toVariableBundlePredicate(Predicates.isNull()))
+            .nonEqualObjectFactory(args -> Experimentals.toVariableBundlePredicate(Predicates.isNotNull(), 1))
+            .equalObjectFactory(args -> Experimentals.toVariableBundlePredicate(Predicates.isNotNull()))
             .cached(false)
             .$()
     };

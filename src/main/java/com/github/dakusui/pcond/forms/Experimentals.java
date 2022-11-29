@@ -39,7 +39,7 @@ public enum Experimentals {
    * @see VariableBundle
    */
   public static Function<Stream<?>, Stream<VariableBundle>> toContextStream() {
-    return Printables.function(() -> "toContextStream", VariableBundleUtils::toContextStream);
+    return Printables.function(() -> "toContextStream", VariableBundleUtils::toVariableBundleStream);
   }
 
   /**
@@ -49,7 +49,7 @@ public enum Experimentals {
    * @return A function to convert a value into a context.
    */
   public static <T> Function<T, VariableBundle> toContext() {
-    return Printables.function(() -> "toContext", VariableBundleUtils::toContext);
+    return Printables.function(() -> "toContext", VariableBundleUtils::toVariableBundle);
   }
 
   /**
@@ -60,8 +60,8 @@ public enum Experimentals {
    * @param <T>        An expected type of value to be tested.
    * @return A new predicate to test a value in a context.
    */
-  public static <T> Predicate<VariableBundle> toContextPredicate(Predicate<T> predicate_, int argIndex) {
-    return PrintablePredicateFactory.contextPredicate(predicate_, argIndex);
+  public static <T> Predicate<VariableBundle> toVariableBundlePredicate(Predicate<T> predicate_, int argIndex) {
+    return PrintablePredicateFactory.variableBundlePredicate(predicate_, argIndex);
   }
 
   /**
@@ -72,8 +72,8 @@ public enum Experimentals {
    * @param <T>       An expected type of the input value.
    * @return A context predicate.
    */
-  public static <T> Predicate<VariableBundle> toContextPredicate(Predicate<T> predicate) {
-    return toContextPredicate(predicate, 0);
+  public static <T> Predicate<VariableBundle> toVariableBundlePredicate(Predicate<T> predicate) {
+    return toVariableBundlePredicate(predicate, 0);
   }
 
   /**
@@ -83,7 +83,7 @@ public enum Experimentals {
    * @param orderArgs       An array to specify the order in which values in the context are applied to the function.
    * @return A predicate converted from the given curried function.
    */
-  public static Predicate<VariableBundle> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
+  public static Predicate<VariableBundle> toVariableBundlePredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
     return VariableBundleUtils.toContextPredicate(curriedFunction, orderArgs);
   }
 

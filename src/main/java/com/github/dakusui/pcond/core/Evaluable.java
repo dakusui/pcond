@@ -192,7 +192,7 @@ public interface Evaluable<T> {
    *
    * @see VariableBundle
    */
-  interface ContextPred extends Pred<VariableBundle> {
+  interface VariableBundlePred extends Pred<VariableBundle> {
     @SuppressWarnings("unchecked")
     @Override
     default void accept(EvaluationContext<? extends VariableBundle> evaluationContext, Evaluator evaluator) {

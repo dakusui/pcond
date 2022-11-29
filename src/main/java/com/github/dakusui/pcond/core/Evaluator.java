@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
@@ -64,11 +65,11 @@ public interface Evaluator {
   /**
    * Evaluates `value` with a context predicate.
    *
-   * @param value       A value to be evaluated.
-   * @param contextPred A predicate with which `value` is evaluated.
-   * @see com.github.dakusui.pcond.core.Evaluable.ContextPred
+   * @param value              A value to be evaluated.
+   * @param variableBundlePred A predicate with which `value` is evaluated.
+   * @see Evaluable.VariableBundlePred
    */
-  void evaluate(EvaluationContext<VariableBundle> value, Evaluable.ContextPred contextPred);
+  void evaluate(EvaluationContext<VariableBundle> value, Evaluable.VariableBundlePred variableBundlePred);
 
   /**
    * Evaluates `value` with a "transformatioin" predicate.
@@ -290,19 +291,24 @@ public interface Evaluator {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.Func<T> func) {
+      System.out.println("func:" + func);
       this.enter(EvaluableDesc.fromEvaluable(func), evaluationContext);
       try {
         Object outputActualValue;
         if (isValueReturned(evaluationContext)) {
+          System.out.println("path-1.a");
           T inputActualValue = evaluationContext.returnedValue();
           outputActualValue = func.head().apply(inputActualValue);
-          leaveWithReturnedValue((Evaluable<Object>) func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
-          func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(EvaluationContext.forValue(outputActualValue), this));
+          System.out.println("outputActualValue:" + outputActualValue);
+          leaveWithReturnedValue((Evaluable<Object>) (Evaluable)func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
+          func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(evaluationContext.valueReturned((T)outputActualValue), this));
+          System.out.println("path-1.b");
         } else if (isExceptionThrown(evaluationContext)) {
+          System.out.println("path-2");
           Throwable inputActualValue = evaluationContext.thrownException();
           outputActualValue = inputActualValue;
           leaveWithReturnedValue((Evaluable<Object>) func, ioEntryForFuncWhenSkipped(func, inputActualValue), (EvaluationContext<Object>) evaluationContext);
-          func.tail().ifPresent(tailSide -> tailSide.accept(EvaluationContext.forException((Throwable) outputActualValue), this));
+          func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext)evaluationContext.exceptionThrown((Throwable) outputActualValue), this));
         } else
           assert false;
       } catch (Error e) {
@@ -314,17 +320,18 @@ public interface Evaluator {
     }
 
     @Override
-    public void evaluate(EvaluationContext<VariableBundle> evaluationContext, Evaluable.ContextPred contextPred) {
-      this.enter(EvaluableDesc.fromEvaluable(contextPred), evaluationContext);
-      // TODO: Issue-#59: Need exception handling
+    public void evaluate(EvaluationContext<VariableBundle> evaluationContext, Evaluable.VariableBundlePred variableBundlePred) {
+      this.enter(EvaluableDesc.fromEvaluable(variableBundlePred), evaluationContext);
       VariableBundle inputActualValue = evaluationContext.returnedValue();
-      contextPred.enclosed().accept(EvaluationContext.forValue(inputActualValue.valueAt(contextPred.argIndex())), this);
+      EvaluationContext<? super Object> evaluationContextForEnclosedPredicate = EvaluationContext.forValue(inputActualValue.valueAt(variableBundlePred.argIndex()));
+      System.out.println("--->" + evaluationContextForEnclosedPredicate.value() + "<---");
+      variableBundlePred.enclosed().accept(evaluationContextForEnclosedPredicate, this);
       leaveWithReturnedValue(
-          (Evaluable) contextPred,
+          (Evaluable<Object>) (Evaluable) variableBundlePred,
           ioEntryForContextPredicateWhenValueReturned(
-              this.outputExpectationFor(contextPred),
+              this.outputExpectationFor(variableBundlePred),
               inputActualValue,
-              evaluationContext.value()),
+              evaluationContextForEnclosedPredicate.value()),
           (EvaluationContext<Object>) (EvaluationContext) evaluationContext);
     }
 
@@ -336,21 +343,24 @@ public interface Evaluator {
         Object inputActualValue = evaluationContext.returnedValue();
         Evaluable<T> mapperEvaluable = (Evaluable<T>) transformation.mapper();
         mapperEvaluable.accept(evaluationContext, this);
+        System.out.println("mapperEvaluable:" + mapperEvaluable);
+        Object outputActualValueFromMapper = evaluationContext.value();
+        System.out.println("outputActualValueFromMapper:" + outputActualValueFromMapper);
         if (isValueReturned((EvaluationContext<Object>) evaluationContext)) {
-          leaveWithReturnedValue((Evaluable<Object>) mapperEvaluable, ioEntryForTransformingFunctionWhenValueReturned(inputActualValue, ((EvaluationContext<Object>) evaluationContext).returnedValue(), evaluationContext.value()), (EvaluationContext<Object>) evaluationContext);
+          leaveWithReturnedValue((Evaluable<Object>) mapperEvaluable, ioEntryForTransformingFunctionWhenValueReturned(inputActualValue, evaluationContext.returnedValue(), evaluationContext.returnedValue()), (EvaluationContext<Object>) evaluationContext);
         } else if (isExceptionThrown((EvaluationContext<Object>) evaluationContext))
           leaveWithThrownException(mapperEvaluable, ioEntryForTransformingFunctionWhenSkipped(inputActualValue, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
         else
           assert false;
         this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), evaluationContext);
         {
-          Object inputActualValueForChecker = evaluationContext.value();
+          Object inputActualValueForChecker = outputActualValueFromMapper;
           Evaluable<? super R> checkerEvaluable = transformation.checker();
           checkerEvaluable.accept((EvaluationContext<R>) evaluationContext, this);
           if (isValueReturned(evaluationContext)) {
             leaveWithReturnedValue(
                 (Evaluable<Object>) checkerEvaluable,
-                ioEntryForCheckerPredicateWhenValueReturned(checkerEvaluable, inputActualValueForChecker, evaluationContext.value()),
+                ioEntryForCheckerPredicateWhenValueReturned(checkerEvaluable, inputActualValueForChecker, evaluationContext.returnedValue()),
                 (EvaluationContext<Object>) evaluationContext);
           } else if (isExceptionThrown(evaluationContext)) {
             leaveWithReturnedValue((Evaluable<Object>) checkerEvaluable, ioEntryForCheckerPredicateWhenSkipped(inputActualValueForChecker, evaluationContext.value()), (EvaluationContext<Object>) evaluationContext);
@@ -362,6 +372,8 @@ public interface Evaluator {
 
     @Override
     public <E> void evaluate(EvaluationContext<Stream<E>> evaluationContext, Evaluable.StreamPred<E> streamPred) {
+      System.out.println("evaluate:streampred");
+      Stream<E> inputActualValue = evaluationContext.returnedValue();
       boolean ret = streamPred.defaultValue();
       this.enter(EvaluableDesc.fromEvaluable(streamPred), evaluationContext);
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
@@ -369,8 +381,6 @@ public interface Evaluator {
       // Although NULL_VALUE is an ordinary Object, not a evaluationContext of E, this works
       // because either way we will just return a boolean and during the execution,
       // type information is erased.
-      // TODO: Issue-#59: Need exception handling
-      Stream<E> inputActualValue = evaluationContext.returnedValue();
       Boolean outputActualValue = inputActualValue
           .filter(createValueCheckingPredicateForStream(streamPred))
           .map(v -> v != null ? v : NULL_VALUE)
@@ -379,7 +389,7 @@ public interface Evaluator {
           .orElse(ret);
       leaveWithReturnedValue(
           (Evaluable) streamPred,
-          ioEntryForStreamPredicateWhenValueReturned(streamPred, outputActualValue, inputActualValue),
+          ioEntryForStreamPredicateWhenValueReturned(streamPred, outputActualValue, evaluationContext.value()),
           (EvaluationContext) evaluationContext);
     }
 
@@ -390,17 +400,19 @@ public interface Evaluator {
       return false;
     }
 
-
     @Override
     public List<EvaluationEntry> resultEntries() {
       return unmodifiableList(this.entries);
     }
 
-    public boolean resultValueAsBooleanIfBooleanOtherwise(EvaluationContext<Object> evaluationContext, boolean otherwiseValue) {
+    public boolean resultValueAsBooleanIfBooleanOtherwise
+        (EvaluationContext<Object> evaluationContext, boolean otherwiseValue) {
       return evaluationContext.value() instanceof Boolean ? resultValueAsBoolean(evaluationContext) : otherwiseValue;
     }
 
-    private <T> EvaluableIo ioEntryForLeafWhenValueReturned(Evaluable.LeafPred<T> leafPred, T inputActualValue, boolean outputActualValue) {
+    private <T> EvaluableIo
+    ioEntryForLeafWhenValueReturned(Evaluable.LeafPred<T> leafPred, T inputActualValue,
+        boolean outputActualValue) {
       return new EvaluableIo(
           inputActualValue,
           outputExpectationFor(leafPred),
@@ -409,7 +421,8 @@ public interface Evaluator {
           this.currentlyExpectedBooleanValue != outputActualValue);
     }
 
-    private EvaluableIo ioEntryForLeafWhenExceptionThrown(Object inputExpectation, boolean outputExpectation, Throwable outputActualValue) {
+    private EvaluableIo ioEntryForLeafWhenExceptionThrown(Object
+        inputExpectation, boolean outputExpectation, Throwable outputActualValue) {
       return new EvaluableIo(
           inputExpectation,
           outputExpectation,
@@ -418,7 +431,8 @@ public interface Evaluator {
           true);
     }
 
-    private <T> EvaluableIo ioEntryForLeafWhenSkipped(Evaluable.LeafPred<T> leafPred, Object inputActualValue) {
+    private <T> EvaluableIo
+    ioEntryForLeafWhenSkipped(Evaluable.LeafPred<T> leafPred, Object inputActualValue) {
       return new EvaluableIo(
           inputActualValue,
           outputExpectationFor(leafPred),
@@ -427,11 +441,13 @@ public interface Evaluator {
           false);
     }
 
-    private <T> EvaluableIo ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
+    private <T> EvaluableIo
+    ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
       return new EvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
     }
 
-    private <T> EvaluableIo ioEntryForFuncWhenSkipped(Evaluable.Func<T> func, Throwable inputActualValue) {
+    private <T> EvaluableIo
+    ioEntryForFuncWhenSkipped(Evaluable.Func<T> func, Throwable inputActualValue) {
       return new EvaluableIo(
           inputActualValue,
           outputExpectationFor(func),
@@ -440,7 +456,8 @@ public interface Evaluator {
           false);
     }
 
-    private <T> EvaluableIo ioEntryForFuncWhenExceptionThrown(T inputActualValue, Throwable outputActualValue) {
+    private <T> EvaluableIo
+    ioEntryForFuncWhenExceptionThrown(T inputActualValue, Throwable outputActualValue) {
       return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, true);
     }
 
@@ -448,51 +465,66 @@ public interface Evaluator {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
-    private static EvaluableIo ioEntryForConjunctionWhenEvaluationFinished(boolean outputExpectation, Object inputActualValue, boolean outputActualValue) {
+    private static EvaluableIo ioEntryForConjunctionWhenEvaluationFinished(
+        boolean outputExpectation, Object inputActualValue,
+        boolean outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
-    private static EvaluableIo ioEntryForDisjunctionWhenEvaluationFinished(boolean outputExpectation, Object inputActualValue, Object outputActualValue) {
+    private static EvaluableIo ioEntryForDisjunctionWhenEvaluationFinished(
+        boolean outputExpectation, Object inputActualValue, Object
+        outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
-    private <T> EvaluableIo ioEntryForNegationWhenValueReturned(Evaluable.Negation<T> negation, Object inputActualValue, boolean outputActualValue) {
+    private <T> EvaluableIo
+    ioEntryForNegationWhenValueReturned(Evaluable.Negation<T> negation, Object inputActualValue,
+        boolean outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, this.outputExpectationFor(negation) != outputActualValue);
     }
 
-    private <T> EvaluableIo ioEntryForNegationWhenExceptionThrown(Evaluable.Negation<T> negation, Object inputActualValue, Throwable outputActualValue) {
+    private <T> EvaluableIo
+    ioEntryForNegationWhenExceptionThrown(Evaluable.Negation<T> negation, Object inputActualValue, Throwable outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, true);
     }
 
-    private <T> boolean outputExpectationFor(Evaluable<T> predicateEvaluable) {
+    private <T> boolean outputExpectationFor
+        (Evaluable<T> predicateEvaluable) {
       return predicateEvaluable.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue;
     }
 
-    private static <T> boolean isValueReturned(EvaluationContext<T> evaluationContext) {
+    private static <T> boolean isValueReturned
+        (EvaluationContext<T> evaluationContext) {
       return evaluationContext.state() == EvaluationContext.State.VALUE_RETURNED;
     }
 
-    private static <T> boolean isExceptionThrown(EvaluationContext<T> evaluationContext) {
+    private static <T> boolean isExceptionThrown
+        (EvaluationContext<T> evaluationContext) {
       return evaluationContext.state() == EvaluationContext.State.EXCEPTION_THROWN;
     }
 
-    private EvaluableIo ioEntryForCheckerPredicateWhenSkipped(Object inputActualValue, Object outputActualValue) {
+    private EvaluableIo ioEntryForCheckerPredicateWhenSkipped(Object
+        inputActualValue, Object outputActualValue) {
       return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
     }
 
-    private <T, R> EvaluableIo ioEntryForCheckerPredicateWhenValueReturned(Evaluable<? super R> checker, Object inputActualValue, Object outputActualValue) {
+    private <T, R> EvaluableIo
+    ioEntryForCheckerPredicateWhenValueReturned(Evaluable<? super R> checker, Object inputActualValue, Object outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectationFor(checker), inputActualValue, outputActualValue, false);
     }
 
-    private static EvaluableIo ioEntryForTransformingFunctionWhenSkipped(Object inputActualValue, Object outputActualValue) {
+    private static EvaluableIo ioEntryForTransformingFunctionWhenSkipped
+        (Object inputActualValue, Object outputActualValue) {
       return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
     }
 
-    private static EvaluableIo ioEntryForTransformingFunctionWhenValueReturned(Object inputActualValue, Object outputActualValue, Object outputExpectation) {
+    private static EvaluableIo ioEntryForTransformingFunctionWhenValueReturned
+        (Object inputActualValue, Object outputActualValue, Object outputExpectation) {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
-    private <E> EvaluableIo ioEntryForStreamPredicateWhenValueReturned(Evaluable.StreamPred<E> streamPred, Boolean outputActualValue, Object inputActualValue) {
+    private <E> EvaluableIo
+    ioEntryForStreamPredicateWhenValueReturned(Evaluable.StreamPred<E> streamPred, Boolean outputActualValue, Object inputActualValue) {
       return new EvaluableIo(
           inputActualValue,
           outputExpectationFor(streamPred),
@@ -533,13 +565,15 @@ public interface Evaluator {
       return impl;
     }
 
-    public void importEvaluationEntries(List<EvaluationEntry> resultEntries, Object other) {
+    public void importEvaluationEntries
+        (List<EvaluationEntry> resultEntries, Object other) {
       resultEntries.stream()
           .map(each -> createEvaluationEntryForImport(each, other))
           .forEach(each -> this.entries.add(each));
     }
 
-    private EvaluationEntry.Finalized createEvaluationEntryForImport(EvaluationEntry entry, Object other) {
+    private EvaluationEntry.Finalized createEvaluationEntryForImport
+        (EvaluationEntry entry, Object other) {
       assert entry instanceof EvaluationEntry.Finalized;
       return new EvaluationEntry.Finalized(
           entry.formName(),
@@ -555,7 +589,8 @@ public interface Evaluator {
           entry.requiresExplanation());
     }
 
-    private static String composeActualValueFromInputAndThrowable(Object input, Throwable throwable) {
+    private static String composeActualValueFromInputAndThrowable(Object
+        input, Throwable throwable) {
       StringBuilder b = new StringBuilder();
       b.append("Input: '").append(input).append("'").append(format("%n"));
       b.append("Input Type: ").append(input == null ? "(null)" : input.getClass().getName()).append(format("%n"));
@@ -604,7 +639,7 @@ public interface Evaluator {
       );
     }
 
-    static EvaluableDesc fromEvaluable(Evaluable.ContextPred contextEvaluable) {
+    static EvaluableDesc fromEvaluable(Evaluable.VariableBundlePred contextEvaluable) {
       return new EvaluableDesc(
           LEAF,
           String.format("%s", contextEvaluable),

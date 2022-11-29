@@ -32,7 +32,7 @@ public class DbCExperimentalsTest extends TestBase {
    *
    * You can build a check using a multi-parameter static method which returns a boolean value.
    * In this example, {@link TargetMethodHolder#stringEndsWith(String, String)} is the method.
-   * It is turned into a curried function in {@link ExperimentalsUtils#stringEndsWith()} and then passed to {@link Experimentals#toContextPredicate(CurriedFunction, int...)}.
+   * It is turned into a curried function in {@link ExperimentalsUtils#stringEndsWith()} and then passed to {@link Experimentals#toVariableBundlePredicate(CurriedFunction, int...)}.
    * The method {@code Experimentals#test(CurriedFunction, int...)} converts a curried function whose final returned value is a boolean into a predicate of a {@link VariableBundle}.
    * A {@code Context} may have one or more values at once and those values are indexed.
    */
@@ -41,21 +41,21 @@ public class DbCExperimentalsTest extends TestBase {
     validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2", "o"))))
-            .check(anyMatch(toContextPredicate(stringEndsWith()))));
+            .check(anyMatch(toVariableBundlePredicate(stringEndsWith()))));
   }
 
   @Test
   public void hello_a() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(toContextPredicate(stringEndsWith(), 0, 1))));
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))));
   }
 
   @Test
   public void hello_b() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toContextPredicate(stringEndsWith(), 1, 0))));
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toVariableBundlePredicate(stringEndsWith(), 1, 0))));
   }
 
   @Test(expected = IllegalValueException.class)
@@ -65,7 +65,7 @@ public class DbCExperimentalsTest extends TestBase {
           asList("Hi", "hello", "world"),
           transform(stream()
               .andThen(nest(asList("1", "2", "o"))))
-              .check(noneMatch(toContextPredicate(stringEndsWith(), 0, 1))));                // (1)
+              .check(noneMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))));                // (1)
     } catch (IllegalValueException e) {
       /* BEFORE
 com.github.dakusui.pcond.provider.exceptions.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
@@ -107,13 +107,22 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
 
 
   @Test(expected = IllegalValueException.class)
+  public void givenStream_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
+    validate(
+        asList("Hi", "hello", "world"),
+        transform((Functions.<String>stream())).check(anyMatch(containsString("hello"))),
+        IllegalValueException::new);
+  }
+
+
+  @Test(expected = IllegalValueException.class)
   public void givenStreamContainingNull_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
     try {
       validate(
           asList(null, "Hi", "hello", "world", null),
           transform(stream().andThen(nest(asList("1", "2", "o"))))
               .check(noneMatch(
-                  toContextPredicate(transform(Functions.length()).check(gt(3))))),
+                  toVariableBundlePredicate(transform(Functions.length()).check(gt(3))))),
           IllegalValueException::new);
     } catch (IllegalValueException e) {
       e.printStackTrace(System.out);
@@ -142,12 +151,12 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   public void hello_b_e2() {
     try {
       validate(
-      //TestAssertions.assertThat(
+          //TestAssertions.assertThat(
           asList("Hi", "hello", "world", null),
           transform(stream().andThen(nest(asList("1", "2", "o"))))
               .check(
                   noneMatch(
-                      toContextPredicate(transform(Functions.length()).check(gt(3))))));
+                      toVariableBundlePredicate(transform(Functions.length()).check(gt(3))))));
       //              |                  |         |                         |
       //              |                  |         |                         |
       //             (1)                (2)       (3)                       (4)
@@ -222,7 +231,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
     validate(
         asList(null, "Hi", "hello", "world", null),
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
-            toContextPredicate(transform((Function<String, Integer>) s -> {
+            toVariableBundlePredicate(transform((Function<String, Integer>) s -> {
               throw new IntentionalError();
             }).check(gt(3))))));
   }
@@ -231,14 +240,14 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   public void hello_c() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(toContextStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(toContextPredicate(stringEndsWith(), 0, 1))));
+        transform(stream().andThen(toContextStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))));
   }
 
   @Test
   public void hello_d_1() {
     validate(
         "hello",
-        transform(streamOf().andThen(nest(asList("Hello", "HELLO", "hello")))).check(anyMatch(toContextPredicate(areEqual()))));
+        transform(streamOf().andThen(nest(asList("Hello", "HELLO", "hello")))).check(anyMatch(toVariableBundlePredicate(areEqual()))));
   }
 
   @Test(expected = IllegalValueException.class)
@@ -248,7 +257,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           "hello",
           transform(streamOf()                                        // (1)
               .andThen(toContextStream()))                            // (2)
-              .check(anyMatch(toContextPredicate(isNull()))));        // (3)
+              .check(anyMatch(toVariableBundlePredicate(isNull()))));        // (3)
     } catch (IllegalValueException e) {
       e.printStackTrace();
       int i = 0;
@@ -292,7 +301,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   public void givenStreamOfSingleString$hello$_whenRequireNonNullIsFound_thenPassing() {
     validate(
         "hello",
-        transform(toContext()).check(toContextPredicate(isNotNull())));
+        transform(toContext()).check(toVariableBundlePredicate(isNotNull())));
   }
 
   @Test(expected = IllegalValueException.class)
@@ -301,7 +310,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       validate(
           "hello",
           transform(toContext())                              // (1)
-              .check(toContextPredicate(isNull())));          // (2) -1,2
+              .check(toVariableBundlePredicate(isNull())));          // (2) -1,2
     } catch (IllegalValueException e) {
       e.printStackTrace(System.out);
       int i = 0;
@@ -358,7 +367,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           asList("hello", "world"),
           transform(stream()                                                        // (1)
               .andThen(nest(asList("1", "2", "o"))))                                // (2)
-              .check(allMatch(toContextPredicate(stringEndsWith()))));              // (3)
+              .check(allMatch(toVariableBundlePredicate(stringEndsWith()))));              // (3)
     } catch (IllegalValueException e) {
       e.printStackTrace(System.out);
       int i = 0;
@@ -498,13 +507,13 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   public void nestedLoop_success() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toContextPredicate(equalTo("msg-2"), 1))));
+        transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toVariableBundlePredicate(equalTo("msg-2"), 1))));
   }
 
   @Test(expected = IllegalValueException.class)
   public void nestedLoop_fail() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toContextPredicate(equalTo("msg-3"), 1))));
+        transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toVariableBundlePredicate(equalTo("msg-3"), 1))));
   }
 }
