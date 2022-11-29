@@ -271,6 +271,7 @@ public interface Evaluator {
       try {
         if (isValueReturned(evaluationContext)) {
           T inputActualValue = evaluationContext.returnedValue();
+          System.out.println(inputActualValue + ":" + inputActualValue);
           boolean outputActualValue = leafPred.predicate().test(inputActualValue);
           leave((Evaluable<Object>) leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
         } else if (isExceptionThrown(evaluationContext)) {
@@ -338,7 +339,7 @@ public interface Evaluator {
         if (isValueReturned((EvaluationContext<Object>) evaluationContext)) {
           leave((Evaluable<Object>) mapperEvaluable, ioEntryForTransformingFunctionWhenValueReturned(inputActualValue, evaluationContext.returnedValue(), evaluationContext.returnedValue()), (EvaluationContext<Object>) evaluationContext);
         } else if (isExceptionThrown((EvaluationContext<Object>) evaluationContext))
-          leaveWithThrownException(mapperEvaluable, ioEntryForTransformingFunctionWhenSkipped(inputActualValue, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
+          leave(mapperEvaluable, ioEntryForTransformingFunctionWhenSkipped(inputActualValue, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
         else
           assert false;
         this.enter(EvaluableDesc.forCheckerFromEvaluable(transformation), evaluationContext);
@@ -463,8 +464,8 @@ public interface Evaluator {
     }
 
     private static EvaluableIo ioEntryForTransformingFunctionWhenSkipped
-        (Object inputActualValue, Object outputActualValue) {
-      return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
+        (Object inputActualValue, Throwable outputActualValue) {
+      return EvaluableIo.exceptionThrown(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
     }
 
     private static EvaluableIo ioEntryForTransformingFunctionWhenValueReturned
