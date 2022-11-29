@@ -147,9 +147,9 @@ public interface Evaluator {
     void enter(EvaluableDesc evaluableDesc, EvaluationContext<?> evaluationContext) {
       EvaluationEntry.OnGoing newEntry = new EvaluationEntry.OnGoing(
           evaluableDesc.formName, evaluableDesc.type(), (int) onGoingEntries.stream().filter(each -> !each.isSquashable()).count(),
-          evaluationContext.currentValue(), toSnapshotIfPossible(evaluationContext.currentValue()),
+          evaluationContext.value(), toSnapshotIfPossible(evaluationContext.value()),
           this.currentlyExpectedBooleanValue, toSnapshotIfPossible(this.currentlyExpectedBooleanValue),
-          evaluationContext, toSnapshotIfPossible(evaluationContext.currentValue()),
+          evaluationContext, toSnapshotIfPossible(evaluationContext.value()),
           evaluableDesc.isSquashable(), entries.size()
       );
       this.onGoingEntries.add(newEntry);
@@ -159,7 +159,9 @@ public interface Evaluator {
     }
 
     void leaveWithReturnedValue(
-        Evaluable<Object> evaluable, EvaluableIo io, EvaluationContext<Object> evaluationContext) {
+        Evaluable<Object> evaluable,
+        EvaluableIo io,
+        EvaluationContext<Object> evaluationContext) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       this.entries.set(
@@ -172,14 +174,16 @@ public interface Evaluator {
               io.getOutputActualValue(),
               toSnapshotIfPossible(io.getInputActualValue()),
               io.requiresExplanation()));
-      this.onGoingEntries.remove(positionInOngoingEntries);
       evaluationContext.valueReturned(io.getOutputActualValue());
+      this.onGoingEntries.remove(positionInOngoingEntries);
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
     }
 
     void leaveWithThrownException(
-        Evaluable<?> evaluable, EvaluableIo io, EvaluationContext<Object> evaluationContext) {
+        Evaluable<?> evaluable,
+        EvaluableIo io,
+        EvaluationContext<Object> evaluationContext) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
       this.entries.set(
@@ -191,8 +195,8 @@ public interface Evaluator {
               io.getOutputActualValue(),
               composeActualValueFromInputAndThrowable(io.getInputActualValue(), (Throwable) io.getOutputActualValue()),
               true));
-      this.onGoingEntries.remove(positionInOngoingEntries);
       evaluationContext.exceptionThrown((Throwable) io.getOutputActualValue());
+      this.onGoingEntries.remove(positionInOngoingEntries);
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
     }
@@ -291,20 +295,15 @@ public interface Evaluator {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.Func<T> func) {
-      System.out.println("func:" + func);
       this.enter(EvaluableDesc.fromEvaluable(func), evaluationContext);
       try {
         Object outputActualValue;
         if (isValueReturned(evaluationContext)) {
-          System.out.println("path-1.a");
           T inputActualValue = evaluationContext.returnedValue();
           outputActualValue = func.head().apply(inputActualValue);
-          System.out.println("outputActualValue:" + outputActualValue);
           leaveWithReturnedValue((Evaluable<Object>) (Evaluable)func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
           func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(evaluationContext.valueReturned((T)outputActualValue), this));
-          System.out.println("path-1.b");
         } else if (isExceptionThrown(evaluationContext)) {
-          System.out.println("path-2");
           Throwable inputActualValue = evaluationContext.thrownException();
           outputActualValue = inputActualValue;
           leaveWithReturnedValue((Evaluable<Object>) func, ioEntryForFuncWhenSkipped(func, inputActualValue), (EvaluationContext<Object>) evaluationContext);
@@ -324,7 +323,6 @@ public interface Evaluator {
       this.enter(EvaluableDesc.fromEvaluable(variableBundlePred), evaluationContext);
       VariableBundle inputActualValue = evaluationContext.returnedValue();
       EvaluationContext<? super Object> evaluationContextForEnclosedPredicate = EvaluationContext.forValue(inputActualValue.valueAt(variableBundlePred.argIndex()));
-      System.out.println("--->" + evaluationContextForEnclosedPredicate.value() + "<---");
       variableBundlePred.enclosed().accept(evaluationContextForEnclosedPredicate, this);
       leaveWithReturnedValue(
           (Evaluable<Object>) (Evaluable) variableBundlePred,
@@ -343,9 +341,7 @@ public interface Evaluator {
         Object inputActualValue = evaluationContext.returnedValue();
         Evaluable<T> mapperEvaluable = (Evaluable<T>) transformation.mapper();
         mapperEvaluable.accept(evaluationContext, this);
-        System.out.println("mapperEvaluable:" + mapperEvaluable);
         Object outputActualValueFromMapper = evaluationContext.value();
-        System.out.println("outputActualValueFromMapper:" + outputActualValueFromMapper);
         if (isValueReturned((EvaluationContext<Object>) evaluationContext)) {
           leaveWithReturnedValue((Evaluable<Object>) mapperEvaluable, ioEntryForTransformingFunctionWhenValueReturned(inputActualValue, evaluationContext.returnedValue(), evaluationContext.returnedValue()), (EvaluationContext<Object>) evaluationContext);
         } else if (isExceptionThrown((EvaluationContext<Object>) evaluationContext))
@@ -372,7 +368,6 @@ public interface Evaluator {
 
     @Override
     public <E> void evaluate(EvaluationContext<Stream<E>> evaluationContext, Evaluable.StreamPred<E> streamPred) {
-      System.out.println("evaluate:streampred");
       Stream<E> inputActualValue = evaluationContext.returnedValue();
       boolean ret = streamPred.defaultValue();
       this.enter(EvaluableDesc.fromEvaluable(streamPred), evaluationContext);

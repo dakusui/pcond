@@ -5,6 +5,7 @@ import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.ut.IntentionalError;
+import com.github.dakusui.pcond.ut.IntentionalException;
 import com.github.dakusui.shared.ExperimentalsUtils;
 import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.TargetMethodHolder;
@@ -106,7 +107,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
   }
 
 
-  @Test(expected = IllegalValueException.class)
+  @Test
   public void givenStream_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
     validate(
         asList("Hi", "hello", "world"),
@@ -236,11 +237,21 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
             }).check(gt(3))))));
   }
 
+  @Test(expected = IllegalValueException.class)
+  public void hello_b_e5() {
+    validate(
+        asList(null, "Hi", "hello", "world", null),
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
+            toVariableBundlePredicate(transform((Function<String, Integer>) s -> {
+              throw new IntentionalException();
+            }).check(gt(3))))));
+  }
+
   @Test
   public void hello_c() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(toContextStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))));
+        transform(stream().andThen(toVariableBundleStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))));
   }
 
   @Test
@@ -256,7 +267,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       validate(
           "hello",
           transform(streamOf()                                        // (1)
-              .andThen(toContextStream()))                            // (2)
+              .andThen(toVariableBundleStream()))                            // (2)
               .check(anyMatch(toVariableBundlePredicate(isNull()))));        // (3)
     } catch (IllegalValueException e) {
       e.printStackTrace();

@@ -83,18 +83,9 @@ public class EvaluationContext<V> implements Cloneable {
     return this.thrownException();
   }
 
-  public V currentValue() {
-    return this.value;
-  }
-
   public static <V> EvaluationContext<V> forValue(V value) {
     return new EvaluationContext<>(State.VALUE_RETURNED, value, null);
   }
-
-  public static <V> EvaluationContext<V> forException(Throwable exception) {
-    return new EvaluationContext<>(State.EXCEPTION_THROWN, null, exception);
-  }
-
 
   public String toString() {
     return String.format("state:%s, value:%s, exception:%s", state, value, exception);

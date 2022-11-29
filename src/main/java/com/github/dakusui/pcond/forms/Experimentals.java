@@ -38,7 +38,7 @@ public enum Experimentals {
    * @return A function to convert an object stream into context stream.
    * @see VariableBundle
    */
-  public static Function<Stream<?>, Stream<VariableBundle>> toContextStream() {
+  public static Function<Stream<?>, Stream<VariableBundle>> toVariableBundleStream() {
     return Printables.function(() -> "toContextStream", VariableBundleUtils::toVariableBundleStream);
   }
 
