@@ -237,7 +237,7 @@ public interface Evaluator {
           outputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && !outputValue) || i == conjunction.children().size() - 1) {
           boolean outputExpectation = outputExpectationFor(conjunction);
-          leaveWithReturnedValue(
+          leave(
               (Evaluable<Object>) conjunction,
               ioEntryForNonLeafWhenEvaluationFinished(outputExpectation, inputActualValue, outputValue), (EvaluationContext<Object>) evaluationContext);
           return;
@@ -295,10 +295,10 @@ public interface Evaluator {
         if (isValueReturned(evaluationContext)) {
           T inputActualValue = evaluationContext.returnedValue();
           boolean outputActualValue = leafPred.predicate().test(inputActualValue);
-          leaveWithReturnedValue((Evaluable<Object>) leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
+          leave((Evaluable<Object>) leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
         } else if (isExceptionThrown(evaluationContext)) {
           Throwable inputActualValue = evaluationContext.thrownException();
-          leaveWithReturnedValue((Evaluable<Object>) leafPred, ioEntryWhenSkipped(leafPred, inputActualValue), (EvaluationContext<Object>) evaluationContext);
+          leave((Evaluable<Object>) leafPred, ioEntryWhenSkipped(leafPred, inputActualValue), (EvaluationContext<Object>) evaluationContext);
         } else
           assert false;
       } catch (Error e) {
@@ -423,7 +423,7 @@ public interface Evaluator {
 
     private <T> EvaluableIo
     ioEntryWhenSkipped(Evaluable<T> evaluable, Throwable inputActualValue) {
-      return new EvaluableIo(
+      return EvaluableIo.valueReturned(
           inputActualValue,
           outputExpectationFor(evaluable),
           inputActualValue,
@@ -434,7 +434,7 @@ public interface Evaluator {
     private <T> EvaluableIo
     ioEntryForLeafWhenValueReturned(Evaluable.LeafPred<T> leafPred, T inputActualValue,
         boolean outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputExpectationFor(leafPred), inputActualValue, outputActualValue, this.currentlyExpectedBooleanValue != outputActualValue);
+      return EvaluableIo.valueReturned(inputActualValue, outputExpectationFor(leafPred), inputActualValue, outputActualValue, this.currentlyExpectedBooleanValue != outputActualValue);
     }
 
 
@@ -772,7 +772,7 @@ public interface Evaluator {
       abstract EvaluationEntry.Finalized finalizeEvaluationEntry(EvaluationEntry.OnGoing evaluationEntry, EvaluableIo io, Evaluable<Object> evaluable);
     }
 
-    public final Type    type;
+    public final  Type    type;
     private final Object  inputExpectation;
     private final Object  outputExpectation;
     private final Object  inputActualValue;
