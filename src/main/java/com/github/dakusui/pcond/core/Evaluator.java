@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainInputActualValue;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainOutputExpectation;
+import static com.github.dakusui.pcond.core.Evaluator.Impl.composeActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
 import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
@@ -157,6 +158,22 @@ public interface Evaluator {
         this.flipCurrentlyExpectedBooleanValue();
     }
 
+    void leave(
+        Evaluable<Object> evaluable,
+        EvaluableIo io,
+        EvaluationContext<Object> evaluationContext) {
+      int positionInOngoingEntries = onGoingEntries.size() - 1;
+      EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
+      this.entries.set(
+          current.positionInEntries,
+          io.type.finalizeEvaluationEntry(current, io, evaluable));
+      io.type.finishEvaluationContext(evaluationContext, io.getOutputActualValue());
+      evaluationContext.valueReturned(io.getOutputActualValue());
+      this.onGoingEntries.remove(positionInOngoingEntries);
+      if (evaluable.requestExpectationFlip())
+        this.flipCurrentlyExpectedBooleanValue();
+    }
+
     void leaveWithReturnedValue(
         Evaluable<Object> evaluable,
         EvaluableIo io,
@@ -267,7 +284,7 @@ public interface Evaluator {
       } else {
         leaveWithThrownException(
             negation,
-            ioEntryForNegationWhenExceptionThrown(outputExpectationFor(negation), inputActualValue, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
+            ioEntryWhenExceptionThrown(outputExpectationFor(negation), inputActualValue, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
       }
     }
 
@@ -287,7 +304,7 @@ public interface Evaluator {
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        leaveWithThrownException(leafPred, ioEntryForLeafWhenExceptionThrown(outputExpectationFor(leafPred), evaluationContext.value(), e), (EvaluationContext<Object>) evaluationContext);
+        leaveWithThrownException(leafPred, ioEntryWhenExceptionThrown(outputExpectationFor(leafPred), evaluationContext.value(), e), (EvaluationContext<Object>) evaluationContext);
       }
     }
 
@@ -438,17 +455,8 @@ public interface Evaluator {
       return new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, this.outputExpectationFor(negation) != outputActualValue);
     }
 
-    private EvaluableIo ioEntryForLeafWhenExceptionThrown(boolean outputExpectation, Object inputActualValue, Throwable outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, true);
-    }
-
     private <T> EvaluableIo
     ioEntryWhenExceptionThrown(Object outputExpectation, Object inputActualValue, Throwable outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, true);
-    }
-
-    private <T> EvaluableIo
-    ioEntryForNegationWhenExceptionThrown(boolean outputExpectation, Object inputActualValue, Throwable outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, true);
     }
 
@@ -553,7 +561,7 @@ public interface Evaluator {
           entry.requiresExplanation());
     }
 
-    private static String composeActualValueFromInputAndThrowable(Object
+    static String composeActualValueFromInputAndThrowable(Object
         input, Throwable throwable) {
       StringBuilder b = new StringBuilder();
       b.append("Input: '").append(input).append("'").append(format("%n"));
@@ -723,18 +731,65 @@ public interface Evaluator {
   }
 
   class EvaluableIo {
+    enum Type {
+      EXCEPTION_THROWN {
+        @Override
+        void finishEvaluationContext(EvaluationContext<Object> evaluationContext, Object outputActualValue) {
+          evaluationContext.exceptionThrown((Throwable) outputActualValue);
+        }
+
+        @Override
+        EvaluationEntry.Finalized finalizeEvaluationEntry(EvaluationEntry.OnGoing evaluationEntry, EvaluableIo io, Evaluable<Object> evaluable) {
+          return evaluationEntry.finalizeEntry(
+              io.getInputExpectation(), (Snapshottable) io::getInputExpectation,
+              io.getOutputExpectation(), explainOutputExpectation(evaluable),
+              io.getInputActualValue(), explainInputActualValue(evaluable, io.getInputActualValue()),
+              io.getOutputActualValue(),
+              composeActualValueFromInputAndThrowable(io.getInputActualValue(), (Throwable) io.getOutputActualValue()),
+              true);
+        }
+      },
+      VALUE_RETURNED {
+        @Override
+        void finishEvaluationContext(EvaluationContext<Object> evaluationContext, Object outputActualValue) {
+          evaluationContext.valueReturned(outputActualValue);
+        }
+
+        @Override
+        EvaluationEntry.Finalized finalizeEvaluationEntry(EvaluationEntry.OnGoing evaluationEntry, EvaluableIo io, Evaluable<Object> evaluable) {
+          return evaluationEntry.finalizeEntry(
+              io.getInputExpectation(), io.getInputExpectation(),
+              io.getOutputExpectation(), explainOutputExpectation(evaluable),
+              io.getInputActualValue(), explainInputActualValue(evaluable, io.getInputActualValue()),
+              io.getOutputActualValue(),
+              toSnapshotIfPossible(io.getInputActualValue()),
+              io.requiresExplanation());
+        }
+      };
+
+      abstract void finishEvaluationContext(EvaluationContext<Object> evaluationContext, Object outputActualValue);
+
+      abstract EvaluationEntry.Finalized finalizeEvaluationEntry(EvaluationEntry.OnGoing evaluationEntry, EvaluableIo io, Evaluable<Object> evaluable);
+    }
+
+    public final Type    type;
     private final Object  inputExpectation;
     private final Object  outputExpectation;
     private final Object  inputActualValue;
     private final Object  outputActualValue;
     private final boolean requiresExplanation;
 
-    public EvaluableIo(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
+    public EvaluableIo(Type type, Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
+      this.type = type;
       this.inputExpectation = inputExpectation;
       this.outputExpectation = outputExpectation;
       this.inputActualValue = inputActualValue;
       this.outputActualValue = outputActualValue;
       this.requiresExplanation = requiresExplanation;
+    }
+
+    public EvaluableIo(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
+      this(Type.VALUE_RETURNED, inputExpectation, outputExpectation, inputActualValue, outputActualValue, requiresExplanation);
     }
 
     public Object getInputExpectation() {
@@ -755,6 +810,14 @@ public interface Evaluator {
 
     public boolean requiresExplanation() {
       return requiresExplanation;
+    }
+
+    static EvaluableIo valueReturned(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
+      return new EvaluableIo(Type.VALUE_RETURNED, inputExpectation, outputExpectation, inputActualValue, outputActualValue, requiresExplanation);
+    }
+
+    static EvaluableIo exceptionThrown(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
+      return new EvaluableIo(Type.EXCEPTION_THROWN, inputExpectation, outputExpectation, inputActualValue, outputActualValue, requiresExplanation);
     }
   }
 }
