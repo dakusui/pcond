@@ -267,7 +267,7 @@ public interface Evaluator {
       } else {
         leaveWithThrownException(
             negation,
-            ioEntryForNegationWhenExceptionThrown(negation, inputActualValue, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
+            ioEntryForNegationWhenExceptionThrown(outputExpectationFor(negation), inputActualValue, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
       }
     }
 
@@ -287,7 +287,7 @@ public interface Evaluator {
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        leaveWithThrownException(leafPred, ioEntryForLeafWhenExceptionThrown(evaluationContext.value(), outputExpectationFor(leafPred), e), (EvaluationContext<Object>) evaluationContext);
+        leaveWithThrownException(leafPred, ioEntryForLeafWhenExceptionThrown(outputExpectationFor(leafPred), evaluationContext.value(), e), (EvaluationContext<Object>) evaluationContext);
       }
     }
 
@@ -312,7 +312,7 @@ public interface Evaluator {
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        leaveWithThrownException(func, ioEntryForFuncWhenExceptionThrown(evaluationContext.returnedValue(), e), (EvaluationContext<Object>) evaluationContext);
+        leaveWithThrownException(func, ioEntryWhenExceptionThrown(UNKNOWN, evaluationContext.returnedValue(), e), (EvaluationContext<Object>) evaluationContext);
         func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) ((EvaluationContext<Object>) evaluationContext).exceptionThrown(e), this));
       }
     }
@@ -404,16 +404,6 @@ public interface Evaluator {
       return evaluationContext.value() instanceof Boolean ? resultValueAsBoolean(evaluationContext) : otherwiseValue;
     }
 
-    private EvaluableIo ioEntryForLeafWhenExceptionThrown(Object
-        inputExpectation, boolean outputExpectation, Throwable outputActualValue) {
-      return new EvaluableIo(
-          inputExpectation,
-          outputExpectation,
-          inputExpectation,
-          outputActualValue,
-          true);
-    }
-
     private <T> EvaluableIo
     ioEntryWhenSkipped(Evaluable<T> evaluable, Throwable inputActualValue) {
       return new EvaluableIo(
@@ -430,15 +420,6 @@ public interface Evaluator {
       return new EvaluableIo(inputActualValue, outputExpectationFor(leafPred), inputActualValue, outputActualValue, this.currentlyExpectedBooleanValue != outputActualValue);
     }
 
-    private <T> EvaluableIo
-    ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
-    }
-
-    private <T> EvaluableIo
-    ioEntryForFuncWhenExceptionThrown(T inputActualValue, Throwable outputActualValue) {
-      return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, true);
-    }
 
     private static EvaluableIo ioEntryForNonLeafWhenEvaluationFinished(
         boolean outputExpectation, Object inputActualValue, Object
@@ -447,14 +428,28 @@ public interface Evaluator {
     }
 
     private <T> EvaluableIo
+    ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
+    }
+
+    private <T> EvaluableIo
     ioEntryForNegationWhenValueReturned(Evaluable.Negation<T> negation, Object inputActualValue,
         boolean outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, this.outputExpectationFor(negation) != outputActualValue);
     }
 
+    private EvaluableIo ioEntryForLeafWhenExceptionThrown(boolean outputExpectation, Object inputActualValue, Throwable outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, true);
+    }
+
     private <T> EvaluableIo
-    ioEntryForNegationWhenExceptionThrown(Evaluable.Negation<T> negation, Object inputActualValue, Throwable outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, true);
+    ioEntryWhenExceptionThrown(Object outputExpectation, Object inputActualValue, Throwable outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, true);
+    }
+
+    private <T> EvaluableIo
+    ioEntryForNegationWhenExceptionThrown(boolean outputExpectation, Object inputActualValue, Throwable outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, true);
     }
 
     private <T> boolean outputExpectationFor
