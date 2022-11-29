@@ -262,7 +262,7 @@ public interface Evaluator {
           outputValue = cur; // This is constant, but keeping it for readability
         if ((shortcut && outputValue) || i == disjunction.children().size() - 1) {
           boolean outputExpectation = outputExpectationFor(disjunction);
-          leaveWithReturnedValue(
+          leave(
               (Evaluable<Object>) disjunction,
               ioEntryForNonLeafWhenEvaluationFinished(outputExpectation, inputActualValue, outputValue), (EvaluationContext<Object>) evaluationContext);
           return;
@@ -278,7 +278,7 @@ public interface Evaluator {
       negation.target().accept(evaluationContext, this);
       if (isValueReturned((EvaluationContext<Object>) evaluationContext)) {
         boolean outputActualValue = !this.resultValueAsBoolean((EvaluationContext<Object>) evaluationContext);
-        this.leaveWithReturnedValue(
+        this.leave(
             (Evaluable<Object>) negation,
             ioEntryForNegationWhenValueReturned(negation, inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
       } else {
@@ -317,12 +317,12 @@ public interface Evaluator {
         if (isValueReturned(evaluationContext)) {
           T inputActualValue = evaluationContext.returnedValue();
           outputActualValue = func.head().apply(inputActualValue);
-          leaveWithReturnedValue((Evaluable<Object>) (Evaluable) func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
+          leave((Evaluable<Object>) (Evaluable) func, ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
           func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(evaluationContext.valueReturned((T) outputActualValue), this));
         } else if (isExceptionThrown(evaluationContext)) {
           Throwable inputActualValue = evaluationContext.thrownException();
           outputActualValue = inputActualValue;
-          leaveWithReturnedValue((Evaluable<Object>) func, ioEntryWhenSkipped(func, inputActualValue), (EvaluationContext<Object>) evaluationContext);
+          leave((Evaluable<Object>) func, ioEntryWhenSkipped(func, inputActualValue), (EvaluationContext<Object>) evaluationContext);
           func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) evaluationContext.exceptionThrown((Throwable) outputActualValue), this));
         } else
           assert false;
@@ -340,7 +340,7 @@ public interface Evaluator {
       VariableBundle inputActualValue = evaluationContext.returnedValue();
       EvaluationContext<? super Object> evaluationContextForEnclosedPredicate = EvaluationContext.forValue(inputActualValue.valueAt(variableBundlePred.argIndex()));
       variableBundlePred.enclosed().accept(evaluationContextForEnclosedPredicate, this);
-      leaveWithReturnedValue(
+      leave(
           (Evaluable<Object>) (Evaluable) variableBundlePred,
           ioEntryForNonLeafWhenEvaluationFinished(
               this.outputExpectationFor(variableBundlePred),
@@ -359,7 +359,7 @@ public interface Evaluator {
         mapperEvaluable.accept(evaluationContext, this);
         Object outputActualValueFromMapper = evaluationContext.value();
         if (isValueReturned((EvaluationContext<Object>) evaluationContext)) {
-          leaveWithReturnedValue((Evaluable<Object>) mapperEvaluable, ioEntryForTransformingFunctionWhenValueReturned(inputActualValue, evaluationContext.returnedValue(), evaluationContext.returnedValue()), (EvaluationContext<Object>) evaluationContext);
+          leave((Evaluable<Object>) mapperEvaluable, ioEntryForTransformingFunctionWhenValueReturned(inputActualValue, evaluationContext.returnedValue(), evaluationContext.returnedValue()), (EvaluationContext<Object>) evaluationContext);
         } else if (isExceptionThrown((EvaluationContext<Object>) evaluationContext))
           leaveWithThrownException(mapperEvaluable, ioEntryForTransformingFunctionWhenSkipped(inputActualValue, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
         else
@@ -370,12 +370,12 @@ public interface Evaluator {
           Evaluable<? super R> checkerEvaluable = transformation.checker();
           checkerEvaluable.accept((EvaluationContext<R>) evaluationContext, this);
           if (isValueReturned(evaluationContext)) {
-            leaveWithReturnedValue(
+            leave(
                 (Evaluable<Object>) checkerEvaluable,
                 ioEntryForCheckerPredicateWhenValueReturned(checkerEvaluable, inputActualValueForChecker, evaluationContext.returnedValue()),
                 (EvaluationContext<Object>) evaluationContext);
           } else if (isExceptionThrown(evaluationContext)) {
-            leaveWithReturnedValue((Evaluable<Object>) checkerEvaluable, ioEntryForCheckerPredicateWhenSkipped(inputActualValueForChecker, evaluationContext.value()), (EvaluationContext<Object>) evaluationContext);
+            leave((Evaluable<Object>) checkerEvaluable, ioEntryForCheckerPredicateWhenSkipped(inputActualValueForChecker, evaluationContext.value()), (EvaluationContext<Object>) evaluationContext);
           } else
             assert false;
         }
@@ -398,7 +398,7 @@ public interface Evaluator {
           .findFirst()
           .map(each -> !ret)
           .orElse(ret);
-      leaveWithReturnedValue(
+      leave(
           (Evaluable) streamPred,
           ioEntryForStreamPredicateWhenValueReturned(streamPred, outputActualValue, evaluationContext.value()),
           (EvaluationContext) evaluationContext);
