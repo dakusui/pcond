@@ -222,7 +222,7 @@ public interface Evaluator {
           boolean outputExpectation = outputExpectationFor(conjunction);
           leaveWithReturnedValue(
               (Evaluable<Object>) conjunction,
-              ioEntryForConjunctionWhenEvaluationFinished(outputExpectation, inputActualValue, outputValue), (EvaluationContext<Object>) evaluationContext);
+              ioEntryForNonLeafWhenEvaluationFinished(outputExpectation, inputActualValue, outputValue), (EvaluationContext<Object>) evaluationContext);
           return;
         }
         i++;
@@ -247,7 +247,7 @@ public interface Evaluator {
           boolean outputExpectation = outputExpectationFor(disjunction);
           leaveWithReturnedValue(
               (Evaluable<Object>) disjunction,
-              ioEntryForDisjunctionWhenEvaluationFinished(outputExpectation, inputActualValue, outputValue), (EvaluationContext<Object>) evaluationContext);
+              ioEntryForNonLeafWhenEvaluationFinished(outputExpectation, inputActualValue, outputValue), (EvaluationContext<Object>) evaluationContext);
           return;
         }
         i++;
@@ -325,7 +325,7 @@ public interface Evaluator {
       variableBundlePred.enclosed().accept(evaluationContextForEnclosedPredicate, this);
       leaveWithReturnedValue(
           (Evaluable<Object>) (Evaluable) variableBundlePred,
-          ioEntryForContextPredicateWhenValueReturned(
+          ioEntryForNonLeafWhenEvaluationFinished(
               this.outputExpectationFor(variableBundlePred),
               inputActualValue,
               evaluationContextForEnclosedPredicate.value()),
@@ -415,16 +415,6 @@ public interface Evaluator {
     }
 
     private <T> EvaluableIo
-    ioEntryForLeafWhenSkipped(Evaluable.LeafPred<T> leafPred, Object inputActualValue) {
-      return new EvaluableIo(
-          inputActualValue,
-          outputExpectationFor(leafPred),
-          inputActualValue,
-          NOT_EVALUATED,
-          false);
-    }
-
-    private <T> EvaluableIo
     ioEntryWhenSkipped(Evaluable<T> evaluable, Throwable inputActualValue) {
       return new EvaluableIo(
           inputActualValue,
@@ -450,17 +440,7 @@ public interface Evaluator {
       return new EvaluableIo(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, true);
     }
 
-    private static EvaluableIo ioEntryForContextPredicateWhenValueReturned(boolean outputExpectation, VariableBundle inputActualValue, Object outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
-    }
-
-    private static EvaluableIo ioEntryForConjunctionWhenEvaluationFinished(
-        boolean outputExpectation, Object inputActualValue,
-        boolean outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
-    }
-
-    private static EvaluableIo ioEntryForDisjunctionWhenEvaluationFinished(
+    private static EvaluableIo ioEntryForNonLeafWhenEvaluationFinished(
         boolean outputExpectation, Object inputActualValue, Object
         outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
