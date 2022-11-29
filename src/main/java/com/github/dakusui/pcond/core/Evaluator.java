@@ -168,7 +168,6 @@ public interface Evaluator {
           current.positionInEntries,
           io.type.finalizeEvaluationEntry(current, io, (Evaluable<Object>) evaluable));
       io.type.finishEvaluationContext(evaluationContext, io.getOutputActualValue());
-      evaluationContext.valueReturned(io.getOutputActualValue());
       this.onGoingEntries.remove(positionInOngoingEntries);
       if (evaluable.requestExpectationFlip())
         this.flipCurrentlyExpectedBooleanValue();
@@ -282,7 +281,7 @@ public interface Evaluator {
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        leaveWithThrownException(leafPred, ioEntryWhenExceptionThrown(outputExpectationFor(leafPred), evaluationContext.value(), e), (EvaluationContext<Object>) evaluationContext);
+        leave(leafPred, ioEntryWhenExceptionThrown(outputExpectationFor(leafPred), evaluationContext.value(), e), (EvaluationContext<Object>) evaluationContext);
       }
     }
 
