@@ -26,62 +26,61 @@ public class EvaluatorTest extends TestBase {
     }
   }
 
-  /*
   @Test
   public void testDisjShortcut_withTrue() {
     Evaluator evaluator = new Evaluator.Impl();
-    @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(isNull(), alwaysTrue());
-    evaluable.accept(EvaluationContext.forValue(null), evaluator);
-    assertTrue(evaluator.resultValueAsBoolean(evaluator.currentEvaluationContext(evaluationContext)));
+    @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) or(isNull(), alwaysTrue());
+    EvaluationContext<Object> evaluationContext = EvaluationContext.forValue(null);
+    evaluable.accept(evaluationContext, evaluator);
+    assertTrue(evaluator.resultValueAsBoolean(evaluationContext));
   }
 
   @Test
   public void testDisjShortcut_withFalse() {
     Evaluator evaluator = new Evaluator.Impl();
-    @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(isNull(), alwaysTrue().negate());
-    evaluable.accept(EvaluationContext.forValue(null), evaluator);
-    assertTrue(evaluator.resultValueAsBoolean(evaluator.currentEvaluationContext(evaluationContext)));
+    @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) or(isNull(), alwaysTrue().negate());
+    EvaluationContext<Object> evaluationContext = EvaluationContext.forValue(null);
+    evaluable.accept(evaluationContext, evaluator);
+    assertTrue(evaluator.resultValueAsBoolean((evaluationContext)));
   }
 
   @Test
   public void testDisjNonShortcut() {
     Evaluator evaluator = new Evaluator.Impl();
-    @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) or(alwaysTrue().negate(), isNull());
-    evaluable.accept(EvaluationContext.forValue(null), evaluator);
-    assertTrue(evaluator.resultValueAsBoolean(evaluator.currentEvaluationContext(evaluationContext)));
+    @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) or(alwaysTrue().negate(), isNull());
+    EvaluationContext<Object> evaluationContext = EvaluationContext.forValue(null);
+    evaluable.accept(evaluationContext, evaluator);
+    assertTrue(evaluator.resultValueAsBoolean((evaluationContext)));
   }
 
   @Test
   public void testConjShortcut_withTrue() {
     Evaluator evaluator = new Evaluator.Impl();
-    @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(isNotNull(), alwaysTrue());
-    evaluable.accept(EvaluationContext.forValue(null), evaluator);
-    assertFalse(evaluator.resultValueAsBoolean(evaluator.currentEvaluationContext(evaluationContext)));
+    @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) and(isNotNull(), alwaysTrue());
+    EvaluationContext<Object> evaluationContext = EvaluationContext.forValue(null);
+    evaluable.accept(evaluationContext, evaluator);
+    assertFalse(evaluator.resultValueAsBoolean((evaluationContext)));
   }
 
   @Test
   public void testConjShortcut_withFalse() {
     Evaluator evaluator = new Evaluator.Impl();
-    @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(isNotNull(), alwaysTrue().negate());
-    evaluable.accept(EvaluationContext.forValue(null), evaluator);
-    assertFalse(evaluator.resultValueAsBoolean(evaluator.currentEvaluationContext(evaluationContext)));
+    @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) and(isNotNull(), alwaysTrue().negate());
+    EvaluationContext<Object> evaluationContext = EvaluationContext.forValue(null);
+    evaluable.accept(evaluationContext, evaluator);
+    assertFalse(evaluator.resultValueAsBoolean(evaluationContext));
   }
 
   @Test
   public void testConjNonShortcut() {
     Evaluator evaluator = new Evaluator.Impl();
-    @SuppressWarnings("unchecked") Evaluable<String> evaluable = (Evaluable<String>) and(alwaysTrue(), isNotNull());
-    evaluable.accept(EvaluationContext.forValue(null), evaluator);
-    assertFalse(evaluator.resultValueAsBoolean(evaluator.currentEvaluationContext(evaluationContext)));
-  }
-*/
-
-  @Test
-  public void fixCompilationErrorsAndUncommentTestMethodsAbove() {
-    throw new RuntimeException("fixCompilationErrorsAndUncommentTestMethodsAbove");
+    @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) and(alwaysTrue(), isNotNull());
+    EvaluationContext<Object> evaluationContext = EvaluationContext.forValue(null);
+    evaluable.accept(evaluationContext, evaluator);
+    assertFalse(evaluator.resultValueAsBoolean(evaluationContext));
   }
 
-  public Predicate<String> errorThrowingPredicate() {
+  public Predicate<Object> errorThrowingPredicate() {
     return Printables.predicate("errorThrowing", v -> {
       throw new EvaluationFailure();
     });

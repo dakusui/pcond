@@ -288,7 +288,7 @@ public interface Evaluator {
       }
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "unchecked" })
     @Override
     public <T> void evaluate(EvaluationContext<T> evaluationContext, Evaluable.Func<T> func) {
       this.enter(EvaluableDesc.fromEvaluable(func), evaluationContext);
