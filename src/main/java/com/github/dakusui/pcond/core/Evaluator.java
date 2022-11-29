@@ -257,7 +257,7 @@ public interface Evaluator {
         boolean outputActualValue = !this.resultValueAsBoolean((EvaluationContext<Object>) evaluationContext);
         this.leave(
             (Evaluable<Object>) negation,
-            ioEntryForNegationWhenValueReturned(negation, inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
+            ioEntryForNegationWhenValueReturned(this.outputExpectationFor(negation), inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
       } else {
         leave(
             negation,
@@ -273,7 +273,7 @@ public interface Evaluator {
           T inputActualValue = evaluationContext.returnedValue();
           System.out.println(inputActualValue + ":" + inputActualValue);
           boolean outputActualValue = leafPred.predicate().test(inputActualValue);
-          leave((Evaluable<Object>) leafPred, ioEntryForLeafWhenValueReturned(leafPred, inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
+          leave((Evaluable<Object>) leafPred, ioEntryForLeafWhenValueReturned(outputExpectationFor(leafPred), inputActualValue, outputActualValue), (EvaluationContext<Object>) evaluationContext);
         } else if (isExceptionThrown(evaluationContext)) {
           Throwable inputActualValue = evaluationContext.thrownException();
           leave((Evaluable<Object>) leafPred, ioEntryWhenSkipped(leafPred, inputActualValue), (EvaluationContext<Object>) evaluationContext);
@@ -337,7 +337,7 @@ public interface Evaluator {
         mapperEvaluable.accept(evaluationContext, this);
         Object outputActualValueFromMapper = evaluationContext.value();
         if (isValueReturned((EvaluationContext<Object>) evaluationContext)) {
-          leave((Evaluable<Object>) mapperEvaluable, ioEntryForTransformingFunctionWhenValueReturned(inputActualValue, evaluationContext.returnedValue(), evaluationContext.returnedValue()), (EvaluationContext<Object>) evaluationContext);
+          leave((Evaluable<Object>) mapperEvaluable, ioEntryWhenValueReturned(evaluationContext.returnedValue(), inputActualValue, evaluationContext.returnedValue()), (EvaluationContext<Object>) evaluationContext);
         } else if (isExceptionThrown((EvaluationContext<Object>) evaluationContext))
           leave(mapperEvaluable, ioEntryWhenSkipped(inputActualValue, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
         else
@@ -350,7 +350,7 @@ public interface Evaluator {
           if (isValueReturned(evaluationContext)) {
             leave(
                 (Evaluable<Object>) checkerEvaluable,
-                ioEntryForCheckerPredicateWhenValueReturned(checkerEvaluable, inputActualValueForChecker, evaluationContext.returnedValue()),
+                ioEntryForCheckerPredicateWhenValueReturned(inputActualValueForChecker, evaluationContext.returnedValue(), outputExpectationFor(checkerEvaluable)),
                 (EvaluationContext<Object>) evaluationContext);
           } else if (isExceptionThrown(evaluationContext)) {
             leave((Evaluable<Object>) checkerEvaluable, ioEntryWhenSkipped(inputActualValueForChecker, evaluationContext.thrownException()), (EvaluationContext<Object>) evaluationContext);
@@ -378,7 +378,7 @@ public interface Evaluator {
           .orElse(ret);
       leave(
           (Evaluable) streamPred,
-          ioEntryForStreamPredicateWhenValueReturned(outputActualValue, evaluationContext.value(), outputExpectationFor(streamPred)),
+          ioEntryWhenValueReturned(outputExpectationFor(streamPred), evaluationContext.value(), outputActualValue),
           (EvaluationContext) evaluationContext);
     }
 
@@ -399,8 +399,7 @@ public interface Evaluator {
       return evaluationContext.value() instanceof Boolean ? resultValueAsBoolean(evaluationContext) : otherwiseValue;
     }
 
-    private <T> EvaluableIo
-    ioEntryWhenSkipped(Evaluable<T> evaluable, Throwable inputActualValue) {
+    private <T> EvaluableIo ioEntryWhenSkipped(Evaluable<T> evaluable, Throwable inputActualValue) {
       return EvaluableIo.valueReturned(
           inputActualValue,
           outputExpectationFor(evaluable),
@@ -409,37 +408,29 @@ public interface Evaluator {
           false);
     }
 
-    private <T> EvaluableIo
-    ioEntryForLeafWhenValueReturned(Evaluable.LeafPred<T> leafPred, T inputActualValue,
-        boolean outputActualValue) {
-      return EvaluableIo.valueReturned(inputActualValue, outputExpectationFor(leafPred), inputActualValue, outputActualValue, this.currentlyExpectedBooleanValue != outputActualValue);
-    }
 
-
-    private static EvaluableIo ioEntryForNonLeafWhenEvaluationFinished(
-        boolean outputExpectation, Object inputActualValue, Object
-        outputActualValue) {
+    private static EvaluableIo ioEntryForNonLeafWhenEvaluationFinished(boolean outputExpectation, Object inputActualValue, Object outputActualValue) {
       return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
-    private <T> EvaluableIo
-    ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
+    private <T> EvaluableIo ioEntryForLeafWhenValueReturned(boolean outputExpectation, T inputActualValue,
+        boolean outputActualValue) {
+      return EvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, this.currentlyExpectedBooleanValue != outputActualValue);
+    }
+
+    private <T> EvaluableIo ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
       return new EvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
     }
 
-    private <T> EvaluableIo
-    ioEntryForNegationWhenValueReturned(Evaluable.Negation<T> negation, Object inputActualValue,
-        boolean outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputExpectationFor(negation), inputActualValue, outputActualValue, this.outputExpectationFor(negation) != outputActualValue);
+    private <T> EvaluableIo ioEntryForNegationWhenValueReturned(boolean outputExpectation, Object inputActualValue, boolean outputActualValue) {
+      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, outputExpectation != outputActualValue);
     }
 
-    private <T> EvaluableIo
-    ioEntryWhenExceptionThrown(Object outputExpectation, Object inputActualValue, Throwable outputActualValue) {
+    private <T> EvaluableIo ioEntryWhenExceptionThrown(Object outputExpectation, Object inputActualValue, Throwable outputActualValue) {
       return EvaluableIo.exceptionThrown(inputActualValue, outputExpectation, inputActualValue, outputActualValue, true);
     }
 
-    private <T> boolean outputExpectationFor
-        (Evaluable<T> predicateEvaluable) {
+    private <T> boolean outputExpectationFor(Evaluable<T> predicateEvaluable) {
       return predicateEvaluable.requestExpectationFlip() ^ this.currentlyExpectedBooleanValue;
     }
 
@@ -454,23 +445,12 @@ public interface Evaluator {
     }
 
     private <T, R> EvaluableIo
-    ioEntryForCheckerPredicateWhenValueReturned(Evaluable<? super R> checker, Object inputActualValue, Object outputActualValue) {
-      return EvaluableIo.valueReturned(inputActualValue, outputExpectationFor(checker), inputActualValue, outputActualValue, false);
-    }
-
-    private static EvaluableIo ioEntryForTransformingFunctionWhenValueReturned
-        (Object inputActualValue, Object outputActualValue, Object outputExpectation) {
+    ioEntryForCheckerPredicateWhenValueReturned(Object inputActualValue, Object outputActualValue, boolean outputExpectation) {
       return EvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
-    private <E> EvaluableIo
-    ioEntryForStreamPredicateWhenValueReturned(Boolean outputActualValue, Object inputActualValue, boolean outputExpectation) {
-      return new EvaluableIo(
-          inputActualValue,
-          outputExpectation,
-          inputActualValue,
-          outputActualValue,
-          false);
+    private static EvaluableIo ioEntryWhenValueReturned(Object outputExpectation, Object inputActualValue, Object outputActualValue) {
+      return EvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
     private EvaluableIo ioEntryWhenSkipped(Object inputActualValue, Throwable outputActualValue) {
