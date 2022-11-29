@@ -306,7 +306,7 @@ public interface Evaluator {
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        leaveWithThrownException(func, ioEntryWhenExceptionThrown(UNKNOWN, evaluationContext.returnedValue(), e), (EvaluationContext<Object>) evaluationContext);
+        leave(func, ioEntryWhenExceptionThrown(UNKNOWN, evaluationContext.returnedValue(), e), (EvaluationContext<Object>) evaluationContext);
         func.tail().ifPresent(tailSide -> tailSide.accept((EvaluationContext) ((EvaluationContext<Object>) evaluationContext).exceptionThrown(e), this));
       }
     }
