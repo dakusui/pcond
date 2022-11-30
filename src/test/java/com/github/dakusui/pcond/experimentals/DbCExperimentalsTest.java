@@ -10,6 +10,7 @@ import com.github.dakusui.shared.ExperimentalsUtils;
 import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.TargetMethodHolder;
 import com.github.dakusui.shared.utils.TestBase;
+import com.github.dakusui.thincrest.TestAssertions;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
@@ -163,7 +164,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       //             (1)                (2)       (3)                       (4)
 
     } catch (IllegalValueException e) {
-      System.err.println(e.getMessage());
+      System.err.println("<<" + e.getMessage() + ">>");
       e.printStackTrace(System.out);
       int i = 3;
       // expected (1)

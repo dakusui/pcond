@@ -374,7 +374,7 @@ public interface Evaluator {
       this.enter(EvaluableDesc.fromEvaluable(streamPred), evaluationContext);
       // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
       // on 'findFirst()'.
-      // Although NULL_VALUE is an ordinary Object, not a evaluationContext of E, this works
+      // Although NULL_VALUE is an ordinary Object, not an evaluationContext of E, this works
       // because either way we will just return a boolean and during the execution,
       // type information is erased.
       Boolean outputActualValue = inputActualValue
@@ -385,7 +385,7 @@ public interface Evaluator {
           .orElse(ret);
       leave(
           (Evaluable) streamPred,
-          ioEntryWhenValueReturned(outputExpectationFor(streamPred), evaluationContext.value(), outputActualValue),
+          ioEntryWhenValueReturned(outputExpectationFor(streamPred), inputActualValue, outputActualValue),
           (EvaluationContext) evaluationContext);
     }
 
