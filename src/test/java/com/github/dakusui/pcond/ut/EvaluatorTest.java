@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.core.CompatEvaluationContext;
+import com.github.dakusui.pcond.core.EvaluationResultHolder;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.forms.Printables;
@@ -19,7 +19,7 @@ public class EvaluatorTest extends TestBase {
     Evaluator evaluator = new Evaluator.Impl();
     try {
       evaluator.evaluate(
-          CompatEvaluationContext.forValue("hello"),
+          EvaluationResultHolder.forValue("hello"),
           (Evaluable.Conjunction<String>) and(isNotNull(), errorThrowingPredicate()));
     } catch (EvaluationFailure e) {
       assertFalse(evaluator.resultEntries().get(0).evaluationFinished());
@@ -30,54 +30,54 @@ public class EvaluatorTest extends TestBase {
   public void testDisjShortcut_withTrue() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) or(isNull(), alwaysTrue());
-    CompatEvaluationContext<Object> evaluationContext = CompatEvaluationContext.forValue(null);
-    evaluable.accept(evaluationContext, evaluator);
-    assertTrue(evaluator.resultValueAsBoolean(evaluationContext));
+    EvaluationResultHolder<Object> evaluationResultHolder = EvaluationResultHolder.forValue(null);
+    evaluable.accept(evaluationResultHolder, evaluator);
+    assertTrue(evaluator.resultValueAsBoolean(evaluationResultHolder));
   }
 
   @Test
   public void testDisjShortcut_withFalse() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) or(isNull(), alwaysTrue().negate());
-    CompatEvaluationContext<Object> evaluationContext = CompatEvaluationContext.forValue(null);
-    evaluable.accept(evaluationContext, evaluator);
-    assertTrue(evaluator.resultValueAsBoolean((evaluationContext)));
+    EvaluationResultHolder<Object> evaluationResultHolder = EvaluationResultHolder.forValue(null);
+    evaluable.accept(evaluationResultHolder, evaluator);
+    assertTrue(evaluator.resultValueAsBoolean((evaluationResultHolder)));
   }
 
   @Test
   public void testDisjNonShortcut() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) or(alwaysTrue().negate(), isNull());
-    CompatEvaluationContext<Object> evaluationContext = CompatEvaluationContext.forValue(null);
-    evaluable.accept(evaluationContext, evaluator);
-    assertTrue(evaluator.resultValueAsBoolean((evaluationContext)));
+    EvaluationResultHolder<Object> evaluationResultHolder = EvaluationResultHolder.forValue(null);
+    evaluable.accept(evaluationResultHolder, evaluator);
+    assertTrue(evaluator.resultValueAsBoolean((evaluationResultHolder)));
   }
 
   @Test
   public void testConjShortcut_withTrue() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) and(isNotNull(), alwaysTrue());
-    CompatEvaluationContext<Object> evaluationContext = CompatEvaluationContext.forValue(null);
-    evaluable.accept(evaluationContext, evaluator);
-    assertFalse(evaluator.resultValueAsBoolean((evaluationContext)));
+    EvaluationResultHolder<Object> evaluationResultHolder = EvaluationResultHolder.forValue(null);
+    evaluable.accept(evaluationResultHolder, evaluator);
+    assertFalse(evaluator.resultValueAsBoolean((evaluationResultHolder)));
   }
 
   @Test
   public void testConjShortcut_withFalse() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) and(isNotNull(), alwaysTrue().negate());
-    CompatEvaluationContext<Object> evaluationContext = CompatEvaluationContext.forValue(null);
-    evaluable.accept(evaluationContext, evaluator);
-    assertFalse(evaluator.resultValueAsBoolean(evaluationContext));
+    EvaluationResultHolder<Object> evaluationResultHolder = EvaluationResultHolder.forValue(null);
+    evaluable.accept(evaluationResultHolder, evaluator);
+    assertFalse(evaluator.resultValueAsBoolean(evaluationResultHolder));
   }
 
   @Test
   public void testConjNonShortcut() {
     Evaluator evaluator = new Evaluator.Impl();
     @SuppressWarnings("unchecked") Evaluable<Object> evaluable = (Evaluable<Object>) and(alwaysTrue(), isNotNull());
-    CompatEvaluationContext<Object> evaluationContext = CompatEvaluationContext.forValue(null);
-    evaluable.accept(evaluationContext, evaluator);
-    assertFalse(evaluator.resultValueAsBoolean(evaluationContext));
+    EvaluationResultHolder<Object> evaluationResultHolder = EvaluationResultHolder.forValue(null);
+    evaluable.accept(evaluationResultHolder, evaluator);
+    assertFalse(evaluator.resultValueAsBoolean(evaluationResultHolder));
   }
 
   public Predicate<Object> errorThrowingPredicate() {

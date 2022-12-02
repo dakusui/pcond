@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.validator;
 
-import com.github.dakusui.pcond.core.CompatEvaluationContext;
+import com.github.dakusui.pcond.core.EvaluationResultHolder;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.EvaluationEntry;
 import com.github.dakusui.pcond.core.Evaluator;
@@ -396,11 +396,11 @@ public interface Validator {
       Predicate<? super T> cond,
       BiFunction<T, Predicate<? super T>, String> messageComposerFunction,
       ExceptionFactory<Throwable> exceptionComposerFunction) {
-    CompatEvaluationContext<T> evaluationContext = CompatEvaluationContext.forValue(value);
+    EvaluationResultHolder<T> evaluationResultHolder = EvaluationResultHolder.forValue(value);
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
-        ((Evaluable<T>) cond).accept(evaluationContext, evaluator);
+        ((Evaluable<T>) cond).accept(evaluationResultHolder, evaluator);
       } catch (Error error) {
         throw error;
       } catch (Throwable t) {
@@ -414,7 +414,7 @@ public interface Validator {
                     t),
             t);
       }
-      if (evaluator.resultValueAsBoolean((CompatEvaluationContext<Object>) evaluationContext))
+      if (evaluator.resultValueAsBoolean((EvaluationResultHolder<Object>) evaluationResultHolder))
         return value;
       List<EvaluationEntry> entries = evaluator.resultEntries();
       throw exceptionComposerFunction.create(configuration()
@@ -424,7 +424,7 @@ public interface Validator {
               entries,
               null));
     } else {
-      if (!cond.test(evaluationContext.returnedValue()))
+      if (!cond.test(evaluationResultHolder.returnedValue()))
         throw exceptionComposerFunction.create(configuration()
             .reportComposer()
             .composeExplanation(
