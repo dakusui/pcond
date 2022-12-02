@@ -36,7 +36,7 @@ public interface Evaluable<T> {
    * @param evaluationContext     The evaluationContext to be evaluated.
    * @param evaluator An evaluator with which the `evaluationContext` is evaluated.
    */
-  void accept(EvaluationContext<? extends T> evaluationContext, Evaluator evaluator);
+  void accept(CompatEvaluationContext<? extends T> evaluationContext, Evaluator evaluator);
 
   /**
    * In order to generate an informative report, the framework needs information
@@ -119,7 +119,7 @@ public interface Evaluable<T> {
    */
   interface Conjunction<T> extends Composite<T> {
     @Override
-    default void accept(EvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
+    default void accept(CompatEvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
       evaluator.evaluate(evaluationContext, this);
     }
   }
@@ -132,8 +132,8 @@ public interface Evaluable<T> {
   interface Disjunction<T> extends Composite<T> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationContext<T>) evaluationContext, this);
+    default void accept(CompatEvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate((CompatEvaluationContext<T>) evaluationContext, this);
     }
   }
 
@@ -145,8 +145,8 @@ public interface Evaluable<T> {
   interface Negation<T> extends Pred<T> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationContext<T>) evaluationContext, this);
+    default void accept(CompatEvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate((CompatEvaluationContext<T>) evaluationContext, this);
     }
 
     /**
@@ -175,8 +175,8 @@ public interface Evaluable<T> {
   interface LeafPred<T> extends Pred<T> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationContext<T>) evaluationContext, this);
+    default void accept(CompatEvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate((CompatEvaluationContext<T>) evaluationContext, this);
     }
 
     /**
@@ -195,8 +195,8 @@ public interface Evaluable<T> {
   interface VariableBundlePred extends Pred<VariableBundle> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationContext<? extends VariableBundle> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationContext<VariableBundle>) evaluationContext, this);
+    default void accept(CompatEvaluationContext<? extends VariableBundle> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate((CompatEvaluationContext<VariableBundle>) evaluationContext, this);
     }
 
     <T> Evaluable<? super T> enclosed();
@@ -212,8 +212,8 @@ public interface Evaluable<T> {
   interface StreamPred<E> extends Pred<Stream<E>> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationContext<? extends Stream<E>> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationContext<Stream<E>>) evaluationContext, this);
+    default void accept(CompatEvaluationContext<? extends Stream<E>> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate((CompatEvaluationContext<Stream<E>>) evaluationContext, this);
     }
 
     /**
@@ -256,8 +256,8 @@ public interface Evaluable<T> {
   interface Transformation<T, R> extends Pred<T> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationContext<T>) evaluationContext, this);
+    default void accept(CompatEvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate((CompatEvaluationContext<T>) evaluationContext, this);
     }
 
     /**
@@ -293,8 +293,8 @@ public interface Evaluable<T> {
   interface Func<T> extends Evaluable<T> {
     @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationContext<T>) evaluationContext, this);
+    default void accept(CompatEvaluationContext<? extends T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate((CompatEvaluationContext<T>) evaluationContext, this);
     }
 
     Function<? super T, ?> head();

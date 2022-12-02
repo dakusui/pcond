@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.validator;
 
-import com.github.dakusui.pcond.core.EvaluationContext;
+import com.github.dakusui.pcond.core.CompatEvaluationContext;
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.EvaluationEntry;
 import com.github.dakusui.pcond.core.Evaluator;
@@ -396,7 +396,7 @@ public interface Validator {
       Predicate<? super T> cond,
       BiFunction<T, Predicate<? super T>, String> messageComposerFunction,
       ExceptionFactory<Throwable> exceptionComposerFunction) {
-    EvaluationContext<T> evaluationContext = EvaluationContext.forValue(value);
+    CompatEvaluationContext<T> evaluationContext = CompatEvaluationContext.forValue(value);
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
@@ -414,7 +414,7 @@ public interface Validator {
                     t),
             t);
       }
-      if (evaluator.resultValueAsBoolean((EvaluationContext<Object>) evaluationContext))
+      if (evaluator.resultValueAsBoolean((CompatEvaluationContext<Object>) evaluationContext))
         return value;
       List<EvaluationEntry> entries = evaluator.resultEntries();
       throw exceptionComposerFunction.create(configuration()

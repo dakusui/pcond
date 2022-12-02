@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.core;
 
-public class EvaluationContext<V> implements Cloneable {
-  public void resetTo(EvaluationContext<V> clonedContext) {
+public class CompatEvaluationContext<V> implements Cloneable {
+  public void resetTo(CompatEvaluationContext<V> clonedContext) {
     this.state = clonedContext.state();
     this.value = clonedContext.value;
     this.exception = clonedContext.exception;
@@ -9,43 +9,43 @@ public class EvaluationContext<V> implements Cloneable {
 
   enum State {
     VALUE_RETURNED {
-      <V> V value(EvaluationContext<V> vContextVariable) {
+      <V> V value(CompatEvaluationContext<V> vContextVariable) {
         return vContextVariable.value;
       }
 
-      <V> Throwable exception(EvaluationContext<V> vContextVariable) {
+      <V> Throwable exception(CompatEvaluationContext<V> vContextVariable) {
         throw new UnsupportedOperationException();
       }
     },
     EXCEPTION_THROWN {
-      <V> V value(EvaluationContext<V> vContextVariable) {
+      <V> V value(CompatEvaluationContext<V> vContextVariable) {
         throw new UnsupportedOperationException();
       }
 
-      <V> Throwable exception(EvaluationContext<V> vContextVariable) {
+      <V> Throwable exception(CompatEvaluationContext<V> vContextVariable) {
         return vContextVariable.exception;
       }
     };
 
-    abstract <V> V value(EvaluationContext<V> vContextVariable);
+    abstract <V> V value(CompatEvaluationContext<V> vContextVariable);
 
-    abstract <V> Throwable exception(EvaluationContext<V> vContextVariable);
+    abstract <V> Throwable exception(CompatEvaluationContext<V> vContextVariable);
   }
 
   private State     state;
   private V         value;
   private Throwable exception;
 
-  private EvaluationContext(State state, V value, Throwable exception) {
+  private CompatEvaluationContext(State state, V value, Throwable exception) {
     this.state = state;
     this.value = value;
     this.exception = exception;
   }
 
   @SuppressWarnings("unchecked")
-  public EvaluationContext<V> clone() {
+  public CompatEvaluationContext<V> clone() {
     try {
-      return (EvaluationContext<V>) super.clone();
+      return (CompatEvaluationContext<V>) super.clone();
     } catch (CloneNotSupportedException e) {
       throw new RuntimeException(e);
     }
@@ -63,14 +63,14 @@ public class EvaluationContext<V> implements Cloneable {
     return this.state.exception(this);
   }
 
-  public EvaluationContext<V> valueReturned(V returnedValue) {
+  public CompatEvaluationContext<V> valueReturned(V returnedValue) {
     this.state = State.VALUE_RETURNED;
     this.value = returnedValue;
     this.exception = null;
     return this;
   }
 
-  public EvaluationContext<V> exceptionThrown(Throwable thrownException) {
+  public CompatEvaluationContext<V> exceptionThrown(Throwable thrownException) {
     this.state = State.EXCEPTION_THROWN;
     this.exception = thrownException;
     this.value = null;
@@ -83,8 +83,8 @@ public class EvaluationContext<V> implements Cloneable {
     return this.thrownException();
   }
 
-  public static <V> EvaluationContext<V> forValue(V value) {
-    return new EvaluationContext<>(State.VALUE_RETURNED, value, null);
+  public static <V> CompatEvaluationContext<V> forValue(V value) {
+    return new CompatEvaluationContext<>(State.VALUE_RETURNED, value, null);
   }
 
   public String toString() {
