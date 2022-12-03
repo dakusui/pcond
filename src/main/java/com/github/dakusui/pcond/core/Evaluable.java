@@ -118,6 +118,7 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface Conjunction<T> extends Composite<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
       evaluator.evaluate((EvaluableIo<T, Conjunction<T>, Boolean>) (EvaluableIo) evaluableIo, this);
@@ -130,6 +131,7 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface Disjunction<T> extends Composite<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
       evaluator.evaluate((EvaluableIo<T, Disjunction<T>, Boolean>) (EvaluableIo) evaluableIo, this);
@@ -142,6 +144,7 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface Negation<T> extends Pred<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
       evaluator.evaluate((EvaluableIo<T, Negation<T>, Boolean>) (EvaluableIo)evaluableIo, this);
@@ -171,6 +174,7 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface LeafPred<T> extends Pred<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
       evaluator.evaluate((EvaluableIo<T, LeafPred<T>, Boolean>) (EvaluableIo)evaluableIo, this);
@@ -190,6 +194,7 @@ public interface Evaluable<T> {
    * @see VariableBundle
    */
   interface VariableBundlePred extends Pred<VariableBundle> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     default <O> void accept(EvaluableIo<VariableBundle, Evaluable<VariableBundle>, O> evaluableIo, Evaluator evaluator) {
       evaluator.evaluate((EvaluableIo<VariableBundle, VariableBundlePred, Boolean>) (EvaluableIo)evaluableIo, this);
@@ -206,6 +211,7 @@ public interface Evaluable<T> {
    * @param <E> The type of elements in the stream to be evaluated.
    */
   interface StreamPred<E> extends Pred<Stream<E>> {
+    @SuppressWarnings("unchecked")
     @Override
     default <O> void accept(EvaluableIo<Stream<E>, Evaluable<Stream<E>>, O> evaluableIo, Evaluator evaluator) {
       evaluator.evaluate((EvaluableIo<Stream<E>, StreamPred<E>, Boolean>) (EvaluableIo)evaluableIo, this);
@@ -249,6 +255,7 @@ public interface Evaluable<T> {
    * @param <R> The type to which the value (`T`) is transformed and then tested.
    */
   interface Transformation<T, R> extends Pred<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
       evaluator.evaluate((EvaluableIo<T, Transformation<T, R>, R>) (EvaluableIo)evaluableIo, this);
@@ -285,6 +292,7 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface Func<T> extends Evaluable<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
       evaluator.evaluate((EvaluableIo<T, Func<T>, O>) (EvaluableIo)evaluableIo, this);
