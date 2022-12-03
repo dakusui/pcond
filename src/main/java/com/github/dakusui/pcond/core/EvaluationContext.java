@@ -9,8 +9,9 @@ import static com.github.dakusui.pcond.core.EvaluationResultHolder.State.EXCEPTI
 import static com.github.dakusui.pcond.core.EvaluationResultHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainInputActualValue;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainOutputExpectation;
-import static com.github.dakusui.pcond.core.Evaluator.Impl.composeDetailOutputActualValueFromInputAndThrowable;
+import static com.github.dakusui.pcond.core.Evaluator.Impl.NOT_EVALUATED;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
@@ -27,6 +28,20 @@ public class EvaluationContext<T> {
   boolean expectationFlipped = false;
 
   public EvaluationContext() {
+  }
+
+  static String composeDetailOutputActualValueFromInputAndThrowable(Object input, Throwable throwable) {
+    StringBuilder b = new StringBuilder();
+    b.append("Input: '").append(input).append("'").append(format("%n"));
+    b.append("Input Type: ").append(input == null ? "(null)" : input.getClass().getName()).append(format("%n"));
+    b.append("Thrown Exception: '").append(throwable.getClass().getName()).append("'").append(format("%n"));
+    b.append("Exception Message: ").append(throwable.getMessage()).append(format("%n"));
+    for (StackTraceElement each : throwable.getStackTrace()) {
+      b.append("\t");
+      b.append(each);
+      b.append(format("%n"));
+    }
+    return b.toString();
   }
 
   public void evaluate(EvaluationResultHolder<T> input, Evaluable<T> evaluable, BiConsumer<Evaluable<T>, EvaluableIo<T, Evaluable<T>, ?>> evaluatorCallback) {
@@ -113,7 +128,7 @@ public class EvaluationContext<T> {
         return !evaluationContext.expectationFlipped;
       return evaluableIo.output().returnedValue();
     } else if (evaluableIo.output().state() == EXCEPTION_THROWN)
-      return "(not available)";
+      return NOT_EVALUATED;
     else
       throw new AssertionError();
   }

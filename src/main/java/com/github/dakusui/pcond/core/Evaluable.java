@@ -33,10 +33,10 @@ public interface Evaluable<T> {
   /**
    * Performs an evaluation of the `evaluationContext` with a given `evaluator`.
    *
-   * @param evaluationContext
-   * @param evaluator         An evaluator with which the `evaluationContext` is evaluated.
+   * @param evaluableIo An execution occurrence of an evaluable.
+   * @param evaluator   An evaluator with which the `evaluationContext` is evaluated.
    */
-  void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator);
+  <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator);
 
   /**
    * In order to generate an informative report, the framework needs information
@@ -119,8 +119,8 @@ public interface Evaluable<T> {
    */
   interface Conjunction<T> extends Composite<T> {
     @Override
-    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate(evaluationContext, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
+      evaluator.evaluate((EvaluableIo<T, Conjunction<T>, Boolean>) (EvaluableIo) evaluableIo, this);
     }
   }
 
@@ -131,8 +131,8 @@ public interface Evaluable<T> {
    */
   interface Disjunction<T> extends Composite<T> {
     @Override
-    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate(evaluationContext, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
+      evaluator.evaluate((EvaluableIo<T, Disjunction<T>, Boolean>) (EvaluableIo) evaluableIo, this);
     }
   }
 
@@ -143,8 +143,8 @@ public interface Evaluable<T> {
    */
   interface Negation<T> extends Pred<T> {
     @Override
-    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate(evaluationContext, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
+      evaluator.evaluate((EvaluableIo<T, Negation<T>, Boolean>) (EvaluableIo)evaluableIo, this);
     }
 
     /**
@@ -172,8 +172,8 @@ public interface Evaluable<T> {
    */
   interface LeafPred<T> extends Pred<T> {
     @Override
-    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate(evaluationContext, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
+      evaluator.evaluate((EvaluableIo<T, LeafPred<T>, Boolean>) (EvaluableIo)evaluableIo, this);
     }
 
     /**
@@ -191,8 +191,8 @@ public interface Evaluable<T> {
    */
   interface VariableBundlePred extends Pred<VariableBundle> {
     @Override
-    default void accept(EvaluationContext<VariableBundle> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate(evaluationContext, this);
+    default <O> void accept(EvaluableIo<VariableBundle, Evaluable<VariableBundle>, O> evaluableIo, Evaluator evaluator) {
+      evaluator.evaluate((EvaluableIo<VariableBundle, VariableBundlePred, Boolean>) (EvaluableIo)evaluableIo, this);
     }
 
     <T> Evaluable<? super T> enclosed();
@@ -207,8 +207,8 @@ public interface Evaluable<T> {
    */
   interface StreamPred<E> extends Pred<Stream<E>> {
     @Override
-    default void accept(EvaluationContext<Stream<E>> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate(evaluationContext, this);
+    default <O> void accept(EvaluableIo<Stream<E>, Evaluable<Stream<E>>, O> evaluableIo, Evaluator evaluator) {
+      evaluator.evaluate((EvaluableIo<Stream<E>, StreamPred<E>, Boolean>) (EvaluableIo)evaluableIo, this);
     }
 
     /**
@@ -250,8 +250,8 @@ public interface Evaluable<T> {
    */
   interface Transformation<T, R> extends Pred<T> {
     @Override
-    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate(evaluationContext, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
+      evaluator.evaluate((EvaluableIo<T, Transformation<T, R>, R>) (EvaluableIo)evaluableIo, this);
     }
 
     /**
@@ -286,8 +286,8 @@ public interface Evaluable<T> {
    */
   interface Func<T> extends Evaluable<T> {
     @Override
-    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluate(evaluationContext, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
+      evaluator.evaluate((EvaluableIo<T, Func<T>, O>) (EvaluableIo)evaluableIo, this);
     }
 
     Function<? super T, ?> head();
