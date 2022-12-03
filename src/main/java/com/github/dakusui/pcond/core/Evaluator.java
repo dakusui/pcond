@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainInputActualValue;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainOutputExpectation;
-import static com.github.dakusui.pcond.core.Evaluator.Impl.composeActualValueFromInputAndThrowable;
+import static com.github.dakusui.pcond.core.Evaluator.Impl.composeDetailOutputActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
 import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
@@ -498,8 +498,7 @@ public interface Evaluator {
           entry.requiresExplanation());
     }
 
-    static String composeActualValueFromInputAndThrowable(Object
-        input, Throwable throwable) {
+    static String composeDetailOutputActualValueFromInputAndThrowable(Object input, Throwable throwable) {
       StringBuilder b = new StringBuilder();
       b.append("Input: '").append(input).append("'").append(format("%n"));
       b.append("Input Type: ").append(input == null ? "(null)" : input.getClass().getName()).append(format("%n"));
@@ -682,7 +681,7 @@ public interface Evaluator {
               io.getOutputExpectation(), explainOutputExpectation(evaluable),
               io.getInputActualValue(), explainInputActualValue(evaluable, io.getInputActualValue()),
               io.getOutputActualValue(),
-              composeActualValueFromInputAndThrowable(io.getInputActualValue(), (Throwable) io.getOutputActualValue()),
+              composeDetailOutputActualValueFromInputAndThrowable(io.getInputActualValue(), (Throwable) io.getOutputActualValue()),
               true);
         }
       },
