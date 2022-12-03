@@ -44,10 +44,15 @@ public class EvaluationContext<T> {
     return b.toString();
   }
 
-  public void evaluate(EvaluationResultHolder<T> input, Evaluable<T> evaluable, BiConsumer<Evaluable<T>, EvaluableIo<T, Evaluable<T>, ?>> evaluatorCallback) {
+  /**
+   * @param evaluable
+   * @param input
+   * @param evaluatorCallback
+   */
+  public <E extends Evaluable<T>, O> void evaluate(E evaluable, EvaluationResultHolder<T> input, BiConsumer<E, EvaluableIo<T, Evaluable<T>, O>> evaluatorCallback) {
     requireNonNull(evaluable);
     requireNonNull(input);
-    EvaluableIo<T, Evaluable<T>, ?> evaluableIo = this.enter(input, evaluable);
+    EvaluableIo<T, Evaluable<T>, O> evaluableIo = this.enter(input, evaluable);
     try {
       evaluatorCallback.accept(evaluable, evaluableIo);
     } catch (Throwable t) {
@@ -61,22 +66,38 @@ public class EvaluationContext<T> {
     }
   }
 
+  public static <T> EvaluationEntry.Type resolveEvaluationEntryType(Evaluable<T> evaluable) {
+    if (evaluable instanceof Evaluable.LeafPred || evaluable instanceof Evaluable.VariableBundlePred || evaluable instanceof Evaluable.StreamPred)
+      return LEAF;
+    if (evaluable instanceof Evaluable.Func)
+      return FUNCTION;
+    if (evaluable instanceof Evaluable.Conjunction)
+      return AND;
+    if (evaluable instanceof Evaluable.Disjunction)
+      return OR;
+    if (evaluable instanceof Evaluable.Negation)
+      return NOT;
+    if (evaluable instanceof Evaluable.Transformation)
+      return TRANSFORM; // How to model CHECK?
+    throw new IllegalArgumentException();
+  }
 
-  private EvaluableIo<T, Evaluable<T>, ?> enter(EvaluationResultHolder<T> input, Evaluable<T> evaluable) {
-    EvaluableIo<T, Evaluable<T>, ?> ret = createEvaluableIo(input, evaluable);
+
+  private <O> EvaluableIo<T, Evaluable<T>, O> enter(EvaluationResultHolder<T> input, Evaluable<T> evaluable) {
+    EvaluableIo<T, Evaluable<T>, O> ret = createEvaluableIo(input, evaluable);
     this.expectationFlipped = this.expectationFlipped ^ evaluable.requestExpectationFlip();
     this.visitorLineage.add(ret);
     return ret;
   }
 
 
-  private void leave(EvaluableIo<T, Evaluable<T>, ?> evaluableIo) {
+  private <O> void leave(EvaluableIo<T, Evaluable<T>, O> evaluableIo) {
     this.evaluationEntries.add(createEvaluationEntry(this, evaluableIo));
     this.visitorLineage.remove(this.visitorLineage.size() - 1);
     this.expectationFlipped = this.expectationFlipped ^ evaluableIo.evaluable().requestExpectationFlip();
   }
 
-  private static <T> EvaluableIo<T, Evaluable<T>, ?> createEvaluableIo(EvaluationResultHolder<T> input, Evaluable<T> evaluable) {
+  private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(EvaluationResultHolder<T> input, Evaluable<T> evaluable) {
     return new EvaluableIo<>(input, resolveEvaluationEntryType(evaluable), evaluable);
   }
 
@@ -156,21 +177,5 @@ public class EvaluationContext<T> {
         evaluableIo.output().state() == EvaluationResultHolder.State.EXCEPTION_THROWN || (
             evaluableIo.evaluableType() == LEAF && (
                 evaluationContext.expectationFlipped ^ (Boolean) evaluableIo.output().returnedValue())));
-  }
-
-  private static <T> EvaluationEntry.Type resolveEvaluationEntryType(Evaluable<T> evaluable) {
-    if (evaluable instanceof Evaluable.LeafPred || evaluable instanceof Evaluable.VariableBundlePred || evaluable instanceof Evaluable.StreamPred)
-      return LEAF;
-    if (evaluable instanceof Evaluable.Func)
-      return FUNCTION;
-    if (evaluable instanceof Evaluable.Conjunction)
-      return AND;
-    if (evaluable instanceof Evaluable.Disjunction)
-      return OR;
-    if (evaluable instanceof Evaluable.Negation)
-      return NOT;
-    if (evaluable instanceof Evaluable.Transformation)
-      return TRANSFORM; // How to model CHECK?
-    throw new IllegalArgumentException();
   }
 }

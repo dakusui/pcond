@@ -281,9 +281,10 @@ public enum PrintablePredicateFactory {
   }
 
   abstract static class Junction<T> extends PrintablePredicate<T> implements Evaluable.Composite<T> {
-    final         List<Evaluable<? super T>> children;
+    final         List<Evaluable<T>> children;
     final private boolean                    shortcut;
 
+    @SuppressWarnings("unchecked")
     protected Junction(
         List<Predicate<? super T>> predicates,
         PrintablePredicateFactory creator,
@@ -294,12 +295,15 @@ public enum PrintablePredicateFactory {
           new ArrayList<>(predicates),
           () -> formatJunction(predicates, junctionSymbol),
           junction(predicates, junctionOp));
-      this.children = predicates.stream().map(InternalUtils::toEvaluableIfNecessary).collect(toList());
+      this.children = predicates.stream()
+          .map(InternalUtils::toEvaluableIfNecessary)
+          .map(each -> (Evaluable<T>)each)
+          .collect(toList());
       this.shortcut = shortcut;
     }
 
     @Override
-    public List<Evaluable<? super T>> children() {
+    public List<Evaluable<T>> children() {
       return this.children;
     }
 
@@ -334,7 +338,7 @@ public enum PrintablePredicateFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> List<Predicate<T>> evaluablesToPredicates(List<Evaluable<? super T>> evaluables) {
+    private static <T> List<Predicate<T>> evaluablesToPredicates(List<Evaluable<T>> evaluables) {
       return evaluables.stream()
           .peek(each -> {
             assert each instanceof Predicate;

@@ -83,7 +83,7 @@ public interface Evaluable<T> {
      *
      * @return The list of the child predicates.
      */
-    List<Evaluable<? super T>> children();
+    List<Evaluable<T>> children();
 
     /**
      * Returns `true` if the "shortcut" evaluation is enabled.

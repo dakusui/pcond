@@ -109,7 +109,7 @@ public interface Evaluator {
       }
     };
     private static final Object NULL_VALUE    = new Object();
-    public static final Object                    UNKNOWN       = new Snapshottable() {
+    public static final  Object UNKNOWN       = new Snapshottable() {
       @Override
       public Object snapshot() {
         return this.toString();
@@ -120,12 +120,21 @@ public interface Evaluator {
         return "(unknown)";
       }
     };
+
     public Impl() {
     }
 
     @Override
     public <T> void evaluateConjunction(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
-
+      evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input(), (evaluable, io) -> {
+        boolean result = true;
+        for (Evaluable<T> each : evaluable.children()) {
+          EvaluableIo<T, Evaluable<T>, Boolean> child = new EvaluableIo<>(evaluableIo.input(), EvaluationContext.resolveEvaluationEntryType(each), each);
+          each.accept(child, evaluationContext, this);
+          result &= child.output().returnedValue();
+        }
+        io.output().valueReturned(result);
+      });
     }
 
     @Override
