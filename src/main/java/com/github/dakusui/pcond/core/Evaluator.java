@@ -160,7 +160,7 @@ public interface Evaluator {
 
     <T> void leave(
         Evaluable<T> evaluable,
-        EvaluableIo io,
+        CompatEvaluableIo io,
         EvaluationResultHolder<Object> evaluationResultHolder) {
       int positionInOngoingEntries = onGoingEntries.size() - 1;
       EvaluationEntry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
@@ -247,7 +247,7 @@ public interface Evaluator {
     @Override
     public <T> void evaluate(EvaluationResultHolder<T> evaluationResultHolder, Evaluable.LeafPred<T> leafPred) {
       this.enter(EvaluableDesc.fromEvaluable(leafPred), evaluationResultHolder);
-      EvaluableIo io = null;
+      CompatEvaluableIo io = null;
       try {
         if (isValueReturned(evaluationResultHolder)) {
           T inputActualValue = evaluationResultHolder.returnedValue();
@@ -276,24 +276,24 @@ public interface Evaluator {
         if (isValueReturned(evaluationResultHolder)) {
           T inputActualValue = evaluationResultHolder.returnedValue();
           outputActualValue = func.head().apply(inputActualValue);
-          EvaluableIo io = ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue);
+          CompatEvaluableIo io = ioEntryForFuncWhenValueReturned(inputActualValue, outputActualValue);
           leave((Evaluable<Object>) func, io, (EvaluationResultHolder<Object>) evaluationResultHolder);
-          func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(evaluationResultHolder.valueReturned((T) outputActualValue), this));
+          func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(evaluationResultHolder.compatValueReturned((T) outputActualValue), this));
         } else if (isExceptionThrown(evaluationResultHolder)) {
           Throwable inputActualValue = evaluationResultHolder.thrownException();
           outputActualValue = inputActualValue;
-          EvaluableIo io = ioEntryWhenSkipped(func, inputActualValue);
+          CompatEvaluableIo io = ioEntryWhenSkipped(func, inputActualValue);
           leave((Evaluable<Object>) func, io, (EvaluationResultHolder<Object>) evaluationResultHolder);
-          func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(evaluationResultHolder.exceptionThrown((Throwable) outputActualValue), this));
+          func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(evaluationResultHolder.compatExceptionThrown((Throwable) outputActualValue), this));
         } else
           assert false;
       } catch (Error e) {
         throw e;
       } catch (Throwable e) {
-        EvaluableIo io = ioEntryWhenExceptionThrown(UNKNOWN, evaluationResultHolder.returnedValue(), e);
+        CompatEvaluableIo io = ioEntryWhenExceptionThrown(UNKNOWN, evaluationResultHolder.returnedValue(), e);
         leave(func, io, (EvaluationResultHolder<Object>) evaluationResultHolder);
         func.tail().ifPresent(tailSide -> {
-          ((Evaluable<Object>) tailSide).accept(((EvaluationResultHolder<Object>) evaluationResultHolder).exceptionThrown(e), this);
+          ((Evaluable<Object>) tailSide).accept(((EvaluationResultHolder<Object>) evaluationResultHolder).compatExceptionThrown(e), this);
         });
       }
     }
@@ -385,8 +385,8 @@ public interface Evaluator {
       return evaluationResultHolder.value() instanceof Boolean ? resultValueAsBoolean(evaluationResultHolder) : otherwiseValue;
     }
 
-    private <T> EvaluableIo ioEntryWhenSkipped(Evaluable<T> evaluable, Throwable inputActualValue) {
-      return EvaluableIo.valueReturned(
+    private <T> CompatEvaluableIo ioEntryWhenSkipped(Evaluable<T> evaluable, Throwable inputActualValue) {
+      return CompatEvaluableIo.valueReturned(
           inputActualValue,
           outputExpectationFor(evaluable),
           inputActualValue,
@@ -395,24 +395,24 @@ public interface Evaluator {
     }
 
 
-    private static EvaluableIo ioEntryForNonLeafWhenEvaluationFinished(boolean outputExpectation, Object inputActualValue, Object outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
+    private static CompatEvaluableIo ioEntryForNonLeafWhenEvaluationFinished(boolean outputExpectation, Object inputActualValue, Object outputActualValue) {
+      return new CompatEvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
-    private <T> EvaluableIo ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
+    private <T> CompatEvaluableIo ioEntryForFuncWhenValueReturned(T inputActualValue, Object outputActualValue) {
+      return new CompatEvaluableIo(inputActualValue, outputActualValue, inputActualValue, outputActualValue, false);
     }
 
-    private <T> EvaluableIo ioEntryForLeafWhenValueReturned(boolean outputExpectation, T inputActualValue, boolean outputActualValue) {
-      return EvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, this.currentlyExpectedBooleanValue != outputActualValue);
+    private <T> CompatEvaluableIo ioEntryForLeafWhenValueReturned(boolean outputExpectation, T inputActualValue, boolean outputActualValue) {
+      return CompatEvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, this.currentlyExpectedBooleanValue != outputActualValue);
     }
 
-    private <T> EvaluableIo ioEntryForNegationWhenValueReturned(boolean outputExpectation, Object inputActualValue, boolean outputActualValue) {
-      return new EvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, outputExpectation != outputActualValue);
+    private <T> CompatEvaluableIo ioEntryForNegationWhenValueReturned(boolean outputExpectation, Object inputActualValue, boolean outputActualValue) {
+      return new CompatEvaluableIo(inputActualValue, outputExpectation, inputActualValue, outputActualValue, outputExpectation != outputActualValue);
     }
 
-    private <T> EvaluableIo ioEntryWhenExceptionThrown(Object outputExpectation, Object inputActualValue, Throwable outputActualValue) {
-      return EvaluableIo.exceptionThrown(inputActualValue, outputExpectation, inputActualValue, outputActualValue, true);
+    private <T> CompatEvaluableIo ioEntryWhenExceptionThrown(Object outputExpectation, Object inputActualValue, Throwable outputActualValue) {
+      return CompatEvaluableIo.exceptionThrown(inputActualValue, outputExpectation, inputActualValue, outputActualValue, true);
     }
 
     private <T> boolean outputExpectationFor(Evaluable<T> predicateEvaluable) {
@@ -429,17 +429,17 @@ public interface Evaluator {
       return evaluationResultHolder.state() == EvaluationResultHolder.State.EXCEPTION_THROWN;
     }
 
-    private <T, R> EvaluableIo
+    private <T, R> CompatEvaluableIo
     ioEntryForCheckerPredicateWhenValueReturned(Object inputActualValue, Object outputActualValue, boolean outputExpectation) {
-      return EvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
+      return CompatEvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
-    private static EvaluableIo ioEntryWhenValueReturned(Object outputExpectation, Object inputActualValue, Object outputActualValue) {
-      return EvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
+    private static CompatEvaluableIo ioEntryWhenValueReturned(Object outputExpectation, Object inputActualValue, Object outputActualValue) {
+      return CompatEvaluableIo.valueReturned(inputActualValue, outputExpectation, inputActualValue, outputActualValue, false);
     }
 
-    private EvaluableIo ioEntryWhenSkipped(Object inputActualValue, Throwable outputActualValue) {
-      return EvaluableIo.exceptionThrown(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
+    private CompatEvaluableIo ioEntryWhenSkipped(Object inputActualValue, Throwable outputActualValue) {
+      return CompatEvaluableIo.exceptionThrown(inputActualValue, UNKNOWN, inputActualValue, outputActualValue, false);
     }
 
     private <E> Predicate<E> createValueCheckingPredicateForStream(Evaluable.StreamPred<E> streamPredicate) {
@@ -577,7 +577,7 @@ public interface Evaluator {
 
     static <T> EvaluableDesc fromEvaluable(Evaluable.Conjunction<T> conjunctionEvaluable) {
       return new EvaluableDesc(
-          FUNCTION,
+          AND,
           String.format("%s", conjunctionEvaluable.shortcut() ? "and" : "allOf"),
           conjunctionEvaluable.requestExpectationFlip(),
           conjunctionEvaluable.isSquashable()
@@ -586,7 +586,7 @@ public interface Evaluator {
 
     static <T> EvaluableDesc fromEvaluable(Evaluable.Disjunction<T> disjunctionEvaluable) {
       return new EvaluableDesc(
-          FUNCTION,
+          OR,
           String.format("%s", disjunctionEvaluable.shortcut() ? "or" : "anyOf"),
           disjunctionEvaluable.requestExpectationFlip(),
           disjunctionEvaluable.isSquashable()
@@ -595,7 +595,7 @@ public interface Evaluator {
 
     static <T> EvaluableDesc fromEvaluable(Evaluable.Negation<T> negationEvaluable) {
       return new EvaluableDesc(
-          FUNCTION,
+          NOT,
           "not",
           negationEvaluable.requestExpectationFlip(),
           true
@@ -667,16 +667,16 @@ public interface Evaluator {
     }
   }
 
-  class EvaluableIo {
+  class CompatEvaluableIo {
     enum Type {
       EXCEPTION_THROWN {
         @Override
         void finishEvaluationContext(EvaluationResultHolder<Object> evaluationResultHolder, Object outputActualValue) {
-          evaluationResultHolder.exceptionThrown((Throwable) outputActualValue);
+          evaluationResultHolder.compatExceptionThrown((Throwable) outputActualValue);
         }
 
         @Override
-        EvaluationEntry.Finalized finalizeEvaluationEntry(EvaluationEntry.OnGoing evaluationEntry, EvaluableIo io, Evaluable<Object> evaluable) {
+        EvaluationEntry.Finalized finalizeEvaluationEntry(EvaluationEntry.OnGoing evaluationEntry, CompatEvaluableIo io, Evaluable<Object> evaluable) {
           return evaluationEntry.finalizeEntry(
               io.getInputExpectation(), (Snapshottable) io::getInputExpectation,
               io.getOutputExpectation(), explainOutputExpectation(evaluable),
@@ -689,11 +689,11 @@ public interface Evaluator {
       VALUE_RETURNED {
         @Override
         void finishEvaluationContext(EvaluationResultHolder<Object> evaluationResultHolder, Object outputActualValue) {
-          evaluationResultHolder.valueReturned(outputActualValue);
+          evaluationResultHolder.compatValueReturned(outputActualValue);
         }
 
         @Override
-        EvaluationEntry.Finalized finalizeEvaluationEntry(EvaluationEntry.OnGoing evaluationEntry, EvaluableIo io, Evaluable<Object> evaluable) {
+        EvaluationEntry.Finalized finalizeEvaluationEntry(EvaluationEntry.OnGoing evaluationEntry, CompatEvaluableIo io, Evaluable<Object> evaluable) {
           return evaluationEntry.finalizeEntry(
               io.getInputExpectation(), io.getInputExpectation(),
               io.getOutputExpectation(), explainOutputExpectation(evaluable),
@@ -706,7 +706,7 @@ public interface Evaluator {
 
       abstract void finishEvaluationContext(EvaluationResultHolder<Object> evaluationResultHolder, Object outputActualValue);
 
-      abstract EvaluationEntry.Finalized finalizeEvaluationEntry(EvaluationEntry.OnGoing evaluationEntry, EvaluableIo io, Evaluable<Object> evaluable);
+      abstract EvaluationEntry.Finalized finalizeEvaluationEntry(EvaluationEntry.OnGoing evaluationEntry, CompatEvaluableIo io, Evaluable<Object> evaluable);
     }
 
     public final  Type    type;
@@ -716,7 +716,7 @@ public interface Evaluator {
     private final Object  outputActualValue;
     private final boolean requiresExplanation;
 
-    public EvaluableIo(Type type, Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
+    public CompatEvaluableIo(Type type, Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
       this.type = type;
       this.inputExpectation = inputExpectation;
       this.outputExpectation = outputExpectation;
@@ -725,7 +725,7 @@ public interface Evaluator {
       this.requiresExplanation = requiresExplanation;
     }
 
-    public EvaluableIo(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
+    public CompatEvaluableIo(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
       this(Type.VALUE_RETURNED, inputExpectation, outputExpectation, inputActualValue, outputActualValue, requiresExplanation);
     }
 
@@ -749,12 +749,12 @@ public interface Evaluator {
       return requiresExplanation;
     }
 
-    static EvaluableIo valueReturned(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
-      return new EvaluableIo(Type.VALUE_RETURNED, inputExpectation, outputExpectation, inputActualValue, outputActualValue, requiresExplanation);
+    static CompatEvaluableIo valueReturned(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
+      return new CompatEvaluableIo(Type.VALUE_RETURNED, inputExpectation, outputExpectation, inputActualValue, outputActualValue, requiresExplanation);
     }
 
-    static EvaluableIo exceptionThrown(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
-      return new EvaluableIo(Type.EXCEPTION_THROWN, inputExpectation, outputExpectation, inputActualValue, outputActualValue, requiresExplanation);
+    static CompatEvaluableIo exceptionThrown(Object inputExpectation, Object outputExpectation, Object inputActualValue, Object outputActualValue, boolean requiresExplanation) {
+      return new CompatEvaluableIo(Type.EXCEPTION_THROWN, inputExpectation, outputExpectation, inputActualValue, outputActualValue, requiresExplanation);
     }
   }
 }

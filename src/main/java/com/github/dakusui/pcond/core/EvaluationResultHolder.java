@@ -1,5 +1,8 @@
 package com.github.dakusui.pcond.core;
 
+import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
+import static java.util.Objects.requireNonNull;
+
 public class EvaluationResultHolder<V> implements Cloneable {
 
   private State state;
@@ -33,14 +36,14 @@ public class EvaluationResultHolder<V> implements Cloneable {
     return this.state.exception(this);
   }
 
-  public EvaluationResultHolder<V> valueReturned(V returnedValue) {
+  public EvaluationResultHolder<V> compatValueReturned(V returnedValue) {
     this.state = State.VALUE_RETURNED;
     this.value = returnedValue;
     this.exception = null;
     return this;
   }
 
-  public EvaluationResultHolder<V> exceptionThrown(Throwable thrownException) {
+  public EvaluationResultHolder<V> compatExceptionThrown(Throwable thrownException) {
     this.state = State.EXCEPTION_THROWN;
     this.exception = thrownException;
     this.value = null;
@@ -95,5 +98,23 @@ public class EvaluationResultHolder<V> implements Cloneable {
     abstract <V> V value(EvaluationResultHolder<V> vContextVariable);
 
     abstract <V> Throwable exception(EvaluationResultHolder<V> vContextVariable);
+  }
+
+  public EvaluationResultHolder<V> valueReturned(V value) {
+    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
+    return new EvaluationResultHolder<>(State.VALUE_RETURNED, requireNonNull(value), null);
+  }
+
+  public EvaluationResultHolder<V> exceptionThrown(Throwable throwable) {
+    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
+    return new EvaluationResultHolder<>(State.EXCEPTION_THROWN, null, requireNonNull(throwable));
+  }
+
+  static <E> EvaluationResultHolder<E> create() {
+    return new EvaluationResultHolder<>(State.NOT_YET_EVALUATED, null, null);
+  }
+
+  private static String messageNotYetEvaluatedStateIsRequired(State v, Object thisValue) {
+    return "state:<" + State.NOT_YET_EVALUATED + "> of <" + thisValue + "> is expected but it was <" + v + ">";
   }
 }
