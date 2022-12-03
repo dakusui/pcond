@@ -33,10 +33,10 @@ public interface Evaluable<T> {
   /**
    * Performs an evaluation of the `evaluationContext` with a given `evaluator`.
    *
-   * @param evaluationResultHolder     The evaluationContext to be evaluated.
-   * @param evaluator An evaluator with which the `evaluationContext` is evaluated.
+   * @param evaluationContext
+   * @param evaluator         An evaluator with which the `evaluationContext` is evaluated.
    */
-  void accept(EvaluationResultHolder<? extends T> evaluationResultHolder, Evaluator evaluator);
+  void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator);
 
   /**
    * In order to generate an informative report, the framework needs information
@@ -119,8 +119,8 @@ public interface Evaluable<T> {
    */
   interface Conjunction<T> extends Composite<T> {
     @Override
-    default void accept(EvaluationResultHolder<? extends T> evaluationResultHolder, Evaluator evaluator) {
-      evaluator.evaluate(evaluationResultHolder, this);
+    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate(evaluationContext, this);
     }
   }
 
@@ -130,10 +130,9 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface Disjunction<T> extends Composite<T> {
-    @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationResultHolder<? extends T> evaluationResultHolder, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationResultHolder<T>) evaluationResultHolder, this);
+    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate(evaluationContext, this);
     }
   }
 
@@ -143,10 +142,9 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface Negation<T> extends Pred<T> {
-    @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationResultHolder<? extends T> evaluationResultHolder, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationResultHolder<T>) evaluationResultHolder, this);
+    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate(evaluationContext, this);
     }
 
     /**
@@ -173,10 +171,9 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface LeafPred<T> extends Pred<T> {
-    @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationResultHolder<? extends T> evaluationResultHolder, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationResultHolder<T>) evaluationResultHolder, this);
+    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate(evaluationContext, this);
     }
 
     /**
@@ -193,10 +190,9 @@ public interface Evaluable<T> {
    * @see VariableBundle
    */
   interface VariableBundlePred extends Pred<VariableBundle> {
-    @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationResultHolder<? extends VariableBundle> evaluationResultHolder, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationResultHolder<VariableBundle>) evaluationResultHolder, this);
+    default void accept(EvaluationContext<VariableBundle> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate(evaluationContext, this);
     }
 
     <T> Evaluable<? super T> enclosed();
@@ -210,10 +206,9 @@ public interface Evaluable<T> {
    * @param <E> The type of elements in the stream to be evaluated.
    */
   interface StreamPred<E> extends Pred<Stream<E>> {
-    @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationResultHolder<? extends Stream<E>> evaluationResultHolder, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationResultHolder<Stream<E>>) evaluationResultHolder, this);
+    default void accept(EvaluationContext<Stream<E>> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate(evaluationContext, this);
     }
 
     /**
@@ -254,10 +249,9 @@ public interface Evaluable<T> {
    * @param <R> The type to which the value (`T`) is transformed and then tested.
    */
   interface Transformation<T, R> extends Pred<T> {
-    @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationResultHolder<? extends T> evaluationResultHolder, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationResultHolder<T>) evaluationResultHolder, this);
+    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate(evaluationContext, this);
     }
 
     /**
@@ -291,15 +285,13 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface Func<T> extends Evaluable<T> {
-    @SuppressWarnings("unchecked")
     @Override
-    default void accept(EvaluationResultHolder<? extends T> evaluationResultHolder, Evaluator evaluator) {
-      evaluator.evaluate((EvaluationResultHolder<T>) evaluationResultHolder, this);
+    default void accept(EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluate(evaluationContext, this);
     }
 
     Function<? super T, ?> head();
 
     Optional<Evaluable<?>> tail();
   }
-
 }

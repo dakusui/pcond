@@ -1,26 +1,18 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.core.EvaluationResultHolder;
-import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.Evaluator;
-import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 
-import java.util.function.Predicate;
-
-import static com.github.dakusui.pcond.forms.Predicates.*;
-import static org.junit.Assert.*;
-
 public class EvaluatorTest extends TestBase {
+  /*
   @SuppressWarnings("unchecked")
   @Test
   public void testFinalizedEntry() {
     Evaluator evaluator = new Evaluator.Impl();
     try {
       evaluator.evaluate(
-          EvaluationResultHolder.forValue("hello"),
-          (Evaluable.Conjunction<String>) and(isNotNull(), errorThrowingPredicate()));
+          , (Evaluable.Conjunction<String>) and(isNotNull(), errorThrowingPredicate()), EvaluationResultHolder.forValue("hello"),
+          );
     } catch (EvaluationFailure e) {
       assertFalse(evaluator.resultEntries().get(0).evaluationFinished());
     }
@@ -79,7 +71,6 @@ public class EvaluatorTest extends TestBase {
     evaluable.accept(evaluationResultHolder, evaluator);
     assertFalse(evaluator.resultValueAsBoolean(evaluationResultHolder));
   }
-
   public Predicate<Object> errorThrowingPredicate() {
     return Printables.predicate("errorThrowing", v -> {
       throw new EvaluationFailure();
@@ -87,5 +78,13 @@ public class EvaluatorTest extends TestBase {
   }
 
   public static class EvaluationFailure extends RuntimeException {
+  }
+
+   */
+
+
+  @Test
+  public void uncommentTests() {
+    throw new RuntimeException("Uncomment tests in this class and fix them.");
   }
 }
