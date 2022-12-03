@@ -15,78 +15,78 @@ public interface Evaluator {
   /**
    * Evaluates `value` with `conjunction` predicate ("and").
    *
-   * @param <T>         The type of the `value`.
-   * @param evaluableIo An evaluation context.
-   * @param conjunction A conjunction predicate with which `value` is evaluated.
+   * @param <T>               The type of the `value`.
+   * @param evaluableIo       An evaluation context.
+   * @param evaluationContext
    * @see com.github.dakusui.pcond.core.Evaluable.Conjunction
    */
-  <T> void evaluate(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, Evaluable.Conjunction<T> conjunction);
+  <T> void evaluateConjunction(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a `disjunction` predicate ("or").
    *
-   * @param <T>         The type of the `value`.
-   * @param evaluableIo An evaluation context.
-   * @param disjunction A disjunction predicate with which `value` is evaluated.
+   * @param <T>               The type of the `value`.
+   * @param evaluableIo       An evaluation context.
+   * @param evaluationContext
    * @see com.github.dakusui.pcond.core.Evaluable.Disjunction
    */
-  <T> void evaluate(EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> evaluableIo, Evaluable.Disjunction<T> disjunction);
+  <T> void evaluateDisjunction(EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a `negation` predicate ("not").
    *
-   * @param <T>         The type of the `value`.
-   * @param evaluableIo An evaluation context.
-   * @param negation    A negation predicate with which `value` is evaluated.
+   * @param <T>               The type of the `value`.
+   * @param evaluableIo       An evaluation context.
+   * @param evaluationContext
    * @see com.github.dakusui.pcond.core.Evaluable.Negation
    */
-  <T> void evaluate(EvaluableIo<T, Evaluable.Negation<T>, Boolean> evaluableIo, Evaluable.Negation<T> negation);
+  <T> void evaluateNegation(EvaluableIo<T, Evaluable.Negation<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a leaf predicate.
    *
-   * @param <T>         The type of the `value`.
-   * @param evaluableIo An evaluation context.
-   * @param leafPred    A predicate with which `value` is evaluated.
+   * @param <T>               The type of the `value`.
+   * @param evaluableIo       An evaluation context.
+   * @param evaluationContext
    * @see com.github.dakusui.pcond.core.Evaluable.LeafPred
    */
-  <T> void evaluate(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, Evaluable.LeafPred<T> leafPred);
+  <T> void evaluateLeaf(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a context predicate.
    *
-   * @param evaluableIo        An evaluation context.
-   * @param variableBundlePred A predicate with which `value` is evaluated.
+   * @param evaluableIo       An evaluation context.
+   * @param evaluationContext
    * @see Evaluable.VariableBundlePred
    */
-  void evaluate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, Evaluable.VariableBundlePred variableBundlePred);
+  void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext);
 
   /**
    * Evaluates `value` with a "transformatioin" predicate.
    *
-   * @param evaluableIo    An evaluation context.
-   * @param transformation A predicate with which `value` is evaluated.
+   * @param evaluableIo       An evaluation context.
+   * @param evaluationContext
    * @see com.github.dakusui.pcond.core.Evaluable.Transformation
    */
-  <T, R> void evaluate(EvaluableIo<T, Evaluable.Transformation<T, R>, R> evaluableIo, Evaluable.Transformation<T, R> transformation);
+  <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, R> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a "function" predicate.
    *
-   * @param evaluableIo An evaluation context.
-   * @param func        A predicate with which `value` is evaluated.
+   * @param evaluableIo       An evaluation context.
+   * @param evaluationContext
    * @see com.github.dakusui.pcond.core.Evaluable.Func
    */
-  <T, R> void evaluate(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, Evaluable.Func<T> func);
+  <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a predicate for a stream.
    *
-   * @param evaluableIo An evaluation context.
-   * @param streamPred  A predicate with which `value` is evaluated.
+   * @param evaluableIo       An evaluation context.
+   * @param evaluationContext
    * @see com.github.dakusui.pcond.core.Evaluable.StreamPred
    */
-  <E> void evaluate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, Evaluable.StreamPred<E> streamPred);
+  <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext);
 
   boolean resultValueAsBoolean(EvaluationResultHolder<Object> evaluationResultHolder);
 
@@ -109,7 +109,7 @@ public interface Evaluator {
       }
     };
     private static final Object NULL_VALUE    = new Object();
-    public static final  Object UNKNOWN       = new Snapshottable() {
+    public static final Object                    UNKNOWN       = new Snapshottable() {
       @Override
       public Object snapshot() {
         return this.toString();
@@ -124,35 +124,36 @@ public interface Evaluator {
     }
 
     @Override
-    public <T> void evaluate(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, Evaluable.Conjunction<T> conjunction) {
+    public <T> void evaluateConjunction(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
+
     }
 
     @Override
-    public <T> void evaluate(EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> evaluableIo, Evaluable.Disjunction<T> disjunction) {
+    public <T> void evaluateDisjunction(EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
     }
 
     @Override
-    public <T> void evaluate(EvaluableIo<T, Evaluable.Negation<T>, Boolean> evaluableIo, Evaluable.Negation<T> negation) {
+    public <T> void evaluateNegation(EvaluableIo<T, Evaluable.Negation<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
     }
 
     @Override
-    public <T> void evaluate(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, Evaluable.LeafPred<T> leafPred) {
+    public <T> void evaluateLeaf(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
     }
 
     @Override
-    public <T, R> void evaluate(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, Evaluable.Func<T> func) {
+    public <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
     }
 
     @Override
-    public void evaluate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, Evaluable.VariableBundlePred variableBundlePred) {
+    public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
     }
 
     @Override
-    public <T, R> void evaluate(EvaluableIo<T, Evaluable.Transformation<T, R>, R> evaluableIo, Evaluable.Transformation<T, R> transformation) {
+    public <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
     }
 
     @Override
-    public <E> void evaluate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, Evaluable.StreamPred<E> streamPred) {
+    public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
     }
 
     @Override

@@ -400,7 +400,7 @@ public interface Validator {
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
-        ((Evaluable<T>) cond).accept(null, evaluator);
+        ((Evaluable<T>) cond).accept(null, null, evaluator);
       } catch (Error error) {
         throw error;
       } catch (Throwable t) {

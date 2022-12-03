@@ -33,10 +33,11 @@ public interface Evaluable<T> {
   /**
    * Performs an evaluation of the `evaluationContext` with a given `evaluator`.
    *
-   * @param evaluableIo An execution occurrence of an evaluable.
-   * @param evaluator   An evaluator with which the `evaluationContext` is evaluated.
+   * @param evaluableIo       An execution occurrence of an evaluable.
+   * @param evaluationContext An evaluation context.
+   * @param evaluator         An evaluator with which the `evaluationContext` is evaluated.
    */
-  <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator);
+  <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator);
 
   /**
    * In order to generate an informative report, the framework needs information
@@ -120,8 +121,8 @@ public interface Evaluable<T> {
   interface Conjunction<T> extends Composite<T> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
-      evaluator.evaluate((EvaluableIo<T, Conjunction<T>, Boolean>) (EvaluableIo) evaluableIo, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateConjunction((EvaluableIo<T, Conjunction<T>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
   }
 
@@ -133,8 +134,8 @@ public interface Evaluable<T> {
   interface Disjunction<T> extends Composite<T> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
-      evaluator.evaluate((EvaluableIo<T, Disjunction<T>, Boolean>) (EvaluableIo) evaluableIo, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateDisjunction((EvaluableIo<T, Disjunction<T>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
   }
 
@@ -146,8 +147,8 @@ public interface Evaluable<T> {
   interface Negation<T> extends Pred<T> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
-      evaluator.evaluate((EvaluableIo<T, Negation<T>, Boolean>) (EvaluableIo)evaluableIo, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateNegation((EvaluableIo<T, Negation<T>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     /**
@@ -176,8 +177,8 @@ public interface Evaluable<T> {
   interface LeafPred<T> extends Pred<T> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
-      evaluator.evaluate((EvaluableIo<T, LeafPred<T>, Boolean>) (EvaluableIo)evaluableIo, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateLeaf((EvaluableIo<T, LeafPred<T>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     /**
@@ -196,8 +197,8 @@ public interface Evaluable<T> {
   interface VariableBundlePred extends Pred<VariableBundle> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default <O> void accept(EvaluableIo<VariableBundle, Evaluable<VariableBundle>, O> evaluableIo, Evaluator evaluator) {
-      evaluator.evaluate((EvaluableIo<VariableBundle, VariableBundlePred, Boolean>) (EvaluableIo)evaluableIo, this);
+    default <O> void accept(EvaluableIo<VariableBundle, Evaluable<VariableBundle>, O> evaluableIo, EvaluationContext<VariableBundle> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateVariableBundlePredicate((EvaluableIo<VariableBundle, VariableBundlePred, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     <T> Evaluable<? super T> enclosed();
@@ -211,10 +212,10 @@ public interface Evaluable<T> {
    * @param <E> The type of elements in the stream to be evaluated.
    */
   interface StreamPred<E> extends Pred<Stream<E>> {
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default <O> void accept(EvaluableIo<Stream<E>, Evaluable<Stream<E>>, O> evaluableIo, Evaluator evaluator) {
-      evaluator.evaluate((EvaluableIo<Stream<E>, StreamPred<E>, Boolean>) (EvaluableIo)evaluableIo, this);
+    default <O> void accept(EvaluableIo<Stream<E>, Evaluable<Stream<E>>, O> evaluableIo, EvaluationContext<Stream<E>> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateStreamPredicate((EvaluableIo<Stream<E>, StreamPred<E>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     /**
@@ -257,8 +258,8 @@ public interface Evaluable<T> {
   interface Transformation<T, R> extends Pred<T> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
-      evaluator.evaluate((EvaluableIo<T, Transformation<T, R>, R>) (EvaluableIo)evaluableIo, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateTransformation((EvaluableIo<T, Transformation<T, R>, R>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     /**
@@ -294,8 +295,8 @@ public interface Evaluable<T> {
   interface Func<T> extends Evaluable<T> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, Evaluator evaluator) {
-      evaluator.evaluate((EvaluableIo<T, Func<T>, O>) (EvaluableIo)evaluableIo, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateFunction((EvaluableIo<T, Func<T>, O>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     Function<? super T, ?> head();
