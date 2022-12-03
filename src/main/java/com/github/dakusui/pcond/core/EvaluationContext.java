@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.EvaluationResultHolder.State.EXCEPTION_THROWN;
@@ -28,15 +29,12 @@ public class EvaluationContext<T> {
   public EvaluationContext() {
   }
 
-  public void visit(Evaluator evaluator, Evaluable<T> evaluable, EvaluationResultHolder<T> input) {
-    requireNonNull(evaluator);
+  public void evaluate(EvaluationResultHolder<T> input, Evaluable<T> evaluable, BiConsumer<Evaluable<T>, EvaluableIo<T, Evaluable<T>, ?>> evaluatorCallback) {
     requireNonNull(evaluable);
     requireNonNull(input);
     EvaluableIo<T, Evaluable<T>, ?> evaluableIo = this.enter(input, evaluable);
     try {
-      evaluableIo.evaluable().accept(
-          evaluableIo.input() /* Actually, we need to pass evaluableIo itself, not its input only */,
-          evaluator);
+      evaluatorCallback.accept(evaluable, evaluableIo);
     } catch (Throwable t) {
       // Whatever the exception here is, it will be an internal error (a bug in pcond).
       // Because `evaluable.accept()` should catch it if an exception is thrown from a leaf
