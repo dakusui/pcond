@@ -421,12 +421,12 @@ public interface Evaluator {
 
     private static <T> boolean isValueReturned
         (EvaluationResultHolder<T> evaluationResultHolder) {
-      return evaluationResultHolder.state() == EvaluationContext.State.VALUE_RETURNED;
+      return evaluationResultHolder.state() == EvaluationResultHolder.State.VALUE_RETURNED;
     }
 
     private static <T> boolean isExceptionThrown
         (EvaluationResultHolder<T> evaluationResultHolder) {
-      return evaluationResultHolder.state() == EvaluationContext.State.EXCEPTION_THROWN;
+      return evaluationResultHolder.state() == EvaluationResultHolder.State.EXCEPTION_THROWN;
     }
 
     private <T, R> EvaluableIo

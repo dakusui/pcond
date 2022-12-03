@@ -3,7 +3,9 @@ package com.github.dakusui.pcond.core;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 
 /**
  * The new design:
@@ -17,27 +19,33 @@ public class EvaluationContext<T> {
   final Evaluable<T>                    evaluable;
 
   public EvaluationContext(Evaluable<T> evaluable) {
-    this.evaluable = evaluable;
+    this.evaluable = requireNonNull(evaluable);
   }
 
   public void visit(Evaluator evaluator) {
-    EvaluationResultHolder<T> evaluationResultHolder = enter(evaluator);
+    EvaluationResultHolder<T> evaluationResultHolder = this.enter();
     try {
-      evaluable.accept(evaluationResultHolder, evaluator);
+      this.evaluable.accept(evaluationResultHolder, evaluator);
+    } catch (Throwable t) {
+      // Whatever the exception here is, it will be an internal error (a bug in pcond).
+      // Because `evaluable.accept()` should catch it if an exception is thrown from a leaf
+      // predicate or function.
+      // The exception should be stored in the evaluationResultHolder
+      throw wrapIfNecessary(t);
     } finally {
-      leave(evaluator, evaluable, evaluationResultHolder);
+      this.leave(evaluationResultHolder);
     }
   }
 
 
-  private EvaluationResultHolder<T> enter(Evaluator evaluator) {
+  private EvaluationResultHolder<T> enter() {
     this.visitorLineage.add(this);
     return createEvaluationResultHolder(this);
   }
 
 
-  private void leave(Evaluator evaluator, Evaluable<T> evaluable, EvaluationResultHolder<T> evaluationResultHolder) {
-    this.evaluationEntries.add(createEvaluationEntry(this, evaluationResultHolder));
+  private void leave(EvaluationResultHolder<T> evaluationResultHolder) {
+    this.evaluationEntries.add(createEvaluationEntry(this.evaluable, this, evaluationResultHolder));
     EvaluationContext<?> removed = this.visitorLineage.remove(this.visitorLineage.size() - 1);
     assert removed == this;
   }
@@ -47,9 +55,8 @@ public class EvaluationContext<T> {
   }
 
   private static <T> EvaluationEntry.Finalized createEvaluationEntry(
-      EvaluationContext<T> evaluationContext,
+      Evaluable<T> evaluable, EvaluationContext<T> evaluationContext,
       EvaluationResultHolder<T> evaluationResultHolder) {
-    Evaluable<T> evaluable = evaluationContext.evaluable;
     EvaluationEntry.Type evaluationEntryType = figureOutEvaluationEntryType(evaluable);
     return new EvaluationEntry.Finalized(
         String.format("%s", evaluable),
@@ -69,34 +76,5 @@ public class EvaluationContext<T> {
 
   private static <T> EvaluationEntry.Type figureOutEvaluationEntryType(Evaluable<T> evaluable) {
     return null;
-  }
-
-  EvaluationContext createChild() {
-    return new EvaluationContext(evaluable);
-  }
-
-  public enum State {
-    VALUE_RETURNED {
-      <V> V value(EvaluationResultHolder<V> vContextVariable) {
-        return vContextVariable.value;
-      }
-
-      <V> Throwable exception(EvaluationResultHolder<V> vContextVariable) {
-        throw new UnsupportedOperationException();
-      }
-    },
-    EXCEPTION_THROWN {
-      <V> V value(EvaluationResultHolder<V> vContextVariable) {
-        throw new UnsupportedOperationException();
-      }
-
-      <V> Throwable exception(EvaluationResultHolder<V> vContextVariable) {
-        return vContextVariable.exception;
-      }
-    };
-
-    abstract <V> V value(EvaluationResultHolder<V> vContextVariable);
-
-    abstract <V> Throwable exception(EvaluationResultHolder<V> vContextVariable);
   }
 }
