@@ -126,36 +126,68 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluateConjunction(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
-      evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input(), (evaluable, io) -> {
-        boolean result = true;
-        boolean skipped = false;
-        for (Evaluable<T> each : evaluable.children()) {
-          EvaluableIo<T, Evaluable<T>, Boolean> child = new EvaluableIo<>(evaluableIo.input(), EvaluationContext.resolveEvaluationEntryType(each), each);
-          each.accept(child, evaluationContext, this);
-          EvaluationResultHolder<Boolean> outputFromEach = child.output();
-          if (outputFromEach.isValueReturned()) {
-            result &= outputFromEach.returnedValue();
-            if (child.output().isValueReturned())
-              evaluableIo.output().valueReturned(result);
-            else if (child.output().isExceptionThrown())
-              skipped = true;
-            else if (child.output().isEvaluationSkipped())
-              skipped = true;
+      evaluationContext.evaluate(
+          evaluableIo.evaluable(),
+          evaluableIo.input(),
+          io -> {
+            boolean result = true;
+            boolean skipped = false;
+            for (Evaluable<T> each : io.evaluable().children()) {
+              EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(evaluableIo, each);
+              each.accept(child, evaluationContext, this);
+              EvaluationResultHolder<Boolean> outputFromEach = child.output();
+              if (outputFromEach.isValueReturned()) {
+                result &= outputFromEach.returnedValue();
+                if (child.output().isValueReturned())
+                  evaluableIo.valueReturned(result);
+                else if (child.output().isExceptionThrown())
+                  skipped = true;
+                else if (child.output().isEvaluationSkipped())
+                  skipped = true;
+                else
+                  assert false;
+                if (io.evaluable().shortcut() && (skipped || !result))
+                  break;
+              }
+            }
+            if (skipped)
+              io.evaluationSkipped();
             else
-              assert false;
-            if (evaluable.shortcut() && (skipped || !result))
-              break;
-          }
-        }
-        if (skipped)
-          io.output().evaluationSkipped();
-        else
-          io.output().valueReturned(result);
-      });
+              io.valueReturned(result);
+          });
     }
 
     @Override
     public <T> void evaluateDisjunction(EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
+      evaluationContext.evaluate(
+          evaluableIo.evaluable(),
+          evaluableIo.input(),
+          io -> {
+            boolean result = false;
+            boolean skipped = false;
+            for (Evaluable<T> each : io.evaluable().children()) {
+              EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(evaluableIo, each);
+              each.accept(child, evaluationContext, this);
+              EvaluationResultHolder<Boolean> outputFromEach = child.output();
+              if (outputFromEach.isValueReturned()) {
+                result |= outputFromEach.returnedValue();
+                if (child.output().isValueReturned())
+                  evaluableIo.valueReturned(result);
+                else if (child.output().isExceptionThrown())
+                  skipped = true;
+                else if (child.output().isEvaluationSkipped())
+                  skipped = true;
+                else
+                  assert false;
+                if (io.evaluable().shortcut() && (skipped || result))
+                  break;
+              }
+            }
+            if (skipped)
+              io.evaluationSkipped();
+            else
+              io.valueReturned(result);
+          });
     }
 
     @Override
@@ -164,10 +196,22 @@ public interface Evaluator {
 
     @Override
     public <T> void evaluateLeaf(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
+      evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input, io -> {
+        if (io.input().isValueReturned()) {
+          io.output().valueReturned(io.evaluable().predicate().test(io.input().returnedValue()));
+        } else
+          io.output().evaluationSkipped();
+      });
     }
 
     @Override
     public <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
+      evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input, io -> {
+        if (io.input().isValueReturned()) {
+          io.output().valueReturned(io.evaluable().head().apply(io.input().returnedValue()));
+        } else
+          io.output().evaluationSkipped();
+      });
     }
 
     @Override
@@ -192,6 +236,11 @@ public interface Evaluator {
     @Override
     public List<EvaluationEntry> resultEntries() {
       return Collections.emptyList();
+    }
+
+    private static <T, E extends Evaluable<T>>
+    EvaluableIo<T, Evaluable<T>, Boolean> createChildEvaluableIoOf(EvaluableIo<T, E, Boolean> evaluableIo, Evaluable<T> evaluable) {
+      return new EvaluableIo<>(evaluableIo.input(), EvaluationContext.resolveEvaluationEntryType(evaluable), evaluable);
     }
   }
 

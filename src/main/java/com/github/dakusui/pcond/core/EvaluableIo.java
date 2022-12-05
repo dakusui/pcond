@@ -25,6 +25,11 @@ public class EvaluableIo<I, E extends Evaluable<I>, O> {
     return this;
   }
 
+  public EvaluableIo<I, E, O> evaluationSkipped() {
+    this.output = this.output.evaluationSkipped();
+    return this;
+  }
+
   public EvaluationResultHolder<I> input() {
     return this.input;
   }
