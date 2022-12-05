@@ -9,7 +9,7 @@ import static com.github.dakusui.pcond.core.EvaluationResultHolder.State.EXCEPTI
 import static com.github.dakusui.pcond.core.EvaluationResultHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainInputActualValue;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainOutputExpectation;
-import static com.github.dakusui.pcond.core.Evaluator.Impl.NOT_EVALUATED;
+import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -55,6 +55,8 @@ public class EvaluationContext<T> {
     EvaluableIo<T, Evaluable<T>, O> evaluableIo = this.enter(input, evaluable);
     try {
       evaluatorCallback.accept(evaluable, evaluableIo);
+      if (evaluableIo.input().isEvaluationSkipped())
+        evaluableIo.output().evaluationSkipped();
     } catch (Throwable t) {
       // Whatever the exception here is, it will be an internal error (a bug in pcond).
       // Because `evaluable.accept()` should catch it if an exception is thrown from a leaf
@@ -149,7 +151,7 @@ public class EvaluationContext<T> {
         return !evaluationContext.expectationFlipped;
       return evaluableIo.output().returnedValue();
     } else if (evaluableIo.output().state() == EXCEPTION_THROWN)
-      return NOT_EVALUATED;
+      return EVALUATION_SKIPPED;
     else
       throw new AssertionError();
   }

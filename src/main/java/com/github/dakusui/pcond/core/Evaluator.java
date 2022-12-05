@@ -102,13 +102,13 @@ public interface Evaluator {
   List<EvaluationEntry> resultEntries();
 
   class Impl implements Evaluator {
-    public static final  Object NOT_EVALUATED = new Object() {
+    public static final  Object EVALUATION_SKIPPED = new Object() {
       @Override
       public String toString() {
         return "(not evaluated)";
       }
     };
-    private static final Object NULL_VALUE    = new Object();
+    private static final Object NULL_VALUE         = new Object();
     public static final  Object UNKNOWN       = new Snapshottable() {
       @Override
       public Object snapshot() {
@@ -131,7 +131,12 @@ public interface Evaluator {
         for (Evaluable<T> each : evaluable.children()) {
           EvaluableIo<T, Evaluable<T>, Boolean> child = new EvaluableIo<>(evaluableIo.input(), EvaluationContext.resolveEvaluationEntryType(each), each);
           each.accept(child, evaluationContext, this);
-          result &= child.output().returnedValue();
+          EvaluationResultHolder<Boolean> outputFromEach = child.output();
+          if (outputFromEach.isValueReturned()) {
+            result &= outputFromEach.returnedValue();
+            if (!evaluable.shortcut() && outputFromEach.returnedValue())
+              break;
+          }
         }
         io.output().valueReturned(result);
       });

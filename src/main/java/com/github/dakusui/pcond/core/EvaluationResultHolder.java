@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core;
 
+import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Objects.requireNonNull;
 
@@ -36,24 +37,14 @@ public class EvaluationResultHolder<V> implements Cloneable {
     return this.state.exception(this);
   }
 
-  public EvaluationResultHolder<V> compatValueReturned(V returnedValue) {
-    this.state = State.VALUE_RETURNED;
-    this.value = returnedValue;
-    this.exception = null;
-    return this;
-  }
-
-  public EvaluationResultHolder<V> compatExceptionThrown(Throwable thrownException) {
-    this.state = State.EXCEPTION_THROWN;
-    this.exception = thrownException;
-    this.value = null;
-    return this;
-  }
-
   public Object value() {
-    if (this.state() == State.VALUE_RETURNED)
+    if (isValueReturned())
       return this.returnedValue();
-    return this.thrownException();
+    if (isEvaluationSkipped())
+      return EVALUATION_SKIPPED;
+    if (isExceptionThrown())
+      return this.thrownException();
+    throw new IllegalStateException();
   }
 
   public static <V> EvaluationResultHolder<V> forValue(V value) {
@@ -64,40 +55,45 @@ public class EvaluationResultHolder<V> implements Cloneable {
     return String.format("state:%s, value:%s, exception:%s", state, value, exception);
   }
 
+  public boolean isValueReturned() {
+    return this.state() == State.VALUE_RETURNED;
+  }
+
+  public boolean isExceptionThrown() {
+    return this.state() == State.EXCEPTION_THROWN;
+  }
+
+  public boolean isEvaluationSkipped() {
+    return this.state() == State.EVALUATION_SKIPPED;
+  }
+
+  public boolean wasEvaluationAttempted() {
+    return this.state() != State.NOT_YET_EVALUATED;
+  }
+
   public enum State {
     NOT_YET_EVALUATED {
-      @Override
-      <V> V value(EvaluationResultHolder<V> vContextVariable) {
-        throw new IllegalStateException();
-      }
-
-      @Override
-      <V> Throwable exception(EvaluationResultHolder<V> vContextVariable) {
-        throw new IllegalStateException();
-      }
     },
     VALUE_RETURNED {
-      <V> V value(EvaluationResultHolder<V> vContextVariable) {
-        return vContextVariable.value;
-      }
-
-      <V> Throwable exception(EvaluationResultHolder<V> vContextVariable) {
-        throw new UnsupportedOperationException();
+      <V> V value(EvaluationResultHolder<V> evaluationResultHolder) {
+        return evaluationResultHolder.value;
       }
     },
     EXCEPTION_THROWN {
-      <V> V value(EvaluationResultHolder<V> vContextVariable) {
-        throw new UnsupportedOperationException();
-      }
-
       <V> Throwable exception(EvaluationResultHolder<V> vContextVariable) {
         return vContextVariable.exception;
       }
+    },
+    EVALUATION_SKIPPED {
     };
 
-    abstract <V> V value(EvaluationResultHolder<V> vContextVariable);
+    <V> V value(EvaluationResultHolder<V> evaluationResultHolder) {
+      throw new IllegalStateException();
+    }
 
-    abstract <V> Throwable exception(EvaluationResultHolder<V> vContextVariable);
+    <V> Throwable exception(EvaluationResultHolder<V> vContextVariable) {
+      throw new IllegalStateException();
+    }
   }
 
   public EvaluationResultHolder<V> valueReturned(V value) {
@@ -108,6 +104,11 @@ public class EvaluationResultHolder<V> implements Cloneable {
   public EvaluationResultHolder<V> exceptionThrown(Throwable throwable) {
     requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
     return new EvaluationResultHolder<>(State.EXCEPTION_THROWN, null, requireNonNull(throwable));
+  }
+
+  public EvaluationResultHolder<V> evaluationSkipped() {
+    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
+    return new EvaluationResultHolder<>(State.EVALUATION_SKIPPED, null, null);
   }
 
   static <E> EvaluationResultHolder<E> create() {
