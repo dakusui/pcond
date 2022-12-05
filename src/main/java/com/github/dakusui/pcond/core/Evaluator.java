@@ -109,7 +109,7 @@ public interface Evaluator {
       }
     };
     private static final Object NULL_VALUE         = new Object();
-    public static final  Object UNKNOWN       = new Snapshottable() {
+    public static final  Object UNKNOWN            = new Snapshottable() {
       @Override
       public Object snapshot() {
         return this.toString();
@@ -128,17 +128,29 @@ public interface Evaluator {
     public <T> void evaluateConjunction(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input(), (evaluable, io) -> {
         boolean result = true;
+        boolean skipped = false;
         for (Evaluable<T> each : evaluable.children()) {
           EvaluableIo<T, Evaluable<T>, Boolean> child = new EvaluableIo<>(evaluableIo.input(), EvaluationContext.resolveEvaluationEntryType(each), each);
           each.accept(child, evaluationContext, this);
           EvaluationResultHolder<Boolean> outputFromEach = child.output();
           if (outputFromEach.isValueReturned()) {
             result &= outputFromEach.returnedValue();
-            if (!evaluable.shortcut() && outputFromEach.returnedValue())
+            if (child.output().isValueReturned())
+              evaluableIo.output().valueReturned(result);
+            else if (child.output().isExceptionThrown())
+              skipped = true;
+            else if (child.output().isEvaluationSkipped())
+              skipped = true;
+            else
+              assert false;
+            if (evaluable.shortcut() && (skipped || !result))
               break;
           }
         }
-        io.output().valueReturned(result);
+        if (skipped)
+          io.output().evaluationSkipped();
+        else
+          io.output().valueReturned(result);
       });
     }
 
