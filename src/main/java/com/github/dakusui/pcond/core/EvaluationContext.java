@@ -152,7 +152,7 @@ public class EvaluationContext<T> {
     } else if (evaluableIo.output().state() == EXCEPTION_THROWN)
       return EVALUATION_SKIPPED;
     else
-      throw new AssertionError();
+      throw new AssertionError("output state=<" + evaluableIo.output().state() + ">");
   }
 
   private static <T, E extends Evaluable<T>> Object computeOutputActualValue(EvaluableIo<T, E, ?> evaluableIo) {

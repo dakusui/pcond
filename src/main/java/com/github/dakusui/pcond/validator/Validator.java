@@ -1,9 +1,6 @@
 package com.github.dakusui.pcond.validator;
 
-import com.github.dakusui.pcond.core.EvaluationResultHolder;
-import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.EvaluationEntry;
-import com.github.dakusui.pcond.core.Evaluator;
+import com.github.dakusui.pcond.core.*;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.io.IOException;
@@ -16,6 +13,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.executionFailure;
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
@@ -397,10 +395,13 @@ public interface Validator {
       BiFunction<T, Predicate<? super T>, String> messageComposerFunction,
       ExceptionFactory<Throwable> exceptionComposerFunction) {
     EvaluationResultHolder<T> evaluationResultHolder = EvaluationResultHolder.forValue(value);
+    Evaluable<T> evaluable = toEvaluableIfNecessary(cond);
+    EvaluableIo<T, Evaluable<T>, Boolean> evaluableIo = new EvaluableIo<>(evaluationResultHolder, EvaluationContext.resolveEvaluationEntryType(evaluable), evaluable);
+    EvaluationContext<T> evaluationContext = new EvaluationContext<>();
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
-        ((Evaluable<T>) cond).accept(null /* TODO */, null /* TODO */, evaluator);
+        ((Evaluable<T>) cond).accept(evaluableIo, evaluationContext, evaluator);
       } catch (Error error) {
         throw error;
       } catch (Throwable t) {

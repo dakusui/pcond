@@ -253,7 +253,7 @@ public enum PrintablePredicateFactory {
     }
 
     @Override
-    public Evaluable<? super T> target() {
+    public Evaluable<T> target() {
       return target;
     }
   }

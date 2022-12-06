@@ -156,7 +156,7 @@ public interface Evaluable<T> {
      *
      * @return A target predicate.
      */
-    Evaluable<? super T> target();
+    Evaluable<T> target();
 
     @Override
     default boolean requestExpectationFlip() {
