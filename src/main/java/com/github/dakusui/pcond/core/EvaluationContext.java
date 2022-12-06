@@ -45,9 +45,9 @@ public class EvaluationContext<T> {
   }
 
   /**
-   * @param evaluable
-   * @param input
-   * @param evaluatorCallback
+   * @param evaluable A form to be evaluated.
+   * @param input An object that holds an input value to {@code evaluable}.
+   * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
    */
   public <E extends Evaluable<T>, O> void evaluate(E evaluable, EvaluationResultHolder<T> input, Consumer<EvaluableIo<T, E, O>> evaluatorCallback) {
     requireNonNull(evaluable);

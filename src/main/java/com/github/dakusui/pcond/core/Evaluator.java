@@ -214,9 +214,9 @@ public interface Evaluator {
           evaluableIo.input(),
           io -> {
             if (io.input().isValueReturned()) {
-              io.output().valueReturned(io.evaluable().predicate().test(io.input().returnedValue()));
+              io.valueReturned(io.evaluable().predicate().test(io.input().returnedValue()));
             } else
-              io.output().evaluationSkipped();
+              io.evaluationSkipped();
           });
     }
 
@@ -224,9 +224,9 @@ public interface Evaluator {
     public <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input(), (EvaluableIo<T, Evaluable.Func<T>, Object> io) -> {
         if (io.input().isValueReturned()) {
-          io.output().valueReturned(io.evaluable().head().apply(io.input().returnedValue()));
+          io.valueReturned(io.evaluable().head().apply(io.input().returnedValue()));
         } else
-          io.output().evaluationSkipped();
+          io.evaluationSkipped();
       });
     }
 
