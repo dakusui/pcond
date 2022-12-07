@@ -2,8 +2,6 @@ package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.core.context.VariableBundle;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
@@ -98,8 +96,6 @@ public interface Evaluator {
   static Evaluator create() {
     return new Impl();
   }
-
-  List<EvaluationEntry> resultEntries();
 
   class Impl implements Evaluator {
     public static final  Object EVALUATION_SKIPPED = new Object() {
@@ -247,11 +243,6 @@ public interface Evaluator {
       if (evaluationResultHolder.value() instanceof Boolean)
         return (boolean) evaluationResultHolder.value();
       return false;
-    }
-
-    @Override
-    public List<EvaluationEntry> resultEntries() {
-      return Collections.emptyList();
     }
 
     private static <T, E extends Evaluable<T>>

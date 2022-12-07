@@ -411,13 +411,13 @@ public interface Validator {
                 .reportComposer()
                 .composeExplanation(
                     message,
-                    evaluator.resultEntries(),
+                    evaluationContext.resultEntries(),
                     t),
             t);
       }
       if (evaluator.resultValueAsBoolean((EvaluationResultHolder<Object>) evaluationResultHolder))
         return value;
-      List<EvaluationEntry> entries = evaluator.resultEntries();
+      List<EvaluationEntry> entries = evaluationContext.resultEntries();
       throw exceptionComposerFunction.create(configuration()
           .reportComposer()
           .composeExplanation(

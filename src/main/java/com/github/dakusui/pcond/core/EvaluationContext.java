@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -111,7 +112,7 @@ public class EvaluationContext<T> {
     Object outputExpectation = computeOutputExpectation(evaluationContext, evaluableIo);
     Object detailOutputExpectation = explainOutputExpectation(evaluableIo.evaluable());
     Object detailInputActualValue = explainInputActualValue(evaluable, inputActualValue);
-    Object outputActualValue1 = computeOutputActualValue(evaluableIo);
+    Object outputActualValue = computeOutputActualValue(evaluableIo);
     Object detailOutputActualValue = explainOutputActualValue(evaluableIo);
     boolean squashable = evaluable.isSquashable();
     boolean explanationRequired = isExplanationRequired(evaluationEntryType, evaluationContext, evaluableIo);
@@ -121,7 +122,7 @@ public class EvaluationContext<T> {
         evaluationContext.visitorLineage.size(),
         outputExpectation, detailOutputExpectation,
         inputActualValue, detailInputActualValue,
-        outputActualValue1, detailOutputActualValue,
+        outputActualValue, detailOutputActualValue,
         squashable,
         explanationRequired
     );
@@ -166,7 +167,7 @@ public class EvaluationContext<T> {
 
   private static <T, E extends Evaluable<T>> Object explainOutputActualValue(EvaluableIo<T, E, ?> evaluableIo) {
     if (evaluableIo.output().state() == VALUE_RETURNED)
-      return evaluableIo.output().returnedValue();
+      return evaluableIo.input().returnedValue();
     else if (evaluableIo.output().state() == EXCEPTION_THROWN)
       return composeDetailOutputActualValueFromInputAndThrowable(evaluableIo.input().value(), evaluableIo.output().thrownException());
     else
@@ -177,6 +178,10 @@ public class EvaluationContext<T> {
     return asList(FUNCTION, LEAF).contains(evaluationEntryType) && (
         evaluableIo.output().state() == EvaluationResultHolder.State.EXCEPTION_THROWN || (
             evaluableIo.evaluableType() == LEAF && (
-                evaluationContext.expectationFlipped ^ (Boolean) evaluableIo.output().returnedValue())));
+                evaluationContext.expectationFlipped ^ !(Boolean) evaluableIo.output().returnedValue())));
+  }
+
+  public List<EvaluationEntry> resultEntries() {
+    return new ArrayList<>(this.evaluationEntries);
   }
 }

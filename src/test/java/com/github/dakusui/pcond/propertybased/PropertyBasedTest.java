@@ -3,6 +3,7 @@ package com.github.dakusui.pcond.propertybased;
 import com.github.dakusui.pcond.forms.Predicates;
 import org.junit.Test;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
@@ -24,5 +25,13 @@ public class PropertyBasedTest {
 
   String composeValue() {
     return "Hello";
+  }
+
+  interface TestCase {
+    Predicate<String> composePredicate();
+
+    String composeValue();
+
+    Optional<Predicate<Throwable>> expectedException();
   }
 }
