@@ -115,11 +115,6 @@ public class ValueHolder<V> implements Cloneable {
     return new ValueHolder<>(State.NOT_YET_EVALUATED, null, null);
   }
 
-  public static boolean resultValueAsBoolean(ValueHolder<Object> valueHolder) {
-    if (valueHolder.value() instanceof Boolean)
-      return (boolean) valueHolder.value();
-    return false;
-  }
   private static String messageNotYetEvaluatedStateIsRequired(State v, Object thisValue) {
     return "state:<" + State.NOT_YET_EVALUATED + "> of <" + thisValue + "> is expected but it was <" + v + ">";
   }

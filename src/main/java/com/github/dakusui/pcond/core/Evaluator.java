@@ -125,8 +125,7 @@ public interface Evaluator {
     @Override
     public <T> void evaluateConjunction(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(
-          evaluableIo.evaluable(),
-          evaluableIo.input(),
+          evaluableIo,
           (EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> io) -> {
             boolean result = true;
             boolean skipped = false;
@@ -156,8 +155,7 @@ public interface Evaluator {
     @Override
     public <T> void evaluateDisjunction(EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(
-          evaluableIo.evaluable(),
-          evaluableIo.input(),
+          evaluableIo,
           (EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> io) -> {
             boolean result = false;
             boolean skipped = false;
@@ -187,8 +185,7 @@ public interface Evaluator {
     @Override
     public <T> void evaluateNegation(EvaluableIo<T, Evaluable.Negation<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(
-          evaluableIo.evaluable(),
-          evaluableIo.input(),
+          evaluableIo,
           (EvaluableIo<T, Evaluable.Negation<T>, Boolean> io) -> {
             EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(io, io.evaluable().target());
             io.evaluable().target().accept(child, evaluationContext, this);
@@ -208,8 +205,7 @@ public interface Evaluator {
     @Override
     public <T> void evaluateLeaf(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(
-          evaluableIo.evaluable(),
-          evaluableIo.input(),
+          evaluableIo,
           io -> {
             if (io.input().isValueReturned()) {
               io.valueReturned(io.evaluable().predicate().test(io.input().returnedValue()));
@@ -221,34 +217,39 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
-      evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input(), (EvaluableIo<T, Evaluable.Func<T>, R> io) -> {
-        if (io.input().isValueReturned()) {
-          io.valueReturned((R) io.evaluable().head().apply(io.input().returnedValue()));
-        } else
-          io.evaluationSkipped();
-        EvaluationContext<R> childContext = new EvaluationContext<>();
-        evaluableIo.evaluable().<R>tail().ifPresent((Evaluable<R> tail) -> {
-          tail.accept(new EvaluableIo<>(io.output(), resolveEvaluationEntryType(tail), tail), childContext, this);
-          evaluationContext.importEntries(childContext);
-        });
-      });
+      evaluationContext.evaluate(
+          evaluableIo,
+          (EvaluableIo<T, Evaluable.Func<T>, R> io) -> {
+            if (io.input().isValueReturned()) {
+              io.valueReturned((R) io.evaluable().head().apply(io.input().returnedValue()));
+            } else
+              io.evaluationSkipped();
+            EvaluationContext<R> childContext = new EvaluationContext<>();
+            evaluableIo.evaluable().<R>tail().ifPresent((Evaluable<R> tail) -> {
+              tail.accept(new EvaluableIo<>(io.output(), resolveEvaluationEntryType(tail), tail), childContext, this);
+              evaluationContext.importEntries(childContext);
+            });
+          });
     }
 
     @Override
     public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
-      evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input(), (EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> io) -> {
+      evaluationContext.evaluate(evaluableIo, (EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> io) -> {
       });
     }
 
     @Override
     public <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
-      evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input(), (EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> io) -> {
+      /*
+      evaluationContext.evaluate(evaluableIo, (EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> io) -> {
       });
+
+       */
     }
 
     @Override
     public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
-      evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input(), (EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io) -> {
+      evaluationContext.evaluate(evaluableIo, (EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io) -> {
       });
     }
 

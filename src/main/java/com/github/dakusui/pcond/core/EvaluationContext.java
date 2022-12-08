@@ -45,16 +45,14 @@ public class EvaluationContext<T> {
   }
 
   /**
-   * @param evaluable A form to be evaluated.
-   * @param input An object that holds an input value to {@code evaluable}.
+   * @param evaluableIo An object to hold a form and its I/O.
    * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
    */
-  public <E extends Evaluable<T>, O> void evaluate(E evaluable, ValueHolder<T> input, Consumer<EvaluableIo<T, E, O>> evaluatorCallback) {
-    requireNonNull(evaluable);
-    requireNonNull(input);
-    EvaluableIo<T, E, O> evaluableIo = this.enter(input, evaluable);
+  public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, Consumer<EvaluableIo<T, E, O>> evaluatorCallback) {
+    requireNonNull(evaluableIo);
+    EvaluableIo<T, E, O> evaluableIoWork = this.enter(evaluableIo.input(), evaluableIo.evaluable());
     try {
-      evaluatorCallback.accept(evaluableIo);
+      evaluatorCallback.accept(evaluableIoWork);
     } catch (Throwable t) {
       // Whatever the exception here is, it will be an internal error (a bug in pcond).
       // Because `evaluable.accept()` should catch it if an exception is thrown from a leaf
@@ -62,7 +60,7 @@ public class EvaluationContext<T> {
       // The exception should be stored in the evaluableIo
       throw wrapIfNecessary(t);
     } finally {
-      this.leave(evaluableIo);
+      this.leave(evaluableIo, evaluableIoWork);
     }
   }
 
@@ -92,10 +90,18 @@ public class EvaluationContext<T> {
   }
 
 
-  private <E extends Evaluable<T>, O> void leave(EvaluableIo<T, E, O> evaluableIo) {
-    this.evaluationEntries.add(createEvaluationEntry(this, evaluableIo));
+  private <E extends Evaluable<T>, O> void leave(EvaluableIo<T, E, O> evaluableIo, EvaluableIo<T, E, O> evaluableIoWork) {
+    this.evaluationEntries.add(createEvaluationEntry(this, evaluableIoWork));
     this.visitorLineage.remove(this.visitorLineage.size() - 1);
-    this.expectationFlipped = this.expectationFlipped ^ evaluableIo.evaluable().requestExpectationFlip();
+    this.expectationFlipped = this.expectationFlipped ^ evaluableIoWork.evaluable().requestExpectationFlip();
+    if (evaluableIoWork.output().isValueReturned())
+      evaluableIo.valueReturned(evaluableIoWork.output().returnedValue());
+    else if (evaluableIoWork.output().isExceptionThrown())
+      evaluableIo.exceptionThrown(evaluableIoWork.output().thrownException());
+    else if (evaluableIoWork.output().isEvaluationSkipped())
+      evaluableIo.evaluationSkipped();
+    else
+      assert false;
   }
 
   private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(ValueHolder<T> input, Evaluable<T> evaluable) {
