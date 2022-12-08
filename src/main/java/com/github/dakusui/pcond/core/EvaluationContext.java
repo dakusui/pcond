@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
-import static com.github.dakusui.pcond.core.EvaluationResultHolder.State.EXCEPTION_THROWN;
-import static com.github.dakusui.pcond.core.EvaluationResultHolder.State.VALUE_RETURNED;
+import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
+import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.*;
 import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
@@ -49,7 +49,7 @@ public class EvaluationContext<T> {
    * @param input An object that holds an input value to {@code evaluable}.
    * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
    */
-  public <E extends Evaluable<T>, O> void evaluate(E evaluable, EvaluationResultHolder<T> input, Consumer<EvaluableIo<T, E, O>> evaluatorCallback) {
+  public <E extends Evaluable<T>, O> void evaluate(E evaluable, ValueHolder<T> input, Consumer<EvaluableIo<T, E, O>> evaluatorCallback) {
     requireNonNull(evaluable);
     requireNonNull(input);
     EvaluableIo<T, E, O> evaluableIo = this.enter(input, evaluable);
@@ -84,7 +84,7 @@ public class EvaluationContext<T> {
 
 
   @SuppressWarnings("unchecked")
-  private <E extends Evaluable<T>, O> EvaluableIo<T, E, O> enter(EvaluationResultHolder<T> input, E evaluable) {
+  private <E extends Evaluable<T>, O> EvaluableIo<T, E, O> enter(ValueHolder<T> input, E evaluable) {
     EvaluableIo<T, Evaluable<T>, O> ret = createEvaluableIo(input, evaluable);
     this.expectationFlipped = this.expectationFlipped ^ evaluable.requestExpectationFlip();
     this.visitorLineage.add(ret);
@@ -98,7 +98,7 @@ public class EvaluationContext<T> {
     this.expectationFlipped = this.expectationFlipped ^ evaluableIo.evaluable().requestExpectationFlip();
   }
 
-  private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(EvaluationResultHolder<T> input, Evaluable<T> evaluable) {
+  private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(ValueHolder<T> input, Evaluable<T> evaluable) {
     return new EvaluableIo<>(input, resolveEvaluationEntryType(evaluable), evaluable);
   }
 
@@ -166,12 +166,16 @@ public class EvaluationContext<T> {
 
   private static <T, E extends Evaluable<T>> boolean isExplanationRequired(EvaluationEntry.Type evaluationEntryType, EvaluationContext<T> evaluationContext, EvaluableIo<T, E, ?> evaluableIo) {
     return asList(FUNCTION, LEAF).contains(evaluationEntryType) && (
-        evaluableIo.output().state() == EvaluationResultHolder.State.EXCEPTION_THROWN || (
+        evaluableIo.output().state() == ValueHolder.State.EXCEPTION_THROWN || (
             evaluableIo.evaluableType() == LEAF && (
                 evaluationContext.expectationFlipped ^ !(Boolean) evaluableIo.output().returnedValue())));
   }
 
   public List<EvaluationEntry> resultEntries() {
     return new ArrayList<>(this.evaluationEntries);
+  }
+
+  public <R> void importEntries(EvaluationContext<R> childContext) {
+    childContext.resultEntries().forEach(each -> this.evaluationEntries.add((EvaluationEntry.Finalized) each));
   }
 }

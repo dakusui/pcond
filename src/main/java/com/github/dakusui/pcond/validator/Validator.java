@@ -160,7 +160,7 @@ public interface Validator {
    * Otherwise, an exception created by `forValidate.exceptionForIllegalArgument()`
    * will be thrown.
    * This method is intended to be used by {@code Validates#validateArgument(Object, Predicate)}
-   * method in valid8j library.
+   * method in `valid8j` library.
    *
    * @param value       The value to be checked.
    * @param cond        A condition to validate the `value`.
@@ -368,7 +368,7 @@ public interface Validator {
         value,
         cond,
         configuration().messageComposer()::composeMessageForAssertion,
-        explantion -> configuration().exceptionComposer().forAssertThat().testSkippedException(explantion, configuration().reportComposer()));
+        explanation -> configuration().exceptionComposer().forAssertThat().testSkippedException(explanation, configuration().reportComposer()));
   }
 
   /**
@@ -394,9 +394,9 @@ public interface Validator {
       Predicate<? super T> cond,
       BiFunction<T, Predicate<? super T>, String> messageComposerFunction,
       ExceptionFactory<Throwable> exceptionComposerFunction) {
-    EvaluationResultHolder<T> evaluationResultHolder = EvaluationResultHolder.forValue(value);
+    ValueHolder<T> valueHolder = ValueHolder.forValue(value);
     Evaluable<T> evaluable = toEvaluableIfNecessary(cond);
-    EvaluableIo<T, Evaluable<T>, Boolean> evaluableIo = new EvaluableIo<>(evaluationResultHolder, EvaluationContext.resolveEvaluationEntryType(evaluable), evaluable);
+    EvaluableIo<T, Evaluable<T>, Boolean> evaluableIo = new EvaluableIo<>(valueHolder, EvaluationContext.resolveEvaluationEntryType(evaluable), evaluable);
     EvaluationContext<T> evaluationContext = new EvaluationContext<>();
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
@@ -415,7 +415,7 @@ public interface Validator {
                     t),
             t);
       }
-      if (evaluator.resultValueAsBoolean((EvaluationResultHolder<Object>) evaluationResultHolder))
+      if (evaluableIo.output().isValueReturned() && Objects.equals(true, evaluableIo.output().value()))
         return value;
       List<EvaluationEntry> entries = evaluationContext.resultEntries();
       throw exceptionComposerFunction.create(configuration()
@@ -425,7 +425,7 @@ public interface Validator {
               entries,
               null));
     } else {
-      if (!cond.test(evaluationResultHolder.returnedValue()))
+      if (!cond.test(valueHolder.returnedValue()))
         throw exceptionComposerFunction.create(configuration()
             .reportComposer()
             .composeExplanation(

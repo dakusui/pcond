@@ -267,9 +267,9 @@ public interface Evaluable<T> {
      *
      * @return A transformer function.
      */
-    Evaluable<? super T> mapper();
+    Evaluable<T> mapper();
 
-    Evaluable<? super R> checker();
+    Evaluable<R> checker();
 
     /**
      * Returns a name of a transformer, if any.
@@ -301,6 +301,6 @@ public interface Evaluable<T> {
 
     Function<? super T, ?> head();
 
-    Optional<Evaluable<?>> tail();
+    <R> Optional<Evaluable<R>> tail();
   }
 }

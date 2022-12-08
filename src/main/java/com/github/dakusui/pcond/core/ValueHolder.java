@@ -4,22 +4,22 @@ import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
 import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
 import static java.util.Objects.requireNonNull;
 
-public class EvaluationResultHolder<V> implements Cloneable {
+public class ValueHolder<V> implements Cloneable {
 
-  private State state;
+  private final State state;
   V         value;
   Throwable exception;
 
-  private EvaluationResultHolder(State state, V value, Throwable exception) {
+  private ValueHolder(State state, V value, Throwable exception) {
     this.state = state;
     this.value = value;
     this.exception = exception;
   }
 
   @SuppressWarnings("unchecked")
-  public EvaluationResultHolder<V> clone() {
+  public ValueHolder<V> clone() {
     try {
-      return (EvaluationResultHolder<V>) super.clone();
+      return (ValueHolder<V>) super.clone();
     } catch (CloneNotSupportedException e) {
       throw new RuntimeException(e);
     }
@@ -47,8 +47,8 @@ public class EvaluationResultHolder<V> implements Cloneable {
     throw new IllegalStateException();
   }
 
-  public static <V> EvaluationResultHolder<V> forValue(V value) {
-    return new EvaluationResultHolder<>(State.VALUE_RETURNED, value, null);
+  public static <V> ValueHolder<V> forValue(V value) {
+    return new ValueHolder<>(State.VALUE_RETURNED, value, null);
   }
 
   public String toString() {
@@ -75,46 +75,51 @@ public class EvaluationResultHolder<V> implements Cloneable {
     NOT_YET_EVALUATED {
     },
     VALUE_RETURNED {
-      <V> V value(EvaluationResultHolder<V> evaluationResultHolder) {
-        return evaluationResultHolder.value;
+      <V> V value(ValueHolder<V> valueHolder) {
+        return valueHolder.value;
       }
     },
     EXCEPTION_THROWN {
-      <V> Throwable exception(EvaluationResultHolder<V> vContextVariable) {
+      <V> Throwable exception(ValueHolder<V> vContextVariable) {
         return vContextVariable.exception;
       }
     },
     EVALUATION_SKIPPED {
     };
 
-    <V> V value(EvaluationResultHolder<V> evaluationResultHolder) {
+    <V> V value(ValueHolder<V> valueHolder) {
       throw new IllegalStateException();
     }
 
-    <V> Throwable exception(EvaluationResultHolder<V> vContextVariable) {
+    <V> Throwable exception(ValueHolder<V> vContextVariable) {
       throw new IllegalStateException();
     }
   }
 
-  public EvaluationResultHolder<V> valueReturned(V value) {
+  public ValueHolder<V> valueReturned(V value) {
     requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
-    return new EvaluationResultHolder<>(State.VALUE_RETURNED, requireNonNull(value), null);
+    return new ValueHolder<>(State.VALUE_RETURNED, requireNonNull(value), null);
   }
 
-  public EvaluationResultHolder<V> exceptionThrown(Throwable throwable) {
+  public ValueHolder<V> exceptionThrown(Throwable throwable) {
     requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
-    return new EvaluationResultHolder<>(State.EXCEPTION_THROWN, null, requireNonNull(throwable));
+    return new ValueHolder<>(State.EXCEPTION_THROWN, null, requireNonNull(throwable));
   }
 
-  public EvaluationResultHolder<V> evaluationSkipped() {
+  public ValueHolder<V> evaluationSkipped() {
     requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
-    return new EvaluationResultHolder<>(State.EVALUATION_SKIPPED, null, null);
+    return new ValueHolder<>(State.EVALUATION_SKIPPED, null, null);
   }
 
-  static <E> EvaluationResultHolder<E> create() {
-    return new EvaluationResultHolder<>(State.NOT_YET_EVALUATED, null, null);
+  static <E> ValueHolder<E> create() {
+    return new ValueHolder<>(State.NOT_YET_EVALUATED, null, null);
   }
 
+  public static boolean resultValueAsBoolean(ValueHolder<Object> valueHolder) {
+    if (valueHolder.value() instanceof Boolean)
+      return (boolean) valueHolder.value();
+    return false;
+  }
   private static String messageNotYetEvaluatedStateIsRequired(State v, Object thisValue) {
     return "state:<" + State.NOT_YET_EVALUATED + "> of <" + thisValue + "> is expected but it was <" + v + ">";
   }

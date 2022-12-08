@@ -29,7 +29,7 @@ public class PropertyBasedTest extends TestBase {
 
 
   private static TestCase<String, ComparisonFailure> createTestCase1() {
-    return new TestCase.Builder.ForThrownException<String, ComparisonFailure>(
+    return new TestCase.Builder.ForThrownException<>(
         "Hello",
         Predicates.isEqualTo("HELLO"),
         ComparisonFailure.class)
@@ -39,7 +39,7 @@ public class PropertyBasedTest extends TestBase {
   }
 
   private static TestCase<String, Throwable> createTestCase2() {
-    return new TestCase.Builder.ForReturnedValue<String>(
+    return new TestCase.Builder.ForReturnedValue<>(
         String.class,
         "HELLO",
         Predicates.isEqualTo("HELLO"))
@@ -47,7 +47,7 @@ public class PropertyBasedTest extends TestBase {
         .build();
   }
 
-  private static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualIsEqualTo(int numberOfExpectedSummaryRecordsForActual) {
+  private static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualIsEqualTo(@SuppressWarnings("SameParameterValue") int numberOfExpectedSummaryRecordsForActual) {
     return makePrintable("# of records (actual) = 1", e -> Objects.equals(numberOfExpectedSummaryRecordsForActual, new ReportParser(e.getActual()).summary().records().size()));
   }
 

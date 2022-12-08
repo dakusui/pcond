@@ -374,13 +374,14 @@ public enum PrintablePredicateFactory {
     }
 
     @Override
-    public Evaluable<? super T> mapper() {
-      return this.mapper;
+    public Evaluable<T> mapper() {
+      return (Evaluable<T>) this.mapper;
     }
 
     @Override
-    public Evaluable<? super R> checker() {
-      return this.checker;
+    public Evaluable<
+        R> checker() {
+      return (Evaluable<R>) this.checker;
     }
 
     @Override
