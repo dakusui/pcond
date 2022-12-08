@@ -9,6 +9,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -16,6 +19,8 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
@@ -23,6 +28,11 @@ import static java.util.stream.Collectors.joining;
 
 @RunWith(Parameterized.class)
 public class PropertyBasedTest extends TestBase {
+  @Retention(RUNTIME)
+  @Target(METHOD)
+  @interface TestCaseParameter {
+
+  }
   private final TestCase<?, ?> testCase;
 
   public PropertyBasedTest(TestCase<?, ?> testCase) {
@@ -44,7 +54,13 @@ public class PropertyBasedTest extends TestBase {
   }
 
 
-  private static TestCase<String, ComparisonFailure> givenSimplePredicate_whenUnexpectedValue_thenComparisonFailureThrown() {
+  private static List<TestCase<?, ?>> parameters(Class<?> testClass) {
+    Method[] parameterMethods = null;
+    return null;
+  }
+
+  @TestCaseParameter
+  static TestCase<String, ComparisonFailure> givenSimplePredicate_whenUnexpectedValue_thenComparisonFailureThrown() {
     return new TestCase.Builder.ForThrownException<>(
         "Hello",
         Predicates.isEqualTo("HELLO"),
@@ -55,7 +71,8 @@ public class PropertyBasedTest extends TestBase {
   }
 
 
-  private static TestCase<String, Throwable> givenSimplePredicate_whenExpectedValue_thenValueReturned() {
+  @TestCaseParameter
+  static TestCase<String, Throwable> givenSimplePredicate_whenExpectedValue_thenValueReturned() {
     return new TestCase.Builder.ForReturnedValue<>(
         String.class,
         "HELLO",
