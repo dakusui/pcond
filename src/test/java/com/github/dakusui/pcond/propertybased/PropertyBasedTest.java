@@ -5,6 +5,9 @@ import com.github.dakusui.shared.ReportParser;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -13,22 +16,35 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
+
+@RunWith(Parameterized.class)
 public class PropertyBasedTest extends TestBase {
+  private final TestCase<?, ?> testCase;
 
-  @Test
-  public void test1() {
-    exerciseTestCase(createTestCase1());
+  public PropertyBasedTest(TestCase<?, ?> testCase) {
+    this.testCase = requireNonNull(testCase);
   }
 
   @Test
-  public void test2() {
-    exerciseTestCase(createTestCase2());
+  public void exerciseTestCase() {
+    exerciseTestCase(testCase);
   }
 
 
-  private static TestCase<String, ComparisonFailure> createTestCase1() {
+  @Parameters(name = "{index}: {0}")
+  public static Iterable<TestCase<?, ?>> parameters() {
+    return asList(
+        givenSimplePredicate_whenUnexpectedValue_thenComparisonFailureThrown(),
+        givenSimplePredicate_whenExpectedValue_thenValueReturned()
+    );
+  }
+
+
+  private static TestCase<String, ComparisonFailure> givenSimplePredicate_whenUnexpectedValue_thenComparisonFailureThrown() {
     return new TestCase.Builder.ForThrownException<>(
         "Hello",
         Predicates.isEqualTo("HELLO"),
@@ -38,7 +54,8 @@ public class PropertyBasedTest extends TestBase {
         .build();
   }
 
-  private static TestCase<String, Throwable> createTestCase2() {
+
+  private static TestCase<String, Throwable> givenSimplePredicate_whenExpectedValue_thenValueReturned() {
     return new TestCase.Builder.ForReturnedValue<>(
         String.class,
         "HELLO",
@@ -115,12 +132,14 @@ public class PropertyBasedTest extends TestBase {
     abstract class Builder<V, T extends Throwable> {
       private final V            value;
       private final Predicate<V> predicate;
+      private final String       name;
       Expectation<V> expectationForReturnedValue   = null;
       Expectation<T> expectationForThrownException = null;
 
       public Builder(V value, Predicate<V> predicate) {
         this.value = value;
-        this.predicate = Objects.requireNonNull(predicate);
+        this.predicate = requireNonNull(predicate);
+        this.name = new Throwable().getStackTrace()[2].getMethodName();
       }
 
       public TestCase<V, T> build() {
@@ -143,6 +162,11 @@ public class PropertyBasedTest extends TestBase {
           @Override
           public Optional<Expectation<V>> expectationForReturnedValue() {
             return Optional.ofNullable(expectationForReturnedValue);
+          }
+
+          @Override
+          public String toString() {
+            return name;
           }
         };
       }
@@ -184,7 +208,7 @@ public class PropertyBasedTest extends TestBase {
 
         public ForThrownException(V value, Predicate<V> predicate, Class<T> expectedExceptionClass) {
           super(value, predicate);
-          this.expectedExceptionClass = Objects.requireNonNull(expectedExceptionClass);
+          this.expectedExceptionClass = requireNonNull(expectedExceptionClass);
         }
 
         public ForThrownException<V, T> addExpectationPredicate(Predicate<T> predicate) {
