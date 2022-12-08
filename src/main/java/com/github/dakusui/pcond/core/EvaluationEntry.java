@@ -3,7 +3,7 @@ package com.github.dakusui.pcond.core;
 /**
  * A class to hold an entry of execution history of the {@link Evaluator}.
  * When an evaluator enters into one {@link Evaluable} (actually a predicate or a function),
- * an {@link OnGoing} entry is created and held by the evaluator as a current
+ * an {@code OnGoing} entry is created and held by the evaluator as a current
  * one.
  * Since one evaluate can have its children and only one child can be evaluated at once,
  * on-going entries are held as a list (stack).
@@ -87,19 +87,6 @@ public abstract class EvaluationEntry {
     this.squashable = squashable;
   }
 
-  EvaluationEntry(EvaluationEntry base) {
-    this.type = base.type();
-    this.level = base.level();
-    this.formName = base.formName();
-    this.inputExpectation = base.inputExpectation();
-    this.detailInputExpectation = base.detailInputExpectation();
-    this.inputActualValue = base.inputActualValue();
-    this.detailInputActualValue = base.detailInputActualValue();
-    this.detailOutputExpectation = base.detailOutputExpectation();
-    this.outputExpectation = base.outputExpectation();
-    this.squashable = base.isSquashable();
-  }
-
   public String formName() {
     return formName;
   }
@@ -107,8 +94,6 @@ public abstract class EvaluationEntry {
   public Type type() {
     return this.type;
   }
-
-  public abstract boolean evaluationFinished();
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean isSquashable() {
@@ -141,9 +126,6 @@ public abstract class EvaluationEntry {
     return this.inputActualValue;
   }
 
-  final public Object detailInputActualValue() {
-    return this.detailInputActualValue;
-  }
 
   public abstract Object outputActualValue();
 
@@ -181,30 +163,6 @@ public abstract class EvaluationEntry {
       this.requiresExplanation = requiresExplanation;
     }
 
-    Finalized(
-        OnGoing onGoing,
-        Object inputExpectation, Object detailInputExpectation,
-        Object outputExpectation, Object detailOutputExpectation,
-        Object inputActualValue, Object detailInputActualValue,
-        Object outputActualValue, Object detailOutputActualValue,
-        boolean requiresExplanation) {
-      super(onGoing);
-      this.requiresExplanation = requiresExplanation;
-      this.inputExpectation = inputExpectation;
-      this.detailInputExpectation = detailInputExpectation;
-      this.outputExpectation = outputExpectation;
-      this.detailOutputExpectation = detailOutputExpectation;
-      this.inputActualValue = inputActualValue;
-      this.detailInputActualValue = detailInputActualValue;
-      this.outputActualValue = outputActualValue;
-      this.detailOutputActualValue = detailOutputActualValue;
-    }
-
-    @Override
-    public boolean evaluationFinished() {
-      return true;
-    }
-
     @Override
     public Object outputActualValue() {
       return outputActualValue;
@@ -218,48 +176,6 @@ public abstract class EvaluationEntry {
     @Override
     public boolean requiresExplanation() {
       return this.requiresExplanation;
-    }
-  }
-
-  static class OnGoing extends EvaluationEntry {
-    final int positionInEntries;
-
-    OnGoing(String formName, Type type, int level,
-        Object inputExpectation_, Object detailInputExpectation_,
-        Object outputExpectation, Object detailOutputExpectation,
-        Object inputActualValue, Object detailInputActualValue,
-        boolean trivial, int positionInEntries) {
-      super(formName, type, level, inputExpectation_, detailInputExpectation_, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, trivial);
-      this.positionInEntries = positionInEntries;
-    }
-
-    Finalized finalizeEntry(
-        Object inputExpectation, Object detailInputExpectation,
-        Object outputExpectation, Object detailOutputExpectation,
-        Object inputActualValue, Object detailInputActualValue,
-        Object outputActualValue, Object detailOutputActualValue,
-        boolean requiresExplanation) {
-      return new Finalized(this, inputExpectation, detailInputExpectation, outputExpectation, detailOutputExpectation, inputActualValue, detailInputActualValue, outputActualValue, detailOutputActualValue, requiresExplanation);
-    }
-
-    @Override
-    public boolean evaluationFinished() {
-      return false;
-    }
-
-    @Override
-    public Object outputActualValue() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Object detailOutputActualValue() {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean requiresExplanation() {
-      throw new UnsupportedOperationException();
     }
   }
 

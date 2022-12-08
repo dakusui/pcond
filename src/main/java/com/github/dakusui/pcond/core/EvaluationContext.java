@@ -8,8 +8,7 @@ import java.util.function.Consumer;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.EvaluationResultHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.EvaluationResultHolder.State.VALUE_RETURNED;
-import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainInputActualValue;
-import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainOutputExpectation;
+import static com.github.dakusui.pcond.core.Evaluator.Explainable.*;
 import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static java.lang.String.format;
@@ -113,7 +112,7 @@ public class EvaluationContext<T> {
     Object detailOutputExpectation = explainOutputExpectation(evaluableIo.evaluable());
     Object detailInputActualValue = explainInputActualValue(evaluable, inputActualValue);
     Object outputActualValue = computeOutputActualValue(evaluableIo);
-    Object detailOutputActualValue = explainOutputActualValue(evaluableIo);
+    Object detailOutputActualValue = explainActual(evaluableIo);
     boolean squashable = evaluable.isSquashable();
     boolean explanationRequired = isExplanationRequired(evaluationEntryType, evaluationContext, evaluableIo);
     return createEvaluationEntry(
@@ -161,15 +160,6 @@ public class EvaluationContext<T> {
       return evaluableIo.output().returnedValue();
     if (evaluableIo.output().state() == EXCEPTION_THROWN)
       return evaluableIo.output().thrownException();
-    else
-      throw new AssertionError();
-  }
-
-  private static <T, E extends Evaluable<T>> Object explainOutputActualValue(EvaluableIo<T, E, ?> evaluableIo) {
-    if (evaluableIo.output().state() == VALUE_RETURNED)
-      return evaluableIo.input().returnedValue();
-    else if (evaluableIo.output().state() == EXCEPTION_THROWN)
-      return composeDetailOutputActualValueFromInputAndThrowable(evaluableIo.input().value(), evaluableIo.output().thrownException());
     else
       throw new AssertionError();
   }

@@ -108,7 +108,7 @@ public interface ReportComposer {
                 first.level(),
                 first.inputExpectation(), first.detailInputExpectation(),
                 last.outputExpectation(), last.detailOutputExpectation(),
-                first.inputActualValue(), first.detailInputActualValue(),
+                first.inputActualValue(), null,
                 last.outputActualValue(), last.detailOutputActualValue(),
                 false,
                 squashedItems.stream().anyMatch(EvaluationEntry::requiresExplanation)));

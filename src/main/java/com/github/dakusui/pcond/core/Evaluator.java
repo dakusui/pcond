@@ -4,6 +4,9 @@ import com.github.dakusui.pcond.core.context.VariableBundle;
 
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.core.EvaluationContext.composeDetailOutputActualValueFromInputAndThrowable;
+import static com.github.dakusui.pcond.core.EvaluationResultHolder.State.EXCEPTION_THROWN;
+import static com.github.dakusui.pcond.core.EvaluationResultHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
 
 /**
@@ -14,8 +17,8 @@ public interface Evaluator {
    * Evaluates `value` with `conjunction` predicate ("and").
    *
    * @param <T>               The type of the `value`.
-   * @param evaluableIo       An evaluation context.
-   * @param evaluationContext
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.Conjunction
    */
   <T> void evaluateConjunction(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
@@ -24,8 +27,8 @@ public interface Evaluator {
    * Evaluates `value` with a `disjunction` predicate ("or").
    *
    * @param <T>               The type of the `value`.
-   * @param evaluableIo       An evaluation context.
-   * @param evaluationContext
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.Disjunction
    */
   <T> void evaluateDisjunction(EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
@@ -34,8 +37,8 @@ public interface Evaluator {
    * Evaluates `value` with a `negation` predicate ("not").
    *
    * @param <T>               The type of the `value`.
-   * @param evaluableIo       An evaluation context.
-   * @param evaluationContext
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.Negation
    */
   <T> void evaluateNegation(EvaluableIo<T, Evaluable.Negation<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
@@ -44,8 +47,8 @@ public interface Evaluator {
    * Evaluates `value` with a leaf predicate.
    *
    * @param <T>               The type of the `value`.
-   * @param evaluableIo       An evaluation context.
-   * @param evaluationContext
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.LeafPred
    */
   <T> void evaluateLeaf(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
@@ -53,8 +56,8 @@ public interface Evaluator {
   /**
    * Evaluates `value` with a context predicate.
    *
-   * @param evaluableIo       An evaluation context.
-   * @param evaluationContext
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see Evaluable.VariableBundlePred
    */
   void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext);
@@ -62,8 +65,8 @@ public interface Evaluator {
   /**
    * Evaluates `value` with a "transformatioin" predicate.
    *
-   * @param evaluableIo       An evaluation context.
-   * @param evaluationContext
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.Transformation
    */
   <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, R> evaluableIo, EvaluationContext<T> evaluationContext);
@@ -71,8 +74,8 @@ public interface Evaluator {
   /**
    * Evaluates `value` with a "function" predicate.
    *
-   * @param evaluableIo       An evaluation context.
-   * @param evaluationContext
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.Func
    */
   <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext);
@@ -80,8 +83,8 @@ public interface Evaluator {
   /**
    * Evaluates `value` with a predicate for a stream.
    *
-   * @param evaluableIo       An evaluation context.
-   * @param evaluationContext
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.StreamPred
    */
   <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext);
@@ -216,13 +219,15 @@ public interface Evaluator {
           });
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
-      evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input(), (EvaluableIo<T, Evaluable.Func<T>, Object> io) -> {
+      evaluationContext.evaluate(evaluableIo.evaluable(), evaluableIo.input(), (EvaluableIo<T, Evaluable.Func<T>, R> io) -> {
         if (io.input().isValueReturned()) {
-          io.valueReturned(io.evaluable().head().apply(io.input().returnedValue()));
+          io.valueReturned((R) io.evaluable().head().apply(io.input().returnedValue()));
         } else
           io.evaluationSkipped();
+        //evaluableIo.evaluable().tail().ifPresent((Evaluable<R> tail) -> tail.accept(new EvaluableIo<>(io.output(), resolveEvaluationEntryType(tail), tail), evaluationContext, this));
       });
     }
 
@@ -295,6 +300,15 @@ public interface Evaluator {
       if (evaluable instanceof Explainable)
         return explainValue(((Explainable) evaluable).explainActual(actualValue));
       return null;
+    }
+
+    static <T, E extends Evaluable<T>> Object explainActual(EvaluableIo<T, E, ?> evaluableIo) {
+      if (evaluableIo.output().state() == VALUE_RETURNED)
+        return evaluableIo.input().returnedValue();
+      else if (evaluableIo.output().state() == EXCEPTION_THROWN)
+        return composeDetailOutputActualValueFromInputAndThrowable(evaluableIo.input().value(), evaluableIo.output().thrownException());
+      else
+        throw new AssertionError();
     }
   }
 }
