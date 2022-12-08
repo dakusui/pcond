@@ -13,23 +13,67 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
-import static com.github.dakusui.valid8j.Requires.requireNonNull;
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.joining;
 
 public class PropertyBasedTest extends TestBase {
 
   @Test
-  public void exercise() {
-    exerciseTestCase(createTestCase());
+  public void test1() {
+    exerciseTestCase(createTestCase1());
+  }
+
+  @Test
+  public void test2() {
+    exerciseTestCase(createTestCase2());
+  }
+
+
+  private static TestCase<String, ComparisonFailure> createTestCase1() {
+    return new TestCase.Builder.ForThrownException<String, ComparisonFailure>(
+        "Hello",
+        Predicates.isEqualTo("HELLO"),
+        ComparisonFailure.class)
+        .addExpectationPredicate(numberOfSummaryRecordsForActualIsEqualTo(1))
+        .addExpectationPredicate(numberOfSummaryRecordsForActualAndExpectedAreEqual())
+        .build();
+  }
+
+  private static TestCase<String, Throwable> createTestCase2() {
+    return new TestCase.Builder.ForReturnedValue<String>(
+        String.class,
+        "HELLO",
+        Predicates.isEqualTo("HELLO"))
+        .addExpectationPredicate(v -> Objects.equals(v, "HELLO"))
+        .build();
+  }
+
+  private static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualIsEqualTo(int numberOfExpectedSummaryRecordsForActual) {
+    return makePrintable("# of records (actual) = 1", e -> Objects.equals(numberOfExpectedSummaryRecordsForActual, new ReportParser(e.getActual()).summary().records().size()));
+  }
+
+  private static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualAndExpectedAreEqual() {
+    return makePrintable("# of records (actual) = # of records (expected)", e -> Objects.equals(new ReportParser(e.getActual()).summary().records().size(), new ReportParser(e.getExpected()).summary().records().size()));
   }
 
   @SuppressWarnings("unchecked")
-  private <T, E extends Throwable> void exerciseTestCase(TestCase<T, E> testCase) {
+  private static <T, E extends Throwable> void exerciseTestCase(TestCase<T, E> testCase) {
     try {
-      assertThat(testCase.targetValue(), testCase.targetPredicate());
+      T value;
+      assertThat(value = testCase.targetValue(), testCase.targetPredicate());
       if (testCase.expectationForThrownException().isPresent())
         throw new AssertionError("An exception that satisfies: <" + testCase.expectationForThrownException().get().expectedClass() + "> was expected to be thrown, but not");
+      if (testCase.expectationForReturnedValue().isPresent()) {
+        List<Predicate<T>> errors = new LinkedList<>();
+        for (Predicate<T> each : testCase.expectationForReturnedValue().get().checks()) {
+          if (!each.test(value))
+            errors.add(each);
+        }
+        if (!errors.isEmpty())
+          throw new AssertionError("Returned value: <" + value + "> did not satisfy following conditions:%n" +
+              errors.stream()
+                  .map(each -> String.format("%s", each))
+                  .collect(joining("%n", "- ", "")));
+      }
     } catch (Throwable t) {
       t.printStackTrace();
       if (testCase.expectationForThrownException().isPresent()) {
@@ -51,63 +95,6 @@ public class PropertyBasedTest extends TestBase {
         throw t;
       }
     }
-  }
-
-  public void exercise(String value, Predicate<String> predicate) {
-    assertThat(value, predicate);
-  }
-
-  Predicate<String> composePredicate() {
-    return Predicates.isEqualTo("HELLO");
-  }
-
-  String composeValue() {
-    return "Hello";
-  }
-
-  static TestCase<String, ComparisonFailure> createTestCase() {
-    return new TestCase<String, ComparisonFailure>() {
-      @Override
-      public Predicate<String> targetPredicate() {
-        return Predicates.isEqualTo("HELLO");
-      }
-
-      @Override
-      public String targetValue() {
-        return "Hello";
-      }
-
-      @Override
-      public Optional<Expectation<ComparisonFailure>> expectationForThrownException() {
-        return Optional.of(new Expectation<ComparisonFailure>() {
-          @Override
-          public Class<ComparisonFailure> expectedClass() {
-            return ComparisonFailure.class;
-          }
-
-          @Override
-          public List<Predicate<ComparisonFailure>> checks() {
-            return asList(
-                numberOfSummaryRecordsForActualIsEqualTo(1),
-                numberOfSummaryRecordsForActualAndExpectedAreEqual()
-            );
-          }
-        });
-      }
-
-      @Override
-      public Optional<Expectation<String>> expectationForReturnedValue() {
-        return Optional.empty();
-      }
-    };
-  }
-
-  private static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualIsEqualTo(int numberOfExpectedSummaryRecordsForActual) {
-    return makePrintable("# of records (actual) = 1", e -> Objects.equals(numberOfExpectedSummaryRecordsForActual, new ReportParser(e.getActual()).summary().records().size()));
-  }
-
-  private static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualAndExpectedAreEqual() {
-    return makePrintable("# of records (actual) = # of records (expected)", e -> Objects.equals(new ReportParser(e.getActual()).summary().records().size(), new ReportParser(e.getExpected()).summary().records().size()));
   }
 
   interface TestCase<V, T extends Throwable> {
@@ -133,7 +120,7 @@ public class PropertyBasedTest extends TestBase {
 
       public Builder(V value, Predicate<V> predicate) {
         this.value = value;
-        this.predicate = requireNonNull(predicate);
+        this.predicate = Objects.requireNonNull(predicate);
       }
 
       public TestCase<V, T> build() {
@@ -190,11 +177,14 @@ public class PropertyBasedTest extends TestBase {
           return super.build();
         }
       }
+
       public static class ForThrownException<V, T extends Throwable> extends Builder<V, T> {
         private final List<Predicate<T>> expectations = new LinkedList<>();
+        private final Class<T>           expectedExceptionClass;
 
-        public ForThrownException(V value, Predicate<V> predicate) {
+        public ForThrownException(V value, Predicate<V> predicate, Class<T> expectedExceptionClass) {
           super(value, predicate);
+          this.expectedExceptionClass = Objects.requireNonNull(expectedExceptionClass);
         }
 
         public ForThrownException<V, T> addExpectationPredicate(Predicate<T> predicate) {
@@ -207,7 +197,7 @@ public class PropertyBasedTest extends TestBase {
           this.expectationForThrownException = new Expectation<T>() {
             @Override
             public Class<T> expectedClass() {
-              return expectedClass;
+              return expectedExceptionClass;
             }
 
             @Override
