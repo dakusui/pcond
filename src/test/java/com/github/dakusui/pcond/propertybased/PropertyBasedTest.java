@@ -12,18 +12,18 @@ import org.junit.runners.Parameterized.Parameters;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static java.util.Arrays.asList;
+import static java.lang.reflect.Modifier.isStatic;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 
 @RunWith(Parameterized.class)
@@ -31,32 +31,51 @@ public class PropertyBasedTest extends TestBase {
   @Retention(RUNTIME)
   @Target(METHOD)
   @interface TestCaseParameter {
-
   }
+
   private final TestCase<?, ?> testCase;
 
-  public PropertyBasedTest(TestCase<?, ?> testCase) {
+  public PropertyBasedTest(@SuppressWarnings("unused") String testName, TestCase<?, ?> testCase) {
     this.testCase = requireNonNull(testCase);
   }
 
   @Test
-  public void exerciseTestCase() {
+  public void exerciseTestCase() throws Throwable {
     exerciseTestCase(testCase);
   }
 
 
   @Parameters(name = "{index}: {0}")
-  public static Iterable<TestCase<?, ?>> parameters() {
-    return asList(
-        givenSimplePredicate_whenUnexpectedValue_thenComparisonFailureThrown(),
-        givenSimplePredicate_whenExpectedValue_thenValueReturned()
-    );
+  public static Iterable<Object[]> parameters() {
+    return parameters(PropertyBasedTest.class);
   }
 
 
-  private static List<TestCase<?, ?>> parameters(Class<?> testClass) {
-    Method[] parameterMethods = null;
-    return null;
+  private static List<Object[]> parameters(@SuppressWarnings("SameParameterValue") Class<?> testClass) {
+    return Arrays.stream(requireNonNull(testClass).getDeclaredMethods())
+        .filter(m -> m.isAnnotationPresent(TestCaseParameter.class))
+        .filter(m -> isStatic(m.getModifiers()))
+        .sorted(comparing(Method::getName))
+        .map(m -> new Object[] { m.getName(), invokeMethod(m) })
+        .collect(toList());
+  }
+
+  private static Object invokeMethod(Method m) {
+    try {
+      return m.invoke(null);
+    } catch (Exception e) {
+      throw wrapIfNecessary(e);
+    }
+  }
+
+  @TestCaseParameter
+  static TestCase<String, Throwable> givenSimplePredicate_whenExpectedValue_thenValueReturned() {
+    return new TestCase.Builder.ForReturnedValue<>(
+        String.class,
+        "HELLO",
+        Predicates.isEqualTo("HELLO"))
+        .addExpectationPredicate(equalsPredicate("HELLO"))
+        .build();
   }
 
   @TestCaseParameter
@@ -70,15 +89,29 @@ public class PropertyBasedTest extends TestBase {
         .build();
   }
 
-
   @TestCaseParameter
-  static TestCase<String, Throwable> givenSimplePredicate_whenExpectedValue_thenValueReturned() {
+  static TestCase<String, Throwable> givenNegatedSimplePredicateReturningFalse_whenExpectedValue_thenValueReturned() {
     return new TestCase.Builder.ForReturnedValue<>(
         String.class,
         "HELLO",
-        Predicates.isEqualTo("HELLO"))
-        .addExpectationPredicate(v -> Objects.equals(v, "HELLO"))
+        Predicates.not(Predicates.isEqualTo("hello")))
+        .addExpectationPredicate(equalsPredicate("HELLO"))
         .build();
+  }
+
+  @TestCaseParameter
+  static TestCase<String, ComparisonFailure> givenNegatedSimplePredicateReturningTrue_whenUnexpectedValue_thenComparisonFailureThrown() {
+    return new TestCase.Builder.ForThrownException<>(
+        "Hello",
+        Predicates.not(Predicates.isEqualTo("Hello")),
+        ComparisonFailure.class)
+        .addExpectationPredicate(numberOfSummaryRecordsForActualIsEqualTo(1))
+        .addExpectationPredicate(numberOfSummaryRecordsForActualAndExpectedAreEqual())
+        .build();
+  }
+
+  private static Predicate<String> equalsPredicate(Object w) {
+    return makePrintable("equals(" + w + ")", v -> Objects.equals(v, w));
   }
 
   private static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualIsEqualTo(@SuppressWarnings("SameParameterValue") int numberOfExpectedSummaryRecordsForActual) {
@@ -89,46 +122,53 @@ public class PropertyBasedTest extends TestBase {
     return makePrintable("# of records (actual) = # of records (expected)", e -> Objects.equals(new ReportParser(e.getActual()).summary().records().size(), new ReportParser(e.getExpected()).summary().records().size()));
   }
 
-  @SuppressWarnings("unchecked")
-  private static <T, E extends Throwable> void exerciseTestCase(TestCase<T, E> testCase) {
+  private static <T, E extends Throwable> void exerciseTestCase(TestCase<T, E> testCase) throws Throwable {
     try {
       T value;
       assertThat(value = testCase.targetValue(), testCase.targetPredicate());
-      if (testCase.expectationForThrownException().isPresent())
-        throw new AssertionError("An exception that satisfies: <" + testCase.expectationForThrownException().get().expectedClass() + "> was expected to be thrown, but not");
-      if (testCase.expectationForReturnedValue().isPresent()) {
-        List<Predicate<T>> errors = new LinkedList<>();
-        for (Predicate<T> each : testCase.expectationForReturnedValue().get().checks()) {
-          if (!each.test(value))
+      examineReturnedValue(testCase, value);
+    } catch (Throwable t) {
+      examineThrownException(testCase, t);
+    }
+  }
+
+  private static <T, E extends Throwable> void examineThrownException(TestCase<T, E> testCase, Throwable t) throws Throwable {
+    if (testCase.expectationForThrownException().isPresent()) {
+      TestCase.Expectation<E> comparisonFailureExpectation = testCase.expectationForThrownException().get();
+      if (comparisonFailureExpectation.expectedClass().isAssignableFrom(t.getClass())) {
+        List<Predicate<E>> errors = new LinkedList<>();
+        for (Predicate<E> each : comparisonFailureExpectation.checks()) {
+          if (!each.test((E) t))
             errors.add(each);
         }
-        if (!errors.isEmpty())
-          throw new AssertionError("Returned value: <" + value + "> did not satisfy following conditions:%n" +
+        if (!errors.isEmpty()) {
+          throw new AssertionError(String.format("Thrown exception: <" + t + "> did not satisfy following conditions:%n" +
               errors.stream()
                   .map(each -> String.format("%s", each))
-                  .collect(joining("%n", "- ", "")));
-      }
-    } catch (Throwable t) {
-      t.printStackTrace();
-      if (testCase.expectationForThrownException().isPresent()) {
-        TestCase.Expectation<E> comparisonFailureExpectation = testCase.expectationForThrownException().get();
-        if (comparisonFailureExpectation.expectedClass().isAssignableFrom(t.getClass())) {
-          List<Predicate<E>> errors = new LinkedList<>();
-          for (Predicate<E> each : comparisonFailureExpectation.checks()) {
-            if (!each.test((E) t))
-              errors.add(each);
-          }
-          if (!errors.isEmpty()) {
-            throw new AssertionError(String.format("Thrown exception: <" + t + "> did not satisfy following conditions:%n" +
-                errors.stream()
-                    .map(each -> String.format("%s", each))
-                    .collect(joining("%n", "- ", ""))));
-          }
+                  .collect(joining("%n", "- ", ""))));
         }
-      } else {
-        throw t;
       }
+    } else {
+      throw t;
     }
+  }
+
+  private static <T, E extends Throwable> void examineReturnedValue(TestCase<T, E> testCase, T value) {
+    if (testCase.expectationForThrownException().isPresent())
+      throw new AssertionError("An exception that satisfies: <" + testCase.expectationForThrownException().get().expectedClass() + "> was expected to be thrown, but not");
+    else if (testCase.expectationForReturnedValue().isPresent()) {
+      List<Predicate<T>> errors = new LinkedList<>();
+      for (Predicate<T> each : testCase.expectationForReturnedValue().get().checks()) {
+        if (!each.test(value))
+          errors.add(each);
+      }
+      if (!errors.isEmpty())
+        throw new AssertionError("Returned value: <" + value + "> did not satisfy following conditions:%n" +
+            errors.stream()
+                .map(each -> String.format("%s", each))
+                .collect(joining("%n", "- ", "")));
+    } else
+      assert false;
   }
 
   interface TestCase<V, T extends Throwable> {
@@ -149,14 +189,12 @@ public class PropertyBasedTest extends TestBase {
     abstract class Builder<V, T extends Throwable> {
       private final V            value;
       private final Predicate<V> predicate;
-      private final String       name;
       Expectation<V> expectationForReturnedValue   = null;
       Expectation<T> expectationForThrownException = null;
 
       public Builder(V value, Predicate<V> predicate) {
         this.value = value;
         this.predicate = requireNonNull(predicate);
-        this.name = new Throwable().getStackTrace()[2].getMethodName();
       }
 
       public TestCase<V, T> build() {
@@ -179,11 +217,6 @@ public class PropertyBasedTest extends TestBase {
           @Override
           public Optional<Expectation<V>> expectationForReturnedValue() {
             return Optional.ofNullable(expectationForReturnedValue);
-          }
-
-          @Override
-          public String toString() {
-            return name;
           }
         };
       }
