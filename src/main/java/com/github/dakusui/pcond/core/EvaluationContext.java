@@ -30,6 +30,14 @@ public class EvaluationContext<T> {
   public EvaluationContext() {
   }
 
+  public boolean isExpectationFlipped() {
+    return this.expectationFlipped;
+  }
+
+  public void flipExpectation() {
+    this.expectationFlipped = !expectationFlipped;
+  }
+
   static String composeDetailOutputActualValueFromInputAndThrowable(Object input, Throwable throwable) {
     StringBuilder b = new StringBuilder();
     b.append("Input: '").append(input).append("'").append(format("%n"));
@@ -45,7 +53,7 @@ public class EvaluationContext<T> {
   }
 
   /**
-   * @param evaluableIo An object to hold a form and its I/O.
+   * @param evaluableIo       An object to hold a form and its I/O.
    * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
    */
   public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, Consumer<EvaluableIo<T, E, O>> evaluatorCallback) {
@@ -91,7 +99,7 @@ public class EvaluationContext<T> {
 
 
   private <E extends Evaluable<T>, O> void leave(EvaluableIo<T, E, O> evaluableIo, EvaluableIo<T, E, O> evaluableIoWork) {
-    this.evaluationEntries.add(createEvaluationEntry(this, evaluableIoWork));
+    this.evaluationEntries.add(0,createEvaluationEntry(this, evaluableIoWork));
     this.visitorLineage.remove(this.visitorLineage.size() - 1);
     this.expectationFlipped = this.expectationFlipped ^ evaluableIoWork.evaluable().requestExpectationFlip();
     if (evaluableIoWork.output().isValueReturned())

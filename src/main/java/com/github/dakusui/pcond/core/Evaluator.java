@@ -133,10 +133,9 @@ public interface Evaluator {
               EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(io, each);
               each.accept(child, evaluationContext, this);
               ValueHolder<Boolean> outputFromEach = child.output();
-              if (outputFromEach.isValueReturned()) {
+              if (outputFromEach.isValueReturned())
                 result &= outputFromEach.returnedValue();
-                io.valueReturned(result);
-              } else if (child.output().isExceptionThrown())
+              else if (child.output().isExceptionThrown())
                 skipped = true;
               else if (child.output().isEvaluationSkipped())
                 skipped = true;
@@ -163,10 +162,9 @@ public interface Evaluator {
               EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(io, each);
               each.accept(child, evaluationContext, this);
               ValueHolder<Boolean> outputFromEach = child.output();
-              if (outputFromEach.isValueReturned()) {
+              if (outputFromEach.isValueReturned())
                 result |= outputFromEach.returnedValue();
-                io.valueReturned(result);
-              } else if (outputFromEach.isExceptionThrown())
+              else if (outputFromEach.isExceptionThrown())
                 skipped = true;
               else if (outputFromEach.isEvaluationSkipped())
                 skipped = true;
@@ -190,9 +188,9 @@ public interface Evaluator {
             EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(io, io.evaluable().target());
             io.evaluable().target().accept(child, evaluationContext, this);
             ValueHolder<Boolean> outputFromTarget = child.output();
-            if (outputFromTarget.isValueReturned()) {
+            if (outputFromTarget.isValueReturned())
               io.valueReturned(evaluationContext.expectationFlipped ^ outputFromTarget.returnedValue());
-            } else if (outputFromTarget.isExceptionThrown())
+            else if (outputFromTarget.isExceptionThrown())
               io.exceptionThrown(outputFromTarget.thrownException());
             else if (outputFromTarget.isEvaluationSkipped())
               io.evaluationSkipped();
