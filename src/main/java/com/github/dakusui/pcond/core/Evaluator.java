@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.core.context.VariableBundle;
 
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.EvaluationContext.composeDetailOutputActualValueFromInputAndThrowable;
@@ -9,6 +10,7 @@ import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationE
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A visitor interface that defines a mechanism to "evaluate" printable predicates.
@@ -187,17 +189,21 @@ public interface Evaluator {
           (EvaluableIo<T, Evaluable.Negation<T>, Boolean> io) -> {
             EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(io, io.evaluable().target());
             io.evaluable().target().accept(child, evaluationContext, this);
-            ValueHolder<Boolean> outputFromTarget = child.output();
-            if (outputFromTarget.isValueReturned())
-              io.valueReturned(evaluationContext.expectationFlipped ^ outputFromTarget.returnedValue());
-            else if (outputFromTarget.isExceptionThrown())
-              io.exceptionThrown(outputFromTarget.thrownException());
-            else if (outputFromTarget.isEvaluationSkipped())
-              io.evaluationSkipped();
-            else
-              assert false;
+            updateEvaluableIoForNegation(evaluationContext, io, child);
           }
       );
+    }
+
+    private static <T> void updateEvaluableIoForNegation(EvaluationContext<T> evaluationContext, EvaluableIo<T, Evaluable.Negation<T>, Boolean> io, EvaluableIo<T, Evaluable<T>, Boolean> childIo) {
+      ValueHolder<Boolean> outputFromTarget = childIo.output();
+      if (outputFromTarget.isValueReturned())
+        io.valueReturned(evaluationContext.expectationFlipped ^ outputFromTarget.returnedValue());
+      else if (outputFromTarget.isExceptionThrown())
+        io.exceptionThrown(outputFromTarget.thrownException());
+      else if (outputFromTarget.isEvaluationSkipped())
+        io.evaluationSkipped();
+      else
+        assert false;
     }
 
     @Override
@@ -206,7 +212,14 @@ public interface Evaluator {
           evaluableIo,
           io -> {
             if (io.input().isValueReturned()) {
-              io.valueReturned(io.evaluable().predicate().test(io.input().returnedValue()));
+              T value = io.input().returnedValue();
+              Predicate<? super T> predicate = requireNonNull(io.evaluable().predicate());
+              try {
+                boolean result = predicate.test(value);
+                io.valueReturned(result);
+              } catch (Throwable t) {
+                io.exceptionThrown(t);
+              }
             } else
               io.evaluationSkipped();
           });
