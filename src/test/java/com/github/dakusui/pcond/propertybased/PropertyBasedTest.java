@@ -15,9 +15,7 @@ import static com.github.dakusui.pcond.propertybased.TestCaseUtils.numberOfSumma
 import static com.github.dakusui.pcond.propertybased.TestCaseUtils.numberOfSummaryRecordsForActualIsEqualTo;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
 
 
 @RunWith(Parameterized.class)

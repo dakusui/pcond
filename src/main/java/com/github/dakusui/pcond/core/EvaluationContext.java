@@ -99,7 +99,7 @@ public class EvaluationContext<T> {
 
 
   private <E extends Evaluable<T>, O> void leave(EvaluableIo<T, E, O> evaluableIo, EvaluableIo<T, E, O> evaluableIoWork) {
-    this.evaluationEntries.add(0,createEvaluationEntry(this, evaluableIoWork));
+    this.evaluationEntries.add(0, createEvaluationEntry(this, evaluableIoWork, resolveEvaluationEntryType(evaluableIo.evaluable()).formName(evaluableIoWork.evaluable())));
     this.visitorLineage.remove(this.visitorLineage.size() - 1);
     this.expectationFlipped = this.expectationFlipped ^ evaluableIoWork.evaluable().requestExpectationFlip();
     if (evaluableIoWork.output().isValueReturned())
@@ -118,7 +118,8 @@ public class EvaluationContext<T> {
 
   private static <T, E extends Evaluable<T>> EvaluationEntry.Finalized createEvaluationEntry(
       EvaluationContext<T> evaluationContext,
-      EvaluableIo<T, E, ?> evaluableIo) {
+      EvaluableIo<T, E, ?> evaluableIo,
+      String formName) {
     Evaluable<T> evaluable = evaluableIo.evaluable();
     EvaluationEntry.Type evaluationEntryType = evaluableIo.evaluableType();
     Object inputActualValue = evaluableIo.input().value();
@@ -130,8 +131,8 @@ public class EvaluationContext<T> {
     boolean squashable = evaluable.isSquashable();
     boolean explanationRequired = isExplanationRequired(evaluationEntryType, evaluationContext, evaluableIo);
     return createEvaluationEntry(
-        evaluable,
         evaluationEntryType,
+        formName,
         evaluationContext.visitorLineage.size(),
         outputExpectation, detailOutputExpectation,
         inputActualValue, detailInputActualValue,
@@ -141,9 +142,9 @@ public class EvaluationContext<T> {
     );
   }
 
-  private static <T> EvaluationEntry.Finalized createEvaluationEntry(Evaluable<T> evaluable, EvaluationEntry.Type evaluationEntryType, int indentLevel, Object outputExpectation, Object detailOutputExpectation, Object inputActualValue, Object detailInputActualValue, Object outputActualValue, Object detailOutputActualValue, boolean squashable, boolean explanationRequired) {
+  private static <T> EvaluationEntry.Finalized createEvaluationEntry(EvaluationEntry.Type evaluationEntryType, String formName, int indentLevel, Object outputExpectation, Object detailOutputExpectation, Object inputActualValue, Object detailInputActualValue, Object outputActualValue, Object detailOutputActualValue, boolean squashable, boolean explanationRequired) {
     return new EvaluationEntry.Finalized(
-        String.format("%s", evaluable),
+        formName,
         evaluationEntryType,
         indentLevel,
         inputActualValue,

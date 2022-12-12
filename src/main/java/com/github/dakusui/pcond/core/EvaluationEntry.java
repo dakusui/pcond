@@ -132,13 +132,50 @@ public abstract class EvaluationEntry {
   public abstract Object detailOutputActualValue();
 
   public enum Type {
-    TRANSFORM,
-    CHECK,
-    AND,
-    OR,
-    NOT,
-    LEAF,
-    FUNCTION,
+    TRANSFORM {
+      @Override
+      String formName(Evaluable<?> evaluable) {
+        return "transform:" + evaluable.toString();
+      }
+    },
+    CHECK {
+      @Override
+      String formName(Evaluable<?> evaluable) {
+        return "check:" + evaluable.toString();
+      }
+    },
+    AND {
+      @Override
+      String formName(Evaluable<?> evaluable) {
+        return ((Evaluable.Conjunction<?>) evaluable).shortcut() ? "and" : "allOf";
+      }
+    },
+    OR {
+      @Override
+      String formName(Evaluable<?> evaluable) {
+        return ((Evaluable.Disjunction<?>) evaluable).shortcut() ? "or" : "anyOf";
+      }
+    },
+    NOT {
+      @Override
+      String formName(Evaluable<?> evaluable) {
+        return "not";
+      }
+    },
+    LEAF {
+      @Override
+      String formName(Evaluable<?> evaluable) {
+        return evaluable.toString();
+      }
+    },
+    FUNCTION {
+      @Override
+      String formName(Evaluable<?> evaluable) {
+        return evaluable.toString();
+      }
+    };
+
+    abstract String formName(Evaluable<?> evaluable);
   }
 
   static class Finalized extends EvaluationEntry {

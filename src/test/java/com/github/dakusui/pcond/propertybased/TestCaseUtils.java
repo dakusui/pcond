@@ -62,6 +62,11 @@ enum TestCaseUtils {
 
   @SuppressWarnings("unchecked")
   private static <T, E extends Throwable> void examineThrownException(TestCase<T, E> testCase, Throwable t) throws Throwable {
+    System.out.println(t.getMessage());
+    if (t instanceof ComparisonFailure) {
+      System.out.println(((ComparisonFailure)t).getExpected());
+      System.out.println(((ComparisonFailure)t).getActual());
+    }
     if (testCase.expectationForThrownException().isPresent()) {
       TestCase.Expectation<E> exceptionExpectation = testCase.expectationForThrownException().get();
       if (exceptionExpectation.expectedClass().isAssignableFrom(t.getClass())) {
