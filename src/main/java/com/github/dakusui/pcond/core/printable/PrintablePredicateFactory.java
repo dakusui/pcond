@@ -249,7 +249,8 @@ public enum PrintablePredicateFactory {
           args,
           () -> format("!%s", predicate),
           (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).negate().test(t));
-      target = toEvaluableIfNecessary(predicate);
+      this.target = toEvaluableIfNecessary(predicate);
+      this.squashable = true;
     }
 
     @Override
@@ -282,7 +283,7 @@ public enum PrintablePredicateFactory {
 
   abstract static class Junction<T> extends PrintablePredicate<T> implements Evaluable.Composite<T> {
     final         List<Evaluable<T>> children;
-    final private boolean                    shortcut;
+    final private boolean            shortcut;
 
     @SuppressWarnings("unchecked")
     protected Junction(
@@ -297,7 +298,7 @@ public enum PrintablePredicateFactory {
           junction(predicates, junctionOp));
       this.children = predicates.stream()
           .map(InternalUtils::toEvaluableIfNecessary)
-          .map(each -> (Evaluable<T>)each)
+          .map(each -> (Evaluable<T>) each)
           .collect(toList());
       this.shortcut = shortcut;
     }

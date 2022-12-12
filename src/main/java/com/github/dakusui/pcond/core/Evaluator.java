@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.core.context.VariableBundle;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -10,6 +11,7 @@ import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationE
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
+import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -187,9 +189,9 @@ public interface Evaluator {
       evaluationContext.evaluate(
           evaluableIo,
           (EvaluableIo<T, Evaluable.Negation<T>, Boolean> io) -> {
-            EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(io, io.evaluable().target());
-            io.evaluable().target().accept(child, evaluationContext, this);
-            updateEvaluableIoForNegation(evaluationContext, io, child);
+            EvaluableIo<T, Evaluable<T>, Boolean> childIo = createChildEvaluableIoOf(io, io.evaluable().target());
+            io.evaluable().target().accept(childIo, evaluationContext, this);
+            updateEvaluableIoForNegation(evaluationContext, io, childIo);
           }
       );
     }
@@ -249,13 +251,18 @@ public interface Evaluator {
       });
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
-      /*
-      evaluationContext.evaluate(evaluableIo, (EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> io) -> {
-      });
-
-       */
+      if (isDummyFunction((Function<?, ?>) evaluableIo.evaluable().mapper())) {
+        evaluableIo.evaluable().checker().accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
+        return;
+      }
+      evaluationContext.evaluate(
+          evaluableIo,
+          (EvaluableIo<T, Evaluable.Transformation<T, R>, R> io) -> {
+          }
+      );
     }
 
     @Override
