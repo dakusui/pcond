@@ -74,7 +74,7 @@ public interface Evaluator {
    * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.Transformation
    */
-  <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, R> evaluableIo, EvaluationContext<T> evaluationContext);
+  <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a "function" predicate.
@@ -253,14 +253,26 @@ public interface Evaluator {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
+    public <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
       if (isDummyFunction((Function<?, ?>) evaluableIo.evaluable().mapper())) {
         evaluableIo.evaluable().checker().accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
         return;
       }
       evaluationContext.evaluate(
           evaluableIo,
-          (EvaluableIo<T, Evaluable.Transformation<T, R>, R> io) -> {
+          (EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> io) -> {
+            EvaluableIo<T, Evaluable<T>, R> ioForMapper = createChildEvaluableIoOf(io, evaluableIo.evaluable().mapper());
+            io.evaluable().mapper().accept(ioForMapper, evaluationContext, this);
+            EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = new EvaluableIo<>(ioForMapper.output(), resolveEvaluationEntryType(io.evaluable().checker()), io.evaluable().checker());
+            io.evaluable().checker().accept(ioForChecker, (EvaluationContext<R>) evaluationContext, this);
+            if (ioForChecker.output().isValueReturned())
+              io.valueReturned(ioForChecker.output().returnedValue());
+            else if (ioForChecker.output().isExceptionThrown())
+              io.exceptionThrown(ioForChecker.output().thrownException());
+            else if (ioForChecker.output().isEvaluationSkipped())
+              io.evaluationSkipped();
+            else
+              assert false;
           }
       );
     }
@@ -268,13 +280,16 @@ public interface Evaluator {
     @Override
     public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
       evaluationContext.evaluate(evaluableIo, (EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io) -> {
+        if (io.input().isValueReturned()) {
+          io.input().returnedValue().filter()
+        }
       });
     }
 
 
-    private static <T, E extends Evaluable<T>>
-    EvaluableIo<T, Evaluable<T>, Boolean> createChildEvaluableIoOf(EvaluableIo<T, E, Boolean> evaluableIo, Evaluable<T> evaluable) {
-      return new EvaluableIo<>(evaluableIo.input(), EvaluationContext.resolveEvaluationEntryType(evaluable), evaluable);
+    private static <T, E extends Evaluable<T>, R, O>
+    EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(EvaluableIo<T, ? extends Evaluable<T>, R> evaluableIo, E evaluable) {
+      return new EvaluableIo<>(evaluableIo.input(), resolveEvaluationEntryType(evaluable), evaluable);
     }
   }
 

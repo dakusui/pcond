@@ -259,7 +259,7 @@ public interface Evaluable<T> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluateTransformation((EvaluableIo<T, Transformation<T, R>, R>) (EvaluableIo) evaluableIo, evaluationContext);
+      evaluator.evaluateTransformation((EvaluableIo<T, Transformation<T, R>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     /**
