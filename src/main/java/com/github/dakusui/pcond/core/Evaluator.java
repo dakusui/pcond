@@ -263,13 +263,17 @@ public interface Evaluator {
         if (io.input().isValueReturned()) {
           boolean defaultValue = io.evaluable().defaultValue();
           boolean ret = io.input().returnedValue()
-              .filter(createPredicateForStream(evaluableIo.evaluable(), io, evaluationContext))
+              .filter((E e) -> checkValue(e, evaluableIo.evaluable(), io, evaluationContext))
               .findFirst()
               .map(each -> !defaultValue)
               .orElse(defaultValue);
           updateOutputOfEvaluableIo(io, io, v -> true);
         }
       });
+    }
+
+    private <E> boolean checkValue(E value, Evaluable.StreamPred<E> evaluable, EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io, EvaluationContext<Stream<E>> evaluationContext) {
+      return false;
     }
 
     private <E> Predicate<E> createPredicateForStream(Evaluable.StreamPred<E> p, EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io, EvaluationContext<Stream<E>> evaluationContext) {
@@ -282,8 +286,6 @@ public interface Evaluator {
           EvaluableIo<E, Evaluable<E>, Boolean> childIo = new EvaluableIo(io.input(), resolveEvaluationEntryType(io.evaluable()), io.evaluable());
           p.cut().accept(childIo, c, this);
           succeeded = true;
-        } catch (Error error) {
-          throw error;
         } catch (Throwable t) {
           throwable = t;
           throw wrapIfNecessary(t);
