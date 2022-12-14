@@ -3,7 +3,7 @@ package com.github.dakusui.pcond.core;
 import static java.util.Objects.requireNonNull;
 
 public class EvaluableIo<I, E extends Evaluable<I>, O> {
-  final         ValueHolder<I>       input;
+  private final ValueHolder<I>       input;
   private final E                    evaluable;
   private final EvaluationEntry.Type evaluableType;
   private       ValueHolder<O>       output;

@@ -10,8 +10,7 @@ import static com.github.dakusui.pcond.core.EvaluationContext.composeDetailOutpu
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
-import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
-import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
+import static com.github.dakusui.pcond.internals.InternalUtils.*;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -191,21 +190,9 @@ public interface Evaluator {
           (EvaluableIo<T, Evaluable.Negation<T>, Boolean> io) -> {
             EvaluableIo<T, Evaluable<T>, Boolean> childIo = createChildEvaluableIoOf(io, io.evaluable().target());
             io.evaluable().target().accept(childIo, evaluationContext, this);
-            updateEvaluableIoForNegation(evaluationContext, io, childIo);
+            updateOutputOfEvaluableIo(io, childIo, output -> evaluationContext.expectationFlipped ^ output.returnedValue());
           }
       );
-    }
-
-    private static <T> void updateEvaluableIoForNegation(EvaluationContext<T> evaluationContext, EvaluableIo<T, Evaluable.Negation<T>, Boolean> io, EvaluableIo<T, Evaluable<T>, Boolean> childIo) {
-      ValueHolder<Boolean> outputFromTarget = childIo.output();
-      if (outputFromTarget.isValueReturned())
-        io.valueReturned(evaluationContext.expectationFlipped ^ outputFromTarget.returnedValue());
-      else if (outputFromTarget.isExceptionThrown())
-        io.exceptionThrown(outputFromTarget.thrownException());
-      else if (outputFromTarget.isEvaluationSkipped())
-        io.evaluationSkipped();
-      else
-        assert false;
     }
 
     @Override
@@ -265,14 +252,7 @@ public interface Evaluator {
             io.evaluable().mapper().accept(ioForMapper, evaluationContext, this);
             EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = new EvaluableIo<>(ioForMapper.output(), resolveEvaluationEntryType(io.evaluable().checker()), io.evaluable().checker());
             io.evaluable().checker().accept(ioForChecker, (EvaluationContext<R>) evaluationContext, this);
-            if (ioForChecker.output().isValueReturned())
-              io.valueReturned(ioForChecker.output().returnedValue());
-            else if (ioForChecker.output().isExceptionThrown())
-              io.exceptionThrown(ioForChecker.output().thrownException());
-            else if (ioForChecker.output().isEvaluationSkipped())
-              io.evaluationSkipped();
-            else
-              assert false;
+            updateOutputOfEvaluableIo(io, ioForChecker, output -> evaluationContext.expectationFlipped ^ output.returnedValue());
           }
       );
     }
@@ -281,15 +261,64 @@ public interface Evaluator {
     public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
       evaluationContext.evaluate(evaluableIo, (EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io) -> {
         if (io.input().isValueReturned()) {
-          io.input().returnedValue().filter()
+          boolean defaultValue = io.evaluable().defaultValue();
+          boolean ret = io.input().returnedValue()
+              .filter(createPredicateForStream(evaluableIo.evaluable(), io, evaluationContext))
+              .findFirst()
+              .map(each -> !defaultValue)
+              .orElse(defaultValue);
+          updateOutputOfEvaluableIo(io, io, v -> true);
         }
       });
     }
 
+    private <E> Predicate<E> createPredicateForStream(Evaluable.StreamPred<E> p, EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io, EvaluationContext<Stream<E>> evaluationContext) {
+      return e -> {
+        boolean succeeded = false;
+        boolean ret = false;
+        Object throwable = NULL_VALUE;
+        try {
+          EvaluationContext<E> c = new EvaluationContext<>();
+          EvaluableIo<E, Evaluable<E>, Boolean> childIo = new EvaluableIo(io.input(), resolveEvaluationEntryType(io.evaluable()), io.evaluable());
+          p.cut().accept(childIo, c, this);
+          succeeded = true;
+        } catch (Error error) {
+          throw error;
+        } catch (Throwable t) {
+          throwable = t;
+          throw wrapIfNecessary(t);
+        } finally {
+          /*
+          if (!succeeded || evaluator.<Boolean>resultValue() == p.valueToCut()) {
+            importResultEntries(evaluator.resultEntries(), throwable);
+            ret = true;
+          }
 
-    private static <T, E extends Evaluable<T>, R, O>
-    EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(EvaluableIo<T, ? extends Evaluable<T>, R> evaluableIo, E evaluable) {
+           */
+        }
+        return ret;
+      };
+
+    }
+
+
+    private static <T, E extends Evaluable<T>, R, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(EvaluableIo<T, ? extends Evaluable<T>, R> evaluableIo, E evaluable) {
       return new EvaluableIo<>(evaluableIo.input(), resolveEvaluationEntryType(evaluable), evaluable);
+    }
+
+    private static <T, R, E extends Evaluable<T>, F extends Evaluable<R>> void updateOutputOfEvaluableIo(
+        EvaluableIo<T, E, Boolean> io,
+        EvaluableIo<R, F, Boolean> childIo,
+        Function<ValueHolder<Boolean>, Boolean> returnedValueResolver) {
+      ValueHolder<Boolean> outputFromTarget = childIo.output();
+      if (outputFromTarget.isValueReturned())
+        io.valueReturned(returnedValueResolver.apply(outputFromTarget));
+      else if (outputFromTarget.isExceptionThrown())
+        io.exceptionThrown(outputFromTarget.thrownException());
+      else if (outputFromTarget.isEvaluationSkipped())
+        io.evaluationSkipped();
+      else
+        assert false;
     }
   }
 

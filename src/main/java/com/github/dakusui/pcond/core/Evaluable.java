@@ -233,7 +233,7 @@ public interface Evaluable<T> {
      *
      * @return An evaluable which triggers a "cut".
      */
-    Evaluable<? super E> cut();
+    Evaluable<E> cut();
 
     /**
      * Returns a value to make a "cut" happen.

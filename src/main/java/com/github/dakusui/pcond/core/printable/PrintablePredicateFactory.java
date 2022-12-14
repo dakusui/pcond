@@ -374,14 +374,15 @@ public enum PrintablePredicateFactory {
       this.squashable = true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Evaluable<T> mapper() {
       return (Evaluable<T>) this.mapper;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Evaluable<
-        R> checker() {
+    public Evaluable<R> checker() {
       return (Evaluable<R>) this.checker;
     }
 
