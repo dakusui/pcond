@@ -8,8 +8,6 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.EvaluationContext.composeDetailOutputActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
-import static com.github.dakusui.pcond.core.EvaluationEntry.Type.CHECK;
-import static com.github.dakusui.pcond.core.EvaluationEntry.Type.TRANSFORM;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
@@ -131,28 +129,26 @@ public interface Evaluator {
     public <T> void evaluateConjunction(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(
           evaluableIo,
-          (EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> io) -> {
+          (Evaluable.Conjunction<T> evaluable, ValueHolder<T> input) -> {
+            ValueHolder<Boolean> ret = ValueHolder.create();
             boolean result = true;
-            boolean skipped = false;
-            for (Evaluable<T> each : io.evaluable().children()) {
-              EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(io, each);
+            for (Evaluable<T> each : evaluable.children()) {
+              EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(each, input);
               each.accept(child, evaluationContext, this);
               ValueHolder<Boolean> outputFromEach = child.output();
-              if (outputFromEach.isValueReturned())
+              if (outputFromEach.isValueReturned()) {
                 result &= outputFromEach.returnedValue();
-              else if (child.output().isExceptionThrown())
-                skipped = true;
+                ret.valueReturned(result);
+              } else if (child.output().isExceptionThrown())
+                ret.evaluationSkipped();
               else if (child.output().isEvaluationSkipped())
-                skipped = true;
+                ret.evaluationSkipped();
               else
                 assert false;
-              if (io.evaluable().shortcut() && (skipped || !result))
+              if (evaluable.shortcut() && (ret.isEvaluationSkipped() || !result))
                 break;
             }
-            if (skipped)
-              io.evaluationSkipped();
-            else
-              io.valueReturned(result);
+            return ret;
           });
     }
 
@@ -160,28 +156,26 @@ public interface Evaluator {
     public <T> void evaluateDisjunction(EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(
           evaluableIo,
-          (EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> io) -> {
+          (Evaluable.Disjunction<T> evaluable, ValueHolder<T> input) -> {
+            ValueHolder<Boolean> ret = ValueHolder.create();
             boolean result = false;
-            boolean skipped = false;
-            for (Evaluable<T> each : io.evaluable().children()) {
-              EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(io, each);
+            for (Evaluable<T> each : evaluable.children()) {
+              EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(each, input);
               each.accept(child, evaluationContext, this);
               ValueHolder<Boolean> outputFromEach = child.output();
-              if (outputFromEach.isValueReturned())
+              if (outputFromEach.isValueReturned()) {
                 result |= outputFromEach.returnedValue();
-              else if (outputFromEach.isExceptionThrown())
-                skipped = true;
+                ret.valueReturned(result);
+              } else if (outputFromEach.isExceptionThrown())
+                ret.evaluationSkipped();
               else if (outputFromEach.isEvaluationSkipped())
-                skipped = true;
+                ret.evaluationSkipped();
               else
                 assert false;
-              if (io.evaluable().shortcut() && (skipped || result))
+              if (evaluable.shortcut() && (ret.isEvaluationSkipped() || result))
                 break;
             }
-            if (skipped)
-              io.evaluationSkipped();
-            else
-              io.valueReturned(result);
+            return ret;
           });
     }
 
@@ -189,10 +183,10 @@ public interface Evaluator {
     public <T> void evaluateNegation(EvaluableIo<T, Evaluable.Negation<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(
           evaluableIo,
-          (EvaluableIo<T, Evaluable.Negation<T>, Boolean> io) -> {
-            EvaluableIo<T, Evaluable<T>, Boolean> childIo = createChildEvaluableIoOf(io, io.evaluable().target());
-            io.evaluable().target().accept(childIo, evaluationContext, this);
-            updateOutputOfEvaluableIo(io, childIo, output -> evaluationContext.expectationFlipped ^ output.returnedValue());
+          (Evaluable.Negation<T> evaluable, ValueHolder<T> input) -> {
+            EvaluableIo<T, Evaluable<T>, Boolean> childIo = createChildEvaluableIoOf(evaluable.target(), input);
+            evaluable.target().accept(childIo, evaluationContext, this);
+            return childIo.output().isValueReturned() ? ValueHolder.forValue(evaluationContext.expectationFlipped ^ childIo.output().returnedValue()) : childIo.output();
           }
       );
     }
@@ -201,18 +195,18 @@ public interface Evaluator {
     public <T> void evaluateLeaf(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(
           evaluableIo,
-          io -> {
-            if (io.input().isValueReturned()) {
-              T value = io.input().returnedValue();
-              Predicate<? super T> predicate = requireNonNull(io.evaluable().predicate());
+          (evaluable, input) -> {
+            ValueHolder<Boolean> ret = ValueHolder.create();
+            if (input.isValueReturned()) {
+              T value = input.returnedValue();
+              Predicate<? super T> predicate = requireNonNull(evaluable.predicate());
               try {
-                boolean result = predicate.test(value);
-                io.valueReturned(result);
+                return ret.valueReturned(predicate.test(value));
               } catch (Throwable t) {
-                io.exceptionThrown(t);
+                return ret.exceptionThrown(t);
               }
             } else
-              io.evaluationSkipped();
+              return ret.evaluationSkipped();
           });
     }
 
@@ -221,23 +215,24 @@ public interface Evaluator {
     public <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(
           evaluableIo,
-          (EvaluableIo<T, Evaluable.Func<T>, R> io) -> {
-            if (io.input().isValueReturned()) {
-              io.valueReturned((R) io.evaluable().head().apply(io.input().returnedValue()));
+          (Evaluable.Func<T> evaluable, ValueHolder<T> input) -> {
+            ValueHolder<R> ret = ValueHolder.create();
+            if (input.isValueReturned()) {
+              ret.valueReturned((R) evaluable.head().apply(input.returnedValue()));
             } else
-              io.evaluationSkipped();
+              ret.evaluationSkipped();
             EvaluationContext<R> childContext = new EvaluationContext<>();
             evaluableIo.evaluable().<R>tail().ifPresent((Evaluable<R> tail) -> {
-              tail.accept(new EvaluableIo<>(io.output(), resolveEvaluationEntryType(tail), tail), childContext, this);
+              tail.accept(new EvaluableIo<>(ret, resolveEvaluationEntryType(tail), tail), childContext, this);
               evaluationContext.importEntries(childContext);
             });
+            return ret;
           });
     }
 
     @Override
     public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
-      evaluationContext.evaluate(evaluableIo, (EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> io) -> {
-      });
+      evaluationContext.evaluate(evaluableIo, (Evaluable.VariableBundlePred evaluable, ValueHolder<VariableBundle> input) -> ValueHolder.create());
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -249,12 +244,14 @@ public interface Evaluator {
       }
       evaluationContext.evaluate(
           evaluableIo,
-          (EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> io_) -> {
-            EvaluableIo<T, Evaluable.Transformation<T, R>, R> ioForMapper = new EvaluableIo<>(io_.input(), TRANSFORM, evaluableIo.evaluable());
+          (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
+            return null;
+            /*
+            EvaluableIo<T, Evaluable.Transformation<T, R>, R> ioForMapper = new EvaluableIo<>(input, TRANSFORM, evaluableIo.evaluable());
             evaluationContext.evaluate(
                 ioForMapper,
-                (EvaluableIo<T, Evaluable.Transformation<T, R>, R> childIo) -> {
-                  childIo.evaluable().mapper().accept((EvaluableIo<T, Evaluable<T>, R>) (EvaluableIo) childIo, evaluationContext, this);
+                (Evaluable.Func<T> func, ValueHolder<T> funcInput) -> {
+                  func.accept((EvaluableIo<T, Evaluable<T>, R>) (EvaluableIo) childIo, evaluationContext, this);
                   childIo.valueReturned(null);
                 });
             EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = new EvaluableIo<>(ioForMapper.output(), CHECK, evaluableIo.evaluable().checker());
@@ -264,12 +261,14 @@ public interface Evaluator {
                   childIo.evaluable().accept((EvaluableIo) childIo, (EvaluationContext<R>) evaluationContext, this);
                   updateOutputOfEvaluableIo(io_, childIo, ValueHolder::returnedValue);
                 });
+             */
           }
       );
     }
 
     @Override
     public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
+      /*
       evaluationContext.evaluate(evaluableIo, (EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io) -> {
         if (io.input().isValueReturned()) {
           boolean defaultValue = io.evaluable().defaultValue();
@@ -279,8 +278,12 @@ public interface Evaluator {
               .map(each -> !defaultValue)
               .orElse(defaultValue);
           updateOutputOfEvaluableIo(io, io, v -> true);
+          return null;
         }
+        return null;
       });
+
+       */
     }
 
     private <E> boolean checkValue(E value, Evaluable.StreamPred<E> evaluable, EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io, EvaluationContext<Stream<E>> evaluationContext) {
@@ -315,19 +318,10 @@ public interface Evaluator {
     }
 
 
-    private static <T, E extends Evaluable<T>, R, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(EvaluableIo<T, ? extends Evaluable<T>, R> evaluableIo, E evaluable) {
-      return new EvaluableIo<>(evaluableIo.input(), resolveEvaluationEntryType(evaluable), evaluable);
+    private static <T, E extends Evaluable<T>, R, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(E evaluable, ValueHolder<T> input) {
+      return new EvaluableIo<>(input, resolveEvaluationEntryType(evaluable), evaluable);
     }
 
-    /**
-     * @param io                    The IO object to which childIo is imported.
-     * @param childIo
-     * @param returnedValueResolver A function that resolves returned value from
-     * @param <T>
-     * @param <R>
-     * @param <E>
-     * @param <F>
-     */
     private static <T, R, E extends Evaluable<T>, F extends Evaluable<R>> void updateOutputOfEvaluableIo(
         EvaluableIo<T, E, Boolean> io,
         EvaluableIo<R, F, Boolean> childIo,

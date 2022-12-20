@@ -3,13 +3,12 @@ package com.github.dakusui.pcond.core;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiFunction;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
-import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
@@ -55,20 +54,11 @@ public class EvaluationContext<T> {
    * @param evaluableIo       An object to hold a form and its I/O.
    * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
    */
-  public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, Consumer<EvaluableIo<T, E, O>> evaluatorCallback) {
+  public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, BiFunction<E, ValueHolder<T>, ValueHolder<O>> evaluatorCallback) {
     requireNonNull(evaluableIo);
     EvaluableIo<T, E, O> evaluableIoWork = this.enter(evaluableIo.input(), evaluableIo.evaluable());
-    try {
-      evaluatorCallback.accept(evaluableIoWork);
-    } catch (Throwable t) {
-      // Whatever the exception here is, it will be an internal error (a bug in pcond).
-      // Because `evaluable.accept()` should catch it if an exception is thrown from a leaf
-      // predicate or function.
-      // The exception should be stored in the evaluableIo
-      throw wrapIfNecessary(t);
-    } finally {
-      this.leave(evaluableIo, evaluableIoWork);
-    }
+    ValueHolder<O> out = evaluatorCallback.apply(evaluableIo.evaluable(), evaluableIo.input());
+    this.leave(evaluableIoWork, out);
   }
 
   public static <T> EvaluationEntry.Type resolveEvaluationEntryType(Evaluable<T> evaluable) {
@@ -98,18 +88,17 @@ public class EvaluationContext<T> {
   }
 
 
-  private <E extends Evaluable<T>, O> void leave(EvaluableIo<T, E, O> evaluableIo, EvaluableIo<T, E, O> evaluableIoWork) {
+  private <E extends Evaluable<T>, O> void leave(EvaluableIo<T, E, O> evaluableIo, ValueHolder<O> output) {
     this.visitorLineage.remove(this.visitorLineage.size() - 1);
-    this.expectationFlipped = this.expectationFlipped ^ evaluableIoWork.evaluable().requestExpectationFlip();
-    if (evaluableIoWork.output().isValueReturned())
-      evaluableIo.valueReturned(evaluableIoWork.output().returnedValue());
-    else if (evaluableIoWork.output().isExceptionThrown())
-      evaluableIo.exceptionThrown(evaluableIoWork.output().thrownException());
-    else if (evaluableIoWork.output().isEvaluationSkipped())
+    this.expectationFlipped = this.expectationFlipped ^ evaluableIo.evaluable().requestExpectationFlip();
+    if (output.isValueReturned())
+      evaluableIo.valueReturned(output.returnedValue());
+    else if (output.isExceptionThrown())
+      evaluableIo.exceptionThrown(output.thrownException());
+    else if (output.isEvaluationSkipped())
       evaluableIo.evaluationSkipped();
     else
-      assert false :
-          evaluableIoWork.output();
+      assert false : output;
   }
 
   private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(ValueHolder<T> input, Evaluable<T> evaluable) {
