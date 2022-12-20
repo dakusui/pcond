@@ -38,7 +38,7 @@ enum TestCaseUtils {
         .collect(toList());
   }
 
-  static Predicate<String> equalsPredicate(@SuppressWarnings("SameParameterValue") Object w) {
+  static Predicate<String> equalsPredicate(Object w) {
     return makePrintable("equals(" + w + ")", v -> Objects.equals(v, w));
   }
 
@@ -98,7 +98,7 @@ enum TestCaseUtils {
           errors.add(each);
       }
       if (!errors.isEmpty())
-        throw new AssertionError("Returned value: <" + value + "> did not satisfy following conditions:%n" +
+        throw new AssertionError("Returned value: <" + value + "> did not satisfy following conditions:" + String.format("%n") +
             errors.stream()
                 .map(each -> String.format("%s", each))
                 .collect(joining("%n", "- ", "")));

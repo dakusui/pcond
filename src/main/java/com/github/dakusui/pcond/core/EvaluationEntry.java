@@ -132,10 +132,16 @@ public abstract class EvaluationEntry {
   public abstract Object detailOutputActualValue();
 
   public enum Type {
+    TRANSFORM_AND_CHECK {
+      @Override
+      String formName(Evaluable<?> evaluable) {
+        return "";
+      }
+    },
     TRANSFORM {
       @Override
       String formName(Evaluable<?> evaluable) {
-        return "transform:" + evaluable.toString();
+        return "transform";
       }
     },
     CHECK {

@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.propertybased;
 
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.ComparisonFailure;
@@ -10,6 +11,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.propertybased.TestCaseUtils.numberOfSummaryRecordsForActualAndExpectedAreEqual;
 import static com.github.dakusui.pcond.propertybased.TestCaseUtils.numberOfSummaryRecordsForActualIsEqualTo;
@@ -127,6 +129,22 @@ public class PropertyBasedTest extends TestBase {
         "Hello",
         Predicates.anyOf(Predicates.not(Predicates.alwaysTrue())),
         ComparisonFailure.class)
+        .build();
+  }
+
+  @SuppressWarnings("unchecked")
+  @TestCaseParameter
+  static TestCase<String, Throwable> givenTransformingPredicate_whenExpectedValue_thenValueReturned() {
+    return new TestCase.Builder.ForReturnedValue<>("hello", (Predicate<String>) Predicates.transform(Functions.length()).check(Predicates.isEqualTo(5)), String.class)
+        .addExpectationPredicate(TestCaseUtils.equalsPredicate("hello"))
+        .build();
+  }
+
+  @SuppressWarnings("unchecked")
+  @TestCaseParameter
+  static TestCase<String, Throwable> givenTransformingPredicate_whenNonExpectedValue_thenValueReturned() {
+    return new TestCase.Builder.ForReturnedValue<>("hello", (Predicate<String>) Predicates.transform(Functions.length()).check(Predicates.isEqualTo(6)), String.class)
+        .addExpectationPredicate(TestCaseUtils.equalsPredicate("hello"))
         .build();
   }
 

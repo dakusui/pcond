@@ -84,7 +84,7 @@ public class EvaluationContext<T> {
     if (evaluable instanceof Evaluable.Negation)
       return NOT;
     if (evaluable instanceof Evaluable.Transformation)
-      return TRANSFORM; // How to model CHECK?
+      return TRANSFORM_AND_CHECK; // How to model CHECK?
     throw new IllegalArgumentException();
   }
 
