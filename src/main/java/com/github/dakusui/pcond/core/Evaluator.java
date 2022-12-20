@@ -8,6 +8,8 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.EvaluationContext.composeDetailOutputActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.CHECK;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.TRANSFORM;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
@@ -247,12 +249,18 @@ public interface Evaluator {
       }
       evaluationContext.evaluate(
           evaluableIo,
-          (EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> io) -> {
-            EvaluableIo<T, Evaluable<T>, R> ioForMapper = createChildEvaluableIoOf(io, evaluableIo.evaluable().mapper());
-            io.evaluable().mapper().accept(ioForMapper, evaluationContext, this);
-            EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = new EvaluableIo<>(ioForMapper.output(), resolveEvaluationEntryType(io.evaluable().checker()), io.evaluable().checker());
-            io.evaluable().checker().accept(ioForChecker, (EvaluationContext<R>) evaluationContext, this);
-            updateOutputOfEvaluableIo(io, ioForChecker, output -> evaluationContext.expectationFlipped ^ output.returnedValue());
+          (EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> io_) -> {
+            EvaluableIo<T, Evaluable.Transformation<T, R>, R> ioForMapper = new EvaluableIo<>(io_.input(), TRANSFORM, evaluableIo.evaluable());
+            evaluationContext.evaluate(
+                ioForMapper,
+                (EvaluableIo<T, Evaluable.Transformation<T, R>, R> childIo) -> childIo.evaluable().mapper().accept((EvaluableIo<T, Evaluable<T>, R>) (EvaluableIo) childIo, evaluationContext, this));
+            EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = new EvaluableIo<>(ioForMapper.output(), CHECK, evaluableIo.evaluable().checker());
+            ((EvaluationContext<R>) evaluationContext).evaluate(
+                ioForChecker,
+                (EvaluableIo<R, Evaluable<R>, Boolean> childIo) -> {
+                  childIo.evaluable().accept((EvaluableIo) childIo, (EvaluationContext<R>) evaluationContext, this);
+                  updateOutputOfEvaluableIo(io_, childIo, ValueHolder::returnedValue);
+                });
           }
       );
     }
@@ -308,16 +316,25 @@ public interface Evaluator {
       return new EvaluableIo<>(evaluableIo.input(), resolveEvaluationEntryType(evaluable), evaluable);
     }
 
+    /**
+     * @param io                    The IO object to which childIo is imported.
+     * @param childIo
+     * @param returnedValueResolver A function that resolves returned value from
+     * @param <T>
+     * @param <R>
+     * @param <E>
+     * @param <F>
+     */
     private static <T, R, E extends Evaluable<T>, F extends Evaluable<R>> void updateOutputOfEvaluableIo(
         EvaluableIo<T, E, Boolean> io,
         EvaluableIo<R, F, Boolean> childIo,
         Function<ValueHolder<Boolean>, Boolean> returnedValueResolver) {
-      ValueHolder<Boolean> outputFromTarget = childIo.output();
-      if (outputFromTarget.isValueReturned())
-        io.valueReturned(returnedValueResolver.apply(outputFromTarget));
-      else if (outputFromTarget.isExceptionThrown())
-        io.exceptionThrown(outputFromTarget.thrownException());
-      else if (outputFromTarget.isEvaluationSkipped())
+      ValueHolder<Boolean> outputFromChildIo = childIo.output();
+      if (outputFromChildIo.isValueReturned())
+        io.valueReturned(returnedValueResolver.apply(outputFromChildIo));
+      else if (outputFromChildIo.isExceptionThrown())
+        io.exceptionThrown(outputFromChildIo.thrownException());
+      else if (outputFromChildIo.isEvaluationSkipped())
         io.evaluationSkipped();
       else
         assert false;

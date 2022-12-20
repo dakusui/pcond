@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
-import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
-import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.*;
 import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
+import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
+import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -22,7 +22,7 @@ import static java.util.Objects.requireNonNull;
  */
 
 public class EvaluationContext<T> {
-  final List<EvaluationEntry.Finalized>       evaluationEntries = new LinkedList<>();
+  final List<EvaluationEntry.Impl>            evaluationEntries = new LinkedList<>();
   final List<EvaluableIo<T, Evaluable<T>, ?>> visitorLineage    = new LinkedList<>();
 
   boolean expectationFlipped = false;
@@ -84,7 +84,7 @@ public class EvaluationContext<T> {
     if (evaluable instanceof Evaluable.Negation)
       return NOT;
     if (evaluable instanceof Evaluable.Transformation)
-      return TRANSFORM_AND_CHECK; // How to model CHECK?
+      return TRANSFORM_AND_CHECK;
     throw new IllegalArgumentException();
   }
 
@@ -99,7 +99,7 @@ public class EvaluationContext<T> {
 
 
   private <E extends Evaluable<T>, O> void leave(EvaluableIo<T, E, O> evaluableIo, EvaluableIo<T, E, O> evaluableIoWork) {
-    this.evaluationEntries.add(0, createEvaluationEntry(this, evaluableIoWork, resolveEvaluationEntryType(evaluableIo.evaluable()).formName(evaluableIoWork.evaluable())));
+    this.evaluationEntries.add(createEvaluationEntry(this, evaluableIoWork, resolveEvaluationEntryType(evaluableIo.evaluable()).formName(evaluableIoWork.evaluable())));
     this.visitorLineage.remove(this.visitorLineage.size() - 1);
     this.expectationFlipped = this.expectationFlipped ^ evaluableIoWork.evaluable().requestExpectationFlip();
     if (evaluableIoWork.output().isValueReturned())
@@ -109,25 +109,28 @@ public class EvaluationContext<T> {
     else if (evaluableIoWork.output().isEvaluationSkipped())
       evaluableIo.evaluationSkipped();
     else
-      assert false;
+      assert false : evaluableIoWork.output();
   }
 
   private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(ValueHolder<T> input, Evaluable<T> evaluable) {
     return new EvaluableIo<>(input, resolveEvaluationEntryType(evaluable), evaluable);
   }
 
-  private static <T, E extends Evaluable<T>> EvaluationEntry.Finalized createEvaluationEntry(
+  private static <T, E extends Evaluable<T>> void finalizeEvaluationEntry(EvaluationEntry.Impl evaluationEntry) {
+  }
+
+  private static <T, E extends Evaluable<T>> EvaluationEntry.Impl createEvaluationEntry(
       EvaluationContext<T> evaluationContext,
       EvaluableIo<T, E, ?> evaluableIo,
       String formName) {
     Evaluable<T> evaluable = evaluableIo.evaluable();
     EvaluationEntry.Type evaluationEntryType = evaluableIo.evaluableType();
     Object inputActualValue = evaluableIo.input().value();
-    Object outputExpectation = computeOutputExpectation(evaluationContext, evaluableIo);
+    Object outputExpectation = null; //computeOutputExpectation(evaluationContext, evaluableIo); //
     Object detailOutputExpectation = explainOutputExpectation(evaluableIo.evaluable());
     Object detailInputActualValue = explainInputActualValue(evaluable, inputActualValue);
-    Object outputActualValue = computeOutputActualValue(evaluableIo);
-    Object detailOutputActualValue = explainActual(evaluableIo);
+    Object outputActualValue = null; //computeOutputActualValue(evaluableIo); //
+    Object detailOutputActualValue = null; // explainActual(evaluableIo);
     boolean squashable = evaluable.isSquashable();
     boolean explanationRequired = isExplanationRequired(evaluationEntryType, evaluationContext, evaluableIo);
     return createEvaluationEntry(
@@ -142,8 +145,8 @@ public class EvaluationContext<T> {
     );
   }
 
-  private static <T> EvaluationEntry.Finalized createEvaluationEntry(EvaluationEntry.Type evaluationEntryType, String formName, int indentLevel, Object outputExpectation, Object detailOutputExpectation, Object inputActualValue, Object detailInputActualValue, Object outputActualValue, Object detailOutputActualValue, boolean squashable, boolean explanationRequired) {
-    return new EvaluationEntry.Finalized(
+  private static <T> EvaluationEntry.Impl createEvaluationEntry(EvaluationEntry.Type evaluationEntryType, String formName, int indentLevel, Object outputExpectation, Object detailOutputExpectation, Object inputActualValue, Object detailInputActualValue, Object outputActualValue, Object detailOutputActualValue, boolean squashable, boolean explanationRequired) {
+    return new EvaluationEntry.Impl(
         formName,
         evaluationEntryType,
         indentLevel,
@@ -191,6 +194,6 @@ public class EvaluationContext<T> {
   }
 
   public <R> void importEntries(EvaluationContext<R> childContext) {
-    childContext.resultEntries().forEach(each -> this.evaluationEntries.add((EvaluationEntry.Finalized) each));
+    childContext.resultEntries().forEach(each -> this.evaluationEntries.add((EvaluationEntry.Impl) each));
   }
 }

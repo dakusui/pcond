@@ -63,6 +63,10 @@ public interface Evaluable<T> {
     throw new UnsupportedOperationException();
   }
 
+  default Evaluable<T> toEvaluable() {
+    return this;
+  }
+
   /**
    * A base interface to model all the predicates in the model of the evaluation
    * framework.

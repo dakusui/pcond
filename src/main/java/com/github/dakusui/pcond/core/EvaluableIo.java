@@ -39,7 +39,6 @@ public class EvaluableIo<I, E extends Evaluable<I>, O> {
     return this.evaluable;
   }
 
-
   public ValueHolder<O> output() {
     return this.output;
   }

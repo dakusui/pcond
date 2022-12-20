@@ -184,12 +184,12 @@ public abstract class EvaluationEntry {
     abstract String formName(Evaluable<?> evaluable);
   }
 
-  static class Finalized extends EvaluationEntry {
+  static class Impl extends EvaluationEntry {
     final         Object  outputActualValue;
     final         Object  detailOutputActualValue;
     private final boolean requiresExplanation;
 
-    Finalized(
+    Impl(
         String formName, Type type,
         int level,
         Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object detailOutputExpectation,
@@ -230,7 +230,7 @@ public abstract class EvaluationEntry {
       Object inputActualValue, Object detailInputActualValue,
       Object outputActualValue, Object detailOutputActualValue,
       boolean trivial, boolean requiresExplanation) {
-    return new Finalized(
+    return new Impl(
         formName, type,
         level,
         inputExpectation_, detailInputExpectation_,
