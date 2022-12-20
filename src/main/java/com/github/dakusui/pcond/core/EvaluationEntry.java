@@ -1,5 +1,8 @@
 package com.github.dakusui.pcond.core;
 
+import static com.github.dakusui.pcond.core.EvaluationContext.*;
+import static com.github.dakusui.pcond.core.Evaluator.Explainable.*;
+
 /**
  * A class to hold an entry of execution history of the {@link Evaluator}.
  * When an evaluator enters into one {@link Evaluable} (actually a predicate or a function),
@@ -184,15 +187,16 @@ public abstract class EvaluationEntry {
     abstract String formName(Evaluable<?> evaluable);
   }
 
-  static class Impl extends EvaluationEntry {
+  static class Finalized extends EvaluationEntry {
     final         Object  outputActualValue;
     final         Object  detailOutputActualValue;
     private final boolean requiresExplanation;
 
-    Impl(
+    Finalized(
         String formName, Type type,
         int level,
-        Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object detailOutputExpectation,
+        Object inputExpectation_, Object detailInputExpectation_,
+        Object outputExpectation, Object detailOutputExpectation,
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
         boolean squashable, boolean requiresExplanation) {
@@ -230,7 +234,7 @@ public abstract class EvaluationEntry {
       Object inputActualValue, Object detailInputActualValue,
       Object outputActualValue, Object detailOutputActualValue,
       boolean trivial, boolean requiresExplanation) {
-    return new Impl(
+    return new Finalized(
         formName, type,
         level,
         inputExpectation_, detailInputExpectation_,
@@ -239,5 +243,66 @@ public abstract class EvaluationEntry {
         outputActualValue, detailOutputActualValue,
         trivial, requiresExplanation
     );
+  }
+
+  public static class Impl extends EvaluationEntry {
+
+    private final EvaluableIo<?, ?, ?> evaluableIo;
+    private final EvaluationContext<?> evaluationContext;
+
+    <T, E extends Evaluable<T>> Impl(
+        EvaluationContext<T> evaluationContext,
+        EvaluableIo<T, E, ?> evaluableIo) {
+      super(
+          evaluableIo.evaluableType().formName(evaluableIo.evaluable()),
+          evaluableIo.evaluableType(),
+          evaluationContext.visitorLineage.size(),
+          computeInputExpectation(evaluableIo),                   // inputExpectation        == inputActualValue
+          explainInputExpectation(evaluableIo),                   // detailInputExpectation  == detailInputActualValue
+          null, // not necessary                                  // outputExpectation
+          explainOutputExpectation(evaluableIo.evaluable()),      // detailOutputExpectation
+          computeInputActualValue(evaluableIo),
+          explainInputActualValue(evaluableIo.evaluable(), computeInputActualValue(evaluableIo)),
+          evaluableIo.evaluable().isSquashable());
+      this.evaluableIo = evaluableIo;
+      this.evaluationContext = evaluationContext;
+    }
+
+    private static <E extends Evaluable<T>, T> Object explainInputExpectation(EvaluableIo<T, E, ?> evaluableIo) {
+      return explainInputActualValue(evaluableIo, computeInputExpectation(evaluableIo));
+    }
+
+    private static <E extends Evaluable<T>, T> Object computeInputExpectation(EvaluableIo<T, E, ?> evaluableIo) {
+      return computeInputActualValue(evaluableIo);
+    }
+
+    @Override
+    public boolean requiresExplanation() {
+      return isExplanationRequired(evaluableIo().evaluableType(), evaluationContext(), evaluableIo());
+    }
+
+    @SuppressWarnings("unchecked")
+    private <E> EvaluationContext<E> evaluationContext() {
+      return (EvaluationContext<E>) this.evaluationContext;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <I, O> EvaluableIo<I, Evaluable<I>, O> evaluableIo() {
+      return (EvaluableIo<I, Evaluable<I>, O>) this.evaluableIo;
+    }
+
+    public Object outputExpectation() {
+      return computeOutputExpectation(evaluationContext(), evaluableIo());
+    }
+
+    @Override
+    public Object outputActualValue() {
+      return computeOutputActualValue(evaluableIo());
+    }
+
+    @Override
+    public Object detailOutputActualValue() {
+      return explainActual(evaluableIo());
+    }
   }
 }
