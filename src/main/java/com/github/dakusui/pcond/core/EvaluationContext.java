@@ -108,7 +108,8 @@ public class EvaluationContext<T> {
     else if (evaluableIoWork.output().isEvaluationSkipped())
       evaluableIo.evaluationSkipped();
     else
-      assert false : evaluableIoWork.output();
+      assert false :
+          evaluableIoWork.output();
   }
 
   private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(ValueHolder<T> input, Evaluable<T> evaluable) {

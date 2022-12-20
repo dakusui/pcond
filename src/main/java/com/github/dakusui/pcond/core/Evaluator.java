@@ -253,7 +253,10 @@ public interface Evaluator {
             EvaluableIo<T, Evaluable.Transformation<T, R>, R> ioForMapper = new EvaluableIo<>(io_.input(), TRANSFORM, evaluableIo.evaluable());
             evaluationContext.evaluate(
                 ioForMapper,
-                (EvaluableIo<T, Evaluable.Transformation<T, R>, R> childIo) -> childIo.evaluable().mapper().accept((EvaluableIo<T, Evaluable<T>, R>) (EvaluableIo) childIo, evaluationContext, this));
+                (EvaluableIo<T, Evaluable.Transformation<T, R>, R> childIo) -> {
+                  childIo.evaluable().mapper().accept((EvaluableIo<T, Evaluable<T>, R>) (EvaluableIo) childIo, evaluationContext, this);
+                  childIo.valueReturned(null);
+                });
             EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = new EvaluableIo<>(ioForMapper.output(), CHECK, evaluableIo.evaluable().checker());
             ((EvaluationContext<R>) evaluationContext).evaluate(
                 ioForChecker,
