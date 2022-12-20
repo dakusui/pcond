@@ -138,11 +138,11 @@ public interface Evaluator {
               ValueHolder<Boolean> outputFromEach = child.output();
               if (outputFromEach.isValueReturned()) {
                 result &= outputFromEach.returnedValue();
-                ret.valueReturned(result);
+                ret = ValueHolder.forValue(result);
               } else if (child.output().isExceptionThrown())
-                ret.evaluationSkipped();
+                ret = ValueHolder.<Boolean>create().evaluationSkipped();
               else if (child.output().isEvaluationSkipped())
-                ret.evaluationSkipped();
+                ret = ValueHolder.<Boolean>create().evaluationSkipped();
               else
                 assert false;
               if (evaluable.shortcut() && (ret.isEvaluationSkipped() || !result))
@@ -165,11 +165,11 @@ public interface Evaluator {
               ValueHolder<Boolean> outputFromEach = child.output();
               if (outputFromEach.isValueReturned()) {
                 result |= outputFromEach.returnedValue();
-                ret.valueReturned(result);
+                ret = ValueHolder.forValue(result);
               } else if (outputFromEach.isExceptionThrown())
-                ret.evaluationSkipped();
+                ret = ValueHolder.<Boolean>create().evaluationSkipped();
               else if (outputFromEach.isEvaluationSkipped())
-                ret.evaluationSkipped();
+                ret = ValueHolder.<Boolean>create().evaluationSkipped();
               else
                 assert false;
               if (evaluable.shortcut() && (ret.isEvaluationSkipped() || result))

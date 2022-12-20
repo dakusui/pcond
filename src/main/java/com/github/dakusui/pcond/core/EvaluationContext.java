@@ -57,8 +57,16 @@ public class EvaluationContext<T> {
   public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, BiFunction<E, ValueHolder<T>, ValueHolder<O>> evaluatorCallback) {
     requireNonNull(evaluableIo);
     EvaluableIo<T, E, O> evaluableIoWork = this.enter(evaluableIo.input(), evaluableIo.evaluable());
-    ValueHolder<O> out = evaluatorCallback.apply(evaluableIo.evaluable(), evaluableIo.input());
+    ValueHolder<O> out = evaluatorCallback.apply(evaluableIoWork.evaluable(), evaluableIoWork.input());
     this.leave(evaluableIoWork, out);
+    if (evaluableIoWork.output().isValueReturned())
+      evaluableIo.valueReturned(evaluableIoWork.output().returnedValue());
+    else if (evaluableIoWork.output().isExceptionThrown())
+      evaluableIo.exceptionThrown(evaluableIoWork.output().thrownException());
+    else if (evaluableIoWork.output().isEvaluationSkipped())
+      evaluableIo.evaluationSkipped();
+    else
+      assert false;
   }
 
   public static <T> EvaluationEntry.Type resolveEvaluationEntryType(Evaluable<T> evaluable) {
