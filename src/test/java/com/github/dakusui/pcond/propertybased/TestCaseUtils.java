@@ -1,13 +1,11 @@
 package com.github.dakusui.pcond.propertybased;
 
-import com.github.dakusui.shared.ReportParser;
 import org.junit.ComparisonFailure;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
@@ -38,24 +36,15 @@ enum TestCaseUtils {
         .collect(toList());
   }
 
-  static Predicate<String> equalsPredicate(Object w) {
-    return makePrintable("equals(" + w + ")", v -> Objects.equals(v, w));
-  }
-
-  static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualIsEqualTo(@SuppressWarnings("SameParameterValue") int numberOfExpectedSummaryRecordsForActual) {
-    return makePrintable("# of records (actual) = " + numberOfExpectedSummaryRecordsForActual, e -> Objects.equals(numberOfExpectedSummaryRecordsForActual, new ReportParser(e.getActual()).summary().records().size()));
-  }
-
-  static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualAndExpectedAreEqual() {
-    return makePrintable("# of records (actual) = # of records (expected)", e -> Objects.equals(new ReportParser(e.getActual()).summary().records().size(), new ReportParser(e.getExpected()).summary().records().size()));
-  }
-
   static <T, E extends Throwable> void exerciseTestCase(TestCase<T, E> testCase) throws Throwable {
     try {
       T value;
       assertThat(value = testCase.targetValue(), testCase.targetPredicate());
       examineReturnedValue(testCase, value);
     } catch (Throwable t) {
+      if (Boolean.parseBoolean(System.getProperty("pcond.ut.dontCatchComparisonFailure")) && t instanceof ComparisonFailure) {
+        throw t;
+      }
       examineThrownException(testCase, t);
     }
   }
@@ -104,19 +93,5 @@ enum TestCaseUtils {
                 .collect(joining("%n", "- ", "")));
     } else
       assert false;
-  }
-
-  public static <T> Predicate<T> makePrintable(String s, Predicate<T> predicate) {
-    return new Predicate<T>() {
-      @Override
-      public boolean test(T t) {
-        return predicate.test(t);
-      }
-
-      @Override
-      public String toString() {
-        return s;
-      }
-    };
   }
 }
