@@ -14,6 +14,7 @@ import org.junit.runners.Parameterized;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -213,11 +214,22 @@ public class PropertyBasedTest {
 
     @SuppressWarnings("unchecked")
     @TestCaseParameter
-    static TestCase<String, Throwable> givenTransformingPredicate_whenNonExpectedValue_thenValueReturned() {
+    static TestCase<String, Throwable> givenTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
       return new TestCase.Builder.ForReturnedValue<>("hello", (Predicate<String>) Predicates.transform(Functions.length()).check(Predicates.isEqualTo(6)), String.class)
           .addExpectationPredicate(equalsPredicate("hello"))
           .build();
     }
+
+    @TestCaseParameter
+    static TestCase<String, Throwable> givenChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
+      return new TestCase.Builder.ForReturnedValue<>("hello", Predicates.transform(toLowerCase().andThen(toLowerCase()).andThen(Functions.length())).check(Predicates.isEqualTo(6)), String.class)
+          .addExpectationPredicate(equalsPredicate("hello"))
+          .build();
+    }
+  }
+
+  private static Function<String, String> toLowerCase() {
+    return Printables.function("toLowerCase", String::toLowerCase);
   }
 
   private static Predicate<String> alwaysFalse() {

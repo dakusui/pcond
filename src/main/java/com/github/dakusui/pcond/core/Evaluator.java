@@ -2,11 +2,14 @@ package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.core.context.VariableBundle;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.CHECK;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.TRANSFORM;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
@@ -225,16 +228,19 @@ public interface Evaluator {
           evaluableIo,
           (Evaluable.Func<T> evaluable, ValueHolder<T> input) -> {
             ValueHolder<R> ret = ValueHolder.create();
-            if (input.isValueReturned()) {
-              ret.valueReturned((R) evaluable.head().apply(input.returnedValue()));
-            } else
-              ret.evaluationSkipped();
+            if (input.isValueReturned())
+              ret = ret.valueReturned((R) evaluable.head().apply(input.returnedValue()));
+            else
+              ret = ret.evaluationSkipped();
+            Optional<Evaluable<R>> tailOptional = evaluableIo.evaluable().tail();
+            if (!tailOptional.isPresent())
+              return ret;
+            Evaluable<R> tail = tailOptional.get();
             EvaluationContext<R> childContext = new EvaluationContext<>();
-            evaluableIo.evaluable().<R>tail().ifPresent((Evaluable<R> tail) -> {
-              tail.accept(new EvaluableIo<>(ret, resolveEvaluationEntryType(tail), tail), childContext, this);
-              evaluationContext.importEntries(childContext);
-            });
-            return ret;
+            EvaluableIo<R, Evaluable<R>, Object> ioForTail = new EvaluableIo<>(ret, resolveEvaluationEntryType(tail), tail);
+            tail.accept(ioForTail, childContext, this);
+            evaluationContext.importEntries(childContext);
+            return (ValueHolder<R>) ioForTail.output();
           });
     }
 
@@ -253,23 +259,19 @@ public interface Evaluator {
       evaluationContext.evaluate(
           evaluableIo,
           (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
-            return null;
-            /*
-            EvaluableIo<T, Evaluable.Transformation<T, R>, R> ioForMapper = new EvaluableIo<>(input, TRANSFORM, evaluableIo.evaluable());
-            evaluationContext.evaluate(
-                ioForMapper,
-                (Evaluable.Func<T> func, ValueHolder<T> funcInput) -> {
-                  func.accept((EvaluableIo<T, Evaluable<T>, R>) (EvaluableIo) childIo, evaluationContext, this);
-                  childIo.valueReturned(null);
-                });
+            EvaluableIo<T, Evaluable<T>, R> ioForMapper = new EvaluableIo<>(input, TRANSFORM, (Evaluable.Func<T>) evaluableIo.evaluable().mapper());
+            {
+              EvaluationContext<T> childContext = new EvaluationContext<>();
+              evaluableIo.evaluable().mapper().accept(ioForMapper, childContext, this);
+              evaluationContext.importEntries(childContext);
+            }
             EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = new EvaluableIo<>(ioForMapper.output(), CHECK, evaluableIo.evaluable().checker());
-            ((EvaluationContext<R>) evaluationContext).evaluate(
-                ioForChecker,
-                (EvaluableIo<R, Evaluable<R>, Boolean> childIo) -> {
-                  childIo.evaluable().accept((EvaluableIo) childIo, (EvaluationContext<R>) evaluationContext, this);
-                  updateOutputOfEvaluableIo(io_, childIo, ValueHolder::returnedValue);
-                });
-             */
+            {
+              EvaluationContext<R> childContext = new EvaluationContext<>();
+              evaluableIo.evaluable().checker().accept(ioForChecker, childContext, this);
+              evaluationContext.importEntries(childContext);
+            }
+            return ioForChecker.output();
           }
       );
     }

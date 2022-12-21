@@ -31,7 +31,7 @@ public enum ReportCheckUtils {
     };
   }
 
-  static Predicate<String> equalsPredicate(Object w) {
+  static <T> Predicate<T> equalsPredicate(T w) {
     return makePrintable("equals(" + w + ")", v -> Objects.equals(v, w));
   }
 }

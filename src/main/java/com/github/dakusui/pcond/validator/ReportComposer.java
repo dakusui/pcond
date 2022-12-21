@@ -90,7 +90,7 @@ public interface ReportComposer {
       List<EvaluationEntry> squashedItems = new LinkedList<>();
       for (EvaluationEntry each : evaluationHistory) {
         if (squashedItems.isEmpty()) {
-          if (each.isSquashable()) {
+          if (each.isSquashable() && !suppressSquashing()) {
             squashedItems.add(each);
           } else {
             ret.add(each);
@@ -117,6 +117,10 @@ public interface ReportComposer {
         }
       }
       return ret.stream().filter(each -> !(each.inputActualValue() instanceof Fluents.DummyValue)).collect(toList());
+    }
+
+    private static boolean suppressSquashing() {
+      return Boolean.parseBoolean(System.getProperty("pcond.suppressSquashing", "false"));
     }
 
     private static String computeDetailOutputExpectationFromSquashedItems(List<EvaluationEntry> squashedItems) {

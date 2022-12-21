@@ -231,7 +231,7 @@ public abstract class EvaluationEntry {
     FUNCTION {
       @Override
       String formName(Evaluable<?> evaluable) {
-        return evaluable.toString();
+        return ((Evaluable.Func<?>)evaluable).head().toString();
       }
     };
 
@@ -244,7 +244,8 @@ public abstract class EvaluationEntry {
     private final boolean requiresExplanation;
 
     Finalized(
-        String formName, Type type,
+        String formName,
+        Type type,
         int level,
         Object inputExpectation_, Object detailInputExpectation_,
         Object outputExpectation, Object detailOutputExpectation,
