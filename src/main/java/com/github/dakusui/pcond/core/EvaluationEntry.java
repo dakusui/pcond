@@ -66,7 +66,7 @@ public abstract class EvaluationEntry {
    */
   private final String formName;
 
-  private final int level;
+  int level;
 
   Object inputExpectation;
   Object detailInputExpectation;
@@ -189,7 +189,7 @@ public abstract class EvaluationEntry {
     TRANSFORM_AND_CHECK {
       @Override
       String formName(Evaluable<?> evaluable) {
-        return "";
+        return "transformAndCheck";
       }
     },
     TRANSFORM {

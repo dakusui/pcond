@@ -236,8 +236,7 @@ public interface Evaluator {
               EvaluationContext<Object> childContext = new EvaluationContext<>();
               EvaluableIo<Object, Evaluable<Object>, R> ioForTail = new EvaluableIo<>(finalRet, resolveEvaluationEntryType(e), e);
               e.accept(ioForTail, childContext, this);
-              evaluationContext.importEntries(childContext);
-              System.out.println("  ioForTail:<" + ioForTail.output() + ">");
+              evaluationContext.importEntries(childContext, 0);
             });
             return ret;
           });
@@ -258,7 +257,7 @@ public interface Evaluator {
       evaluationContext.evaluate(
           evaluableIo,
           (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
-            EvaluableIo<T, Evaluable<T>, R> ioForMapper = new EvaluableIo<>(input, TRANSFORM, (Evaluable.Func<T>) evaluableIo.evaluable().mapper());
+            EvaluableIo<T, Evaluable<T>, R> ioForMapper = new EvaluableIo<>(input, TRANSFORM, evaluableIo.evaluable().mapper());
             {
               EvaluationContext<T> childContext = new EvaluationContext<>();
               evaluableIo.evaluable().mapper().accept(ioForMapper, childContext, this);

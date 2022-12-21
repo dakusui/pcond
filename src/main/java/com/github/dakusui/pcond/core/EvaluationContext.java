@@ -111,6 +111,11 @@ public class EvaluationContext<T> {
   }
 
   public <R> void importEntries(EvaluationContext<R> childContext) {
+    importEntries(childContext, this.visitorLineage.size());
+  }
+
+  public <R> void importEntries(EvaluationContext<R> childContext, int indentGap) {
+    childContext.evaluationEntries.forEach(each -> each.level += indentGap);
     this.evaluationEntries.addAll(childContext.resultEntries());
   }
 }
