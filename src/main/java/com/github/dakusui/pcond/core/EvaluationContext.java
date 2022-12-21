@@ -23,6 +23,10 @@ public class EvaluationContext<T> {
   public EvaluationContext() {
   }
 
+  public static String formNameOf(Evaluable<?> evaluable) {
+    return resolveEvaluationEntryType(evaluable).formName(evaluable);
+  }
+
   public boolean isExpectationFlipped() {
     return this.expectationFlipped;
   }

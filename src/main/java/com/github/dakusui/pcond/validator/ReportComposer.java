@@ -107,7 +107,7 @@ public interface ReportComposer {
                 first.type(),
                 first.level(),
                 first.inputExpectation(), first.detailInputExpectation(),
-                first.outputExpectation(), first.detailOutputExpectation(),
+                first.outputExpectation(), computeDetailOutputExpectationFromSquashedItems(squashedItems),
                 first.inputActualValue(), null,
                 first.outputActualValue(), last.detailOutputActualValue(),
                 false,
@@ -117,6 +117,10 @@ public interface ReportComposer {
         }
       }
       return ret.stream().filter(each -> !(each.inputActualValue() instanceof Fluents.DummyValue)).collect(toList());
+    }
+
+    private static String computeDetailOutputExpectationFromSquashedItems(List<EvaluationEntry> squashedItems) {
+      return squashedItems.stream().map(EvaluationEntry::detailOutputExpectation).map(Objects::toString).collect(joining(":"));
     }
 
     private static FormattedEntry createFormattedEntryForExpectation(EvaluationEntry each) {

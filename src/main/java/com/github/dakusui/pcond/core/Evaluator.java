@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
@@ -382,6 +383,8 @@ public interface Evaluator {
     static Object explainOutputExpectation(Object evaluable) {
       if (evaluable instanceof Explainable)
         return explainValue(((Explainable) evaluable).explainOutputExpectation());
+      if (evaluable instanceof Evaluable)
+        return formNameOf((Evaluable<?>) evaluable);
       return null;
     }
 
