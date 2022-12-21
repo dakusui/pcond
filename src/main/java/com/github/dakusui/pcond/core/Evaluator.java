@@ -2,16 +2,15 @@ package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.core.context.VariableBundle;
 
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
+import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.CHECK;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.TRANSFORM;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
-import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.internals.InternalUtils.*;
@@ -232,15 +231,15 @@ public interface Evaluator {
               ret = ret.valueReturned((R) evaluable.head().apply(input.returnedValue()));
             else
               ret = ret.evaluationSkipped();
-            Optional<Evaluable<R>> tailOptional = evaluableIo.evaluable().tail();
-            if (!tailOptional.isPresent())
-              return ret;
-            Evaluable<R> tail = tailOptional.get();
-            EvaluationContext<R> childContext = new EvaluationContext<>();
-            EvaluableIo<R, Evaluable<R>, Object> ioForTail = new EvaluableIo<>(ret, resolveEvaluationEntryType(tail), tail);
-            tail.accept(ioForTail, childContext, this);
-            evaluationContext.importEntries(childContext);
-            return (ValueHolder<R>) ioForTail.output();
+            ValueHolder<Object> finalRet = (ValueHolder<Object>) ret;
+            evaluable.tail().ifPresent((Evaluable<Object> e) -> {
+              EvaluationContext<Object> childContext = new EvaluationContext<>();
+              EvaluableIo<Object, Evaluable<Object>, R> ioForTail = new EvaluableIo<>(finalRet, resolveEvaluationEntryType(e), e);
+              e.accept(ioForTail, childContext, this);
+              evaluationContext.importEntries(childContext);
+              System.out.println("  ioForTail:<" + ioForTail.output() + ">");
+            });
+            return ret;
           });
     }
 
