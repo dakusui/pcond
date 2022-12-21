@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.EvaluationContext.composeDetailOutputActualValueFromInputAndThrowable;
+import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
@@ -184,9 +184,16 @@ public interface Evaluator {
       evaluationContext.evaluate(
           evaluableIo,
           (Evaluable.Negation<T> evaluable, ValueHolder<T> input) -> {
-            EvaluableIo<T, Evaluable<T>, Boolean> childIo = createChildEvaluableIoOf(evaluable.target(), input);
-            evaluable.target().accept(childIo, evaluationContext, this);
-            return childIo.output().isValueReturned() ? ValueHolder.forValue(evaluationContext.expectationFlipped ^ childIo.output().returnedValue()) : childIo.output();
+            evaluationContext.flipExpectation();
+            try {
+              EvaluableIo<T, Evaluable<T>, Boolean> childIo = createChildEvaluableIoOf(evaluable.target(), input);
+              evaluable.target().accept(childIo, evaluationContext, this);
+              return childIo.output().isValueReturned() ?
+                  ValueHolder.forValue(evaluationContext.isExpectationFlipped() ^ childIo.output().returnedValue()) :
+                  childIo.output();
+            } finally {
+              evaluationContext.flipExpectation();
+            }
           }
       );
     }

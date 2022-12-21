@@ -1,7 +1,13 @@
 package com.github.dakusui.pcond.core;
 
-import static com.github.dakusui.pcond.core.EvaluationContext.*;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.FUNCTION;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.LEAF;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.*;
+import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
+import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
+import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
 
 /**
  * A class to hold an entry of execution history of the {@link Evaluator}.
@@ -88,6 +94,51 @@ public abstract class EvaluationEntry {
     this.inputActualValue = inputActualValue;
     this.detailInputActualValue = detailInputActualValue;
     this.squashable = squashable;
+  }
+
+  static String composeDetailOutputActualValueFromInputAndThrowable(Object input, Throwable throwable) {
+    StringBuilder b = new StringBuilder();
+    b.append("Input: '").append(input).append("'").append(format("%n"));
+    b.append("Input Type: ").append(input == null ? "(null)" : input.getClass().getName()).append(format("%n"));
+    b.append("Thrown Exception: '").append(throwable.getClass().getName()).append("'").append(format("%n"));
+    b.append("Exception Message: ").append(throwable.getMessage()).append(format("%n"));
+    for (StackTraceElement each : throwable.getStackTrace()) {
+      b.append("\t");
+      b.append(each);
+      b.append(format("%n"));
+    }
+    return b.toString();
+  }
+
+  static <T, E extends Evaluable<T>> Object computeInputActualValue(EvaluableIo<T, E, ?> evaluableIo) {
+    return evaluableIo.input().value();
+  }
+
+  static <T, E extends Evaluable<T>> Object computeOutputExpectation(EvaluableIo<T, E, ?> evaluableIo, boolean expectationFlipped) {
+    if (evaluableIo.output().state() == VALUE_RETURNED) {
+      if (evaluableIo.evaluableType() == FUNCTION)
+        return evaluableIo.output().returnedValue();
+      return !expectationFlipped;
+    } else if (evaluableIo.output().state() == EXCEPTION_THROWN)
+      return EVALUATION_SKIPPED;
+    else
+      throw new AssertionError("output state=<" + evaluableIo.output().state() + ">");
+  }
+
+  static <T, E extends Evaluable<T>> Object computeOutputActualValue(EvaluableIo<T, E, ?> evaluableIo) {
+    if (evaluableIo.output().state() == VALUE_RETURNED)
+      return evaluableIo.output().returnedValue();
+    if (evaluableIo.output().state() == EXCEPTION_THROWN)
+      return evaluableIo.output().thrownException();
+    else
+      throw new AssertionError();
+  }
+
+  static <T, E extends Evaluable<T>> boolean isExplanationRequired(Type evaluationEntryType, EvaluableIo<T, E, ?> evaluableIo, boolean expectationFlipped) {
+    return asList(FUNCTION, LEAF).contains(evaluationEntryType) && (
+        evaluableIo.output().state() == EXCEPTION_THROWN || (
+            evaluableIo.evaluableType() == LEAF && (
+                expectationFlipped ^ !(Boolean) evaluableIo.output().returnedValue())));
   }
 
   public String formName() {
@@ -248,7 +299,7 @@ public abstract class EvaluationEntry {
   public static class Impl extends EvaluationEntry {
 
     private final EvaluableIo<?, ?, ?> evaluableIo;
-    private final EvaluationContext<?> evaluationContext;
+    private final boolean expectationFlipped;
 
     <T, E extends Evaluable<T>> Impl(
         EvaluationContext<T> evaluationContext,
@@ -265,7 +316,7 @@ public abstract class EvaluationEntry {
           explainInputActualValue(evaluableIo.evaluable(), computeInputActualValue(evaluableIo)),
           evaluableIo.evaluable().isSquashable());
       this.evaluableIo = evaluableIo;
-      this.evaluationContext = evaluationContext;
+      this.expectationFlipped = evaluationContext.isExpectationFlipped();
     }
 
     private static <E extends Evaluable<T>, T> Object explainInputExpectation(EvaluableIo<T, E, ?> evaluableIo) {
@@ -278,12 +329,7 @@ public abstract class EvaluationEntry {
 
     @Override
     public boolean requiresExplanation() {
-      return isExplanationRequired(evaluableIo().evaluableType(), evaluationContext(), evaluableIo());
-    }
-
-    @SuppressWarnings("unchecked")
-    private <E> EvaluationContext<E> evaluationContext() {
-      return (EvaluationContext<E>) this.evaluationContext;
+      return isExplanationRequired(evaluableIo().evaluableType(), evaluableIo(), this.expectationFlipped);
     }
 
     @SuppressWarnings("unchecked")
@@ -292,7 +338,7 @@ public abstract class EvaluationEntry {
     }
 
     public Object outputExpectation() {
-      return computeOutputExpectation(evaluationContext(), evaluableIo());
+      return computeOutputExpectation(evaluableIo(), expectationFlipped);
     }
 
     @Override

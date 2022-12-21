@@ -107,9 +107,9 @@ public interface ReportComposer {
                 first.type(),
                 first.level(),
                 first.inputExpectation(), first.detailInputExpectation(),
-                last.outputExpectation(), last.detailOutputExpectation(),
+                first.outputExpectation(), first.detailOutputExpectation(),
                 first.inputActualValue(), null,
-                last.outputActualValue(), last.detailOutputActualValue(),
+                first.outputActualValue(), last.detailOutputActualValue(),
                 false,
                 squashedItems.stream().anyMatch(EvaluationEntry::requiresExplanation)));
             squashedItems.clear();
@@ -237,11 +237,11 @@ public interface ReportComposer {
 
 
     public static class FormattedEntry {
-      private final        String         input;
-      private final        String         formName;
-      private final        String         indent;
-      private final        String         output;
-      private final        boolean        requiresExplanation;
+      private final String  input;
+      private final String  formName;
+      private final String  indent;
+      private final String  output;
+      private final boolean requiresExplanation;
 
       FormattedEntry(String input, String formName, String indent, String output, boolean requiresExplanation) {
         this.input = input;

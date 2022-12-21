@@ -32,7 +32,7 @@ public class PropertyBasedTest {
   @interface TestCaseParameter {
   }
 
-  private static class Base extends TestBase {
+  private static abstract class Base extends TestBase {
     private final TestCase<?, ?> testCase;
 
     public Base(@SuppressWarnings("unused") String testName, TestCase<?, ?> testCase) {
