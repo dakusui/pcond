@@ -205,7 +205,7 @@ public interface Evaluable<T> {
       evaluator.evaluateVariableBundlePredicate((EvaluableIo<VariableBundle, VariableBundlePred, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
-    <T> Evaluable<? super T> enclosed();
+    <T> Evaluable<T> enclosed();
 
     int argIndex();
   }

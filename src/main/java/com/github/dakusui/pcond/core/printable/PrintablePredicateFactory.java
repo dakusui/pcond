@@ -450,8 +450,8 @@ public enum PrintablePredicateFactory {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <TT> Evaluable<? super TT> enclosed() {
-      return (Evaluable<? super TT>) this.enclosed;
+    public <TT> Evaluable<TT> enclosed() {
+      return (Evaluable<TT>) this.enclosed;
     }
 
     @Override

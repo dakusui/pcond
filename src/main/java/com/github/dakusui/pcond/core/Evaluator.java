@@ -13,7 +13,8 @@ import static com.github.dakusui.pcond.core.EvaluationEntry.Type.TRANSFORM;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
-import static com.github.dakusui.pcond.internals.InternalUtils.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
+import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -61,6 +62,15 @@ public interface Evaluator {
   <T> void evaluateLeaf(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
+   * Evaluates `value` with a "function" predicate.
+   *
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
+   * @see com.github.dakusui.pcond.core.Evaluable.Func
+   */
+  <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext);
+
+  /**
    * Evaluates `value` with a context predicate.
    *
    * @param evaluableIo       An object to hold an evaluable and its input and output.
@@ -77,15 +87,6 @@ public interface Evaluator {
    * @see com.github.dakusui.pcond.core.Evaluable.Transformation
    */
   <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
-
-  /**
-   * Evaluates `value` with a "function" predicate.
-   *
-   * @param evaluableIo       An object to hold an evaluable and its input and output.
-   * @param evaluationContext An evaluation context.
-   * @see com.github.dakusui.pcond.core.Evaluable.Func
-   */
-  <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a predicate for a stream.
@@ -106,14 +107,20 @@ public interface Evaluator {
   }
 
   class Impl implements Evaluator {
-    public static final  Object EVALUATION_SKIPPED = new Object() {
+    public static final Object EVALUATION_SKIPPED = new Object() {
       @Override
       public String toString() {
         return "(not evaluated)";
       }
     };
-    private static final Object NULL_VALUE         = new Object();
-    public static final  Object UNKNOWN            = new Snapshottable() {
+
+    private static final Object NULL_VALUE = new Object() {
+      public String toString() {
+        return "null";
+      }
+    };
+
+    public static final Object UNKNOWN = new Snapshottable() {
       @Override
       public Object snapshot() {
         return this.toString();
@@ -242,11 +249,6 @@ public interface Evaluator {
           });
     }
 
-    @Override
-    public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
-      evaluationContext.evaluate(evaluableIo, (Evaluable.VariableBundlePred evaluable, ValueHolder<VariableBundle> input) -> ValueHolder.create());
-    }
-
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
@@ -276,93 +278,39 @@ public interface Evaluator {
 
     @Override
     public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
-      /*
-      evaluationContext.evaluate(evaluableIo, (EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io) -> {
-        if (io.input().isValueReturned()) {
-          boolean defaultValue = io.evaluable().defaultValue();
-          boolean ret = io.input().returnedValue()
-              .filter((E e) -> checkValue(e, evaluableIo.evaluable(), io, evaluationContext))
-              .findFirst()
-              .map(each -> !defaultValue)
-              .orElse(defaultValue);
-          updateOutputOfEvaluableIo(io, io, v -> true);
-          return null;
-        }
-        return null;
-      });
-       */
+      evaluationContext.evaluate(
+          evaluableIo,
+          (Evaluable.StreamPred<E> evaluable, ValueHolder<Stream<E>> input) ->
+              input.returnedValue()
+                  .map((E e) -> {
+                    EvaluationContext<E> childContext = new EvaluationContext<>();
+                    EvaluableIo<E, Evaluable<E>, Boolean> ioForCutPredicate = createChildEvaluableIoOf(evaluable.cut(), ValueHolder.forValue(e));
+                    evaluable.cut().accept(ioForCutPredicate, childContext, this);
+                    evaluationContext.importEntries(childContext);
+                    return ioForCutPredicate.output();
+                  })
+                  .filter(eachResult -> {
+                    if (!eachResult.isValueReturned())
+                      return true;
+                    return eachResult.returnedValue() == evaluable.valueToCut();
+                  })
+                  .findFirst()
+                  .orElseGet(() -> ValueHolder.forValue(evaluable.defaultValue())));
+    }
 
-      evaluationContext.evaluate(evaluableIo, (Evaluable.StreamPred<E> evaluable, ValueHolder<Stream<E>> input) -> {
-        ValueHolder<Boolean> ret = ValueHolder.create();
-        input.returnedValue()
-            .filter(new Predicate<E>() {
-              @Override
-              public boolean test(E e) {
-                return false;
-              }
-            })
-            .map(new Function<E, Object>() {
-              @Override
-              public Object apply(E e) {
-                Object o = null;
-                return o;
-              }
-            })
-            .findFirst();
-
-        return ret;
+    @Override
+    public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
+      evaluationContext.evaluate(evaluableIo, (Evaluable.VariableBundlePred evaluable, ValueHolder<VariableBundle> input) -> {
+        EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.value.valueAt(evaluable.argIndex())));
+        EvaluationContext<Object> childContext = new EvaluationContext<>();
+        evaluable.enclosed().accept(io, childContext, this);
+        evaluationContext.importEntries(childContext);
+        return io.output();
       });
     }
 
-    private <E> boolean checkValue(E value, Evaluable.StreamPred<E> evaluable, EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io, EvaluationContext<Stream<E>> evaluationContext) {
-      return false;
-    }
-
-    private <E> Predicate<E> createPredicateForStream(Evaluable.StreamPred<E> p, EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io, EvaluationContext<Stream<E>> evaluationContext) {
-      return e -> {
-        boolean succeeded = false;
-        boolean ret = false;
-        Object throwable = NULL_VALUE;
-        try {
-          EvaluationContext<E> c = new EvaluationContext<>();
-          EvaluableIo<E, Evaluable<E>, Boolean> childIo = new EvaluableIo(io.input(), resolveEvaluationEntryType(io.evaluable()), io.evaluable());
-          p.cut().accept(childIo, c, this);
-          succeeded = true;
-        } catch (Throwable t) {
-          throwable = t;
-          throw wrapIfNecessary(t);
-        } finally {
-          /*
-          if (!succeeded || evaluator.<Boolean>resultValue() == p.valueToCut()) {
-            importResultEntries(evaluator.resultEntries(), throwable);
-            ret = true;
-          }
-
-           */
-        }
-        return ret;
-      };
-
-    }
-
-
-    private static <T, E extends Evaluable<T>, R, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(E evaluable, ValueHolder<T> input) {
+    private static <T, E extends Evaluable<T>, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(E evaluable, ValueHolder<T> input) {
       return new EvaluableIo<>(input, resolveEvaluationEntryType(evaluable), evaluable);
-    }
-
-    private static <T, R, E extends Evaluable<T>, F extends Evaluable<R>> void updateOutputOfEvaluableIo(
-        EvaluableIo<T, E, Boolean> io,
-        EvaluableIo<R, F, Boolean> childIo,
-        Function<ValueHolder<Boolean>, Boolean> returnedValueResolver) {
-      ValueHolder<Boolean> outputFromChildIo = childIo.output();
-      if (outputFromChildIo.isValueReturned())
-        io.valueReturned(returnedValueResolver.apply(outputFromChildIo));
-      else if (outputFromChildIo.isExceptionThrown())
-        io.exceptionThrown(outputFromChildIo.thrownException());
-      else if (outputFromChildIo.isEvaluationSkipped())
-        io.evaluationSkipped();
-      else
-        assert false;
     }
   }
 
@@ -415,9 +363,10 @@ public interface Evaluator {
     }
 
     static <T, E extends Evaluable<T>> Object explainActual(EvaluableIo<T, E, ?> evaluableIo) {
-      if (evaluableIo.output().state() == VALUE_RETURNED)
-        return evaluableIo.input().returnedValue();
-      else if (evaluableIo.output().state() == EXCEPTION_THROWN)
+      if (evaluableIo.output().state() == VALUE_RETURNED) {
+        T ret = evaluableIo.input().returnedValue();
+        return ret != null ? ret : Impl.NULL_VALUE;
+      } else if (evaluableIo.output().state() == EXCEPTION_THROWN)
         return composeDetailOutputActualValueFromInputAndThrowable(evaluableIo.input().value(), evaluableIo.output().thrownException());
       else
         throw new AssertionError();

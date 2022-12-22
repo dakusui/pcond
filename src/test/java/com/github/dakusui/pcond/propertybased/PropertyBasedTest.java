@@ -17,12 +17,13 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.forms.Predicates.alwaysTrue;
-import static com.github.dakusui.pcond.forms.Predicates.anyOf;
+import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.propertybased.ReportCheckUtils.*;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 
@@ -224,6 +225,55 @@ public class PropertyBasedTest {
     static TestCase<String, Throwable> givenChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
       return new TestCase.Builder.ForReturnedValue<>("HELLO", Predicates.transform(toLowerCase().andThen(toLowerCase()).andThen(Functions.length())).check(Predicates.isEqualTo(6)), String.class)
           .addExpectationPredicate(equalsPredicate("hello"))
+          .build();
+    }
+  }
+
+  @RunWith(Parameterized.class)
+  public static class StreamAllMatchPredicate extends Base {
+
+    public StreamAllMatchPredicate(String testName, TestCase<?, ?> testCase) {
+      super(testName, testCase);
+    }
+
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static Iterable<Object[]> parameters() {
+      return TestCaseUtils.parameters(StreamAllMatchPredicate.class);
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @TestCaseParameter
+    static TestCase<Stream<String>, Throwable> givenStreamPredicate_whenExpectedValue_thenValueReturned() {
+      Stream<String> v;
+      return new TestCase.Builder.ForReturnedValue<>(
+          v = Stream.of("hello", "world"),
+          Predicates.allMatch(isNotNull()),
+          (Class<Stream<String>>) (Class) Stream.class)
+          .addExpectationPredicate(equalsPredicate(v))
+          .build();
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @TestCaseParameter
+    static TestCase<Stream<String>, Throwable> givenStreamPredicate_whenUnexpectedValue_thenComparisonFailure() {
+      Stream<String> v;
+      return new TestCase.Builder.ForReturnedValue<>(
+          v = Stream.of("hello", "world", "HELLO", "WORLD"),
+          Predicates.allMatch(containsString("o")),
+          (Class<Stream<String>>) (Class) Stream.class)
+          .addExpectationPredicate(equalsPredicate(v))
+          .build();
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @TestCaseParameter
+    static TestCase<Stream<String>, Throwable> givenStreamPredicate_whenUnexpectedNullValue_thenComparisonFailure() {
+      Stream<String> v;
+      return new TestCase.Builder.ForReturnedValue<>(
+          v = Stream.of("hello", "world", null, "HELLO", "WORLD"),
+          Predicates.allMatch(isNotNull()),
+          (Class<Stream<String>>) (Class) Stream.class)
+          .addExpectationPredicate(equalsPredicate(v))
           .build();
     }
   }
