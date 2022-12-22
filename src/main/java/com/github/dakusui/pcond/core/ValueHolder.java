@@ -97,7 +97,7 @@ public class ValueHolder<V> implements Cloneable {
 
   public ValueHolder<V> valueReturned(V value) {
 //    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
-    return new ValueHolder<>(State.VALUE_RETURNED, requireNonNull(value), null);
+    return new ValueHolder<>(State.VALUE_RETURNED, value, null);
   }
 
   public ValueHolder<V> exceptionThrown(Throwable throwable) {

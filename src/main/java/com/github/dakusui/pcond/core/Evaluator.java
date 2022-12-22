@@ -233,19 +233,22 @@ public interface Evaluator {
       evaluationContext.evaluate(
           evaluableIo,
           (Evaluable.Func<T> evaluable, ValueHolder<T> input) -> {
+            // System.out.println("head");
             ValueHolder<R> ret = ValueHolder.create();
             if (input.isValueReturned())
               ret = ret.valueReturned((R) evaluable.head().apply(input.returnedValue()));
             else
               ret = ret.evaluationSkipped();
             ValueHolder<Object> finalRet = (ValueHolder<Object>) ret;
-            evaluable.tail().ifPresent((Evaluable<Object> e) -> {
-              EvaluationContext<Object> childContext = new EvaluationContext<>();
-              EvaluableIo<Object, Evaluable<Object>, R> ioForTail = new EvaluableIo<>(finalRet, resolveEvaluationEntryType(e), e);
-              e.accept(ioForTail, childContext, this);
-              evaluationContext.importEntries(childContext, 0);
-            });
-            return ret;
+            return evaluable.tail().map((Evaluable<Object> e) -> {
+                  // System.out.println("tail");
+                  EvaluationContext<Object> childContext = new EvaluationContext<>();
+                  EvaluableIo<Object, Evaluable<Object>, R> ioForTail = new EvaluableIo<>(finalRet, resolveEvaluationEntryType(e), e);
+                  e.accept(ioForTail, childContext, this);
+                  evaluationContext.importEntries(childContext, 0);
+                  return ioForTail.output();
+                })
+                .orElse(ret);
           });
     }
 
@@ -265,6 +268,7 @@ public interface Evaluator {
               evaluableIo.evaluable().mapper().accept(ioForMapper, childContext, this);
               evaluationContext.importEntries(childContext);
             }
+            // System.out.println("-> (ioForMapper.output): " + ioForMapper.output());
             EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = new EvaluableIo<>(ioForMapper.output(), CHECK, evaluableIo.evaluable().checker());
             {
               EvaluationContext<R> childContext = new EvaluationContext<>();
@@ -301,7 +305,7 @@ public interface Evaluator {
     @Override
     public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
       evaluationContext.evaluate(evaluableIo, (Evaluable.VariableBundlePred evaluable, ValueHolder<VariableBundle> input) -> {
-        EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.value.valueAt(evaluable.argIndex())));
+        EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.returnedValue().valueAt(evaluable.argIndex())));
         EvaluationContext<Object> childContext = new EvaluationContext<>();
         evaluable.enclosed().accept(io, childContext, this);
         evaluationContext.importEntries(childContext);

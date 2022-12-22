@@ -303,8 +303,8 @@ public interface Evaluable<T> {
       evaluator.evaluateFunction((EvaluableIo<T, Func<T>, O>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
-    Function<? super T, ?> head();
+    Function<? super T, Object> head();
 
-    <R> Optional<Evaluable<R>> tail();
+    Optional<Evaluable<Object>> tail();
   }
 }

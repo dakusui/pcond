@@ -18,8 +18,8 @@ public class PrintableFunction<T, R> extends
     Evaluator.Explainable,
     Cloneable {
   final         Function<? super T, ? extends R> function;
-  private final Function<? super T, ?>           head;
-  private final Evaluable<?>                     tail;
+  private final Function<? super T, Object>           head;
+  private final Evaluable<Object>                tail;
   private final Supplier<String>                 formatter;
   private final Function<?, R>                   tailAsFunction;
 
@@ -30,8 +30,8 @@ public class PrintableFunction<T, R> extends
     super(creator, args);
     this.formatter = Objects.requireNonNull(s);
     this.function = requireNonPrintableFunction(unwrap(Objects.requireNonNull(function)));
-    this.head = head != null ? head : this;
-    this.tail = tail;
+    this.head = head != null ? (Function<? super T, Object>) head : (Function<? super T, Object>) this;
+    this.tail = (Evaluable<Object>) tail;
     this.tailAsFunction = (Function<?, R>) tail;
   }
 
@@ -59,12 +59,12 @@ public class PrintableFunction<T, R> extends
   }
 
   @Override
-  public Function<? super T, ?> head() {
-    return this.head;
+  public Function<? super T, Object> head() {
+    return (Function<? super T, Object>) this.head;
   }
 
   @Override
-  public Optional<Evaluable<?>> tail() {
+  public Optional<Evaluable<Object>> tail() {
     return Optional.ofNullable(this.tail);
   }
 

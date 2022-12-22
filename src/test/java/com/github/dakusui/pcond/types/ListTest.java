@@ -64,6 +64,5 @@ public class ListTest extends TestBase {
     List<String> value = asList("Hello", "world");
     validate(value, when().asListOf((String) value()).then().findElementsInOrderBy(Predicates.isEqualTo("Hello"), Predicates.isEqualTo("world")));
   }
-
-   */
+  */
 }

@@ -10,7 +10,6 @@ import com.github.dakusui.shared.ExperimentalsUtils;
 import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.TargetMethodHolder;
 import com.github.dakusui.shared.utils.TestBase;
-import com.github.dakusui.thincrest.TestAssertions;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
@@ -156,12 +155,11 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           //TestAssertions.assertThat(
           asList("Hi", "hello", "world", null),
           transform(stream().andThen(nest(asList("1", "2", "o"))))
-              .check(
-                  noneMatch(
-                      toVariableBundlePredicate(transform(Functions.length()).check(gt(3))))));
-      //              |                  |         |                         |
-      //              |                  |         |                         |
-      //             (1)                (2)       (3)                       (4)
+              .check(noneMatch(
+                  toVariableBundlePredicate(transform(Functions.length()).check(gt(3))))));
+      //          |                         |         |                         |
+      //          |                         |         |                         |
+      //         (1)                       (2)       (3)                       (4)
 
     } catch (IllegalValueException e) {
       System.err.println("<<" + e.getMessage() + ">>");

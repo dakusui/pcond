@@ -41,10 +41,15 @@ public class EvaluationContext<T> {
    */
   public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, BiFunction<E, ValueHolder<T>, ValueHolder<O>> evaluatorCallback) {
     requireNonNull(evaluableIo);
+    System.out.println("BEGIN: EVALUATE: " + resolveEvaluationEntryType(evaluableIo.evaluable()) + " evaluable:" + evaluableIo.evaluable());
+    System.out.println("- in: "+ evaluableIo.input());
     EvaluableIo<T, E, O> evaluableIoWork = this.enter(evaluableIo.input(), evaluableIo.evaluable());
     ValueHolder<O> out = evaluatorCallback.apply(evaluableIoWork.evaluable(), evaluableIoWork.input());
     this.leave(evaluableIoWork, out);
     updateEvaluableIo(evaluableIo, evaluableIoWork);
+    System.out.println("END:   EVALUATE: " + resolveEvaluationEntryType(evaluableIo.evaluable()) + " evaluable:" + evaluableIo.evaluable());
+    System.out.println("- out:  "+ evaluableIo.output());
+    System.out.println("- (in): "+ evaluableIoWork.input());
   }
 
   private static <T, E extends Evaluable<T>, O> void updateEvaluableIo(EvaluableIo<T, E, O> evaluableIo, EvaluableIo<T, E, O> evaluableIoWork) {
