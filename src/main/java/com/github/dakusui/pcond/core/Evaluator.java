@@ -290,8 +290,28 @@ public interface Evaluator {
         }
         return null;
       });
-
        */
+
+      evaluationContext.evaluate(evaluableIo, (Evaluable.StreamPred<E> evaluable, ValueHolder<Stream<E>> input) -> {
+        ValueHolder<Boolean> ret = ValueHolder.create();
+        input.returnedValue()
+            .filter(new Predicate<E>() {
+              @Override
+              public boolean test(E e) {
+                return false;
+              }
+            })
+            .map(new Function<E, Object>() {
+              @Override
+              public Object apply(E e) {
+                Object o = null;
+                return o;
+              }
+            })
+            .findFirst();
+
+        return ret;
+      });
     }
 
     private <E> boolean checkValue(E value, Evaluable.StreamPred<E> evaluable, EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> io, EvaluationContext<Stream<E>> evaluationContext) {
