@@ -50,8 +50,13 @@ public class ValueHolder<V> implements Cloneable {
     return new ValueHolder<>(State.VALUE_RETURNED, value, null);
   }
 
+  @Override
   public String toString() {
-    return String.format("state:%s, value:%s, exception:%s", state, value, exception);
+    if (isValueReturned())
+      return String.format("state:%s, value:%s", state, value);
+    if (isEvaluationSkipped())
+      return String.format("state:%s, exception:%s", state, exception);
+    return String.format("state:%s", state);
   }
 
   public boolean isValueReturned() {
@@ -64,10 +69,6 @@ public class ValueHolder<V> implements Cloneable {
 
   public boolean isEvaluationSkipped() {
     return this.state() == State.EVALUATION_SKIPPED;
-  }
-
-  public boolean wasEvaluationAttempted() {
-    return this.state() != State.NOT_YET_EVALUATED;
   }
 
   public enum State {
@@ -96,17 +97,17 @@ public class ValueHolder<V> implements Cloneable {
   }
 
   public ValueHolder<V> valueReturned(V value) {
-//    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
+    //    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
     return new ValueHolder<>(State.VALUE_RETURNED, value, null);
   }
 
   public ValueHolder<V> exceptionThrown(Throwable throwable) {
-//    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
+    //    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
     return new ValueHolder<>(State.EXCEPTION_THROWN, null, requireNonNull(throwable));
   }
 
   public ValueHolder<V> evaluationSkipped() {
-//    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
+    //    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
     return new ValueHolder<>(State.EVALUATION_SKIPPED, null, null);
   }
 

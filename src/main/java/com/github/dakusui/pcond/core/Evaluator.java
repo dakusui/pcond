@@ -231,30 +231,41 @@ public interface Evaluator {
       evaluationContext.evaluate(
           evaluableIo,
           (Evaluable.Func<T> evaluable, ValueHolder<T> input) -> {
-            ValueHolder<R> ret = ValueHolder.create();
-            if (input.isValueReturned())
-              ret = applyFunction(ret, input.returnedValue(), evaluable.head());
-            else
-              ret = ret.evaluationSkipped();
+            ValueHolder<R> ret;
+            {
+              System.out.printf("BEGIN: func:%s(%s)%n", evaluable, input);
+              System.out.printf("BEGIN: head:%s(%s)%n", evaluable, input);
+              EvaluationContext<T> childContext = new EvaluationContext<>();
+              EvaluableIo<T, Evaluable<T>, Object> ioForHead = createChildEvaluableIoOf(evaluable, input);
+              childContext.evaluate(ioForHead, io -> {
+                ValueHolder<Object> tmp = ValueHolder.create();
+                if (input.isValueReturned())
+                  tmp = applyFunction(tmp, io.input().returnedValue(), ((Evaluable.Func<T>) io.evaluable()).head());
+                else
+                  tmp = tmp.evaluationSkipped();
+                return tmp;
+              });
+              ret = (ValueHolder<R>) ioForHead.output();
+              evaluationContext.importEntries(childContext, 0);
+              System.out.printf("END:   head:%s(%s)%n", evaluable, ret);
+            }
             ValueHolder<Object> finalRet = (ValueHolder<Object>) ret;
-            evaluable.tail().ifPresent((Evaluable<Object> e) -> {
-              System.out.println("tail: " + e);
+            return evaluable.tail().map((Evaluable<Object> e) -> {
+              System.out.printf("BEGIN: tail:%s(%s)%n", e, finalRet);
               EvaluationContext<Object> childContext = new EvaluationContext<>();
               EvaluableIo<Object, Evaluable<Object>, R> ioForTail = createChildEvaluableIoOf(e, finalRet);
               e.accept(ioForTail, childContext, this);
-              evaluationContext.importEntries(childContext, 0);
-              //                  return ioForTail.output();
-            });
-            //              .orElse(ret);
-            return ret;
+              System.out.printf("END:   tail:%s(%s)=%s%n", e, finalRet, ioForTail.output());
+              return ioForTail.output();
+            }).orElse(ret);
           });
     }
 
     @SuppressWarnings("unchecked")
     private static <T, R> ValueHolder<R> applyFunction(ValueHolder<R> ret, T in, Function<? super T, Object> function) {
+      System.out.println("-->function:" + function);
       try {
         R returnedValue;
-        System.out.println("head: " + function);
         returnedValue = (R) function.apply(in);
         return ret.valueReturned(returnedValue);
       } catch (Throwable t) {
@@ -305,31 +316,37 @@ public interface Evaluator {
     public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
       evaluationContext.evaluate(
           evaluableIo,
-          (Evaluable.StreamPred<E> evaluable, ValueHolder<Stream<E>> input) ->
-              input.returnedValue()
-                  .map((E e) -> {
-                    EvaluationContext<E> childContext = new EvaluationContext<>();
-                    EvaluableIo<E, Evaluable<E>, Boolean> ioForCutPredicate = createChildEvaluableIoOf(evaluable.cut(), ValueHolder.forValue(e));
-                    evaluable.cut().accept(ioForCutPredicate, childContext, this);
-                    evaluationContext.importEntries(childContext);
-                    return ioForCutPredicate.output();
-                  })
-                  .filter(eachResult -> {
-                    if (!eachResult.isValueReturned())
-                      return true;
-                    return eachResult.returnedValue() == evaluable.valueToCut();
-                  })
-                  .findFirst()
-                  .orElseGet(() -> ValueHolder.forValue(evaluable.defaultValue())));
+          (Evaluable.StreamPred<E> evaluable, ValueHolder<Stream<E>> input) -> {
+            System.out.printf("BEGIN: StreamPredicate: %s(%s)%n", evaluable, input);
+            ValueHolder<Boolean> ret = input.returnedValue()
+                .map((E e) -> {
+                  EvaluationContext<E> childContext = new EvaluationContext<>();
+                  EvaluableIo<E, Evaluable<E>, Boolean> ioForCutPredicate = createChildEvaluableIoOf(evaluable.cut(), ValueHolder.forValue(e));
+                  evaluable.cut().accept(ioForCutPredicate, childContext, this);
+                  evaluationContext.importEntries(childContext);
+                  return ioForCutPredicate.output();
+                })
+                .filter(eachResult -> {
+                  if (!eachResult.isValueReturned())
+                    return true;
+                  return eachResult.returnedValue() == evaluable.valueToCut();
+                })
+                .findFirst()
+                .orElseGet(() -> ValueHolder.forValue(evaluable.defaultValue()));
+            System.out.printf("END:  StreamPredicate: %s(%s)=%s%n", evaluable, input, ret);
+            return ret;
+          });
     }
 
     @Override
     public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
       evaluationContext.evaluate(evaluableIo, (Evaluable.VariableBundlePred evaluable, ValueHolder<VariableBundle> input) -> {
+        System.out.printf("VariableBundlePredicate:BEGIN: %s(%s)%n", evaluable, input);
         EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.returnedValue().valueAt(evaluable.argIndex())));
         EvaluationContext<Object> childContext = new EvaluationContext<>();
         evaluable.enclosed().accept(io, childContext, this);
         evaluationContext.importEntries(childContext);
+        System.out.printf("VariableBundlePredicate:END: %s(%s)=%s%n", evaluable, input, io.output());
         return io.output();
       });
     }

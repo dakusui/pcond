@@ -19,11 +19,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.forms.Experimentals.toVariableBundlePredicate;
+import static com.github.dakusui.pcond.forms.Experimentals.toVariableBundleStream;
+import static com.github.dakusui.pcond.forms.Functions.streamOf;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.propertybased.ReportCheckUtils.*;
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
 
@@ -280,6 +282,32 @@ public class PropertyBasedTest {
           v = Stream.of("hello", "world", null, "HELLO", "WORLD"),
           Predicates.allMatch(isNotNull()),
           (Class<Stream<String>>) (Class) Stream.class)
+          .addExpectationPredicate(equalsPredicate(v))
+          .build();
+    }
+  }
+
+  @RunWith(Parameterized.class)
+  public static class VariableBundlePredicate extends Base {
+
+    public VariableBundlePredicate(String testName, TestCase<?, ?> testCase) {
+      super(testName, testCase);
+    }
+
+    @Parameterized.Parameters(name = "{index}: {0}")
+    public static Iterable<Object[]> parameters() {
+      return TestCaseUtils.parameters(VariableBundlePredicate.class);
+    }
+
+    @TestCaseParameter
+    static TestCase<Object, Throwable> givenVariableBundlePredicate_whenExpectedValue_thenValueReturned() {
+      Object v;
+      return new TestCase.Builder.ForReturnedValue<>(
+          v = "hello",
+          transform(streamOf()                                        // (1)
+              .andThen(toVariableBundleStream()))                            // (2)
+              .check(anyMatch(toVariableBundlePredicate(isNotNull()))),
+          Object.class)
           .addExpectationPredicate(equalsPredicate(v))
           .build();
     }

@@ -1,0 +1,11 @@
+BEGIN: func:streamOf->toVariableBundleStream(state:VALUE_RETURNED, value:hello)
+    BEGIN: head:streamOf->toVariableBundleStream(state:VALUE_RETURNED, value:hello)
+    END:   head:streamOf->toVariableBundleStream(state:VALUE_RETURNED, value:java.util.stream.ReferencePipeline$Head@63d4e2ba)
+    BEGIN: tail:toVariableBundleStream(state:VALUE_RETURNED, value:java.util.stream.ReferencePipeline$Head@63d4e2ba)
+        BEGIN: func:toVariableBundleStream(state:VALUE_RETURNED, value:java.util.stream.ReferencePipeline$Head@63d4e2ba)
+            BEGIN: head:toVariableBundleStream(state:VALUE_RETURNED, value:java.util.stream.ReferencePipeline$Head@63d4e2ba)
+            END:   head:toVariableBundleStream(state:VALUE_RETURNED, value:java.util.stream.ReferencePipeline$3@47fd17e3)
+        END:   func:toVariableBundleStream(state:VALUE_RETURNED, value:java.util.stream.ReferencePipeline$Head@63d4e2ba)=state:VALUE_RETURNED, value:java.util.stream.ReferencePipeline$3@47fd17e3
+    END:   tail:toVariableBundleStream(state:VALUE_RETURNED, value:java.util.stream.ReferencePipeline$Head@63d4e2ba)=state:VALUE_RETURNED, value:java.util.stream.ReferencePipeline$3@47fd17e3
+END:   func:streamOf->toVariableBundleStream(state:VALUE_RETURNED, value:hello)=state:VALUE_RETURNED, value:java.util.stream.ReferencePipeline$Head@63d4e2ba
+StreamPredicate:BEGIN: anyMatch[contextPredicate[isNotNull,0]](state:VALUE_RETURNED, value:java.util.stream.ReferencePipeline$Head@63d4e2ba)

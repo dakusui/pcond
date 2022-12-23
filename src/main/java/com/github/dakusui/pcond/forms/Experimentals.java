@@ -39,7 +39,7 @@ public enum Experimentals {
    * @see VariableBundle
    */
   public static Function<Stream<?>, Stream<VariableBundle>> toVariableBundleStream() {
-    return Printables.function(() -> "toContextStream", VariableBundleUtils::toVariableBundleStream);
+    return Printables.function(() -> "toVariableBundleStream", VariableBundleUtils::toVariableBundleStream);
   }
 
   /**
