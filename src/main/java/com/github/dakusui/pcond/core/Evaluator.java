@@ -8,8 +8,6 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
-import static com.github.dakusui.pcond.core.EvaluationEntry.Type.CHECK;
-import static com.github.dakusui.pcond.core.EvaluationEntry.Type.TRANSFORM;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
@@ -236,20 +234,31 @@ public interface Evaluator {
             // System.out.println("head");
             ValueHolder<R> ret = ValueHolder.create();
             if (input.isValueReturned())
-              ret = ret.valueReturned((R) evaluable.head().apply(input.returnedValue()));
+              ret = applyFunction(ret, input.returnedValue(), evaluable.head());
             else
               ret = ret.evaluationSkipped();
             ValueHolder<Object> finalRet = (ValueHolder<Object>) ret;
             return evaluable.tail().map((Evaluable<Object> e) -> {
                   // System.out.println("tail");
                   EvaluationContext<Object> childContext = new EvaluationContext<>();
-                  EvaluableIo<Object, Evaluable<Object>, R> ioForTail = new EvaluableIo<>(finalRet, resolveEvaluationEntryType(e), e);
+                  EvaluableIo<Object, Evaluable<Object>, R> ioForTail = createChildEvaluableIoOf(e, finalRet);
                   e.accept(ioForTail, childContext, this);
                   evaluationContext.importEntries(childContext, 0);
                   return ioForTail.output();
                 })
                 .orElse(ret);
           });
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T, R> ValueHolder<R> applyFunction(ValueHolder<R> ret, T in, Function<? super T, Object> function) {
+      try {
+        R returnedValue;
+        returnedValue = (R) function.apply(in);
+        return ret.valueReturned(returnedValue);
+      } catch (Throwable t) {
+        return ret.exceptionThrown(t);
+      }
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -262,14 +271,13 @@ public interface Evaluator {
       evaluationContext.evaluate(
           evaluableIo,
           (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
-            EvaluableIo<T, Evaluable<T>, R> ioForMapper = new EvaluableIo<>(input, TRANSFORM, evaluableIo.evaluable().mapper());
+            EvaluableIo<T, Evaluable<T>, R> ioForMapper = createChildEvaluableIoOf(evaluableIo.evaluable().mapper(), input);
             {
               EvaluationContext<T> childContext = new EvaluationContext<>();
               evaluableIo.evaluable().mapper().accept(ioForMapper, childContext, this);
               evaluationContext.importEntries(childContext);
             }
-            // System.out.println("-> (ioForMapper.output): " + ioForMapper.output());
-            EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = new EvaluableIo<>(ioForMapper.output(), CHECK, evaluableIo.evaluable().checker());
+            EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = createChildEvaluableIoOf(evaluableIo.evaluable().checker(), ioForMapper.output());
             {
               EvaluationContext<R> childContext = new EvaluationContext<>();
               evaluableIo.evaluable().checker().accept(ioForChecker, childContext, this);

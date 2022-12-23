@@ -1,10 +1,12 @@
 package com.github.dakusui.pcond.core;
 
+import com.github.dakusui.pcond.core.ValueHolder.State;
+
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.FUNCTION;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.LEAF;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.*;
 import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
-import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
+import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -115,30 +117,37 @@ public abstract class EvaluationEntry {
   }
 
   static <T, E extends Evaluable<T>> Object computeOutputExpectation(EvaluableIo<T, E, ?> evaluableIo, boolean expectationFlipped) {
-    if (evaluableIo.output().state() == VALUE_RETURNED) {
+    final State state = evaluableIo.output().state();
+    if (state == VALUE_RETURNED) {
       if (evaluableIo.evaluableType() == FUNCTION)
-        return evaluableIo.output().returnedValue();
+        return toSnapshotIfPossible(evaluableIo.output().returnedValue());
       return !expectationFlipped;
-    } else if (evaluableIo.output().state() == EXCEPTION_THROWN)
+    } else if (state == State.EXCEPTION_THROWN || state == State.EVALUATION_SKIPPED)
       return EVALUATION_SKIPPED;
     else
-      throw new AssertionError("output state=<" + evaluableIo.output().state() + ">");
+      throw new AssertionError("output state=<" + state + ">");
   }
 
   static <T, E extends Evaluable<T>> Object computeOutputActualValue(EvaluableIo<T, E, ?> evaluableIo) {
-    if (evaluableIo.output().state() == VALUE_RETURNED)
-      return evaluableIo.output().returnedValue();
-    if (evaluableIo.output().state() == EXCEPTION_THROWN)
+    if (evaluableIo.output().state() == State.VALUE_RETURNED)
+      return toSnapshotIfPossible(evaluableIo.output().returnedValue());
+    if (evaluableIo.output().state() == State.EXCEPTION_THROWN)
       return evaluableIo.output().thrownException();
     else
-      throw new AssertionError();
+      return EVALUATION_SKIPPED;
+    //throw new AssertionError();
   }
 
   static <T, E extends Evaluable<T>> boolean isExplanationRequired(Type evaluationEntryType, EvaluableIo<T, E, ?> evaluableIo, boolean expectationFlipped) {
     return asList(FUNCTION, LEAF).contains(evaluationEntryType) && (
-        evaluableIo.output().state() == EXCEPTION_THROWN || (
-            evaluableIo.evaluableType() == LEAF && (
-                expectationFlipped ^ !(Boolean) evaluableIo.output().returnedValue())));
+        evaluableIo.output().state() == State.EXCEPTION_THROWN || (
+            evaluableIo.evaluableType() == LEAF && returnedValueOrVoidIfSkipped(expectationFlipped, evaluableIo.output())));
+  }
+
+  private static <T, E extends Evaluable<T>> boolean returnedValueOrVoidIfSkipped(boolean expectationFlipped, ValueHolder<?> output) {
+    if (output.state() == State.EVALUATION_SKIPPED)
+      return false;
+    return expectationFlipped ^ !(Boolean) output.returnedValue();
   }
 
   public String formName() {
@@ -231,7 +240,7 @@ public abstract class EvaluationEntry {
     FUNCTION {
       @Override
       String formName(Evaluable<?> evaluable) {
-        return ((Evaluable.Func<?>)evaluable).head().toString();
+        return ((Evaluable.Func<?>) evaluable).head().toString();
       }
     };
 
@@ -300,7 +309,11 @@ public abstract class EvaluationEntry {
   public static class Impl extends EvaluationEntry {
 
     private final EvaluableIo<?, ?, ?> evaluableIo;
-    private final boolean expectationFlipped;
+    private final boolean              expectationFlipped;
+
+    private boolean finalized = false;
+    private Object  outputActualValue;
+    private Object  detailOutputActualValue;
 
     <T, E extends Evaluable<T>> Impl(
         EvaluationContext<T> evaluationContext,
@@ -313,8 +326,8 @@ public abstract class EvaluationEntry {
           explainInputExpectation(evaluableIo),                   // detailInputExpectation  == detailInputActualValue
           null, // not necessary                                  // outputExpectation
           explainOutputExpectation(evaluableIo.evaluable()),      // detailOutputExpectation
-          computeInputActualValue(evaluableIo),
-          explainInputActualValue(evaluableIo.evaluable(), computeInputActualValue(evaluableIo)),
+          computeInputActualValue(evaluableIo),                   // inputActualValue
+          explainInputActualValue(evaluableIo.evaluable(), computeInputActualValue(evaluableIo)), // detailInputActualValue
           evaluableIo.evaluable().isSquashable());
       this.evaluableIo = evaluableIo;
       this.expectationFlipped = evaluationContext.isExpectationFlipped();
@@ -339,17 +352,27 @@ public abstract class EvaluationEntry {
     }
 
     public Object outputExpectation() {
-      return computeOutputExpectation(evaluableIo(), expectationFlipped);
+      assert finalized;
+      return outputExpectation;
     }
 
     @Override
     public Object outputActualValue() {
-      return computeOutputActualValue(evaluableIo());
+      assert finalized;
+      return outputActualValue;
     }
 
     @Override
     public Object detailOutputActualValue() {
-      return explainActual(evaluableIo());
+      assert finalized;
+      return detailOutputActualValue;
+    }
+
+    public void finalizeValues() {
+      this.outputExpectation = computeOutputExpectation(evaluableIo(), expectationFlipped);
+      this.outputActualValue = computeOutputActualValue(evaluableIo());
+      this.detailOutputActualValue = explainActual(evaluableIo());
+      this.finalized = true;
     }
   }
 }

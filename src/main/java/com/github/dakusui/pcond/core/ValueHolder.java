@@ -87,7 +87,7 @@ public class ValueHolder<V> implements Cloneable {
     };
 
     <V> V value(ValueHolder<V> valueHolder) {
-      throw new IllegalStateException();
+      throw new IllegalStateException("current state=" + valueHolder.state);
     }
 
     <V> Throwable exception(ValueHolder<V> vContextVariable) {

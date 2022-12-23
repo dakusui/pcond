@@ -120,7 +120,8 @@ public interface ReportComposer {
     }
 
     private static boolean suppressSquashing() {
-      return Boolean.parseBoolean(System.getProperty("pcond.suppressSquashing", "false"));
+      return true;
+      //return Boolean.parseBoolean(System.getProperty("pcond.suppressSquashing", "false"));
     }
 
     private static String computeDetailOutputExpectationFromSquashedItems(List<EvaluationEntry> squashedItems) {

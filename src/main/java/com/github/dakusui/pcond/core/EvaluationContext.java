@@ -15,8 +15,8 @@ import static java.util.Objects.requireNonNull;
  */
 
 public class EvaluationContext<T> {
-  final List<EvaluationEntry>                 evaluationEntries = new LinkedList<>();
-  final List<EvaluableIo<T, Evaluable<T>, ?>> visitorLineage    = new LinkedList<>();
+  final List<EvaluationEntry> evaluationEntries = new LinkedList<>();
+  final List<EvaluationEntry> visitorLineage    = new LinkedList<>();
 
   boolean expectationFlipped = false;
 
@@ -41,15 +41,10 @@ public class EvaluationContext<T> {
    */
   public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, BiFunction<E, ValueHolder<T>, ValueHolder<O>> evaluatorCallback) {
     requireNonNull(evaluableIo);
-    System.out.println("BEGIN: EVALUATE: " + resolveEvaluationEntryType(evaluableIo.evaluable()) + " evaluable:" + evaluableIo.evaluable());
-    System.out.println("- in: "+ evaluableIo.input());
     EvaluableIo<T, E, O> evaluableIoWork = this.enter(evaluableIo.input(), evaluableIo.evaluable());
     ValueHolder<O> out = evaluatorCallback.apply(evaluableIoWork.evaluable(), evaluableIoWork.input());
     this.leave(evaluableIoWork, out);
     updateEvaluableIo(evaluableIo, evaluableIoWork);
-    System.out.println("END:   EVALUATE: " + resolveEvaluationEntryType(evaluableIo.evaluable()) + " evaluable:" + evaluableIo.evaluable());
-    System.out.println("- out:  "+ evaluableIo.output());
-    System.out.println("- (in): "+ evaluableIoWork.input());
   }
 
   private static <T, E extends Evaluable<T>, O> void updateEvaluableIo(EvaluableIo<T, E, O> evaluableIo, EvaluableIo<T, E, O> evaluableIoWork) {
@@ -79,18 +74,16 @@ public class EvaluationContext<T> {
     throw new IllegalArgumentException();
   }
 
-
   @SuppressWarnings("unchecked")
   private <E extends Evaluable<T>, O> EvaluableIo<T, E, O> enter(ValueHolder<T> input, E evaluable) {
     EvaluableIo<T, Evaluable<T>, O> ret = createEvaluableIo(input, evaluable);
     this.evaluationEntries.add(createEvaluationEntry(this, ret));
-    this.visitorLineage.add(ret);
+    this.visitorLineage.add(evaluationEntries.get(evaluationEntries.size() - 1));
     return (EvaluableIo<T, E, O>) ret;
   }
 
-
   private <E extends Evaluable<T>, O> void leave(EvaluableIo<T, E, O> evaluableIo, ValueHolder<O> output) {
-    this.visitorLineage.remove(this.visitorLineage.size() - 1);
+    EvaluationEntry.Impl currentEvaluationEntry = (EvaluationEntry.Impl) this.visitorLineage.remove(this.visitorLineage.size() - 1);
     if (output.isValueReturned())
       evaluableIo.valueReturned(output.returnedValue());
     else if (output.isExceptionThrown())
@@ -99,6 +92,7 @@ public class EvaluationContext<T> {
       evaluableIo.evaluationSkipped();
     else
       assert false : output;
+    currentEvaluationEntry.finalizeValues();
   }
 
   private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(ValueHolder<T> input, Evaluable<T> evaluable) {
@@ -116,11 +110,15 @@ public class EvaluationContext<T> {
   }
 
   public <R> void importEntries(EvaluationContext<R> childContext) {
-    importEntries(childContext, this.visitorLineage.size());
+    importEntries(childContext, currentIndentLevel());
   }
 
-  public <R> void importEntries(EvaluationContext<R> childContext, int indentGap) {
-    childContext.evaluationEntries.forEach(each -> each.level += indentGap);
+  private int currentIndentLevel() {
+    return this.visitorLineage.size();
+  }
+
+  public <R> void importEntries(EvaluationContext<R> childContext, int indentLevelGap) {
+    childContext.evaluationEntries.forEach(each -> each.level += indentLevelGap);
     this.evaluationEntries.addAll(childContext.resultEntries());
   }
 }

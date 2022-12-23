@@ -18,7 +18,6 @@ import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.makeSquashable;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 import static com.github.dakusui.thincrest.TestFluents.assertStatement;
-import static java.util.Objects.requireNonNull;
 
 @RunWith(Enclosed.class)
 public class Fluent4Example {
