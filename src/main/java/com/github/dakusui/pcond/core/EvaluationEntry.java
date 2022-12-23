@@ -204,7 +204,7 @@ public abstract class EvaluationEntry {
     TRANSFORM {
       @Override
       String formName(Evaluable<?> evaluable) {
-        return "transform";
+        return "transform:" + ((Evaluable.Func<?>)evaluable).head();
       }
     },
     CHECK {

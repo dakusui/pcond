@@ -264,28 +264,40 @@ public interface Evaluator {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
-      if (isDummyFunction((Function<?, ?>) evaluableIo.evaluable().mapper())) {
+      Evaluable<T> mapper = evaluableIo.evaluable().mapper();
+      Evaluable<R> checker = evaluableIo.evaluable().checker();
+      if (isDummyFunction((Function<?, ?>) mapper)) {
         evaluableIo.evaluable().checker().accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
         return;
       }
       evaluationContext.evaluate(
           evaluableIo,
           (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
-            EvaluableIo<T, Evaluable<T>, R> ioForMapper = createChildEvaluableIoOf(evaluableIo.evaluable().mapper(), input);
-            {
-              EvaluationContext<T> childContext = new EvaluationContext<>();
-              evaluableIo.evaluable().mapper().accept(ioForMapper, childContext, this);
-              evaluationContext.importEntries(childContext);
-            }
-            EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = createChildEvaluableIoOf(evaluableIo.evaluable().checker(), ioForMapper.output());
-            {
-              EvaluationContext<R> childContext = new EvaluationContext<>();
-              evaluableIo.evaluable().checker().accept(ioForChecker, childContext, this);
-              evaluationContext.importEntries(childContext);
-            }
-            return ioForChecker.output();
+            EvaluableIo<T, Evaluable<T>, R> mapperIo = evaluateMapper(mapper, input, evaluationContext);
+            EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(checker, mapperIo, evaluationContext);
+            return checkerIo.output();
           }
       );
+    }
+
+    private <T, R> EvaluableIo<R, Evaluable<R>, Boolean> evaluateChecker(Evaluable<R> checker, EvaluableIo<T, Evaluable<T>, R> mapperIo, EvaluationContext<T> evaluationContext) {
+      EvaluableIo<R, Evaluable<R>, Boolean> ret = createChildEvaluableIoOf(checker, mapperIo.output());
+      {
+        EvaluationContext<R> childContext = new EvaluationContext<>();
+        checker.accept(ret, childContext, this);
+        evaluationContext.importEntries(childContext);
+      }
+      return ret;
+    }
+
+    private <T, R> EvaluableIo<T, Evaluable<T>, R> evaluateMapper(Evaluable<T> mapper, ValueHolder<T> input, EvaluationContext<T> evaluationContext) {
+      EvaluableIo<T, Evaluable<T>, R> ioForMapper = createChildEvaluableIoOf(mapper, input);
+      {
+        EvaluationContext<T> childContext = new EvaluationContext<>();
+        mapper.accept(ioForMapper, childContext, this);
+        evaluationContext.importEntries(childContext);
+      }
+      return ioForMapper;
     }
 
     @Override
