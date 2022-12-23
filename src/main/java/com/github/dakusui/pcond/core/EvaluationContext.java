@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static java.util.Objects.requireNonNull;
@@ -40,10 +41,13 @@ public class EvaluationContext<T> {
    * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
    */
   public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, BiFunction<E, ValueHolder<T>, ValueHolder<O>> evaluatorCallback) {
+    evaluate(evaluableIo, evaluableIoWork1 -> evaluatorCallback.apply(evaluableIoWork1.evaluable(), evaluableIoWork1.input()));
+  }
+
+  public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, Function<EvaluableIo<T, E, O>, ValueHolder<O>> function) {
     requireNonNull(evaluableIo);
     EvaluableIo<T, E, O> evaluableIoWork = this.enter(evaluableIo.input(), evaluableIo.evaluable());
-    ValueHolder<O> out = evaluatorCallback.apply(evaluableIoWork.evaluable(), evaluableIoWork.input());
-    this.leave(evaluableIoWork, out);
+    this.leave(evaluableIoWork, function.apply(evaluableIoWork));
     updateEvaluableIo(evaluableIo, evaluableIoWork);
   }
 

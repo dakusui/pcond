@@ -231,22 +231,22 @@ public interface Evaluator {
       evaluationContext.evaluate(
           evaluableIo,
           (Evaluable.Func<T> evaluable, ValueHolder<T> input) -> {
-            // System.out.println("head");
             ValueHolder<R> ret = ValueHolder.create();
             if (input.isValueReturned())
               ret = applyFunction(ret, input.returnedValue(), evaluable.head());
             else
               ret = ret.evaluationSkipped();
             ValueHolder<Object> finalRet = (ValueHolder<Object>) ret;
-            return evaluable.tail().map((Evaluable<Object> e) -> {
-                  // System.out.println("tail");
-                  EvaluationContext<Object> childContext = new EvaluationContext<>();
-                  EvaluableIo<Object, Evaluable<Object>, R> ioForTail = createChildEvaluableIoOf(e, finalRet);
-                  e.accept(ioForTail, childContext, this);
-                  evaluationContext.importEntries(childContext, 0);
-                  return ioForTail.output();
-                })
-                .orElse(ret);
+            evaluable.tail().ifPresent((Evaluable<Object> e) -> {
+              System.out.println("tail: " + e);
+              EvaluationContext<Object> childContext = new EvaluationContext<>();
+              EvaluableIo<Object, Evaluable<Object>, R> ioForTail = createChildEvaluableIoOf(e, finalRet);
+              e.accept(ioForTail, childContext, this);
+              evaluationContext.importEntries(childContext, 0);
+              //                  return ioForTail.output();
+            });
+            //              .orElse(ret);
+            return ret;
           });
     }
 
@@ -254,6 +254,7 @@ public interface Evaluator {
     private static <T, R> ValueHolder<R> applyFunction(ValueHolder<R> ret, T in, Function<? super T, Object> function) {
       try {
         R returnedValue;
+        System.out.println("head: " + function);
         returnedValue = (R) function.apply(in);
         return ret.valueReturned(returnedValue);
       } catch (Throwable t) {
@@ -267,7 +268,7 @@ public interface Evaluator {
       Evaluable<T> mapper = evaluableIo.evaluable().mapper();
       Evaluable<R> checker = evaluableIo.evaluable().checker();
       if (isDummyFunction((Function<?, ?>) mapper)) {
-        evaluableIo.evaluable().checker().accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
+        checker.accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
         return;
       }
       evaluationContext.evaluate(
