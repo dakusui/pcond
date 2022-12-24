@@ -6,13 +6,15 @@ import static java.util.Objects.requireNonNull;
 public class ValueHolder<V> implements Cloneable {
 
   private final State state;
+  private final CreatorFormType creatorFormType;
   V         value;
   Throwable exception;
 
-  private ValueHolder(State state, V value, Throwable exception) {
+  private ValueHolder(State state, V value, Throwable exception, CreatorFormType creatorFormType) {
     this.state = state;
     this.value = value;
     this.exception = exception;
+    this.creatorFormType = creatorFormType;
   }
 
   @SuppressWarnings("unchecked")
@@ -47,7 +49,7 @@ public class ValueHolder<V> implements Cloneable {
   }
 
   public static <V> ValueHolder<V> forValue(V value) {
-    return new ValueHolder<>(State.VALUE_RETURNED, value, null);
+    return new ValueHolder<>(State.VALUE_RETURNED, value, null, CreatorFormType.UNKNOWN);
   }
 
   @Override
@@ -69,6 +71,37 @@ public class ValueHolder<V> implements Cloneable {
 
   public boolean isEvaluationSkipped() {
     return this.state() == State.EVALUATION_SKIPPED;
+  }
+
+  public CreatorFormType creatorFormType() {
+    return this.creatorFormType;
+  }
+
+  public ValueHolder<V> valueReturned(V value) {
+    //    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
+    return new ValueHolder<>(State.VALUE_RETURNED, value, null, this.creatorFormType);
+  }
+
+  public ValueHolder<V> exceptionThrown(Throwable throwable) {
+    //    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
+    return new ValueHolder<>(State.EXCEPTION_THROWN, null, requireNonNull(throwable), this.creatorFormType);
+  }
+
+  public ValueHolder<V> evaluationSkipped() {
+    //    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
+    return new ValueHolder<>(State.EVALUATION_SKIPPED, null, null, this.creatorFormType);
+  }
+
+  public ValueHolder<V> creatorFormType(CreatorFormType creatorFormType) {
+    return new ValueHolder<>(this.state, this.value, this.exception, creatorFormType);
+  }
+
+  static <E> ValueHolder<E> create() {
+    return create(CreatorFormType.UNKNOWN);
+  }
+
+  public static <E> ValueHolder<E> create(CreatorFormType creatorFormType) {
+    return new ValueHolder<>(State.NOT_YET_EVALUATED, null, null, creatorFormType);
   }
 
   public enum State {
@@ -96,26 +129,9 @@ public class ValueHolder<V> implements Cloneable {
     }
   }
 
-  public ValueHolder<V> valueReturned(V value) {
-    //    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
-    return new ValueHolder<>(State.VALUE_RETURNED, value, null);
-  }
-
-  public ValueHolder<V> exceptionThrown(Throwable throwable) {
-    //    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
-    return new ValueHolder<>(State.EXCEPTION_THROWN, null, requireNonNull(throwable));
-  }
-
-  public ValueHolder<V> evaluationSkipped() {
-    //    requireState(this.state, v -> v.equals(State.NOT_YET_EVALUATED), v -> messageNotYetEvaluatedStateIsRequired(v, this));
-    return new ValueHolder<>(State.EVALUATION_SKIPPED, null, null);
-  }
-
-  static <E> ValueHolder<E> create() {
-    return new ValueHolder<>(State.NOT_YET_EVALUATED, null, null);
-  }
-
-  private static String messageNotYetEvaluatedStateIsRequired(State v, Object thisValue) {
-    return "state:<" + State.NOT_YET_EVALUATED + "> of <" + thisValue + "> is expected but it was <" + v + ">";
+  enum CreatorFormType {
+    FUNC_HEAD,
+    FUNC_TAIL,
+    UNKNOWN;
   }
 }

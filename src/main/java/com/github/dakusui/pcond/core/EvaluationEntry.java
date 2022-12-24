@@ -7,6 +7,7 @@ import static com.github.dakusui.pcond.core.EvaluationEntry.Type.LEAF;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.*;
 import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_TAIL;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -67,7 +68,6 @@ public abstract class EvaluationEntry {
    * A name of a form (evaluable; function, predicate)
    */
   private final String formName;
-
   int level;
 
   Object inputExpectation;
@@ -135,7 +135,6 @@ public abstract class EvaluationEntry {
       return evaluableIo.output().thrownException();
     else
       return EVALUATION_SKIPPED;
-    //throw new AssertionError();
   }
 
   static <T, E extends Evaluable<T>> boolean isExplanationRequired(Type evaluationEntryType, EvaluableIo<T, E, ?> evaluableIo, boolean expectationFlipped) {
@@ -144,7 +143,7 @@ public abstract class EvaluationEntry {
             evaluableIo.evaluableType() == LEAF && returnedValueOrVoidIfSkipped(expectationFlipped, evaluableIo.output())));
   }
 
-  private static <T, E extends Evaluable<T>> boolean returnedValueOrVoidIfSkipped(boolean expectationFlipped, ValueHolder<?> output) {
+  private static boolean returnedValueOrVoidIfSkipped(boolean expectationFlipped, ValueHolder<?> output) {
     if (output.state() == State.EVALUATION_SKIPPED)
       return false;
     return expectationFlipped ^ !(Boolean) output.returnedValue();
@@ -194,6 +193,11 @@ public abstract class EvaluationEntry {
 
   public abstract Object detailOutputActualValue();
 
+  @Override
+  public String toString() {
+    return String.format("%s(%s)", formName(), inputActualValue());
+  }
+
   public enum Type {
     TRANSFORM_AND_CHECK {
       @Override
@@ -204,7 +208,7 @@ public abstract class EvaluationEntry {
     TRANSFORM {
       @Override
       String formName(Evaluable<?> evaluable) {
-        return "transform:" + ((Evaluable.Func<?>)evaluable).head();
+        return "transform:" + ((Evaluable.Func<?>) evaluable).head();
       }
     },
     CHECK {
@@ -310,6 +314,7 @@ public abstract class EvaluationEntry {
 
     private final EvaluableIo<?, ?, ?> evaluableIo;
     private final boolean              expectationFlipped;
+    private final boolean              ignored;
 
     private boolean finalized = false;
     private Object  outputActualValue;
@@ -331,6 +336,8 @@ public abstract class EvaluationEntry {
           evaluableIo.evaluable().isSquashable());
       this.evaluableIo = evaluableIo;
       this.expectationFlipped = evaluationContext.isExpectationFlipped();
+      this.ignored = evaluableIo.output().creatorFormType() == FUNC_TAIL;
+      System.out.printf("%s.creatorFormType=%s%n", evaluableIo.evaluable(), evaluableIo.output().creatorFormType());
     }
 
     private static <E extends Evaluable<T>, T> Object explainInputExpectation(EvaluableIo<T, E, ?> evaluableIo) {
@@ -373,6 +380,10 @@ public abstract class EvaluationEntry {
       this.outputActualValue = computeOutputActualValue(evaluableIo());
       this.detailOutputActualValue = explainActual(evaluableIo());
       this.finalized = true;
+    }
+
+    public boolean ignored() {
+      return this.ignored;
     }
   }
 }

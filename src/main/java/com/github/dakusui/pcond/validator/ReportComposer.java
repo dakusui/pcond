@@ -89,6 +89,8 @@ public interface ReportComposer {
       List<EvaluationEntry> ret = new LinkedList<>();
       List<EvaluationEntry> squashedItems = new LinkedList<>();
       for (EvaluationEntry each : evaluationHistory) {
+        if (each instanceof EvaluationEntry.Impl && ((EvaluationEntry.Impl) each).ignored())
+          continue;
         if (squashedItems.isEmpty()) {
           if (each.isSquashable() && !suppressSquashing()) {
             squashedItems.add(each);

@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_HEAD;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_TAIL;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
@@ -233,30 +235,22 @@ public interface Evaluator {
           (Evaluable.Func<T> evaluable, ValueHolder<T> input) -> {
             ValueHolder<R> ret;
             {
-              System.out.printf("BEGIN: func:%s(%s)%n", evaluable, input);
-              System.out.printf("BEGIN: head:%s(%s)%n", evaluable, input);
-              EvaluationContext<T> childContext = new EvaluationContext<>();
               EvaluableIo<T, Evaluable<T>, Object> ioForHead = createChildEvaluableIoOf(evaluable, input);
-              childContext.evaluate(ioForHead, io -> {
+              evaluationContext.evaluate(ioForHead, io -> {
                 ValueHolder<Object> tmp = ValueHolder.create();
                 if (input.isValueReturned())
                   tmp = applyFunction(tmp, io.input().returnedValue(), ((Evaluable.Func<T>) io.evaluable()).head());
                 else
                   tmp = tmp.evaluationSkipped();
-                return tmp;
+                return tmp.creatorFormType(FUNC_HEAD);
               });
               ret = (ValueHolder<R>) ioForHead.output();
-              evaluationContext.importEntries(childContext, 0);
-              System.out.printf("END:   head:%s(%s)%n", evaluable, ret);
             }
             ValueHolder<Object> finalRet = (ValueHolder<Object>) ret;
             return evaluable.tail().map((Evaluable<Object> e) -> {
-              System.out.printf("BEGIN: tail:%s(%s)%n", e, finalRet);
-              EvaluationContext<Object> childContext = new EvaluationContext<>();
               EvaluableIo<Object, Evaluable<Object>, R> ioForTail = createChildEvaluableIoOf(e, finalRet);
-              e.accept(ioForTail, childContext, this);
-              System.out.printf("END:   tail:%s(%s)=%s%n", e, finalRet, ioForTail.output());
-              return ioForTail.output();
+              e.accept(ioForTail, (EvaluationContext<Object>) evaluationContext,this);
+              return ioForTail.output().creatorFormType(FUNC_TAIL);
             }).orElse(ret);
           });
     }
