@@ -236,7 +236,8 @@ public interface Evaluator {
             ValueHolder<R> ret;
             {
               EvaluableIo<T, Evaluable<T>, Object> ioForHead = createChildEvaluableIoOf(evaluable, input);
-              evaluationContext.evaluate(ioForHead, io -> {
+              EvaluationContext<T> childContext = new EvaluationContext<>();
+              childContext.evaluate(ioForHead, io -> {
                 ValueHolder<Object> tmp = ValueHolder.create();
                 if (input.isValueReturned())
                   tmp = applyFunction(tmp, io.input().returnedValue(), ((Evaluable.Func<T>) io.evaluable()).head());
@@ -244,14 +245,15 @@ public interface Evaluator {
                   tmp = tmp.evaluationSkipped();
                 return tmp.creatorFormType(FUNC_HEAD);
               });
+              evaluationContext.importEntries(childContext, 0);
               ret = (ValueHolder<R>) ioForHead.output();
             }
             ValueHolder<Object> finalRet = (ValueHolder<Object>) ret;
             return evaluable.tail().map((Evaluable<Object> e) -> {
               EvaluableIo<Object, Evaluable<Object>, R> ioForTail = createChildEvaluableIoOf(e, finalRet);
-              e.accept(ioForTail, (EvaluationContext<Object>) evaluationContext,this);
-              return ioForTail.output().creatorFormType(FUNC_TAIL);
-            }).orElse(ret);
+              e.accept(ioForTail, (EvaluationContext<Object>) evaluationContext, this);
+              return ioForTail.output();
+            }).orElse(ret).creatorFormType(FUNC_TAIL);
           });
     }
 

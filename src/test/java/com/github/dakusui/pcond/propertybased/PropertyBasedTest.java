@@ -218,7 +218,9 @@ public class PropertyBasedTest {
     @SuppressWarnings("unchecked")
     @TestCaseParameter
     static TestCase<String, Throwable> givenTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
-      return new TestCase.Builder.ForReturnedValue<>("hello", (Predicate<String>) Predicates.transform(Functions.length()).check(Predicates.isEqualTo(6)), String.class)
+      return new TestCase.Builder.ForReturnedValue<>(
+          "hello",
+          (Predicate<String>) Predicates.transform(Functions.length()).check(Predicates.isEqualTo(6)), String.class)
           .addExpectationPredicate(equalsPredicate("hello"))
           .build();
     }
