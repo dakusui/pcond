@@ -282,14 +282,14 @@ public interface Evaluator {
           evaluableIo,
           (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
             EvaluableIo<T, Evaluable<T>, R> mapperIo = evaluateMapper(mapper, input, evaluationContext);
-            EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(checker, mapperIo, evaluationContext);
-            return checkerIo.output();
+            EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(checker, mapperIo.output(), evaluationContext);
+            return checkerIo.output().creatorFormType(FUNC_TAIL);
           }
       );
     }
 
-    private <T, R> EvaluableIo<R, Evaluable<R>, Boolean> evaluateChecker(Evaluable<R> checker, EvaluableIo<T, Evaluable<T>, R> mapperIo, EvaluationContext<T> evaluationContext) {
-      EvaluableIo<R, Evaluable<R>, Boolean> ret = createChildEvaluableIoOf(checker, mapperIo.output());
+    private <T, R> EvaluableIo<R, Evaluable<R>, Boolean> evaluateChecker(Evaluable<R> checker, ValueHolder<R> input, EvaluationContext<T> evaluationContext) {
+      EvaluableIo<R, Evaluable<R>, Boolean> ret = createChildEvaluableIoOf(checker, input);
       {
         EvaluationContext<R> childContext = new EvaluationContext<>();
         checker.accept(ret, childContext, this);
@@ -307,6 +307,62 @@ public interface Evaluator {
       }
       return ioForMapper;
     }
+
+    /*
+    @Override
+    public <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
+      Evaluable<T> mapper = evaluableIo.evaluable().mapper();
+      Evaluable<R> checker = evaluableIo.evaluable().checker();
+      if (isDummyFunction((Function<?, ?>) mapper)) {
+        checker.accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
+        return;
+      }
+      EvaluableIo<T, Evaluable<T>, R> mapperIo = createChildEvaluableIoOf(evaluableIo.evaluable().mapper(), evaluableIo.input());
+      {
+        EvaluationContext<T> childContext = new EvaluationContext<>();
+        childContext.evaluate(
+            mapperIo,
+            (Evaluable<T> evaluable, ValueHolder<T> input) -> {
+              EvaluableIo<T, Evaluable<T>, R> result = evaluateMapper(evaluable, input, childContext);
+              return result.output();
+            }
+        );
+        evaluationContext.importEntries(childContext);
+      }
+      EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = createChildEvaluableIoOf(checker, mapperIo.output());
+      {
+        EvaluationContext<R> childContext = new EvaluationContext<>();
+        childContext.evaluate(
+            checkerIo,
+            (Evaluable<R> evaluable, ValueHolder<R> input) -> {
+              System.out.println("---->" + evaluable + "(" + input + ")");
+              EvaluableIo<R, Evaluable<R>, Boolean> result = evaluateChecker(evaluable, input, childContext);
+              return result.output().creatorFormType(FUNC_TAIL);
+            }
+        );
+        System.out.println("----> evaluationContext:" + evaluationContext.resultEntries());
+        System.out.println("----> childContext:     " + childContext.resultEntries());
+        evaluationContext.importEntries(childContext, -1);
+      }
+    }
+
+    private <T> EvaluableIo<T, Evaluable<T>, Boolean> evaluateChecker(Evaluable<T> checker, ValueHolder<T> input, EvaluationContext<T> evaluationContext) {
+      EvaluableIo<T, Evaluable<T>, Boolean> ret = createChildEvaluableIoOf(checker, input);
+      {
+        checker.accept(ret, evaluationContext, this);
+      }
+      return ret;
+    }
+
+    private <T, R> EvaluableIo<T, Evaluable<T>, R> evaluateMapper(Evaluable<T> mapper, ValueHolder<T> input, EvaluationContext<T> evaluationContext) {
+      EvaluableIo<T, Evaluable<T>, R> ret = createChildEvaluableIoOf(mapper, input);
+      {
+        mapper.accept(ret, evaluationContext, this);
+      }
+      return ret;
+    }
+
+     */
 
     @Override
     public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
