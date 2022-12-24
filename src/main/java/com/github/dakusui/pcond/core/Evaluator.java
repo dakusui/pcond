@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_HEAD;
 import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_TAIL;
@@ -211,6 +212,7 @@ public interface Evaluator {
     @Override
     public <T> void evaluateLeaf(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
       evaluationContext.evaluate(
+          LEAF,
           evaluableIo,
           (evaluable, input) -> {
             ValueHolder<Boolean> ret = ValueHolder.create();
@@ -230,19 +232,22 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
-      evaluationContext.evaluate(
+      System.out.println("----------------------: type=" + evaluableIo.evaluableType());
+      evaluationContext.evaluate( //#2
+          FUNCTION,
           evaluableIo,
           (Evaluable.Func<T> evaluable, ValueHolder<T> input) -> {
             ValueHolder<R> ret;
             {
               EvaluableIo<T, Evaluable<T>, Object> ioForHead = createChildEvaluableIoOf(evaluable, input);
               EvaluationContext<T> childContext = new EvaluationContext<>();
-              childContext.evaluate(ioForHead, io -> {
+              childContext.evaluate(FUNCTION, ioForHead, io -> {
                 ValueHolder<Object> tmp = ValueHolder.create();
-                if (input.isValueReturned())
+                if (io.input().isValueReturned())
                   tmp = applyFunction(tmp, io.input().returnedValue(), ((Evaluable.Func<T>) io.evaluable()).head());
                 else
                   tmp = tmp.evaluationSkipped();
+                System.out.println("+++++++++++++++++++++: HEAD: " + io.evaluableType() + ":" + io.evaluable() + "(" + io.input() + ")=" + io.output());
                 return tmp.creatorFormType(FUNC_HEAD);
               });
               evaluationContext.importEntries(childContext, 0);
@@ -250,10 +255,11 @@ public interface Evaluator {
             }
             ValueHolder<Object> finalRet = (ValueHolder<Object>) ret;
             return evaluable.tail().map((Evaluable<Object> e) -> {
-              EvaluableIo<Object, Evaluable<Object>, R> ioForTail = createChildEvaluableIoOf(e, finalRet);
-              e.accept(ioForTail, (EvaluationContext<Object>) evaluationContext, this);
-              return ioForTail.output();
-            }).orElse(ret).creatorFormType(FUNC_TAIL);
+                  EvaluableIo<Object, Evaluable<Object>, R> ioForTail = createChildEvaluableIoOf(e, finalRet);
+                  e.accept(ioForTail, (EvaluationContext<Object>) evaluationContext, this);
+                  return ioForTail.output().creatorFormType(FUNC_TAIL);
+                })
+                .orElse(ret);
           });
     }
 
@@ -272,37 +278,53 @@ public interface Evaluator {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
-      Evaluable<T> mapper = evaluableIo.evaluable().mapper();
-      Evaluable<R> checker = evaluableIo.evaluable().checker();
-      if (isDummyFunction((Function<?, ?>) mapper)) {
-        checker.accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
+      if (isDummyFunction((Function<?, ?>) evaluableIo.evaluable().mapper())) {
+        evaluableIo.evaluable().checker().accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
         return;
       }
       evaluationContext.evaluate(
           evaluableIo,
           (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
-            EvaluableIo<T, Evaluable<T>, R> mapperIo = evaluateMapper(mapper, input, evaluationContext);
-            EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(checker, mapperIo.output(), evaluationContext);
-            return checkerIo.output().creatorFormType(FUNC_TAIL);
+            EvaluableIo<T, Evaluable<T>, R> mapperIo = evaluateMapper(evaluable.mapper(), input, evaluationContext);
+            EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(evaluable.checker(), mapperIo.output(), evaluationContext);
+            return checkerIo.output();
           }
       );
     }
 
     private <T, R> EvaluableIo<R, Evaluable<R>, Boolean> evaluateChecker(Evaluable<R> checker, ValueHolder<R> input, EvaluationContext<T> evaluationContext) {
-      EvaluableIo<R, Evaluable<R>, Boolean> ret = createChildEvaluableIoOf(checker, input);
+      EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = createChildEvaluableIoOf(checker, input);
       {
         EvaluationContext<R> childContext = new EvaluationContext<>();
-        checker.accept(ret, childContext, this);
+
+        childContext.evaluate(CHECK, ioForChecker, io -> {
+          io.evaluable().accept(io, childContext, this);
+          return io.output();
+        });
+
         evaluationContext.importEntries(childContext);
       }
-      return ret;
+      return ioForChecker;
     }
 
     private <T, R> EvaluableIo<T, Evaluable<T>, R> evaluateMapper(Evaluable<T> mapper, ValueHolder<T> input, EvaluationContext<T> evaluationContext) {
       EvaluableIo<T, Evaluable<T>, R> ioForMapper = createChildEvaluableIoOf(mapper, input);
       {
+        /*
         EvaluationContext<T> childContext = new EvaluationContext<>();
         mapper.accept(ioForMapper, childContext, this);
+        evaluationContext.importEntries(childContext);
+
+         */
+        EvaluationContext<T> childContext = new EvaluationContext<>();
+
+        // #1
+        childContext.evaluate(TRANSFORM, ioForMapper, io -> {
+          io.evaluable().accept(io, childContext, this);
+          System.out.println("**************************: TRANSFORM: " + io.evaluable() + "(" + io.input() + ")=" + io.output());
+          return io.output();
+        });
+
         evaluationContext.importEntries(childContext);
       }
       return ioForMapper;
@@ -404,7 +426,11 @@ public interface Evaluator {
     }
 
     private static <T, E extends Evaluable<T>, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(E evaluable, ValueHolder<T> input) {
-      return new EvaluableIo<>(input, resolveEvaluationEntryType(evaluable), evaluable);
+      return createChildEvaluableIoOf(evaluable, input, resolveEvaluationEntryType(evaluable));
+    }
+
+    private static <T, E extends Evaluable<T>, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(E evaluable, ValueHolder<T> input, EvaluationEntry.Type evaluableType) {
+      return new EvaluableIo<>(input, evaluableType, evaluable);
     }
   }
 

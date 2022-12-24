@@ -41,12 +41,16 @@ public class EvaluationContext<T> {
    * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
    */
   public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, BiFunction<E, ValueHolder<T>, ValueHolder<O>> evaluatorCallback) {
-    evaluate(evaluableIo, io -> evaluatorCallback.apply(io.evaluable(), io.input()));
+    evaluate(evaluableIo.evaluableType(), evaluableIo, evaluatorCallback);
   }
 
-  public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, Function<EvaluableIo<T, E, O>, ValueHolder<O>> function) {
+  public <E extends Evaluable<T>, O> void evaluate(EvaluationEntry.Type type, EvaluableIo<T, E, O> evaluableIo, BiFunction<E, ValueHolder<T>, ValueHolder<O>> evaluatorCallback) {
+    evaluate(type, evaluableIo, io -> evaluatorCallback.apply(io.evaluable(), io.input()));
+  }
+
+  public <E extends Evaluable<T>, O> void evaluate(EvaluationEntry.Type type, EvaluableIo<T, E, O> evaluableIo, Function<EvaluableIo<T, E, O>, ValueHolder<O>> function) {
     requireNonNull(evaluableIo);
-    EvaluableIo<T, E, O> evaluableIoWork = this.enter(evaluableIo.input(), evaluableIo.evaluable());
+    EvaluableIo<T, E, O> evaluableIoWork = this.enter(type, evaluableIo.input(), evaluableIo.evaluable());
     this.leave(evaluableIoWork, function.apply(evaluableIoWork));
     updateEvaluableIo(evaluableIo, evaluableIoWork);
   }
@@ -72,8 +76,8 @@ public class EvaluationContext<T> {
   }
 
   @SuppressWarnings("unchecked")
-  private <E extends Evaluable<T>, O> EvaluableIo<T, E, O> enter(ValueHolder<T> input, E evaluable) {
-    EvaluableIo<T, Evaluable<T>, O> ret = createEvaluableIo(input, evaluable);
+  private <E extends Evaluable<T>, O> EvaluableIo<T, E, O> enter(EvaluationEntry.Type type, ValueHolder<T> input, E evaluable) {
+    EvaluableIo<T, Evaluable<T>, O> ret = createEvaluableIo(input, evaluable, type);
     this.evaluationEntries.add(createEvaluationEntry(this, ret));
     this.visitorLineage.add(evaluationEntries.get(evaluationEntries.size() - 1));
     return (EvaluableIo<T, E, O>) ret;
@@ -85,8 +89,8 @@ public class EvaluationContext<T> {
     currentEvaluationEntry.finalizeValues();
   }
 
-  private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(ValueHolder<T> input, Evaluable<T> evaluable) {
-    return new EvaluableIo<>(input, resolveEvaluationEntryType(evaluable), evaluable);
+  private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(ValueHolder<T> input, Evaluable<T> evaluable, EvaluationEntry.Type type) {
+    return new EvaluableIo<>(input, type, evaluable);
   }
 
   private static <T, E extends Evaluable<T>> EvaluationEntry createEvaluationEntry(

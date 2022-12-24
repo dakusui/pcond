@@ -210,13 +210,13 @@ public abstract class EvaluationEntry {
     TRANSFORM {
       @Override
       String formName(Evaluable<?> evaluable) {
-        return "transform:" + ((Evaluable.Func<?>) evaluable).head();
+        return "transform";
       }
     },
     CHECK {
       @Override
       String formName(Evaluable<?> evaluable) {
-        return "check:" + evaluable.toString();
+        return "check";
       }
     },
     AND {
