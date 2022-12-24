@@ -55,10 +55,10 @@ public class ValueHolder<V> implements Cloneable {
   @Override
   public String toString() {
     if (isValueReturned())
-      return String.format("state:%s, value:%s", state, value);
+      return String.format("state:%s, value:%s, creator:%s", state, value, creatorFormType);
     if (isEvaluationSkipped())
-      return String.format("state:%s, exception:%s", state, exception);
-    return String.format("state:%s", state);
+      return String.format("state:%s, exception:%s, creator:%s", state, exception, creatorFormType);
+    return String.format("state:%s, creator:%s", state, creatorFormType);
   }
 
   public boolean isValueReturned() {

@@ -41,7 +41,7 @@ public class EvaluationContext<T> {
    * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
    */
   public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, BiFunction<E, ValueHolder<T>, ValueHolder<O>> evaluatorCallback) {
-    evaluate(evaluableIo, evaluableIoWork1 -> evaluatorCallback.apply(evaluableIoWork1.evaluable(), evaluableIoWork1.input()));
+    evaluate(evaluableIo, io -> evaluatorCallback.apply(io.evaluable(), io.input()));
   }
 
   public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, Function<EvaluableIo<T, E, O>, ValueHolder<O>> function) {
@@ -52,14 +52,7 @@ public class EvaluationContext<T> {
   }
 
   private static <T, E extends Evaluable<T>, O> void updateEvaluableIo(EvaluableIo<T, E, O> evaluableIo, EvaluableIo<T, E, O> evaluableIoWork) {
-    if (evaluableIoWork.output().isValueReturned())
-      evaluableIo.valueReturned(evaluableIoWork.output().returnedValue());
-    else if (evaluableIoWork.output().isExceptionThrown())
-      evaluableIo.exceptionThrown(evaluableIoWork.output().thrownException());
-    else if (evaluableIoWork.output().isEvaluationSkipped())
-      evaluableIo.evaluationSkipped();
-    else
-      assert false;
+    evaluableIo.output(evaluableIoWork.output());
   }
 
   public static <T> EvaluationEntry.Type resolveEvaluationEntryType(Evaluable<T> evaluable) {
@@ -88,14 +81,7 @@ public class EvaluationContext<T> {
 
   private <E extends Evaluable<T>, O> void leave(EvaluableIo<T, E, O> evaluableIo, ValueHolder<O> output) {
     EvaluationEntry.Impl currentEvaluationEntry = (EvaluationEntry.Impl) this.visitorLineage.remove(this.visitorLineage.size() - 1);
-    if (output.isValueReturned())
-      evaluableIo.valueReturned(output.returnedValue());
-    else if (output.isExceptionThrown())
-      evaluableIo.exceptionThrown(output.thrownException());
-    else if (output.isEvaluationSkipped())
-      evaluableIo.evaluationSkipped();
-    else
-      assert false : output;
+    evaluableIo.output(output);
     currentEvaluationEntry.finalizeValues();
   }
 

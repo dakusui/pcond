@@ -193,6 +193,8 @@ public abstract class EvaluationEntry {
 
   public abstract Object detailOutputActualValue();
 
+  public abstract boolean ignored();
+
   @Override
   public String toString() {
     return String.format("%s(%s)", formName(), inputActualValue());
@@ -255,6 +257,7 @@ public abstract class EvaluationEntry {
     final         Object  outputActualValue;
     final         Object  detailOutputActualValue;
     private final boolean requiresExplanation;
+    private       boolean ignored;
 
     Finalized(
         String formName,
@@ -264,7 +267,7 @@ public abstract class EvaluationEntry {
         Object outputExpectation, Object detailOutputExpectation,
         Object inputActualValue, Object detailInputActualValue,
         Object outputActualValue, Object detailOutputActualValue,
-        boolean squashable, boolean requiresExplanation) {
+        boolean squashable, boolean requiresExplanation, boolean ignored) {
       super(
           formName, type, level,
           inputExpectation_, detailInputExpectation_,
@@ -273,6 +276,7 @@ public abstract class EvaluationEntry {
       this.outputActualValue = outputActualValue;
       this.detailOutputActualValue = detailOutputActualValue;
       this.requiresExplanation = requiresExplanation;
+      this.ignored = ignored;
     }
 
     @Override
@@ -283,6 +287,11 @@ public abstract class EvaluationEntry {
     @Override
     public Object detailOutputActualValue() {
       return this.detailOutputActualValue;
+    }
+
+    @Override
+    public boolean ignored() {
+      return this.ignored;
     }
 
     @Override
@@ -298,7 +307,7 @@ public abstract class EvaluationEntry {
       Object outputExpectation, Object detailOutputExpectation,
       Object inputActualValue, Object detailInputActualValue,
       Object outputActualValue, Object detailOutputActualValue,
-      boolean trivial, boolean requiresExplanation) {
+      boolean trivial, boolean requiresExplanation, boolean ignored) {
     return new Finalized(
         formName, type,
         level,
@@ -306,15 +315,15 @@ public abstract class EvaluationEntry {
         outputExpectation, detailOutputExpectation,
         inputActualValue, detailInputActualValue,
         outputActualValue, detailOutputActualValue,
-        trivial, requiresExplanation
+        trivial, requiresExplanation, ignored
     );
   }
 
   public static class Impl extends EvaluationEntry {
 
     private final EvaluableIo<?, ?, ?> evaluableIo;
-    private final boolean              expectationFlipped;
-    private final boolean              ignored;
+    private final boolean expectationFlipped;
+    private       boolean ignored;
 
     private boolean finalized = false;
     private Object  outputActualValue;
@@ -375,15 +384,18 @@ public abstract class EvaluationEntry {
       return detailOutputActualValue;
     }
 
+    public boolean ignored() {
+      assert finalized;
+      return this.ignored;
+    }
+
     public void finalizeValues() {
       this.outputExpectation = computeOutputExpectation(evaluableIo(), expectationFlipped);
       this.outputActualValue = computeOutputActualValue(evaluableIo());
       this.detailOutputActualValue = explainActual(evaluableIo());
+      this.ignored = this.evaluableIo.output().creatorFormType() == FUNC_TAIL;
       this.finalized = true;
     }
 
-    public boolean ignored() {
-      return this.ignored;
-    }
   }
 }

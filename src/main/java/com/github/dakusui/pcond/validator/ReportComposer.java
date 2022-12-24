@@ -66,6 +66,7 @@ public interface ReportComposer {
      * @return An explanation object.
      */
     static Explanation composeExplanation(String message, List<EvaluationEntry> evaluationHistory) {
+      evaluationHistory.forEach(each -> System.err.println(">" + each));
       List<Object> detailsForExpectation = new LinkedList<>();
       List<FormattedEntry> summaryDataForExpectations = squashTrivialEntries(evaluationHistory)
           .stream()
@@ -89,7 +90,7 @@ public interface ReportComposer {
       List<EvaluationEntry> ret = new LinkedList<>();
       List<EvaluationEntry> squashedItems = new LinkedList<>();
       for (EvaluationEntry each : evaluationHistory) {
-        if (each instanceof EvaluationEntry.Impl && ((EvaluationEntry.Impl) each).ignored())
+        if (each.ignored())
           continue;
         if (squashedItems.isEmpty()) {
           if (each.isSquashable() && !suppressSquashing()) {
@@ -113,7 +114,7 @@ public interface ReportComposer {
                 first.inputActualValue(), null,
                 first.outputActualValue(), last.detailOutputActualValue(),
                 false,
-                squashedItems.stream().anyMatch(EvaluationEntry::requiresExplanation)));
+                squashedItems.stream().anyMatch(EvaluationEntry::requiresExplanation), false));
             squashedItems.clear();
           }
         }

@@ -15,16 +15,9 @@ public class EvaluableIo<I, E extends Evaluable<I>, O> {
     this.output = ValueHolder.create();
   }
 
-  public void valueReturned(O value) {
-    this.output = this.output.valueReturned(value);
-  }
-
-  public void exceptionThrown(Throwable throwable) {
-    this.output = this.output.exceptionThrown(throwable);
-  }
-
-  public void evaluationSkipped() {
-    this.output = this.output.evaluationSkipped();
+  public void output(ValueHolder<O> output) {
+    System.out.println("output:<" + output + ">");
+    this.output = requireNonNull(output).clone();
   }
 
   public ValueHolder<I> input() {
