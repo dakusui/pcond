@@ -346,7 +346,6 @@ public abstract class EvaluationEntry {
       this.evaluableIo = evaluableIo;
       this.expectationFlipped = evaluationContext.isExpectationFlipped();
       this.ignored = evaluableIo.output().creatorFormType() == FUNC_TAIL;
-      System.out.printf("%s.creatorFormType=%s%n", evaluableIo.evaluable(), evaluableIo.output().creatorFormType());
     }
 
     private static <E extends Evaluable<T>, T> Object explainInputExpectation(EvaluableIo<T, E, ?> evaluableIo) {

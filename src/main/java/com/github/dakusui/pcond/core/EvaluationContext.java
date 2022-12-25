@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.core;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.indent;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -52,6 +54,7 @@ public class EvaluationContext<T> {
     requireNonNull(evaluableIo);
     EvaluableIo<T, E, O> evaluableIoWork = this.enter(type, evaluableIo.input(), evaluableIo.evaluable());
     this.leave(evaluableIoWork, function.apply(evaluableIoWork));
+    printTo(this, System.err, 1);
     updateEvaluableIo(evaluableIo, evaluableIoWork);
   }
 
@@ -73,6 +76,13 @@ public class EvaluationContext<T> {
     if (evaluable instanceof Evaluable.Transformation)
       return TRANSFORM_AND_CHECK;
     throw new IllegalArgumentException();
+  }
+
+  private static <T> void printTo(EvaluationContext<T> evaluationContext, PrintStream ps, int indent) {
+    ps.println(indent(indent) + "context=<" + evaluationContext + ">");
+    for (Object each : evaluationContext.resultEntries()) {
+      ps.println(indent(indent + 1) + each);
+    }
   }
 
   @SuppressWarnings("unchecked")

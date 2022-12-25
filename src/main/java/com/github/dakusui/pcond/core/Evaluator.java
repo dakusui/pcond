@@ -10,8 +10,7 @@ import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
-import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_HEAD;
-import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_TAIL;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.*;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
@@ -232,7 +231,6 @@ public interface Evaluator {
     @SuppressWarnings("unchecked")
     @Override
     public <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
-      System.out.println("----------------------: type=" + evaluableIo.evaluableType());
       evaluationContext.evaluate( //#2
           FUNCTION,
           evaluableIo,
@@ -247,7 +245,6 @@ public interface Evaluator {
                   tmp = applyFunction(tmp, io.input().returnedValue(), ((Evaluable.Func<T>) io.evaluable()).head());
                 else
                   tmp = tmp.evaluationSkipped();
-                System.out.println("+++++++++++++++++++++: HEAD: " + io.evaluableType() + ":" + io.evaluable() + "(" + io.input() + ")=" + io.output());
                 return tmp.creatorFormType(FUNC_HEAD);
               });
               evaluationContext.importEntries(childContext, 0);
@@ -261,11 +258,12 @@ public interface Evaluator {
                 })
                 .orElse(ret);
           });
+/*
+ */
     }
 
     @SuppressWarnings("unchecked")
     private static <T, R> ValueHolder<R> applyFunction(ValueHolder<R> ret, T in, Function<? super T, Object> function) {
-      System.out.println("-->function:" + function);
       try {
         R returnedValue;
         returnedValue = (R) function.apply(in);
@@ -292,21 +290,6 @@ public interface Evaluator {
       );
     }
 
-    private <T, R> EvaluableIo<R, Evaluable<R>, Boolean> evaluateChecker(Evaluable<R> checker, ValueHolder<R> input, EvaluationContext<T> evaluationContext) {
-      EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = createChildEvaluableIoOf(checker, input);
-      {
-        EvaluationContext<R> childContext = new EvaluationContext<>();
-
-        childContext.evaluate(CHECK, ioForChecker, io -> {
-          io.evaluable().accept(io, childContext, this);
-          return io.output();
-        });
-
-        evaluationContext.importEntries(childContext);
-      }
-      return ioForChecker;
-    }
-
     private <T, R> EvaluableIo<T, Evaluable<T>, R> evaluateMapper(Evaluable<T> mapper, ValueHolder<T> input, EvaluationContext<T> evaluationContext) {
       EvaluableIo<T, Evaluable<T>, R> ioForMapper = createChildEvaluableIoOf(mapper, input);
       {
@@ -321,13 +304,27 @@ public interface Evaluator {
         // #1
         childContext.evaluate(TRANSFORM, ioForMapper, io -> {
           io.evaluable().accept(io, childContext, this);
-          System.out.println("**************************: TRANSFORM: " + io.evaluable() + "(" + io.input() + ")=" + io.output());
           return io.output();
         });
 
         evaluationContext.importEntries(childContext);
       }
       return ioForMapper;
+    }
+
+    private <T, R> EvaluableIo<R, Evaluable<R>, Boolean> evaluateChecker(Evaluable<R> checker, ValueHolder<R> input, EvaluationContext<T> evaluationContext) {
+      EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = createChildEvaluableIoOf(checker, input);
+      {
+        EvaluationContext<R> childContext = new EvaluationContext<>();
+
+        childContext.evaluate(CHECK, ioForChecker, io -> {
+          io.evaluable().accept(io, childContext, this);
+          return io.output();
+        });
+
+        evaluationContext.importEntries(childContext);
+      }
+      return ioForChecker;
     }
 
     /*
@@ -390,37 +387,30 @@ public interface Evaluator {
     public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
       evaluationContext.evaluate(
           evaluableIo,
-          (Evaluable.StreamPred<E> evaluable, ValueHolder<Stream<E>> input) -> {
-            System.out.printf("BEGIN: StreamPredicate: %s(%s)%n", evaluable, input);
-            ValueHolder<Boolean> ret = input.returnedValue()
-                .map((E e) -> {
-                  EvaluationContext<E> childContext = new EvaluationContext<>();
-                  EvaluableIo<E, Evaluable<E>, Boolean> ioForCutPredicate = createChildEvaluableIoOf(evaluable.cut(), ValueHolder.forValue(e));
-                  evaluable.cut().accept(ioForCutPredicate, childContext, this);
-                  evaluationContext.importEntries(childContext);
-                  return ioForCutPredicate.output();
-                })
-                .filter(eachResult -> {
-                  if (!eachResult.isValueReturned())
-                    return true;
-                  return eachResult.returnedValue() == evaluable.valueToCut();
-                })
-                .findFirst()
-                .orElseGet(() -> ValueHolder.forValue(evaluable.defaultValue()));
-            System.out.printf("END:  StreamPredicate: %s(%s)=%s%n", evaluable, input, ret);
-            return ret;
-          });
+          (Evaluable.StreamPred<E> evaluable, ValueHolder<Stream<E>> input) -> input.returnedValue()
+              .map((E e) -> {
+                EvaluationContext<E> childContext = new EvaluationContext<>();
+                EvaluableIo<E, Evaluable<E>, Boolean> ioForCutPredicate = createChildEvaluableIoOf(evaluable.cut(), ValueHolder.forValue(e));
+                evaluable.cut().accept(ioForCutPredicate, childContext, this);
+                evaluationContext.importEntries(childContext);
+                return ioForCutPredicate.output();
+              })
+              .filter(eachResult -> {
+                if (!eachResult.isValueReturned())
+                  return true;
+                return eachResult.returnedValue() == evaluable.valueToCut();
+              })
+              .findFirst()
+              .orElseGet(() -> ValueHolder.forValue(evaluable.defaultValue())));
     }
 
     @Override
     public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
       evaluationContext.evaluate(evaluableIo, (Evaluable.VariableBundlePred evaluable, ValueHolder<VariableBundle> input) -> {
-        System.out.printf("VariableBundlePredicate:BEGIN: %s(%s)%n", evaluable, input);
         EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.returnedValue().valueAt(evaluable.argIndex())));
         EvaluationContext<Object> childContext = new EvaluationContext<>();
         evaluable.enclosed().accept(io, childContext, this);
         evaluationContext.importEntries(childContext);
-        System.out.printf("VariableBundlePredicate:END: %s(%s)=%s%n", evaluable, input, io.output());
         return io.output();
       });
     }

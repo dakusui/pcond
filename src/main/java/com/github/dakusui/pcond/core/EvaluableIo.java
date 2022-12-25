@@ -16,7 +16,6 @@ public class EvaluableIo<I, E extends Evaluable<I>, O> {
   }
 
   public void output(ValueHolder<O> output) {
-    System.out.println("output:<" + output + ">");
     this.output = requireNonNull(output).clone();
   }
 
