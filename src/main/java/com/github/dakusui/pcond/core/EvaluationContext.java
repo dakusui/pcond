@@ -1,15 +1,12 @@
 package com.github.dakusui.pcond.core;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
-import static com.github.dakusui.pcond.internals.InternalUtils.indent;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -55,7 +52,7 @@ public class EvaluationContext<T> {
     requireNonNull(evaluableIo);
     EvaluableIo<T, E, O> evaluableIoWork = this.enter(type, evaluableIo.input(), evaluableIo.evaluable());
     this.leave(evaluableIoWork, function.apply(evaluableIoWork));
-    printTo(this, System.err, 1);
+    DebuggingUtils.printTo(this, System.err, 1);
     updateEvaluableIo(evaluableIo, evaluableIoWork);
   }
 
@@ -77,13 +74,6 @@ public class EvaluationContext<T> {
     if (evaluable instanceof Evaluable.Transformation)
       return TRANSFORM_AND_CHECK;
     throw new IllegalArgumentException();
-  }
-
-  private static <T> void printTo(EvaluationContext<T> evaluationContext, PrintStream ps, int indent) {
-    ps.println(indent(indent) + "context=<" + evaluationContext + ">");
-    for (Object each : evaluationContext.resultEntries()) {
-      ps.println(indent(indent + 1) + each);
-    }
   }
 
   @SuppressWarnings("unchecked")
@@ -115,22 +105,15 @@ public class EvaluationContext<T> {
   }
 
   public <R> void importEntries(EvaluationContext<R> childContext) {
-    importEntries(childContext, v -> true);
+    importEntries(childContext, currentIndentLevel());
   }
 
-  private int currentIndentLevel() {
-    return this.visitorLineage.size();
-  }
-
-  public <R> void importEntries(EvaluationContext<R> childContext, Predicate<EvaluationEntry.Impl> implPredicate) {
-    importEntries(childContext, currentIndentLevel(), implPredicate);
-  }
-
-    public <R> void importEntries(EvaluationContext<R> childContext, int indentLevelGap, Predicate<EvaluationEntry.Impl> implPredicate) {
-    childContext.evaluationEntries.stream()
-        .map(each -> (EvaluationEntry.Impl)each)
-        .filter(implPredicate)
-        .forEach(each -> each.level += indentLevelGap);
+  public <R> void importEntries(EvaluationContext<R> childContext, int indentLevelGap) {
+    childContext.evaluationEntries.forEach(each -> each.level += indentLevelGap);
     this.evaluationEntries.addAll(childContext.resultEntries());
+  }
+
+  public int currentIndentLevel() {
+    return this.visitorLineage.size();
   }
 }

@@ -410,7 +410,7 @@ public abstract class EvaluationEntry {
 
     @Override
     public String toString() {
-      return String.format("%s(%s)=%s (expected:=%s)", formName(), inputActualValue(), finalized ? outputActualValue() : "(n/a)", finalized ? outputExpectation() : "(n/a)");
+      return String.format("%s(%s)=%s (expected:=%s):%s", formName(), inputActualValue(), finalized ? outputActualValue() : "(n/a)", finalized ? outputExpectation() : "(n/a)", this.level());
     }
   }
 }
