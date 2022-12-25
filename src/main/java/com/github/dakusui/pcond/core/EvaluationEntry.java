@@ -2,8 +2,7 @@ package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.core.ValueHolder.State;
 
-import static com.github.dakusui.pcond.core.EvaluationEntry.Type.FUNCTION;
-import static com.github.dakusui.pcond.core.EvaluationEntry.Type.LEAF;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.*;
 import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
 import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
@@ -340,13 +339,13 @@ public abstract class EvaluationEntry {
         EvaluationContext<T> evaluationContext,
         EvaluableIo<T, E, ?> evaluableIo) {
       super(
-          evaluableIo.evaluableType().formName(evaluableIo.evaluable()),
+          EvaluationContext.formNameOf(evaluableIo),
           evaluableIo.evaluableType(),
           evaluationContext.visitorLineage.size(),
           computeInputExpectation(evaluableIo),                   // inputExpectation        == inputActualValue
           explainInputExpectation(evaluableIo),                   // detailInputExpectation  == detailInputActualValue
           null, // not necessary                                  // outputExpectation
-          explainOutputExpectation(evaluableIo.evaluable()),      // detailOutputExpectation
+          explainOutputExpectation(evaluableIo.evaluable(), evaluableIo),      // detailOutputExpectation
           computeInputActualValue(evaluableIo),                   // inputActualValue
           explainInputActualValue(evaluableIo.evaluable(), computeInputActualValue(evaluableIo)), // detailInputActualValue
           evaluableIo.evaluable().isSquashable());
@@ -396,7 +395,7 @@ public abstract class EvaluationEntry {
     }
 
     public String formName() {
-      return evaluableIo.evaluableType().formName(evaluableIo.evaluable());
+      return EvaluationContext.formNameOf(this.evaluableIo);
       // FOR DEBUGGING SUMMARY OUTPUT
       //return evaluableIo.evaluableType() + ":" + evaluableIo.input().creatorFormType() + ":" + evaluableIo.output().creatorFormType() + ":" + evaluableIo.evaluableType().formName(evaluableIo.evaluable());
     }
@@ -404,7 +403,7 @@ public abstract class EvaluationEntry {
       this.outputExpectation = computeOutputExpectation(evaluableIo(), expectationFlipped);
       this.outputActualValue = computeOutputActualValue(evaluableIo());
       this.detailOutputActualValue = explainActual(evaluableIo());
-      this.ignored = this.evaluableIo.evaluableType() == FUNCTION && this.evaluableIo.output().creatorFormType() == FUNC_TAIL;
+      this.ignored = this.evaluableIo.evaluableType() == TRANSFORM_AND_CHECK || this.evaluableIo.evaluableType() == FUNCTION && this.evaluableIo.output().creatorFormType() == FUNC_TAIL;
       this.finalized = true;
     }
 

@@ -91,29 +91,11 @@ public class SmokeTest extends TestBase {
     );
     Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book(title, abstractText);
     try {
-      assertAll(
-          stringValue("hello").length().then().greaterThan(1),
-          new Fluent4Example.OnGoing.BookTransformer(book)
-              .transform(b -> b.title()
-                  .transform(ty -> ty.then().isNotNull().done())
-                  .transform(ty -> ty.parseInt().then()
-                      .greaterThanOrEqualTo(10)
-                      .lessThan(40)
-                      .done()).done())
-              .transform(b -> b.abstractText()
-                  .transform(ty -> ty.then().checkWithPredicate(isNull().negate()).done())
-                  .transform(ty -> ty.length().then()
-                      .greaterThanOrEqualTo(200)
-                      .lessThan(400)
-                      .done()).done()));
+      performSmoke(book);
     } catch (ComparisonFailure e) {
-      if (true)
-        throw e;
-
       e.printStackTrace();
       ReportParser reportParserForActualValue = new ReportParser(e.getActual());
       ReportParser reportParserForExpectation = new ReportParser(e.getExpected());
-
       assertAllRunnables(
           () -> assertAllRunnables(
               () -> {
@@ -182,6 +164,62 @@ public class SmokeTest extends TestBase {
       );
       throw e;
     }
+  }
+
+  @Ignore
+  @Test
+  public void performSmoke() {
+    String title = "De Bello Gallico";
+    String abstractText = "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.";
+    List<String> expectedInputList = asList(
+        "'hello'",
+        "5",
+        "Book:[title:<De Bello G...i appellantur.>]",
+        "'De Bello Gallico'",
+        "NumberFormatException:'For input s...ico''",
+        "Book:[title:<De Bello G...i appellantur.>]",
+        "'Gallia est omnis divis...li appellantur.'",
+        "145");
+    List<String> extractedOpNameList = asList(
+        "WHEN:transform:length",
+        "THEN:>[1]",
+        "WHEN:allOf",
+        "transform:title",
+        "THEN:allOf",
+        "isNotNull",
+        "transform:parseInt",
+        "THEN:allOf",
+        ">=[10]",
+        "<[40]",
+        "transform:abstractText",
+        "THEN:allOf",
+        "not:isNull",
+        "transform:length",
+        "THEN:allOf",
+        ">=[200]",
+        "<[400]"
+    );
+    Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book(title, abstractText);
+    performSmoke(book);
+  }
+
+
+  private static void performSmoke(Fluent4Example.OnGoing.Book book) {
+    assertAll(
+        stringValue("hello").length().then().greaterThan(1),
+        new Fluent4Example.OnGoing.BookTransformer(book)
+            .transform(b -> b.title()
+                .transform(ty -> ty.then().isNotNull().done())
+                .transform(ty -> ty.parseInt().then()
+                    .greaterThanOrEqualTo(10)
+                    .lessThan(40)
+                    .done()).done())
+            .transform(b -> b.abstractText()
+                .transform(ty -> ty.then().checkWithPredicate(isNull().negate()).done())
+                .transform(ty -> ty.length().then()
+                    .greaterThanOrEqualTo(200)
+                    .lessThan(400)
+                    .done()).done()));
   }
 
   private static List<String> extractInputFromReport(ReportParser reportParserForExpectation) {

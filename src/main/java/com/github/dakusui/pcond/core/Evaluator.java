@@ -390,11 +390,11 @@ public interface Evaluator {
 
     Object explainActual(Object actualValue);
 
-    static Object explainOutputExpectation(Object evaluable) {
+    static Object explainOutputExpectation(Object evaluable, EvaluableIo<? , ?, ?> evaluableIo) {
       if (evaluable instanceof Explainable)
         return explainValue(((Explainable) evaluable).explainOutputExpectation());
       if (evaluable instanceof Evaluable)
-        return formNameOf((Evaluable<?>) evaluable);
+        return formNameOf(evaluableIo);
       return null;
     }
 

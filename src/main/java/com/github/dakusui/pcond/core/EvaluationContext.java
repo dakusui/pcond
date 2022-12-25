@@ -24,8 +24,9 @@ public class EvaluationContext<T> {
   public EvaluationContext() {
   }
 
-  public static String formNameOf(Evaluable<?> evaluable) {
-    return resolveEvaluationEntryType(evaluable).formName(evaluable);
+  public static String formNameOf(EvaluableIo<?, ?, ?> evaluableIo) {
+    Evaluable<?> e = evaluableIo.evaluable();
+    return evaluableIo.evaluableType().formName(e);
   }
 
   public boolean isExpectationFlipped() {
