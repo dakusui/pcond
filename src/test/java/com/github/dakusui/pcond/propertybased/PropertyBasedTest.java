@@ -62,7 +62,6 @@ public class PropertyBasedTest {
       return TestCaseUtils.parameters(SimplePredicate.class);
     }
 
-
     @TestCaseParameter
     static TestCase<String, Throwable> givenSimplePredicate_whenExpectedValue_thenValueReturned() {
       return new TestCase.Builder.ForReturnedValue<>("HELLO", Predicates.isEqualTo("HELLO"), String.class)
@@ -227,7 +226,9 @@ public class PropertyBasedTest {
 
     @TestCaseParameter
     static TestCase<String, Throwable> givenDoubleChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
-      return new TestCase.Builder.ForReturnedValue<>("HELLO", Predicates.transform(toLowerCase().andThen(toLowerCase()).andThen(Functions.length())).check(Predicates.isEqualTo(6)), String.class)
+      return new TestCase.Builder.ForReturnedValue<>(
+          "HELLO",
+          Predicates.transform(toUpperCase().andThen(toLowerCase()).andThen(Functions.length())).check(Predicates.isEqualTo(6)), String.class)
           .addExpectationPredicate(equalsPredicate("hello"))
           .build();
     }
@@ -317,6 +318,10 @@ public class PropertyBasedTest {
 
   private static Function<String, String> toLowerCase() {
     return Printables.function("toLowerCase", String::toLowerCase);
+  }
+
+  private static Function<String, String> toUpperCase() {
+    return Printables.function("toUpperCase", String::toUpperCase);
   }
 
   private static Predicate<String> alwaysFalse() {

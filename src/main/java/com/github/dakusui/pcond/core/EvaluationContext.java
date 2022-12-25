@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.indent;
@@ -114,15 +115,22 @@ public class EvaluationContext<T> {
   }
 
   public <R> void importEntries(EvaluationContext<R> childContext) {
-    importEntries(childContext, currentIndentLevel());
+    importEntries(childContext, v -> true);
   }
 
   private int currentIndentLevel() {
     return this.visitorLineage.size();
   }
 
-  public <R> void importEntries(EvaluationContext<R> childContext, int indentLevelGap) {
-    childContext.evaluationEntries.forEach(each -> each.level += indentLevelGap);
+  public <R> void importEntries(EvaluationContext<R> childContext, Predicate<EvaluationEntry.Impl> implPredicate) {
+    importEntries(childContext, currentIndentLevel(), implPredicate);
+  }
+
+    public <R> void importEntries(EvaluationContext<R> childContext, int indentLevelGap, Predicate<EvaluationEntry.Impl> implPredicate) {
+    childContext.evaluationEntries.stream()
+        .map(each -> (EvaluationEntry.Impl)each)
+        .filter(implPredicate)
+        .forEach(each -> each.level += indentLevelGap);
     this.evaluationEntries.addAll(childContext.resultEntries());
   }
 }

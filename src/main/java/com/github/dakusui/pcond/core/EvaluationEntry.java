@@ -247,6 +247,13 @@ public abstract class EvaluationEntry {
       @Override
       String formName(Evaluable<?> evaluable) {
         return ((Evaluable.Func<?>) evaluable).head().toString();
+        /*
+        // FOR DEBUGGING SUMMARY OUTPUT
+        if (!((Evaluable.Func<?>) evaluable).tail().isPresent())
+          return ((Evaluable.Func<?>) evaluable).head().toString();
+        return ((Evaluable.Func<?>) evaluable).head().toString() + ":" + ((Evaluable.Func<?>) evaluable).tail().get();
+
+         */
       }
     };
 
@@ -322,8 +329,8 @@ public abstract class EvaluationEntry {
   public static class Impl extends EvaluationEntry {
 
     private final EvaluableIo<?, ?, ?> evaluableIo;
-    private final boolean expectationFlipped;
-    private       boolean ignored;
+    private final boolean              expectationFlipped;
+    private       boolean              ignored;
 
     private boolean finalized = false;
     private Object  outputActualValue;
@@ -345,7 +352,7 @@ public abstract class EvaluationEntry {
           evaluableIo.evaluable().isSquashable());
       this.evaluableIo = evaluableIo;
       this.expectationFlipped = evaluationContext.isExpectationFlipped();
-      this.ignored = evaluableIo.output().creatorFormType() == FUNC_TAIL;
+      this.ignored = false;
     }
 
     private static <E extends Evaluable<T>, T> Object explainInputExpectation(EvaluableIo<T, E, ?> evaluableIo) {
@@ -362,7 +369,7 @@ public abstract class EvaluationEntry {
     }
 
     @SuppressWarnings("unchecked")
-    private <I, O> EvaluableIo<I, Evaluable<I>, O> evaluableIo() {
+    public <I, O> EvaluableIo<I, Evaluable<I>, O> evaluableIo() {
       return (EvaluableIo<I, Evaluable<I>, O>) this.evaluableIo;
     }
 
@@ -388,13 +395,22 @@ public abstract class EvaluationEntry {
       return this.ignored;
     }
 
+    public String formName() {
+      return evaluableIo.evaluableType().formName(evaluableIo.evaluable());
+      // FOR DEBUGGING SUMMARY OUTPUT
+      //return evaluableIo.evaluableType() + ":" + evaluableIo.input().creatorFormType() + ":" + evaluableIo.output().creatorFormType() + ":" + evaluableIo.evaluableType().formName(evaluableIo.evaluable());
+    }
     public void finalizeValues() {
       this.outputExpectation = computeOutputExpectation(evaluableIo(), expectationFlipped);
       this.outputActualValue = computeOutputActualValue(evaluableIo());
       this.detailOutputActualValue = explainActual(evaluableIo());
-      this.ignored = this.evaluableIo.output().creatorFormType() == FUNC_TAIL;
+      this.ignored = this.evaluableIo.evaluableType() == FUNCTION && this.evaluableIo.output().creatorFormType() == FUNC_TAIL;
       this.finalized = true;
     }
 
+    @Override
+    public String toString() {
+      return String.format("%s(%s)=%s (expected:=%s)", formName(), inputActualValue(), finalized ? outputActualValue() : "(n/a)", finalized ? outputExpectation() : "(n/a)");
+    }
   }
 }

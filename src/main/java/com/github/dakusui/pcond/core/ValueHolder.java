@@ -132,6 +132,7 @@ public class ValueHolder<V> implements Cloneable {
   enum CreatorFormType {
     FUNC_HEAD,
     FUNC_TAIL,
+    TRANSFORM,
     UNKNOWN;
   }
 }

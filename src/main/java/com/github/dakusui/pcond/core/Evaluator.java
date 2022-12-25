@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.TRANSFORM;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.*;
 import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
@@ -237,29 +238,41 @@ public interface Evaluator {
           (Evaluable.Func<T> evaluable, ValueHolder<T> input) -> {
             ValueHolder<R> ret;
             {
-              EvaluableIo<T, Evaluable<T>, Object> ioForHead = createChildEvaluableIoOf(evaluable, input);
-              EvaluationContext<T> childContext = new EvaluationContext<>();
-              childContext.evaluate(FUNCTION, ioForHead, io -> {
+              if (evaluable.tail().isPresent()) {
+                EvaluableIo<T, Evaluable<T>, Object> ioForHead = createChildEvaluableIoOf(evaluable, input);
+                EvaluationContext<T> childContext = new EvaluationContext<>();
+                printIo("FUNC_HEAD:BEFORE", ioForHead);
+                childContext.evaluate(FUNCTION, ioForHead, io -> {
+                  ValueHolder<Object> tmp = ValueHolder.create();
+                  if (io.input().isValueReturned())
+                    tmp = applyFunction(tmp, io.input().returnedValue(), ((Evaluable.Func<T>) io.evaluable()).head());
+                  else
+                    tmp = tmp.evaluationSkipped();
+                  printIo("FUNC_HEAD:AFTER", io);
+                  return tmp.creatorFormType(FUNC_HEAD);
+                });
+                evaluationContext.importEntries(childContext);
+                ret = (ValueHolder<R>) ioForHead.output();
+              } else {
                 ValueHolder<Object> tmp = ValueHolder.create();
-                if (io.input().isValueReturned())
-                  tmp = applyFunction(tmp, io.input().returnedValue(), ((Evaluable.Func<T>) io.evaluable()).head());
+                if (input.isValueReturned())
+                  ret = (ValueHolder<R>) applyFunction(tmp, input.returnedValue(), evaluable.head());
                 else
-                  tmp = tmp.evaluationSkipped();
-                return tmp.creatorFormType(FUNC_HEAD);
-              });
-              evaluationContext.importEntries(childContext, 0);
-              ret = (ValueHolder<R>) ioForHead.output();
+                  ret = (ValueHolder<R>) tmp.evaluationSkipped();
+              }
             }
+            System.err.println("FUNC_TAIL:IFANY:"+ evaluable.tail().isPresent());
             ValueHolder<Object> finalRet = (ValueHolder<Object>) ret;
             return evaluable.tail().map((Evaluable<Object> e) -> {
                   EvaluableIo<Object, Evaluable<Object>, R> ioForTail = createChildEvaluableIoOf(e, finalRet);
+                  printIo("FUNC_TAIL:BEFORE", ioForTail);
+                  printIo("-- evaluableIo:", evaluableIo);
                   e.accept(ioForTail, (EvaluationContext<Object>) evaluationContext, this);
+                  printIo("FUNC_TAIL:AFTER", ioForTail);
                   return ioForTail.output().creatorFormType(FUNC_TAIL);
                 })
                 .orElse(ret);
           });
-/*
- */
     }
 
     @SuppressWarnings("unchecked")
@@ -283,15 +296,19 @@ public interface Evaluator {
       evaluationContext.evaluate(
           evaluableIo,
           (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
+            printInput("TRANSFORMATION:BEFORE", evaluable, input);
+            System.err.println("MAP");
             EvaluableIo<T, Evaluable<T>, R> mapperIo = evaluateMapper(evaluable.mapper(), input, evaluationContext);
+            System.err.println("CHECK");
             EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(evaluable.checker(), mapperIo.output(), evaluationContext);
+            printInputAndOutput("TRANSFORMATION:AFTER", evaluable, input, checkerIo.output());
             return checkerIo.output();
           }
       );
     }
 
     private <T, R> EvaluableIo<T, Evaluable<T>, R> evaluateMapper(Evaluable<T> mapper, ValueHolder<T> input, EvaluationContext<T> evaluationContext) {
-      EvaluableIo<T, Evaluable<T>, R> ioForMapper = createChildEvaluableIoOf(mapper, input);
+      EvaluableIo<T, Evaluable<T>, R> ioForMapper = createChildEvaluableIoOf(mapper, input.creatorFormType(ValueHolder.CreatorFormType.TRANSFORM));
       {
         /*
         EvaluationContext<T> childContext = new EvaluationContext<>();
@@ -303,13 +320,27 @@ public interface Evaluator {
 
         // #1
         childContext.evaluate(TRANSFORM, ioForMapper, io -> {
+          printIo("TRANSFORM:BEFORE", io);
           io.evaluable().accept(io, childContext, this);
-          return io.output();
+          printIo("TRANSFORM:AFTER", io);
+          return io.output(); //.creatorFormType(ValueHolder.CreatorFormType.TRANSFORM);
         });
 
         evaluationContext.importEntries(childContext);
       }
       return ioForMapper;
+    }
+
+    private static <T, R> void printIo(String x, EvaluableIo<T, ? extends Evaluable<T>, R> io) {
+      System.err.println(x + ":" + io.evaluableType() + ":" + io.evaluable() + "(" + io.input() + ")=" + io.output());
+    }
+
+    private static <T> void printInput(String x, Evaluable<T> evaluable, ValueHolder<T> input) {
+      System.err.println(x + ":" + evaluable + "(" + input + ")");
+    }
+
+    private static <T, R> void printInputAndOutput(String x, Evaluable<T> evaluable, ValueHolder<T> input, ValueHolder<R> output) {
+      System.err.println(x + ":" + evaluable + "(" + input + ")=" + output);
     }
 
     private <T, R> EvaluableIo<R, Evaluable<R>, Boolean> evaluateChecker(Evaluable<R> checker, ValueHolder<R> input, EvaluationContext<T> evaluationContext) {
@@ -318,7 +349,9 @@ public interface Evaluator {
         EvaluationContext<R> childContext = new EvaluationContext<>();
 
         childContext.evaluate(CHECK, ioForChecker, io -> {
+          printIo("CHECK:BEFORE", io);
           io.evaluable().accept(io, childContext, this);
+          printIo("CHECK:AFTER", io);
           return io.output();
         });
 
