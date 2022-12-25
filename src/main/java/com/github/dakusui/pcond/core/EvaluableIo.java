@@ -34,4 +34,9 @@ public class EvaluableIo<I, E extends Evaluable<I>, O> {
   public ValueHolder<O> output() {
     return this.output;
   }
+
+  @Override
+  public String toString() {
+    return "evaluable:<" + evaluableType + ":" + evaluable + "> in:" + input + " out:" + output;
+  }
 }

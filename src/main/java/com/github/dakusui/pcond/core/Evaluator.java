@@ -12,8 +12,7 @@ import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.TRANSFORM;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
 import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.*;
-import static com.github.dakusui.pcond.core.ValueHolder.State.EXCEPTION_THROWN;
-import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
+import static com.github.dakusui.pcond.core.ValueHolder.State.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
 import static java.util.Objects.requireNonNull;
@@ -411,8 +410,10 @@ public interface Evaluator {
         return ret != null ? ret : Impl.NULL_VALUE;
       } else if (evaluableIo.output().state() == EXCEPTION_THROWN)
         return composeDetailOutputActualValueFromInputAndThrowable(evaluableIo.input().value(), evaluableIo.output().thrownException());
-      else
-        throw new AssertionError();
+      else if (evaluableIo.output().state() == EVALUATION_SKIPPED) {
+        return EVALUATION_SKIPPED;
+      } else
+        throw new AssertionError("evaluableIo:" + evaluableIo);
     }
   }
 }
