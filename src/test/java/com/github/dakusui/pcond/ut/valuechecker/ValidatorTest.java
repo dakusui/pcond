@@ -1,10 +1,10 @@
 package com.github.dakusui.pcond.ut.valuechecker;
 
-import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.pcond.validator.ExceptionComposer;
 import com.github.dakusui.pcond.validator.MessageComposer;
 import com.github.dakusui.pcond.validator.ReportComposer;
 import com.github.dakusui.pcond.validator.Validator;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 
 public class ValidatorTest extends TestBase {
@@ -23,6 +23,11 @@ public class ValidatorTest extends TestBase {
       @Override
       public ExceptionComposer exceptionComposer() {
         return null;
+      }
+
+      @Override
+      public boolean isDebugModeEnabled() {
+        return true;
       }
 
       @Override

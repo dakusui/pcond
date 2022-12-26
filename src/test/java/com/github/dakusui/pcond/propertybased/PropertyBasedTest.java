@@ -234,6 +234,18 @@ public class PropertyBasedTest {
     }
 
     @TestCaseParameter
+    static TestCase<String, Throwable> givenTwoChainedTransformingPredicates_whenNonExpectedValue_thenComparisonFailure() {
+      return new TestCase.Builder.ForReturnedValue<>(
+          "HELLO",
+          allOf(
+              Predicates.transform(toUpperCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)),
+              Predicates.transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6))),
+          String.class)
+          .addExpectationPredicate(equalsPredicate("hello"))
+          .build();
+    }
+
+    @TestCaseParameter
     static TestCase<String, Throwable> givenChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
       return new TestCase.Builder.ForReturnedValue<>("HELLO", Predicates.transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)), String.class)
           .addExpectationPredicate(equalsPredicate("hello"))

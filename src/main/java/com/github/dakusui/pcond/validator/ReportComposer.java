@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.validator;
 
+import com.github.dakusui.pcond.core.DebuggingUtils;
 import com.github.dakusui.pcond.core.EvaluationEntry;
 import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.internals.InternalUtils;
@@ -123,8 +124,7 @@ public interface ReportComposer {
     }
 
     private static boolean suppressSquashing() {
-      return true;
-      //return Boolean.parseBoolean(System.getProperty("pcond.suppressSquashing", "false"));
+      return DebuggingUtils.isDebugEnabled();
     }
 
     private static String computeDetailOutputExpectationFromSquashedItems(List<EvaluationEntry> squashedItems) {
@@ -223,7 +223,9 @@ public interface ReportComposer {
         if (outputLength > maxOutputLength)
           maxOutputLength = outputLength;
       }
-      int formNameColumnLength = (formNameColumnLength = max(12, min(summarizedStringLength(), maxIndentAndFormNameLength))) + formNameColumnLength % 2;
+      int formNameColumnLength = (formNameColumnLength = max(
+          DebuggingUtils.isDebugEnabled() ? 80: 12,
+          min(summarizedStringLength(), maxIndentAndFormNameLength))) + formNameColumnLength % 2;
       Function<FormattedEntry, String> formatter = formatterFactory.apply(
           new int[] { maxInputLength, formNameColumnLength, maxOutputLength });
       return formattedEntries

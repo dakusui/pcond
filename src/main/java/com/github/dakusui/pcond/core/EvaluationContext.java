@@ -24,19 +24,6 @@ public class EvaluationContext<T> {
   public EvaluationContext() {
   }
 
-  public static String formNameOf(EvaluableIo<?, ?, ?> evaluableIo) {
-    Evaluable<?> e = evaluableIo.evaluable();
-    return evaluableIo.evaluableType().formName(e);
-  }
-
-  public boolean isExpectationFlipped() {
-    return this.expectationFlipped;
-  }
-
-  public void flipExpectation() {
-    this.expectationFlipped = !expectationFlipped;
-  }
-
   /**
    * @param evaluableIo       An object to hold a form and its I/O.
    * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
@@ -50,11 +37,31 @@ public class EvaluationContext<T> {
   }
 
   public <E extends Evaluable<T>, O> void evaluate(EvaluationEntry.Type type, EvaluableIo<T, E, O> evaluableIo, Function<EvaluableIo<T, E, O>, ValueHolder<O>> function) {
+    evaluate(type, formNameOf(evaluableIo), evaluableIo, function);
+  }
+
+  public <E extends Evaluable<T>, O> void evaluate(EvaluationEntry.Type type, String formName, EvaluableIo<T, E, O> evaluableIo, Function<EvaluableIo<T, E, O>, ValueHolder<O>> function) {
     requireNonNull(evaluableIo);
-    EvaluableIo<T, E, O> evaluableIoWork = this.enter(type, evaluableIo.input(), evaluableIo.evaluable());
+    EvaluableIo<T, E, O> evaluableIoWork = this.enter(evaluableIo.input(), type, formName, evaluableIo.evaluable());
     this.leave(evaluableIoWork, function.apply(evaluableIoWork));
     DebuggingUtils.printTo(this, System.err, 1);
     updateEvaluableIo(evaluableIo, evaluableIoWork);
+  }
+
+  public static String formNameOf(EvaluableIo<?, ?, ?> evaluableIo) {
+    return formNameOf(evaluableIo.evaluableType(), evaluableIo.evaluable());
+  }
+
+  public static String formNameOf(EvaluationEntry.Type type, Evaluable<?> e) {
+    return type.formName(e);
+  }
+
+  public boolean isExpectationFlipped() {
+    return this.expectationFlipped;
+  }
+
+  public void flipExpectation() {
+    this.expectationFlipped = !expectationFlipped;
   }
 
   private static <T, E extends Evaluable<T>, O> void updateEvaluableIo(EvaluableIo<T, E, O> evaluableIo, EvaluableIo<T, E, O> evaluableIoWork) {
@@ -78,8 +85,8 @@ public class EvaluationContext<T> {
   }
 
   @SuppressWarnings("unchecked")
-  private <E extends Evaluable<T>, O> EvaluableIo<T, E, O> enter(EvaluationEntry.Type type, ValueHolder<T> input, E evaluable) {
-    EvaluableIo<T, Evaluable<T>, O> ret = createEvaluableIo(input, evaluable, type);
+  private <E extends Evaluable<T>, O> EvaluableIo<T, E, O> enter(ValueHolder<T> input, EvaluationEntry.Type type, String formName, E evaluable) {
+    EvaluableIo<T, Evaluable<T>, O> ret = createEvaluableIo(input, type, formName, evaluable);
     this.evaluationEntries.add(createEvaluationEntry(this, ret));
     this.visitorLineage.add(evaluationEntries.get(evaluationEntries.size() - 1));
     return (EvaluableIo<T, E, O>) ret;
@@ -91,8 +98,8 @@ public class EvaluationContext<T> {
     currentEvaluationEntry.finalizeValues();
   }
 
-  private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(ValueHolder<T> input, Evaluable<T> evaluable, EvaluationEntry.Type type) {
-    return new EvaluableIo<>(input, type, evaluable);
+  private static <T, O> EvaluableIo<T, Evaluable<T>, O> createEvaluableIo(ValueHolder<T> input, EvaluationEntry.Type type, String formName, Evaluable<T> evaluable) {
+    return new EvaluableIo<>(input, type, formName, evaluable);
   }
 
   private static <T, E extends Evaluable<T>> EvaluationEntry createEvaluationEntry(

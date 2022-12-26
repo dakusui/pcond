@@ -480,6 +480,8 @@ public interface Validator {
      */
     ExceptionComposer exceptionComposer();
 
+    boolean isDebugModeEnabled();
+
     enum Utils {
       ;
 
@@ -620,6 +622,11 @@ public interface Validator {
            */
           public ExceptionComposer exceptionComposer() {
             return this.exceptionComposer;
+          }
+
+          @Override
+          public boolean isDebugModeEnabled() {
+            return true;
           }
 
 

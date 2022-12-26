@@ -2,6 +2,8 @@ package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.core.ValueHolder.State;
 
+import static com.github.dakusui.pcond.core.DebuggingUtils.isDebugEnabled;
+import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.*;
 import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
@@ -118,7 +120,7 @@ public abstract class EvaluationEntry {
   static <T, E extends Evaluable<T>> Object computeOutputExpectation(EvaluableIo<T, E, ?> evaluableIo, boolean expectationFlipped) {
     final State state = evaluableIo.output().state();
     if (state == VALUE_RETURNED) {
-      if (evaluableIo.evaluableType() == FUNCTION)
+      if (evaluableIo.evaluableType() == FUNCTION || evaluableIo.evaluableType() == TRANSFORM)
         return toSnapshotIfPossible(evaluableIo.output().returnedValue());
       return !expectationFlipped;
     } else if (state == State.EXCEPTION_THROWN || state == State.EVALUATION_SKIPPED)
@@ -215,7 +217,7 @@ public abstract class EvaluationEntry {
     CHECK {
       @Override
       String formName(Evaluable<?> evaluable) {
-        return "check";
+        return resolveEvaluationEntryType(evaluable).formName(evaluable);
       }
     },
     AND {
@@ -245,14 +247,12 @@ public abstract class EvaluationEntry {
     FUNCTION {
       @Override
       String formName(Evaluable<?> evaluable) {
+        if (isDebugEnabled()) {
+          if (!((Evaluable.Func<?>) evaluable).tail().isPresent())
+            return ((Evaluable.Func<?>) evaluable).head().toString();
+          return ((Evaluable.Func<?>) evaluable).head().toString() + ":" + ((Evaluable.Func<?>) evaluable).tail().get();
+        }
         return ((Evaluable.Func<?>) evaluable).head().toString();
-        /*
-        // FOR DEBUGGING SUMMARY OUTPUT
-        if (!((Evaluable.Func<?>) evaluable).tail().isPresent())
-          return ((Evaluable.Func<?>) evaluable).head().toString();
-        return ((Evaluable.Func<?>) evaluable).head().toString() + ":" + ((Evaluable.Func<?>) evaluable).tail().get();
-
-         */
       }
     };
 
@@ -263,7 +263,7 @@ public abstract class EvaluationEntry {
     final         Object  outputActualValue;
     final         Object  detailOutputActualValue;
     private final boolean requiresExplanation;
-    private       boolean ignored;
+    private final boolean ignored;
 
     Finalized(
         String formName,
@@ -395,15 +395,18 @@ public abstract class EvaluationEntry {
     }
 
     public String formName() {
-      return EvaluationContext.formNameOf(this.evaluableIo);
-      // FOR DEBUGGING SUMMARY OUTPUT
-      //return evaluableIo.evaluableType() + ":" + evaluableIo.input().creatorFormType() + ":" + evaluableIo.output().creatorFormType() + ":" + evaluableIo.evaluableType().formName(evaluableIo.evaluable());
+      if (isDebugEnabled())
+        return evaluableIo.formName() + "(" + evaluableIo.evaluableType() + ":" + evaluableIo.input().creatorFormType() + ":" + evaluableIo.output().creatorFormType() + ")";
+      return this.evaluableIo.formName();
     }
+
     public void finalizeValues() {
       this.outputExpectation = computeOutputExpectation(evaluableIo(), expectationFlipped);
       this.outputActualValue = computeOutputActualValue(evaluableIo());
       this.detailOutputActualValue = explainActual(evaluableIo());
-      this.ignored = this.evaluableIo.evaluableType() == TRANSFORM_AND_CHECK || this.evaluableIo.evaluableType() == FUNCTION && this.evaluableIo.output().creatorFormType() == FUNC_TAIL;
+      this.ignored =
+          this.evaluableIo.evaluableType() == TRANSFORM_AND_CHECK ||
+          this.evaluableIo.evaluableType() == FUNCTION && this.evaluableIo.output().creatorFormType() == FUNC_TAIL;
       this.finalized = true;
     }
 
