@@ -30,7 +30,7 @@ public class Fluent4Example {
           .isTrue());
     }
 
-    @Test(expected = ComparisonFailure.class)
+    @Test//(expected = ComparisonFailure.class)
     public void test_b() {
       assertStatement(stringTransformer("INPUT_VALUE")
           .toLowerCase()
