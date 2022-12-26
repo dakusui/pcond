@@ -7,6 +7,8 @@ import com.github.dakusui.pcond.validator.Validator;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 
+import java.util.Optional;
+
 public class ValidatorTest extends TestBase {
   public static class TestValidator implements Validator {
     private final Configuration configuration = new Configuration() {
@@ -26,8 +28,8 @@ public class ValidatorTest extends TestBase {
       }
 
       @Override
-      public boolean isDebugModeEnabled() {
-        return true;
+      public Optional<Debugging> debugging() {
+        return Optional.empty();
       }
 
       @Override

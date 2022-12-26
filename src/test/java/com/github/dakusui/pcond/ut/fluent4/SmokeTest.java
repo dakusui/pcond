@@ -171,34 +171,6 @@ public class SmokeTest extends TestBase {
   public void performSmoke() {
     String title = "De Bello Gallico";
     String abstractText = "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.";
-    List<String> expectedInputList = asList(
-        "'hello'",
-        "5",
-        "Book:[title:<De Bello G...i appellantur.>]",
-        "'De Bello Gallico'",
-        "NumberFormatException:'For input s...ico''",
-        "Book:[title:<De Bello G...i appellantur.>]",
-        "'Gallia est omnis divis...li appellantur.'",
-        "145");
-    List<String> extractedOpNameList = asList(
-        "WHEN:transform:length",
-        "THEN:>[1]",
-        "WHEN:allOf",
-        "transform:title",
-        "THEN:allOf",
-        "isNotNull",
-        "transform:parseInt",
-        "THEN:allOf",
-        ">=[10]",
-        "<[40]",
-        "transform:abstractText",
-        "THEN:allOf",
-        "not:isNull",
-        "transform:length",
-        "THEN:allOf",
-        ">=[200]",
-        "<[400]"
-    );
     Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book(title, abstractText);
     performSmoke(book);
   }

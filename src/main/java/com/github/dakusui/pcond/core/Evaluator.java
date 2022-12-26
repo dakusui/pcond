@@ -274,7 +274,7 @@ public interface Evaluator {
             DebuggingUtils.printInput("TRANSFORMATION:BEFORE", evaluable, input);
             EvaluableIo<T, Evaluable<T>, R> mapperIo = evaluateMapper(evaluable.mapperName().orElse("transform"), evaluable.mapper(), input, evaluationContext);
             EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(evaluable.checkerName().orElse("check"), evaluable.checker(), mapperIo.output(), evaluationContext);
-            DebuggingUtils.printInputAndOutput("TRANSFORMATION:AFTER", evaluable, input, checkerIo.output());
+            DebuggingUtils.printInputAndOutput(evaluable, input, checkerIo.output());
             return checkerIo.output();
           }
       );
@@ -303,7 +303,7 @@ public interface Evaluator {
       {
         EvaluationContext<R> childContext = new EvaluationContext<>();
 
-        childContext.evaluate(CHECK, checkerName, ioForChecker, io -> {
+        childContext.evaluate(getType(checker), checkerName, ioForChecker, io -> {
           DebuggingUtils.printIo("CHECK:BEFORE", io);
           io.evaluable().accept(io, childContext, this);
           DebuggingUtils.printIo("CHECK:AFTER", io);
@@ -313,6 +313,10 @@ public interface Evaluator {
         evaluationContext.importEntries(childContext);
       }
       return ioForChecker;
+    }
+
+    private static <R> EvaluationEntry.Type getType(Evaluable<R> checker) {
+      return resolveEvaluationEntryType(checker) == TRANSFORM_AND_CHECK ? TRANSFORM_AND_CHECK : CHECK;
     }
 
     @Override
@@ -348,11 +352,16 @@ public interface Evaluator {
     }
 
     private static <T, E extends Evaluable<T>, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(E evaluable, ValueHolder<T> input) {
-      return createChildEvaluableIoOf(evaluable, input, resolveEvaluationEntryType(evaluable));
+      return createChildEvaluableIoOf(resolveEvaluationEntryType(evaluable).formName(evaluable), evaluable, input);
     }
 
-    private static <T, E extends Evaluable<T>, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(E evaluable, ValueHolder<T> input, EvaluationEntry.Type evaluableType) {
-      return new EvaluableIo<>(input, evaluableType, evaluable);
+    private static <T, E extends Evaluable<T>, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(String formName, E evaluable, ValueHolder<T> input) {
+      EvaluationEntry.Type evaluableType = resolveEvaluationEntryType(evaluable);
+      return createChildEvaluableIoOf(evaluableType, formName, evaluable, input);
+    }
+
+    private static <T, E extends Evaluable<T>, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(EvaluationEntry.Type evaluableType, String formName, E evaluable, ValueHolder<T> input) {
+      return new EvaluableIo<>(input, evaluableType, formName, evaluable);
     }
   }
 

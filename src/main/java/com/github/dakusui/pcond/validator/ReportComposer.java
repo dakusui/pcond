@@ -67,7 +67,6 @@ public interface ReportComposer {
      * @return An explanation object.
      */
     static Explanation composeExplanation(String message, List<EvaluationEntry> evaluationHistory) {
-      evaluationHistory.forEach(each -> System.err.println(">" + each));
       List<Object> detailsForExpectation = new LinkedList<>();
       List<FormattedEntry> summaryDataForExpectations = squashTrivialEntries(evaluationHistory)
           .stream()
@@ -91,7 +90,7 @@ public interface ReportComposer {
       List<EvaluationEntry> ret = new LinkedList<>();
       List<EvaluationEntry> squashedItems = new LinkedList<>();
       for (EvaluationEntry each : evaluationHistory) {
-        if (each.ignored())
+        if (each.ignored() && !DebuggingUtils.reportIgnoredEntries())
           continue;
         if (squashedItems.isEmpty()) {
           if (each.isSquashable() && !suppressSquashing()) {
@@ -124,7 +123,7 @@ public interface ReportComposer {
     }
 
     private static boolean suppressSquashing() {
-      return DebuggingUtils.isDebugEnabled();
+      return DebuggingUtils.suppressSquashing();
     }
 
     private static String computeDetailOutputExpectationFromSquashedItems(List<EvaluationEntry> squashedItems) {
@@ -224,7 +223,7 @@ public interface ReportComposer {
           maxOutputLength = outputLength;
       }
       int formNameColumnLength = (formNameColumnLength = max(
-          DebuggingUtils.isDebugEnabled() ? 80: 12,
+          DebuggingUtils.showEvaluableDetail() ? 80 : 12,
           min(summarizedStringLength(), maxIndentAndFormNameLength))) + formNameColumnLength % 2;
       Function<FormattedEntry, String> formatter = formatterFactory.apply(
           new int[] { maxInputLength, formNameColumnLength, maxOutputLength });

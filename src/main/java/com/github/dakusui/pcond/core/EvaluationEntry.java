@@ -2,7 +2,8 @@ package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.core.ValueHolder.State;
 
-import static com.github.dakusui.pcond.core.DebuggingUtils.isDebugEnabled;
+import java.util.Objects;
+
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
 import static com.github.dakusui.pcond.core.Evaluator.Explainable.*;
@@ -213,11 +214,23 @@ public abstract class EvaluationEntry {
       String formName(Evaluable<?> evaluable) {
         return "transform";
       }
+
+      @Override
+      boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
+        if (Objects.equals(FUNCTION, nextEntry.evaluableIo().evaluableType()))
+          return !((Evaluable.Func<?>) nextEntry.evaluableIo().evaluable()).tail().isPresent();
+        return false;
+      }
     },
     CHECK {
       @Override
       String formName(Evaluable<?> evaluable) {
         return resolveEvaluationEntryType(evaluable).formName(evaluable);
+      }
+
+      @Override
+      boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
+        return asList(LEAF, NOT, AND, OR).contains(nextEntry.evaluableIo().evaluableType());
       }
     },
     AND {
@@ -237,6 +250,16 @@ public abstract class EvaluationEntry {
       String formName(Evaluable<?> evaluable) {
         return "not";
       }
+
+      @Override
+      boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
+        return Objects.equals(LEAF, nextEntry.evaluableIo().evaluableType());
+      }
+
+      @Override
+      Object outputValueForSquashedEntry(Object valueFromCurrentEntry, Object valueFromNextEntry) {
+        return valueFromNextEntry;
+      }
     },
     LEAF {
       @Override
@@ -247,16 +270,24 @@ public abstract class EvaluationEntry {
     FUNCTION {
       @Override
       String formName(Evaluable<?> evaluable) {
-        if (isDebugEnabled()) {
+        if (DebuggingUtils.showEvaluableDetail()) {
           if (!((Evaluable.Func<?>) evaluable).tail().isPresent())
             return ((Evaluable.Func<?>) evaluable).head().toString();
-          return ((Evaluable.Func<?>) evaluable).head().toString() + ":" + ((Evaluable.Func<?>) evaluable).tail().get();
+          return ((Evaluable.Func<?>) evaluable).head().toString() + "(" + ((Evaluable.Func<?>) evaluable).tail().get() + ")";
         }
         return ((Evaluable.Func<?>) evaluable).head().toString();
       }
     };
 
     abstract String formName(Evaluable<?> evaluable);
+
+    boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
+      return false;
+    }
+
+    Object outputValueForSquashedEntry(Object valueFromCurrentEntry, Object valueFromNextEntry) {
+      return valueFromCurrentEntry;
+    }
   }
 
   static class Finalized extends EvaluationEntry {
@@ -395,8 +426,12 @@ public abstract class EvaluationEntry {
     }
 
     public String formName() {
-      if (isDebugEnabled())
-        return evaluableIo.formName() + "(" + evaluableIo.evaluableType() + ":" + evaluableIo.input().creatorFormType() + ":" + evaluableIo.output().creatorFormType() + ")";
+      if (DebuggingUtils.showEvaluableDetail())
+        return evaluableIo.formName() + "(" +
+            evaluableIo.evaluableType() + ":" +
+            evaluableIo.input().creatorFormType() + ":" +
+            evaluableIo.output().creatorFormType() +
+            (this.ignored() ? ":ignored" : "") + ")";
       return this.evaluableIo.formName();
     }
 
@@ -405,8 +440,8 @@ public abstract class EvaluationEntry {
       this.outputActualValue = computeOutputActualValue(evaluableIo());
       this.detailOutputActualValue = explainActual(evaluableIo());
       this.ignored =
-          this.evaluableIo.evaluableType() == TRANSFORM_AND_CHECK ||
-          this.evaluableIo.evaluableType() == FUNCTION && this.evaluableIo.output().creatorFormType() == FUNC_TAIL;
+          (this.evaluableIo.evaluableType() == TRANSFORM_AND_CHECK && this.evaluableIo.formName().equals("transformAndCheck")) ||
+              (this.evaluableIo.evaluableType() == FUNCTION && this.evaluableIo.output().creatorFormType() == FUNC_TAIL);
       this.finalized = true;
     }
 

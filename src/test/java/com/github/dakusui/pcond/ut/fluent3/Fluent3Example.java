@@ -31,7 +31,7 @@ public class Fluent3Example {
               .isNull());
     }
 
-    @Test(expected = ComparisonFailure.class)
+    @Test//(expected = ComparisonFailure.class)
     public void thirdExample() {
       assertAll(
           stringValue("Hello")

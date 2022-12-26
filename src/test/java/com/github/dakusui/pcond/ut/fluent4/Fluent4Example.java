@@ -32,11 +32,12 @@ public class Fluent4Example {
 
     @Test//(expected = ComparisonFailure.class)
     public void test_b() {
-      assertStatement(stringTransformer("INPUT_VALUE")
-          .toLowerCase()
-          .parseBoolean()
-          .then()
-          .isTrue());
+      assertAll(
+          stringTransformer("INPUT_VALUE")
+              .toLowerCase()
+              .parseBoolean()
+              .then()
+              .isTrue());
     }
 
     @Test(expected = ComparisonFailure.class)

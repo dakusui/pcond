@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -452,6 +453,27 @@ public interface Validator {
   }
 
   interface Configuration {
+    /**
+     * When `com.github.dakusui.pcond.debug` is not `true`, the values
+     */
+    interface Debugging {
+      default boolean suppressSquashing() {
+        return true;
+      }
+
+      default boolean enableDebugLog() {
+        return false;
+      }
+
+      default boolean showEvaluableDetail() {
+        return true;
+      }
+
+      default boolean reportIgnoredEntries() {
+        return true;
+      }
+    }
+
     int summarizedStringLength();
 
     boolean useEvaluator();
@@ -480,7 +502,7 @@ public interface Validator {
      */
     ExceptionComposer exceptionComposer();
 
-    boolean isDebugModeEnabled();
+    Optional<Debugging> debugging();
 
     enum Utils {
       ;
@@ -596,6 +618,9 @@ public interface Validator {
 
       public Configuration build() {
         return new Configuration() {
+          private final Debugging debugging = new Debugging() {
+          };
+
           private final ExceptionComposer exceptionComposer = new ExceptionComposer.Impl(
               exceptionComposerForRequire,
               exceptionComposerForEnsure,
@@ -625,8 +650,11 @@ public interface Validator {
           }
 
           @Override
-          public boolean isDebugModeEnabled() {
-            return true;
+          public Optional<Debugging> debugging() {
+            if (Boolean.parseBoolean(System.getProperty("com.github.dakusui.pcond.debug"))) {
+              return Optional.of(this.debugging);
+            }
+            return Optional.empty();
           }
 
 
