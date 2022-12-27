@@ -25,7 +25,7 @@ public interface ReportComposer {
     return Explanation.fromMessage(msg);
   }
 
-  default Explanation composeExplanation(String message, List<EvaluationEntry> result, Throwable t) {
+  default Explanation composeExplanation(String message, List<EvaluationEntry> result) {
     return Utils.composeExplanation(message, result);
   }
 
@@ -73,22 +73,32 @@ public interface ReportComposer {
           .peek((EvaluationEntry each) -> addToDetailsListIfExplanationIsRequired(detailsForExpectation, each, each::detailOutputExpectation))
           .map(Utils::createFormattedEntryForExpectation)
           .collect(toList());
-      String textSummaryForExpectations = composeSummaryForExpectations(summaryDataForExpectations);
+      String textSummaryForExpectations = composeSummaryForExpectations(minimizeIndentation(summaryDataForExpectations));
       List<Object> detailsForActual = new LinkedList<>();
       List<FormattedEntry> summaryForActual = squashTrivialEntries(evaluationHistory)
           .stream()
           .peek((EvaluationEntry each) -> addToDetailsListIfExplanationIsRequired(detailsForActual, each, each::detailOutputActualValue))
           .map(Utils::createFormattedEntryForActualValue)
           .collect(toList());
-      String textSummaryForActualResult = composeSummaryForActualResults(summaryForActual);
+      String textSummaryForActualResult = composeSummaryForActualResults(minimizeIndentation(summaryForActual));
       return new Explanation(message,
           composeReport(textSummaryForExpectations, detailsForExpectation),
           composeReport(textSummaryForActualResult, detailsForActual));
     }
 
+    private static List<FormattedEntry> minimizeIndentation(List<FormattedEntry> summaryForActual) {
+      String minIndent = summaryForActual.stream()
+          .map(e -> e.indent)
+          .min(Comparator.comparingInt(String::length))
+          .orElse("");
+      return summaryForActual.stream()
+          .map(e -> new FormattedEntry(e.input, e.formName(), e.indent().replaceFirst(minIndent, ""), e.output, e.requiresExplanation()))
+          .collect(toList());
+    }
+
     private static List<EvaluationEntry> squashTrivialEntries(List<EvaluationEntry> evaluationHistory) {
       List<EvaluationEntry> ret = new LinkedList<>();
-      List<EvaluationEntry> squashedItems = new LinkedList<>();
+      List<EvaluationEntry> entriesToSquash = new LinkedList<>();
       EvaluationEntry each = null;
       for (EvaluationEntry cur : evaluationHistory) {
         if (each == null) {
@@ -98,37 +108,46 @@ public interface ReportComposer {
         try {
           if (each.ignored() && !DebuggingUtils.reportIgnoredEntries())
             continue;
-          if (squashedItems.isEmpty()) {
+          if (entriesToSquash.isEmpty()) {
             if (each.isSquashable(cur) && !suppressSquashing()) {
-              squashedItems.add(each);
+              entriesToSquash.add(each);
             } else {
               ret.add(each);
             }
           } else {
             if (each.isSquashable(cur)) {
-              squashedItems.add(each);
+              entriesToSquash.add(each);
             } else {
-              squashedItems.add(each);
-              EvaluationEntry first = squashedItems.get(0);
-              EvaluationEntry last = squashedItems.get(squashedItems.size() - 1);
-              ret.add(EvaluationEntry.create(
-                  squashedItems.stream().map(EvaluationEntry::formName).collect(joining(":")),
-                  first.type(),
-                  first.level(),
-                  first.inputExpectation(), first.detailInputExpectation(),
-                  first.outputExpectation(), computeDetailOutputExpectationFromSquashedItems(squashedItems),
-                  first.inputActualValue(), null,
-                  first.outputActualValue(), last.detailOutputActualValue(),
-                  false,
-                  squashedItems.stream().anyMatch(EvaluationEntry::requiresExplanation), false));
-              squashedItems.clear();
+              entriesToSquash.add(each);
+              ret.add(squashEntries(entriesToSquash));
+              entriesToSquash.clear();
             }
           }
         } finally {
           each = cur;
         }
       }
-      return ret.stream().filter(e -> !(e.inputActualValue() instanceof Fluents.DummyValue)).collect(toList());
+      return ret.stream()
+          .filter(e -> !(e.inputActualValue() instanceof Fluents.DummyValue))
+          .collect(toList());
+    }
+
+    private static EvaluationEntry squashEntries(List<EvaluationEntry> squashedItems) {
+      EvaluationEntry first = squashedItems.get(0);
+      return EvaluationEntry.create(
+          squashedItems.stream()
+              .map(e -> (EvaluationEntry.Impl) e)
+              .filter(e -> e.evaluableIo().evaluableType() != EvaluationEntry.Type.TRANSFORM)
+              .map(EvaluationEntry::formName)
+              .collect(joining(":")),
+          first.type(),
+          first.level(),
+          first.inputExpectation(), first.detailInputExpectation(),
+          first.outputExpectation(), computeDetailOutputExpectationFromSquashedItems(squashedItems),
+          first.inputActualValue(), null,
+          first.outputActualValue(), squashedItems.get(squashedItems.size() - 1).detailOutputActualValue(),
+          false,
+          squashedItems.stream().anyMatch(EvaluationEntry::requiresExplanation), false);
     }
 
     private static boolean suppressSquashing() {
@@ -136,7 +155,11 @@ public interface ReportComposer {
     }
 
     private static String computeDetailOutputExpectationFromSquashedItems(List<EvaluationEntry> squashedItems) {
-      return squashedItems.stream().map(EvaluationEntry::detailOutputExpectation).map(Objects::toString).collect(joining(":"));
+      return squashedItems.stream()
+          .filter(e -> e.type() != EvaluationEntry.Type.TRANSFORM)
+          .map(EvaluationEntry::detailOutputExpectation)
+          .map(Objects::toString)
+          .collect(joining(":"));
     }
 
     private static FormattedEntry createFormattedEntryForExpectation(EvaluationEntry each) {

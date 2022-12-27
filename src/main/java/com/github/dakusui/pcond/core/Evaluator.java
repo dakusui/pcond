@@ -268,16 +268,18 @@ public interface Evaluator {
         evaluableIo.evaluable().checker().accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
         return;
       }
-      evaluationContext.evaluate(
+      EvaluationContext<T> childContext = new EvaluationContext<>();
+      childContext.evaluate(
           evaluableIo,
           (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
             DebuggingUtils.printInput("TRANSFORMATION:BEFORE", evaluable, input);
-            EvaluableIo<T, Evaluable<T>, R> mapperIo = evaluateMapper(evaluable.mapperName().orElse("transform"), evaluable.mapper(), input, evaluationContext);
-            EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(evaluable.checkerName().orElse("check"), evaluable.checker(), mapperIo.output(), evaluationContext);
+            EvaluableIo<T, Evaluable<T>, R> mapperIo = evaluateMapper(evaluable.mapperName().orElse("transform"), evaluable.mapper(), input, childContext);
+            EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(evaluable.checkerName().orElse("check"), evaluable.checker(), mapperIo.output(), childContext);
             DebuggingUtils.printInputAndOutput(evaluable, input, checkerIo.output());
             return checkerIo.output();
           }
       );
+      evaluationContext.importEntries(childContext, 1);
     }
 
     private <T, R> EvaluableIo<T, Evaluable<T>, R> evaluateMapper(String mapperName, Evaluable<T> mapper, ValueHolder<T> input, EvaluationContext<T> evaluationContext) {
@@ -303,7 +305,7 @@ public interface Evaluator {
       {
         EvaluationContext<R> childContext = new EvaluationContext<>();
 
-        childContext.evaluate(getType(checker), checkerName, ioForChecker, io -> {
+        childContext.evaluate(CHECK, checkerName, ioForChecker, io -> {
           DebuggingUtils.printIo("CHECK:BEFORE", io);
           io.evaluable().accept(io, childContext, this);
           DebuggingUtils.printIo("CHECK:AFTER", io);
@@ -313,10 +315,6 @@ public interface Evaluator {
         evaluationContext.importEntries(childContext);
       }
       return ioForChecker;
-    }
-
-    private static <R> EvaluationEntry.Type getType(Evaluable<R> checker) {
-      return resolveEvaluationEntryType(checker) == TRANSFORM_AND_CHECK ? TRANSFORM_AND_CHECK : resolveEvaluationEntryType(checker);
     }
 
     @Override

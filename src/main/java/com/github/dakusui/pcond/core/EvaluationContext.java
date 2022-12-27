@@ -29,7 +29,7 @@ public class EvaluationContext<T> {
    * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
    */
   public <E extends Evaluable<T>, O> void evaluate(EvaluableIo<T, E, O> evaluableIo, BiFunction<E, ValueHolder<T>, ValueHolder<O>> evaluatorCallback) {
-    evaluate(evaluableIo.evaluableType(), evaluableIo, evaluatorCallback);
+    evaluate(resolveEvaluationEntryType(evaluableIo.evaluable()), evaluableIo, evaluatorCallback);
   }
 
   public <E extends Evaluable<T>, O> void evaluate(EvaluationEntry.Type type, EvaluableIo<T, E, O> evaluableIo, BiFunction<E, ValueHolder<T>, ValueHolder<O>> evaluatorCallback) {

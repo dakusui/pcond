@@ -412,8 +412,8 @@ public interface Validator {
                 .reportComposer()
                 .composeExplanation(
                     message,
-                    evaluationContext.resultEntries(),
-                    t),
+                    evaluationContext.resultEntries()
+                ),
             t);
       }
       if (evaluableIo.output().isValueReturned() && Objects.equals(true, evaluableIo.output().value()))
@@ -423,16 +423,16 @@ public interface Validator {
           .reportComposer()
           .composeExplanation(
               messageComposerFunction.apply(value, cond),
-              entries,
-              null));
+              entries
+          ));
     } else {
       if (!cond.test(valueHolder.returnedValue()))
         throw exceptionComposerFunction.create(configuration()
             .reportComposer()
             .composeExplanation(
                 messageComposerFunction.apply(value, cond),
-                emptyList(),
-                null));
+                emptyList()
+            ));
       return value;
     }
   }

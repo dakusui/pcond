@@ -1,8 +1,12 @@
 package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.core.ValueHolder.State;
+import com.github.dakusui.pcond.validator.Validator;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
@@ -13,6 +17,7 @@ import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_TAI
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A class to hold an entry of execution history of the {@link Evaluator}.
@@ -100,13 +105,66 @@ public abstract class EvaluationEntry {
     this.squashable = squashable;
   }
 
+  public String formName() {
+    return formName;
+  }
+
+  public Type type() {
+    return this.type;
+  }
+
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+  public boolean isSquashable(EvaluationEntry nextEntry) {
+    return this.squashable;
+  }
+
+  public abstract boolean requiresExplanation();
+
+  public int level() {
+    return level;
+  }
+
+
+  public Object inputExpectation() {
+    return this.inputExpectation;
+  }
+
+  public Object detailInputExpectation() {
+    return this.detailInputExpectation;
+  }
+
+  public Object outputExpectation() {
+    return this.outputExpectation;
+  }
+
+  public Object detailOutputExpectation() {
+    return this.detailOutputExpectation;
+  }
+
+  public Object inputActualValue() {
+    return this.inputActualValue;
+  }
+
+
+  public abstract Object outputActualValue();
+
+  public abstract Object detailOutputActualValue();
+
+  public abstract boolean ignored();
+
+  @Override
+  public String toString() {
+    return String.format("%s(%s)", formName(), inputActualValue());
+  }
+
   static String composeDetailOutputActualValueFromInputAndThrowable(Object input, Throwable throwable) {
     StringBuilder b = new StringBuilder();
     b.append("Input: '").append(input).append("'").append(format("%n"));
     b.append("Input Type: ").append(input == null ? "(null)" : input.getClass().getName()).append(format("%n"));
     b.append("Thrown Exception: '").append(throwable.getClass().getName()).append("'").append(format("%n"));
     b.append("Exception Message: ").append(throwable.getMessage()).append(format("%n"));
-    for (StackTraceElement each : throwable.getStackTrace()) {
+
+    for (StackTraceElement each : foldInternalPackageElements(throwable)) {
       b.append("\t");
       b.append(each);
       b.append(format("%n"));
@@ -145,61 +203,37 @@ public abstract class EvaluationEntry {
             evaluableIo.evaluableType() == LEAF && returnedValueOrVoidIfSkipped(expectationFlipped, evaluableIo.output())));
   }
 
+  private static List<StackTraceElement> foldInternalPackageElements(Throwable throwable) {
+    AtomicReference<StackTraceElement> firstInternalStackElement = new AtomicReference<>();
+    String lastPackageNameElementPattern = "\\.[a-zA-Z0-9_.]+$";
+    String internalPackageName = Validator.class.getPackage().getName()
+        .replaceFirst(lastPackageNameElementPattern, "")
+        .replaceFirst(lastPackageNameElementPattern, "");
+    return Arrays.stream(throwable.getStackTrace())
+        .filter(e -> {
+          if (e.getClassName().startsWith(internalPackageName)) {
+            if (firstInternalStackElement.get() == null) {
+              firstInternalStackElement.set(e);
+              return true;
+            }
+            return false;
+          }
+          firstInternalStackElement.set(null);
+          return true;
+        })
+        .map(e -> {
+          if (e.getClassName().startsWith(internalPackageName)) {
+            return new StackTraceElement("...internal.InternalClass", "internalMethod", "Internal.java", 0);
+          }
+          return e;
+        })
+        .collect(toList());
+  }
+
   private static boolean returnedValueOrVoidIfSkipped(boolean expectationFlipped, ValueHolder<?> output) {
     if (output.state() == State.EVALUATION_SKIPPED)
       return false;
     return expectationFlipped ^ !(Boolean) output.returnedValue();
-  }
-
-  public String formName() {
-    return formName;
-  }
-
-  public Type type() {
-    return this.type;
-  }
-
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  public boolean isSquashable(EvaluationEntry nextEntry) {
-    return this.squashable;
-  }
-
-  public abstract boolean requiresExplanation();
-
-  public int level() {
-    return level;
-  }
-
-  public Object inputExpectation() {
-    return this.inputExpectation;
-  }
-
-  public Object detailInputExpectation() {
-    return this.detailInputExpectation;
-  }
-
-  public Object outputExpectation() {
-    return this.outputExpectation;
-  }
-
-  public Object detailOutputExpectation() {
-    return this.detailOutputExpectation;
-  }
-
-  public Object inputActualValue() {
-    return this.inputActualValue;
-  }
-
-
-  public abstract Object outputActualValue();
-
-  public abstract Object detailOutputActualValue();
-
-  public abstract boolean ignored();
-
-  @Override
-  public String toString() {
-    return String.format("%s(%s)", formName(), inputActualValue());
   }
 
   public enum Type {
@@ -230,7 +264,7 @@ public abstract class EvaluationEntry {
 
       @Override
       boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
-        return asList(LEAF, NOT, AND, OR).contains(nextEntry.evaluableIo().evaluableType());
+        return asList(LEAF, NOT, AND, OR, TRANSFORM_AND_CHECK).contains(nextEntry.evaluableIo().evaluableType());
       }
     },
     AND {
