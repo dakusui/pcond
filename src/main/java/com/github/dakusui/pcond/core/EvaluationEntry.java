@@ -264,7 +264,7 @@ public abstract class EvaluationEntry {
 
       @Override
       boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
-        return asList(LEAF, NOT, AND, OR, TRANSFORM_AND_CHECK).contains(nextEntry.evaluableIo().evaluableType());
+        return asList(LEAF, NOT, AND, OR, TRANSFORM).contains(nextEntry.evaluableIo().evaluableType());
       }
     },
     AND {

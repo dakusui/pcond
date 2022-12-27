@@ -101,13 +101,13 @@ public interface ReportComposer {
       List<EvaluationEntry> entriesToSquash = new LinkedList<>();
       EvaluationEntry each = null;
       for (EvaluationEntry cur : evaluationHistory) {
+        if (cur.ignored() && !DebuggingUtils.reportIgnoredEntries())
+          continue;
         if (each == null) {
           each = cur;
           continue;
         }
         try {
-          if (each.ignored() && !DebuggingUtils.reportIgnoredEntries())
-            continue;
           if (entriesToSquash.isEmpty()) {
             if (each.isSquashable(cur) && !suppressSquashing()) {
               entriesToSquash.add(each);
