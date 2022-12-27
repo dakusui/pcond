@@ -43,6 +43,7 @@ abstract class CustomTransformer<
     return new ObjectChecker.Impl<>(this::value, transformFunction);
   }
 
+  @SuppressWarnings("unchecked")
   public TX transform(Function<TX, Predicate<T>> clause) {
     requireNonNull(clause);
     return this.addTransformAndCheckClause(tx -> clause.apply((TX) tx));

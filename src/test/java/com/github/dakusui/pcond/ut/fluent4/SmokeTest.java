@@ -1,5 +1,7 @@
 package com.github.dakusui.pcond.ut.fluent4;
 
+import com.github.dakusui.pcond.core.fluent.builtins.StringTransformer;
+import com.github.dakusui.pcond.ut.fluent4.Fluent4Example.OnGoing.BookTransformer;
 import com.github.dakusui.shared.ReportParser;
 import com.github.dakusui.shared.utils.TestBase;
 import com.github.dakusui.shared.utils.TestUtils;
@@ -179,16 +181,16 @@ public class SmokeTest extends TestBase {
   private static void performSmoke(Fluent4Example.OnGoing.Book book) {
     assertAll(
         stringValue("hello").length().then().greaterThan(1),
-        new Fluent4Example.OnGoing.BookTransformer(book)
-            .transform(b -> b.title()
-                .transform(ty -> ty.then().isNotNull().done())
-                .transform(ty -> ty.parseInt().then()
+        new BookTransformer(book)
+            .transform((BookTransformer b) -> b.title()
+                .transform((StringTransformer<String> ty) -> ty.then().isNotNull().done())
+                .transform((StringTransformer<String> ty) -> ty.parseInt().then()
                     .greaterThanOrEqualTo(10)
                     .lessThan(40)
                     .done()).done())
-            .transform(b -> b.abstractText()
-                .transform(ty -> ty.then().checkWithPredicate(isNull().negate()).done())
-                .transform(ty -> ty.length().then()
+            .transform((BookTransformer b) -> b.abstractText()
+                .transform((StringTransformer<String> ty) -> ty.then().checkWithPredicate(isNull().negate()).done())
+                .transform((StringTransformer<String> ty) -> ty.length().then()
                     .greaterThanOrEqualTo(200)
                     .lessThan(400)
                     .done()).done()));
