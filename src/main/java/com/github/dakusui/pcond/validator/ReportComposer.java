@@ -156,7 +156,7 @@ public interface ReportComposer {
 
     private static String computeDetailOutputExpectationFromSquashedItems(List<EvaluationEntry> squashedItems) {
       return squashedItems.stream()
-          .filter(e -> e.type() != EvaluationEntry.Type.TRANSFORM)
+          .filter(e -> e.type() != EvaluationEntry.Type.TRANSFORM && e.type() != EvaluationEntry.Type.CHECK)
           .map(EvaluationEntry::detailOutputExpectation)
           .map(Objects::toString)
           .collect(joining(":"));
