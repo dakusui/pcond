@@ -136,7 +136,12 @@ public interface ReportComposer {
     }
 
     private static String computeDetailOutputExpectationFromSquashedItems(List<EvaluationEntry> squashedItems) {
-      return squashedItems.stream().map(EvaluationEntry::detailOutputExpectation).map(Objects::toString).collect(joining(":"));
+      return squashedItems
+          .stream()
+          .map(EvaluationEntry::detailOutputExpectation)
+          .map(Objects::toString)
+          .findFirst()
+          .orElseThrow(() -> new AssertionError("There should be at least one squashed items."));
     }
 
     private static FormattedEntry createFormattedEntryForExpectation(EvaluationEntry each) {

@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.core;
 
 import com.github.dakusui.pcond.core.context.VariableBundle;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -9,9 +10,9 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
-import static com.github.dakusui.pcond.core.EvaluationEntry.Type.TRANSFORM;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
-import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.*;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_HEAD;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_TAIL;
 import static com.github.dakusui.pcond.core.ValueHolder.State.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
@@ -130,6 +131,7 @@ public interface Evaluator {
           (Evaluable.Conjunction<T> evaluable, ValueHolder<T> input) -> {
             ValueHolder<Boolean> ret = ValueHolder.create();
             boolean result = true;
+            ValueHolder<Boolean> retSkipped = null;
             for (Evaluable<T> each : evaluable.children()) {
               EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(each, input);
               each.accept(child, evaluationContext, this);
@@ -137,16 +139,18 @@ public interface Evaluator {
               if (outputFromEach.isValueReturned()) {
                 result &= outputFromEach.returnedValue();
                 ret = ValueHolder.forValue(result);
-              } else if (child.output().isExceptionThrown())
+              } else if (child.output().isExceptionThrown()) {
                 ret = ValueHolder.<Boolean>create().evaluationSkipped();
-              else if (child.output().isEvaluationSkipped())
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else if (child.output().isEvaluationSkipped()) {
                 ret = ValueHolder.<Boolean>create().evaluationSkipped();
-              else
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else
                 assert false;
               if (evaluable.shortcut() && (ret.isEvaluationSkipped() || !result))
                 break;
             }
-            return ret;
+            return retSkipped != null ? retSkipped : ret;
           });
     }
 
@@ -157,6 +161,7 @@ public interface Evaluator {
           (Evaluable.Disjunction<T> evaluable, ValueHolder<T> input) -> {
             ValueHolder<Boolean> ret = ValueHolder.create();
             boolean result = false;
+            ValueHolder<Boolean> retSkipped = null;
             for (Evaluable<T> each : evaluable.children()) {
               EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(each, input);
               each.accept(child, evaluationContext, this);
@@ -164,16 +169,18 @@ public interface Evaluator {
               if (outputFromEach.isValueReturned()) {
                 result |= outputFromEach.returnedValue();
                 ret = ValueHolder.forValue(result);
-              } else if (outputFromEach.isExceptionThrown())
+              } else if (outputFromEach.isExceptionThrown()) {
                 ret = ValueHolder.<Boolean>create().evaluationSkipped();
-              else if (outputFromEach.isEvaluationSkipped())
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else if (outputFromEach.isEvaluationSkipped()) {
                 ret = ValueHolder.<Boolean>create().evaluationSkipped();
-              else
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else
                 assert false;
               if (evaluable.shortcut() && (ret.isEvaluationSkipped() || result))
                 break;
             }
-            return ret;
+            return retSkipped != null ? retSkipped : ret;
           });
     }
 
@@ -235,7 +242,7 @@ public interface Evaluator {
                   tmp = tmp.evaluationSkipped();
                 return tmp.creatorFormType(FUNC_HEAD);
               });
-              evaluationContext.importEntries(childContext, 1);
+              evaluationContext.importEntries(childContext, 0);
               ret = (ValueHolder<R>) ioForHead.output().creatorFormType(FUNC_TAIL);
             }
             ValueHolder<Object> finalRet = (ValueHolder<Object>) ret;
@@ -268,16 +275,22 @@ public interface Evaluator {
         evaluableIo.evaluable().checker().accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
         return;
       }
-      evaluationContext.evaluate(
+      extracted(evaluableIo, evaluationContext, (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
+        DebuggingUtils.printInput("TRANSFORMATION:BEFORE", evaluable, input);
+        EvaluableIo<T, Evaluable<T>, R> mapperIo = evaluateMapper(evaluable.mapperName().orElse("transform"), evaluable.mapper(), input, evaluationContext);
+        EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(evaluable.checkerName().orElse("check"), evaluable.checker(), mapperIo.output(), evaluationContext);
+        DebuggingUtils.printInputAndOutput(evaluable, input, checkerIo.output());
+        return checkerIo.output();
+      });
+    }
+
+    private <T, R> void extracted(EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext, BiFunction<Evaluable.Transformation<T, R>, ValueHolder<T>, ValueHolder<Boolean>> transformationValueHolderValueHolderBiFunction) {
+      EvaluationContext<T> childContext = new EvaluationContext<>();
+      childContext.evaluate(
           evaluableIo,
-          (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
-            DebuggingUtils.printInput("TRANSFORMATION:BEFORE", evaluable, input);
-            EvaluableIo<T, Evaluable<T>, R> mapperIo = evaluateMapper(evaluable.mapperName().orElse("transform"), evaluable.mapper(), input, evaluationContext);
-            EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(evaluable.checkerName().orElse("check"), evaluable.checker(), mapperIo.output(), evaluationContext);
-            DebuggingUtils.printInputAndOutput(evaluable, input, checkerIo.output());
-            return checkerIo.output();
-          }
+          transformationValueHolderValueHolderBiFunction
       );
+      evaluationContext.importEntries(childContext, 0);
     }
 
     private <T, R> EvaluableIo<T, Evaluable<T>, R> evaluateMapper(String mapperName, Evaluable<T> mapper, ValueHolder<T> input, EvaluationContext<T> evaluationContext) {
@@ -399,7 +412,7 @@ public interface Evaluator {
 
     Object explainActual(Object actualValue);
 
-    static Object explainOutputExpectation(Object evaluable, EvaluableIo<? , ?, ?> evaluableIo) {
+    static Object explainOutputExpectation(Object evaluable, EvaluableIo<?, ?, ?> evaluableIo) {
       if (evaluable instanceof Explainable)
         return explainValue(((Explainable) evaluable).explainOutputExpectation());
       if (evaluable instanceof Evaluable)
