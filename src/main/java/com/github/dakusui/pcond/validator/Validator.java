@@ -472,6 +472,10 @@ public interface Validator {
       default boolean reportIgnoredEntries() {
         return true;
       }
+
+      default boolean passThroughComparisonFailure() {
+        return true;
+      }
     }
 
     int summarizedStringLength();

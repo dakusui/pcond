@@ -47,4 +47,8 @@ public enum DebuggingUtils {
   public static boolean reportIgnoredEntries() {
     return Validator.INSTANCE.configuration().debugging().map(Validator.Configuration.Debugging::reportIgnoredEntries).orElse(false);
   }
+
+  public static boolean passThroughComparisonFailure() {
+    return Validator.INSTANCE.configuration().debugging().map(Validator.Configuration.Debugging::passThroughComparisonFailure).orElse(false);
+  }
 }

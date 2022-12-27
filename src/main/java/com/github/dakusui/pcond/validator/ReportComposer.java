@@ -89,37 +89,46 @@ public interface ReportComposer {
     private static List<EvaluationEntry> squashTrivialEntries(List<EvaluationEntry> evaluationHistory) {
       List<EvaluationEntry> ret = new LinkedList<>();
       List<EvaluationEntry> squashedItems = new LinkedList<>();
-      for (EvaluationEntry each : evaluationHistory) {
-        if (each.ignored() && !DebuggingUtils.reportIgnoredEntries())
+      EvaluationEntry each = null;
+      for (EvaluationEntry cur : evaluationHistory) {
+        if (each == null) {
+          each = cur;
           continue;
-        if (squashedItems.isEmpty()) {
-          if (each.isSquashable() && !suppressSquashing()) {
-            squashedItems.add(each);
+        }
+        try {
+          if (each.ignored() && !DebuggingUtils.reportIgnoredEntries())
+            continue;
+          if (squashedItems.isEmpty()) {
+            if (each.isSquashable(cur) && !suppressSquashing()) {
+              squashedItems.add(each);
+            } else {
+              ret.add(each);
+            }
           } else {
-            ret.add(each);
+            if (each.isSquashable(cur)) {
+              squashedItems.add(each);
+            } else {
+              squashedItems.add(each);
+              EvaluationEntry first = squashedItems.get(0);
+              EvaluationEntry last = squashedItems.get(squashedItems.size() - 1);
+              ret.add(EvaluationEntry.create(
+                  squashedItems.stream().map(EvaluationEntry::formName).collect(joining(":")),
+                  first.type(),
+                  first.level(),
+                  first.inputExpectation(), first.detailInputExpectation(),
+                  first.outputExpectation(), computeDetailOutputExpectationFromSquashedItems(squashedItems),
+                  first.inputActualValue(), null,
+                  first.outputActualValue(), last.detailOutputActualValue(),
+                  false,
+                  squashedItems.stream().anyMatch(EvaluationEntry::requiresExplanation), false));
+              squashedItems.clear();
+            }
           }
-        } else {
-          if (each.isSquashable()) {
-            squashedItems.add(each);
-          } else {
-            squashedItems.add(each);
-            EvaluationEntry first = squashedItems.get(0);
-            EvaluationEntry last = squashedItems.get(squashedItems.size() - 1);
-            ret.add(EvaluationEntry.create(
-                squashedItems.stream().map(EvaluationEntry::formName).collect(joining(":")),
-                first.type(),
-                first.level(),
-                first.inputExpectation(), first.detailInputExpectation(),
-                first.outputExpectation(), computeDetailOutputExpectationFromSquashedItems(squashedItems),
-                first.inputActualValue(), null,
-                first.outputActualValue(), last.detailOutputActualValue(),
-                false,
-                squashedItems.stream().anyMatch(EvaluationEntry::requiresExplanation), false));
-            squashedItems.clear();
-          }
+        } finally {
+          each = cur;
         }
       }
-      return ret.stream().filter(each -> !(each.inputActualValue() instanceof Fluents.DummyValue)).collect(toList());
+      return ret.stream().filter(e -> !(e.inputActualValue() instanceof Fluents.DummyValue)).collect(toList());
     }
 
     private static boolean suppressSquashing() {

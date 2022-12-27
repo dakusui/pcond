@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.propertybased;
 
+import com.github.dakusui.pcond.core.DebuggingUtils;
 import org.junit.ComparisonFailure;
 
 import java.lang.reflect.Method;
@@ -42,7 +43,7 @@ enum TestCaseUtils {
       assertThat(value = testCase.targetValue(), testCase.targetPredicate());
       examineReturnedValue(testCase, value);
     } catch (Throwable t) {
-      if (Boolean.parseBoolean(System.getProperty("pcond.ut.dontCatchComparisonFailure")) && t instanceof ComparisonFailure) {
+      if (DebuggingUtils.passThroughComparisonFailure() && t instanceof ComparisonFailure) {
         throw t;
       }
       examineThrownException(testCase, t);

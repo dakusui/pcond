@@ -160,7 +160,7 @@ public abstract class EvaluationEntry {
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  public boolean isSquashable() {
+  public boolean isSquashable(EvaluationEntry nextEntry) {
     return this.squashable;
   }
 
@@ -423,6 +423,12 @@ public abstract class EvaluationEntry {
     public boolean ignored() {
       assert finalized;
       return this.ignored;
+    }
+
+    public boolean isSquashable(EvaluationEntry nextEntry) {
+      if (nextEntry instanceof EvaluationEntry.Impl)
+        return this.type().isSquashableWith((Impl) nextEntry);
+      return false;
     }
 
     public String formName() {

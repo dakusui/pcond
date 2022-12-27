@@ -316,7 +316,7 @@ public interface Evaluator {
     }
 
     private static <R> EvaluationEntry.Type getType(Evaluable<R> checker) {
-      return resolveEvaluationEntryType(checker) == TRANSFORM_AND_CHECK ? TRANSFORM_AND_CHECK : CHECK;
+      return resolveEvaluationEntryType(checker) == TRANSFORM_AND_CHECK ? TRANSFORM_AND_CHECK : resolveEvaluationEntryType(checker);
     }
 
     @Override
