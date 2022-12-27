@@ -9,9 +9,9 @@ import java.util.stream.Stream;
 import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
 import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
 import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
-import static com.github.dakusui.pcond.core.EvaluationEntry.Type.TRANSFORM;
 import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
-import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.*;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_HEAD;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_TAIL;
 import static com.github.dakusui.pcond.core.ValueHolder.State.*;
 import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
 import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
@@ -130,6 +130,7 @@ public interface Evaluator {
           (Evaluable.Conjunction<T> evaluable, ValueHolder<T> input) -> {
             ValueHolder<Boolean> ret = ValueHolder.create();
             boolean result = true;
+            ValueHolder<Boolean> retSkipped = null;
             for (Evaluable<T> each : evaluable.children()) {
               EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(each, input);
               each.accept(child, evaluationContext, this);
@@ -137,16 +138,18 @@ public interface Evaluator {
               if (outputFromEach.isValueReturned()) {
                 result &= outputFromEach.returnedValue();
                 ret = ValueHolder.forValue(result);
-              } else if (child.output().isExceptionThrown())
+              } else if (child.output().isExceptionThrown()) {
                 ret = ValueHolder.<Boolean>create().evaluationSkipped();
-              else if (child.output().isEvaluationSkipped())
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else if (child.output().isEvaluationSkipped()) {
                 ret = ValueHolder.<Boolean>create().evaluationSkipped();
-              else
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else
                 assert false;
               if (evaluable.shortcut() && (ret.isEvaluationSkipped() || !result))
                 break;
             }
-            return ret;
+            return retSkipped != null ? retSkipped : ret;
           });
     }
 
@@ -157,6 +160,7 @@ public interface Evaluator {
           (Evaluable.Disjunction<T> evaluable, ValueHolder<T> input) -> {
             ValueHolder<Boolean> ret = ValueHolder.create();
             boolean result = false;
+            ValueHolder<Boolean> retSkipped = null;
             for (Evaluable<T> each : evaluable.children()) {
               EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(each, input);
               each.accept(child, evaluationContext, this);
@@ -164,16 +168,18 @@ public interface Evaluator {
               if (outputFromEach.isValueReturned()) {
                 result |= outputFromEach.returnedValue();
                 ret = ValueHolder.forValue(result);
-              } else if (outputFromEach.isExceptionThrown())
+              } else if (outputFromEach.isExceptionThrown()) {
                 ret = ValueHolder.<Boolean>create().evaluationSkipped();
-              else if (outputFromEach.isEvaluationSkipped())
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else if (outputFromEach.isEvaluationSkipped()) {
                 ret = ValueHolder.<Boolean>create().evaluationSkipped();
-              else
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else
                 assert false;
               if (evaluable.shortcut() && (ret.isEvaluationSkipped() || result))
                 break;
             }
-            return ret;
+            return retSkipped != null ? retSkipped : ret;
           });
     }
 
@@ -397,7 +403,7 @@ public interface Evaluator {
 
     Object explainActual(Object actualValue);
 
-    static Object explainOutputExpectation(Object evaluable, EvaluableIo<? , ?, ?> evaluableIo) {
+    static Object explainOutputExpectation(Object evaluable, EvaluableIo<?, ?, ?> evaluableIo) {
       if (evaluable instanceof Explainable)
         return explainValue(((Explainable) evaluable).explainOutputExpectation());
       if (evaluable instanceof Evaluable)
