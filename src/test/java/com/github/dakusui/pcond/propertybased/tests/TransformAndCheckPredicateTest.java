@@ -11,9 +11,9 @@ import org.junit.runners.Parameterized.Parameters;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
+import static com.github.dakusui.pcond.forms.Predicates.transform;
 import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.equalsPredicate;
-import static com.github.dakusui.pcond.propertybased.utils.TransformingPredicateForPcondUT.numberOfActualSummariesIsEqualTo;
-import static com.github.dakusui.pcond.propertybased.utils.TransformingPredicateForPcondUT.numberOfExpectAndActualSummariesAreEqual;
+import static com.github.dakusui.pcond.propertybased.utils.TransformingPredicateForPcondUT.*;
 import static com.github.dakusui.shared.utils.TestUtils.toLowerCase;
 import static com.github.dakusui.shared.utils.TestUtils.toUpperCase;
 
@@ -30,33 +30,33 @@ public class TransformAndCheckPredicateTest extends PropertyBasedTestBase {
   }
 
   @TestCaseParameter
-  public static TestCase<String, ComparisonFailure> givenTwoChainedTransformingPredicates_whenNonExpectedValue_thenComparisonFailure() {
+  public static TestCase<String, ComparisonFailure> givenChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
     return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("HELLO")
-        .predicate(
-            allOf(
-                Predicates.transform(toUpperCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)),
-                Predicates.transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6))))
+        .predicate(transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)))
         .expectedExceptionClass(ComparisonFailure.class)
         .addExpectationPredicate(numberOfExpectAndActualSummariesAreEqual())
-        .addExpectationPredicate(numberOfActualSummariesIsEqualTo(9))
-        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfExpectAndActualSummariesWithDetailsAreEqual())
-        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfExpectSummariesWithDetailsIsEqualTo(2))
+        .addExpectationPredicate(numberOfActualSummariesIsEqualTo(4))
+        .addExpectationPredicate(numberOfExpectAndActualSummariesWithDetailsAreEqual())
+        .addExpectationPredicate(numberOfExpectSummariesWithDetailsIsEqualTo(1))
         .build();
   }
 
   @TestCaseParameter
-  public static TestCase<String, Throwable> givenDoubleChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
-    return new TestCase.Builder.ForReturnedValue<>(
-        "HELLO",
-        Predicates.transform(toUpperCase().andThen(toLowerCase()).andThen(Functions.length())).check(Predicates.isEqualTo(6)), String.class)
-        .addExpectationPredicate(equalsPredicate("hello"))
+  public static TestCase<String, ComparisonFailure> givenDoubleChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
+    return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("HELLO")
+        .predicate(transform(toUpperCase().andThen(toLowerCase()).andThen(Functions.length())).check(Predicates.isEqualTo(6)))
+        .expectedExceptionClass(ComparisonFailure.class)
+        .addExpectationPredicate(numberOfExpectAndActualSummariesAreEqual())
+        .addExpectationPredicate(numberOfActualSummariesIsEqualTo(5))
+        .addExpectationPredicate(numberOfExpectAndActualSummariesWithDetailsAreEqual())
+        .addExpectationPredicate(numberOfExpectSummariesWithDetailsIsEqualTo(1))
         .build();
   }
 
   @SuppressWarnings("unchecked")
   @TestCaseParameter
   public static TestCase<String, Throwable> givenTransformingPredicate_whenExpectedValue_thenValueReturned() {
-    return new TestCase.Builder.ForReturnedValue<>("hello", (Predicate<String>) Predicates.transform(Functions.length()).check(Predicates.isEqualTo(5)), String.class)
+    return new TestCase.Builder.ForReturnedValue<>("hello", (Predicate<String>) transform(Functions.length()).check(Predicates.isEqualTo(5)), String.class)
         .addExpectationPredicate(equalsPredicate("hello"))
         .build();
   }
@@ -65,24 +65,27 @@ public class TransformAndCheckPredicateTest extends PropertyBasedTestBase {
   @TestCaseParameter
   public static TestCase<String, ComparisonFailure> givenTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
     return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("hello")
-        .predicate((Predicate<String>) Predicates.transform(Functions.length()).check(Predicates.isEqualTo(6)))
+        .predicate((Predicate<String>) transform(Functions.length()).check(Predicates.isEqualTo(6)))
         .expectedExceptionClass(ComparisonFailure.class)
         .addExpectationPredicate(numberOfExpectAndActualSummariesAreEqual())
-        .addExpectationPredicate(numberOfActualSummariesIsEqualTo(9))
-        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfExpectAndActualSummariesWithDetailsAreEqual())
-        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfExpectSummariesWithDetailsIsEqualTo(2))
+        .addExpectationPredicate(numberOfActualSummariesIsEqualTo(2))
+        .addExpectationPredicate(numberOfExpectAndActualSummariesWithDetailsAreEqual())
+        .addExpectationPredicate(numberOfExpectSummariesWithDetailsIsEqualTo(1))
         .build();
   }
 
   @TestCaseParameter
-  public static TestCase<String, ComparisonFailure> givenChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
+  public static TestCase<String, ComparisonFailure> givenTwoChainedTransformingPredicates_whenNonExpectedValue_thenComparisonFailure() {
     return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("HELLO")
-        .predicate(Predicates.transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)))
+        .predicate(
+            allOf(
+                transform(toUpperCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)),
+                transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6))))
         .expectedExceptionClass(ComparisonFailure.class)
         .addExpectationPredicate(numberOfExpectAndActualSummariesAreEqual())
         .addExpectationPredicate(numberOfActualSummariesIsEqualTo(9))
-        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfExpectAndActualSummariesWithDetailsAreEqual())
-        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfExpectSummariesWithDetailsIsEqualTo(2))
+        .addExpectationPredicate(numberOfExpectAndActualSummariesWithDetailsAreEqual())
+        .addExpectationPredicate(numberOfExpectSummariesWithDetailsIsEqualTo(2))
         .build();
   }
 }

@@ -1,8 +1,6 @@
 package com.github.dakusui.pcond.propertybased.utils;
 
-import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.ReportParser;
-import com.github.dakusui.shared.utils.TestUtils;
 import org.junit.ComparisonFailure;
 
 import java.util.List;
@@ -42,12 +40,14 @@ public class TransformingPredicateForPcondUT<T, R> {
         equalsPredicate(numberOfExpectedSummaryRecordsForActual));
   }
 
-  public static Predicate<ComparisonFailure> numberOfExpectAndActualSummariesWithDetailsAreEqual() {
-    return Printables.predicate("numberOfExpectAndActualSummariesWithDetailsAreEqual", comparisonFailure -> {
-      List<ReportParser.Summary.Record> expectationSummariesWithDetails = TestUtils.summariesWithDetailsOf(comparisonFailure.getExpected());
-      List<ReportParser.Summary.Record> actualValueSummariesWithDetails = TestUtils.summariesWithDetailsOf(comparisonFailure.getActual());
-      return expectationSummariesWithDetails.size() == actualValueSummariesWithDetails.size();
-    });
+  public static TransformingPredicateForPcondUT<ComparisonFailure, List<Long>> numberOfExpectAndActualSummariesWithDetailsAreEqual() {
+    return new TransformingPredicateForPcondUT<>(
+        makePrintableFunction("numberOfExpectAndActualSummariesWithDetailsAreEqual",
+            e -> asList(
+                new ReportParser(e.getActual()).summary().records().stream().filter(s -> s.detailIndex().isPresent()).count(),
+                new ReportParser(e.getExpected()).summary().records().stream().filter(s -> s. detailIndex().isPresent()).count())),
+        makePrintablePredicate("bothAreEqual", e -> Objects.equals(e.get(0), e.get(1)))
+    );
   }
 
   public static TransformingPredicateForPcondUT<ComparisonFailure, Long> numberOfExpectSummariesWithDetailsIsEqualTo(long numberOfSummariesWithDetails) {

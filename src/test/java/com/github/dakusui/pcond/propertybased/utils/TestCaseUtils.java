@@ -85,7 +85,7 @@ public enum TestCaseUtils {
           throw new AssertionError(format("Thrown exception: <" + formatObject(t) + "> did not satisfy some of following conditions:%n" +
               testresuls.stream()
                   .map((CheckResult each) ->
-                      format("%-2s (%s).%s->(%s).%s", each.passed ? "" : "NG", formatObject(t), each.testDef.transform, formatObject(each.transformOutput), each.testDef.check))
+                      format("%-2s %s(%s(%s)->(%s))", each.passed ? "" : "NG", each.testDef.check, each.testDef.transform, formatObject(t, 16), formatObject(each.transformOutput)))
                   .collect(joining("%n- ", "----%n- ", "%n----"))) + String.format("%n%nTHROWN EXCEPTION DETAIL:%n") + formatException(t));
         }
       } else
