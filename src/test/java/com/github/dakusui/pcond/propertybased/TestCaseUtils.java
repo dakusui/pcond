@@ -68,7 +68,7 @@ enum TestCaseUtils {
         if (!errors.isEmpty()) {
           throw new AssertionError(String.format("Thrown exception: <" + t + "> did not satisfy following conditions:%n" +
               errors.stream()
-                  .map(each -> String.format("%s", each))
+                  .map((Predicate<E> each) -> String.format("%s", each))
                   .collect(joining("%n", "- ", ""))));
         }
       } else

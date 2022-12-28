@@ -10,7 +10,9 @@ public enum ReportCheckUtils {
   ;
 
   static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualIsEqualTo(@SuppressWarnings("SameParameterValue") int numberOfExpectedSummaryRecordsForActual) {
-    return makePrintable("# of records (actual) = " + numberOfExpectedSummaryRecordsForActual, e -> Objects.equals(numberOfExpectedSummaryRecordsForActual, new ReportParser(e.getActual()).summary().records().size()));
+    return makePrintable(
+        "# of records (actual) = " + numberOfExpectedSummaryRecordsForActual,
+        e -> Objects.equals(numberOfExpectedSummaryRecordsForActual, new ReportParser(e.getActual()).summary().records().size()));
   }
 
   static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualAndExpectedAreEqual() {

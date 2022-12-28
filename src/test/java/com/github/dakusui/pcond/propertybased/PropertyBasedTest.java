@@ -277,27 +277,27 @@ public class PropertyBasedTest {
           .build();
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @TestCaseParameter
-    static TestCase<Stream<String>, Throwable> givenStreamPredicate_whenUnexpectedValue_thenComparisonFailure() {
+    static TestCase<Stream<String>, ComparisonFailure> givenStreamPredicate_whenUnexpectedValue_thenComparisonFailure() {
       Stream<String> v;
-      return new TestCase.Builder.ForReturnedValue<>(
+      return new TestCase.Builder.ForThrownException<>(
           v = Stream.of("hello", "world", "HELLO", "WORLD"),
           Predicates.allMatch(containsString("o")),
-          (Class<Stream<String>>) (Class) Stream.class)
-          .addExpectationPredicate(equalsPredicate(v))
+          ComparisonFailure.class)
+          .addExpectationPredicate(numberOfSummaryRecordsForActualIsEqualTo(4))
+          .addExpectationPredicate(numberOfSummaryRecordsForActualAndExpectedAreEqual())
           .build();
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @TestCaseParameter
-    static TestCase<Stream<String>, Throwable> givenStreamPredicate_whenUnexpectedNullValue_thenComparisonFailure() {
+    static TestCase<Stream<String>, ComparisonFailure> givenStreamPredicate_whenUnexpectedNullValue_thenComparisonFailure() {
       Stream<String> v;
-      return new TestCase.Builder.ForReturnedValue<>(
+      return new TestCase.Builder.ForThrownException<>(
           v = Stream.of("hello", "world", null, "HELLO", "WORLD"),
           Predicates.allMatch(isNotNull()),
-          (Class<Stream<String>>) (Class) Stream.class)
-          .addExpectationPredicate(equalsPredicate(v))
+          ComparisonFailure.class)
+          .addExpectationPredicate(numberOfSummaryRecordsForActualIsEqualTo(4))
+          .addExpectationPredicate(numberOfSummaryRecordsForActualAndExpectedAreEqual())
           .build();
     }
   }
