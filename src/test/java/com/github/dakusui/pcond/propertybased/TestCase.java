@@ -73,7 +73,7 @@ interface TestCase<V, T extends Throwable> {
     }
 
     public static class ForReturnedValue<V> extends Builder<ForReturnedValue<V>, V, Throwable> {
-      private       Class<V>                                                    expectedClass;
+      private       Class<V>                                                       expectedClass;
       private final List<ForThrownException.TransformingPredicateForPcondUT<V, ?>> expectations = new LinkedList<>();
 
       public ForReturnedValue(V value, Predicate<V> predicate, Class<V> expectedClass) {
@@ -96,7 +96,11 @@ interface TestCase<V, T extends Throwable> {
       }
 
       public ForReturnedValue<V> addExpectationPredicate(Predicate<V> predicate) {
-        this.expectations.add(new ForThrownException.TransformingPredicateForPcondUT<V, V>(makePrintableFunction("identity", Function.identity()), predicate));
+        return this.addExpectationPredicate(makePrintableFunction("identity", Function.identity()), predicate);
+      }
+
+      public <W> ForReturnedValue<V> addExpectationPredicate(Function<V, W> function, Predicate<W> predicate) {
+        this.expectations.add(new ForThrownException.TransformingPredicateForPcondUT<>(function, predicate));
         return this;
       }
 
@@ -120,7 +124,7 @@ interface TestCase<V, T extends Throwable> {
     public static class ForThrownException<V, T extends Throwable> extends Builder<ForThrownException<V, T>, V, T> {
       static class TransformingPredicateForPcondUT<T, R> {
         final Function<T, R> transform;
-        final Predicate<R> check;
+        final Predicate<R>   check;
 
         TransformingPredicateForPcondUT(Function<T, R> transform, Predicate<R> check) {
           this.transform = requireNonNull(transform);
@@ -131,8 +135,9 @@ interface TestCase<V, T extends Throwable> {
           return new TransformingPredicateForPcondUT<>(makePrintableFunction("identity", Function.identity()), predicate);
         }
       }
+
       private final List<TransformingPredicateForPcondUT<T, ?>> expectations = new LinkedList<>();
-      private       Class<T>           expectedExceptionClass;
+      private       Class<T>                                    expectedExceptionClass;
 
       public ForThrownException(V value) {
         super(value);
