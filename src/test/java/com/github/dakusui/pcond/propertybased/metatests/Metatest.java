@@ -1,12 +1,13 @@
-package com.github.dakusui.pcond.propertybased;
+package com.github.dakusui.pcond.propertybased.metatests;
 
 import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.propertybased.utils.TestCase;
 import org.junit.ComparisonFailure;
 import org.junit.Test;
 
 import java.io.IOException;
 
-import static com.github.dakusui.pcond.propertybased.TestCaseUtils.exerciseTestCase;
+import static com.github.dakusui.pcond.propertybased.utils.TestCaseUtils.exerciseTestCase;
 
 public class Metatest {
   @Test
@@ -24,7 +25,7 @@ public class Metatest {
   public void whenUnexpectedExceptionIsThrown_thenAssertionErrorIsThrown() throws Throwable {
     exerciseTestCase(
         new TestCase.Builder.ForThrownException<String, IOException>("")
-            .predicate( Predicates.isNull())
+            .predicate(Predicates.isNull())
             .expectedExceptionClass(IOException.class)
             .build());
   }

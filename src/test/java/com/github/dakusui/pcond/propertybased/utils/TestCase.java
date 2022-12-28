@@ -1,6 +1,4 @@
-package com.github.dakusui.pcond.propertybased;
-
-import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
+package com.github.dakusui.pcond.propertybased.utils;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -8,11 +6,10 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.propertybased.ReportCheckUtils.makePrintableFunction;
-import static com.github.dakusui.pcond.propertybased.ReportCheckUtils.makePrintablePredicate;
+import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.makePrintableFunction;
 import static java.util.Objects.requireNonNull;
 
-interface TestCase<V, T extends Throwable> {
+public interface TestCase<V, T extends Throwable> {
   Predicate<V> targetPredicate();
 
   V targetValue();
@@ -43,7 +40,7 @@ interface TestCase<V, T extends Throwable> {
     }
 
     @SuppressWarnings("unchecked")
-    B predicate(Predicate<V> predicate) {
+    public B predicate(Predicate<V> predicate) {
       this.predicate = requireNonNull(predicate);
       return (B) this;
     }

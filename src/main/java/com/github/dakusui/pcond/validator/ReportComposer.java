@@ -163,6 +163,7 @@ public interface ReportComposer {
           squashedItems.stream().anyMatch(EvaluationEntry::requiresExplanation), false);
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private static boolean suppressSquashing() {
       return DebuggingUtils.suppressSquashing();
     }

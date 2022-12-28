@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.propertybased;
+package com.github.dakusui.pcond.propertybased.utils;
 
 import com.github.dakusui.shared.ReportParser;
 import org.junit.ComparisonFailure;
@@ -10,13 +10,13 @@ import java.util.function.Predicate;
 public enum ReportCheckUtils {
   ;
 
-  static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualIsEqualTo(@SuppressWarnings("SameParameterValue") int numberOfExpectedSummaryRecordsForActual) {
+  public static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualIsEqualTo(@SuppressWarnings("SameParameterValue") int numberOfExpectedSummaryRecordsForActual) {
     return makePrintablePredicate(
         "# of records (actual) = " + numberOfExpectedSummaryRecordsForActual,
         e -> Objects.equals(numberOfExpectedSummaryRecordsForActual, new ReportParser(e.getActual()).summary().records().size()));
   }
 
-  static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualAndExpectedAreEqual() {
+  public static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualAndExpectedAreEqual() {
     return makePrintablePredicate("# of records (actual) = # of records (expected)", e -> Objects.equals(new ReportParser(e.getActual()).summary().records().size(), new ReportParser(e.getExpected()).summary().records().size()));
   }
 
@@ -48,7 +48,7 @@ public enum ReportCheckUtils {
     };
   }
 
-  static <T> Predicate<T> equalsPredicate(T w) {
+  public static <T> Predicate<T> equalsPredicate(T w) {
     return makePrintablePredicate("equals(" + w + ")", v -> Objects.equals(v, w));
   }
 }

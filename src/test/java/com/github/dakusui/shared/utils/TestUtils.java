@@ -1,9 +1,16 @@
 package com.github.dakusui.shared.utils;
 
+import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.shared.ReportParser;
+import org.junit.ComparisonFailure;
+
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import static com.github.dakusui.pcond.forms.Printables.function;
 
@@ -72,5 +79,44 @@ public enum TestUtils {
    */
   public static String simplifyString(String str) {
     return str.replaceAll(" +", " ").replaceAll("\"", "'");
+  }
+
+  public static Function<String, String> toLowerCase() {
+    return function("toLowerCase", String::toLowerCase);
+  }
+
+  public static Function<String, String> toUpperCase() {
+    return function("toUpperCase", String::toUpperCase);
+  }
+
+  public static Predicate<String> alwaysFalse() {
+    return Printables.predicate("alwaysFalse", v -> false);
+  }
+
+  public static Predicate<ComparisonFailure> expectationSummarySizeIsEqualTo(final int expectedSize) {
+    return Printables.predicate(
+        "expectationSummarySize==" + expectedSize,
+        comparisonFailure -> new ReportParser(comparisonFailure.getExpected()).summary().records().size() == expectedSize);
+  }
+
+  public static Predicate<ComparisonFailure> numberOfSummariesWithDetailsInExpectationIsEqualTo(int numberOfSummariesWithDetails) {
+    return Printables.predicate("numberOfSummariesWithDetailInExpectation==" + numberOfSummariesWithDetails, comparisonFailure -> new ReportParser(comparisonFailure.getExpected()).summary().records().stream().filter(e -> e.detailIndex().isPresent()).count() == numberOfSummariesWithDetails);
+  }
+
+  public static Predicate<ComparisonFailure> numberOfSummariesWithDetailsForExpectationAndActualAreEqual() {
+    return Printables.predicate("numberOfSummariesWithDetailsForExpectationAndActualAreEqual", comparisonFailure -> {
+      List<ReportParser.Summary.Record> expectationSummariesWithDetails = summariesWithDetailsOf(comparisonFailure.getExpected());
+      List<ReportParser.Summary.Record> actualValueSummariesWithDetails = summariesWithDetailsOf(comparisonFailure.getActual());
+      return expectationSummariesWithDetails.size() == actualValueSummariesWithDetails.size();
+    });
+  }
+
+  private static List<ReportParser.Summary.Record> summariesWithDetailsOf(String expectedOrActualStringInComparisonFailure) {
+    return new ReportParser(expectedOrActualStringInComparisonFailure)
+        .summary()
+        .records()
+        .stream()
+        .filter(r -> r.detailIndex().isPresent())
+        .collect(Collectors.toList());
   }
 }

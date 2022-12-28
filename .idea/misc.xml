@@ -2,7 +2,7 @@
 <project version="4">
   <component name="EntryPointsManager">
     <list size="1">
-      <item index="0" class="java.lang.String" itemvalue="com.github.dakusui.pcond.propertybased.PropertyBasedTest.TestCaseParameter" />
+      <item index="0" class="java.lang.String" itemvalue="com.github.dakusui.pcond.propertybased.utils.TestCaseParameter" />
     </list>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />

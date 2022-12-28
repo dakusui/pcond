@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.propertybased;
+package com.github.dakusui.pcond.propertybased.utils;
 
 import com.github.dakusui.pcond.core.DebuggingUtils;
 import org.junit.ComparisonFailure;
@@ -17,10 +17,10 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
-enum TestCaseUtils {
+public enum TestCaseUtils {
   ;
 
-  private static Object invokeMethod(Method m) {
+  private static Object invokeStaticMethod(Method m) {
     try {
       return m.invoke(null);
     } catch (Exception e) {
@@ -28,16 +28,16 @@ enum TestCaseUtils {
     }
   }
 
-  static List<Object[]> parameters(@SuppressWarnings("SameParameterValue") Class<?> testClass) {
+  public static List<Object[]> parameters(@SuppressWarnings("SameParameterValue") Class<?> testClass) {
     return Arrays.stream(requireNonNull(testClass).getDeclaredMethods())
-        .filter(m -> m.isAnnotationPresent(PropertyBasedTest.TestCaseParameter.class))
+        .filter(m -> m.isAnnotationPresent(TestCaseParameter.class))
         .filter(m -> isStatic(m.getModifiers()))
         .sorted(comparing(Method::getName))
-        .map(m -> new Object[] { m.getName(), invokeMethod(m) })
+        .map(m -> new Object[] { m.getName(), invokeStaticMethod(m) })
         .collect(toList());
   }
 
-  static <T, E extends Throwable> void exerciseTestCase(TestCase<T, E> testCase) throws Throwable {
+  public static <T, E extends Throwable> void exerciseTestCase(TestCase<T, E> testCase) throws Throwable {
     try {
       T value;
       assertThat(value = testCase.targetValue(), testCase.targetPredicate());
