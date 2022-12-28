@@ -12,6 +12,7 @@ import java.util.function.Predicate;
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
+import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isStatic;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
@@ -55,39 +56,66 @@ public enum TestCaseUtils {
   private static <T, E extends Throwable, F> void examineThrownException(TestCase<T, E> testCase, Throwable t) throws Throwable {
     System.out.println(t.getMessage());
     if (t instanceof ComparisonFailure) {
-      System.out.println(((ComparisonFailure)t).getExpected());
-      System.out.println(((ComparisonFailure)t).getActual());
+      System.out.println(((ComparisonFailure) t).getExpected());
+      System.out.println(((ComparisonFailure) t).getActual());
     }
     if (testCase.expectationForThrownException().isPresent()) {
       TestCase.Expectation<E> exceptionExpectation = testCase.expectationForThrownException().get();
       if (exceptionExpectation.expectedClass().isAssignableFrom(t.getClass())) {
-        class ErrorInfo {
+        class CheckResult {
           final TransformingPredicateForPcondUT<E, ?> testDef;
           final Object                                transformOutput;
+          final boolean                               passed;
 
-          ErrorInfo(TransformingPredicateForPcondUT<E, ?> testDef, Object transformOutput) {
+
+          CheckResult(TransformingPredicateForPcondUT<E, ?> testDef, Object transformOutput, boolean passed) {
             this.testDef = testDef;
             this.transformOutput = transformOutput;
+            this.passed = passed;
           }
         }
-        List<ErrorInfo> errors = new LinkedList<>();
+        List<CheckResult> testresuls = new LinkedList<>();
         for (TransformingPredicateForPcondUT<E, ?> each : exceptionExpectation.checks()) {
           Object v;
-          if (!((Predicate<Object>)each.check).test(v = each.transform.apply((E) t)))
-            errors.add(new ErrorInfo(each, v));
+          boolean passed;
+          passed = ((Predicate<Object>) each.check).test(v = each.transform.apply((E) t));
+          testresuls.add(new CheckResult(each, v, passed));
         }
-        if (!errors.isEmpty()) {
-          throw new AssertionError(String.format("Thrown exception: <" + t + "> did not satisfy following conditions:%n" +
-              errors.stream()
-                  .map((ErrorInfo each) ->
-                      String.format("(%s).%s->(%s).%s", formatObject(t), each.testDef.transform, formatObject(each.transformOutput), each.testDef.check))
-                  .collect(joining("%n- ", "----%n- ", "%n----"))));
+        if (testresuls.stream().anyMatch(r -> !r.passed)) {
+          throw new AssertionError(format("Thrown exception: <" + formatObject(t) + "> did not satisfy some of following conditions:%n" +
+              testresuls.stream()
+                  .map((CheckResult each) ->
+                      format("%-2s (%s).%s->(%s).%s", each.passed ? "" : "NG", formatObject(t), each.testDef.transform, formatObject(each.transformOutput), each.testDef.check))
+                  .collect(joining("%n- ", "----%n- ", "%n----"))) + String.format("%n%nTHROWN EXCEPTION DETAIL:%n") + formatException(t));
         }
       } else
-        throw new AssertionError("Expected exception is '" + exceptionExpectation.expectedClass() +  "' but thrown exception was: " + t);
+        throw new AssertionError("Expected exception is '" + exceptionExpectation.expectedClass() + "' but thrown exception was: " + t);
     } else {
       throw t;
     }
+  }
+
+  private static Object formatException(Throwable t) {
+    if (!(t instanceof ComparisonFailure))
+      return t;
+    StringBuilder b = new StringBuilder().append(format("%n"));
+    b.append("MESSAGE:").append(format("%n"));
+    b.append("- ").append(t.getMessage().replaceAll("\\n.+", ""));
+    b.append("EXPECTATION:").append(format("%n"));
+    for (String s : ((ComparisonFailure) t).getExpected().split("\n")) {
+      b.append("  ").append(s).append(format("%n"));
+    }
+    b.append(format("%n"));
+    b.append("ACTUAL:").append(String.format("%n"));
+    for (String s : ((ComparisonFailure) t).getActual().split("\n")) {
+      b.append("  ").append(s).append(format("%n"));
+    }
+    b.append(format("%n"));
+    b.append("STACKTRACE:").append("%n");
+    for (StackTraceElement s : t.getStackTrace()) {
+      b.append("  ").append(s).append(format("%n"));
+    }
+    return b.toString();
   }
 
   @SuppressWarnings("unchecked")
@@ -97,13 +125,13 @@ public enum TestCaseUtils {
     else if (testCase.expectationForReturnedValue().isPresent()) {
       List<TransformingPredicateForPcondUT<T, ?>> errors = new LinkedList<>();
       for (TransformingPredicateForPcondUT<T, ?> each : testCase.expectationForReturnedValue().get().checks()) {
-        if (!((Predicate<Object>)each.check).test(each.transform.apply(value)))
+        if (!((Predicate<Object>) each.check).test(each.transform.apply(value)))
           errors.add(each);
       }
       if (!errors.isEmpty())
-        throw new AssertionError("Returned value: <" + value + "> did not satisfy following conditions:" + String.format("%n") +
+        throw new AssertionError("Returned value: <" + value + "> did not satisfy following conditions:" + format("%n") +
             errors.stream()
-                .map(each -> String.format("%s", each))
+                .map(each -> format("%s", each))
                 .collect(joining("%n", "- ", "")));
     } else
       assert false;

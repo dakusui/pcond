@@ -38,7 +38,7 @@ public class AnyOfPredicateTest extends PropertyBasedTestBase {
         "Hello",
         Predicates.anyOf(TestUtils.alwaysFalse()), ComparisonFailure.class)
         .addExpectationPredicate(TestUtils.expectationSummarySizeIsEqualTo(1 + /* anyOf */ +1 /*alwaysFalse*/))
-        .addExpectationPredicate(TestUtils.numberOfSummariesWithDetailsInExpectationIsEqualTo(1))
+        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfExpectSummariesWithDetailsIsEqualTo(1))
         .build();
   }
 

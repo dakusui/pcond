@@ -99,19 +99,7 @@ public enum TestUtils {
         comparisonFailure -> new ReportParser(comparisonFailure.getExpected()).summary().records().size() == expectedSize);
   }
 
-  public static Predicate<ComparisonFailure> numberOfSummariesWithDetailsInExpectationIsEqualTo(int numberOfSummariesWithDetails) {
-    return Printables.predicate("numberOfSummariesWithDetailInExpectation==" + numberOfSummariesWithDetails, comparisonFailure -> new ReportParser(comparisonFailure.getExpected()).summary().records().stream().filter(e -> e.detailIndex().isPresent()).count() == numberOfSummariesWithDetails);
-  }
-
-  public static Predicate<ComparisonFailure> numberOfSummariesWithDetailsForExpectationAndActualAreEqual() {
-    return Printables.predicate("numberOfSummariesWithDetailsForExpectationAndActualAreEqual", comparisonFailure -> {
-      List<ReportParser.Summary.Record> expectationSummariesWithDetails = summariesWithDetailsOf(comparisonFailure.getExpected());
-      List<ReportParser.Summary.Record> actualValueSummariesWithDetails = summariesWithDetailsOf(comparisonFailure.getActual());
-      return expectationSummariesWithDetails.size() == actualValueSummariesWithDetails.size();
-    });
-  }
-
-  private static List<ReportParser.Summary.Record> summariesWithDetailsOf(String expectedOrActualStringInComparisonFailure) {
+  public static List<ReportParser.Summary.Record> summariesWithDetailsOf(String expectedOrActualStringInComparisonFailure) {
     return new ReportParser(expectedOrActualStringInComparisonFailure)
         .summary()
         .records()
