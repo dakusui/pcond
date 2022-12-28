@@ -22,11 +22,19 @@ public class Metatest {
 
   @Test(expected = AssertionError.class)
   public void whenUnexpectedExceptionIsThrown_thenAssertionErrorIsThrown() throws Throwable {
-    exerciseTestCase(new TestCase.Builder.ForThrownException<>("", Predicates.isNull(), IOException.class).build());
+    exerciseTestCase(
+        new TestCase.Builder.ForThrownException<String, IOException>("")
+            .predicate( Predicates.isNull())
+            .expectedExceptionClass(IOException.class)
+            .build());
   }
 
   @Test
   public void whenExpectedExceptionIsThrown_thenPasses() throws Throwable {
-    exerciseTestCase(new TestCase.Builder.ForThrownException<>("", Predicates.isNull(), ComparisonFailure.class).build());
+    exerciseTestCase(
+        new TestCase.Builder.ForThrownException<String, ComparisonFailure>("")
+            .predicate(Predicates.isNull())
+            .expectedExceptionClass(ComparisonFailure.class)
+            .build());
   }
 }

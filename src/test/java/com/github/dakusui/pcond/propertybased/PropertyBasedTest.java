@@ -64,7 +64,8 @@ public class PropertyBasedTest {
 
     @TestCaseParameter
     static TestCase<String, Throwable> givenSimplePredicate_whenExpectedValue_thenValueReturned() {
-      return new TestCase.Builder.ForReturnedValue<>("HELLO", Predicates.isEqualTo("HELLO"), String.class)
+      return new TestCase.Builder.ForReturnedValue<>("HELLO", Predicates.isEqualTo("HELLO"))
+          .expectedClass(String.class)
           .addExpectationPredicate(equalsPredicate("HELLO"))
           .build();
     }
@@ -234,21 +235,29 @@ public class PropertyBasedTest {
     }
 
     @TestCaseParameter
-    static TestCase<String, Throwable> givenTwoChainedTransformingPredicates_whenNonExpectedValue_thenComparisonFailure() {
-      return new TestCase.Builder.ForReturnedValue<>(
-          "HELLO",
-          allOf(
-              Predicates.transform(toUpperCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)),
-              Predicates.transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6))),
-          String.class)
-          .addExpectationPredicate(equalsPredicate("hello"))
+    static TestCase<String, ComparisonFailure> givenTwoChainedTransformingPredicates_whenNonExpectedValue_thenComparisonFailure() {
+      return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("HELLO")
+          .predicate(
+              allOf(
+                  Predicates.transform(toUpperCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)),
+                  Predicates.transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6))))
+          .expectedExceptionClass(ComparisonFailure.class)
+          .addExpectationPredicate(numberOfSummaryRecordsForActualAndExpectedAreEqual())
+          .addExpectationPredicate(numberOfSummaryRecordsForActualIsEqualTo(9))
+          .addExpectationPredicate(numberOfSummariesWithDetailsForExpectationAndActualAreEqual())
+          .addExpectationPredicate(numberOfSummariesWithDetailsInExpectationIsEqualTo(2))
           .build();
     }
 
     @TestCaseParameter
-    static TestCase<String, Throwable> givenChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
-      return new TestCase.Builder.ForReturnedValue<>("HELLO", Predicates.transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)), String.class)
-          .addExpectationPredicate(equalsPredicate("hello"))
+    static TestCase<String, ComparisonFailure> givenChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
+      return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("HELLO")
+          .predicate(Predicates.transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)))
+          .expectedExceptionClass(ComparisonFailure.class)
+          .addExpectationPredicate(numberOfSummaryRecordsForActualAndExpectedAreEqual())
+          .addExpectationPredicate(numberOfSummaryRecordsForActualIsEqualTo(9))
+          .addExpectationPredicate(numberOfSummariesWithDetailsForExpectationAndActualAreEqual())
+          .addExpectationPredicate(numberOfSummariesWithDetailsInExpectationIsEqualTo(2))
           .build();
     }
   }

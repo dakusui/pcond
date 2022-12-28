@@ -51,7 +51,7 @@ enum TestCaseUtils {
   }
 
   @SuppressWarnings("unchecked")
-  private static <T, E extends Throwable> void examineThrownException(TestCase<T, E> testCase, Throwable t) throws Throwable {
+  private static <T, E extends Throwable, F> void examineThrownException(TestCase<T, E> testCase, Throwable t) throws Throwable {
     System.out.println(t.getMessage());
     if (t instanceof ComparisonFailure) {
       System.out.println(((ComparisonFailure)t).getExpected());
@@ -60,15 +60,15 @@ enum TestCaseUtils {
     if (testCase.expectationForThrownException().isPresent()) {
       TestCase.Expectation<E> exceptionExpectation = testCase.expectationForThrownException().get();
       if (exceptionExpectation.expectedClass().isAssignableFrom(t.getClass())) {
-        List<Predicate<E>> errors = new LinkedList<>();
-        for (Predicate<E> each : exceptionExpectation.checks()) {
-          if (!each.test((E) t))
+        List<TestCase.Builder.ForThrownException.TransformingPredicateForPcondUT<E, ?>> errors = new LinkedList<>();
+        for (TestCase.Builder.ForThrownException.TransformingPredicateForPcondUT<E, ?> each : exceptionExpectation.checks()) {
+          if (!((Predicate<Object>)each.check).test(each.transform.apply((E) t)))
             errors.add(each);
         }
         if (!errors.isEmpty()) {
           throw new AssertionError(String.format("Thrown exception: <" + t + "> did not satisfy following conditions:%n" +
               errors.stream()
-                  .map((Predicate<E> each) -> String.format("%s", each))
+                  .map((TestCase.Builder.ForThrownException.TransformingPredicateForPcondUT<E, ?> each) -> String.format("(%s).%s->%s", t, each.transform, each.check))
                   .collect(joining("%n", "- ", ""))));
         }
       } else
@@ -78,13 +78,14 @@ enum TestCaseUtils {
     }
   }
 
+  @SuppressWarnings("unchecked")
   private static <T, E extends Throwable> void examineReturnedValue(TestCase<T, E> testCase, T value) {
     if (testCase.expectationForThrownException().isPresent())
       throw new AssertionError("An exception that satisfies: <" + testCase.expectationForThrownException().get().expectedClass() + "> was expected to be thrown, but not");
     else if (testCase.expectationForReturnedValue().isPresent()) {
-      List<Predicate<T>> errors = new LinkedList<>();
-      for (Predicate<T> each : testCase.expectationForReturnedValue().get().checks()) {
-        if (!each.test(value))
+      List<TestCase.Builder.ForThrownException.TransformingPredicateForPcondUT<T, ?>> errors = new LinkedList<>();
+      for (TestCase.Builder.ForThrownException.TransformingPredicateForPcondUT<T, ?> each : testCase.expectationForReturnedValue().get().checks()) {
+        if (!((Predicate<Object>)each.check).test(each.transform.apply(value)))
           errors.add(each);
       }
       if (!errors.isEmpty())
