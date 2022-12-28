@@ -21,7 +21,7 @@ public interface TestCase<V, T extends Throwable> {
   interface Expectation<E> {
     Class<E> expectedClass();
 
-    List<Builder.ForThrownException.TransformingPredicateForPcondUT<E, ?>> checks();
+    List<TransformingPredicateForPcondUT<E, ?>> checks();
   }
 
   abstract class Builder<B extends Builder<B, V, T>, V, T extends Throwable> {
@@ -70,8 +70,8 @@ public interface TestCase<V, T extends Throwable> {
     }
 
     public static class ForReturnedValue<V> extends Builder<ForReturnedValue<V>, V, Throwable> {
-      private       Class<V>                                                       expectedClass;
-      private final List<ForThrownException.TransformingPredicateForPcondUT<V, ?>> expectations = new LinkedList<>();
+      private       Class<V>                                    expectedClass;
+      private final List<TransformingPredicateForPcondUT<V, ?>> expectations = new LinkedList<>();
 
       public ForReturnedValue(V value, Predicate<V> predicate, Class<V> expectedClass) {
         this(value, predicate);
@@ -97,7 +97,7 @@ public interface TestCase<V, T extends Throwable> {
       }
 
       public <W> ForReturnedValue<V> addExpectationPredicate(Function<V, W> function, Predicate<W> predicate) {
-        this.expectations.add(new ForThrownException.TransformingPredicateForPcondUT<>(function, predicate));
+        this.expectations.add(new TransformingPredicateForPcondUT<>(function, predicate));
         return this;
       }
 
@@ -110,7 +110,7 @@ public interface TestCase<V, T extends Throwable> {
           }
 
           @Override
-          public List<ForThrownException.TransformingPredicateForPcondUT<V, ?>> checks() {
+          public List<TransformingPredicateForPcondUT<V, ?>> checks() {
             return expectations;
           }
         };
@@ -119,19 +119,6 @@ public interface TestCase<V, T extends Throwable> {
     }
 
     public static class ForThrownException<V, T extends Throwable> extends Builder<ForThrownException<V, T>, V, T> {
-      static class TransformingPredicateForPcondUT<T, R> {
-        final Function<T, R> transform;
-        final Predicate<R>   check;
-
-        TransformingPredicateForPcondUT(Function<T, R> transform, Predicate<R> check) {
-          this.transform = requireNonNull(transform);
-          this.check = requireNonNull(check);
-        }
-
-        static <T> TransformingPredicateForPcondUT<T, T> createFromSimplePredicate(Predicate<T> predicate) {
-          return new TransformingPredicateForPcondUT<>(makePrintableFunction("identity", Function.identity()), predicate);
-        }
-      }
 
       private final List<TransformingPredicateForPcondUT<T, ?>> expectations = new LinkedList<>();
       private       Class<T>                                    expectedExceptionClass;
@@ -156,7 +143,11 @@ public interface TestCase<V, T extends Throwable> {
       }
 
       public ForThrownException<V, T> addExpectationPredicate(Predicate<T> predicate) {
-        this.expectations.add(TransformingPredicateForPcondUT.createFromSimplePredicate(predicate));
+        return addExpectationPredicate(TransformingPredicateForPcondUT.createFromSimplePredicate(predicate));
+      }
+
+      public ForThrownException<V, T> addExpectationPredicate(TransformingPredicateForPcondUT<T, ?> fromSimplePredicate) {
+        this.expectations.add(fromSimplePredicate);
         return this;
       }
 

@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static java.lang.reflect.Modifier.isStatic;
@@ -60,16 +61,27 @@ public enum TestCaseUtils {
     if (testCase.expectationForThrownException().isPresent()) {
       TestCase.Expectation<E> exceptionExpectation = testCase.expectationForThrownException().get();
       if (exceptionExpectation.expectedClass().isAssignableFrom(t.getClass())) {
-        List<TestCase.Builder.ForThrownException.TransformingPredicateForPcondUT<E, ?>> errors = new LinkedList<>();
-        for (TestCase.Builder.ForThrownException.TransformingPredicateForPcondUT<E, ?> each : exceptionExpectation.checks()) {
-          if (!((Predicate<Object>)each.check).test(each.transform.apply((E) t)))
-            errors.add(each);
+        class ErrorInfo {
+          final TransformingPredicateForPcondUT<E, ?> testDef;
+          final Object                                transformOutput;
+
+          ErrorInfo(TransformingPredicateForPcondUT<E, ?> testDef, Object transformOutput) {
+            this.testDef = testDef;
+            this.transformOutput = transformOutput;
+          }
+        }
+        List<ErrorInfo> errors = new LinkedList<>();
+        for (TransformingPredicateForPcondUT<E, ?> each : exceptionExpectation.checks()) {
+          Object v;
+          if (!((Predicate<Object>)each.check).test(v = each.transform.apply((E) t)))
+            errors.add(new ErrorInfo(each, v));
         }
         if (!errors.isEmpty()) {
           throw new AssertionError(String.format("Thrown exception: <" + t + "> did not satisfy following conditions:%n" +
               errors.stream()
-                  .map((TestCase.Builder.ForThrownException.TransformingPredicateForPcondUT<E, ?> each) -> String.format("(%s).%s->%s", t, each.transform, each.check))
-                  .collect(joining("%n", "- ", ""))));
+                  .map((ErrorInfo each) ->
+                      String.format("(%s).%s->(%s).%s", formatObject(t), each.testDef.transform, formatObject(each.transformOutput), each.testDef.check))
+                  .collect(joining("%n- ", "----%n- ", "%n----"))));
         }
       } else
         throw new AssertionError("Expected exception is '" + exceptionExpectation.expectedClass() +  "' but thrown exception was: " + t);
@@ -83,8 +95,8 @@ public enum TestCaseUtils {
     if (testCase.expectationForThrownException().isPresent())
       throw new AssertionError("An exception that satisfies: <" + testCase.expectationForThrownException().get().expectedClass() + "> was expected to be thrown, but not");
     else if (testCase.expectationForReturnedValue().isPresent()) {
-      List<TestCase.Builder.ForThrownException.TransformingPredicateForPcondUT<T, ?>> errors = new LinkedList<>();
-      for (TestCase.Builder.ForThrownException.TransformingPredicateForPcondUT<T, ?> each : testCase.expectationForReturnedValue().get().checks()) {
+      List<TransformingPredicateForPcondUT<T, ?>> errors = new LinkedList<>();
+      for (TransformingPredicateForPcondUT<T, ?> each : testCase.expectationForReturnedValue().get().checks()) {
         if (!((Predicate<Object>)each.check).test(each.transform.apply(value)))
           errors.add(each);
       }

@@ -2,10 +2,7 @@ package com.github.dakusui.pcond.propertybased.tests;
 
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.propertybased.utils.PropertyBasedTestBase;
-import com.github.dakusui.pcond.propertybased.utils.TestCase;
-import com.github.dakusui.pcond.propertybased.utils.TestCaseParameter;
-import com.github.dakusui.pcond.propertybased.utils.TestCaseUtils;
+import com.github.dakusui.pcond.propertybased.utils.*;
 import com.github.dakusui.shared.utils.TestUtils;
 import org.junit.ComparisonFailure;
 import org.junit.runner.RunWith;
@@ -15,7 +12,9 @@ import org.junit.runners.Parameterized.Parameters;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
-import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.*;
+import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.equalsPredicate;
+import static com.github.dakusui.pcond.propertybased.utils.TransformingPredicateForPcondUT.numberOfSummaryRecordsForActualIsEqualTo;
+import static com.github.dakusui.pcond.propertybased.utils.TransformingPredicateForPcondUT.numberOfSummaryRecordsForActualAndExpectedAreEqual;
 import static com.github.dakusui.shared.utils.TestUtils.toLowerCase;
 import static com.github.dakusui.shared.utils.TestUtils.toUpperCase;
 
@@ -65,11 +64,14 @@ public class TransformAndCheckPredicateTest extends PropertyBasedTestBase {
 
   @SuppressWarnings("unchecked")
   @TestCaseParameter
-  public static TestCase<String, Throwable> givenTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
-    return new TestCase.Builder.ForReturnedValue<>(
-        "hello",
-        (Predicate<String>) Predicates.transform(Functions.length()).check(Predicates.isEqualTo(6)), String.class)
-        .addExpectationPredicate(equalsPredicate("hello"))
+  public static TestCase<String, ComparisonFailure> givenTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
+    return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("hello")
+        .predicate((Predicate<String>) Predicates.transform(Functions.length()).check(Predicates.isEqualTo(6)))
+        .expectedExceptionClass(ComparisonFailure.class)
+        .addExpectationPredicate(numberOfSummaryRecordsForActualAndExpectedAreEqual())
+        .addExpectationPredicate(numberOfSummaryRecordsForActualIsEqualTo(9))
+        .addExpectationPredicate(TestUtils.numberOfSummariesWithDetailsForExpectationAndActualAreEqual())
+        .addExpectationPredicate(TestUtils.numberOfSummariesWithDetailsInExpectationIsEqualTo(2))
         .build();
   }
 

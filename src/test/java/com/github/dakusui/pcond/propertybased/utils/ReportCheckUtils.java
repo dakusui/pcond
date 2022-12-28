@@ -1,24 +1,11 @@
 package com.github.dakusui.pcond.propertybased.utils;
 
-import com.github.dakusui.shared.ReportParser;
-import org.junit.ComparisonFailure;
-
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public enum ReportCheckUtils {
   ;
-
-  public static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualIsEqualTo(@SuppressWarnings("SameParameterValue") int numberOfExpectedSummaryRecordsForActual) {
-    return makePrintablePredicate(
-        "# of records (actual) = " + numberOfExpectedSummaryRecordsForActual,
-        e -> Objects.equals(numberOfExpectedSummaryRecordsForActual, new ReportParser(e.getActual()).summary().records().size()));
-  }
-
-  public static Predicate<ComparisonFailure> numberOfSummaryRecordsForActualAndExpectedAreEqual() {
-    return makePrintablePredicate("# of records (actual) = # of records (expected)", e -> Objects.equals(new ReportParser(e.getActual()).summary().records().size(), new ReportParser(e.getExpected()).summary().records().size()));
-  }
 
   public static <T> Predicate<T> makePrintablePredicate(String s, Predicate<T> predicate) {
     return new Predicate<T>() {

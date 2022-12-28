@@ -43,8 +43,8 @@ public class StreamAllMatchPredicateTest extends PropertyBasedTestBase {
         v = Stream.of("hello", "world", "HELLO", "WORLD"),
         Predicates.allMatch(containsString("o")),
         ComparisonFailure.class)
-        .addExpectationPredicate(numberOfSummaryRecordsForActualIsEqualTo(4))
-        .addExpectationPredicate(numberOfSummaryRecordsForActualAndExpectedAreEqual())
+        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfSummaryRecordsForActualIsEqualTo(4))
+        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfSummaryRecordsForActualAndExpectedAreEqual())
         .build();
   }
 
@@ -55,8 +55,8 @@ public class StreamAllMatchPredicateTest extends PropertyBasedTestBase {
         v = Stream.of("hello", "world", null, "HELLO", "WORLD"),
         Predicates.allMatch(isNotNull()),
         ComparisonFailure.class)
-        .addExpectationPredicate(numberOfSummaryRecordsForActualIsEqualTo(4))
-        .addExpectationPredicate(numberOfSummaryRecordsForActualAndExpectedAreEqual())
+        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfSummaryRecordsForActualIsEqualTo(4))
+        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfSummaryRecordsForActualAndExpectedAreEqual())
         .build();
   }
 }

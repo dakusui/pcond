@@ -35,6 +35,10 @@ public enum InternalUtils {
   }
 
   public static String formatObject(Object value, int maxLength) {
+    return _formatObject(value, maxLength).replaceAll("[\\r\\n]", " ");
+  }
+
+  private static String _formatObject(Object value, int maxLength) {
     if (value == null)
       return "null";
     if (value instanceof Collection) {
