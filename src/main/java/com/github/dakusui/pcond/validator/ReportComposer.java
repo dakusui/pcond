@@ -100,35 +100,33 @@ public interface ReportComposer {
       if (evaluationHistory.size() > 1) {
         List<EvaluationEntry> ret = new LinkedList<>();
         List<EvaluationEntry> entriesToSquash = new LinkedList<>();
-        for (int i = 1; i < evaluationHistory.size(); i++) {
-          EvaluationEntry cur = evaluationHistory.get(i - 1);
-          EvaluationEntry next = evaluationHistory.get(i);
-          if (next.ignored() && !DebuggingUtils.reportIgnoredEntries())
-            continue;
-          if (cur == null) {
-            cur = next;
-            continue;
-          }
-          try {
-            if (entriesToSquash.isEmpty()) {
-              if (cur.isSquashable(next) && !suppressSquashing()) {
-                entriesToSquash.add(cur);
-              } else {
-                ret.add(cur);
+        AtomicReference<EvaluationEntry> cur = new AtomicReference<>();
+        evaluationHistory.stream()
+            .filter(each -> !each.ignored() || DebuggingUtils.reportIgnoredEntries())
+            .filter(each ->  {
+              if (cur.get() != null)
+                return true;
+              else {
+                cur.set(each);
+                return false;
               }
-            } else {
-              if (cur.isSquashable(next)) {
-                entriesToSquash.add(cur);
+            })
+            .forEach(each -> {
+              if (entriesToSquash.isEmpty()) {
+                if (cur.get().isSquashable(each) && !suppressSquashing()) {
+                  entriesToSquash.add(cur.get());
+                } else  {
+                  ret.add(cur.get());
+                }
               } else {
-                entriesToSquash.add(cur);
+                entriesToSquash.add(cur.get());
                 ret.add(squashEntries(entriesToSquash));
                 entriesToSquash.clear();
               }
-            }
-          } finally {
-            cur = next;
-          }
-        }
+              cur.set(each);
+            });
+        ret.addAll(entriesToSquash);
+        ret.add(cur.get());
         return ret.stream()
             .filter(e -> !(e.inputActualValue() instanceof Fluents.DummyValue))
             .collect(toList());
