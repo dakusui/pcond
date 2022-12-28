@@ -1,5 +1,6 @@
-package com.github.dakusui.pcond.propertybased.tests;
+package com.github.dakusui.pcond.propertybased.tests.suites;
 
+import com.github.dakusui.pcond.propertybased.tests.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;

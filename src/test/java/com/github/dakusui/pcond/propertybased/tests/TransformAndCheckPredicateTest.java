@@ -3,8 +3,8 @@ package com.github.dakusui.pcond.propertybased.tests;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.propertybased.utils.PropertyBasedTestBase;
-import com.github.dakusui.pcond.propertybased.utils.TestCaseParameter;
 import com.github.dakusui.pcond.propertybased.utils.TestCase;
+import com.github.dakusui.pcond.propertybased.utils.TestCaseParameter;
 import com.github.dakusui.pcond.propertybased.utils.TestCaseUtils;
 import com.github.dakusui.shared.utils.TestUtils;
 import org.junit.ComparisonFailure;
@@ -31,6 +31,30 @@ public class TransformAndCheckPredicateTest extends PropertyBasedTestBase {
     return TestCaseUtils.parameters(TransformAndCheckPredicateTest.class);
   }
 
+  @TestCaseParameter
+  public static TestCase<String, ComparisonFailure> givenTwoChainedTransformingPredicates_whenNonExpectedValue_thenComparisonFailure() {
+    return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("HELLO")
+        .predicate(
+            allOf(
+                Predicates.transform(toUpperCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)),
+                Predicates.transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6))))
+        .expectedExceptionClass(ComparisonFailure.class)
+        .addExpectationPredicate(numberOfSummaryRecordsForActualAndExpectedAreEqual())
+        .addExpectationPredicate(numberOfSummaryRecordsForActualIsEqualTo(9))
+        .addExpectationPredicate(TestUtils.numberOfSummariesWithDetailsForExpectationAndActualAreEqual())
+        .addExpectationPredicate(TestUtils.numberOfSummariesWithDetailsInExpectationIsEqualTo(2))
+        .build();
+  }
+
+  @TestCaseParameter
+  public static TestCase<String, Throwable> givenDoubleChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
+    return new TestCase.Builder.ForReturnedValue<>(
+        "HELLO",
+        Predicates.transform(toUpperCase().andThen(toLowerCase()).andThen(Functions.length())).check(Predicates.isEqualTo(6)), String.class)
+        .addExpectationPredicate(equalsPredicate("hello"))
+        .build();
+  }
+
   @SuppressWarnings("unchecked")
   @TestCaseParameter
   public static TestCase<String, Throwable> givenTransformingPredicate_whenExpectedValue_thenValueReturned() {
@@ -46,30 +70,6 @@ public class TransformAndCheckPredicateTest extends PropertyBasedTestBase {
         "hello",
         (Predicate<String>) Predicates.transform(Functions.length()).check(Predicates.isEqualTo(6)), String.class)
         .addExpectationPredicate(equalsPredicate("hello"))
-        .build();
-  }
-
-  @TestCaseParameter
-  public static TestCase<String, Throwable> givenDoubleChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure() {
-    return new TestCase.Builder.ForReturnedValue<>(
-        "HELLO",
-        Predicates.transform(toUpperCase().andThen(toLowerCase()).andThen(Functions.length())).check(Predicates.isEqualTo(6)), String.class)
-        .addExpectationPredicate(equalsPredicate("hello"))
-        .build();
-  }
-
-  @TestCaseParameter
-  public static TestCase<String, ComparisonFailure> givenTwoChainedTransformingPredicates_whenNonExpectedValue_thenComparisonFailure() {
-    return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("HELLO")
-        .predicate(
-            allOf(
-                Predicates.transform(toUpperCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)),
-                Predicates.transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6))))
-        .expectedExceptionClass(ComparisonFailure.class)
-        .addExpectationPredicate(numberOfSummaryRecordsForActualAndExpectedAreEqual())
-        .addExpectationPredicate(numberOfSummaryRecordsForActualIsEqualTo(9))
-        .addExpectationPredicate(TestUtils.numberOfSummariesWithDetailsForExpectationAndActualAreEqual())
-        .addExpectationPredicate(TestUtils.numberOfSummariesWithDetailsInExpectationIsEqualTo(2))
         .build();
   }
 
