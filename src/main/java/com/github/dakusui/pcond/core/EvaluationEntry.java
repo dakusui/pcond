@@ -471,7 +471,7 @@ public abstract class EvaluationEntry {
             evaluableIo.evaluableType() + ":" +
             evaluableIo.input().creatorFormType() + ":" +
             evaluableIo.output().creatorFormType() +
-            (this.ignored() ? ":ignored" : "") + ")";
+            (finalized && this.ignored() ? ":ignored" : "") + ")";
       return this.evaluableIo.formName();
     }
 

@@ -462,7 +462,7 @@ public interface Validator {
       }
 
       default boolean enableDebugLog() {
-        return false;
+        return true;
       }
 
       default boolean showEvaluableDetail() {
