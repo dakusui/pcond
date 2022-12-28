@@ -454,7 +454,7 @@ public interface Validator {
 
   interface Configuration {
     /**
-     * When `com.github.dakusui.pcond.debug` is not `true`, the values
+     * When `com.github.dakusui.pcond.debug` is not `true`, it is assumed that those methods in this interface return `false`.
      */
     interface Debugging {
       default boolean suppressSquashing() {

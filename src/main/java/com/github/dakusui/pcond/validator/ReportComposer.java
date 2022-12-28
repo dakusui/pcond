@@ -97,39 +97,44 @@ public interface ReportComposer {
     }
 
     private static List<EvaluationEntry> squashTrivialEntries(List<EvaluationEntry> evaluationHistory) {
-      List<EvaluationEntry> ret = new LinkedList<>();
-      List<EvaluationEntry> entriesToSquash = new LinkedList<>();
-      EvaluationEntry each = null;
-      for (EvaluationEntry cur : evaluationHistory) {
-        if (cur.ignored() && !DebuggingUtils.reportIgnoredEntries())
-          continue;
-        if (each == null) {
-          each = cur;
-          continue;
-        }
-        try {
-          if (entriesToSquash.isEmpty()) {
-            if (each.isSquashable(cur) && !suppressSquashing()) {
-              entriesToSquash.add(each);
-            } else {
-              ret.add(each);
-            }
-          } else {
-            if (each.isSquashable(cur)) {
-              entriesToSquash.add(each);
-            } else {
-              entriesToSquash.add(each);
-              ret.add(squashEntries(entriesToSquash));
-              entriesToSquash.clear();
-            }
+      if (evaluationHistory.size() > 1) {
+        List<EvaluationEntry> ret = new LinkedList<>();
+        List<EvaluationEntry> entriesToSquash = new LinkedList<>();
+        for (int i = 1; i < evaluationHistory.size(); i++) {
+          EvaluationEntry cur = evaluationHistory.get(i - 1);
+          EvaluationEntry next = evaluationHistory.get(i);
+          if (next.ignored() && !DebuggingUtils.reportIgnoredEntries())
+            continue;
+          if (cur == null) {
+            cur = next;
+            continue;
           }
-        } finally {
-          each = cur;
+          try {
+            if (entriesToSquash.isEmpty()) {
+              if (cur.isSquashable(next) && !suppressSquashing()) {
+                entriesToSquash.add(cur);
+              } else {
+                ret.add(cur);
+              }
+            } else {
+              if (cur.isSquashable(next)) {
+                entriesToSquash.add(cur);
+              } else {
+                entriesToSquash.add(cur);
+                ret.add(squashEntries(entriesToSquash));
+                entriesToSquash.clear();
+              }
+            }
+          } finally {
+            cur = next;
+          }
         }
+        return ret.stream()
+            .filter(e -> !(e.inputActualValue() instanceof Fluents.DummyValue))
+            .collect(toList());
+      } else {
+        return new ArrayList<>(evaluationHistory);
       }
-      return ret.stream()
-          .filter(e -> !(e.inputActualValue() instanceof Fluents.DummyValue))
-          .collect(toList());
     }
 
     private static EvaluationEntry squashEntries(List<EvaluationEntry> squashedItems) {
