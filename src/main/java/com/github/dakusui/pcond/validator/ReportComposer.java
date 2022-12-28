@@ -103,7 +103,7 @@ public interface ReportComposer {
         AtomicReference<EvaluationEntry> cur = new AtomicReference<>();
         evaluationHistory.stream()
             .filter(each -> !each.ignored() || DebuggingUtils.reportIgnoredEntries())
-            .filter(each ->  {
+            .filter(each -> {
               if (cur.get() != null)
                 return true;
               else {
@@ -115,7 +115,7 @@ public interface ReportComposer {
               if (entriesToSquash.isEmpty()) {
                 if (cur.get().isSquashable(each) && !suppressSquashing()) {
                   entriesToSquash.add(cur.get());
-                } else  {
+                } else {
                   ret.add(cur.get());
                 }
               } else {
@@ -125,13 +125,23 @@ public interface ReportComposer {
               }
               cur.set(each);
             });
-        ret.addAll(entriesToSquash);
-        ret.add(cur.get());
+        finishLeftOverEntries(ret, entriesToSquash, cur);
         return ret.stream()
             .filter(e -> !(e.inputActualValue() instanceof Fluents.DummyValue))
             .collect(toList());
       } else {
         return new ArrayList<>(evaluationHistory);
+      }
+    }
+
+    private static void finishLeftOverEntries(List<EvaluationEntry> out, List<EvaluationEntry> leftOverEntriesToSquash, AtomicReference<EvaluationEntry> leftOver) {
+      if (!leftOverEntriesToSquash.isEmpty() && leftOverEntriesToSquash.get(leftOverEntriesToSquash.size() - 1).isSquashable(leftOver.get()) && !suppressSquashing()) {
+        leftOverEntriesToSquash.add(leftOver.get());
+        out.add(squashEntries(leftOverEntriesToSquash));
+      } else {
+        if (!leftOverEntriesToSquash.isEmpty())
+          out.add(squashEntries(leftOverEntriesToSquash));
+        out.add(leftOver.get());
       }
     }
 

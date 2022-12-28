@@ -20,6 +20,8 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
 /**
+ *
+ * // @formatter:off
  * A class to hold an entry of execution history of the {@link Evaluator}.
  * When an evaluator enters into one {@link Evaluable} (actually a predicate or a function),
  * an {@code OnGoing} entry is created and held by the evaluator as a current
@@ -38,19 +40,19 @@ import static java.util.stream.Collectors.toList;
  * |  |                                            |                           +- Output
  * |  |                                            |                           |
  * V  V                                            V                           V
- * Book:[title:<De Bello G...i appellantur.>]->check:allOf               ->false
- * transform:title       ->"De Bello Gallico"
- * "De Bello Gallico"                        ->    check:allOf           ->false
- * isNotNull         ->true
- * [0]                                                     transform:parseInt->NumberFormatException:"For input s...ico""
- * null                                      ->        check:allOf       ->false
- * >=[10]        ->true
- * <[40]         ->true
- * Book:[title:<De Bello G...i appellantur.>]->    transform:title       ->"Gallia est omnis divis...li appellantur."
- * "Gallia est omnis divis...li appellantur."->    check:allOf           ->false
- * isNotNull         ->true
- * transform:length  ->145
- * 145                                       ->        check:allOf       ->false
+ *     Book:[title:<De Bello G...i appellantur.>]->check:allOf               ->false
+ *                                                    transform:title       ->"De Bello Gallico"
+ *                       "De Bello Gallico"     ->    check:allOf           ->false
+ *                                                        isNotNull         ->true
+ * [0]                                                    transform:parseInt->NumberFormatException:"For input s...ico""
+ *                          null                ->        check:allOf       ->false
+ *                                                            >=[10]        ->true
+ *                                                            <[40]         ->true
+ *    Book:[title:<De Bello G...i appellantur.>]->    transform:title       ->"Gallia est omnis divis...li appellantur."
+ *    "Gallia est omnis divis...li appellantur."->    check:allOf           ->false
+ *                                                        isNotNull         ->true
+ *                                                        transform:length  ->145
+ *    145                                       ->        check:allOf       ->false
  * [1]                                                         >=[200]       ->true
  * <[400]        ->true
  * ----
@@ -68,6 +70,8 @@ import static java.util.stream.Collectors.toList;
  * For predicates, expected boolean value is printed.
  * For functions, if a function does not throw an exception during its evaluation, the result will be printed here both for expectation and actual behavior summary.
  * If it throws an exception, the exception will be printed here in actual behavior summary.
+ *
+ * // @formatter:on
  */
 public abstract class EvaluationEntry {
   private final Type   type;
