@@ -484,6 +484,26 @@ public enum PrintablePredicateFactory {
     }
   }
 
+  static class AnyMatch<E> extends StreamPredicate<E> {
+    @SuppressWarnings("unchecked")
+    private AnyMatch(Predicate<? super E> predicate) {
+      super(
+          AnyMatch.class,
+          singletonList(predicate),
+          () -> format("anyMatch[%s]", predicate),
+          (Stream<E> stream) -> stream.anyMatch(PrintablePredicate.unwrap(predicate)),
+          toEvaluableIfNecessary((Predicate<? super Stream<E>>) predicate),
+          false,
+          true);
+    }
+
+    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
+      return new AnyMatch<>(
+          predicate
+      );
+    }
+  }
+
   static class NoneMatch<E> extends StreamPredicate<E> {
     @SuppressWarnings("unchecked")
     private NoneMatch(Predicate<? super E> predicate) {
@@ -507,26 +527,6 @@ public enum PrintablePredicateFactory {
           predicate
       ) {
       };
-    }
-  }
-
-  static class AnyMatch<E> extends StreamPredicate<E> {
-    @SuppressWarnings("unchecked")
-    private AnyMatch(Predicate<? super E> predicate) {
-      super(
-          AnyMatch.class,
-          singletonList(predicate),
-          () -> format("anyMatch[%s]", predicate),
-          (Stream<E> stream) -> stream.anyMatch(PrintablePredicate.unwrap(predicate)),
-          toEvaluableIfNecessary((Predicate<? super Stream<E>>) predicate),
-          false,
-          true);
-    }
-
-    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
-      return new AnyMatch<>(
-          predicate
-      );
     }
   }
 

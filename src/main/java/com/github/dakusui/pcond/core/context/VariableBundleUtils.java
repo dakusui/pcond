@@ -22,9 +22,10 @@ public enum VariableBundleUtils {
   ;
 
   public static Stream<VariableBundle> nest(Stream<?> stream, Collection<?> inner) {
-    Stream<VariableBundle> ret = toVariableBundleStream(stream).flatMap((VariableBundle variableBundle) -> inner.stream().map((Function<Object, VariableBundle>) variableBundle::append));
-    System.out.println("->nest:" + ret);
-    return ret;
+    return toVariableBundleStream(stream)
+        .flatMap((VariableBundle variableBundle) -> inner
+            .stream()
+            .map((Function<Object, VariableBundle>) variableBundle::append));
   }
 
   public static Stream<VariableBundle> toVariableBundleStream(Stream<?> stream) {

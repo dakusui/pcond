@@ -323,6 +323,11 @@ public interface Evaluator {
       return ioForChecker;
     }
 
+    //             ValueToCut  ValueOnCut ValueForNone
+    // NoneMatch          true      false         true
+    // AnyMatch           true       true        false
+    // AllMatch          false      false         true
+
     @Override
     public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
       evaluationContext.evaluate(
@@ -340,6 +345,7 @@ public interface Evaluator {
                   return true;
                 return eachResult.returnedValue() == evaluable.valueToCut();
               })
+              .map(eachResult -> eachResult.valueReturned(!evaluable.defaultValue()))
               .findFirst()
               .orElseGet(() -> ValueHolder.forValue(evaluable.defaultValue())));
     }
@@ -348,6 +354,7 @@ public interface Evaluator {
     public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
       evaluationContext.evaluate(evaluableIo, (Evaluable.VariableBundlePred evaluable, ValueHolder<VariableBundle> input) -> {
         EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.returnedValue().valueAt(evaluable.argIndex())));
+        System.out.printf("in[%s]:<%s>%n", + evaluable.argIndex(),  input.returnedValue());
         EvaluationContext<Object> childContext = new EvaluationContext<>();
         evaluable.enclosed().accept(io, childContext, this);
         evaluationContext.importEntries(childContext);
