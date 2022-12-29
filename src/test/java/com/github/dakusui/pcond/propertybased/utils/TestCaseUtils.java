@@ -63,19 +63,19 @@ public enum TestCaseUtils {
       TestCase.Expectation<E> exceptionExpectation = testCase.expectationForThrownException().get();
       if (exceptionExpectation.expectedClass().isAssignableFrom(t.getClass())) {
         class CheckResult {
-          final TransformingPredicateForPcondUT<E, ?> testDef;
-          final Object                                transformOutput;
+          final TestCheck<E, ?> testDef;
+          final Object          transformOutput;
           final boolean                               passed;
 
 
-          CheckResult(TransformingPredicateForPcondUT<E, ?> testDef, Object transformOutput, boolean passed) {
+          CheckResult(TestCheck<E, ?> testDef, Object transformOutput, boolean passed) {
             this.testDef = testDef;
             this.transformOutput = transformOutput;
             this.passed = passed;
           }
         }
         List<CheckResult> testresuls = new LinkedList<>();
-        for (TransformingPredicateForPcondUT<E, ?> each : exceptionExpectation.checks()) {
+        for (TestCheck<E, ?> each : exceptionExpectation.checks()) {
           Object v;
           boolean passed;
           passed = ((Predicate<Object>) each.check).test(v = each.transform.apply((E) t));
@@ -123,8 +123,8 @@ public enum TestCaseUtils {
     if (testCase.expectationForThrownException().isPresent())
       throw new AssertionError("An exception that satisfies: <" + testCase.expectationForThrownException().get().expectedClass() + "> was expected to be thrown, but not");
     else if (testCase.expectationForReturnedValue().isPresent()) {
-      List<TransformingPredicateForPcondUT<T, ?>> errors = new LinkedList<>();
-      for (TransformingPredicateForPcondUT<T, ?> each : testCase.expectationForReturnedValue().get().checks()) {
+      List<TestCheck<T, ?>> errors = new LinkedList<>();
+      for (TestCheck<T, ?> each : testCase.expectationForReturnedValue().get().checks()) {
         if (!((Predicate<Object>) each.check).test(each.transform.apply(value)))
           errors.add(each);
       }

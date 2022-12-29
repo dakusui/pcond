@@ -21,7 +21,7 @@ public interface TestCase<V, T extends Throwable> {
   interface Expectation<E> {
     Class<E> expectedClass();
 
-    List<TransformingPredicateForPcondUT<E, ?>> checks();
+    List<TestCheck<E, ?>> checks();
   }
 
   abstract class Builder<B extends Builder<B, V, T>, V, T extends Throwable> {
@@ -70,8 +70,8 @@ public interface TestCase<V, T extends Throwable> {
     }
 
     public static class ForReturnedValue<V> extends Builder<ForReturnedValue<V>, V, Throwable> {
-      private       Class<V>                                    expectedClass;
-      private final List<TransformingPredicateForPcondUT<V, ?>> expectations = new LinkedList<>();
+      private       Class<V>              expectedClass;
+      private final List<TestCheck<V, ?>> expectations = new LinkedList<>();
 
       public ForReturnedValue(V value, Predicate<V> predicate, Class<V> expectedClass) {
         this(value, predicate);
@@ -97,7 +97,7 @@ public interface TestCase<V, T extends Throwable> {
       }
 
       public <W> ForReturnedValue<V> addExpectationPredicate(Function<V, W> function, Predicate<W> predicate) {
-        this.expectations.add(new TransformingPredicateForPcondUT<>(function, predicate));
+        this.expectations.add(new TestCheck<>(function, predicate));
         return this;
       }
 
@@ -110,7 +110,7 @@ public interface TestCase<V, T extends Throwable> {
           }
 
           @Override
-          public List<TransformingPredicateForPcondUT<V, ?>> checks() {
+          public List<TestCheck<V, ?>> checks() {
             return expectations;
           }
         };
@@ -120,8 +120,8 @@ public interface TestCase<V, T extends Throwable> {
 
     public static class ForThrownException<V, T extends Throwable> extends Builder<ForThrownException<V, T>, V, T> {
 
-      private final List<TransformingPredicateForPcondUT<T, ?>> expectations = new LinkedList<>();
-      private       Class<T>                                    expectedExceptionClass;
+      private final List<TestCheck<T, ?>> expectations = new LinkedList<>();
+      private       Class<T>              expectedExceptionClass;
 
       public ForThrownException(V value) {
         super(value);
@@ -142,11 +142,11 @@ public interface TestCase<V, T extends Throwable> {
         return this;
       }
 
-      public ForThrownException<V, T> addExpectationPredicate(Predicate<T> predicate) {
-        return addExpectationPredicate(TransformingPredicateForPcondUT.createFromSimplePredicate(predicate));
+      public ForThrownException<V, T> addCheck(Predicate<T> predicate) {
+        return addCheck(TestCheck.createFromSimplePredicate(predicate));
       }
 
-      public ForThrownException<V, T> addExpectationPredicate(TransformingPredicateForPcondUT<T, ?> fromSimplePredicate) {
+      public ForThrownException<V, T> addCheck(TestCheck<T, ?> fromSimplePredicate) {
         this.expectations.add(fromSimplePredicate);
         return this;
       }
@@ -160,7 +160,7 @@ public interface TestCase<V, T extends Throwable> {
           }
 
           @Override
-          public List<TransformingPredicateForPcondUT<T, ?>> checks() {
+          public List<TestCheck<T, ?>> checks() {
             return expectations;
           }
         };

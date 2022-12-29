@@ -32,8 +32,8 @@ public class SimplePredicateTest extends PropertyBasedTestBase {
   @TestCaseParameter
   public static TestCase<String, ComparisonFailure> givenSimplePredicate_whenUnexpectedValue_thenComparisonFailureThrown() {
     return new TestCase.Builder.ForThrownException<>("Hello", Predicates.isEqualTo("HELLO"), ComparisonFailure.class)
-        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfActualSummariesIsEqualTo(1))
-        .addExpectationPredicate(TransformingPredicateForPcondUT.numberOfExpectAndActualSummariesAreEqual())
+        .addCheck(TestCheck.numberOfActualSummariesIsEqualTo(1))
+        .addCheck(TestCheck.numberOfExpectAndActualSummariesAreEqual())
         .build();
   }
 }

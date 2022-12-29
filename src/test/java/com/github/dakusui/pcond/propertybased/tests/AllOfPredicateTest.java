@@ -41,7 +41,7 @@ public class AllOfPredicateTest extends PropertyBasedTestBase {
         "Hello",
         Predicates.allOf(alwaysFalse(), alwaysTrue(), alwaysTrue()),
         ComparisonFailure.class)
-        .addExpectationPredicate(expectationSummarySizeIsEqualTo(1 /*all*/ + 3 /*alwaysFalse, alwaysTrue, alwaysTrue*/))
+        .addCheck(expectationSummarySizeIsEqualTo(1 /*all*/ + 3 /*alwaysFalse, alwaysTrue, alwaysTrue*/))
         .build();
   }
 
@@ -51,7 +51,7 @@ public class AllOfPredicateTest extends PropertyBasedTestBase {
         "Hello",
         Predicates.allOf(alwaysFalse()),
         ComparisonFailure.class)
-        .addExpectationPredicate(expectationSummarySizeIsEqualTo(1 /*all*/ + 1 /*alwaysFalse*/))
+        .addCheck(expectationSummarySizeIsEqualTo(1 /*all*/ + 1 /*alwaysFalse*/))
         .build();
   }
 }

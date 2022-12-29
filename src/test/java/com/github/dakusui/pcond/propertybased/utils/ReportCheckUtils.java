@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.propertybased.utils;
 
 import java.util.Objects;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -12,6 +13,20 @@ public enum ReportCheckUtils {
       @Override
       public boolean test(T t) {
         return predicate.test(t);
+      }
+
+      @Override
+      public String toString() {
+        return s;
+      }
+    };
+  }
+
+  public static <T, R> BiPredicate<T, R> makePrintableBiPredicate(String s, BiPredicate<T, R> predicate) {
+    return new BiPredicate<T, R>() {
+      @Override
+      public boolean test(T t, R r) {
+        return predicate.test(t, r);
       }
 
       @Override
@@ -37,5 +52,9 @@ public enum ReportCheckUtils {
 
   public static <T> Predicate<T> equalsPredicate(T w) {
     return makePrintablePredicate("equals(" + w + ")", v -> Objects.equals(v, w));
+  }
+
+  public static Predicate<Integer> greaterThanOrEqualToPredicate(int w) {
+    return makePrintablePredicate("greaterThan(" + w + ")", (Integer v) -> v >= w);
   }
 }
