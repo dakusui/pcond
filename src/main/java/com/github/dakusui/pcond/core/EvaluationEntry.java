@@ -201,10 +201,10 @@ public abstract class EvaluationEntry {
       return EVALUATION_SKIPPED;
   }
 
-  static <T, E extends Evaluable<T>> boolean isExplanationRequired(Type evaluationEntryType, EvaluableIo<T, E, ?> evaluableIo, boolean expectationFlipped) {
-    return asList(FUNCTION, LEAF).contains(evaluationEntryType) && (
+  static <T, E extends Evaluable<T>> boolean isExplanationRequired(EvaluableIo<T, E, ?> evaluableIo, boolean expectationFlipped) {
+    return asList(FUNCTION, LEAF).contains(evaluableIo.evaluableType()) && (
         evaluableIo.output().state() == State.EXCEPTION_THROWN || (
-            evaluableIo.evaluableType() == LEAF && returnedValueOrVoidIfSkipped(expectationFlipped, evaluableIo.output())));
+            evaluableIo.evaluable() instanceof Evaluable.LeafPred && returnedValueOrVoidIfSkipped(expectationFlipped, evaluableIo)));
   }
 
   private static List<StackTraceElement> foldInternalPackageElements(Throwable throwable) {
@@ -234,10 +234,10 @@ public abstract class EvaluationEntry {
         .collect(toList());
   }
 
-  private static boolean returnedValueOrVoidIfSkipped(boolean expectationFlipped, ValueHolder<?> output) {
-    if (output.state() == State.EVALUATION_SKIPPED)
+  private static boolean returnedValueOrVoidIfSkipped(boolean expectationFlipped, EvaluableIo<?, ?, ?> io) {
+    if (io.output().state() == State.EVALUATION_SKIPPED)
       return false;
-    return expectationFlipped ^ !(Boolean) output.returnedValue();
+    return expectationFlipped ^ !(Boolean) io.output().returnedValue();
   }
 
   public enum Type {
@@ -433,7 +433,7 @@ public abstract class EvaluationEntry {
 
     @Override
     public boolean requiresExplanation() {
-      return isExplanationRequired(evaluableIo().evaluableType(), evaluableIo(), this.expectationFlipped);
+      return isExplanationRequired(evaluableIo(), this.expectationFlipped);
     }
 
     @SuppressWarnings("unchecked")

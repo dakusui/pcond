@@ -232,7 +232,7 @@ public interface Evaluator {
             ValueHolder<R> ret;
             {
               EvaluableIo<T, Evaluable<T>, Object> ioForHead = createChildEvaluableIoOf(evaluable, input);
-              EvaluationContext<T> childContext = new EvaluationContext<>();
+              EvaluationContext<T> childContext = new EvaluationContext<>(evaluationContext);
               childContext.evaluate(FUNCTION, ioForHead, io -> {
                 ValueHolder<Object> tmp = ValueHolder.create();
                 if (io.input().isValueReturned())
@@ -274,7 +274,7 @@ public interface Evaluator {
         evaluableIo.evaluable().checker().accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
         return;
       }
-      EvaluationContext<T> childContext = new EvaluationContext<>();
+      EvaluationContext<T> childContext = new EvaluationContext<>(evaluationContext);
       childContext.evaluate(
           evaluableIo,
           (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
@@ -291,7 +291,7 @@ public interface Evaluator {
     private <T, R> EvaluableIo<T, Evaluable<T>, R> evaluateMapper(String mapperName, Evaluable<T> mapper, ValueHolder<T> input, EvaluationContext<T> evaluationContext) {
       EvaluableIo<T, Evaluable<T>, R> ioForMapper = createChildEvaluableIoOf(mapper, input.creatorFormType(ValueHolder.CreatorFormType.TRANSFORM));
       {
-        EvaluationContext<T> childContext = new EvaluationContext<>();
+        EvaluationContext<T> childContext = new EvaluationContext<>(evaluationContext);
 
         // #1
         childContext.evaluate(TRANSFORM, mapperName, ioForMapper, io -> {
@@ -309,7 +309,7 @@ public interface Evaluator {
     private <T, R> EvaluableIo<R, Evaluable<R>, Boolean> evaluateChecker(String checkerName, Evaluable<R> checker, ValueHolder<R> input, EvaluationContext<T> evaluationContext) {
       EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = createChildEvaluableIoOf(checker, input);
       {
-        EvaluationContext<R> childContext = new EvaluationContext<>();
+        EvaluationContext<R> childContext = new EvaluationContext<>(evaluationContext);
 
         childContext.evaluate(CHECK, checkerName, ioForChecker, io -> {
           DebuggingUtils.printIo("CHECK:BEFORE", io);
@@ -323,10 +323,10 @@ public interface Evaluator {
       return ioForChecker;
     }
 
-    //             ValueToCut  ValueOnCut ValueForNone
-    // NoneMatch          true      false         true
-    // AnyMatch           true       true        false
-    // AllMatch          false      false         true
+    //             ValueToCut  ValueOnCut ValueForNone(=default)
+    // NoneMatch         true       false                   true
+    // AnyMatch          true        true                  false
+    // AllMatch         false       false                   true
 
     @Override
     public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
@@ -334,28 +334,35 @@ public interface Evaluator {
           evaluableIo,
           (Evaluable.StreamPred<E> evaluable, ValueHolder<Stream<E>> input) -> input.returnedValue()
               .map((E e) -> {
-                EvaluationContext<E> childContext = new EvaluationContext<>();
-                EvaluableIo<E, Evaluable<E>, Boolean> ioForCutPredicate = createChildEvaluableIoOf(evaluable.cut(), ValueHolder.forValue(e));
-                evaluable.cut().accept(ioForCutPredicate, childContext, this);
-                evaluationContext.importEntries(childContext);
-                return ioForCutPredicate.output();
+                if (evaluable.requestExpectationFlip())
+                  evaluationContext.flipExpectation();
+                try {
+                  EvaluationContext<E> childContext = new EvaluationContext<>(evaluationContext);
+                  EvaluableIo<E, Evaluable<E>, Boolean> ioForCutPredicate = createChildEvaluableIoOf(evaluable.cut(), ValueHolder.forValue(e));
+                  evaluable.cut().accept(ioForCutPredicate, childContext, this);
+                  evaluationContext.importEntries(childContext);
+                  return ioForCutPredicate.output();
+                } finally {
+                  if (evaluable.requestExpectationFlip())
+                    evaluationContext.flipExpectation();
+                }
               })
               .filter(eachResult -> {
                 if (!eachResult.isValueReturned())
                   return true;
                 return eachResult.returnedValue() == evaluable.valueToCut();
               })
-              .map(eachResult -> eachResult.valueReturned(!evaluable.defaultValue()))
+              .map(eachResult -> eachResult.valueReturned(!evaluable.defaultValue())) // compute Value on cut
               .findFirst()
-              .orElseGet(() -> ValueHolder.forValue(evaluable.defaultValue())));
+              .orElseGet(() -> ValueHolder.forValue(evaluable.defaultValue())));      // compute Value for none
     }
 
     @Override
     public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
       evaluationContext.evaluate(evaluableIo, (Evaluable.VariableBundlePred evaluable, ValueHolder<VariableBundle> input) -> {
         EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.returnedValue().valueAt(evaluable.argIndex())));
-        System.out.printf("in[%s]:<%s>%n", + evaluable.argIndex(),  input.returnedValue());
-        EvaluationContext<Object> childContext = new EvaluationContext<>();
+        System.out.printf("in[%s]:<%s>%n", +evaluable.argIndex(), input.returnedValue());
+        EvaluationContext<Object> childContext = new EvaluationContext<>(evaluationContext);
         evaluable.enclosed().accept(io, childContext, this);
         evaluationContext.importEntries(childContext);
         return io.output();

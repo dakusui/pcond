@@ -24,6 +24,10 @@ public class EvaluationContext<T> {
   public EvaluationContext() {
   }
 
+  public EvaluationContext(EvaluationContext<?> parent) {
+    this.expectationFlipped = parent.isExpectationFlipped();
+  }
+
   /**
    * @param evaluableIo       An object to hold a form and its I/O.
    * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
