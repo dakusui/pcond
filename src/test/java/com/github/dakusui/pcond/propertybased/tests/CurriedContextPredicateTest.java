@@ -1,12 +1,15 @@
 package com.github.dakusui.pcond.propertybased.tests;
 
-import com.github.dakusui.pcond.propertybased.utils.*;
+import com.github.dakusui.pcond.forms.Experimentals;
+import com.github.dakusui.pcond.propertybased.utils.PropertyBasedTestBase;
+import com.github.dakusui.pcond.propertybased.utils.TestCase;
+import com.github.dakusui.pcond.propertybased.utils.TestCaseParameter;
+import com.github.dakusui.pcond.propertybased.utils.TestCaseUtils;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import static com.github.dakusui.pcond.forms.Experimentals.toCurriedPredicate;
-import static com.github.dakusui.pcond.forms.Experimentals.toCurriedStream;
+import static com.github.dakusui.pcond.forms.Experimentals.toCurriedContextStream;
 import static com.github.dakusui.pcond.forms.Functions.streamOf;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.propertybased.utils.TestCheck.equalsPredicate;
@@ -29,8 +32,8 @@ public class CurriedContextPredicateTest extends PropertyBasedTestBase {
     return new TestCase.Builder.ForReturnedValue<>(
         v = "hello",
         transform(streamOf()                                        // (1)
-            .andThen(toCurriedStream()))                            // (2)
-            .check(anyMatch(toCurriedPredicate(isNotNull()))),
+            .andThen(toCurriedContextStream()))                            // (2)
+            .check(anyMatch(Experimentals.toCurriedContextPredicate(isNotNull()))),
         Object.class)
         .addExpectationPredicate(equalsPredicate(v))
         .build();

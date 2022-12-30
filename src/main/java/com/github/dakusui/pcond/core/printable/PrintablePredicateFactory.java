@@ -111,7 +111,7 @@ public enum PrintablePredicateFactory {
   }
 
   public static <T> Predicate<CurriedContext> variableBundlePredicate(Predicate<T> predicate, int argIndex) {
-    return CurriedPredicate.create(toPrintablePredicateIfNotPrintable(predicate), argIndex);
+    return CurriedContextPredicate.create(toPrintablePredicateIfNotPrintable(predicate), argIndex);
   }
 
   private static RuntimeException noPredicateGiven() {
@@ -432,11 +432,11 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  static class CurriedPredicate extends PrintablePredicate<CurriedContext> implements Evaluable.CurriedPred {
+  static class CurriedContextPredicate extends PrintablePredicate<CurriedContext> implements Evaluable.CurriedContextPred {
     private final Evaluable<?> enclosed;
     private final int          argIndex;
 
-    private <T> CurriedPredicate(Object creator, List<Object> args, Predicate<T> predicate, int argIndex) {
+    private <T> CurriedContextPredicate(Object creator, List<Object> args, Predicate<T> predicate, int argIndex) {
       super(
           creator,
           args,
@@ -458,8 +458,8 @@ public enum PrintablePredicateFactory {
       return argIndex;
     }
 
-    public static <T> CurriedPredicate create(Predicate<T> predicate, int argIndex) {
-      return new CurriedPredicate(CurriedPredicate.class, asList(predicate, argIndex), predicate, argIndex);
+    public static <T> CurriedContextPredicate create(Predicate<T> predicate, int argIndex) {
+      return new CurriedContextPredicate(CurriedContextPredicate.class, asList(predicate, argIndex), predicate, argIndex);
     }
   }
 

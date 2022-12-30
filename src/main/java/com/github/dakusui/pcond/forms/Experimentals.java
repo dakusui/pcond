@@ -1,7 +1,7 @@
 package com.github.dakusui.pcond.forms;
 
 import com.github.dakusui.pcond.core.context.CurriedContext;
-import com.github.dakusui.pcond.core.context.CurriedVariablesUtils;
+import com.github.dakusui.pcond.core.context.CurriedContextUtils;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.printable.ParameterizedFunctionFactory;
 import com.github.dakusui.pcond.core.printable.ParameterizedPredicateFactory;
@@ -27,7 +27,7 @@ public enum Experimentals {
    * @return A function to construct a nested structure.
    */
   public static Function<Stream<?>, Stream<CurriedContext>> nest(Collection<?> inner) {
-    return Printables.function(() -> "nest" + formatObject(inner), (Stream<?> stream) -> CurriedVariablesUtils.nest(stream, inner));
+    return Printables.function(() -> "nest" + formatObject(inner), (Stream<?> stream) -> CurriedContextUtils.nest(stream, inner));
   }
 
   /**
@@ -38,8 +38,8 @@ public enum Experimentals {
    * @return A function to convert an object stream into context stream.
    * @see CurriedContext
    */
-  public static Function<Stream<?>, Stream<CurriedContext>> toCurriedStream() {
-    return Printables.function(() -> "toCurriedStream", CurriedVariablesUtils::toCurriedStream);
+  public static Function<Stream<?>, Stream<CurriedContext>> toCurriedContextStream() {
+    return Printables.function(() -> "toCurriedContextStream", CurriedContextUtils::toCurriedContextStream);
   }
 
   /**
@@ -48,8 +48,8 @@ public enum Experimentals {
    * @param <T> The type of the original value.
    * @return A function to convert a value into a context.
    */
-  public static <T> Function<T, CurriedContext> toContext() {
-    return Printables.function(() -> "toContext", CurriedVariablesUtils::toCurriedContext);
+  public static <T> Function<T, CurriedContext> toCurriedContext() {
+    return Printables.function(() -> "toCurriedContext", CurriedContextUtils::toCurriedContext);
   }
 
   /**
@@ -60,7 +60,7 @@ public enum Experimentals {
    * @param <T>        An expected type of value to be tested.
    * @return A new predicate to test a value in a context.
    */
-  public static <T> Predicate<CurriedContext> toCurriedPredicate(Predicate<T> predicate_, int argIndex) {
+  public static <T> Predicate<CurriedContext> toCurriedContextPredicate(Predicate<T> predicate_, int argIndex) {
     return PrintablePredicateFactory.variableBundlePredicate(predicate_, argIndex);
   }
 
@@ -72,8 +72,8 @@ public enum Experimentals {
    * @param <T>       An expected type of the input value.
    * @return A context predicate.
    */
-  public static <T> Predicate<CurriedContext> toCurriedPredicate(Predicate<T> predicate) {
-    return toCurriedPredicate(predicate, 0);
+  public static <T> Predicate<CurriedContext> toCurriedContextPredicate(Predicate<T> predicate) {
+    return toCurriedContextPredicate(predicate, 0);
   }
 
   /**
@@ -83,8 +83,8 @@ public enum Experimentals {
    * @param orderArgs       An array to specify the order in which values in the context are applied to the function.
    * @return A predicate converted from the given curried function.
    */
-  public static Predicate<CurriedContext> toCurriedPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
-    return CurriedVariablesUtils.toContextPredicate(curriedFunction, orderArgs);
+  public static Predicate<CurriedContext> toCurriedContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
+    return CurriedContextUtils.toContextPredicate(curriedFunction, orderArgs);
   }
 
   /**

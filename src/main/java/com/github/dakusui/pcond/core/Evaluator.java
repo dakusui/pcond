@@ -75,9 +75,9 @@ public interface Evaluator {
    *
    * @param evaluableIo       An object to hold an evaluable and its input and output.
    * @param evaluationContext An evaluation context.
-   * @see Evaluable.CurriedPred
+   * @see Evaluable.CurriedContextPred
    */
-  void evaluateCurriedPredicate(EvaluableIo<CurriedContext, Evaluable.CurriedPred, Boolean> evaluableIo, EvaluationContext<CurriedContext> evaluationContext);
+  void evaluateCurriedContextPredicate(EvaluableIo<CurriedContext, Evaluable.CurriedContextPred, Boolean> evaluableIo, EvaluationContext<CurriedContext> evaluationContext);
 
   /**
    * Evaluates `value` with a "transformation" predicate.
@@ -358,8 +358,8 @@ public interface Evaluator {
     }
 
     @Override
-    public void evaluateCurriedPredicate(EvaluableIo<CurriedContext, Evaluable.CurriedPred, Boolean> evaluableIo, EvaluationContext<CurriedContext> evaluationContext) {
-      evaluationContext.evaluate(evaluableIo, (Evaluable.CurriedPred evaluable, ValueHolder<CurriedContext> input) -> {
+    public void evaluateCurriedContextPredicate(EvaluableIo<CurriedContext, Evaluable.CurriedContextPred, Boolean> evaluableIo, EvaluationContext<CurriedContext> evaluationContext) {
+      evaluationContext.evaluate(evaluableIo, (Evaluable.CurriedContextPred evaluable, ValueHolder<CurriedContext> input) -> {
         EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.returnedValue().valueAt(evaluable.argIndex())));
         EvaluationContext<Object> childContext = new EvaluationContext<>(evaluationContext);
         evaluable.enclosed().accept(io, childContext, this);

@@ -28,13 +28,13 @@ public class TestAssertionsExperimentalsTest extends TestBase {
     validate(
         singletonList("hello"),
         transform(stream().andThen(nest(singletonList("o"))))
-            .check(noneMatch(Experimentals.toCurriedPredicate(stringEndsWith()))));
+            .check(noneMatch(Experimentals.toCurriedContextPredicate(stringEndsWith()))));
   }
 
   @Test
   public void toContextPredicateTest() {
-    assertFalse(Experimentals.toCurriedPredicate(isNotNull()).test(CurriedContext.from(null)));
-    assertTrue(Experimentals.toCurriedPredicate(isNotNull()).test(CurriedContext.from(new Object())));
+    assertFalse(Experimentals.toCurriedContextPredicate(isNotNull()).test(CurriedContext.from(null)));
+    assertTrue(Experimentals.toCurriedContextPredicate(isNotNull()).test(CurriedContext.from(new Object())));
   }
 
   @Test

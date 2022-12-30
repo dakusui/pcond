@@ -173,11 +173,11 @@ public interface Evaluable<T> {
    *
    * @see CurriedContext
    */
-  interface CurriedPred extends Pred<CurriedContext> {
+  interface CurriedContextPred extends Pred<CurriedContext> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     default <O> void accept(EvaluableIo<CurriedContext, Evaluable<CurriedContext>, O> evaluableIo, EvaluationContext<CurriedContext> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluateCurriedPredicate((EvaluableIo<CurriedContext, CurriedPred, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
+      evaluator.evaluateCurriedContextPredicate((EvaluableIo<CurriedContext, CurriedContextPred, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     <T> Evaluable<T> enclosed();
