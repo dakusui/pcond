@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
 import static com.github.dakusui.pcond.forms.Predicates.transform;
-import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.equalsPredicate;
+import static com.github.dakusui.pcond.propertybased.utils.TestCheck.equalsPredicate;
 import static com.github.dakusui.pcond.propertybased.utils.TestCheck.*;
 import static com.github.dakusui.shared.utils.TestUtils.toLowerCase;
 import static com.github.dakusui.shared.utils.TestUtils.toUpperCase;
@@ -43,9 +43,9 @@ public class TransformAndCheckPredicateTest extends PropertyBasedTestBase {
     return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("HELLO")
         .predicate(transform(toLowerCase().andThen(Functions.length())).check(Predicates.isEqualTo(6)))
         .expectedExceptionClass(ComparisonFailure.class)
-        .addCheck(numberOfExpectAndActualSummariesAreEqual())
+        .addCheck(numbersOfExpectAndActualSummariesAreEqual())
         .addCheck(numberOfActualSummariesIsEqualTo(4))
-        .addCheck(numberOfExpectAndActualSummariesWithDetailsAreEqual())
+        .addCheck(numbersOfExpectAndActualSummariesWithDetailsAreEqual())
         .addCheck(numberOfExpectSummariesWithDetailsIsEqualTo(1))
         .build();
   }
@@ -55,9 +55,9 @@ public class TransformAndCheckPredicateTest extends PropertyBasedTestBase {
     return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("HELLO")
         .predicate(transform(toUpperCase().andThen(toLowerCase()).andThen(Functions.length())).check(Predicates.isEqualTo(6)))
         .expectedExceptionClass(ComparisonFailure.class)
-        .addCheck(numberOfExpectAndActualSummariesAreEqual())
+        .addCheck(numbersOfExpectAndActualSummariesAreEqual())
         .addCheck(numberOfActualSummariesIsEqualTo(5))
-        .addCheck(numberOfExpectAndActualSummariesWithDetailsAreEqual())
+        .addCheck(numbersOfExpectAndActualSummariesWithDetailsAreEqual())
         .addCheck(numberOfExpectSummariesWithDetailsIsEqualTo(1))
         .build();
   }
@@ -76,9 +76,9 @@ public class TransformAndCheckPredicateTest extends PropertyBasedTestBase {
     return new TestCase.Builder.ForThrownException<String, ComparisonFailure>("hello")
         .predicate((Predicate<String>) transform(Functions.length()).check(Predicates.isEqualTo(6)))
         .expectedExceptionClass(ComparisonFailure.class)
-        .addCheck(numberOfExpectAndActualSummariesAreEqual())
+        .addCheck(numbersOfExpectAndActualSummariesAreEqual())
         .addCheck(numberOfActualSummariesIsEqualTo(2))
-        .addCheck(numberOfExpectAndActualSummariesWithDetailsAreEqual())
+        .addCheck(numbersOfExpectAndActualSummariesWithDetailsAreEqual())
         .addCheck(numberOfExpectSummariesWithDetailsIsEqualTo(1))
         .build();
   }
@@ -114,9 +114,12 @@ public class TransformAndCheckPredicateTest extends PropertyBasedTestBase {
         .predicate(_root)
         /* UNIVERSAL */
         .expectedExceptionClass(ComparisonFailure.class)
+        .configure(genericConfiguratorForComparisonFailure())
         .addCheck(numberOfExpectSummariesWithDetailsIsGreaterThanOrEqualTo(1))
-        .addCheck(numberOfExpectAndActualSummariesAreEqual())
-        .addCheck(numberOfExpectAndActualSummariesWithDetailsAreEqual())
+        .addCheck(numbersOfExpectAndActualSummariesAreEqual())
+        .addCheck(numbersOfExpectAndActualSummariesWithDetailsAreEqual())
+        .addCheck(numberOfExpectDetailsIsGreaterThanOrEqualTo(1))
+        .addCheck(numbersOfExpectAndActualDetailsAreEqual())
         /* DEPENDING ON FORM NAMES */
         .addCheck(numberOfActualSummariesIsGreaterThanOrEqualTo(_formNamesInUse.size()))
         .addCheck(numberOfExpectSummariesWithDetailsIsEqualTo(_failureCausingPredicates.size()))

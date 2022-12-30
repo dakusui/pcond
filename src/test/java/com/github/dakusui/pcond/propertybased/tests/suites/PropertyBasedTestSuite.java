@@ -13,9 +13,9 @@ import org.junit.runners.Suite.SuiteClasses;
     NegatedPredicateTest.class,
     SimplePredicateTest.class,
     StreamAllMatchPredicateTest.class,
+    StreamNoneMatchPredicateTest.class,
     TransformAndCheckPredicateTest.class,
     VariableBundlePredicateTest.class
 })
 public class PropertyBasedTestSuite {
-
 }

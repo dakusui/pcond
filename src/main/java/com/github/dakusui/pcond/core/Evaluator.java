@@ -361,7 +361,6 @@ public interface Evaluator {
     public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
       evaluationContext.evaluate(evaluableIo, (Evaluable.VariableBundlePred evaluable, ValueHolder<VariableBundle> input) -> {
         EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.returnedValue().valueAt(evaluable.argIndex())));
-        System.out.printf("in[%s]:<%s>%n", +evaluable.argIndex(), input.returnedValue());
         EvaluationContext<Object> childContext = new EvaluationContext<>(evaluationContext);
         evaluable.enclosed().accept(io, childContext, this);
         evaluationContext.importEntries(childContext);

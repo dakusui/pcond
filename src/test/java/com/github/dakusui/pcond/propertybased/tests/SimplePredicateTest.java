@@ -6,7 +6,6 @@ import org.junit.ComparisonFailure;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.*;
 import static org.junit.runners.Parameterized.*;
 
 @RunWith(Parameterized.class)
@@ -25,7 +24,7 @@ public class SimplePredicateTest extends PropertyBasedTestBase {
   public static TestCase<String, Throwable> givenSimplePredicate_whenExpectedValue_thenValueReturned() {
     return new TestCase.Builder.ForReturnedValue<>("HELLO", Predicates.isEqualTo("HELLO"))
         .expectedClass(String.class)
-        .addExpectationPredicate(equalsPredicate("HELLO"))
+        .addExpectationPredicate(TestCheck.equalsPredicate("HELLO"))
         .build();
   }
 
@@ -33,7 +32,7 @@ public class SimplePredicateTest extends PropertyBasedTestBase {
   public static TestCase<String, ComparisonFailure> givenSimplePredicate_whenUnexpectedValue_thenComparisonFailureThrown() {
     return new TestCase.Builder.ForThrownException<>("Hello", Predicates.isEqualTo("HELLO"), ComparisonFailure.class)
         .addCheck(TestCheck.numberOfActualSummariesIsEqualTo(1))
-        .addCheck(TestCheck.numberOfExpectAndActualSummariesAreEqual())
+        .addCheck(TestCheck.numbersOfExpectAndActualSummariesAreEqual())
         .build();
   }
 }

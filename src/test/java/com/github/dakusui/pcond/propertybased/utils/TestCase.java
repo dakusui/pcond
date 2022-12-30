@@ -1,8 +1,11 @@
 package com.github.dakusui.pcond.propertybased.utils;
 
+import org.junit.ComparisonFailure;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -137,8 +140,16 @@ public interface TestCase<V, T extends Throwable> {
         this.expectedExceptionClass(expectedExceptionClass);
       }
 
+      @SuppressWarnings({ "unchecked", "rawtypes" })
       public ForThrownException<V, T> expectedExceptionClass(Class<T> expectedExceptionClass) {
         this.expectedExceptionClass = requireNonNull(expectedExceptionClass);
+        if (ComparisonFailure.class.isAssignableFrom(expectedExceptionClass))
+          return ((ForThrownException) this).configure(TestCheck.genericConfiguratorForComparisonFailure());
+        return this;
+      }
+
+      public ForThrownException<V, T> configure(Consumer<ForThrownException<V, T>> consumer) {
+        consumer.accept(this);
         return this;
       }
 

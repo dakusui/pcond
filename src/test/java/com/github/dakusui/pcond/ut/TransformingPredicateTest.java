@@ -67,14 +67,12 @@ public class TransformingPredicateTest extends TestBase {
   @Test
   public void givenNullForName$whenToString$thenLooksGood() {
     PrintablePredicateFactory.TransformingPredicate<Object, Object> p = new PrintablePredicateFactory.TransformingPredicate<>(null, null, Predicates.alwaysTrue(), Functions.identity());
-    System.out.println(p);
     assertEquals("identity alwaysTrue", p.toString());
   }
 
   @Test
   public void givenNonNullName$whenToString$thenLooksGood() {
     PrintablePredicateFactory.TransformingPredicate<Object, Object> p = new PrintablePredicateFactory.TransformingPredicate<>("hello->", null, Predicates.alwaysTrue(), Functions.identity());
-    System.out.println(p);
     assertEquals("hello->(identity alwaysTrue)", p.toString());
   }
 }

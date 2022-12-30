@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.forms.Predicates.containsString;
 import static com.github.dakusui.pcond.forms.Predicates.isNotNull;
-import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.*;
 
 @RunWith(Parameterized.class)
 public class StreamAllMatchPredicateTest extends PropertyBasedTestBase {
@@ -32,7 +31,7 @@ public class StreamAllMatchPredicateTest extends PropertyBasedTestBase {
         v = Stream.of("hello", "world"),
         Predicates.allMatch(isNotNull()),
         (Class<Stream<String>>) (Class) Stream.class)
-        .addExpectationPredicate(equalsPredicate(v))
+        .addExpectationPredicate(TestCheck.equalsPredicate(v))
         .build();
   }
 
@@ -44,7 +43,7 @@ public class StreamAllMatchPredicateTest extends PropertyBasedTestBase {
         Predicates.allMatch(containsString("o")),
         ComparisonFailure.class)
         .addCheck(TestCheck.numberOfActualSummariesIsEqualTo(4))
-        .addCheck(TestCheck.numberOfExpectAndActualSummariesAreEqual())
+        .addCheck(TestCheck.numbersOfExpectAndActualSummariesAreEqual())
         .build();
   }
 
@@ -56,7 +55,7 @@ public class StreamAllMatchPredicateTest extends PropertyBasedTestBase {
         Predicates.allMatch(isNotNull()),
         ComparisonFailure.class)
         .addCheck(TestCheck.numberOfActualSummariesIsEqualTo(4))
-        .addCheck(TestCheck.numberOfExpectAndActualSummariesAreEqual())
+        .addCheck(TestCheck.numbersOfExpectAndActualSummariesAreEqual())
         .build();
   }
 }

@@ -6,10 +6,9 @@ import org.junit.ComparisonFailure;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static com.github.dakusui.pcond.propertybased.utils.TestCheck.numberOfExpectAndActualSummariesAreEqual;
-import static com.github.dakusui.pcond.propertybased.utils.TestCheck.numberOfExpectAndActualSummariesWithDetailsAreEqual;
+import static com.github.dakusui.pcond.propertybased.utils.TestCheck.numbersOfExpectAndActualSummariesAreEqual;
+import static com.github.dakusui.pcond.propertybased.utils.TestCheck.numbersOfExpectAndActualSummariesWithDetailsAreEqual;
 import static com.github.dakusui.pcond.propertybased.utils.TestCheck.numberOfExpectSummariesWithDetailsIsEqualTo;
-import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.*;
 
 @RunWith(Parameterized.class)
 public class NegatedPredicateTest extends PropertyBasedTestBase {
@@ -26,7 +25,7 @@ public class NegatedPredicateTest extends PropertyBasedTestBase {
   @TestCaseParameter
   public static TestCase<String, Throwable> givenNegatedSimplePredicateReturningFalse_whenExpectedValue_thenValueReturned() {
     return new TestCase.Builder.ForReturnedValue<>("HELLO", Predicates.not(Predicates.isEqualTo("hello")), String.class)
-        .addExpectationPredicate(equalsPredicate("HELLO"))
+        .addExpectationPredicate(TestCheck.equalsPredicate("HELLO"))
         .build();
   }
 
@@ -38,8 +37,8 @@ public class NegatedPredicateTest extends PropertyBasedTestBase {
         ComparisonFailure.class)
         .addCheck(TestCheck.numberOfActualSummariesIsEqualTo(1))
         .addCheck(numberOfExpectSummariesWithDetailsIsEqualTo(1))
-        .addCheck(numberOfExpectAndActualSummariesAreEqual())
-        .addCheck(numberOfExpectAndActualSummariesWithDetailsAreEqual())
+        .addCheck(numbersOfExpectAndActualSummariesAreEqual())
+        .addCheck(numbersOfExpectAndActualSummariesWithDetailsAreEqual())
         .build();
   }
 }

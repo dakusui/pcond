@@ -180,7 +180,6 @@ public enum PrintablePredicateFactory {
     EQUALS_IGNORE_CASE(
         (args) -> () -> format("equalsIgnoreCase[%s]", args.get(0)),
         (args) -> (s) -> {
-          System.out.println("equalsIgnoreCase");
           return ((String) s).equalsIgnoreCase((String) args.get(0));
         }),
     OBJECT_IS_SAME_AS(

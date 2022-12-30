@@ -142,7 +142,6 @@ public class ReportParser {
         this.line = line;
         this.detailIndex = extractIndex(this.line());
         String[] fields = Arrays.stream(this.line().replaceAll("^\\[\\d+]", "").split("->")).map(String::trim).toArray(String[]::new);
-        System.out.println(Arrays.toString(fields));
         assert fields.length == 2 || fields.length == 3;
         if (fields.length == 2) {
           this.in = null;

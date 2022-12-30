@@ -9,7 +9,7 @@ import static com.github.dakusui.pcond.forms.Experimentals.toVariableBundlePredi
 import static com.github.dakusui.pcond.forms.Experimentals.toVariableBundleStream;
 import static com.github.dakusui.pcond.forms.Functions.streamOf;
 import static com.github.dakusui.pcond.forms.Predicates.*;
-import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.equalsPredicate;
+import static com.github.dakusui.pcond.propertybased.utils.TestCheck.equalsPredicate;
 
 @RunWith(Parameterized.class)
 public class VariableBundlePredicateTest extends PropertyBasedTestBase {

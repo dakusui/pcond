@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.propertybased.utils;
 
-import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -48,13 +47,5 @@ public enum ReportCheckUtils {
         return s;
       }
     };
-  }
-
-  public static <T> Predicate<T> equalsPredicate(T w) {
-    return makePrintablePredicate("equals(" + w + ")", v -> Objects.equals(v, w));
-  }
-
-  public static Predicate<Integer> greaterThanOrEqualToPredicate(int w) {
-    return makePrintablePredicate("greaterThan(" + w + ")", (Integer v) -> v >= w);
   }
 }

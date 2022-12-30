@@ -54,11 +54,6 @@ public enum TestCaseUtils {
 
   @SuppressWarnings("unchecked")
   private static <T, E extends Throwable, F> void examineThrownException(TestCase<T, E> testCase, Throwable t) throws Throwable {
-    System.out.println(t.getMessage());
-    if (t instanceof ComparisonFailure) {
-      System.out.println(((ComparisonFailure) t).getExpected());
-      System.out.println(((ComparisonFailure) t).getActual());
-    }
     if (testCase.expectationForThrownException().isPresent()) {
       TestCase.Expectation<E> exceptionExpectation = testCase.expectationForThrownException().get();
       if (exceptionExpectation.expectedClass().isAssignableFrom(t.getClass())) {
@@ -86,7 +81,7 @@ public enum TestCaseUtils {
               testresuls.stream()
                   .map((CheckResult each) ->
                       format("%-2s %s(%s(%s)->(%s))", each.passed ? "" : "NG", each.testDef.check, each.testDef.transform, formatObject(t, 16), formatObject(each.transformOutput)))
-                  .collect(joining("%n- ", "----%n- ", "%n----"))) + String.format("%n%nTHROWN EXCEPTION DETAIL:%n") + formatException(t));
+                  .collect(joining("%n- ", "----%n- ", "%n----"))) + format("%n%nTHROWN EXCEPTION DETAIL:%n") + formatException(t));
         }
       } else
         throw new AssertionError("Expected exception is '" + exceptionExpectation.expectedClass() + "' but thrown exception was: " + t);
@@ -106,12 +101,12 @@ public enum TestCaseUtils {
       b.append("  ").append(s).append(format("%n"));
     }
     b.append(format("%n"));
-    b.append("ACTUAL:").append(String.format("%n"));
+    b.append("ACTUAL:").append(format("%n"));
     for (String s : ((ComparisonFailure) t).getActual().split("\n")) {
       b.append("  ").append(s).append(format("%n"));
     }
     b.append(format("%n"));
-    b.append("STACKTRACE:").append("%n");
+    b.append("STACKTRACE:").append(format("%n"));
     for (StackTraceElement s : t.getStackTrace()) {
       b.append("  ").append(s).append(format("%n"));
     }
