@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut.fluent4;
 
 import com.github.dakusui.pcond.core.fluent.builtins.StringTransformer;
+import com.github.dakusui.pcond.core.fluent.CustomTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
@@ -30,7 +31,7 @@ public class Fluent4Example {
           .isTrue());
     }
 
-    @Test//(expected = ComparisonFailure.class)
+    @Test(expected = ComparisonFailure.class)
     public void test_b() {
       assertAll(
           stringTransformer("INPUT_VALUE")

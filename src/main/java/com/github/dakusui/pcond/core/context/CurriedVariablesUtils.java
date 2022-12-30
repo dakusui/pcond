@@ -18,37 +18,37 @@ import static java.util.Objects.requireNonNull;
 /**
  * A utility class that collects helper methods for the "Context" mechanism.
  */
-public enum VariableBundleUtils {
+public enum CurriedVariablesUtils {
   ;
 
   public static Stream<CurriedContext> nest(Stream<?> stream, Collection<?> inner) {
-    return toVariableBundleStream(stream)
+    return toCurriedStream(stream)
         .flatMap((CurriedContext curriedContext) -> inner
             .stream()
             .map((Function<Object, CurriedContext>) curriedContext::append));
   }
 
-  public static Stream<CurriedContext> toVariableBundleStream(Stream<?> stream) {
-    return stream.map(VariableBundleUtils::toVariableBundle);
+  public static Stream<CurriedContext> toCurriedStream(Stream<?> stream) {
+    return stream.map(CurriedVariablesUtils::toCurriedContext);
   }
 
-  public static <T> CurriedContext toVariableBundle(T t) {
+  public static <T> CurriedContext toCurriedContext(T t) {
     return t instanceof CurriedContext ? (CurriedContext) t : CurriedContext.from(t);
   }
 
   public static <R> Predicate<CurriedContext> applyAndTest(CurriedFunction<Object, Object> curriedFunction, Predicate<? super R> pred, @SuppressWarnings("SameParameterValue") Class<? extends R> type, int... orderArgs) {
     List<Object> spec = asList(curriedFunction, pred, asList(Arrays.stream(orderArgs).boxed().toArray()));
     return PrintablePredicateFactory.parameterizedLeaf(
-        args -> () -> String.format("%s(%s%s)", args.get(1), args.get(0), args.get(2)), args -> (CurriedContext curriedContext) -> (pred).test(type.cast(CurryingUtils.applyCurriedFunction(curriedFunction, orderArgs).apply(curriedContext))), spec, VariableBundleUtils.class
+        args -> () -> String.format("%s(%s%s)", args.get(1), args.get(0), args.get(2)), args -> (CurriedContext curriedContext) -> (pred).test(type.cast(CurryingUtils.applyCurriedFunction(curriedFunction, orderArgs).apply(curriedContext))), spec, CurriedVariablesUtils.class
     );
   }
 
   public static Predicate<CurriedContext> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
-    return VariableBundleUtils.applyAndTest(curriedFunction, createPredicate("curry", Predicates.isTrue()), Boolean.class, orderArgs);
+    return CurriedVariablesUtils.applyAndTest(curriedFunction, createPredicate("curry", Predicates.isTrue()), Boolean.class, orderArgs);
   }
 
   public static <T> Predicate<T> createPredicate(String s, Predicate<T> predicate) {
     requireNonNull(s);
-    return PrintablePredicateFactory.leaf(() -> s, predicate, VariableBundleUtils.class);
+    return PrintablePredicateFactory.leaf(() -> s, predicate, CurriedVariablesUtils.class);
   }
 }

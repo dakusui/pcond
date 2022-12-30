@@ -5,7 +5,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import static com.github.dakusui.pcond.forms.Experimentals.toVariableBundlePredicate;
+import static com.github.dakusui.pcond.forms.Experimentals.toCurriedPredicate;
 import static com.github.dakusui.pcond.forms.Experimentals.toCurriedStream;
 import static com.github.dakusui.pcond.forms.Functions.streamOf;
 import static com.github.dakusui.pcond.forms.Predicates.*;
@@ -30,7 +30,7 @@ public class CurriedContextPredicateTest extends PropertyBasedTestBase {
         v = "hello",
         transform(streamOf()                                        // (1)
             .andThen(toCurriedStream()))                            // (2)
-            .check(anyMatch(toVariableBundlePredicate(isNotNull()))),
+            .check(anyMatch(toCurriedPredicate(isNotNull()))),
         Object.class)
         .addExpectationPredicate(equalsPredicate(v))
         .build();

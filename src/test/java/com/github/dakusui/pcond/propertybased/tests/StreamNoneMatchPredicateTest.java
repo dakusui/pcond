@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.propertybased.tests;
 
+import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.propertybased.utils.PropertyBasedTestBase;
@@ -16,7 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.forms.Experimentals.nest;
-import static com.github.dakusui.pcond.forms.Experimentals.toVariableBundlePredicate;
+import static com.github.dakusui.pcond.forms.Experimentals.toCurriedPredicate;
 import static com.github.dakusui.pcond.forms.Functions.length;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.propertybased.utils.TestCheck.*;
@@ -44,7 +45,7 @@ public class StreamNoneMatchPredicateTest extends PropertyBasedTestBase {
         Stream.of(null, "Hi", "hello", "world", null),
         transform(nest(asList("1", "2", "o")))
             .check(noneMatch(
-                toVariableBundlePredicate(transform(Functions.length()).check(gt(3))))))
+                toCurriedPredicate(transform(Functions.length()).check(gt(3))))))
         .expectedExceptionClass(ComparisonFailure.class)
         /* Test Case Specific Check*/
         .addCheck(numberOfActualSummariesIsEqualTo(
@@ -63,7 +64,7 @@ public class StreamNoneMatchPredicateTest extends PropertyBasedTestBase {
         Stream.of("Hi", "hello", "world", null),
         transform(nest(asList("1", "2", "o")))
             .check(noneMatch(
-                toVariableBundlePredicate(transform(length()).check(gt(3))))))
+                toCurriedPredicate(transform(length()).check(gt(3))))))
         //      |                         |         |                         |
         //      |                         |         |                         |
         //     (1)                       (2)       (3)                       (4),
@@ -85,7 +86,7 @@ public class StreamNoneMatchPredicateTest extends PropertyBasedTestBase {
     return new TestCase.Builder.ForThrownException<Stream<?>, ComparisonFailure>(
         Stream.of("Hi", "hello", "world"),
         transform(nest(asList("1", "2", "o")))
-            .check(noneMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))))
+            .check(noneMatch(Experimentals.toCurriedPredicate(stringEndsWith(), 0, 1))))
         .expectedExceptionClass(ComparisonFailure.class)
         /* Test Case Specific Check*/
         .addCheck(numberOfActualSummariesIsEqualTo(
@@ -104,7 +105,7 @@ public class StreamNoneMatchPredicateTest extends PropertyBasedTestBase {
   public static TestCase<Stream<?>, ComparisonFailure> givenStreamPredicate$hello_b_e_4$_whenUnexpectedValue_thenComparisonFailure2() {
     return new TestCase.Builder.ForThrownException<Stream<?>, ComparisonFailure>(Stream.of(null, "Hi", "hello", "world", null),
         transform(nest(asList("1", "2", "o"))).check(noneMatch(
-            toVariableBundlePredicate(
+            toCurriedPredicate(
                 transform(
                     Printables.function("throwIntentionalError", (Function<String, Integer>) s -> {
                       throw new IntentionalError();

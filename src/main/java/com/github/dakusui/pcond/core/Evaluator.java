@@ -77,7 +77,7 @@ public interface Evaluator {
    * @param evaluationContext An evaluation context.
    * @see Evaluable.CurriedPred
    */
-  void evaluateVariableBundlePredicate(EvaluableIo<CurriedContext, Evaluable.CurriedPred, Boolean> evaluableIo, EvaluationContext<CurriedContext> evaluationContext);
+  void evaluateCurriedPredicate(EvaluableIo<CurriedContext, Evaluable.CurriedPred, Boolean> evaluableIo, EvaluationContext<CurriedContext> evaluationContext);
 
   /**
    * Evaluates `value` with a "transformation" predicate.
@@ -358,7 +358,7 @@ public interface Evaluator {
     }
 
     @Override
-    public void evaluateVariableBundlePredicate(EvaluableIo<CurriedContext, Evaluable.CurriedPred, Boolean> evaluableIo, EvaluationContext<CurriedContext> evaluationContext) {
+    public void evaluateCurriedPredicate(EvaluableIo<CurriedContext, Evaluable.CurriedPred, Boolean> evaluableIo, EvaluationContext<CurriedContext> evaluationContext) {
       evaluationContext.evaluate(evaluableIo, (Evaluable.CurriedPred evaluable, ValueHolder<CurriedContext> input) -> {
         EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.returnedValue().valueAt(evaluable.argIndex())));
         EvaluationContext<Object> childContext = new EvaluationContext<>(evaluationContext);

@@ -12,7 +12,6 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.forms.Experimentals.nest;
-import static com.github.dakusui.pcond.forms.Experimentals.toVariableBundlePredicate;
 import static com.github.dakusui.pcond.forms.Functions.stream;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
@@ -29,13 +28,13 @@ public class TestAssertionsExperimentalsTest extends TestBase {
     validate(
         singletonList("hello"),
         transform(stream().andThen(nest(singletonList("o"))))
-            .check(noneMatch(toVariableBundlePredicate(stringEndsWith()))));
+            .check(noneMatch(Experimentals.toCurriedPredicate(stringEndsWith()))));
   }
 
   @Test
   public void toContextPredicateTest() {
-    assertFalse(Experimentals.toVariableBundlePredicate(isNotNull()).test(CurriedContext.from(null)));
-    assertTrue(Experimentals.toVariableBundlePredicate(isNotNull()).test(CurriedContext.from(new Object())));
+    assertFalse(Experimentals.toCurriedPredicate(isNotNull()).test(CurriedContext.from(null)));
+    assertTrue(Experimentals.toCurriedPredicate(isNotNull()).test(CurriedContext.from(new Object())));
   }
 
   @Test
