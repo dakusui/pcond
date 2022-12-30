@@ -140,7 +140,9 @@ public class TestCheck<T, R> {
   }
 
   public static TestCheck<ComparisonFailure, List<String>> detailAtContains(Function<ComparisonFailure, String> reportSelector, int i, BiPredicate<Integer, String> lineCondition) {
-    return checkDetailAt(reportSelector, i,
+    return checkDetailAt(
+        reportSelector,
+        i,
         makePrintablePredicate(
             "anyMatch[" + lineCondition + "]",
             l -> {
@@ -178,7 +180,7 @@ public class TestCheck<T, R> {
   private static Function<ComparisonFailure, List<String>> functionToExtractDetailAt(int i, Function<ComparisonFailure, String> reportSelector) {
     return makePrintableFunction(
         "[" + reportSelector + "]->reportToDetailAt[" + i + "]",
-        comparisonFailure -> new ReportParser(comparisonFailure.getExpected()).details().get(i).body());
+        comparisonFailure -> new ReportParser(reportSelector.apply(comparisonFailure)).details().get(i).body());
   }
 
   private static Predicate<List<String>> sizeIs(Predicate<Integer> p, int i) {

@@ -335,7 +335,7 @@ public class PredicatesTest {
   }
 
   public static class FindStringsTest extends TestBase {
-    @Test//(expected = ComparisonFailure.class)
+    @Test(expected = ComparisonFailure.class)
     public void givenSomeFoundSomeNot$whenFindString$thenFailed() {
       String text = "Gallia est omnis divisa in partes tres, quarum unum incolunt Belgae, aliam Acquitanii, tertiam nostra Galli Appellantur. De Bello Gallicco.";
       try {

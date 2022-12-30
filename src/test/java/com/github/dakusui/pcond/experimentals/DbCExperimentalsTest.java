@@ -4,7 +4,6 @@ import com.github.dakusui.pcond.core.context.VariableBundle;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.pcond.forms.Functions;
-import com.github.dakusui.pcond.ut.IntentionalError;
 import com.github.dakusui.pcond.ut.IntentionalException;
 import com.github.dakusui.shared.ExperimentalsUtils;
 import com.github.dakusui.shared.IllegalValueException;
@@ -59,103 +58,12 @@ public class DbCExperimentalsTest extends TestBase {
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toVariableBundlePredicate(stringEndsWith(), 1, 0))));
   }
 
-  @Test(expected = IllegalValueException.class)
-  public void hello_b_e() {
-    try {
-      validate(
-          asList("Hi", "hello", "world"),
-          transform(stream()
-              .andThen(nest(asList("1", "2", "o"))))
-              .check(noneMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))));                // (1)
-    } catch (IllegalValueException e) {
-      /* BEFORE
-com.github.dakusui.pcond.provider.exceptions.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
-["Hi","hello","world"]          -> =>                                                                  ->     false
-                                     stream                                                            ->   ReferencePipeline$Head@1888ff2c
-ReferencePipeline$Head@1888ff2c ->   nest["1","2","o"]                                                 ->   ReferencePipeline$7@6adca536
-ReferencePipeline$7@6adca536    ->   noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])] ->   false
-context:[hello, o]              ->     contextPredicate(stringEndsWith(String)(String)[0, 1])          -> true
-	at com.github.dakusui.pcond.provider.AssertionProviderBase.lambda$exceptionComposerForPrecondition$0(AssertionProviderBase.java:83)
-       */
-      /* AFTER
-com.github.dakusui.pcond.provider.exceptions.PreconditionViolationException: value:["Hi","hello","world"] violated precondition:value stream->nest["1","2","o"] noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])]
-["Hi","hello","world"]       -> =>                                                                  ->     false
-                                  stream->nest["1","2","o"]                                         ->   ReferencePipeline$7@6c3708b3
-ReferencePipeline$7@6c3708b3 ->   noneMatch[contextPredicate(stringEndsWith(String)(String)[0, 1])] ->   false
-context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(String)[0, 1])          -> true
-	at com.github.dakusui.pcond.provider.AssertionProviderBase.lambda$exceptionComposerForPrecondition$0(AssertionProviderBase.java:83)
-       */
-      e.printStackTrace(System.out);
-      // expected (1)
-      assertThat(
-          lineAt(e.getMessage(), 5),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("curry"),
-              //              CoreMatchers.containsString("stringEndsWith(String)(String)[0, 1]"),
-              CoreMatchers.containsString("false")
-          ));
-      // actual (1)
-      assertThat(
-          lineAt(e.getMessage(), 6),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("curry"),
-              //              CoreMatchers.containsString("stringEndsWith(String)(String)[0, 1]"),
-              CoreMatchers.containsString("true")
-          ));
-      throw e;
-    }
-  }
-
-
   @Test
   public void givenStream_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
     validate(
         asList("Hi", "hello", "world"),
         transform((Functions.<String>stream())).check(anyMatch(containsString("hello"))),
         IllegalValueException::new);
-  }
-
-
-  @Test(expected = IllegalValueException.class)
-  public void givenStreamContainingNull_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
-    try {
-      validate(
-          asList(null, "Hi", "hello", "world", null),
-          transform(stream().andThen(nest(asList("1", "2", "o"))))
-              .check(noneMatch(
-                  toVariableBundlePredicate(transform(Functions.length()).check(gt(3))))),
-          IllegalValueException::new);
-    } catch (IllegalValueException e) {
-      e.printStackTrace(System.out);
-      assertThat(
-          lineAt(e.getMessage(), 3),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("contex..."),
-              CoreMatchers.containsString("length >[3]"),
-              CoreMatchers.containsString(",0"),
-              CoreMatchers.containsString("NullPointerException")
-          ));
-      assertThat(
-          lineAt(e.getMessage(), 5),
-          CoreMatchers.containsString("transform"));
-      assertThat(
-          lineAt(e.getMessage(), 5),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("length"),
-              CoreMatchers.containsString("NullPointerException")
-          ));
-      throw e;
-    }
-  }
-
-  @Test(expected = IntentionalError.class)
-  public void hello_b_e4() {
-    validate(
-        asList(null, "Hi", "hello", "world", null),
-        transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
-            toVariableBundlePredicate(transform((Function<String, Integer>) s -> {
-              throw new IntentionalError();
-            }).check(gt(3))))));
   }
 
   @Test(expected = IllegalValueException.class)
@@ -201,18 +109,18 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
               CoreMatchers.containsString("transform")));
       // (1)
       assertThat(
-          lineAt(e.getMessage(), i),
+          lineAt(e.getMessage(), ++i),
           CoreMatchers.containsString("streamOf"));
       // (2)
       assertThat(
           lineAt(e.getMessage(), ++i),
-          CoreMatchers.containsString("toContextStream"));
+          CoreMatchers.containsString("toVariableBundle"));
       // expected (3)
       assertThat(
           lineAt(e.getMessage(), ++i),
           CoreMatchers.allOf(
               CoreMatchers.containsString("anyMatch"),
-              CoreMatchers.containsString("context..."),
+              CoreMatchers.containsString("curry"),
               CoreMatchers.containsString("isNull"),
               CoreMatchers.containsString("0"),
               CoreMatchers.containsString("true")));
@@ -221,7 +129,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           lineAt(e.getMessage(), ++i),
           CoreMatchers.allOf(
               CoreMatchers.containsString("anyMatch"),
-              CoreMatchers.containsString("context..."),
+              CoreMatchers.containsString("curry"),
               CoreMatchers.containsString("isNull"),
               CoreMatchers.containsString("0"),
               CoreMatchers.containsString("false")));
@@ -252,13 +160,13 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           CoreMatchers.allOf(
               CoreMatchers.containsString("hello"),
               CoreMatchers.containsString("toContext"),
-              CoreMatchers.containsString("context:[hello]")
+              CoreMatchers.containsString("variables:[hello]")
           ));
       // expected (2) -1
       assertThat(
           lineAt(e.getMessage(), ++i),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("context:[hello]"),
+              CoreMatchers.containsString("variables:[hello]"),
               CoreMatchers.containsString("check")
           ));
       // expected (2) -2
@@ -275,7 +183,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       assertThat(
           lineAt(e.getMessage(), ++i),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("context:[hello]"),
+              CoreMatchers.containsString("variables:[hello]"),
               CoreMatchers.containsString("check")
           ));
       // actual (2) -2
@@ -311,7 +219,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
               CoreMatchers.containsString("transform")));
       // (1)
       assertThat(
-          lineAt(e.getMessage(), i),
+          lineAt(e.getMessage(), ++i),
           CoreMatchers.containsString("stream"));
       // (2)
       assertThat(
@@ -324,7 +232,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           lineAt(e.getMessage(), ++i),
           CoreMatchers.allOf(
               CoreMatchers.containsString("allMatch"),
-              CoreMatchers.containsString("context..."),
+              CoreMatchers.containsString("curry"),
               CoreMatchers.containsString("String"),
               CoreMatchers.containsString("true")));
       // actual (3)
@@ -332,7 +240,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           lineAt(e.getMessage(), ++i),
           CoreMatchers.allOf(
               CoreMatchers.containsString("allMatch"),
-              CoreMatchers.containsString("context..."),
+              CoreMatchers.containsString("curry"),
               CoreMatchers.containsString("String"),
               CoreMatchers.containsString("false")));
       throw e;

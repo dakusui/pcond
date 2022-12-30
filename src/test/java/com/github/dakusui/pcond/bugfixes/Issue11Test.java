@@ -27,12 +27,11 @@ public class Issue11Test extends TestBase {
       assertThat(lineAt(e.getMessage(), ++i), containsString("and"));
       // skip diff line
       ++i;
-      assertThat(lineAt(e.getMessage(), ++i), containsString("transform"));
+      ++i;
       assertThat(lineAt(e.getMessage(), i), containsString("size"));
       assertThat(lineAt(e.getMessage(), ++i), containsString("check"));
       assertThat(lineAt(e.getMessage(), i), containsString("isEqualTo[1]"));
-      assertThat(lineAt(e.getMessage(), ++i), containsString("transform"));
-      assertThat(lineAt(e.getMessage(), i), containsString("at[0]"));
+      assertThat(lineAt(e.getMessage(), ++i), containsString("at[0]"));
       assertThat(lineAt(e.getMessage(), ++i), containsString("check"));
       assertThat(lineAt(e.getMessage(), i), containsString("and"));
       // skip diff line
