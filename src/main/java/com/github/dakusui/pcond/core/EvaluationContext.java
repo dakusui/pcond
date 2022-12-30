@@ -73,7 +73,7 @@ public class EvaluationContext<T> {
   }
 
   public static <T> EvaluationEntry.Type resolveEvaluationEntryType(Evaluable<T> evaluable) {
-    if (evaluable instanceof Evaluable.LeafPred || evaluable instanceof Evaluable.VariableBundlePred || evaluable instanceof Evaluable.StreamPred)
+    if (evaluable instanceof Evaluable.LeafPred || evaluable instanceof Evaluable.CurriedPred || evaluable instanceof Evaluable.StreamPred)
       return LEAF;
     if (evaluable instanceof Evaluable.Func)
       return FUNCTION;

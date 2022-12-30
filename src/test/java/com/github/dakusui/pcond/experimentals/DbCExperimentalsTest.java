@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.experimentals;
 
-import com.github.dakusui.pcond.core.context.VariableBundle;
+import com.github.dakusui.pcond.core.context.CurriedContext;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.pcond.forms.Functions;
@@ -33,7 +33,7 @@ public class DbCExperimentalsTest extends TestBase {
    * You can build a check using a multi-parameter static method which returns a boolean value.
    * In this example, {@link TargetMethodHolder#stringEndsWith(String, String)} is the method.
    * It is turned into a curried function in {@link ExperimentalsUtils#stringEndsWith()} and then passed to {@link Experimentals#toVariableBundlePredicate(CurriedFunction, int...)}.
-   * The method {@code Experimentals#test(CurriedFunction, int...)} converts a curried function whose final returned value is a boolean into a predicate of a {@link VariableBundle}.
+   * The method {@code Experimentals#test(CurriedFunction, int...)} converts a curried function whose final returned value is a boolean into a predicate of a {@link CurriedContext}.
    * A {@code Context} may have one or more values at once and those values are indexed.
    */
   @Test
@@ -80,7 +80,7 @@ public class DbCExperimentalsTest extends TestBase {
   public void hello_c() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(toVariableBundleStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))));
+        transform(stream().andThen(toCurriedStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))));
   }
 
   @Test
@@ -96,7 +96,7 @@ public class DbCExperimentalsTest extends TestBase {
       validate(
           "hello",
           transform(streamOf()                                        // (1)
-              .andThen(toVariableBundleStream()))                            // (2)
+              .andThen(toCurriedStream()))                            // (2)
               .check(anyMatch(toVariableBundlePredicate(isNull()))));        // (3)
     } catch (IllegalValueException e) {
       e.printStackTrace();
@@ -114,7 +114,7 @@ public class DbCExperimentalsTest extends TestBase {
       // (2)
       assertThat(
           lineAt(e.getMessage(), ++i),
-          CoreMatchers.containsString("toVariableBundle"));
+          CoreMatchers.containsString("toCurriedStream"));
       // expected (3)
       assertThat(
           lineAt(e.getMessage(), ++i),
@@ -279,10 +279,10 @@ public class DbCExperimentalsTest extends TestBase {
   public void hello4() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(new Predicate<VariableBundle>() {
+        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(new Predicate<CurriedContext>() {
           @Override
-          public boolean test(VariableBundle variableBundle) {
-            return variableBundle.valueAt(1).equals("1");
+          public boolean test(CurriedContext curriedContext) {
+            return curriedContext.valueAt(1).equals("1");
           }
 
           @Override
@@ -296,10 +296,10 @@ public class DbCExperimentalsTest extends TestBase {
   public void hello4_a() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<VariableBundle>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<CurriedContext>() {
           @Override
-          public boolean test(VariableBundle variableBundle) {
-            return variableBundle.valueAt(1).equals("1");
+          public boolean test(CurriedContext curriedContext) {
+            return curriedContext.valueAt(1).equals("1");
           }
 
           @Override
@@ -313,10 +313,10 @@ public class DbCExperimentalsTest extends TestBase {
   public void hello5() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2")))).check(allMatch(new Predicate<VariableBundle>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(allMatch(new Predicate<CurriedContext>() {
           @Override
-          public boolean test(VariableBundle variableBundle) {
-            return variableBundle.valueAt(1).equals("1");
+          public boolean test(CurriedContext curriedContext) {
+            return curriedContext.valueAt(1).equals("1");
           }
 
           @Override
@@ -330,10 +330,10 @@ public class DbCExperimentalsTest extends TestBase {
   public void hello6() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<VariableBundle>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<CurriedContext>() {
           @Override
-          public boolean test(VariableBundle variableBundle) {
-            return variableBundle.valueAt(1).equals("1");
+          public boolean test(CurriedContext curriedContext) {
+            return curriedContext.valueAt(1).equals("1");
           }
 
           @Override

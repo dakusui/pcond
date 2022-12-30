@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
-import com.github.dakusui.pcond.core.context.VariableBundle;
+import com.github.dakusui.pcond.core.context.CurriedContext;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
@@ -110,8 +110,8 @@ public enum PrintablePredicateFactory {
     return AnyMatch.create(predicate);
   }
 
-  public static <T> Predicate<VariableBundle> variableBundlePredicate(Predicate<T> predicate, int argIndex) {
-    return VariableBundlePredicate.create(toPrintablePredicateIfNotPrintable(predicate), argIndex);
+  public static <T> Predicate<CurriedContext> variableBundlePredicate(Predicate<T> predicate, int argIndex) {
+    return CurriedPredicate.create(toPrintablePredicateIfNotPrintable(predicate), argIndex);
   }
 
   private static RuntimeException noPredicateGiven() {
@@ -432,11 +432,11 @@ public enum PrintablePredicateFactory {
     }
   }
 
-  static class VariableBundlePredicate extends PrintablePredicate<VariableBundle> implements Evaluable.VariableBundlePred {
+  static class CurriedPredicate extends PrintablePredicate<CurriedContext> implements Evaluable.CurriedPred {
     private final Evaluable<?> enclosed;
     private final int          argIndex;
 
-    private <T> VariableBundlePredicate(Object creator, List<Object> args, Predicate<T> predicate, int argIndex) {
+    private <T> CurriedPredicate(Object creator, List<Object> args, Predicate<T> predicate, int argIndex) {
       super(
           creator,
           args,
@@ -458,8 +458,8 @@ public enum PrintablePredicateFactory {
       return argIndex;
     }
 
-    public static <T> VariableBundlePredicate create(Predicate<T> predicate, int argIndex) {
-      return new VariableBundlePredicate(VariableBundlePredicate.class, asList(predicate, argIndex), predicate, argIndex);
+    public static <T> CurriedPredicate create(Predicate<T> predicate, int argIndex) {
+      return new CurriedPredicate(CurriedPredicate.class, asList(predicate, argIndex), predicate, argIndex);
     }
   }
 

@@ -6,21 +6,21 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import static com.github.dakusui.pcond.forms.Experimentals.toVariableBundlePredicate;
-import static com.github.dakusui.pcond.forms.Experimentals.toVariableBundleStream;
+import static com.github.dakusui.pcond.forms.Experimentals.toCurriedStream;
 import static com.github.dakusui.pcond.forms.Functions.streamOf;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.propertybased.utils.TestCheck.equalsPredicate;
 
 @RunWith(Parameterized.class)
-public class VariableBundlePredicateTest extends PropertyBasedTestBase {
+public class CurriedContextPredicateTest extends PropertyBasedTestBase {
 
-  public VariableBundlePredicateTest(String testName, TestCase<?, ?> testCase) {
+  public CurriedContextPredicateTest(String testName, TestCase<?, ?> testCase) {
     super(testName, testCase);
   }
 
   @Parameters(name = "{index}: {0}")
   public static Iterable<Object[]> parameters() {
-    return TestCaseUtils.parameters(VariableBundlePredicateTest.class);
+    return TestCaseUtils.parameters(CurriedContextPredicateTest.class);
   }
 
   @TestCaseParameter
@@ -29,7 +29,7 @@ public class VariableBundlePredicateTest extends PropertyBasedTestBase {
     return new TestCase.Builder.ForReturnedValue<>(
         v = "hello",
         transform(streamOf()                                        // (1)
-            .andThen(toVariableBundleStream()))                            // (2)
+            .andThen(toCurriedStream()))                            // (2)
             .check(anyMatch(toVariableBundlePredicate(isNotNull()))),
         Object.class)
         .addExpectationPredicate(equalsPredicate(v))

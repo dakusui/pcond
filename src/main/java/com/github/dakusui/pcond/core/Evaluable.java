@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.core.context.VariableBundle;
+import com.github.dakusui.pcond.core.context.CurriedContext;
 
 import java.util.List;
 import java.util.Optional;
@@ -169,15 +169,15 @@ public interface Evaluable<T> {
   }
 
   /**
-   * An interface to model a predicate for {@link VariableBundle}.
+   * An interface to model a predicate for {@link CurriedContext}.
    *
-   * @see VariableBundle
+   * @see CurriedContext
    */
-  interface VariableBundlePred extends Pred<VariableBundle> {
+  interface CurriedPred extends Pred<CurriedContext> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default <O> void accept(EvaluableIo<VariableBundle, Evaluable<VariableBundle>, O> evaluableIo, EvaluationContext<VariableBundle> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluateVariableBundlePredicate((EvaluableIo<VariableBundle, VariableBundlePred, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
+    default <O> void accept(EvaluableIo<CurriedContext, Evaluable<CurriedContext>, O> evaluableIo, EvaluationContext<CurriedContext> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateVariableBundlePredicate((EvaluableIo<CurriedContext, CurriedPred, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     <T> Evaluable<T> enclosed();
