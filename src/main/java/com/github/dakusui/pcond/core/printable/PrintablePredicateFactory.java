@@ -363,8 +363,8 @@ public enum PrintablePredicateFactory {
           TransformingPredicate.class,
           asList(predicate, function),
           () -> mapperName == null ?
-              format("%s %s", function, checkerName == null ? predicate : checkerName) :
-              format("%s(%s %s)", mapperName, function, checkerName == null ? predicate : checkerName),
+              format("%s %s", function, checkerName == null ? predicate : (checkerName + ":" + predicate.toString())) :
+              format("%s(%s %s)", mapperName, function, checkerName == null ? predicate : checkerName + ":" + predicate.toString()),
           v -> predicate.test(function.apply(v)));
       this.mapper = toEvaluableIfNecessary(function);
       this.mapperName = mapperName;

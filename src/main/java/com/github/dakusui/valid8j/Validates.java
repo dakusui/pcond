@@ -1,6 +1,5 @@
 package com.github.dakusui.valid8j;
 
-import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.validator.ExceptionComposer;
 
 import java.util.function.Function;
@@ -63,13 +62,5 @@ public enum Validates {
     static Validator create(ExceptionComposer.ForValidate exceptionComposerForValidate) {
       return () -> exceptionComposerForValidate;
     }
-  }
-
-  public static void main(String... args) {
-    Predicate<String> p1 = Predicates.containsString("hello");
-    Predicate<String> p2 = Predicates.containsString("hello");
-    System.out.println(System.identityHashCode(p1));
-    System.out.println(System.identityHashCode(p1));
-    System.out.println(p1.equals(p2));
   }
 }

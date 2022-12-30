@@ -1,6 +1,5 @@
 package com.github.dakusui.pcond.validator;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -114,9 +113,5 @@ public class Explanation {
         out.add(0, in[i]);
     }
     return out.toArray(new String[0]);
-  }
-
-  private static String joinStringArray(String[] stringArray) {
-    return Arrays.stream(stringArray).collect(joining(newLine()));
   }
 }

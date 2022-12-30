@@ -1,5 +1,6 @@
 package com.github.dakusui.pcond.ut.fluent4;
 
+import com.github.dakusui.pcond.core.fluent.builtins.IntegerChecker;
 import com.github.dakusui.pcond.core.fluent.builtins.StringTransformer;
 import com.github.dakusui.pcond.ut.fluent4.Fluent4Example.OnGoing.BookTransformer;
 import com.github.dakusui.shared.ReportParser;
@@ -7,6 +8,7 @@ import com.github.dakusui.shared.utils.TestBase;
 import com.github.dakusui.shared.utils.TestUtils;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
+import org.junit.AssumptionViolatedException;
 import org.junit.ComparisonFailure;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
 import static com.github.dakusui.pcond.forms.Predicates.isNull;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
+import static com.github.dakusui.thincrest.TestFluents.assumeAll;
 import static java.util.Arrays.asList;
 
 public class SmokeTest extends TestBase {
@@ -94,7 +97,7 @@ public class SmokeTest extends TestBase {
     );
     Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book(title, abstractText);
     try {
-      performSmoke(book);
+      assertSmoke(book);
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       ReportParser reportParserForActualValue = new ReportParser(e.getActual());
@@ -171,30 +174,57 @@ public class SmokeTest extends TestBase {
 
   @Ignore
   @Test
-  public void performSmoke() {
+  public void assertSmoke() {
     String title = "De Bello Gallico";
     String abstractText = "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.";
     Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book(title, abstractText);
-    performSmoke(book);
+    assertSmoke(book);
+  }
+
+  @Ignore
+  @Test
+  public void assumeSmoke() {
+    String title = "De Bello Gallico";
+    String abstractText = "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.";
+    Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book(title, abstractText);
+    try {
+      assumeSmoke(book);
+    } catch (AssumptionViolatedException e) {
+      ReportParser.extractActualFrom(e).summary().records().forEach(System.out::println);
+    }
   }
 
 
-  private static void performSmoke(Fluent4Example.OnGoing.Book book) {
+  private static void assertSmoke(Fluent4Example.OnGoing.Book book) {
     assertAll(
-        stringValue("hello").length().then().greaterThan(1),
-        new BookTransformer(book)
-            .transform((BookTransformer b) -> b.title()
-                .transform((StringTransformer<String> ty) -> ty.then().isNotNull().done())
-                .transform((StringTransformer<String> ty) -> ty.parseInt().then()
-                    .greaterThanOrEqualTo(10)
-                    .lessThan(40)
-                    .done()).done())
-            .transform((BookTransformer b) -> b.abstractText()
-                .transform((StringTransformer<String> ty) -> ty.then().checkWithPredicate(isNull().negate()).done())
-                .transform((StringTransformer<String> ty) -> ty.length().then()
-                    .greaterThanOrEqualTo(200)
-                    .lessThan(400)
-                    .done()).done()));
+        getHello(),
+        getTransform(book));
+  }
+
+  private static void assumeSmoke(Fluent4Example.OnGoing.Book book) {
+    assumeAll(
+        getHello(),
+        getTransform(book));
+  }
+
+  private static BookTransformer getTransform(Fluent4Example.OnGoing.Book book) {
+    return new BookTransformer(book)
+        .transform((BookTransformer b) -> b.title()
+            .transform((StringTransformer<String> ty) -> ty.then().isNotNull().done())
+            .transform((StringTransformer<String> ty) -> ty.parseInt().then()
+                .greaterThanOrEqualTo(10)
+                .lessThan(40)
+                .done()).done())
+        .transform((BookTransformer b) -> b.abstractText()
+            .transform((StringTransformer<String> ty) -> ty.then().checkWithPredicate(isNull().negate()).done())
+            .transform((StringTransformer<String> ty) -> ty.length().then()
+                .greaterThanOrEqualTo(200)
+                .lessThan(400)
+                .done()).done());
+  }
+
+  private static IntegerChecker<String> getHello() {
+    return stringValue("hello").length().then().greaterThan(1);
   }
 
   private static List<String> extractInputFromReport(ReportParser reportParserForExpectation) {
