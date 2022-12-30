@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 
@@ -10,10 +11,15 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class PrintableFunction<T, R> extends Identifiable.Base implements Evaluable.Func<T>, CurriedFunction<T, R>, Cloneable {
+public class PrintableFunction<T, R> extends
+    Identifiable.Base implements
+    Evaluable.Func<T>,
+    CurriedFunction<T, R>,
+    Evaluator.Explainable,
+    Cloneable {
   final         Function<? super T, ? extends R> function;
-  private final Function<? super T, ?>           head;
-  private final Evaluable<?>                     tail;
+  private final Function<? super T, Object>           head;
+  private final Evaluable<Object>                tail;
   private final Supplier<String>                 formatter;
   private final Function<?, R>                   tailAsFunction;
 
@@ -24,8 +30,8 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
     super(creator, args);
     this.formatter = Objects.requireNonNull(s);
     this.function = requireNonPrintableFunction(unwrap(Objects.requireNonNull(function)));
-    this.head = head != null ? head : this;
-    this.tail = tail;
+    this.head = head != null ? (Function<? super T, Object>) head : (Function<? super T, Object>) this;
+    this.tail = (Evaluable<Object>) tail;
     this.tailAsFunction = (Function<?, R>) tail;
   }
 
@@ -53,12 +59,12 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
   }
 
   @Override
-  public Function<? super T, ?> head() {
-    return this.head;
+  public Function<? super T, Object> head() {
+    return (Function<? super T, Object>) this.head;
   }
 
   @Override
-  public Optional<Evaluable<?>> tail() {
+  public Optional<Evaluable<Object>> tail() {
     return Optional.ofNullable(this.tail);
   }
 
@@ -83,6 +89,16 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
         (Class<? extends R>) Object.class;
   }
 
+  @Override
+  public Object explainOutputExpectation() {
+    return this.formatter.get();
+  }
+
+  @Override
+  public Object explainActual(Object actualValue) {
+    return actualValue;
+  }
+
   @SuppressWarnings("unchecked")
   public static <T, R> Function<T, R> unwrap(Function<T, R> function) {
     Function<T, R> ret = function;
@@ -105,7 +121,7 @@ public class PrintableFunction<T, R> extends Identifiable.Base implements Evalua
   }
 
 
-  public boolean isTrivial() {
+  public boolean isSquashable() {
     return this.trivial;
   }
 

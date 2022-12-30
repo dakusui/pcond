@@ -363,12 +363,12 @@ public class Predicates {
 
 
       @Override
-      public Object explainExpectation() {
+      public Object explainOutputExpectation() {
         return formatExplanation(bExpectation, "SHOULD BE FOUND AFTER THIS POSITION");
       }
 
       @Override
-      public Object explainActualInput(Object actualInputValue) {
+      public Object explainActual(Object actualValue) {
         return formatExplanation(bActual, "BUT NOT FOUND");
       }
 
@@ -391,12 +391,12 @@ public class Predicates {
     return makeExplainable((PrintablePredicate<? super Object>) predicate("(end)", v -> result.get()), new Evaluator.Explainable() {
 
       @Override
-      public Object explainExpectation() {
+      public Object explainOutputExpectation() {
         return ongoingExpectationExplanation.toString() + originalStringSupplier.get().substring(lastTestedPosition.get());
       }
 
       @Override
-      public Object explainActualInput(Object actualInputValue) {
+      public Object explainActual(Object actualValue) {
         return ongoingActualExplanation.toString() + originalStringSupplier.get().substring(lastTestedPosition.get());
       }
     });
@@ -418,13 +418,13 @@ public class Predicates {
       }
 
       @Override
-      public Object explainExpectation() {
-        return explainable.explainExpectation();
+      public Object explainOutputExpectation() {
+        return explainable.explainOutputExpectation();
       }
 
       @Override
-      public Object explainActualInput(Object actualInputValue) {
-        return explainable.explainActualInput(actualInputValue);
+      public Object explainActual(Object actualValue) {
+        return explainable.explainActual(actualValue);
       }
     }
 
@@ -548,12 +548,12 @@ public class Predicates {
     return makeExplainable((PrintablePredicate<? super Object>) predicate("(end)", v -> result.get()), new Evaluator.Explainable() {
 
       @Override
-      public Object explainExpectation() {
+      public Object explainOutputExpectation() {
         return renderExplanationString(expectationExplanationList);
       }
 
       @Override
-      public Object explainActualInput(Object actualInputValue) {
+      public Object explainActual(Object actualValue) {
         return renderExplanationString(createFullExplanationList(actualExplanationList, rest));
       }
 

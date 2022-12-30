@@ -149,11 +149,7 @@ public class DefaultValidatorTest extends TestBase {
       e.printStackTrace(System.out);
       int i = 0;
       // (1)
-      assertThat(lineAt(e.getMessage(), ++i),
-          CoreMatchers.containsString("transform")
-      );
-      // (1)
-      assertThat(lineAt(e.getMessage(), i), allOf(
+      assertThat(lineAt(e.getMessage(), ++i), allOf(
           CoreMatchers.containsString("length"),
           CoreMatchers.containsString("->"),
           CoreMatchers.containsString("5")
@@ -287,14 +283,13 @@ public class DefaultValidatorTest extends TestBase {
       // (3)
       assertThat(lineAt(e.getMessage(), 4), allOf(
           CoreMatchers.not(CoreMatchers.containsString("Mismatch:")),
-          CoreMatchers.containsString("not(isEmpty)"),
+          CoreMatchers.containsString("not:isEmpty"),
           CoreMatchers.containsString("->true")
 
       ));
       // (4)
       assertThat(lineAt(e.getMessage(), 5), allOf(
           CoreMatchers.not(CoreMatchers.containsString("Mismatch:")),
-          CoreMatchers.containsString("transform:"),
           CoreMatchers.containsString("length"),
           CoreMatchers.containsString("->5")
 

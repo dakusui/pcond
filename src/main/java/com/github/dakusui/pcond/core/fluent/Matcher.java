@@ -123,7 +123,7 @@ public interface Matcher<
       }
       if (Objects.equals(transformFunction, Functions.identity()))
         return (Predicate<T>) ret;
-      return Predicates.transform(transformFunction).check(ret);
+      return Predicates.transform(transformFunction).check("THEN", ret);
     }
   }
 

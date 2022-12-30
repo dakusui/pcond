@@ -1,21 +1,21 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.context.VariableBundle;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.core.Evaluator.Entry.Type.*;
-import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainActualInputIfPossibleOrNull;
-import static com.github.dakusui.pcond.core.Evaluator.Explainable.explainExpectationIfPossibleOrNull;
-import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
-import static com.github.dakusui.pcond.internals.InternalUtils.*;
-import static java.util.Collections.unmodifiableList;
+import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
+import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
+import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_HEAD;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_TAIL;
+import static com.github.dakusui.pcond.core.ValueHolder.State.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
+import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
+import static java.util.Objects.requireNonNull;
 
 /**
  * A visitor interface that defines a mechanism to "evaluate" printable predicates.
@@ -24,97 +24,78 @@ public interface Evaluator {
   /**
    * Evaluates `value` with `conjunction` predicate ("and").
    *
-   * @param value       A value to be evaluated.
-   * @param conjunction A conjunction predicate with which `value` is evaluated.
-   * @param <T>         The type of the `value`.
+   * @param <T>               The type of the `value`.
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.Conjunction
    */
-  <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction);
+  <T> void evaluateConjunction(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a `disjunction` predicate ("or").
    *
-   * @param value       A value to be evaluated.
-   * @param disjunction A disjunction predicate with which `value` is evaluated.
-   * @param <T>         The type of the `value`.
+   * @param <T>               The type of the `value`.
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.Disjunction
    */
-  <T> void evaluate(T value, Evaluable.Disjunction<T> disjunction);
+  <T> void evaluateDisjunction(EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a `negation` predicate ("not").
    *
-   * @param value    A value to be evaluated.
-   * @param negation A negation predicate with which `value` is evaluated.
-   * @param <T>      The type of the `value`.
+   * @param <T>               The type of the `value`.
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.Negation
    */
-  <T> void evaluate(T value, Evaluable.Negation<T> negation);
+  <T> void evaluateNegation(EvaluableIo<T, Evaluable.Negation<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a leaf predicate.
    *
-   * @param value    A value to be evaluated.
-   * @param leafPred A predicate with which `value` is evaluated.
-   * @param <T>      The type of the `value`.
+   * @param <T>               The type of the `value`.
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.LeafPred
    */
-  <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred);
-
-  /**
-   * Evaluates `value` with a context predicate.
-   *
-   * @param value       A value to be evaluated.
-   * @param contextPred A predicate with which `value` is evaluated.
-   * @see com.github.dakusui.pcond.core.Evaluable.ContextPred
-   */
-  void evaluate(Context value, Evaluable.ContextPred contextPred);
-
-  /**
-   * Evaluates `value` with a "transformatioin" predicate.
-   *
-   * @param value          A value to be evaluated.
-   * @param transformation A predicate with which `value` is evaluated.
-   * @see com.github.dakusui.pcond.core.Evaluable.Transformation
-   */
-  <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation);
+  <T> void evaluateLeaf(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a "function" predicate.
    *
-   * @param value A value to be evaluated.
-   * @param func  A predicate with which `value` is evaluated.
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.Func
    */
-  <T> void evaluate(T value, Evaluable.Func<T> func);
+  <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext);
+
+  /**
+   * Evaluates `value` with a context predicate.
+   *
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
+   * @see Evaluable.VariableBundlePred
+   */
+  void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext);
+
+  /**
+   * Evaluates `value` with a "transformation" predicate.
+   *
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
+   * @see com.github.dakusui.pcond.core.Evaluable.Transformation
+   */
+  <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext);
 
   /**
    * Evaluates `value` with a predicate for a stream.
    *
-   * @param value      A value to be evaluated.
-   * @param streamPred A predicate with which `value` is evaluated.
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
    * @see com.github.dakusui.pcond.core.Evaluable.StreamPred
    */
-  <E> void evaluate(Stream<? extends E> value, Evaluable.StreamPred<E> streamPred);
-
-  /**
-   * The last evaluated value by an `evaluate` method defined in this interface.
-   * This method is expected to be called from inside an `evaluated` method, not
-   * to be called by a user.
-   *
-   * @param <T> The type of the last value evaluated by this object.
-   * @return The evaluated result value.
-   */
-  <T> T resultValue();
-
-  /**
-   * Returns a list of result entries.
-   *
-   * @return A list of result entries.
-   * @see Entry
-   */
-  List<Entry> resultEntries();
-
+  <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext);
 
   /**
    * Returns a new instance of this interface.
@@ -126,423 +107,302 @@ public interface Evaluator {
   }
 
   class Impl implements Evaluator {
-    private static final Object NULL_VALUE = new Object();
-    List<Entry.OnGoing> onGoingEntries                = new LinkedList<>();
-    List<Entry>         entries                       = new ArrayList<>();
-    Object              currentResult;
-    boolean             currentlyExpectedBooleanValue = true;
+    public static final Object EVALUATION_SKIPPED = new Object() {
+      @Override
+      public String toString() {
+        return "(not evaluated)";
+      }
+    };
+
+    private static final Object NULL_VALUE = new Object() {
+      public String toString() {
+        return "null";
+      }
+    };
 
     public Impl() {
     }
 
-    void enter(Entry.Type type, Evaluable<?> evaluable, String name, Object input) {
-      Entry.OnGoing newEntry = new Entry.OnGoing(
-          type,
-          (int) onGoingEntries.stream().filter(each -> !each.isTrivial()).count(),
-          entries.size(),
-          name,
-          toSnapshotIfPossible(input),
-          this.currentlyExpectedBooleanValue,
-          evaluable.isTrivial());
-      onGoingEntries.add(newEntry);
-      entries.add(newEntry);
-      if (evaluable.requestExpectationFlip())
-        this.flipCurrentlyExpectedBooleanValue();
-    }
-
-    void leave(Object result, Evaluable<?> evaluable, boolean unexpected) {
-      int positionInOngoingEntries = onGoingEntries.size() - 1;
-      Entry.OnGoing current = onGoingEntries.get(positionInOngoingEntries);
-      entries.set(
-          current.positionInEntries,
-          current.result(
-              toSnapshotIfPossible(result),
-              unexpected ? explainExpectationIfPossibleOrNull(evaluable) : null,
-              unexpected ? explainActualInputIfPossibleOrNull(evaluable, current.input()) : null));
-      onGoingEntries.remove(positionInOngoingEntries);
-      this.currentResult = result;
-      if (evaluable.requestExpectationFlip())
-        this.flipCurrentlyExpectedBooleanValue();
-    }
-
-    void flipCurrentlyExpectedBooleanValue() {
-      this.currentlyExpectedBooleanValue = !this.currentlyExpectedBooleanValue;
-    }
-
-    @SuppressWarnings("ConstantConditions")
     @Override
-    public <T> void evaluate(T value, Evaluable.Conjunction<T> conjunction) {
-      int i = 0;
-      boolean finalValue = true;
-      boolean shortcut = conjunction.shortcut();
-      for (Evaluable<? super T> each : conjunction.children()) {
-        if (i == 0)
-          this.enter(AND, conjunction, conjunction.shortcut() ? "and" : "allOf", value);
-        each.accept(value, this);
-        boolean cur = this.<Boolean>resultValue();
-        if (!cur)
-          finalValue = cur; // This is constant, but keeping it for readability
-        if ((shortcut && !finalValue) || i == conjunction.children().size() - 1) {
-          this.leave(finalValue, conjunction, false);
-          return;
-        }
-        i++;
-      }
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public <T> void evaluate(T value, Evaluable.Disjunction<T> disjunction) {
-      int i = 0;
-      boolean finalValue = false;
-      boolean shortcut = disjunction.shortcut();
-      for (Evaluable<? super T> each : disjunction.children()) {
-        if (i == 0)
-          this.enter(OR, disjunction, disjunction.shortcut() ? "or" : "anyOf", value);
-        each.accept(value, this);
-        boolean cur = this.<Boolean>resultValue();
-        if (cur)
-          finalValue = cur; // This is constant, but keeping it for readability
-        if ((shortcut && finalValue) || i == disjunction.children().size() - 1) {
-          this.leave(finalValue, disjunction, false);
-          return;
-        }
-        i++;
-      }
+    public <T> void evaluateConjunction(EvaluableIo<T, Evaluable.Conjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
+      evaluationContext.evaluate(
+          evaluableIo,
+          (Evaluable.Conjunction<T> evaluable, ValueHolder<T> input) -> {
+            ValueHolder<Boolean> ret = ValueHolder.create();
+            boolean result = true;
+            ValueHolder<Boolean> retSkipped = null;
+            for (Evaluable<T> each : evaluable.children()) {
+              EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(each, input);
+              each.accept(child, evaluationContext, this);
+              ValueHolder<Boolean> outputFromEach = child.output();
+              if (outputFromEach.isValueReturned()) {
+                result &= outputFromEach.returnedValue();
+                ret = ValueHolder.forValue(result);
+              } else if (child.output().isExceptionThrown()) {
+                ret = ValueHolder.<Boolean>create().evaluationSkipped();
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else if (child.output().isEvaluationSkipped()) {
+                ret = ValueHolder.<Boolean>create().evaluationSkipped();
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else
+                assert false;
+              if (evaluable.shortcut() && (ret.isEvaluationSkipped() || !result))
+                break;
+            }
+            return retSkipped != null ? retSkipped : ret;
+          });
     }
 
     @Override
-    public <T> void evaluate(T value, Evaluable.Negation<T> negation) {
-      this.enter(Entry.Type.NOT, negation, "not", value);
-      negation.target().accept(value, this);
-      this.leave(!this.<Boolean>resultValue(), negation, false);
-      if (Objects.equals(this.resultValue(), this.currentlyExpectedBooleanValue))
-        mergeLastTwoEntriesIfPossible(this.entries);
+    public <T> void evaluateDisjunction(EvaluableIo<T, Evaluable.Disjunction<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
+      evaluationContext.evaluate(
+          evaluableIo,
+          (Evaluable.Disjunction<T> evaluable, ValueHolder<T> input) -> {
+            ValueHolder<Boolean> ret = ValueHolder.create();
+            boolean result = false;
+            ValueHolder<Boolean> retSkipped = null;
+            for (Evaluable<T> each : evaluable.children()) {
+              EvaluableIo<T, Evaluable<T>, Boolean> child = createChildEvaluableIoOf(each, input);
+              each.accept(child, evaluationContext, this);
+              ValueHolder<Boolean> outputFromEach = child.output();
+              if (outputFromEach.isValueReturned()) {
+                result |= outputFromEach.returnedValue();
+                ret = ValueHolder.forValue(result);
+              } else if (outputFromEach.isExceptionThrown()) {
+                ret = ValueHolder.<Boolean>create().evaluationSkipped();
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else if (outputFromEach.isEvaluationSkipped()) {
+                ret = ValueHolder.<Boolean>create().evaluationSkipped();
+                retSkipped = retSkipped != null ? retSkipped : ret;
+              } else
+                assert false;
+              if (evaluable.shortcut() && (ret.isEvaluationSkipped() || result))
+                break;
+            }
+            return retSkipped != null ? retSkipped : ret;
+          });
     }
 
-    private static void mergeLastTwoEntriesIfPossible(List<Entry> entries) {
-      if (LEAF.equals(entries.get(entries.size() - 1).type())) {
-        Entry entryForLeaf = entries.remove(entries.size() - 1);
-        Entry entryForNegate = entries.remove(entries.size() - 1);
-        entries.add(mergeNegateAndLeafEntries(entryForNegate, entryForLeaf));
-      }
-    }
-
-    public static Entry.Finalized mergeNegateAndLeafEntries(Entry negate, Entry predicate) {
-      return new Entry.Finalized(
-          predicate.type(),
-          negate.level(),
-          negate.input(),
-          negate.output(),
-          String.format("not(%s)", predicate.formName()),
-          negate.expectedBooleanValue(),
-          negate.expectationDetail(),
-          negate.actualInputDetail(),
-          false
+    @Override
+    public <T> void evaluateNegation(EvaluableIo<T, Evaluable.Negation<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
+      evaluationContext.evaluate(
+          evaluableIo,
+          (Evaluable.Negation<T> evaluable, ValueHolder<T> input) -> {
+            evaluationContext.flipExpectation();
+            try {
+              EvaluableIo<T, Evaluable<T>, Boolean> childIo = createChildEvaluableIoOf(evaluable.target(), input);
+              evaluable.target().accept(childIo, evaluationContext, this);
+              return childIo.output().isValueReturned() ?
+                  ValueHolder.forValue(evaluationContext.isExpectationFlipped() ^ childIo.output().returnedValue()) :
+                  childIo.output();
+            } finally {
+              evaluationContext.flipExpectation();
+            }
+          }
       );
     }
 
     @Override
-    public <T> void evaluate(T value, Evaluable.LeafPred<T> leafPred) {
-      this.enter(LEAF, leafPred, String.format("%s", leafPred), value);
-      boolean result = leafPred.predicate().test(value);
-      this.leave(result, leafPred, this.currentlyExpectedBooleanValue != result);
+    public <T> void evaluateLeaf(EvaluableIo<T, Evaluable.LeafPred<T>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
+      evaluationContext.evaluate(
+          LEAF,
+          evaluableIo,
+          (evaluable, input) -> {
+            ValueHolder<Boolean> ret = ValueHolder.create();
+            if (input.isValueReturned()) {
+              T value = input.returnedValue();
+              Predicate<? super T> predicate = requireNonNull(evaluable.predicate());
+              try {
+                return ret.valueReturned(predicate.test(value));
+              } catch (Throwable t) {
+                return ret.exceptionThrown(t);
+              }
+            } else
+              return ret.evaluationSkipped();
+          });
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void evaluate(Context context, Evaluable.ContextPred contextPred) {
-      this.enter(LEAF, contextPred, String.format("%s", contextPred), context);
-      contextPred.enclosed().accept(context.valueAt(contextPred.argIndex()), this);
-      this.leave(this.resultValue(), contextPred, false);
+    public <T, R> void evaluateFunction(EvaluableIo<T, Evaluable.Func<T>, R> evaluableIo, EvaluationContext<T> evaluationContext) {
+      evaluationContext.evaluate( //#2
+          FUNCTION,
+          evaluableIo,
+          (Evaluable.Func<T> evaluable, ValueHolder<T> input) -> {
+            ValueHolder<R> ret;
+            {
+              EvaluableIo<T, Evaluable<T>, Object> ioForHead = createChildEvaluableIoOf(evaluable, input);
+              EvaluationContext<T> childContext = new EvaluationContext<>(evaluationContext);
+              childContext.evaluate(FUNCTION, ioForHead, io -> {
+                ValueHolder<Object> tmp = ValueHolder.create();
+                if (io.input().isValueReturned())
+                  tmp = applyFunction(tmp, io.input().returnedValue(), ((Evaluable.Func<T>) io.evaluable()).head());
+                else
+                  tmp = tmp.evaluationSkipped();
+                return tmp.creatorFormType(FUNC_HEAD);
+              });
+              evaluationContext.importEntries(childContext, 1);
+              ret = (ValueHolder<R>) ioForHead.output().creatorFormType(FUNC_TAIL);
+            }
+            ValueHolder<Object> finalRet = (ValueHolder<Object>) ret;
+            return evaluable.tail().map((Evaluable<Object> e) -> {
+                  EvaluableIo<Object, Evaluable<Object>, R> ioForTail = createChildEvaluableIoOf(e, finalRet);
+                  DebuggingUtils.printIo("FUNC_TAIL:BEFORE", ioForTail);
+                  e.accept(ioForTail, (EvaluationContext<Object>) evaluationContext, this);
+                  DebuggingUtils.printIo("FUNC_TAIL:AFTER", ioForTail);
+                  return ioForTail.output().creatorFormType(FUNC_TAIL);
+                })
+                .orElse(ret);
+          });
     }
 
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings("unchecked")
+    private static <T, R> ValueHolder<R> applyFunction(ValueHolder<R> ret, T in, Function<? super T, Object> function) {
+      try {
+        R returnedValue;
+        returnedValue = (R) function.apply(in);
+        return ret.valueReturned(returnedValue);
+      } catch (Throwable t) {
+        return ret.exceptionThrown(t);
+      }
+    }
+
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public <T, R> void evaluate(T value, Evaluable.Transformation<T, R> transformation) {
-      if (isDummyFunction((Function<?, ?>) transformation.mapper())) {
-        transformation.checker().accept((R) value, this);
+    public <T, R> void evaluateTransformation(EvaluableIo<T, Evaluable.Transformation<T, R>, Boolean> evaluableIo, EvaluationContext<T> evaluationContext) {
+      if (isDummyFunction((Function<?, ?>) evaluableIo.evaluable().mapper())) {
+        evaluableIo.evaluable().checker().accept((EvaluableIo<R, Evaluable<R>, Boolean>) (Evaluable) evaluableIo, (EvaluationContext<R>) evaluationContext, this);
         return;
       }
-      this.enter(TRANSFORM,
-          transformation.mapper(),
-          transformation.mapperName()
-              .orElse("transform"), value);
-      transformation.mapper().accept(value, this);
-      this.leave(this.resultValue(), transformation.checker(), false);
-      this.enter(CHECK,
-          transformation.checker(),
-          transformation.checkerName()
-              .orElse("check"),
-          this.resultValue());
-
-      transformation.checker().accept((R) this.currentResult, this);
-      this.leave(this.resultValue(), transformation.mapper(), false);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T> void evaluate(T value, Evaluable.Func<T> func) {
-      this.enter(FUNCTION, func, String.format("%s", func.head()), value);
-      Object resultValue = func.head().apply(value);
-      this.leave(resultValue, func, false);
-      func.tail().ifPresent(tailSide -> ((Evaluable<Object>) tailSide).accept(resultValue, this));
-    }
-
-    @Override
-    public <E> void evaluate(Stream<? extends E> value, Evaluable.StreamPred<E> streamPred) {
-      boolean ret = streamPred.defaultValue();
-      this.enter(LEAF, streamPred, String.format("%s", streamPred), value);
-      // Use NULL_VALUE object instead of null. Otherwise, the operation will fail with NullPointerException
-      // on 'findFirst()'.
-      // Although NULL_VALUE is an ordinary Object, not a value of E, this works
-      // because either way we will just return a boolean and during the execution,
-      // type information is erased.
-      this.leave(value
-          .filter(valueChecker(streamPred))
-          .map(v -> v != null ? v : NULL_VALUE)
-          .findFirst()
-          .map(each -> !ret)
-          .orElse(ret), streamPred, false);
-    }
-
-    private <E> Predicate<E> valueChecker(Evaluable.StreamPred<E> streamPred) {
-      return e -> {
-        Evaluator evaluator = this.copyEvaluator();
-
-        boolean succeeded = false;
-        boolean ret = false;
-        Object throwable = "<<OUTPUT MISSING>>";
-        try {
-          streamPred.cut().accept(e, evaluator);
-          succeeded = true;
-        } catch (Error error) {
-          throw error;
-        } catch (Throwable t) {
-          throwable = t;
-          throw wrapIfNecessary(t);
-        } finally {
-          if (!succeeded || evaluator.<Boolean>resultValue() == streamPred.valueToCut()) {
-            importResultEntries(evaluator.resultEntries(), throwable);
-            ret = true;
+      EvaluationContext<T> childContext = new EvaluationContext<>(evaluationContext);
+      childContext.evaluate(
+          evaluableIo,
+          (Evaluable.Transformation<T, R> evaluable, ValueHolder<T> input) -> {
+            DebuggingUtils.printInput("TRANSFORMATION:BEFORE", evaluable, input);
+            EvaluableIo<T, Evaluable<T>, R> mapperIo = evaluateMapper(evaluable.mapperName().orElse("transform"), evaluable.mapper(), input, childContext);
+            EvaluableIo<R, Evaluable<R>, Boolean> checkerIo = evaluateChecker(evaluable.checkerName().orElse("check"), evaluable.checker(), mapperIo.output(), childContext);
+            DebuggingUtils.printInputAndOutput(evaluable, input, checkerIo.output());
+            return checkerIo.output();
           }
-        }
-        return ret;
-      };
+      );
+      evaluationContext.importEntries(childContext, 1);
     }
 
-    @SuppressWarnings("unchecked")
+    private <T, R> EvaluableIo<T, Evaluable<T>, R> evaluateMapper(String mapperName, Evaluable<T> mapper, ValueHolder<T> input, EvaluationContext<T> evaluationContext) {
+      EvaluableIo<T, Evaluable<T>, R> ioForMapper = createChildEvaluableIoOf(mapper, input.creatorFormType(ValueHolder.CreatorFormType.TRANSFORM));
+      {
+        EvaluationContext<T> childContext = new EvaluationContext<>(evaluationContext);
+
+        // #1
+        childContext.evaluate(TRANSFORM, mapperName, ioForMapper, io -> {
+          DebuggingUtils.printIo("TRANSFORM:BEFORE", io);
+          io.evaluable().accept(io, childContext, this);
+          DebuggingUtils.printIo("TRANSFORM:AFTER", io);
+          return io.output();
+        });
+
+        evaluationContext.importEntries(childContext);
+      }
+      return ioForMapper;
+    }
+
+    private <T, R> EvaluableIo<R, Evaluable<R>, Boolean> evaluateChecker(String checkerName, Evaluable<R> checker, ValueHolder<R> input, EvaluationContext<T> evaluationContext) {
+      EvaluableIo<R, Evaluable<R>, Boolean> ioForChecker = createChildEvaluableIoOf(checker, input);
+      {
+        EvaluationContext<R> childContext = new EvaluationContext<>(evaluationContext);
+
+        childContext.evaluate(CHECK, checkerName, ioForChecker, io -> {
+          DebuggingUtils.printIo("CHECK:BEFORE", io);
+          io.evaluable().accept(io, childContext, this);
+          DebuggingUtils.printIo("CHECK:AFTER", io);
+          return io.output();
+        });
+
+        evaluationContext.importEntries(childContext);
+      }
+      return ioForChecker;
+    }
+
+    //             ValueToCut  ValueOnCut ValueForNone(=default)
+    // NoneMatch         true       false                   true
+    // AnyMatch          true        true                  false
+    // AllMatch         false       false                   true
+
     @Override
-    public <T> T resultValue() {
-      return (T) currentResult;
+    public <E> void evaluateStreamPredicate(EvaluableIo<Stream<E>, Evaluable.StreamPred<E>, Boolean> evaluableIo, EvaluationContext<Stream<E>> evaluationContext) {
+      evaluationContext.evaluate(
+          evaluableIo,
+          (Evaluable.StreamPred<E> evaluable, ValueHolder<Stream<E>> input) -> input.returnedValue()
+              .map((E e) -> {
+                if (evaluable.requestExpectationFlip())
+                  evaluationContext.flipExpectation();
+                try {
+                  EvaluationContext<E> childContext = new EvaluationContext<>(evaluationContext);
+                  EvaluableIo<E, Evaluable<E>, Boolean> ioForCutPredicate = createChildEvaluableIoOf(evaluable.cut(), ValueHolder.forValue(e));
+                  evaluable.cut().accept(ioForCutPredicate, childContext, this);
+                  evaluationContext.importEntries(childContext);
+                  return ioForCutPredicate.output();
+                } finally {
+                  if (evaluable.requestExpectationFlip())
+                    evaluationContext.flipExpectation();
+                }
+              })
+              .filter(eachResult -> {
+                if (!eachResult.isValueReturned())
+                  return true;
+                return eachResult.returnedValue() == evaluable.valueToCut();
+              })
+              .map(eachResult -> eachResult.valueReturned(!evaluable.defaultValue())) // compute Value on cut
+              .findFirst()
+              .orElseGet(() -> ValueHolder.forValue(evaluable.defaultValue())));      // compute Value for none
     }
 
     @Override
-    public List<Entry> resultEntries() {
-      return unmodifiableList(this.entries);
+    public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
+      evaluationContext.evaluate(evaluableIo, (Evaluable.VariableBundlePred evaluable, ValueHolder<VariableBundle> input) -> {
+        EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.returnedValue().valueAt(evaluable.argIndex())));
+        EvaluationContext<Object> childContext = new EvaluationContext<>(evaluationContext);
+        evaluable.enclosed().accept(io, childContext, this);
+        evaluationContext.importEntries(childContext);
+        return io.output();
+      });
     }
 
-    private Evaluator copyEvaluator() {
-      Impl impl = new Impl();
-      impl.currentlyExpectedBooleanValue = this.currentlyExpectedBooleanValue;
-      return impl;
+    private static <T, E extends Evaluable<T>, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(E evaluable, ValueHolder<T> input) {
+      return createChildEvaluableIoOf(resolveEvaluationEntryType(evaluable).formName(evaluable), evaluable, input);
     }
 
-    public void importResultEntries(List<Entry> resultEntries, Object other) {
-      resultEntries.stream()
-          .map(each -> createEntryForImport(each, other))
-          .forEach(each -> this.entries.add(each));
+    private static <T, E extends Evaluable<T>, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(String formName, E evaluable, ValueHolder<T> input) {
+      EvaluationEntry.Type evaluableType = resolveEvaluationEntryType(evaluable);
+      return createChildEvaluableIoOf(evaluableType, formName, evaluable, input);
     }
 
-    private Entry.Finalized createEntryForImport(Entry each, Object other) {
-      return new Entry.Finalized(
-          each.type,
-          this.onGoingEntries.size() + each.level(),
-          each.input(),
-          each.hasOutput() ? each.output() : other, each.formName(),
-          each.expectedBooleanValue,
-          each.hasExpectationDetail() ? each.expectationDetail() : null,
-          each.hasActualInputDetail() ? each.actualInputDetail() : null,
-          each.trivial);
-    }
-  }
-
-  /**
-   * A class to hold an entry of an execution history of the {@link Evaluator}.
-   */
-  abstract class Entry {
-    private final Type    type;
-    private final int     level;
-    private final Object  input;
-    private final String  name;
-    private final boolean expectedBooleanValue;
-
-    final boolean trivial;
-
-    Entry(Type type, int level, Object input, String name, boolean expectedBooleanValue, boolean trivial) {
-      this.type = type;
-      this.level = level;
-      this.input = input;
-      this.name = name;
-      this.expectedBooleanValue = expectedBooleanValue;
-      this.trivial = trivial;
-    }
-
-    public int level() {
-      return level;
-    }
-
-    @SuppressWarnings({ "unchecked" })
-    public <T> T input() {
-      return (T) this.input;
-    }
-
-    public String formName() {
-      return name;
-    }
-
-    public Type type() {
-      return this.type;
-    }
-
-    public boolean expectedBooleanValue() {
-      return this.expectedBooleanValue;
-    }
-
-    public abstract boolean hasOutput();
-
-    public abstract <T> T output();
-
-    public abstract boolean hasExpectationDetail();
-
-    public abstract Object expectationDetail();
-
-    public abstract boolean hasActualInputDetail();
-
-    public abstract Object actualInputDetail();
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    public boolean isTrivial() {
-      return this.trivial;
-    }
-
-    public enum Type {
-      TRANSFORM,
-      CHECK,
-      AND,
-      OR,
-      NOT,
-      LEAF,
-      FUNCTION,
-    }
-
-    static class Finalized extends Entry {
-      final         Object output;
-      final         Object expectationDetail;
-      private final Object actualInputDetail;
-
-      Finalized(
-          Type type,
-          int level,
-          Object input,
-          Object output,
-          String name,
-          boolean expectedBooleanValue,
-          Object expectationDetail,
-          Object actualInputDetail,
-          boolean trivial) {
-        super(type, level, input, name, expectedBooleanValue, trivial);
-        this.output = output;
-        this.expectationDetail = expectationDetail;
-        this.actualInputDetail = actualInputDetail;
-      }
-
-      @Override
-      public boolean hasOutput() {
-        return true;
-      }
-
-      @SuppressWarnings("unchecked")
-      @Override
-      public <T> T output() {
-        return (T) output;
-      }
-
-      @Override
-      public boolean hasExpectationDetail() {
-        return this.expectationDetail != null;
-      }
-
-      @Override
-      public Object expectationDetail() {
-        return this.expectationDetail;
-      }
-
-      @Override
-      public boolean hasActualInputDetail() {
-        return this.actualInputDetail != null;
-      }
-
-      @Override
-      public Object actualInputDetail() {
-        return this.actualInputDetail;
-      }
-    }
-
-    static class OnGoing extends Entry {
-      final int positionInEntries;
-
-      OnGoing(Type type, int level, int positionInEntries, String name, Object input, boolean expectedBooleanValue, boolean trivial) {
-        super(type, level, input, name, expectedBooleanValue, trivial);
-        this.positionInEntries = positionInEntries;
-      }
-
-      Finalized result(Object result, Object expectationDetail, Object actualInputDetail) {
-        return new Finalized(this.type(), this.level(), this.input(), result, this.formName(), this.expectedBooleanValue(), expectationDetail, actualInputDetail, this.trivial);
-      }
-
-      @Override
-      public boolean hasOutput() {
-        return false;
-      }
-
-      @Override
-      public <T> T output() {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public boolean hasExpectationDetail() {
-        return false;
-      }
-
-      @Override
-      public Object expectationDetail() {
-        throw new UnsupportedOperationException();
-      }
-
-      @Override
-      public boolean hasActualInputDetail() {
-        return false;
-      }
-
-      @Override
-      public Object actualInputDetail() {
-        throw new UnsupportedOperationException();
-      }
+    private static <T, E extends Evaluable<T>, O> EvaluableIo<T, Evaluable<T>, O> createChildEvaluableIoOf(EvaluationEntry.Type evaluableType, String formName, E evaluable, ValueHolder<T> input) {
+      return new EvaluableIo<>(input, evaluableType, formName, evaluable);
     }
   }
 
   /**
    * If an input or an output value object of a form implements this interface,
-   * The value returned by `snapshot` method is stored in a {@link Evaluator.Entry}
+   * The value returned by `snapshot` method is stored in a {@link EvaluationEntry}
    * record, instead of the value itself.
    */
   interface Snapshottable {
+
+    Object NULL = new Object() {
+      @Override
+      public String toString() {
+        return "null";
+      }
+    };
+
     Object snapshot();
 
     static Object toSnapshotIfPossible(Object value) {
       if (value instanceof Snapshottable)
         return ((Snapshottable) value).snapshot();
+      if (value == null)
+        return NULL;
       else
         return value;
     }
@@ -552,28 +412,34 @@ public interface Evaluator {
    * An interface to define methods that make a predicate "explainable" to humans.
    */
   interface Explainable {
-    Object explainExpectation();
+    Object explainOutputExpectation();
 
-    Object explainActualInput(Object actualInputValue);
+    Object explainActual(Object actualValue);
 
-    static Object explainExpectationIfPossibleOrNull(Object value) {
-      if (value instanceof Explainable)
-        return explainExpectation((Explainable) value);
+    static Object explainOutputExpectation(Object evaluable, EvaluableIo<?, ?, ?> evaluableIo) {
+      if (evaluable instanceof Explainable)
+        return explainValue(((Explainable) evaluable).explainOutputExpectation());
+      if (evaluable instanceof Evaluable)
+        return formNameOf(evaluableIo);
       return null;
     }
 
-    static String explainExpectation(Explainable value) {
-      return explainValue(value.explainExpectation());
-    }
-
-    static Object explainActualInputIfPossibleOrNull(Object value, Object actualInputValue) {
-      if (value instanceof Explainable)
-        return explainActualValue((Explainable) value, actualInputValue);
+    static Object explainInputActualValue(Object evaluable, Object actualValue) {
+      if (evaluable instanceof Explainable)
+        return explainValue(((Explainable) evaluable).explainActual(actualValue));
       return null;
     }
 
-    static String explainActualValue(Explainable value, Object actualInputValue) {
-      return explainValue(value.explainActualInput(actualInputValue));
+    static <T, E extends Evaluable<T>> Object explainActual(EvaluableIo<T, E, ?> evaluableIo) {
+      if (evaluableIo.output().state() == VALUE_RETURNED) {
+        T ret = evaluableIo.input().returnedValue();
+        return ret != null ? ret : Impl.NULL_VALUE;
+      } else if (evaluableIo.output().state() == EXCEPTION_THROWN)
+        return composeDetailOutputActualValueFromInputAndThrowable(evaluableIo.input().value(), evaluableIo.output().thrownException());
+      else if (evaluableIo.output().state() == EVALUATION_SKIPPED) {
+        return EVALUATION_SKIPPED;
+      } else
+        throw new AssertionError("evaluableIo:" + evaluableIo);
     }
   }
 }

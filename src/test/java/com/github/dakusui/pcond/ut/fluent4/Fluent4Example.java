@@ -4,21 +4,20 @@ import com.github.dakusui.pcond.core.fluent.builtins.StringTransformer;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.shared.ReportParser;
 import org.junit.ComparisonFailure;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.forms.Functions.length;
-import static com.github.dakusui.pcond.forms.Predicates.isEqualTo;
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.pcond.forms.Predicates.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.makeSquashable;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 import static com.github.dakusui.thincrest.TestFluents.assertStatement;
-import static java.util.Objects.requireNonNull;
 
 @RunWith(Enclosed.class)
 public class Fluent4Example {
@@ -31,13 +30,14 @@ public class Fluent4Example {
           .isTrue());
     }
 
-    @Test(expected = ComparisonFailure.class)
+    @Test//(expected = ComparisonFailure.class)
     public void test_b() {
-      assertStatement(stringTransformer("INPUT_VALUE")
-          .toLowerCase()
-          .parseBoolean()
-          .then()
-          .isTrue());
+      assertAll(
+          stringTransformer("INPUT_VALUE")
+              .toLowerCase()
+              .parseBoolean()
+              .then()
+              .isTrue());
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -171,33 +171,39 @@ public class Fluent4Example {
 
     @Test
     public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength() {
-      Book book = new Book(
-          "De Bello Gallico",
-          "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, "
-              + "aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
-      assertAll(
-          new BookTransformer(book)
-              .transform(tx -> tx.title()
-                  .transform(ty -> ty
-                      .then()
-                      .isNotNull().done())
-                  .transform(ty -> ty
-                      .length()
-                      .then()
-                      .greaterThanOrEqualTo(10)
-                      .lessThan(40)
-                      .done())
-                  .done())
-              .transform(tx -> tx.abstractText()
-                  .transform(ty -> ty
-                      .then()
-                      .isNotNull().done())
-                  .transform(ty -> ty
-                      .length()
-                      .then()
-                      .greaterThanOrEqualTo(200)
-                      .lessThan(400).done())
-                  .done()));
+      try {
+        Book book = new Book(
+            "De Bello Gallico",
+            "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, "
+                + "aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
+        assertAll(
+            new BookTransformer(book)
+                .transform(tx -> tx.title()
+                    .transform(ty -> ty
+                        .then()
+                        .checkWithPredicate(not(isNotNull())).done())
+                    .transform(ty -> ty
+                        .parseInt()
+                        .then()
+                        .greaterThanOrEqualTo(10)
+                        .lessThan(40)
+                        .done())
+                    .done())
+                .transform(tx -> tx.abstractText()
+                    .transform(ty -> ty
+                        .then()
+                        .isNotNull().done())
+                    .transform(ty -> ty
+                        .length()
+                        .then()
+                        .greaterThanOrEqualTo(200)
+                        .lessThan(400).done())
+                    .done()));
+      } catch (ComparisonFailure e) {
+        ReportParser reportParser = new ReportParser(e.getActual());
+        reportParser.summary().records().forEach(each -> System.out.println(each.toString()));
+        throw e;
+      }
     }
 
     public static class Book {
@@ -233,24 +239,12 @@ public class Fluent4Example {
       }
 
       public StringTransformer<Book> abstractText() {
-        return toString(Printables.function("title", Book::abstractText));
+        return toString(Printables.function("abstractText", Book::abstractText));
       }
-
-      @Override
-      public BookTransformer transform(Function<BookTransformer, Predicate<Book>> clause) {
-        requireNonNull(clause);
-        return this.addTransformAndCheckClause(tx -> clause.apply((BookTransformer) tx));
-      }
-
-      @Override
-      protected BookTransformer create(Book value) {
-        return new BookTransformer(value);
-      }
-
     }
   }
 
   private static StringTransformer.Impl<String> stringTransformer(String value) {
-    return new StringTransformer.Impl<>(() -> value, makeTrivial(Functions.identity()));
+    return new StringTransformer.Impl<>(() -> value, makeSquashable(Functions.identity()));
   }
 }

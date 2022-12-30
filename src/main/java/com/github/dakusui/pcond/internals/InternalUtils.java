@@ -35,6 +35,10 @@ public enum InternalUtils {
   }
 
   public static String formatObject(Object value, int maxLength) {
+    return _formatObject(value, maxLength).replaceAll("[\\r\\n]", " ");
+  }
+
+  private static String _formatObject(Object value, int maxLength) {
     if (value == null)
       return "null";
     if (value instanceof Collection) {
@@ -286,7 +290,7 @@ public enum InternalUtils {
    * @param <T>      Input type of the function.
    * @return A predicate marked trivial.
    */
-  public static <T> Predicate<T> makeTrivial(Predicate<T> predicate) {
+  public static <T> Predicate<T> makeSquashable(Predicate<T> predicate) {
     return ((PrintablePredicate<T>) predicate).makeTrivial();
   }
 
@@ -299,7 +303,7 @@ public enum InternalUtils {
    * @param <R>      Output type of the function.
    * @return A function marked trivial.
    */
-  public static <T, R> Function<T, R> makeTrivial(Function<T, R> function) {
+  public static <T, R> Function<T, R> makeSquashable(Function<T, R> function) {
     return ((PrintableFunction<T, R>) function).makeTrivial();
   }
 

@@ -46,8 +46,8 @@ public interface StringTransformer<T> extends
     return toBoolean(Printables.function("parseBoolean", Boolean::parseBoolean));
   }
 
-  default BooleanTransformer<T> parseInt() {
-    return toBoolean(Printables.function("parseBoolean", Boolean::parseBoolean));
+  default IntegerTransformer<T> parseInt() {
+    return toInteger(Printables.function("parseInt", Integer::parseInt));
   }
 
   default LongTransformer<T> parseLong() {

@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.ut.fluent3;
 
 import com.github.dakusui.pcond.ut.fluent4.Fluent4Example;
+import com.github.dakusui.shared.ReportParser;
 import org.junit.ComparisonFailure;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -8,12 +9,13 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
 import static com.github.dakusui.pcond.forms.Functions.identity;
-import static com.github.dakusui.pcond.forms.Predicates.isEqualTo;
-import static com.github.dakusui.pcond.forms.Predicates.transform;
-import static com.github.dakusui.pcond.internals.InternalUtils.makeTrivial;
+import static com.github.dakusui.pcond.forms.Predicates.*;
+import static com.github.dakusui.pcond.forms.Printables.predicate;
+import static com.github.dakusui.pcond.internals.InternalUtils.makeSquashable;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 
@@ -29,7 +31,7 @@ public class Fluent3Example {
               .isNull());
     }
 
-    @Test(expected = ComparisonFailure.class)
+    @Test//(expected = ComparisonFailure.class)
     public void thirdExample() {
       assertAll(
           stringValue("Hello")
@@ -119,35 +121,34 @@ public class Fluent3Example {
           stringValue("Hello5")
               .transform(tx -> tx.length().then().greaterThan(10).done()));
     }
+
   }
+
 
   @Ignore
   public static class OnGoing {
-    /*
-    @Test(expected = StackOverflowError.class)
+    @Test(expected = ComparisonFailure.class)
     public void test8() {
       assertAll(
-          statementForString("Hello5")
+          stringValue("Hello5")
               .then()
-              .appendChild(v -> v.isNull().$())
-              .appendChild(v -> v.isNotNull().$())
-              .$());
+              .check(v -> v.isNull().done())
+              .check(v -> v.isNotNull().done()));
     }
-    @Test(expected = StackOverflowError.class)
+
+    @Test(expected = ComparisonFailure.class)
     public void firstExample() {
       assertAll(
-          statementForString("Hello").allOf()
-              .appendChild(tx -> tx.length()
+          stringValue("Hello").allOf()
+              .transform(tx -> tx.length()
                   .then()
                   .allOf()
                   .greaterThan(10)
                   .lessThan(100)
-                  .root().$())
-              .$());
+                  .done()));
     }
-*/
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test7_C() {
       assertAll(
           stringValue("Hello5")
@@ -172,7 +173,7 @@ public class Fluent3Example {
                   .done()));
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void givenBookTitleAndAbstract_whenCheckThem_thenTheyAreNotNullAndAppropriateLength() {
       String bookTitle = "De Bello Gallico";
       String bookAbstract = "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.";
@@ -202,27 +203,6 @@ public class Fluent3Example {
                   .transform(ty -> ty.then().isNotNull().toPredicate()).done()));
     }
 
-    /*
-    @Test
-    public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength() {
-      Book book = new Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
-      assertAll(
-          new BookTransformer(book)
-              .check(b -> b.title()
-                  .check(ty -> ty.then().isNotNull().done())
-                  .check(ty -> ty.length().then()
-                      .greaterThanOrEqualTo(10)
-                      .lessThan(40)
-                      .done()).done())
-              .check(b -> b.abstractText()
-                  .check(ty -> ty.then().isNotNull().done())
-                  .check(ty -> ty.length().then()
-                      .greaterThanOrEqualTo(200)
-                      .lessThan(400)
-                      .done()));
-    }
-     */
-
     @Test(expected = ComparisonFailure.class)
     public void test6() {
       assertAll(
@@ -240,7 +220,7 @@ public class Fluent3Example {
     }
 
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void thirdExample_a() {
       assertAll(
           stringValue("Hello")
@@ -251,7 +231,7 @@ public class Fluent3Example {
               .isNull());
     }
 
-    @Test
+    @Test(expected = ComparisonFailure.class)
     public void test7() {
       assertAll(
           stringValue("Hello5")
@@ -259,9 +239,78 @@ public class Fluent3Example {
               .transform(tx -> tx.then().isNull().done()));
     }
 
-    @Test
+    @Test//(expected = ComparisonFailure.class)
+    public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength_2() {
+      Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
+      try {
+        assertAll(
+            stringValue("hello").length().then().greaterThan(1),
+            new Fluent4Example.OnGoing.BookTransformer(book)
+                .transform(b -> b.title()
+                    .transform(ty -> ty.then().isNotNull().done())
+                    .transform(ty -> ty.parseInt().then()
+                        .greaterThanOrEqualTo(10)
+                        .lessThan(40)
+                        .done()).done())
+                .transform(b -> b.abstractText()
+                    .transform(ty -> ty.then().checkWithPredicate(isNull().negate()).done())
+                    .transform(ty -> ty.length().then()
+                        .greaterThanOrEqualTo(200)
+                        .lessThan(400)
+                        .done()).done()));
+      } catch (ComparisonFailure e) {
+        ReportParser reportParser = new ReportParser(e.getActual());
+        System.out.println("summary=" + reportParser.summary());
+        reportParser.details().forEach(
+            each -> {
+              System.out.println(each.subject());
+              System.out.println(each.body());
+            }
+        );
+        throw e;
+      }
+    }
+
+    @Test//(expected = ComparisonFailure.class)
+    public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength_3() {
+      Fluent4Example.OnGoing.Book book = new Fluent4Example.OnGoing.Book("De Bello Gallico", "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.");
+      try {
+        assertAll(
+            new Fluent4Example.OnGoing.BookTransformer(book)
+                .transform(b -> b.title()
+                    .transform(ty -> ty.then().isNotNull().done())
+                    .transform(ty -> ty.length().then()
+                        .greaterThanOrEqualTo(10)
+                        .checkWithPredicate(errorThrowingPredicate())
+                        .done()).done())
+                .transform(b -> b.abstractText()
+                    .transform(ty -> ty.then().isNotNull().done())
+                    .transform(ty -> ty.length().then()
+                        .greaterThanOrEqualTo(200)
+                        .lessThan(400)
+                        .done()).done()));
+      } catch (ComparisonFailure e) {
+        ReportParser reportParser = new ReportParser(e.getActual());
+        System.out.println("summary=" + reportParser.summary());
+        reportParser.details().forEach(
+            each -> {
+              System.out.println(each.subject());
+              System.out.println(each.body());
+            }
+        );
+        throw e;
+      }
+    }
+
+    private Predicate<? super Integer> errorThrowingPredicate() {
+      return predicate("errorThrowingPredicate", p -> {
+        throw new RuntimeException("Intentional runtime exception!!!");
+      });
+    }
+
+    @Test(expected = ComparisonFailure.class)
     public void makeTrivialTest() {
-      assertThat("hello", transform(makeTrivial(identity())).check(transform(makeTrivial(identity())).check(isEqualTo("HELLO"))));
+      assertThat("hello", transform(makeSquashable(identity())).check(transform(makeSquashable(identity())).check(isEqualTo("HELLO"))));
     }
   }
 }

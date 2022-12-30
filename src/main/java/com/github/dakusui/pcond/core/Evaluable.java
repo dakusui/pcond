@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.context.VariableBundle;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,12 +31,13 @@ import java.util.stream.Stream;
  */
 public interface Evaluable<T> {
   /**
-   * Performs an evaluation of the `value` with a given `evaluator`.
+   * Performs an evaluation of the `evaluationContext` with a given `evaluator`.
    *
-   * @param value     The value to be evaluated.
-   * @param evaluator An evaluator with which the `value` is evaluated.
+   * @param evaluableIo       An execution occurrence of an evaluable.
+   * @param evaluationContext An evaluation context.
+   * @param evaluator         An evaluator with which the `evaluationContext` is evaluated.
    */
-  void accept(T value, Evaluator evaluator);
+  <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator);
 
   /**
    * In order to generate an informative report, the framework needs information
@@ -54,7 +55,7 @@ public interface Evaluable<T> {
     return false;
   }
 
-  default boolean isTrivial() {
+  default boolean isSquashable() {
     return false;
   }
 
@@ -62,12 +63,16 @@ public interface Evaluable<T> {
     throw new UnsupportedOperationException();
   }
 
-    /**
-     * A base interface to model all the predicates in the model of the evaluation
-     * framework.
-     *
-     * @param <T> The type of the value to be tested.
-     */
+  default Evaluable<T> toEvaluable() {
+    return this;
+  }
+
+  /**
+   * A base interface to model all the predicates in the model of the evaluation
+   * framework.
+   *
+   * @param <T> The type of the value to be tested.
+   */
   interface Pred<T> extends Evaluable<T> {
   }
 
@@ -82,7 +87,7 @@ public interface Evaluable<T> {
      *
      * @return The list of the child predicates.
      */
-    List<Evaluable<? super T>> children();
+    List<Evaluable<T>> children();
 
     /**
      * Returns `true` if the "shortcut" evaluation is enabled.
@@ -105,6 +110,11 @@ public interface Evaluable<T> {
      * @return `true` if the "shortcut" evaluation is enabled.
      */
     boolean shortcut();
+
+    @Override
+    default boolean isSquashable() {
+      return children().size() <= 1;
+    }
   }
 
   /**
@@ -113,9 +123,10 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface Conjunction<T> extends Composite<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default void accept(T value, Evaluator evaluator) {
-      evaluator.evaluate(value, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateConjunction((EvaluableIo<T, Conjunction<T>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
   }
 
@@ -125,9 +136,10 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface Disjunction<T> extends Composite<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default void accept(T value, Evaluator evaluator) {
-      evaluator.evaluate(value, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateDisjunction((EvaluableIo<T, Disjunction<T>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
   }
 
@@ -137,9 +149,10 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface Negation<T> extends Pred<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default void accept(T value, Evaluator evaluator) {
-      evaluator.evaluate(value, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateNegation((EvaluableIo<T, Negation<T>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     /**
@@ -147,10 +160,15 @@ public interface Evaluable<T> {
      *
      * @return A target predicate.
      */
-    Evaluable<? super T> target();
+    Evaluable<T> target();
 
     @Override
     default boolean requestExpectationFlip() {
+      return true;
+    }
+
+    @Override
+    default boolean isSquashable() {
       return true;
     }
   }
@@ -161,9 +179,10 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface LeafPred<T> extends Pred<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default void accept(T value, Evaluator evaluator) {
-      evaluator.evaluate(value, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateLeaf((EvaluableIo<T, LeafPred<T>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     /**
@@ -175,17 +194,18 @@ public interface Evaluable<T> {
   }
 
   /**
-   * An interface to model a predicate for {@link Context}.
+   * An interface to model a predicate for {@link VariableBundle}.
    *
-   * @see Context
+   * @see VariableBundle
    */
-  interface ContextPred extends Pred<Context> {
+  interface VariableBundlePred extends Pred<VariableBundle> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default void accept(Context value, Evaluator evaluator) {
-      evaluator.evaluate(value, this);
+    default <O> void accept(EvaluableIo<VariableBundle, Evaluable<VariableBundle>, O> evaluableIo, EvaluationContext<VariableBundle> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateVariableBundlePredicate((EvaluableIo<VariableBundle, VariableBundlePred, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
-    <T> Evaluable<? super T> enclosed();
+    <T> Evaluable<T> enclosed();
 
     int argIndex();
   }
@@ -196,9 +216,10 @@ public interface Evaluable<T> {
    * @param <E> The type of elements in the stream to be evaluated.
    */
   interface StreamPred<E> extends Pred<Stream<E>> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default void accept(Stream<E> value, Evaluator evaluator) {
-      evaluator.evaluate(value, this);
+    default <O> void accept(EvaluableIo<Stream<E>, Evaluable<Stream<E>>, O> evaluableIo, EvaluationContext<Stream<E>> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateStreamPredicate((EvaluableIo<Stream<E>, StreamPred<E>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     /**
@@ -216,7 +237,7 @@ public interface Evaluable<T> {
      *
      * @return An evaluable which triggers a "cut".
      */
-    Evaluable<? super E> cut();
+    Evaluable<E> cut();
 
     /**
      * Returns a value to make a "cut" happen.
@@ -239,27 +260,31 @@ public interface Evaluable<T> {
    * @param <R> The type to which the value (`T`) is transformed and then tested.
    */
   interface Transformation<T, R> extends Pred<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default void accept(T value, Evaluator evaluator) {
-      evaluator.evaluate(value, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateTransformation((EvaluableIo<T, Transformation<T, R>, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     /**
      * Returns a transformer of this object.
+     *
      * @return A transformer function.
      */
-    Evaluable<? super T> mapper();
+    Evaluable<T> mapper();
 
-    Evaluable<? super R> checker();
+    Evaluable<R> checker();
 
     /**
      * Returns a name of a transformer, if any.
+     *
      * @return An optional to store a name of the transformer.
      */
     Optional<String> mapperName();
 
     /**
      * Returns a name of a checker, if any.
+     *
      * @return An optional to store a name of the checker.
      */
     Optional<String> checkerName();
@@ -272,13 +297,14 @@ public interface Evaluable<T> {
    * @param <T> The type of the value to be evaluated.
    */
   interface Func<T> extends Evaluable<T> {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default void accept(T value, Evaluator evaluator) {
-      evaluator.evaluate(value, this);
+    default <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateFunction((EvaluableIo<T, Func<T>, O>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
-    Function<? super T, ?> head();
+    Function<? super T, Object> head();
 
-    Optional<Evaluable<?>> tail();
+    Optional<Evaluable<Object>> tail();
   }
 }

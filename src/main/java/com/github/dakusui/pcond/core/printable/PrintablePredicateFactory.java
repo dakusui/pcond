@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
-import com.github.dakusui.pcond.core.context.Context;
+import com.github.dakusui.pcond.core.context.VariableBundle;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
@@ -110,8 +110,8 @@ public enum PrintablePredicateFactory {
     return AnyMatch.create(predicate);
   }
 
-  public static <T> Predicate<Context> contextPredicate(Predicate<T> predicate, int argIndex) {
-    return ContextPredicate.create(toPrintablePredicateIfNotPrintable(predicate), argIndex);
+  public static <T> Predicate<VariableBundle> variableBundlePredicate(Predicate<T> predicate, int argIndex) {
+    return VariableBundlePredicate.create(toPrintablePredicateIfNotPrintable(predicate), argIndex);
   }
 
   private static RuntimeException noPredicateGiven() {
@@ -180,7 +180,6 @@ public enum PrintablePredicateFactory {
     EQUALS_IGNORE_CASE(
         (args) -> () -> format("equalsIgnoreCase[%s]", args.get(0)),
         (args) -> (s) -> {
-          System.out.println("equalsIgnoreCase");
           return ((String) s).equalsIgnoreCase((String) args.get(0));
         }),
     OBJECT_IS_SAME_AS(
@@ -224,13 +223,13 @@ public enum PrintablePredicateFactory {
     }
 
     @Override
-    public Object explainExpectation() {
+    public Object explainOutputExpectation() {
       return this.formatter.get();
     }
 
     @Override
-    public Object explainActualInput(Object actualInputValue) {
-      return actualInputValue;
+    public Object explainActual(Object actualValue) {
+      return actualValue;
     }
 
     @Override
@@ -249,11 +248,12 @@ public enum PrintablePredicateFactory {
           args,
           () -> format("!%s", predicate),
           (t) -> PrintablePredicate.unwrap((Predicate<Object>) predicate).negate().test(t));
-      target = toEvaluableIfNecessary(predicate);
+      this.target = toEvaluableIfNecessary(predicate);
+      this.squashable = true;
     }
 
     @Override
-    public Evaluable<? super T> target() {
+    public Evaluable<T> target() {
       return target;
     }
   }
@@ -281,9 +281,10 @@ public enum PrintablePredicateFactory {
   }
 
   abstract static class Junction<T> extends PrintablePredicate<T> implements Evaluable.Composite<T> {
-    final         List<Evaluable<? super T>> children;
-    final private boolean                    shortcut;
+    final         List<Evaluable<T>> children;
+    final private boolean            shortcut;
 
+    @SuppressWarnings("unchecked")
     protected Junction(
         List<Predicate<? super T>> predicates,
         PrintablePredicateFactory creator,
@@ -294,12 +295,15 @@ public enum PrintablePredicateFactory {
           new ArrayList<>(predicates),
           () -> formatJunction(predicates, junctionSymbol),
           junction(predicates, junctionOp));
-      this.children = predicates.stream().map(InternalUtils::toEvaluableIfNecessary).collect(toList());
+      this.children = predicates.stream()
+          .map(InternalUtils::toEvaluableIfNecessary)
+          .map(each -> (Evaluable<T>) each)
+          .collect(toList());
       this.shortcut = shortcut;
     }
 
     @Override
-    public List<Evaluable<? super T>> children() {
+    public List<Evaluable<T>> children() {
       return this.children;
     }
 
@@ -334,7 +338,7 @@ public enum PrintablePredicateFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> List<Predicate<T>> evaluablesToPredicates(List<Evaluable<? super T>> evaluables) {
+    private static <T> List<Predicate<T>> evaluablesToPredicates(List<Evaluable<T>> evaluables) {
       return evaluables.stream()
           .peek(each -> {
             assert each instanceof Predicate;
@@ -359,28 +363,26 @@ public enum PrintablePredicateFactory {
           TransformingPredicate.class,
           asList(predicate, function),
           () -> mapperName == null ?
-              format("%s %s", function, predicate) :
-              format("%s(%s %s)", mapperName, function, predicate),
+              format("%s %s", function, checkerName == null ? predicate : checkerName) :
+              format("%s(%s %s)", mapperName, function, checkerName == null ? predicate : checkerName),
           v -> predicate.test(function.apply(v)));
       this.mapper = toEvaluableIfNecessary(function);
       this.mapperName = mapperName;
       this.checker = toEvaluableIfNecessary(predicate);
       this.checkerName = checkerName;
-      this.trivial = true;
+      this.squashable = true;
     }
 
-    protected TransformingPredicate(Predicate<? super R> predicate, Function<? super T, ? extends R> function) {
-      this(null, null, predicate, function);
-    }
-
+    @SuppressWarnings("unchecked")
     @Override
-    public Evaluable<? super T> mapper() {
-      return this.mapper;
+    public Evaluable<T> mapper() {
+      return (Evaluable<T>) this.mapper;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Evaluable<? super R> checker() {
-      return this.checker;
+    public Evaluable<R> checker() {
+      return (Evaluable<R>) this.checker;
     }
 
     @Override
@@ -401,9 +403,7 @@ public enum PrintablePredicateFactory {
      * @param <O> Input parameter type.
      */
     public interface Factory<P, O> {
-      default Predicate<O> check(String condName, Predicate<? super P> cond) {
-        return check(leaf(condName, cond));
-      }
+      Predicate<O> check(String condName, Predicate<? super P> cond);
 
       @SuppressWarnings("unchecked")
       default <OO> Factory<P, OO> castTo(@SuppressWarnings("unused") Class<OO> ooClass) {
@@ -417,20 +417,30 @@ public enum PrintablePredicateFactory {
       }
 
       static <P, O> Factory<P, O> create(String mapperName, String checkerName, Function<O, P> function) {
-        return cond -> new TransformingPredicate<>(mapperName, checkerName, toPrintablePredicateIfNotPrintable(cond), function);
+        return new Factory<P, O>() {
+          @Override
+          public Predicate<O> check(String condName, Predicate<? super P> cond) {
+            return new TransformingPredicate<>(mapperName, condName, cond, function);
+          }
+
+          @Override
+          public Predicate<O> check(Predicate<? super P> cond) {
+            return new TransformingPredicate<>(mapperName, checkerName, toPrintablePredicateIfNotPrintable(cond), function);
+          }
+        };
       }
     }
   }
 
-  static class ContextPredicate extends PrintablePredicate<Context> implements Evaluable.ContextPred {
+  static class VariableBundlePredicate extends PrintablePredicate<VariableBundle> implements Evaluable.VariableBundlePred {
     private final Evaluable<?> enclosed;
     private final int          argIndex;
 
-    private <T> ContextPredicate(Object creator, List<Object> args, Predicate<T> predicate, int argIndex) {
+    private <T> VariableBundlePredicate(Object creator, List<Object> args, Predicate<T> predicate, int argIndex) {
       super(
           creator,
           args,
-          () -> format("contextPredicate[%s,%s]", predicate, argIndex),
+          () -> format("curry[%s,%s]", predicate, argIndex),
           context -> PrintablePredicate.unwrap(predicate).test(context.valueAt(argIndex)));
       this.enclosed = toEvaluableIfNecessary(predicate);
       this.argIndex = argIndex;
@@ -439,8 +449,8 @@ public enum PrintablePredicateFactory {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <TT> Evaluable<? super TT> enclosed() {
-      return (Evaluable<? super TT>) this.enclosed;
+    public <TT> Evaluable<TT> enclosed() {
+      return (Evaluable<TT>) this.enclosed;
     }
 
     @Override
@@ -448,8 +458,8 @@ public enum PrintablePredicateFactory {
       return argIndex;
     }
 
-    public static <T> ContextPredicate create(Predicate<T> predicate, int argIndex) {
-      return new ContextPredicate(ContextPredicate.class, asList(predicate, argIndex), predicate, argIndex);
+    public static <T> VariableBundlePredicate create(Predicate<T> predicate, int argIndex) {
+      return new VariableBundlePredicate(VariableBundlePredicate.class, asList(predicate, argIndex), predicate, argIndex);
     }
   }
 
@@ -468,6 +478,26 @@ public enum PrintablePredicateFactory {
 
     static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
       return new AllMatch<>(
+          predicate
+      );
+    }
+  }
+
+  static class AnyMatch<E> extends StreamPredicate<E> {
+    @SuppressWarnings("unchecked")
+    private AnyMatch(Predicate<? super E> predicate) {
+      super(
+          AnyMatch.class,
+          singletonList(predicate),
+          () -> format("anyMatch[%s]", predicate),
+          (Stream<E> stream) -> stream.anyMatch(PrintablePredicate.unwrap(predicate)),
+          toEvaluableIfNecessary((Predicate<? super Stream<E>>) predicate),
+          false,
+          true);
+    }
+
+    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
+      return new AnyMatch<>(
           predicate
       );
     }
@@ -496,26 +526,6 @@ public enum PrintablePredicateFactory {
           predicate
       ) {
       };
-    }
-  }
-
-  static class AnyMatch<E> extends StreamPredicate<E> {
-    @SuppressWarnings("unchecked")
-    private AnyMatch(Predicate<? super E> predicate) {
-      super(
-          AnyMatch.class,
-          singletonList(predicate),
-          () -> format("anyMatch[%s]", predicate),
-          (Stream<E> stream) -> stream.anyMatch(PrintablePredicate.unwrap(predicate)),
-          toEvaluableIfNecessary((Predicate<? super Stream<E>>) predicate),
-          false,
-          true);
-    }
-
-    public static <E> StreamPredicate<E> create(Predicate<? super E> predicate) {
-      return new AnyMatch<>(
-          predicate
-      );
     }
   }
 

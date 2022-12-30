@@ -1,19 +1,20 @@
 package com.github.dakusui.pcond.validator;
 
-import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.Evaluator;
+import com.github.dakusui.pcond.core.*;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.executionFailure;
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
@@ -125,7 +126,7 @@ public interface Validator {
    * Otherwise, an exception created by `forValidate.exceptionForGeneralViolation()`
    * will be thrown.
    * This method is intended to be used by {@code Validates#validate(Object, Predicate, Function)}
-   * method in valid8j library.
+   * method in `valid8j` library.
    *
    * @param value       The value to be checked.
    * @param cond        A condition to validate the `value`.
@@ -160,7 +161,7 @@ public interface Validator {
    * Otherwise, an exception created by `forValidate.exceptionForIllegalArgument()`
    * will be thrown.
    * This method is intended to be used by {@code Validates#validateArgument(Object, Predicate)}
-   * method in valid8j library.
+   * method in `valid8j` library.
    *
    * @param value       The value to be checked.
    * @param cond        A condition to validate the `value`.
@@ -368,25 +369,25 @@ public interface Validator {
         value,
         cond,
         configuration().messageComposer()::composeMessageForAssertion,
-        explantion -> configuration().exceptionComposer().forAssertThat().testSkippedException(explantion, configuration().reportComposer()));
+        explanation -> configuration().exceptionComposer().forAssertThat().testSkippedException(explanation, configuration().reportComposer()));
   }
 
   /**
    * The core method of the `ValueChecker`.
-   * This method checks if the given `value` satisfies a condition, passed as `cond`.
-   * If it does, the `value` itself will be returned.
-   * If not, an appropriate message will be composed based on the `value` and `cond` by the `messageComposerFunction`.
+   * This method checks if the given `evaluationContext` satisfies a condition, passed as `cond`.
+   * If it does, the `evaluationContext` itself will be returned.
+   * If not, an appropriate message will be composed based on the `evaluationContext` and `cond` by the `messageComposerFunction`.
    * Internally in this method, an `Explanation` of the failure is created by a {@link ReportComposer}
    * object returned by `configuration().reportComposer()` method.
    * The `Explanation` is passed to the `exceptionComposerFunction` and the exception
    * created by the function will be thrown.
    *
-   * @param value                     A `value` to be checked.
-   * @param cond                      A predicate that checks the `value`.
-   * @param messageComposerFunction   A function that composes an error message from the `value` and the predicate `cond`.
+   * @param <T>                       The type of the `evaluationContext`.
+   * @param value                     A value to be checked.
+   * @param cond                      A predicate that checks the `evaluationContext`.
+   * @param messageComposerFunction   A function that composes an error message from the `evaluationContext` and the predicate `cond`.
    * @param exceptionComposerFunction A function that creates an exception from a failure report created inside this method.
-   * @param <T>                       The type of the `value`.
-   * @return The `value` itself.
+   * @return The `evaluationContext` itself.
    */
   @SuppressWarnings("unchecked")
   default <T> T checkValueAndThrowIfFails(
@@ -394,23 +395,44 @@ public interface Validator {
       Predicate<? super T> cond,
       BiFunction<T, Predicate<? super T>, String> messageComposerFunction,
       ExceptionFactory<Throwable> exceptionComposerFunction) {
+    ValueHolder<T> valueHolder = ValueHolder.forValue(value);
+    Evaluable<T> evaluable = toEvaluableIfNecessary(cond);
+    EvaluableIo<T, Evaluable<T>, Boolean> evaluableIo = new EvaluableIo<>(valueHolder, EvaluationContext.resolveEvaluationEntryType(evaluable), evaluable);
+    EvaluationContext<T> evaluationContext = new EvaluationContext<>();
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
       try {
-        ((Evaluable<T>) cond).accept(value, evaluator);
+        ((Evaluable<T>) cond).accept(evaluableIo, evaluationContext, evaluator);
       } catch (Error error) {
         throw error;
       } catch (Throwable t) {
-        String message = format("An exception(%s) was thrown during evaluation of value: %s: %s", t, value, cond);
-        throw executionFailure(configuration().reportComposer().composeExplanation(message, evaluator.resultEntries(), t), t);
+        t.printStackTrace();
+        String message = format("An exception (%s) was thrown during evaluation of evaluationContext: %s: %s", t, value, cond);
+        throw executionFailure(configuration()
+                .reportComposer()
+                .composeExplanation(
+                    message,
+                    evaluationContext.resultEntries()
+                ),
+            t);
       }
-      if (evaluator.resultValue())
+      if (evaluableIo.output().isValueReturned() && Objects.equals(true, evaluableIo.output().value()))
         return value;
-      List<Evaluator.Entry> entries = evaluator.resultEntries();
-      throw exceptionComposerFunction.create(configuration().reportComposer().composeExplanation(messageComposerFunction.apply(value, cond), entries, null));
+      List<EvaluationEntry> entries = evaluationContext.resultEntries();
+      throw exceptionComposerFunction.create(configuration()
+          .reportComposer()
+          .composeExplanation(
+              messageComposerFunction.apply(value, cond),
+              entries
+          ));
     } else {
-      if (!cond.test(value))
-        throw exceptionComposerFunction.create(configuration().reportComposer().composeExplanation(messageComposerFunction.apply(value, cond), emptyList(), null));
+      if (!cond.test(valueHolder.returnedValue()))
+        throw exceptionComposerFunction.create(configuration()
+            .reportComposer()
+            .composeExplanation(
+                messageComposerFunction.apply(value, cond),
+                emptyList()
+            ));
       return value;
     }
   }
@@ -431,6 +453,31 @@ public interface Validator {
   }
 
   interface Configuration {
+    /**
+     * When `com.github.dakusui.pcond.debug` is not `true`, it is assumed that those methods in this interface return `false`.
+     */
+    interface Debugging {
+      default boolean suppressSquashing() {
+        return true;
+      }
+
+      default boolean enableDebugLog() {
+        return true;
+      }
+
+      default boolean showEvaluableDetail() {
+        return true;
+      }
+
+      default boolean reportIgnoredEntries() {
+        return true;
+      }
+
+      default boolean passThroughComparisonFailure() {
+        return true;
+      }
+    }
+
     int summarizedStringLength();
 
     boolean useEvaluator();
@@ -458,6 +505,8 @@ public interface Validator {
      * @return An exception composer.
      */
     ExceptionComposer exceptionComposer();
+
+    Optional<Debugging> debugging();
 
     enum Utils {
       ;
@@ -516,9 +565,9 @@ public interface Validator {
 
       MessageComposer messageComposer;
       ReportComposer  reportComposer;
-      private ExceptionComposer.ForRequire  exceptionComposerForRequire;
-      private ExceptionComposer.ForEnsure   exceptionComposerForEnsure;
-      private ExceptionComposer.ForValidate defaultExceptionComposerForValidate;
+      private ExceptionComposer.ForRequire       exceptionComposerForRequire;
+      private ExceptionComposer.ForEnsure        exceptionComposerForEnsure;
+      private ExceptionComposer.ForValidate      defaultExceptionComposerForValidate;
       private ExceptionComposer.ForAssertion     exceptionComposerForAssert;
       private ExceptionComposer.ForTestAssertion exceptionComposerForAssertThat;
 
@@ -573,6 +622,9 @@ public interface Validator {
 
       public Configuration build() {
         return new Configuration() {
+          private final Debugging debugging = new Debugging() {
+          };
+
           private final ExceptionComposer exceptionComposer = new ExceptionComposer.Impl(
               exceptionComposerForRequire,
               exceptionComposerForEnsure,
@@ -599,6 +651,14 @@ public interface Validator {
            */
           public ExceptionComposer exceptionComposer() {
             return this.exceptionComposer;
+          }
+
+          @Override
+          public Optional<Debugging> debugging() {
+            if (Boolean.parseBoolean(System.getProperty("com.github.dakusui.pcond.debug"))) {
+              return Optional.of(this.debugging);
+            }
+            return Optional.empty();
           }
 
 

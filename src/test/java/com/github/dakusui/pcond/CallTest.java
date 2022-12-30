@@ -5,6 +5,7 @@ import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.internals.InternalException;
 import com.github.dakusui.pcond.internals.MethodInvocationException;
 import com.github.dakusui.pcond.internals.MethodNotFound;
+import com.github.dakusui.shared.ApplicationException;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 
@@ -62,11 +63,11 @@ public class CallTest extends TestBase {
     assertThat(chained.apply(var), is("WORLD"));
   }
 
-  @Test(expected = InternalException.class)
+  @Test(expected = ApplicationException.class)
   public void methodNotFound() {
     try {
-      validate("hello", Predicates.callp("undefined", "H"));
-    } catch (InternalException e) {
+      validate("hello", Predicates.callp("undefined", "H"), ApplicationException::new);
+    } catch (ApplicationException e) {
       e.printStackTrace();
       assertThat(
           e.getMessage(),
@@ -102,9 +103,9 @@ public class CallTest extends TestBase {
     validate(new AcceptsNull(), Predicates.callp("method", "hello", null));
   }
 
-  @Test(expected = InternalException.class)
+  @Test(expected = ApplicationException.class)
   public void nullReturningFunctionAsPredicate() {
-    validate(new ReturnsNull(), Predicates.callp("method", "hello"));
+    validate(new ReturnsNull(), Predicates.callp("method", "hello"), ApplicationException::new);
   }
 
   @Test(expected = InternalException.class)
@@ -125,11 +126,27 @@ public class CallTest extends TestBase {
     }
   }
 
-  @Test(expected = InternalException.class)
+  @Test(expected = ApplicationException.class)
   public void methodAmbiguous_primitiveBoxed() {
     try {
-      validate(new Ambiguous2(), Predicates.callp("method", 1));
-    } catch (InternalException e) {
+      validate(new Ambiguous2(), Predicates.callp("method", 1), ApplicationException::new);
+    } catch (ApplicationException e) {
+      e.printStackTrace();
+      assertThat(
+          e.getMessage(),
+          allOf(
+              containsString("method[1]"),
+              containsString("were found more than one")
+          ));
+      throw e;
+    }
+  }
+
+  @Test(expected = ApplicationException.class)
+  public void methodAmbiguous_primitiveBoxed_negated() {
+    try {
+      validate(new Ambiguous2(), Predicates.callp("method", 1).negate(), ApplicationException::new);
+    } catch (ApplicationException e) {
       e.printStackTrace();
       assertThat(
           e.getMessage(),

@@ -294,5 +294,4 @@ public interface ExceptionComposer {
       }
     }
   }
-
 }
