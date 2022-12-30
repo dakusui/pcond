@@ -90,7 +90,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       assertThat(
           lineAt(e.getMessage(), 5),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("contextPredicate"),
+              CoreMatchers.containsString("curry"),
               //              CoreMatchers.containsString("stringEndsWith(String)(String)[0, 1]"),
               CoreMatchers.containsString("false")
           ));
@@ -98,7 +98,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       assertThat(
           lineAt(e.getMessage(), 6),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("contextPredicate"),
+              CoreMatchers.containsString("curry"),
               //              CoreMatchers.containsString("stringEndsWith(String)(String)[0, 1]"),
               CoreMatchers.containsString("true")
           ));
@@ -143,83 +143,6 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
           CoreMatchers.allOf(
               CoreMatchers.containsString("length"),
               CoreMatchers.containsString("NullPointerException")
-          ));
-      throw e;
-    }
-  }
-
-  @Test(expected = IllegalValueException.class)
-  public void hello_b_e2() {
-    try {
-      validate(
-          asList("Hi", "hello", "world", null),
-          transform(stream().andThen(nest(asList("1", "2", "o"))))
-              .check(noneMatch(
-                  toVariableBundlePredicate(transform(Functions.length()).check(gt(3))))));
-      //          |                         |         |                         |
-      //          |                         |         |                         |
-      //         (1)                       (2)       (3)                       (4)
-
-    } catch (IllegalValueException e) {
-      System.err.println("<<" + e.getMessage() + ">>");
-      e.printStackTrace(System.out);
-      int i = 3;
-      // expected (1)
-      assertThat(
-          lineAt(e.getMessage(), i),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("context:[hello, 1]"),
-              CoreMatchers.containsString("length >[3]"),
-              CoreMatchers.containsString(",0"),
-              CoreMatchers.containsString("true")
-          ));
-      // actual (1)
-      assertThat(
-          lineAt(e.getMessage(), ++i),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("context:[hello, 1]"),
-              CoreMatchers.containsString("length >[3]"),
-              CoreMatchers.containsString(",0"),
-              CoreMatchers.containsString("false")
-          ));
-      ++i;
-      ++i;
-      // (2)
-      assertThat(
-          lineAt(e.getMessage(), ++i),
-          CoreMatchers.containsString("transform"));
-      // (3)
-      assertThat(
-          lineAt(e.getMessage(), i),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("length"),
-              CoreMatchers.containsString("5")
-          ));
-      // expected (4)
-      assertThat(
-          lineAt(e.getMessage(), ++i),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("5"),
-              CoreMatchers.containsString("check")
-          ));
-      assertThat(
-          lineAt(e.getMessage(), i),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString(">[3]"),
-              CoreMatchers.containsString("false")
-          ));
-      // actual (4)
-      assertThat(
-          lineAt(e.getMessage(), ++i),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString("5"),
-              CoreMatchers.containsString("check")
-          ));
-      assertThat(
-          lineAt(e.getMessage(), i),
-          CoreMatchers.allOf(
-              CoreMatchers.containsString(">[3]"),
-              CoreMatchers.containsString("true")
           ));
       throw e;
     }
@@ -342,7 +265,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       assertThat(
           lineAt(e.getMessage(), i),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("contextPredicate"),
+              CoreMatchers.containsString("curry"),
               CoreMatchers.containsString("isNull"),
               CoreMatchers.containsString("0"),
               CoreMatchers.containsString("->"),
@@ -359,7 +282,7 @@ context:[hello, o]           ->     contextPredicate(stringEndsWith(String)(Stri
       assertThat(
           lineAt(e.getMessage(), i),
           CoreMatchers.allOf(
-              CoreMatchers.containsString("contextPredicate"),
+              CoreMatchers.containsString("curry"),
               CoreMatchers.containsString("isNull"),
               CoreMatchers.containsString("0"),
               CoreMatchers.containsString("->"),

@@ -43,7 +43,7 @@ public interface VariableBundle extends Formattable {
 
   @Override
   default void formatTo(Formatter formatter, int flags, int width, int precision) {
-    formatter.format("context:%s", this.values());
+    formatter.format("variables:%s", this.values());
   }
 
   /**

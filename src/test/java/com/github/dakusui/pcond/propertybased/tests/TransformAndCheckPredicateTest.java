@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import static com.github.dakusui.pcond.forms.Predicates.allOf;
 import static com.github.dakusui.pcond.forms.Predicates.transform;
-import static com.github.dakusui.pcond.propertybased.utils.TestCheck.equalsPredicate;
 import static com.github.dakusui.pcond.propertybased.utils.TestCheck.*;
 import static com.github.dakusui.shared.utils.TestUtils.toLowerCase;
 import static com.github.dakusui.shared.utils.TestUtils.toUpperCase;
@@ -85,7 +84,6 @@ public class TransformAndCheckPredicateTest extends PropertyBasedTestBase {
 
   @TestCaseParameter
   public static TestCase<String, ComparisonFailure> givenTwoChainedTransformingPredicates_whenNonExpectedValue_thenComparisonFailure() {
-    int i = 0;
     Function<String, String> _toUpperCase = toUpperCase();
     Function<? super String, Integer> _length_1 = Functions.length();
     Predicate<Integer> _isEqualTo_1 = Predicates.isEqualTo(6);
@@ -115,11 +113,6 @@ public class TransformAndCheckPredicateTest extends PropertyBasedTestBase {
         /* UNIVERSAL */
         .expectedExceptionClass(ComparisonFailure.class)
         .configure(genericConfiguratorForComparisonFailure())
-        .addCheck(numberOfExpectSummariesWithDetailsIsGreaterThanOrEqualTo(1))
-        .addCheck(numbersOfExpectAndActualSummariesAreEqual())
-        .addCheck(numbersOfExpectAndActualSummariesWithDetailsAreEqual())
-        .addCheck(numberOfExpectDetailsIsGreaterThanOrEqualTo(1))
-        .addCheck(numbersOfExpectAndActualDetailsAreEqual())
         /* DEPENDING ON FORM NAMES */
         .addCheck(numberOfActualSummariesIsGreaterThanOrEqualTo(_formNamesInUse.size()))
         .addCheck(numberOfExpectSummariesWithDetailsIsEqualTo(_failureCausingPredicates.size()))

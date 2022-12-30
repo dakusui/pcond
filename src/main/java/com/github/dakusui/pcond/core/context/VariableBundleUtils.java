@@ -44,7 +44,7 @@ public enum VariableBundleUtils {
   }
 
   public static Predicate<VariableBundle> toContextPredicate(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
-    return VariableBundleUtils.applyAndTest(curriedFunction, createPredicate("contextPredicate", Predicates.isTrue()), Boolean.class, orderArgs);
+    return VariableBundleUtils.applyAndTest(curriedFunction, createPredicate("curry", Predicates.isTrue()), Boolean.class, orderArgs);
   }
 
   public static <T> Predicate<T> createPredicate(String s, Predicate<T> predicate) {

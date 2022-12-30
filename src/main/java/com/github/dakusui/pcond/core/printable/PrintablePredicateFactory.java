@@ -440,7 +440,7 @@ public enum PrintablePredicateFactory {
       super(
           creator,
           args,
-          () -> format("contextPredicate[%s,%s]", predicate, argIndex),
+          () -> format("curry[%s,%s]", predicate, argIndex),
           context -> PrintablePredicate.unwrap(predicate).test(context.valueAt(argIndex)));
       this.enclosed = toEvaluableIfNecessary(predicate);
       this.argIndex = argIndex;

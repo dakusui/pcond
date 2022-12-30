@@ -1,6 +1,9 @@
 package com.github.dakusui.pcond.propertybased.tests;
 
-import com.github.dakusui.pcond.propertybased.utils.*;
+import com.github.dakusui.pcond.propertybased.utils.PropertyBasedTestBase;
+import com.github.dakusui.pcond.propertybased.utils.TestCase;
+import com.github.dakusui.pcond.propertybased.utils.TestCaseParameter;
+import com.github.dakusui.pcond.propertybased.utils.TestCaseUtils;
 import org.junit.ComparisonFailure;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -13,6 +16,7 @@ import static com.github.dakusui.pcond.forms.Experimentals.toVariableBundlePredi
 import static com.github.dakusui.pcond.forms.Functions.length;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.propertybased.utils.TestCheck.*;
+import static com.github.dakusui.shared.ExperimentalsUtils.stringEndsWith;
 import static java.util.Arrays.asList;
 
 @RunWith(Parameterized.class)
@@ -28,24 +32,8 @@ public class StreamNoneMatchPredicateTest extends PropertyBasedTestBase {
   }
 
 
-  /*
-    @Test//(expected = IllegalValueException.class)
-    public void hello_b_e2() {
-      try {
-        TestAssertions.assertThat(
-            //TestAssertions.assertThat(
-            asList("Hi", "hello", "world", null),
-            transform(stream().andThen(nest(asList("1", "2", "o"))))
-                .check(noneMatch(
-                    toVariableBundlePredicate(transform(Functions.length()).check(gt(3))))));
-        //          |                         |         |                         |
-        //          |                         |         |                         |
-        //         (1)                       (2)       (3)                       (4)
-
-   */
   @TestCaseParameter
-  public static TestCase<Stream<?>, ComparisonFailure> givenStreamPredicate_whenUnexpectedValue_thenComparisonFailure2() {
-    Stream<Object> v;
+  public static TestCase<Stream<?>, ComparisonFailure> givenStreamPredicate$hello_b_e$_whenUnexpectedValue_thenComparisonFailure2() {
     return new TestCase.Builder.ForThrownException<Stream<?>, ComparisonFailure>(
         Stream.of("Hi", "hello", "world", null),
         transform(nest(asList("1", "2", "o")))
@@ -61,6 +49,24 @@ public class StreamNoneMatchPredicateTest extends PropertyBasedTestBase {
                 1 /* check:nonMatch */ +
                 ((1 /*contextPredicate*/ + 1 /*length*/ + 1 /*check:gt(3)*/)/* for each element */
                     * 4/* fourth element cuts the stream */)))
+        .addCheck(numberOfExpectSummariesWithDetailsIsEqualTo(1))
+        .addCheck(expectDetailAtContainsToken(0, ">[3]"))
+        .build();
+  }
+
+  @SuppressWarnings("PointlessArithmeticExpression")
+  @TestCaseParameter
+  public static TestCase<Stream<?>, ComparisonFailure> givenStreamPredicate$hello_b_e_2$_whenUnexpectedValue_thenComparisonFailure2() {
+    return new TestCase.Builder.ForThrownException<Stream<?>, ComparisonFailure>(
+        Stream.of("Hi", "hello", "world"),
+        transform(nest(asList("1", "2", "o")))
+            .check(noneMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))))
+        .expectedExceptionClass(ComparisonFailure.class)
+        /* Test Case Specific Check*/
+        .addCheck(numberOfActualSummariesIsEqualTo(
+            1 /* nest */ +
+                1 /* check:nonMatch */ +
+                (1 /*contextPredicate*/ /* for each element */ * 6/* fourth element cuts the stream */)))
         .addCheck(numberOfExpectSummariesWithDetailsIsEqualTo(1))
         .addCheck(expectDetailAtContainsToken(0, ">[3]"))
         .build();
