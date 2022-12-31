@@ -77,13 +77,13 @@ public class RequiresTest extends TestBase.ForAssertionEnabledVM {
     try {
       Requires.requireArgument(
           value,
-          Predicates.transform("LENGTH", Functions.length())
-              .check("GT[100]", Predicates.gt(100)));
+          Predicates.transform("TRANSFORM_TO_LENGTH", Functions.length())
+              .check("CHECK_LENGTH", Predicates.gt(100)));
     } catch (IllegalArgumentException e) {
       e.printStackTrace();
       assertThat(
           firstLineOf(e.getMessage()),
-          CoreMatchers.is("value:<\"hello\"> violated precondition:value LENGTH GT[100]"));
+          CoreMatchers.is("value:<\"hello\"> violated precondition:value TRANSFORM_TO_LENGTH CHECK_LENGTH:>[100]"));
       throw e;
     }
   }

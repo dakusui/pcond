@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.core.context.VariableBundle;
+import com.github.dakusui.pcond.core.context.CurriedContext;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,32 +39,12 @@ public interface Evaluable<T> {
    */
   <O> void accept(EvaluableIo<T, Evaluable<T>, O> evaluableIo, EvaluationContext<T> evaluationContext, Evaluator evaluator);
 
-  /**
-   * In order to generate an informative report, the framework needs information
-   * about the expected value for each predicate.
-   *
-   * The "expected" value of a predicate can be different inside the tree of the `Evaluables`,
-   * when a negation is used.
-   *
-   * If this `Evaluable` node requests to flip the expectation value under the node,
-   * this method should return `true`.
-   *
-   * @return `true`, if the expectation flip is requested.
-   */
-  default boolean requestExpectationFlip() {
-    return false;
-  }
-
   default boolean isSquashable() {
     return false;
   }
 
   default Evaluable<T> makeTrivial() {
     throw new UnsupportedOperationException();
-  }
-
-  default Evaluable<T> toEvaluable() {
-    return this;
   }
 
   /**
@@ -163,11 +143,6 @@ public interface Evaluable<T> {
     Evaluable<T> target();
 
     @Override
-    default boolean requestExpectationFlip() {
-      return true;
-    }
-
-    @Override
     default boolean isSquashable() {
       return true;
     }
@@ -194,15 +169,15 @@ public interface Evaluable<T> {
   }
 
   /**
-   * An interface to model a predicate for {@link VariableBundle}.
+   * An interface to model a predicate for {@link CurriedContext}.
    *
-   * @see VariableBundle
+   * @see CurriedContext
    */
-  interface VariableBundlePred extends Pred<VariableBundle> {
+  interface CurriedContextPred extends Pred<CurriedContext> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    default <O> void accept(EvaluableIo<VariableBundle, Evaluable<VariableBundle>, O> evaluableIo, EvaluationContext<VariableBundle> evaluationContext, Evaluator evaluator) {
-      evaluator.evaluateVariableBundlePredicate((EvaluableIo<VariableBundle, VariableBundlePred, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
+    default <O> void accept(EvaluableIo<CurriedContext, Evaluable<CurriedContext>, O> evaluableIo, EvaluationContext<CurriedContext> evaluationContext, Evaluator evaluator) {
+      evaluator.evaluateCurriedContextPredicate((EvaluableIo<CurriedContext, CurriedContextPred, Boolean>) (EvaluableIo) evaluableIo, evaluationContext);
     }
 
     <T> Evaluable<T> enclosed();
@@ -250,7 +225,22 @@ public interface Evaluable<T> {
      * @return value ( `true` / `false` ) to make a "cut" happen.
      */
     boolean valueToCut();
-  }
+
+    /**
+     * In order to generate an informative report, the framework needs information
+     * about the expected value for each predicate.
+     *
+     * The "expected" value of a predicate can be different inside the tree of the `Evaluables`,
+     * when a negation is used.
+     *
+     * If this `Evaluable` node requests to flip the expectation value under the node,
+     * this method should return `true`.
+     *
+     * @return `true`, if the expectation flip is requested.
+     */
+    default boolean requestExpectationFlip() {
+      return false;
+    }  }
 
   /**
    * An interface to model a "transforming predicate", which models the "transform and check" style of value validation.

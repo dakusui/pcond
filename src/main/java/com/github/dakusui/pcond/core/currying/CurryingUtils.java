@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core.currying;
 
-import com.github.dakusui.pcond.core.context.VariableBundle;
+import com.github.dakusui.pcond.core.context.CurriedContext;
 import com.github.dakusui.pcond.core.multi.MultiFunction;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 
@@ -35,7 +35,7 @@ public enum CurryingUtils {
     return CURRIED_FUNCTION_FACTORY_POOL.get();
   }
 
-  public static <R> Function<VariableBundle, R> applyCurriedFunction(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
+  public static <R> Function<CurriedContext, R> applyCurriedFunction(CurriedFunction<Object, Object> curriedFunction, int... orderArgs) {
     return context -> {
       CurriedFunction<?, ?> cur = curriedFunction;
       int[] normalizedOrderArgs = normalizeOrderArgs(context, orderArgs);
@@ -45,10 +45,10 @@ public enum CurryingUtils {
     };
   }
 
-  public static int[] normalizeOrderArgs(VariableBundle variableBundle, int[] orderArgs) {
+  public static int[] normalizeOrderArgs(CurriedContext curriedContext, int[] orderArgs) {
     int[] order;
     if (orderArgs.length == 0)
-      order = IntStream.range(0, variableBundle.size()).toArray();
+      order = IntStream.range(0, curriedContext.size()).toArray();
     else
       order = orderArgs;
     return order;

@@ -18,7 +18,7 @@ public interface BooleanTransformer<T> extends
         Boolean
         > {
   static BooleanTransformer<Boolean> create(Supplier<Boolean> value) {
-    return new Impl<>(value, null);
+    return new Impl<>(value, trivialIdentityFunction());
   }
 
   @SuppressWarnings("unchecked")

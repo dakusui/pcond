@@ -1,7 +1,5 @@
-package com.github.dakusui.pcond.ut.fluent4;
+package com.github.dakusui.pcond.core.fluent;
 
-import com.github.dakusui.pcond.core.fluent.AbstractObjectTransformer;
-import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.core.fluent.builtins.ObjectChecker;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.internals.InternalException;
@@ -12,7 +10,7 @@ import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
-abstract class CustomTransformer<
+public abstract class CustomTransformer<
     TX extends AbstractObjectTransformer<
         TX,
         ObjectChecker<T, T>,

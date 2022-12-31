@@ -227,7 +227,7 @@ public abstract class EvaluationEntry {
         })
         .map(e -> {
           if (e.getClassName().startsWith(internalPackageName)) {
-            return new StackTraceElement("...internal.InternalClass", "internalMethod", "Internal.java", 0);
+            return new StackTraceElement("...internal.package.InternalClass", "internalMethod", "InternalClass.java", 0);
           }
           return e;
         })

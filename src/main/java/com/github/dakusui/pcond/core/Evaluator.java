@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.core.context.VariableBundle;
+import com.github.dakusui.pcond.core.context.CurriedContext;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -75,9 +75,9 @@ public interface Evaluator {
    *
    * @param evaluableIo       An object to hold an evaluable and its input and output.
    * @param evaluationContext An evaluation context.
-   * @see Evaluable.VariableBundlePred
+   * @see Evaluable.CurriedContextPred
    */
-  void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext);
+  void evaluateCurriedContextPredicate(EvaluableIo<CurriedContext, Evaluable.CurriedContextPred, Boolean> evaluableIo, EvaluationContext<CurriedContext> evaluationContext);
 
   /**
    * Evaluates `value` with a "transformation" predicate.
@@ -358,8 +358,8 @@ public interface Evaluator {
     }
 
     @Override
-    public void evaluateVariableBundlePredicate(EvaluableIo<VariableBundle, Evaluable.VariableBundlePred, Boolean> evaluableIo, EvaluationContext<VariableBundle> evaluationContext) {
-      evaluationContext.evaluate(evaluableIo, (Evaluable.VariableBundlePred evaluable, ValueHolder<VariableBundle> input) -> {
+    public void evaluateCurriedContextPredicate(EvaluableIo<CurriedContext, Evaluable.CurriedContextPred, Boolean> evaluableIo, EvaluationContext<CurriedContext> evaluationContext) {
+      evaluationContext.evaluate(evaluableIo, (Evaluable.CurriedContextPred evaluable, ValueHolder<CurriedContext> input) -> {
         EvaluableIo<Object, Evaluable<Object>, Boolean> io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.returnedValue().valueAt(evaluable.argIndex())));
         EvaluationContext<Object> childContext = new EvaluationContext<>(evaluationContext);
         evaluable.enclosed().accept(io, childContext, this);

@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.experimentals;
 
-import com.github.dakusui.pcond.core.context.VariableBundle;
+import com.github.dakusui.pcond.core.context.CurriedContext;
 import com.github.dakusui.pcond.core.currying.CurriedFunction;
 import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.pcond.forms.Functions;
@@ -32,8 +32,8 @@ public class DbCExperimentalsTest extends TestBase {
    *
    * You can build a check using a multi-parameter static method which returns a boolean value.
    * In this example, {@link TargetMethodHolder#stringEndsWith(String, String)} is the method.
-   * It is turned into a curried function in {@link ExperimentalsUtils#stringEndsWith()} and then passed to {@link Experimentals#toVariableBundlePredicate(CurriedFunction, int...)}.
-   * The method {@code Experimentals#test(CurriedFunction, int...)} converts a curried function whose final returned value is a boolean into a predicate of a {@link VariableBundle}.
+   * It is turned into a curried function in {@link ExperimentalsUtils#stringEndsWith()} and then passed to {@link Experimentals#toCurriedContextPredicate(CurriedFunction, int...)}.
+   * The method {@code Experimentals#test(CurriedFunction, int...)} converts a curried function whose final returned value is a boolean into a predicate of a {@link CurriedContext}.
    * A {@code Context} may have one or more values at once and those values are indexed.
    */
   @Test
@@ -41,21 +41,21 @@ public class DbCExperimentalsTest extends TestBase {
     validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2", "o"))))
-            .check(anyMatch(toVariableBundlePredicate(stringEndsWith()))));
+            .check(anyMatch(toCurriedContextPredicate(stringEndsWith()))));
   }
 
   @Test
   public void hello_a() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))));
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(toCurriedContextPredicate(stringEndsWith(), 0, 1))));
   }
 
   @Test
   public void hello_b() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toVariableBundlePredicate(stringEndsWith(), 1, 0))));
+        transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toCurriedContextPredicate(stringEndsWith(), 1, 0))));
   }
 
   @Test
@@ -71,7 +71,7 @@ public class DbCExperimentalsTest extends TestBase {
     validate(
         asList(null, "Hi", "hello", "world", null),
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(
-            toVariableBundlePredicate(transform((Function<String, Integer>) s -> {
+            toCurriedContextPredicate(transform((Function<String, Integer>) s -> {
               throw new IntentionalException();
             }).check(gt(3))))));
   }
@@ -80,14 +80,14 @@ public class DbCExperimentalsTest extends TestBase {
   public void hello_c() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(toVariableBundleStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(toVariableBundlePredicate(stringEndsWith(), 0, 1))));
+        transform(stream().andThen(toCurriedContextStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(toCurriedContextPredicate(stringEndsWith(), 0, 1))));
   }
 
   @Test
   public void hello_d_1() {
     validate(
         "hello",
-        transform(streamOf().andThen(nest(asList("Hello", "HELLO", "hello")))).check(anyMatch(toVariableBundlePredicate(areEqual()))));
+        transform(streamOf().andThen(nest(asList("Hello", "HELLO", "hello")))).check(anyMatch(toCurriedContextPredicate(areEqual()))));
   }
 
   @Test(expected = IllegalValueException.class)
@@ -96,8 +96,8 @@ public class DbCExperimentalsTest extends TestBase {
       validate(
           "hello",
           transform(streamOf()                                        // (1)
-              .andThen(toVariableBundleStream()))                            // (2)
-              .check(anyMatch(toVariableBundlePredicate(isNull()))));        // (3)
+              .andThen(toCurriedContextStream()))                            // (2)
+              .check(anyMatch(toCurriedContextPredicate(isNull()))));        // (3)
     } catch (IllegalValueException e) {
       e.printStackTrace();
       int i = 0;
@@ -114,7 +114,7 @@ public class DbCExperimentalsTest extends TestBase {
       // (2)
       assertThat(
           lineAt(e.getMessage(), ++i),
-          CoreMatchers.containsString("toVariableBundle"));
+          CoreMatchers.containsString("toCurriedContextStream"));
       // expected (3)
       assertThat(
           lineAt(e.getMessage(), ++i),
@@ -141,7 +141,7 @@ public class DbCExperimentalsTest extends TestBase {
   public void givenStreamOfSingleString$hello$_whenRequireNonNullIsFound_thenPassing() {
     validate(
         "hello",
-        transform(toContext()).check(toVariableBundlePredicate(isNotNull())));
+        transform(toCurriedContext()).check(toCurriedContextPredicate(isNotNull())));
   }
 
   @Test(expected = IllegalValueException.class)
@@ -149,8 +149,8 @@ public class DbCExperimentalsTest extends TestBase {
     try {
       validate(
           "hello",
-          transform(toContext())                              // (1)
-              .check(toVariableBundlePredicate(isNull())));          // (2) -1,2
+          transform(toCurriedContext())                              // (1)
+              .check(toCurriedContextPredicate(isNull())));          // (2) -1,2
     } catch (IllegalValueException e) {
       e.printStackTrace(System.out);
       int i = 0;
@@ -159,7 +159,7 @@ public class DbCExperimentalsTest extends TestBase {
           lineAt(e.getMessage(), ++i),
           CoreMatchers.allOf(
               CoreMatchers.containsString("hello"),
-              CoreMatchers.containsString("toContext"),
+              CoreMatchers.containsString("toCurriedContext"),
               CoreMatchers.containsString("variables:[hello]")
           ));
       // expected (2) -1
@@ -207,7 +207,7 @@ public class DbCExperimentalsTest extends TestBase {
           asList("hello", "world"),
           transform(stream()                                                        // (1)
               .andThen(nest(asList("1", "2", "o"))))                                // (2)
-              .check(allMatch(toVariableBundlePredicate(stringEndsWith()))));              // (3)
+              .check(allMatch(toCurriedContextPredicate(stringEndsWith()))));              // (3)
     } catch (IllegalValueException e) {
       e.printStackTrace(System.out);
       int i = 0;
@@ -279,10 +279,10 @@ public class DbCExperimentalsTest extends TestBase {
   public void hello4() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(new Predicate<VariableBundle>() {
+        transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(new Predicate<CurriedContext>() {
           @Override
-          public boolean test(VariableBundle variableBundle) {
-            return variableBundle.valueAt(1).equals("1");
+          public boolean test(CurriedContext curriedContext) {
+            return curriedContext.valueAt(1).equals("1");
           }
 
           @Override
@@ -296,10 +296,10 @@ public class DbCExperimentalsTest extends TestBase {
   public void hello4_a() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<VariableBundle>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<CurriedContext>() {
           @Override
-          public boolean test(VariableBundle variableBundle) {
-            return variableBundle.valueAt(1).equals("1");
+          public boolean test(CurriedContext curriedContext) {
+            return curriedContext.valueAt(1).equals("1");
           }
 
           @Override
@@ -313,10 +313,10 @@ public class DbCExperimentalsTest extends TestBase {
   public void hello5() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2")))).check(allMatch(new Predicate<VariableBundle>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(allMatch(new Predicate<CurriedContext>() {
           @Override
-          public boolean test(VariableBundle variableBundle) {
-            return variableBundle.valueAt(1).equals("1");
+          public boolean test(CurriedContext curriedContext) {
+            return curriedContext.valueAt(1).equals("1");
           }
 
           @Override
@@ -330,10 +330,10 @@ public class DbCExperimentalsTest extends TestBase {
   public void hello6() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<VariableBundle>() {
+        transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(new Predicate<CurriedContext>() {
           @Override
-          public boolean test(VariableBundle variableBundle) {
-            return variableBundle.valueAt(1).equals("1");
+          public boolean test(CurriedContext curriedContext) {
+            return curriedContext.valueAt(1).equals("1");
           }
 
           @Override
@@ -347,13 +347,13 @@ public class DbCExperimentalsTest extends TestBase {
   public void nestedLoop_success() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toVariableBundlePredicate(equalTo("msg-2"), 1))));
+        transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toCurriedContextPredicate(equalTo("msg-2"), 1))));
   }
 
   @Test(expected = IllegalValueException.class)
   public void nestedLoop_fail() {
     validate(
         asList("hello", "world"),
-        transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toVariableBundlePredicate(equalTo("msg-3"), 1))));
+        transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toCurriedContextPredicate(equalTo("msg-3"), 1))));
   }
 }

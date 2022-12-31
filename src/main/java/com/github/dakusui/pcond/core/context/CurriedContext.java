@@ -6,13 +6,13 @@ import java.util.Formattable;
 import java.util.Formatter;
 import java.util.List;
 
-import static com.github.dakusui.pcond.core.context.VariableBundle.PrivateUtils.variableBundleToString;
+import static com.github.dakusui.pcond.core.context.CurriedContext.PrivateUtils.variableBundleToString;
 import static java.util.Collections.singletonList;
 
 /**
  * `Context` is a concept to handle multiple values in the `pcond`.
  */
-public interface VariableBundle extends Formattable {
+public interface CurriedContext extends Formattable {
   /**
    * Returns the number of context values.
    *
@@ -40,11 +40,11 @@ public interface VariableBundle extends Formattable {
    * @param o A value to appended
    * @return A new context with the appended value.
    */
-  default VariableBundle append(Object o) {
-    return new VariableBundle() {
+  default CurriedContext append(Object o) {
+    return new CurriedContext() {
       @Override
       public List<Object> values() {
-        return InternalUtils.append(VariableBundle.this.values(), o);
+        return InternalUtils.append(CurriedContext.this.values(), o);
       }
 
       @Override
@@ -72,8 +72,8 @@ public interface VariableBundle extends Formattable {
    * @param o The value for which a new context is created.
    * @return A new context.
    */
-  static VariableBundle from(Object o) {
-    return new VariableBundle() {
+  static CurriedContext from(Object o) {
+    return new CurriedContext() {
       @Override
       public List<Object> values() {
         return singletonList(o);
@@ -90,8 +90,8 @@ public interface VariableBundle extends Formattable {
   enum PrivateUtils {
     ;
 
-    static String variableBundleToString(VariableBundle variableBundle) {
-      return "variables:" + variableBundle.values();
+    static String variableBundleToString(CurriedContext curriedContext) {
+      return "variables:" + curriedContext.values();
     }
   }
 }

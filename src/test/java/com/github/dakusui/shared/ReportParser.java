@@ -1,11 +1,17 @@
 package com.github.dakusui.shared;
 
+import org.junit.ComparisonFailure;
+
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.copyOfRange;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 
 public class ReportParser {
   private final String   message;
@@ -141,8 +147,10 @@ public class ReportParser {
       Record(String line) {
         this.line = line;
         this.detailIndex = extractIndex(this.line());
-        String[] fields = Arrays.stream(this.line().replaceAll("^\\[\\d+]", "").split("->")).map(String::trim).toArray(String[]::new);
-        assert fields.length == 2 || fields.length == 3;
+        String[] fields = Arrays.stream(this.line().replaceAll("^\\[\\d+]", "").split("->"))
+            .map(String::trim)
+            .toArray(String[]::new);
+        assert fields.length == 2 || fields.length == 3 : Arrays.toString(fields) + ".length=" + fields.length;
         if (fields.length == 2) {
           this.in = null;
           this.op = fields[0];
@@ -186,5 +194,50 @@ public class ReportParser {
         return String.format("Summary.Record:[in:%s; op:%s; out:%s; detailIndex:%s]", in(), op(), out(), detailIndex());
       }
     }
+  }
+
+  public static ReportParser extractActualFrom(Throwable t) {
+    return extractReportParserFrom(t, "Mismatch>:", "(actual value)", ComparisonFailure::getActual);
+  }
+
+  public static ReportParser extractExpectFrom(Throwable t) {
+    return extractReportParserFrom(t, "Mismatch<:", "(expectation)", ComparisonFailure::getExpected);
+  }
+
+  private static ReportParser extractReportParserFrom(Throwable t, String mismatchPrefix1, final String detailSuffix, Function<ComparisonFailure, String> comparisonSide) {
+    if (t instanceof ComparisonFailure)
+      return new ReportParser(comparisonSide.apply((ComparisonFailure) t));
+    AtomicBoolean separatorFound = new AtomicBoolean(false);
+    return new ReportParser(
+        Arrays.stream(t.getMessage().split(String.format("%n")))
+            .skip(1)
+            .filter(line -> !separatorFound.get())
+            .filter(line -> !line.startsWith(mismatchPrefix1))
+            .map(line -> {
+              if (line.isEmpty()) {
+                separatorFound.set(true);
+                return line;
+              }
+              return line.substring(mismatchPrefix1.length());
+            })
+            .collect(joining(String.format("%n")))) {
+      @Override
+      public List<Detail> details() {
+        return super.details()
+            .stream()
+            .filter(each -> each.subject().endsWith(detailSuffix))
+            .collect(toList());
+      }
+    };
+  }
+
+  public static String extractExpectedFrom(Throwable t) {
+    if (t instanceof ComparisonFailure)
+      return ((ComparisonFailure) t).getExpected();
+    String mismatchPrefixForNonActualRecord = "Mismatch<:";
+    return Arrays.stream(t.getMessage().split(String.format("%n")))
+        .filter(line -> !line.startsWith(mismatchPrefixForNonActualRecord))
+        .map(line -> line.substring(mismatchPrefixForNonActualRecord.length()))
+        .collect(joining(String.format("%n")));
   }
 }

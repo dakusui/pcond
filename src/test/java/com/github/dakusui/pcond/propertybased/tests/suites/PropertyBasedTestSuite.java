@@ -15,7 +15,7 @@ import org.junit.runners.Suite.SuiteClasses;
     StreamAllMatchPredicateTest.class,
     StreamNoneMatchPredicateTest.class,
     TransformAndCheckPredicateTest.class,
-    VariableBundlePredicateTest.class
+    CurriedContextPredicateTest.class
 })
 public class PropertyBasedTestSuite {
 }
