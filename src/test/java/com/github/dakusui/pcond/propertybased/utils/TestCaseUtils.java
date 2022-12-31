@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.propertybased.utils;
 
 import com.github.dakusui.pcond.core.DebuggingUtils;
+import com.github.dakusui.pcond.fluent.Statement;
 import org.junit.ComparisonFailure;
 
 import java.lang.reflect.Method;
@@ -11,6 +12,7 @@ import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.internals.InternalUtils.wrapIfNecessary;
+import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.makePrintablePredicate;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static java.lang.String.format;
 import static java.lang.reflect.Modifier.isStatic;
@@ -52,15 +54,54 @@ public enum TestCaseUtils {
     }
   }
 
+  public static <T> void exerciseStatementExpectingComparisonFailure(Statement<T> statement) {
+    exercisePredicateExpectingComparisonFailure(statement.statementValue(), statement.statementPredicate());
+  }
+
+  public static <T> void exerciseStatementExpectingPass(Statement<T> statement) {
+    exercisePredicateExpectingPass(statement.statementValue(), statement.statementPredicate());
+  }
+
+  public static <T> void exercisePredicateExpectingComparisonFailure(T value, Predicate<T> targetPredicate) {
+    try {
+      TestCaseUtils.exerciseTestCase(testCaseExpectingComparisonFailure(value, targetPredicate).build());
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
+  }
+  public static <T> void exercisePredicateExpectingPass(T value, Predicate<T> targetPredicate) {
+    try {
+      TestCaseUtils.exerciseTestCase(testCaseExpectingPass(value, targetPredicate).build());
+    } catch (Throwable e) {
+      throw new RuntimeException(e);
+    }
+  }
+  public static <T> TestCase.Builder.ForThrownException<T, ComparisonFailure> testCaseExpectingComparisonFailure(T value, Predicate<? super T> targetPredicate) {
+    return testCaseExpectingException(ComparisonFailure.class, value, targetPredicate);
+  }
+
   @SuppressWarnings("unchecked")
-  private static <T, E extends Throwable, F> void examineThrownException(TestCase<T, E> testCase, Throwable t) throws Throwable {
+  public static <E extends Throwable, T> TestCase.Builder.ForThrownException<T, E> testCaseExpectingException(Class<E> expectedExceptionClass, T value, Predicate<? super T> targetPredicate) {
+    return new TestCase.Builder.ForThrownException<T, E>(value)
+        .predicate((Predicate<T>) targetPredicate)
+        .expectedExceptionClass(expectedExceptionClass);
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> TestCase.Builder.ForReturnedValue<T> testCaseExpectingPass(T value, Predicate<? super T> targetPredicate) {
+    return new TestCase.Builder.ForReturnedValue<T>(value).predicate((Predicate<T>) targetPredicate)
+        .addExpectationPredicate(makePrintablePredicate("identicalWith(value:" + value + ")" , v -> v == value));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T, E extends Throwable> void examineThrownException(TestCase<T, E> testCase, Throwable t) throws Throwable {
     if (testCase.expectationForThrownException().isPresent()) {
       TestCase.Expectation<E> exceptionExpectation = testCase.expectationForThrownException().get();
       if (exceptionExpectation.expectedClass().isAssignableFrom(t.getClass())) {
         class CheckResult {
           final TestCheck<E, ?> testDef;
           final Object          transformOutput;
-          final boolean                               passed;
+          final boolean         passed;
 
 
           CheckResult(TestCheck<E, ?> testDef, Object transformOutput, boolean passed) {
@@ -69,20 +110,22 @@ public enum TestCaseUtils {
             this.passed = passed;
           }
         }
-        List<CheckResult> testresuls = new LinkedList<>();
+        List<CheckResult> testResuls = new LinkedList<>();
         for (TestCheck<E, ?> each : exceptionExpectation.checks()) {
           Object v;
           boolean passed;
           passed = ((Predicate<Object>) each.check).test(v = each.transform.apply((E) t));
-          testresuls.add(new CheckResult(each, v, passed));
+          testResuls.add(new CheckResult(each, v, passed));
         }
-        if (testresuls.stream().anyMatch(r -> !r.passed)) {
-          throw new AssertionError(format("Thrown exception: <" + formatObject(t) + "> did not satisfy some of following conditions:%n" +
-              testresuls.stream()
-                  .map((CheckResult each) ->
-                      format("%-2s %s(%s(%s)->(%s))", each.passed ? "" : "NG", each.testDef.check, each.testDef.transform, formatObject(t, 16), formatObject(each.transformOutput)))
-                  .collect(joining("%n- ", "----%n- ", "%n----"))) + format("%n%nTHROWN EXCEPTION DETAIL:%n") + formatException(t));
-        }
+        String message = format("Thrown exception: <" + formatObject(t) + "> did not satisfy some of following conditions:%n" +
+            testResuls.stream()
+                .map((CheckResult each) ->
+                    format("%-2s %s(%s(%s)->(%s))", each.passed ? "" : "NG", each.testDef.check, each.testDef.transform, formatObject(t, 16), formatObject(each.transformOutput)))
+                .collect(joining("%n- ", "----%n- ", "%n----"))) + format("%n%nTHROWN EXCEPTION DETAIL:%n") + formatException(t);
+        if (testResuls.stream().anyMatch(r -> !r.passed))
+          throw new AssertionError(message);
+        else
+          System.err.println(message);
       } else
         throw new AssertionError("Expected exception is '" + exceptionExpectation.expectedClass() + "' but thrown exception was: " + t);
     } else {

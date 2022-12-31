@@ -13,7 +13,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
-import static java.util.Arrays.asList;
 
 public interface ListChecker<
     T,
@@ -36,11 +35,6 @@ public interface ListChecker<
   }
 
   @SuppressWarnings("unchecked")
-  default ListChecker<T, E> findElementsInOrderBy(Predicate<E>... predicates) {
-    return this.findElementsInOrderBy(asList(predicates));
-  }
-
-  @SuppressWarnings("unchecked")
   default ListChecker<T, E> findElementsInOrderBy(List<Predicate<E>> predicates) {
     return checkWithPredicate(Predicates.findElements(predicates.toArray(new Predicate[0])));
   }
@@ -48,7 +42,7 @@ public interface ListChecker<
   @SuppressWarnings("unchecked")
   default ListChecker<T, E> findElementsInOrder(E... elements) {
     return this.findElementsInOrderBy(
-        (Predicate<E>) Arrays.stream(elements)
+        Arrays.stream(elements)
             .map(v -> Printables.predicate("[" + v + "]", e -> Objects.equals(v, e)))
             .map(p -> (Predicate<E>) p)
             .collect(Collectors.toList()));
