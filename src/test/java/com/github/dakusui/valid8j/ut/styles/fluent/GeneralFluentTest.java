@@ -1,6 +1,7 @@
 package com.github.dakusui.valid8j.ut.styles.fluent;
 
 import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.propertybased.utils.TestCase;
 import com.github.dakusui.pcond.propertybased.utils.TestCaseUtils;
 import org.junit.Test;
@@ -23,7 +24,7 @@ import static java.util.stream.Collectors.toList;
 
 @RunWith(Parameterized.class)
 public class GeneralFluentTest {
-    static class TestSuite<T> {
+  static class TestSuite<T> {
     final List<Function<T, Predicate<T>>> statementFactories;
     final List<T>                         passingValues;
     final List<T>                         failingValues;
@@ -72,7 +73,10 @@ public class GeneralFluentTest {
             stringTestSuite_3(),
             objectTestSuite_1(),
             objectTestSuite_2(),
-            objectTestSuite_3())
+            objectTestSuite_3(),
+            objectTestSuite_4(),
+            objectTestSuite_5(),
+            exceptionTestSuite_1())
         .flatMap(each -> each.createTestCases().stream())
         .collect(toList());
   }
@@ -96,6 +100,7 @@ public class GeneralFluentTest {
             singletonList("X"),
             Collections.emptyList()));
   }
+
   private static TestSuite<List<String>> listTestSuite_2() {
     return new TestSuite<>(
         singletonList(
@@ -154,9 +159,9 @@ public class GeneralFluentTest {
     return new TestSuite<>(
         asList(
             (String v) -> stringValue(v).then().invokeStatic(Objects.class, "equals", "hello", parameter()).done(),
-            (String v) -> stringValue(v).then().invoke( "equals", "hello").done(),
-            (String v) -> stringValue(v).invokeStatic( Objects.class, "equals", "hello", parameter()).asBoolean().then().isTrue().done(),
-            (String v) -> stringValue(v).invoke( "equals", "hello").asBoolean().then().isTrue().done()),
+            (String v) -> stringValue(v).then().invoke("equals", "hello").done(),
+            (String v) -> stringValue(v).invokeStatic(Objects.class, "equals", "hello", parameter()).asBoolean().then().isTrue().done(),
+            (String v) -> stringValue(v).invoke("equals", "hello").asBoolean().then().isTrue().done()),
         asList(s, new String(s)),
         singletonList("HELLO"));
   }
@@ -168,6 +173,46 @@ public class GeneralFluentTest {
             (String v) -> stringValue(v).then().isNull().done()),
         singletonList(null),
         singletonList("HELLO"));
+  }
+
+  private static TestSuite<String> objectTestSuite_4() {
+    return new TestSuite<>(
+        asList(
+            (String v) -> stringValue(v).parseLong().asObject().asLong().then().equalTo(123L).done(),
+            (String v) -> stringValue(v).parseInt().asObject().asInteger().then().equalTo(123).done(),
+            (String v) -> stringValue(v).parseShort().asObject().asShort().then().equalTo((short)123).done()
+            ),
+        singletonList("123"),
+        singletonList("124"));
+  }
+
+  private static TestSuite<String> objectTestSuite_5() {
+
+    return new TestSuite<>(
+        asList(
+            (String v) -> stringValue(v).parseFloat().asObject().asFloat().then().equalTo(123.4f).done(),
+            (String v) -> stringValue(v).parseDouble().asObject().asDouble().then().equalTo(123.4).done()
+        ),
+        singletonList("123.4"),
+        singletonList("123.5"));
+  }
+
+  private static TestSuite<String> exceptionTestSuite_1() {
+    class IntentionalException extends RuntimeException {
+    }
+    Function<String, Object> throwRuntimeException = Printables.function("throwRuntimeException", v -> {
+      if ("Hello".equals(v))
+        throw new IntentionalException();
+      return v;
+    });
+    return new TestSuite<>(
+        singletonList(
+            (String v) -> stringValue(v).expectException(Exception.class, throwRuntimeException)
+                .then()
+                .isInstanceOf(IntentionalException.class)
+                .done()),
+        singletonList("Hello"),
+        singletonList("Bye"));
   }
 
 }

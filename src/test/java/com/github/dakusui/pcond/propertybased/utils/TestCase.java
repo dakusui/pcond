@@ -9,7 +9,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.makePrintableFunction;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 public interface TestCase<V, T extends Throwable> {
@@ -72,7 +74,12 @@ public interface TestCase<V, T extends Throwable> {
 
         @Override
         public String toString() {
-          return String.format("expecting:%s:throwing:%s", targetPredicate(), expectationForThrownException());
+          String s = expectationForThrownException()
+              .map(v -> "exceptionThrown:" + v )
+              .orElseGet(() -> expectationForReturnedValue()
+                  .map(v -> "valueReturned:" + v)
+                  .orElseThrow(UnsupportedOperationException::new));
+          return format("Given:<%s>:When:<%s>:Then:<%s>", formatObject(targetValue()), targetPredicate(), s);
         }
       };
     }
@@ -112,6 +119,7 @@ public interface TestCase<V, T extends Throwable> {
       @Override
       public TestCase<V, Throwable> build() {
         this.expectationForReturnedValue = new Expectation<V>() {
+
           @Override
           public Class<V> expectedClass() {
             return expectedClass;
@@ -124,7 +132,7 @@ public interface TestCase<V, T extends Throwable> {
 
           @Override
           public String toString() {
-            return String.format("expecting:%s:returns:%s", predicate, expectationForReturnedValue);
+            return format("%s",  checks());
           }
         };
         return super.build();
@@ -183,6 +191,11 @@ public interface TestCase<V, T extends Throwable> {
           @Override
           public List<TestCheck<T, ?>> checks() {
             return expectations;
+          }
+
+          @Override
+          public String toString() {
+            return format("%s:%s", expectedClass().getSimpleName(), checks());
           }
         };
         return super.build();

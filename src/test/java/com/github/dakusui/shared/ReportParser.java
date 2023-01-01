@@ -8,6 +8,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.copyOfRange;
 import static java.util.stream.Collectors.joining;
@@ -85,10 +86,11 @@ public class ReportParser {
       List<String> body = null;
       int numSeparators = 0;
       for (String each : details) {
+        System.out.println("each:<" + state + ":" + each + ">");
         //noinspection ConstantConditions
         assert state == SEARCHING_SUBJECT || state == BODY;
         if (state == SEARCHING_SUBJECT) {
-          assert "".equals(each) || each.startsWith(".Detail of failure");
+          assert "".equals(each) || each.startsWith(".Detail of failure") : "ERROR" + each + format(">%n====") + Arrays.stream(details).collect(joining(format("%n"))) + format("%n====");
           if ("".equals(each))
             continue;
           subject = each;
@@ -191,7 +193,7 @@ public class ReportParser {
 
       @Override
       public String toString() {
-        return String.format("Summary.Record:[in:%s; op:%s; out:%s; detailIndex:%s]", in(), op(), out(), detailIndex());
+        return format("Summary.Record:[in:%s; op:%s; out:%s; detailIndex:%s]", in(), op(), out(), detailIndex());
       }
     }
   }
@@ -209,7 +211,7 @@ public class ReportParser {
       return new ReportParser(comparisonSide.apply((ComparisonFailure) t));
     AtomicBoolean separatorFound = new AtomicBoolean(false);
     return new ReportParser(
-        Arrays.stream(t.getMessage().split(String.format("%n")))
+        Arrays.stream(t.getMessage().split(format("%n")))
             .skip(1)
             .filter(line -> !separatorFound.get())
             .filter(line -> !line.startsWith(mismatchPrefix1))
@@ -220,7 +222,7 @@ public class ReportParser {
               }
               return line.substring(mismatchPrefix1.length());
             })
-            .collect(joining(String.format("%n")))) {
+            .collect(joining(format("%n")))) {
       @Override
       public List<Detail> details() {
         return super.details()
@@ -235,9 +237,9 @@ public class ReportParser {
     if (t instanceof ComparisonFailure)
       return ((ComparisonFailure) t).getExpected();
     String mismatchPrefixForNonActualRecord = "Mismatch<:";
-    return Arrays.stream(t.getMessage().split(String.format("%n")))
+    return Arrays.stream(t.getMessage().split(format("%n")))
         .filter(line -> !line.startsWith(mismatchPrefixForNonActualRecord))
         .map(line -> line.substring(mismatchPrefixForNonActualRecord.length()))
-        .collect(joining(String.format("%n")));
+        .collect(joining(format("%n")));
   }
 }

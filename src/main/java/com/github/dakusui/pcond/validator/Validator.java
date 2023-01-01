@@ -13,7 +13,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.internals.InternalUtils.executionFailure;
 import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
@@ -401,20 +400,7 @@ public interface Validator {
     EvaluationContext<T> evaluationContext = new EvaluationContext<>();
     if (this.configuration().useEvaluator() && cond instanceof Evaluable) {
       Evaluator evaluator = Evaluator.create();
-      try {
-        ((Evaluable<T>) cond).accept(evaluableIo, evaluationContext, evaluator);
-      } catch (Error error) {
-        throw error;
-      } catch (Throwable t) {
-        String message = format("An exception (%s) was thrown during evaluation of evaluationContext: %s: %s", t, value, cond);
-        throw executionFailure(configuration()
-                .reportComposer()
-                .composeExplanation(
-                    message,
-                    evaluationContext.resultEntries()
-                ),
-            t);
-      }
+      ((Evaluable<T>) cond).accept(evaluableIo, evaluationContext, evaluator);
       if (evaluableIo.output().isValueReturned() && Objects.equals(true, evaluableIo.output().value()))
         return value;
       List<EvaluationEntry> entries = evaluationContext.resultEntries();
