@@ -9,11 +9,13 @@ import org.junit.runners.Parameterized;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static com.github.dakusui.pcond.fluent.Fluents.*;
+import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -67,7 +69,10 @@ public class GeneralFluentTest {
             listTestSuite_2(),
             stringTestSuite_1(),
             stringTestSuite_2(),
-            stringTestSuite_3())
+            stringTestSuite_3(),
+            objectTestSuite_1(),
+            objectTestSuite_2(),
+            objectTestSuite_3())
         .flatMap(each -> each.createTestCases().stream())
         .collect(toList());
   }
@@ -130,4 +135,39 @@ public class GeneralFluentTest {
         singletonList("A:B:C"),
         asList("A:B", null));
   }
+
+  @SuppressWarnings("StringOperationCanBeSimplified")
+  private static TestSuite<String> objectTestSuite_1() {
+    String s = "hello";
+    return new TestSuite<>(
+        asList(
+            (String v) -> stringValue(v).then().isSameReferenceAs(s).done(),
+            /*String#toString() method returns the object itself by specification. Check JavaDoc*/
+            (String v) -> stringValue(v).stringify().then().isSameReferenceAs(s).done()),
+        singletonList(s),
+        singletonList(new String(s)));
+  }
+
+  @SuppressWarnings("StringOperationCanBeSimplified")
+  private static TestSuite<String> objectTestSuite_2() {
+    String s = "hello";
+    return new TestSuite<>(
+        asList(
+            (String v) -> stringValue(v).then().invokeStatic(Objects.class, "equals", "hello", parameter()).done(),
+            (String v) -> stringValue(v).then().invoke( "equals", "hello").done(),
+            (String v) -> stringValue(v).invokeStatic( Objects.class, "equals", "hello", parameter()).asBoolean().then().isTrue().done(),
+            (String v) -> stringValue(v).invoke( "equals", "hello").asBoolean().then().isTrue().done()),
+        asList(s, new String(s)),
+        singletonList("HELLO"));
+  }
+
+  private static TestSuite<String> objectTestSuite_3() {
+    String s = "hello";
+    return new TestSuite<>(
+        singletonList(
+            (String v) -> stringValue(v).then().isNull().done()),
+        singletonList(null),
+        singletonList("HELLO"));
+  }
+
 }
