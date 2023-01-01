@@ -48,6 +48,11 @@ public interface AbstractObjectTransformer<
     return this.transformValueWith(function, ObjectTransformer.Impl::new);
   }
 
+  @SuppressWarnings("unchecked")
+  default <E> ObjectTransformer<T, E> asObject() {
+    return (ObjectTransformer<T, E>)this.toObject(Functions.identity());
+  }
+
 
   default BooleanTransformer<T> toBoolean(Function<? super R, Boolean> function) {
     return this.transformValueWith(function, BooleanTransformer.Impl::new);

@@ -127,7 +127,7 @@ public enum TestCaseUtils {
         else
           System.err.println(message);
       } else
-        throw new AssertionError("Expected exception is '" + exceptionExpectation.expectedClass() + "' but thrown exception was: " + t);
+        throw new AssertionError("Expected exception is '" + exceptionExpectation.expectedClass() + "' but thrown exception was: " + t, t);
     } else {
       throw t;
     }

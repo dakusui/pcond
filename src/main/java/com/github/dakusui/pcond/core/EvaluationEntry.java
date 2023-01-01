@@ -17,6 +17,7 @@ import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_TAI
 import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -166,7 +167,7 @@ public abstract class EvaluationEntry {
     b.append("Input: '").append(input).append("'").append(format("%n"));
     b.append("Input Type: ").append(input == null ? "(null)" : input.getClass().getName()).append(format("%n"));
     b.append("Thrown Exception: '").append(throwable.getClass().getName()).append("'").append(format("%n"));
-    b.append("Exception Message: ").append(throwable.getMessage()).append(format("%n"));
+    b.append("Exception Message: ").append(sanitizeExceptionMessage(throwable)).append(format("%n"));
 
     for (StackTraceElement each : foldInternalPackageElements(throwable)) {
       b.append("\t");
@@ -174,6 +175,14 @@ public abstract class EvaluationEntry {
       b.append(format("%n"));
     }
     return b.toString();
+  }
+
+  private static String sanitizeExceptionMessage(Throwable throwable) {
+    if (throwable.getMessage() == null)
+      return null;
+    return Arrays.stream(throwable.getMessage().split("\n"))
+        .map(s -> "> " + s)
+        .collect(joining(String.format("%n")));
   }
 
   static <T, E extends Evaluable<T>> Object computeInputActualValue(EvaluableIo<T, E, ?> evaluableIo) {
@@ -293,11 +302,6 @@ public abstract class EvaluationEntry {
       boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
         return Objects.equals(LEAF, nextEntry.evaluableIo().evaluableType());
       }
-
-      @Override
-      Object outputValueForSquashedEntry(Object valueFromCurrentEntry, Object valueFromNextEntry) {
-        return valueFromNextEntry;
-      }
     },
     LEAF {
       @Override
@@ -321,10 +325,6 @@ public abstract class EvaluationEntry {
 
     boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
       return false;
-    }
-
-    Object outputValueForSquashedEntry(Object valueFromCurrentEntry, Object valueFromNextEntry) {
-      return valueFromCurrentEntry;
     }
   }
 

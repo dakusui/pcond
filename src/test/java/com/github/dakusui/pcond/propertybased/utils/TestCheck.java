@@ -27,6 +27,10 @@ public class TestCheck<T, R> {
     this.check = requireNonNull(check);
   }
 
+  public String toString() {
+    return transform + "=>" + check;
+  }
+
   static <T> TestCheck<T, T> createFromSimplePredicate(Predicate<T> predicate) {
     return new TestCheck<>(makePrintableFunction("identity", Function.identity()), predicate);
   }

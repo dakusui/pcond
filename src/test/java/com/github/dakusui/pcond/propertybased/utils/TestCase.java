@@ -9,7 +9,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 import static com.github.dakusui.pcond.propertybased.utils.ReportCheckUtils.makePrintableFunction;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 public interface TestCase<V, T extends Throwable> {
@@ -28,8 +30,8 @@ public interface TestCase<V, T extends Throwable> {
   }
 
   abstract class Builder<B extends Builder<B, V, T>, V, T extends Throwable> {
-    private final V            value;
-    private       Predicate<V> predicate;
+    private final V value;
+    Predicate<V>   predicate;
     Expectation<V> expectationForReturnedValue   = null;
     Expectation<T> expectationForThrownException = null;
 
@@ -69,6 +71,16 @@ public interface TestCase<V, T extends Throwable> {
         public Optional<Expectation<V>> expectationForReturnedValue() {
           return Optional.ofNullable(expectationForReturnedValue);
         }
+
+        @Override
+        public String toString() {
+          String s = expectationForThrownException()
+              .map(v -> "exceptionThrown:" + v )
+              .orElseGet(() -> expectationForReturnedValue()
+                  .map(v -> "valueReturned:" + v)
+                  .orElseThrow(UnsupportedOperationException::new));
+          return format("Given:<%s>:When:<%s>:Then:<%s>", formatObject(targetValue()), targetPredicate(), s);
+        }
       };
     }
 
@@ -107,6 +119,7 @@ public interface TestCase<V, T extends Throwable> {
       @Override
       public TestCase<V, Throwable> build() {
         this.expectationForReturnedValue = new Expectation<V>() {
+
           @Override
           public Class<V> expectedClass() {
             return expectedClass;
@@ -115,6 +128,11 @@ public interface TestCase<V, T extends Throwable> {
           @Override
           public List<TestCheck<V, ?>> checks() {
             return expectations;
+          }
+
+          @Override
+          public String toString() {
+            return format("%s",  checks());
           }
         };
         return super.build();
@@ -173,6 +191,11 @@ public interface TestCase<V, T extends Throwable> {
           @Override
           public List<TestCheck<T, ?>> checks() {
             return expectations;
+          }
+
+          @Override
+          public String toString() {
+            return format("%s:%s", expectedClass().getSimpleName(), checks());
           }
         };
         return super.build();

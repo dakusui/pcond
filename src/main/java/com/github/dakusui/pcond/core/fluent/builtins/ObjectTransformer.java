@@ -54,6 +54,10 @@ public interface ObjectTransformer<
     return toFloat(Functions.cast(Float.class));
   }
 
+  default BooleanTransformer<T> asBoolean() {
+    return toBoolean(Functions.cast(Boolean.class));
+  }
+
   static <E> ObjectTransformer<E, E> create(Supplier<E> value) {
     return new Impl<>(value, trivialIdentityFunction());
   }

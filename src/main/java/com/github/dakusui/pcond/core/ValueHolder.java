@@ -133,6 +133,6 @@ public class ValueHolder<V> implements Cloneable {
     FUNC_HEAD,
     FUNC_TAIL,
     TRANSFORM,
-    UNKNOWN;
+    UNKNOWN
   }
 }
