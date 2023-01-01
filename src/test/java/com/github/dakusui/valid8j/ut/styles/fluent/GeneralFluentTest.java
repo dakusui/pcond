@@ -21,11 +21,7 @@ import static java.util.stream.Collectors.toList;
 
 @RunWith(Parameterized.class)
 public class GeneralFluentTest {
-  public GeneralFluentTest(TestCase<?, ?> testCase) {
-    this.testCase = testCase;
-  }
-
-  static class TestSuite<T> {
+    static class TestSuite<T> {
     final List<Function<T, Predicate<T>>> statementFactories;
     final List<T>                         passingValues;
     final List<T>                         failingValues;
@@ -54,12 +50,16 @@ public class GeneralFluentTest {
 
   private final TestCase<?, ?> testCase;
 
+  public GeneralFluentTest(TestCase<?, ?> testCase) {
+    this.testCase = testCase;
+  }
+
   @Test
   public void exerciseTestCase() throws Throwable {
     TestCaseUtils.exerciseTestCase(this.testCase);
   }
 
-  @Parameterized.Parameters
+  @Parameterized.Parameters(name = "{index}: {0}")
   public static List<TestCase<?, ?>> toTestCases() {
     return Stream.of(
             booleanTestSuite_1(),
