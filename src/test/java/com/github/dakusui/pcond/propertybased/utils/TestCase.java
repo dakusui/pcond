@@ -28,8 +28,8 @@ public interface TestCase<V, T extends Throwable> {
   }
 
   abstract class Builder<B extends Builder<B, V, T>, V, T extends Throwable> {
-    private final V            value;
-    private       Predicate<V> predicate;
+    private final V value;
+    Predicate<V>   predicate;
     Expectation<V> expectationForReturnedValue   = null;
     Expectation<T> expectationForThrownException = null;
 
@@ -68,6 +68,11 @@ public interface TestCase<V, T extends Throwable> {
         @Override
         public Optional<Expectation<V>> expectationForReturnedValue() {
           return Optional.ofNullable(expectationForReturnedValue);
+        }
+
+        @Override
+        public String toString() {
+          return String.format("expecting:%s:throwing:%s", targetPredicate(), expectationForThrownException());
         }
       };
     }
@@ -115,6 +120,11 @@ public interface TestCase<V, T extends Throwable> {
           @Override
           public List<TestCheck<V, ?>> checks() {
             return expectations;
+          }
+
+          @Override
+          public String toString() {
+            return String.format("expecting:%s:returns:%s", predicate, expectationForReturnedValue);
           }
         };
         return super.build();
