@@ -150,7 +150,6 @@ public interface ReportComposer {
       return EvaluationEntry.create(
           squashedItems.stream()
               .map(e -> (EvaluationEntry.Impl) e)
-              .filter(e -> e.evaluableIo().evaluableType() != EvaluationEntry.Type.TRANSFORM)
               .map(EvaluationEntry::formName)
               .collect(joining(":")),
           first.type(),

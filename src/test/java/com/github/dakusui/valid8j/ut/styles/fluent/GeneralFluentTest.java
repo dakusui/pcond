@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.propertybased.utils.TestCase;
 import com.github.dakusui.pcond.propertybased.utils.TestCaseUtils;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -23,7 +24,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 @RunWith(Parameterized.class)
-public class GeneralFluentTest {
+public class GeneralFluentTest extends TestBase {
   static class TestSuite<T> {
     final List<Function<T, Predicate<T>>> statementFactories;
     final List<T>                         passingValues;
