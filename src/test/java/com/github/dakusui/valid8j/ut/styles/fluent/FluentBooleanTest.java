@@ -1,13 +1,14 @@
 package com.github.dakusui.valid8j.ut.styles.fluent;
 
 import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 
 import static com.github.dakusui.pcond.fluent.Fluents.booleanValue;
 import static com.github.dakusui.pcond.propertybased.utils.TestCaseUtils.exerciseStatementExpectingComparisonFailure;
 import static com.github.dakusui.pcond.propertybased.utils.TestCaseUtils.exerciseStatementExpectingPass;
 
-public class FluentBooleanTest {
+public class FluentBooleanTest extends TestBase {
   @Test
   public void givenFalse_whenIsTrue_thenComparisonFailure() {
     exerciseStatementExpectingComparisonFailure(booleanValue(false).then().isTrue());

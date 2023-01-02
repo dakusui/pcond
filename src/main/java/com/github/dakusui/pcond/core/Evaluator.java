@@ -301,7 +301,7 @@ public interface Evaluator {
           return io.output();
         });
 
-        evaluationContext.importEntries(childContext);
+        evaluationContext.importEntries(childContext, 0);
       }
       return ioForMapper;
     }
@@ -318,7 +318,7 @@ public interface Evaluator {
           return io.output();
         });
 
-        evaluationContext.importEntries(childContext);
+        evaluationContext.importEntries(childContext, 0);
       }
       return ioForChecker;
     }

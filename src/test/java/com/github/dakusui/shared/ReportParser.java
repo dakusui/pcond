@@ -86,7 +86,6 @@ public class ReportParser {
       List<String> body = null;
       int numSeparators = 0;
       for (String each : details) {
-        System.out.println("each:<" + state + ":" + each + ">");
         //noinspection ConstantConditions
         assert state == SEARCHING_SUBJECT || state == BODY;
         if (state == SEARCHING_SUBJECT) {
