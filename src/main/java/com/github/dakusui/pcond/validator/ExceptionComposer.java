@@ -262,7 +262,7 @@ public interface ExceptionComposer {
       @Override
       public <T extends Error> T testFailedException(Explanation explanation, ReportComposer reportComposer) {
         throw (T) createException("org.opentest4j.AssertionFailedError", explanation, (c, exp) ->
-            c.getConstructor(String.class, Object.class, Object.class).newInstance(exp.message(), exp.expected(), exp.actual()));
+            c.getConstructor(String.class, Object.class, Object.class).newInstance(exp.message(), reportToString(exp.expected()), reportToString(exp.actual())));
       }
     }
   }
