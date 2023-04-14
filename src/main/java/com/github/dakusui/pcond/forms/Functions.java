@@ -32,9 +32,9 @@ import static java.util.Objects.requireNonNull;
  */
 public class Functions {
   private Functions() {
-
+  
   }
-
+  
   /**
    * Returns a printable function that returns a given object itself.
    *
@@ -44,7 +44,7 @@ public class Functions {
   public static <E> Function<E, E> identity() {
     return PrintableFunctionFactory.Simple.IDENTITY.instance();
   }
-
+  
   /**
    * Returns a function that gives a string representation of a object given to it.
    * Internally, the returned function calls `toString` method on a given object.
@@ -55,7 +55,7 @@ public class Functions {
   public static <E> Function<E, String> stringify() {
     return PrintableFunctionFactory.Simple.STRINGIFY.instance();
   }
-
+  
   /**
    * Returns a function that gives a length of a string passed as an argument.
    *
@@ -64,13 +64,13 @@ public class Functions {
   public static Function<? super String, Integer> length() {
     return PrintableFunctionFactory.Simple.LENGTH.instance();
   }
-
-
+  
+  
   @SuppressWarnings({ "unchecked", "RedundantClassCall" })
   public static <E> Function<List<E>, E> elementAt(int i) {
     return Function.class.cast(PrintableFunctionFactory.Parameterized.ELEMENT_AT.create(singletonList(i)));
   }
-
+  
   /**
    * Returns a function that that returns a size of a given list.
    *
@@ -79,9 +79,9 @@ public class Functions {
   public static <E> Function<Collection<E>, Integer> size() {
     return PrintableFunctionFactory.Simple.SIZE.instance();
   }
-
+  
   /**
-   * Returns a function that returns a stream for a given given collection.
+   * Returns a function that returns a stream for a given collection.
    *
    * @param <E> Type of elements in the given collection.
    * @return The function.
@@ -89,17 +89,29 @@ public class Functions {
   public static <E> Function<Collection<? extends E>, Stream<E>> stream() {
     return PrintableFunctionFactory.Simple.STREAM.instance();
   }
-
+  
   /**
-   * Returns a function that returns a stream for a given given collection.
+   * Returns a function that returns a stream for a given collection.
    *
-   * @param <E> Type of elements in the given collection.
+   * @param elementClass A parameter to let compiler know the type of the element in a collection.
+   * @param <E>          A type of elements in a collection.
+   * @return The function.
+   */
+  public static <E> Function<Collection<? extends E>, Stream<E>> stream(@SuppressWarnings("unused") Class<E> elementClass) {
+    return stream();
+  }
+  
+  /**
+   * Returns a function that returns a stream for a given object.
+   * This method corresponds to {@link Stream#of(Object)} method.
+   *
+   * @param <E> Type of object.
    * @return The function.
    */
   public static <E> Function<E, Stream<E>> streamOf() {
     return PrintableFunctionFactory.Simple.STREAM_OF.instance();
   }
-
+  
   /**
    * Returns a function that casts an object into a given class.
    *
@@ -110,7 +122,7 @@ public class Functions {
   public static <E> Function<? super Object, E> cast(Class<E> type) {
     return PrintableFunctionFactory.Parameterized.CAST.create(singletonList(type));
   }
-
+  
   /**
    * Returns a function that casts an object into a given class.
    *
@@ -122,7 +134,7 @@ public class Functions {
   public static <E> Function<? super Object, E> castTo(@SuppressWarnings("unused") E value) {
     return PrintableFunctionFactory.Simple.CAST_TO.instance();
   }
-
+  
   /**
    * Returns a function that creates and returns a list that contains all the elements in the given list.
    *
@@ -133,7 +145,7 @@ public class Functions {
   public static <I extends Collection<E>, E> Function<I, List<E>> collectionToList() {
     return PrintableFunctionFactory.Simple.COLLECTION_TO_LIST.instance();
   }
-
+  
   /**
    * Returns a function that converts a given array into a list.
    *
@@ -143,7 +155,7 @@ public class Functions {
   public static <E> Function<E[], List<E>> arrayToList() {
     return PrintableFunctionFactory.Simple.ARRAY_TO_LIST.instance();
   }
-
+  
   /**
    * Returns a function the counts lines in a given string.
    *
@@ -152,7 +164,7 @@ public class Functions {
   public static Function<String, Integer> countLines() {
     return PrintableFunctionFactory.Simple.COUNT_LINES.instance();
   }
-
+  
   /**
    * //@formatter:off
    * The returned function tries to find a {@code substring} after a given string.
@@ -180,7 +192,7 @@ public class Functions {
           throw new NoSuchElementException(format("'%s' was not found in '%s'", substring, s));
         });
   }
-
+  
   /**
    * https://en.wikipedia.org/wiki/Currying[Curries] a static method specified by the given arguments.
    *
@@ -193,7 +205,7 @@ public class Functions {
   public static CurriedFunction<Object, Object> curry(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
     return curry(multifunction(aClass, methodName, parameterTypes));
   }
-
+  
   /**
    * Curries a given multi-function.
    *
@@ -204,11 +216,11 @@ public class Functions {
   public static CurriedFunction<Object, Object> curry(MultiFunction<Object> function) {
     return CurryingUtils.curry(function);
   }
-
+  
   public static <R> MultiFunction<R> multifunction(Class<?> aClass, String methodName, Class<?>... parameterTypes) {
     return MultiFunctionUtils.multifunction(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);
   }
-
+  
   /**
    * Returns a {@link Function} created from a method specified by a {@code methodQuery}.
    * If the {@code methodQuery} matches none or more than one methods, a {@code RuntimeException} will be thrown.
@@ -225,8 +237,8 @@ public class Functions {
   public static <T, R> Function<T, R> call(MethodQuery methodQuery) {
     return Printables.function(methodQuery.describe(), t -> invokeMethod(methodQuery.bindActualArguments((o) -> o instanceof Parameter, o -> t)));
   }
-
-
+  
+  
   /**
    * // @formatter:off
    * Creates a {@link MethodQuery} object from given arguments to search for {@code static} methods.
@@ -271,7 +283,7 @@ public class Functions {
   public static MethodQuery classMethod(Class<?> targetClass, String methodName, Object... arguments) {
     return MethodQuery.classMethod(targetClass, methodName, arguments);
   }
-
+  
   /**
    * // @formatter:off
    * Creates a {@link MethodQuery} object from given arguments to search for {@code static} methods.
@@ -306,7 +318,7 @@ public class Functions {
   public static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
     return MethodQuery.instanceMethod(targetObject, methodName, arguments);
   }
-
+  
   /**
    * // @formatter:off
    * A short hand method to call
@@ -332,7 +344,7 @@ public class Functions {
   private static <T, R> Function<T, R> callInstanceMethod(Object targetObject, String methodName, Object... arguments) {
     return call(instanceMethod(targetObject, methodName, arguments));
   }
-
+  
   /**
    * Returns a function that calls a method which matches the given {@code methodName}
    * and {@code args} on the object given as input to it.
@@ -366,7 +378,7 @@ public class Functions {
   public static <T, R> Function<T, R> call(String methodName, Object... arguments) {
     return callInstanceMethod(parameter(), methodName, arguments);
   }
-
+  
   /**
    * Returns a function that converts an input value to an exception object, which is thrown by `func`, when it is applied.
    * If it does not throw an exception, or even if thrown, it is not an instance of {@code exceptionClass}, an assertion executed inside this method will fail and an exception
@@ -397,7 +409,7 @@ public class Functions {
           throw new AssertionError("A line that shouldn't be reached. File a ticket.");
         });
   }
-
+  
   /**
    * Returns a {@link Parameter} object, which is used in combination with {@link Functions#instanceMethod(Object, String, Object[])},
    * {@link Functions#classMethod(Class, String, Object[])}, or their shorthand methods.
@@ -406,23 +418,21 @@ public class Functions {
    * when it is applied.
    *
    * @return a {@code Parameter} object
-   *
    * @see Functions#classMethod(Class, String, Object[])
    * @see Functions#instanceMethod(Object, String, Object[])
    * @see Functions#call(MethodQuery)
    * @see Functions#call(String, Object[])
    * @see Predicates#callp(MethodQuery)
    * @see Predicates#callp(String, Object[])
-   *
    */
   public static Parameter parameter() {
     return Parameter.INSTANCE;
   }
-
+  
   private static Predicate<Object> exceptionThrown() {
     return Printables.predicate("exceptionThrown", v -> false);
   }
-
+  
   private static Predicate<Object> exceptionClassWas(Class<? extends Throwable> exceptionClass) {
     return Printables.predicate(() -> "exceptionClass:" + requireNonNull(exceptionClass).getSimpleName(), v -> false);
   }
