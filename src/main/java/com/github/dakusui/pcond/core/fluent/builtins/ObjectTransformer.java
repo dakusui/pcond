@@ -3,12 +3,15 @@ package com.github.dakusui.pcond.core.fluent.builtins;
 import com.github.dakusui.pcond.core.fluent.AbstractObjectTransformer;
 import com.github.dakusui.pcond.core.fluent.Transformer;
 import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Printables;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+import static java.lang.String.format;
 
 
 /**
@@ -57,7 +60,17 @@ public interface ObjectTransformer<
   default BooleanTransformer<T> asBoolean() {
     return toBoolean(Functions.cast(Boolean.class));
   }
-
+  
+  @SuppressWarnings("unchecked")
+  default <EE> ListTransformer<T, EE> asListOf(Class<EE> type) {
+    return toList(Printables.function(format("castTo[List<%s>]", type.getSimpleName()), v -> (List<EE>)v));
+  }
+  
+  @SuppressWarnings("unchecked")
+  default <EE> ListTransformer<T, EE> asList() {
+    return (ListTransformer<T, EE>) asListOf(Object.class);
+  }
+  
   static <E> ObjectTransformer<E, E> create(Supplier<E> value) {
     return new Impl<>(value, trivialIdentityFunction());
   }
