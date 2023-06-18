@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.fluent.Fluents.streamValue;
+import static com.github.dakusui.pcond.fluent.Statement.streamValue;
 import static com.github.dakusui.pcond.forms.Predicates.containsString;
 import static com.github.dakusui.shared.TestUtils.validate;
 

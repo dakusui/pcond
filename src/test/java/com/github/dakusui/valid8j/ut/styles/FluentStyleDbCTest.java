@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
-import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
+import static com.github.dakusui.pcond.fluent.Statement.stringValue;
 import static com.github.dakusui.pcond.forms.Predicates.containsString;
 import static com.github.dakusui.pcond.forms.Predicates.not;
 import static com.github.dakusui.shared.utils.TestUtils.stringToLowerCase;

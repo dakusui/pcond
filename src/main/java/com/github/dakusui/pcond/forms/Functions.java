@@ -7,7 +7,6 @@ import com.github.dakusui.pcond.core.multi.MultiFunctionUtils;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
-import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.validator.Validator;
 
 import java.util.Collection;
@@ -125,16 +124,23 @@ public class Functions {
   
   /**
    * Returns a function that casts an object into a given class.
+   * ```java
+   *     assertThat(
+   *         asList(lastName, fullName),
+   *         allOf(
+   *             transform(elementAt(0).andThen(cast(String.class))).check(allOf(isNotNull(), not(isEmptyString()))),
+   *             transform(elementAt(1).andThen(castTo((List<String>)value()))).check(Predicates.contains(lastName))));
+   *  ```
    *
    * @param value A type place-holder.
-   *              Always use a value returned from {@link Fluents#value()} method.
+   *              Always use a value returned from {@link Functions#value()} method.
    * @param <E>   The type to which the object is case.
    * @return The function.
    */
   public static <E> Function<? super Object, E> castTo(@SuppressWarnings("unused") E value) {
     return PrintableFunctionFactory.Simple.CAST_TO.instance();
   }
-  
+
   /**
    * Returns a function that creates and returns a list that contains all the elements in the given list.
    *
@@ -435,5 +441,15 @@ public class Functions {
   
   private static Predicate<Object> exceptionClassWas(Class<? extends Throwable> exceptionClass) {
     return Printables.predicate(() -> "exceptionClass:" + requireNonNull(exceptionClass).getSimpleName(), v -> false);
+  }
+
+  /**
+   * A method to return a value for a "casting placeholder value".
+   *
+   * @param <E> Type to cast to.
+   * @return Casting placeholder value
+   */
+  public static <E> E value() {
+    return null;
   }
 }

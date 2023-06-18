@@ -90,7 +90,7 @@ public class FunctionsTest {
     public void whenApplied$thenLooksGood() {
       assertEquals(
           asList(100, 200, 300),
-          stream().apply(asList(100, 200, 300)).collect(toList())
+          stream(Integer.class).apply(asList(100, 200, 300)).collect(toList())
       );
     }
 

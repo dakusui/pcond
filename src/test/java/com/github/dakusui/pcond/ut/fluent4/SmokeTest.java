@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
+import static com.github.dakusui.pcond.fluent.Statement.stringValue;
 import static com.github.dakusui.pcond.forms.Predicates.isNull;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 import static com.github.dakusui.thincrest.TestFluents.assumeAll;
