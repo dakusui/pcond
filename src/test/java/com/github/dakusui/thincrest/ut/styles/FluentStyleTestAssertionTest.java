@@ -1,6 +1,7 @@
 package com.github.dakusui.thincrest.ut.styles;
 
-import com.github.dakusui.pcond.fluent.Fluents;
+import com.github.dakusui.pcond.fluent.Statement;
+import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import com.github.dakusui.thincrest.TestFluents;
@@ -15,7 +16,7 @@ import org.junit.runner.RunWith;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
+import static com.github.dakusui.pcond.fluent.Statement.stringValue;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 
@@ -77,7 +78,7 @@ public class FluentStyleTestAssertionTest {
     public void string_assertThatTest_failed() {
       String givenValue = "helloWorld";
       try {
-        TestFluents.assertStatement(Fluents.stringValue(givenValue)
+        TestFluents.assertStatement(Statement.stringValue(givenValue)
             .toLowerCase()
             .then()
             .isEqualTo("HELLOWORLD"));
@@ -108,7 +109,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void int_assertThatTest_passed() {
       int givenValue = 1234;
-      TestFluents.assertStatement(Fluents.integerValue(givenValue)
+      TestFluents.assertStatement(Statement.integerValue(givenValue)
           .then()
           .isEqualTo(1234));
     }
@@ -116,7 +117,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void boolean_assertThatTest_passed() {
       boolean givenValue = true;
-      TestFluents.assertStatement(Fluents.booleanValue(givenValue)
+      TestFluents.assertStatement(Statement.booleanValue(givenValue)
           .then()
           .isEqualTo(true));
     }
@@ -129,7 +130,7 @@ public class FluentStyleTestAssertionTest {
           return "OBJECT";
         }
       };
-      TestFluents.assertStatement(Fluents.objectValue(givenValue)
+      TestFluents.assertStatement(Statement.objectValue(givenValue)
           .toString(Object::toString)
           .then()
           .isEqualTo("OBJECT"));
@@ -138,7 +139,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void list_assertThatTest_passed() {
       List<String> givenValue = asList("hello", "world");
-      TestFluents.assertStatement(Fluents.listValue(givenValue)
+      TestFluents.assertStatement(Statement.listValue(givenValue)
           .then()
           .isEqualTo(asList("hello", "world")));
     }
@@ -146,7 +147,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void stream_assertThatTest_passed() {
       Stream<String> givenValue = Stream.of("hello", "world");
-      TestFluents.assertStatement(Fluents.streamValue(givenValue)
+      TestFluents.assertStatement(Statement.streamValue(givenValue)
           .toList(v -> v.collect(toList()))
           .then()
           .isEqualTo(asList("hello", "world")));
@@ -224,7 +225,7 @@ public class FluentStyleTestAssertionTest {
 
     @Test
     public void test_valueMethod() {
-      MatcherAssert.assertThat(Fluents.value(), CoreMatchers.equalTo(null));
+      MatcherAssert.assertThat(Functions.value(), CoreMatchers.equalTo(null));
     }
   }
 }

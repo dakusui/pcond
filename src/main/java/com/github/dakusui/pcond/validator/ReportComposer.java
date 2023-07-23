@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.validator;
 
 import com.github.dakusui.pcond.core.DebuggingUtils;
 import com.github.dakusui.pcond.core.EvaluationEntry;
-import com.github.dakusui.pcond.fluent.Fluents;
+import com.github.dakusui.pcond.fluent.DummyValue;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.*;
@@ -127,7 +127,7 @@ public interface ReportComposer {
             });
         finishLeftOverEntries(ret, entriesToSquash, cur);
         return ret.stream()
-            .filter(e -> !(e.inputActualValue() instanceof Fluents.DummyValue))
+            .filter(e -> !(e.inputActualValue() instanceof DummyValue))
             .collect(toList());
       } else {
         return new ArrayList<>(evaluationHistory);

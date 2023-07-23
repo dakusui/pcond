@@ -1,5 +1,6 @@
 package com.github.dakusui.thincrest;
 
+import com.github.dakusui.pcond.fluent.DummyList;
 import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.fluent.Statement;
 
@@ -9,6 +10,12 @@ import java.util.function.Predicate;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * Each method in this class accepts {@link Statement} objects.
+ * To create a {@link Statement} object, you can call methods in {@link Fluents}
+ * class such as {@link Statement#booleanValue(Boolean)}, {@link Statement#stringValue(String)},
+ * etc.
+ */
 public enum TestFluents {
   ;
 
@@ -33,7 +40,7 @@ public enum TestFluents {
    */
   public static void assertAll(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    TestAssertions.assertThat(Fluents.DummyList.fromList(values), Fluents.createPredicateForAllOf(statements));
+    TestAssertions.assertThat(DummyList.fromList(values), Statement.createPredicateForAllOf(statements));
   }
 
   /**
@@ -56,6 +63,6 @@ public enum TestFluents {
    */
   public static void assumeAll(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    TestAssertions.assumeThat(values, Fluents.createPredicateForAllOf(statements));
+    TestAssertions.assumeThat(values, Statement.createPredicateForAllOf(statements));
   }
 }

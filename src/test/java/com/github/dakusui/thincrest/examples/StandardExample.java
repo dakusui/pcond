@@ -9,9 +9,9 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
+import static com.github.dakusui.pcond.forms.Functions.value;
+import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.thincrest.TestAssertions.assertThat;
-import static com.github.dakusui.pcond.forms.Functions.cast;
-import static com.github.dakusui.pcond.forms.Functions.elementAt;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -48,6 +48,6 @@ public class StandardExample {
         asList(lastName, fullName),
         allOf(
             transform(elementAt(0).andThen(cast(String.class))).check(allOf(isNotNull(), not(isEmptyString()))),
-            transform(elementAt(1).andThen(v -> (List<String>)v)).check(Predicates.contains((Object)lastName))));
+            transform(elementAt(1).andThen(castTo((List<String>)value()))).check(Predicates.contains(lastName))));
   }
 }
