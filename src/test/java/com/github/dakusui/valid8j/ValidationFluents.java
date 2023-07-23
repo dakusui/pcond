@@ -1,6 +1,5 @@
 package com.github.dakusui.valid8j;
 
-import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.fluent.Statement;
 
 import java.util.Arrays;
@@ -29,7 +28,7 @@ public enum ValidationFluents {
    */
   public static void requireArguments(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    Requires.requireArgument(values, Fluents.createPredicateForAllOf(statements));
+    Requires.requireArgument(values, Statement.createPredicateForAllOf(statements));
   }
 
   public static <T> T requireStatement(Statement<T> statement) {
@@ -44,7 +43,7 @@ public enum ValidationFluents {
    */
   public static void requireAll(Statement<?>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    Requires.require(values, Fluents.createPredicateForAllOf(statements));
+    Requires.require(values, Statement.createPredicateForAllOf(statements));
   }
 
   public static <T> T requireState(Statement<T> statement) {
@@ -60,7 +59,7 @@ public enum ValidationFluents {
   @SafeVarargs
   public static <T> void requireStates(Statement<T>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    Requires.requireState(values, Fluents.createPredicateForAllOf(statements));
+    Requires.requireState(values, Statement.createPredicateForAllOf(statements));
   }
 
   public static <T> T ensureStatement(Statement<T> statement) {
@@ -76,7 +75,7 @@ public enum ValidationFluents {
   @SafeVarargs
   public static <T> void ensureAll(Statement<T>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    Ensures.ensure(values, Fluents.createPredicateForAllOf(statements));
+    Ensures.ensure(values, Statement.createPredicateForAllOf(statements));
   }
 
   /**
@@ -98,7 +97,7 @@ public enum ValidationFluents {
   @SafeVarargs
   public static <T> void ensureStates(Statement<T>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    Ensures.ensureState(values, Fluents.createPredicateForAllOf(statements));
+    Ensures.ensureState(values, Statement.createPredicateForAllOf(statements));
   }
 
   /**
@@ -120,7 +119,7 @@ public enum ValidationFluents {
   @SafeVarargs
   public static <T> boolean all(Statement<T>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    return Assertions.that(values, Fluents.createPredicateForAllOf(statements));
+    return Assertions.that(values, Statement.createPredicateForAllOf(statements));
   }
 
   /**
@@ -142,7 +141,7 @@ public enum ValidationFluents {
   @SafeVarargs
   public static <T> boolean preconditions(Statement<T>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    return Assertions.precondition(values, Fluents.createPredicateForAllOf(statements));
+    return Assertions.precondition(values, Statement.createPredicateForAllOf(statements));
   }
 
   /**
@@ -163,6 +162,6 @@ public enum ValidationFluents {
   @SafeVarargs
   public static <T> boolean postconditions(Statement<T>... statements) {
     List<?> values = Arrays.stream(statements).map(Statement::statementValue).collect(toList());
-    return Assertions.postcondition(values, Fluents.createPredicateForAllOf(statements));
+    return Assertions.postcondition(values, Statement.createPredicateForAllOf(statements));
   }
 }

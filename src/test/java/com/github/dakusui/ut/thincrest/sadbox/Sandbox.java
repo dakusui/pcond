@@ -1,6 +1,6 @@
 package com.github.dakusui.ut.thincrest.sadbox;
 
-import com.github.dakusui.pcond.fluent.Fluents;
+import com.github.dakusui.pcond.fluent.Statement;
 import org.junit.Test;
 
 import java.util.function.Predicate;
@@ -29,6 +29,6 @@ public class Sandbox {
 
   @Test
   public void hello3() {
-    assertStatement(Fluents.stringValue("hello").substring(2).then().isEqualTo("world"));
+    assertStatement(Statement.stringValue("hello").substring(2).then().isEqualTo("world"));
   }
 }

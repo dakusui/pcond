@@ -12,7 +12,7 @@ import org.junit.Test;
 import java.util.Objects;
 
 import static com.github.dakusui.pcond.core.refl.MethodQuery.instanceMethod;
-import static com.github.dakusui.pcond.fluent.Fluents.statement;
+import static com.github.dakusui.pcond.fluent.Statement.statement;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.shared.TestUtils.validate;

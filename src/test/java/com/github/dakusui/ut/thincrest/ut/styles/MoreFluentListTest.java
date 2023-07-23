@@ -1,6 +1,6 @@
 package com.github.dakusui.ut.thincrest.ut.styles;
 
-import com.github.dakusui.pcond.fluent.Fluents;
+import com.github.dakusui.pcond.fluent.Statement;
 import org.junit.Test;
 
 import java.util.List;
@@ -16,13 +16,13 @@ public class MoreFluentListTest {
   @Test
   public void test_elementAt() {
     List<String> var = asList("hello", "world");
-    assertStatement(Fluents.listValue(var).elementAt(0).then().isEqualTo("hello"));
+    assertStatement(Statement.listValue(var).elementAt(0).then().isEqualTo("hello"));
   }
 
   @Test
   public void test_size() {
     List<String> var = asList("hello", "world");
-    assertStatement(Fluents.listValue(var).size().then().equalTo(2));
+    assertStatement(Statement.listValue(var).size().then().equalTo(2));
   }
 
   /*
@@ -41,12 +41,12 @@ public class MoreFluentListTest {
   @Test
   public void test_stream() {
     List<String> var = asList("hello", "world");
-    assertStatement(Fluents.listValue(var).stream().then().allMatch(isNotNull()));
+    assertStatement(Statement.listValue(var).stream().then().allMatch(isNotNull()));
   }
 
   @Test
   public void test_isEmpty() {
     List<String> var = asList("hello", "world");
-    assertStatement(Fluents.listValue(var).isEmpty().then().isFalse());
+    assertStatement(Statement.listValue(var).isEmpty().then().isFalse());
   }
 }

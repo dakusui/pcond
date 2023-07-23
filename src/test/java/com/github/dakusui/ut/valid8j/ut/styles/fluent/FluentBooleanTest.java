@@ -4,7 +4,7 @@ import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 
-import static com.github.dakusui.pcond.fluent.Fluents.booleanValue;
+import static com.github.dakusui.pcond.fluent.Statement.booleanValue;
 import static com.github.dakusui.pcond.propertybased.utils.TestCaseUtils.exerciseStatementExpectingComparisonFailure;
 import static com.github.dakusui.pcond.propertybased.utils.TestCaseUtils.exerciseStatementExpectingPass;
 

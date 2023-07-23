@@ -43,21 +43,21 @@ public class DbCExperimentalsTest extends TestBase {
         transform(stream().andThen(nest(asList("1", "2", "o"))))
             .check(anyMatch(toCurriedContextPredicate(stringEndsWith()))));
   }
-  
+
   @Test
   public void hello_a() {
     validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(anyMatch(toCurriedContextPredicate(stringEndsWith(), 0, 1))));
   }
-  
+
   @Test
   public void hello_b() {
     validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2", "o")))).check(noneMatch(toCurriedContextPredicate(stringEndsWith(), 1, 0))));
   }
-  
+
   @Test
   public void hello_b2() {
     validate(
@@ -65,22 +65,22 @@ public class DbCExperimentalsTest extends TestBase {
         transform(Functions.stream(String.class)).check(anyMatch(matchesRegex("he.*")))
     );
   }
-  
+
   @Test
   public void hello_b3() {
     validate(
         asList("hello", "world"),
         transform(Functions.stream(String.class)).check(anyMatch(isNotNull())));
   }
-  
+
   @Test
   public void givenStream_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException() {
     validate(
         asList("Hi", "hello", "world"),
-        transform((Functions.<String>stream())).check(anyMatch(containsString("hello"))),
+        transform((Functions.stream(String.class))).check(anyMatch(containsString("hello"))),
         IllegalValueException::new);
   }
-  
+
   @Test(expected = IllegalValueException.class)
   public void hello_b_e5() {
     validate(
@@ -90,21 +90,21 @@ public class DbCExperimentalsTest extends TestBase {
               throw new IntentionalException();
             }).check(gt(3))))));
   }
-  
+
   @Test
   public void hello_c() {
     validate(
         asList("hello", "world"),
         transform(stream().andThen(toCurriedContextStream()).andThen(nest(asList("1", "2", "o")))).check(anyMatch(toCurriedContextPredicate(stringEndsWith(), 0, 1))));
   }
-  
+
   @Test
   public void hello_d_1() {
     validate(
         "hello",
         transform(streamOf().andThen(nest(asList("Hello", "HELLO", "hello")))).check(anyMatch(toCurriedContextPredicate(areEqual()))));
   }
-  
+
   @Test(expected = IllegalValueException.class)
   public void givenStreamOfSingleString$hello$_whenRequireNullIsFound_thenPreconditionViolationWithCorrectMessageIsThrown() {
     try {
@@ -151,14 +151,14 @@ public class DbCExperimentalsTest extends TestBase {
       throw e;
     }
   }
-  
+
   @Test
   public void givenStreamOfSingleString$hello$_whenRequireNonNullIsFound_thenPassing() {
     validate(
         "hello",
         transform(toCurriedContext()).check(toCurriedContextPredicate(isNotNull())));
   }
-  
+
   @Test(expected = IllegalValueException.class)
   public void givenString$hello$_whenTransformToContextAndCheckContextValueIsNull_thenPreconditionViolationWithCorrectMessageThrown() {
     try {
@@ -214,7 +214,7 @@ public class DbCExperimentalsTest extends TestBase {
       throw e;
     }
   }
-  
+
   @Test(expected = IllegalValueException.class)
   public void given$hello$_$world$_whenRequireNestedStreamImpossibleConditions_thenPreconditionViolationExceptionWithCorrectMessage() {
     try {
@@ -261,35 +261,35 @@ public class DbCExperimentalsTest extends TestBase {
       throw e;
     }
   }
-  
+
   @Test
   public void hello2() {
     validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2")))).check(alwaysTrue()));
   }
-  
+
   @Test
   public void hello3() {
     validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2")))).check(anyMatch(alwaysTrue())));
   }
-  
+
   @Test
   public void hello3_a() {
     validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(alwaysTrue()));
   }
-  
+
   @Test
   public void hello3_b() {
     validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("1", "2"))).andThen(nest(asList("A", "B")))).check(anyMatch(alwaysTrue())));
   }
-  
+
   @Test
   public void hello4() {
     validate(
@@ -299,14 +299,14 @@ public class DbCExperimentalsTest extends TestBase {
           public boolean test(CurriedContext curriedContext) {
             return curriedContext.valueAt(1).equals("1");
           }
-          
+
           @Override
           public String toString() {
             return "context#valueAt(1) equals '1'";
           }
         })));
   }
-  
+
   @Test
   public void hello4_a() {
     validate(
@@ -316,14 +316,14 @@ public class DbCExperimentalsTest extends TestBase {
           public boolean test(CurriedContext curriedContext) {
             return curriedContext.valueAt(1).equals("1");
           }
-          
+
           @Override
           public String toString() {
             return "context#valueAt(1) equals '1'";
           }
         })));
   }
-  
+
   @Test(expected = IllegalValueException.class)
   public void hello5() {
     validate(
@@ -333,14 +333,14 @@ public class DbCExperimentalsTest extends TestBase {
           public boolean test(CurriedContext curriedContext) {
             return curriedContext.valueAt(1).equals("1");
           }
-          
+
           @Override
           public String toString() {
             return "context#valueAt(1) equals '1'";
           }
         })));
   }
-  
+
   @Test
   public void hello6() {
     validate(
@@ -350,21 +350,21 @@ public class DbCExperimentalsTest extends TestBase {
           public boolean test(CurriedContext curriedContext) {
             return curriedContext.valueAt(1).equals("1");
           }
-          
+
           @Override
           public String toString() {
             return "context#valueAt(1) equals '1'";
           }
         })));
   }
-  
+
   @Test
   public void nestedLoop_success() {
     validate(
         asList("hello", "world"),
         transform(stream().andThen(nest(asList("msg-1", "msg-2")))).check(anyMatch(toCurriedContextPredicate(equalTo("msg-2"), 1))));
   }
-  
+
   @Test(expected = IllegalValueException.class)
   public void nestedLoop_fail() {
     validate(

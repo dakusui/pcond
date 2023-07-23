@@ -1,5 +1,7 @@
 package com.github.dakusui.valid8j;
 
+import com.github.dakusui.pcond.core.fluent.builtins.ObjectTransformer;
+import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.validator.Validator;
 
 import java.util.function.Predicate;
@@ -36,9 +38,18 @@ import java.util.function.Predicate;
  * This means you can enable the feature during the development and disable it in the production so that you will not see no performance impact.
  *
  * // @formatter:on
+ *
+ * Each method in this class accepts {@link com.github.dakusui.pcond.fluent.Statement} objects.
+ * To create a {@code Statement} object, you can call methods in {@link com.github.dakusui.pcond.fluent.Fluents}
+ * class such as {@link Statement#booleanValue(Boolean)},
+ * {@link Statement#stringValue(String)}, etc.
  */
 public enum Assertions {
   ;
+
+  public static <E> ObjectTransformer<E, E> value(E object) {
+    return Statement.objectValue(object);
+  }
 
   /**
    * A method to be used for checking a value satisfies a given invariant condition.
@@ -48,7 +59,7 @@ public enum Assertions {
    * .Example
    * ----
    * public void aMethod(String var) {
-   *   assert that(var, isNotNull());
+   * assert that(var, isNotNull());
    * }
    * ----
    *
@@ -70,7 +81,7 @@ public enum Assertions {
    * .Example
    * ----
    * public void aMethod(String var) {
-   *   assert precondition(var, isNotNull());
+   * assert precondition(var, isNotNull());
    * }
    * ----
    *
@@ -92,7 +103,7 @@ public enum Assertions {
    * .Example
    * ----
    * public void aMethod(String var) {
-   *   assert postcondition(var, isNotNull());
+   * assert postcondition(var, isNotNull());
    * }
    * ----
    *

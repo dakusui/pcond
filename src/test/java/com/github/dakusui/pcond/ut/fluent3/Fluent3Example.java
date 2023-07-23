@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.fluent.Fluents.stringValue;
+import static com.github.dakusui.pcond.fluent.Statement.stringValue;
 import static com.github.dakusui.pcond.forms.Functions.identity;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.predicate;

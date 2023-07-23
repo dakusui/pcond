@@ -1,6 +1,6 @@
 package com.github.dakusui.ut.thincrest.examples;
 
-import com.github.dakusui.pcond.fluent.Fluents;
+import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.utils.TestUtils;
 import com.github.dakusui.thincrest.TestFluents;
@@ -21,7 +21,7 @@ public class MoreFluentStyleExample {
   @Test
   public void test() {
     String givenValue = "helloWorld";
-    TestFluents.assertStatement(Fluents.stringValue(givenValue)
+    TestFluents.assertStatement(Statement.stringValue(givenValue)
         .toString(TestUtils.stringToLowerCase())
         .then()
         .isEqualTo("HELLOWORLD"));
@@ -31,7 +31,7 @@ public class MoreFluentStyleExample {
   @Test
   public void testExpectingException() {
     String givenValue = "helloWorld";
-    TestFluents.assertStatement(Fluents.stringValue(givenValue)
+    TestFluents.assertStatement(Statement.stringValue(givenValue)
         .expectException(Exception.class, TestUtils.stringToLowerCase())
         .then()
         .isEqualTo("HELLOWORLD"));
@@ -40,7 +40,7 @@ public class MoreFluentStyleExample {
   @Test
   public void testExpectingException2() {
     String givenValue = "helloWorld";
-    TestFluents.assertStatement(Fluents.stringValue(givenValue)
+    TestFluents.assertStatement(Statement.stringValue(givenValue)
         .expectException(Exception.class, throwRuntimeException())
         .getCause()
         .then()
@@ -57,7 +57,7 @@ public class MoreFluentStyleExample {
   @Test
   public void test2() {
     List<String> givenValues = asList("hello", "world");
-    TestFluents.assertStatement(Fluents.listValue(givenValues).elementAt(0)
+    TestFluents.assertStatement(Statement.listValue(givenValues).elementAt(0)
         .toString(TestUtils.stringToLowerCase())
         .then()
         .isEqualTo("HELLO"));
@@ -66,7 +66,7 @@ public class MoreFluentStyleExample {
   @Test
   public void test3() {
     List<String> givenValues = asList("hello", "world");
-    TestFluents.assertStatement(Fluents.listValue(givenValues).elementAt(0)
+    TestFluents.assertStatement(Statement.listValue(givenValues).elementAt(0)
         .toString(TestUtils.stringToLowerCase())
         .then()
         .isEqualTo("HELLO"));
@@ -76,8 +76,8 @@ public class MoreFluentStyleExample {
   public void test4() {
     try {
       TestFluents.assertAll(
-          Fluents.stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
-          Fluents.stringValue("world").toLowerCase().then().contains("WORLD"));
+          Statement.stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
+          Statement.stringValue("world").toLowerCase().then().contains("WORLD"));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       throw e;
@@ -95,7 +95,7 @@ public class MoreFluentStyleExample {
     Function<MemberDatabase.Member, String> memberLastName =
         Printables.function("memberLastName", MemberDatabase.Member::lastName);
 
-    TestFluents.assertStatement(Fluents.objectValue(database)
+    TestFluents.assertStatement(Statement.objectValue(database)
         .toObject(lookUpMemberWith.apply(identifier))
         .toString(memberLastName)
         .then()
@@ -115,12 +115,12 @@ public class MoreFluentStyleExample {
         .lastName();
     List<String> fullName = database.findMembersByLastName(lastName).get(0).toFullName();
     TestFluents.assertAll(
-        Fluents.stringValue(lastName)
+        Statement.stringValue(lastName)
             .then()
             .allOf()
             .isNotNull()
             .checkWithPredicate(not(isEmptyString())),
-        Fluents.listValue(fullName)
+        Statement.listValue(fullName)
             .then()
             .contains("DOE"));
   }
@@ -136,7 +136,7 @@ public class MoreFluentStyleExample {
         .lastName();
     List<String> fullName = database.findMembersByLastName(lastName).get(0).toFullName();
     TestFluents.assertAll(
-        Fluents.stringValue(lastName)
+        Statement.stringValue(lastName)
             .then()
             .allOf()
             .isNotNull()
@@ -144,7 +144,7 @@ public class MoreFluentStyleExample {
                 .check(w -> w.isNotNull().toPredicate())
                 .check(w -> w.isEmpty().toPredicate()).toPredicate())
             .check(v -> v.isNotEmpty().toPredicate()),
-        Fluents.listValue(fullName)
+        Statement.listValue(fullName)
             .then()
             .contains("DOE"));
   }
@@ -174,7 +174,7 @@ public class MoreFluentStyleExample {
   public void givenValidName_whenValidatePersonName_thenPass() {
     String s = "John Doe";
 
-    TestFluents.assertStatement(Fluents.stringValue(s).split(" ").size()
+    TestFluents.assertStatement(Statement.stringValue(s).split(" ").size()
         .then()
         .equalTo(2));
   }
@@ -198,11 +198,11 @@ public class MoreFluentStyleExample {
     List<String> strings = asList("HELLO", "WORLD");
 
     TestFluents.assertAll(
-        Fluents.stringValue(s)
+        Statement.stringValue(s)
             .toString(TestUtils.stringToLowerCase())
             .then()
             .isEqualTo("HI"),
-        Fluents.listValue(strings)
+        Statement.listValue(strings)
             .then()
             .findElementsInOrder("HELLO", "WORLD"));
   }
@@ -211,10 +211,10 @@ public class MoreFluentStyleExample {
   public void checkTwoAspectsOfOneValue() {
     String s = "helloWorld";
     TestFluents.assertAll(
-        Fluents.stringValue(s)
+        Statement.stringValue(s)
             .then()
             .isNotNull(),
-        Fluents.stringValue(s).length()
+        Statement.stringValue(s).length()
             .then()
             .greaterThan(100));
   }
@@ -223,13 +223,13 @@ public class MoreFluentStyleExample {
   public void checkTwoAspectsOfOneValue_2() {
     List<String> list = asList("helloWorld", "HI");
     TestFluents.assertAll(
-        Fluents.listValue(list).size()
+        Statement.listValue(list).size()
             .then()
             .greaterThan(3),
-        Fluents.listValue(list).elementAt(0).toString(v -> v)
+        Statement.listValue(list).elementAt(0).toString(v -> v)
             .then()
             .isNotNull(),
-        Fluents.listValue(list).elementAt(0).toString(v -> v).length()
+        Statement.listValue(list).elementAt(0).toString(v -> v).length()
             .then()
             .greaterThan(100));
   }
