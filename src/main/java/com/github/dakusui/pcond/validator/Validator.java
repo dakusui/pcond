@@ -505,8 +505,8 @@ public interface Validator {
             .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty("defaultExceptionComposerForValidate", "com.github.dakusui.pcond.validator.ExceptionComposer$ForValidate$Default")))
             .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty("exceptionComposerForAssert", "com.github.dakusui.pcond.validator.ExceptionComposer$ForAssertion$Default")))
             .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty("exceptionComposerForAssertThat", "com.github.dakusui.pcond.validator.ExceptionComposer$ForTestAssertion$JUnit4")))
-            .messageComposer(instantiate(MessageComposer.class, properties.getProperty("reportComposer", "com.github.dakusui.pcond.validator.MessageComposer$Default")))
-            .reportComposer(instantiate(ReportComposer.class, properties.getProperty("messageComposer", "com.github.dakusui.pcond.validator.ReportComposer$Default")))
+            .messageComposer(instantiate(MessageComposer.class, properties.getProperty("messageComposer", "com.github.dakusui.pcond.validator.MessageComposer$Default")))
+            .reportComposer(instantiate(ReportComposer.class, properties.getProperty("reportComposer", "com.github.dakusui.pcond.validator.ReportComposer$Default")))
             .build();
       }
 

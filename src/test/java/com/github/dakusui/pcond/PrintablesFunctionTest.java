@@ -149,11 +149,11 @@ public class PrintablesFunctionTest {
     }
     
     private static Function<String, String> createToLowerCase(int i) {
-      return Printables.function("toLowerCase", o -> Objects.toString(o).toLowerCase());
+      return Printables.function("toLowerCase", o -> Objects.toString(o).toLowerCase() + i);
     }
     
     private static Function<Object, String> createToUpperCase(int i) {
-      return Printables.function("toUpperCase", o -> Objects.toString(o).toUpperCase());
+      return Printables.function("toUpperCase", o -> Objects.toString(o).toUpperCase() + i) ;
     }
     
     @Test
