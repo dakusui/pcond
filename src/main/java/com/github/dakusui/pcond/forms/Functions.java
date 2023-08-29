@@ -406,10 +406,10 @@ public class Functions {
           try {
             out = func.apply(in);
           } catch (Throwable e) {
-            Validator.INSTANCE.assertThat(e, isInstanceOf(exceptionClass));
+            Validator.instance().assertThat(e, isInstanceOf(exceptionClass));
             return (E) e;
           }
-          Validator.INSTANCE.assertThat(
+          Validator.instance().assertThat(
               String.format("%s(%s)->%s", func, formatObject(in, 12), formatObject(out, 12)),
               allOf(exceptionThrown(), exceptionClassWas(exceptionClass)));
           throw new AssertionError("A line that shouldn't be reached. File a ticket.");

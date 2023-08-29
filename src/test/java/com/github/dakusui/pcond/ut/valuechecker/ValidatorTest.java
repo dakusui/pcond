@@ -54,6 +54,6 @@ public class ValidatorTest extends TestBase {
   public void test2() {
     System.out.println(TestValidator.class.getName());
     System.setProperty("com.github.dakusui.pcond.provider.AssertionProvider", "com.github.dakusui.pcond.ut.providers.AssertionProviderTest$TestAssertionProvider");
-    System.out.println("-->" + Validator.INSTANCE.getClass().getCanonicalName());
+    System.out.println("-->" + Validator.instance().getClass().getCanonicalName());
   }
 }

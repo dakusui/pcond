@@ -10,10 +10,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
+import static com.github.dakusui.pcond.validator.Validator.Configuration.Utils.*;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
@@ -24,7 +26,7 @@ public interface Validator {
   /**
    * A constant field that holds the default provider instance.
    */
-  Validator INSTANCE = create(Configuration.Utils.loadPcondProperties());
+  ThreadLocal<Validator> INSTANCE = ThreadLocal.withInitial(() -> create(loadPcondProperties()));
 
 
   /**
@@ -43,7 +45,7 @@ public interface Validator {
    * @return Created provider instance.
    */
   static Validator create(Properties properties) {
-    return new Impl(properties);
+    return new Impl(configurationFromProperties(properties));
   }
 
   /**
@@ -422,6 +424,25 @@ public interface Validator {
     }
   }
 
+  static Validator instance() {
+    return INSTANCE.get();
+  }
+
+  static void reconfigure(Consumer<Configuration.Builder> builder) {
+    reconfigure(builder, System.getProperties());
+  }
+
+  static void reconfigure(Consumer<Configuration.Builder> builder, Properties properties) {
+    Configuration.Builder b = configurator(properties);
+    Objects.requireNonNull(builder).accept(b);
+    INSTANCE.set(new Validator.Impl(b.build()));
+  }
+
+  static Configuration configurationFromProperties(Properties properties) {
+    return configurator(properties)
+        .build();
+  }
+
   interface ExceptionFactory<E extends Throwable> extends Function<Explanation, E> {
     default RuntimeException create(Explanation explanation) {
       return createException(this, explanation);
@@ -496,7 +517,7 @@ public interface Validator {
     enum Utils {
       ;
 
-      static Configuration configure(Properties properties) {
+      static Configuration.Builder configurator(Properties properties) {
         return new Builder()
             .useEvaluator(Boolean.parseBoolean(properties.getProperty("useEvaluator", "true")))
             .summarizedStringLength(Integer.parseInt(properties.getProperty("summarizedStringLength", "40")))
@@ -506,8 +527,7 @@ public interface Validator {
             .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty("exceptionComposerForAssert", "com.github.dakusui.pcond.validator.ExceptionComposer$ForAssertion$Default")))
             .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty("exceptionComposerForAssertThat", "com.github.dakusui.pcond.validator.ExceptionComposer$ForTestAssertion$JUnit4")))
             .messageComposer(instantiate(MessageComposer.class, properties.getProperty("messageComposer", "com.github.dakusui.pcond.validator.MessageComposer$Default")))
-            .reportComposer(instantiate(ReportComposer.class, properties.getProperty("reportComposer", "com.github.dakusui.pcond.validator.ReportComposer$Default")))
-            .build();
+            .reportComposer(instantiate(ReportComposer.class, properties.getProperty("reportComposer", "com.github.dakusui.pcond.validator.ReportComposer$Default")));
       }
 
       @SuppressWarnings("unchecked")
@@ -665,8 +685,8 @@ public interface Validator {
 
     private final Configuration configuration;
 
-    public Impl(Properties properties) {
-      this.configuration = Configuration.Utils.configure(properties);
+    public Impl(Configuration configuration) {
+      this.configuration = Objects.requireNonNull(configuration);
     }
 
     @Override

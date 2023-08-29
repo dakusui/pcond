@@ -69,7 +69,7 @@ public enum Assertions {
    * @return {@code true}, if the condition given as {@code predicate} is satisfied.
    */
   public static <T> boolean that(T value, Predicate<? super T> predicate) {
-    Validator.INSTANCE.checkInvariant(value, predicate);
+    Validator.instance().checkInvariant(value, predicate);
     return trueValue();
   }
 
@@ -91,7 +91,7 @@ public enum Assertions {
    * @return {@code true}, if the condition given as {@code predicate} is satisfied.
    */
   public static <T> boolean precondition(T value, Predicate<? super T> predicate) {
-    Validator.INSTANCE.checkPrecondition(value, predicate);
+    Validator.instance().checkPrecondition(value, predicate);
     return trueValue();
   }
 
@@ -113,7 +113,7 @@ public enum Assertions {
    * @return {@code true}, if the condition given as {@code predicate} is satisfied.
    */
   public static <T> boolean postcondition(T value, Predicate<? super T> predicate) {
-    Validator.INSTANCE.checkPostcondition(value, predicate);
+    Validator.instance().checkPostcondition(value, predicate);
     return trueValue();
   }
 

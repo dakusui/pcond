@@ -34,21 +34,21 @@ public enum DebuggingUtils {
   }
 
   public static boolean showEvaluableDetail() {
-    return Validator.INSTANCE.configuration().debugging().map(Validator.Configuration.Debugging::showEvaluableDetail).orElse(false);
+    return Validator.instance().configuration().debugging().map(Validator.Configuration.Debugging::showEvaluableDetail).orElse(false);
   }
 
   public static boolean suppressSquashing() {
-    return Validator.INSTANCE.configuration().debugging().map(Validator.Configuration.Debugging::suppressSquashing).orElse(false);
+    return Validator.instance().configuration().debugging().map(Validator.Configuration.Debugging::suppressSquashing).orElse(false);
   }
   public static boolean isDebugLogEnabled() {
-    return Validator.INSTANCE.configuration().debugging().map(Validator.Configuration.Debugging::enableDebugLog).orElse(false);
+    return Validator.instance().configuration().debugging().map(Validator.Configuration.Debugging::enableDebugLog).orElse(false);
   }
 
   public static boolean reportIgnoredEntries() {
-    return Validator.INSTANCE.configuration().debugging().map(Validator.Configuration.Debugging::reportIgnoredEntries).orElse(false);
+    return Validator.instance().configuration().debugging().map(Validator.Configuration.Debugging::reportIgnoredEntries).orElse(false);
   }
 
   public static boolean passThroughComparisonFailure() {
-    return Validator.INSTANCE.configuration().debugging().map(Validator.Configuration.Debugging::passThroughComparisonFailure).orElse(false);
+    return Validator.instance().configuration().debugging().map(Validator.Configuration.Debugging::passThroughComparisonFailure).orElse(false);
   }
 }

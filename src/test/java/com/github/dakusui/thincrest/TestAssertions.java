@@ -53,7 +53,7 @@ public enum TestAssertions {
    * @param <T>       The type of the `value`.
    */
   public static <T> void assertThat(T value, Predicate<? super T> predicate) {
-    Validator.INSTANCE.assertThat(value, predicate);
+    Validator.instance().assertThat(value, predicate);
   }
 
   /**
@@ -66,6 +66,6 @@ public enum TestAssertions {
    * @param <T>       The type of the `value`.
    */
   public static <T> void assumeThat(T value, Predicate<? super T> predicate) {
-    Validator.INSTANCE.assumeThat(value, predicate);
+    Validator.instance().assumeThat(value, predicate);
   }
 }

@@ -35,7 +35,7 @@ public interface Statement<T> {
   default boolean evaluate(boolean evaluationCondition, boolean throwExceptionOnFailure) {
     try {
       T value = this.value();
-      return !evaluationCondition || Validator.INSTANCE.validate(value, this.predicate(), StatementWasFalsified::new) == value;
+      return !evaluationCondition || Validator.instance().validate(value, this.predicate(), StatementWasFalsified::new) == value;
     } catch (StatementWasFalsified e) {
       if (throwExceptionOnFailure) {
         throw e;
