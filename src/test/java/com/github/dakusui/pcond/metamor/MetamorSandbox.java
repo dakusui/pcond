@@ -6,7 +6,10 @@ import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.validator.ExceptionComposer;
+import com.github.dakusui.pcond.validator.Validator;
 import com.github.dakusui.thincrest.TestAssertions;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.text.MessageFormat;
@@ -20,11 +23,11 @@ import static com.github.dakusui.pcond.forms.Predicates.transform;
 import static java.util.Arrays.asList;
 
 public class MetamorSandbox {
-  static {
-    System.setProperty("com.github.dakusui.thincrest_pcond.exceptionComposerForAssertThat", ExceptionComposer.ForTestAssertion.Opentest4J.class.getName());
-    System.setProperty("com.github.dakusui.thincrest_pcond.reportComposer", MetamorphicReportComposer.class.getName());
-  }
 
+  @BeforeClass
+  public static void beforeAll() {
+    Validator.reconfigure(Validator.Configuration.Builder::enableMetamorphicTesting);
+  }
 
   @Test
   public void main() {
@@ -250,5 +253,11 @@ public class MetamorSandbox {
       }
     }
     return Printables.predicate("isEqualTo('hello')", new Ret());
+  }
+
+
+  @AfterClass
+  public static void afterAll() {
+    Validator.resetToDefault();
   }
 }

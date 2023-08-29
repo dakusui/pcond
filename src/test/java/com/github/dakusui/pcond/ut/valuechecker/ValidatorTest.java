@@ -33,6 +33,11 @@ public class ValidatorTest extends TestBase {
       }
 
       @Override
+      public Builder parentBuilder() {
+        throw new UnsupportedOperationException();
+      }
+
+      @Override
       public MessageComposer messageComposer() {
         return null;
       }

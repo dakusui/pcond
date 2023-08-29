@@ -2,6 +2,7 @@ package com.github.dakusui.pcond.validator;
 
 import com.github.dakusui.pcond.core.*;
 import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.metamor.MetamorphicReportComposer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -428,19 +429,28 @@ public interface Validator {
     return INSTANCE.get();
   }
 
-  static void reconfigure(Consumer<Configuration.Builder> builder) {
-    reconfigure(builder, System.getProperties());
+  static void reconfigure(Consumer<Configuration.Builder> configurator) {
+    Configuration.Builder b = instance().configuration().parentBuilder();
+    reconfigure(configurator, b);
   }
 
-  static void reconfigure(Consumer<Configuration.Builder> builder, Properties properties) {
-    Configuration.Builder b = configurator(properties);
-    Objects.requireNonNull(builder).accept(b);
-    INSTANCE.set(new Validator.Impl(b.build()));
+  static void reconfigure(Consumer<Configuration.Builder> configurator, Properties properties) {
+    Configuration.Builder b = Configuration.Builder.fromProperties(properties);
+    reconfigure(configurator, b);
+  }
+
+  static void reconfigure(Consumer<Configuration.Builder> configurator, Configuration.Builder b) {
+    Objects.requireNonNull(configurator).accept(b);
+    INSTANCE.set(new Impl(b.build()));
+  }
+
+  static void resetToDefault() {
+    reconfigure(b -> {
+    });
   }
 
   static Configuration configurationFromProperties(Properties properties) {
-    return configurator(properties)
-        .build();
+    return Configuration.Builder.fromProperties(properties).build();
   }
 
   interface ExceptionFactory<E extends Throwable> extends Function<Explanation, E> {
@@ -514,21 +524,10 @@ public interface Validator {
 
     Optional<Debugging> debugging();
 
+    Configuration.Builder parentBuilder();
+
     enum Utils {
       ;
-
-      static Configuration.Builder configurator(Properties properties) {
-        return new Builder()
-            .useEvaluator(Boolean.parseBoolean(properties.getProperty("useEvaluator", "true")))
-            .summarizedStringLength(Integer.parseInt(properties.getProperty("summarizedStringLength", "40")))
-            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForRequire.class, properties.getProperty("exceptionComposerForRequire", "com.github.dakusui.pcond.validator.ExceptionComposer$ForRequire$Default")))
-            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForEnsure.class, properties.getProperty("exceptionComposerForEnsure", "com.github.dakusui.pcond.validator.ExceptionComposer$ForEnsure$Default")))
-            .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty("defaultExceptionComposerForValidate", "com.github.dakusui.pcond.validator.ExceptionComposer$ForValidate$Default")))
-            .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty("exceptionComposerForAssert", "com.github.dakusui.pcond.validator.ExceptionComposer$ForAssertion$Default")))
-            .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty("exceptionComposerForAssertThat", "com.github.dakusui.pcond.validator.ExceptionComposer$ForTestAssertion$JUnit4")))
-            .messageComposer(instantiate(MessageComposer.class, properties.getProperty("messageComposer", "com.github.dakusui.pcond.validator.MessageComposer$Default")))
-            .reportComposer(instantiate(ReportComposer.class, properties.getProperty("reportComposer", "com.github.dakusui.pcond.validator.ReportComposer$Default")));
-      }
 
       @SuppressWarnings("unchecked")
       static <E> E instantiate(@SuppressWarnings("unused") Class<E> baseClass, String className) {
@@ -563,7 +562,7 @@ public interface Validator {
       }
     }
 
-    class Builder {
+    class Builder implements Cloneable {
       boolean useEvaluator;
       int     summarizedStringLength;
 
@@ -574,7 +573,7 @@ public interface Validator {
       private ExceptionComposer.ForEnsure        exceptionComposerForEnsure;
       private ExceptionComposer.ForValidate      defaultExceptionComposerForValidate;
       private ExceptionComposer.ForAssertion     exceptionComposerForAssert;
-      private ExceptionComposer.ForTestAssertion exceptionComposerForAssertThat;
+      private ExceptionComposer.ForTestAssertion exceptionComposerForTestFailures;
 
       public Builder() {
       }
@@ -611,7 +610,7 @@ public interface Validator {
       }
 
       public Builder exceptionComposerForAssertThat(ExceptionComposer.ForTestAssertion exceptionComposerForAssertThat) {
-        this.exceptionComposerForAssertThat = exceptionComposerForAssertThat;
+        this.exceptionComposerForTestFailures = exceptionComposerForAssertThat;
         return this;
       }
 
@@ -625,6 +624,17 @@ public interface Validator {
         return this;
       }
 
+      @SuppressWarnings("UnusedReturnValue")
+      public Builder enableMetamorphicTesting() {
+        this.reportComposer = new MetamorphicReportComposer();
+        return this;
+      }
+
+      public Builder useOpentest4J() {
+        this.exceptionComposerForTestFailures = new ExceptionComposer.ForTestAssertion.Opentest4J();
+        return this;
+      }
+
       public Configuration build() {
         return new Configuration() {
           private final Debugging debugging = new Debugging() {
@@ -635,7 +645,7 @@ public interface Validator {
               exceptionComposerForEnsure,
               defaultExceptionComposerForValidate,
               exceptionComposerForAssert,
-              exceptionComposerForAssertThat
+              exceptionComposerForTestFailures
           );
 
           @Override
@@ -666,7 +676,6 @@ public interface Validator {
             return Optional.empty();
           }
 
-
           @Override
           public MessageComposer messageComposer() {
             return Builder.this.messageComposer;
@@ -676,7 +685,34 @@ public interface Validator {
           public ReportComposer reportComposer() {
             return Builder.this.reportComposer;
           }
+
+          @Override
+          public Builder parentBuilder() {
+            return Builder.this.clone();
+          }
         };
+      }
+
+      @Override
+      public Builder clone() {
+        try {
+          return (Builder) super.clone();
+        } catch (CloneNotSupportedException e) {
+          throw new AssertionError();
+        }
+      }
+
+      static Builder fromProperties(Properties properties) {
+        return new Builder()
+            .useEvaluator(Boolean.parseBoolean(properties.getProperty("useEvaluator", "true")))
+            .summarizedStringLength(Integer.parseInt(properties.getProperty("summarizedStringLength", "40")))
+            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForRequire.class, properties.getProperty("exceptionComposerForRequire", "com.github.dakusui.pcond.validator.ExceptionComposer$ForRequire$Default")))
+            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForEnsure.class, properties.getProperty("exceptionComposerForEnsure", "com.github.dakusui.pcond.validator.ExceptionComposer$ForEnsure$Default")))
+            .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty("defaultExceptionComposerForValidate", "com.github.dakusui.pcond.validator.ExceptionComposer$ForValidate$Default")))
+            .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty("exceptionComposerForAssert", "com.github.dakusui.pcond.validator.ExceptionComposer$ForAssertion$Default")))
+            .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty("exceptionComposerForTestFailures", "com.github.dakusui.pcond.validator.ExceptionComposer$ForTestAssertion$JUnit4")))
+            .messageComposer(instantiate(MessageComposer.class, properties.getProperty("messageComposer", "com.github.dakusui.pcond.validator.MessageComposer$Default")))
+            .reportComposer(instantiate(ReportComposer.class, properties.getProperty("reportComposer", "com.github.dakusui.pcond.validator.ReportComposer$Default")));
       }
     }
   }
