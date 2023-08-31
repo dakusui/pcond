@@ -195,6 +195,20 @@ public class MetamorSandbox {
   }
 
   @Test
+  public void testMetamorphicTest2a() {
+    /* error */
+    TestAssertions.assertThat(
+        1.23,
+        MetamorphicTestCaseFactory.forFunctionUnderTest("Math::sin", (Double x) -> Math.sin(x + 0.0001 /* error */))
+            .makeInputResolversEndomorphic()
+            .addInputResolver((x) -> String.format("πー%s", x), x -> Math.PI - x)
+            .outputOnly()
+            .proposition("{0}={1}", (Dataset<Double> ds) -> Objects.equals(ds.get(0), ds.get(1)))
+            .build()
+            .toMetamorphicTestPredicate());
+  }
+
+  @Test
   public void testString() {
     TestAssertions.assertThat(
         "helloWorld",
