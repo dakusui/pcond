@@ -21,12 +21,39 @@ Also, we can think of following:
 
 With these knowledge, we can verify the correctness of the implementation of a sine function.
 
+== Design
+
+[ditaa]
+----
+                    +------------+
+                    |source value|
+                    +------------+
+                          ^
+                          |
+                          |
+/-------------------------+--------------------------\
+| /--------------\ /--------------\ /--------------\ |
+| |input resolver| |input resolver| |input resolver| |
+| \--------------/ \--------------/ \--------------/ |
+\-------------------------+--------------------------/
+                          :
+                          |
+                          V
+    +---------------------+---------------------+
+    | +-----------+ +-----------+ +-----------+ |
+    | |input value| |input value| |input value| |
+    | +-----------+ +-----------+ +-----------+ |
+    +-------------------------------------------+
+----
+
 == Example
 
 The entry-point of the metamorphic testing functionality of `pcond` is `MetamorphicTestCaseFactory` class.
 It has several static method which return an instance of `MetamorphicTestCaseFactory.Builder` class.
 
-[source,java]
+Following is an example that illustrates the usage through `thincrest` library.
+
+[%nowrap,java]
 ----
 public class MetamorphicExample {
   @BeforeClass
@@ -36,7 +63,6 @@ public class MetamorphicExample {
 
   @Test
   public void testMetamorphicTest2a() {
-    /* error */
     TestAssertions.assertThat(
         1.23,
         MetamorphicTestCaseFactory.forFunctionUnderTest("Math::sin", (Double x) -> Math.sin(x + 0.0001 /* error */))
