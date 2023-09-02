@@ -298,6 +298,10 @@ public interface MetamorphicTestCaseFactory<X, I, O, R> {
       return (B) this;
     }
 
+    public MetamorphicTestCaseFactory<X, I, O, R> check(Predicate<R> checker) {
+      return checker(checker).build();
+    }
+
     public abstract MetamorphicTestCaseFactory<X, I, O, R> build();
   }
 
@@ -319,16 +323,17 @@ public interface MetamorphicTestCaseFactory<X, I, O, R> {
           .checker(PropositionPredicate.INSTANCE);
     }
 
-    public Builder<X, I, O, Proposition> proposition(Function<Object[], String> formatter, Predicate<Dataset<IoPair<I, O>>> p) {
+    public MetamorphicTestCaseFactory<X, I, O, Proposition> proposition(Function<Object[], String> formatter, Predicate<Dataset<IoPair<I, O>>> p) {
       return this.propositionFactory(
           Proposition.Factory.create(
               p,
               formatter,
               i -> ioVariableName + "[" + i + "]",
-              inputResolverSequenceFactoryProvider.count()));
+              inputResolverSequenceFactoryProvider.count()))
+          .build();
     }
 
-    public Builder<X, I, O, Proposition> proposition(String propositionName, Predicate<Dataset<IoPair<I, O>>> p) {
+    public MetamorphicTestCaseFactory<X, I, O, Proposition> proposition(String propositionName, Predicate<Dataset<IoPair<I, O>>> p) {
       return this.proposition(args -> MessageFormat.format(propositionName, args), p);
     }
 

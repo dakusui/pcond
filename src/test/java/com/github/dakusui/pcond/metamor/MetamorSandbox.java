@@ -93,7 +93,7 @@ public class MetamorSandbox {
                     .function((x) -> String.format("πー%s", x), x -> Math.PI - x - 0.0001)
                     .build())
             .proposition("output({0})=output({1})", (Dataset<IoPair<Double, Double>> ds) -> Objects.equals(ds.get(0).output(), ds.get(1).output()))
-            .build().toMetamorphicTestPredicate());
+            .toMetamorphicTestPredicate());
   }
 
   @Test
@@ -111,7 +111,7 @@ public class MetamorSandbox {
                     .function((x) -> String.format("πー%s", x), x -> Math.PI - x)
                     .build())
             .proposition("{0}.output()={1}.output()", (Dataset<IoPair<Double, Double>> ds) -> Objects.equals(ds.get(0).output(), ds.get(1).output()))
-            .build().toMetamorphicTestPredicate());
+            .toMetamorphicTestPredicate());
   }
 
   @Test
@@ -130,7 +130,7 @@ public class MetamorSandbox {
                     .build())
             .preformer("output", IoPair::output)
             .proposition("{0}={1}", (Dataset<Double> ds) -> Objects.equals(ds.get(0), ds.get(1)))
-            .build().toMetamorphicTestPredicate());
+            .toMetamorphicTestPredicate());
   }
 
 
@@ -148,7 +148,7 @@ public class MetamorSandbox {
                     .build())
             .preformer("output", IoPair::output)
             .proposition("{0}={1}", (Dataset<Double> ds) -> Objects.equals(ds.get(0), ds.get(1)))
-            .build().toMetamorphicTestPredicate());
+            .toMetamorphicTestPredicate());
   }
 
   @Test
@@ -162,7 +162,7 @@ public class MetamorSandbox {
             .addInputResolver((x) -> String.format("πー%s", x), x -> Math.PI - x)
             .outputOnly()
             .proposition("{0}={1}", (Dataset<Double> ds) -> Objects.equals(ds.get(0), ds.get(1)))
-            .build().toMetamorphicTestPredicate());
+            .toMetamorphicTestPredicate());
   }
 
   @Test
@@ -176,7 +176,7 @@ public class MetamorSandbox {
             .addInputResolver((x) -> String.format("πー%s", x), x -> Math.PI - x)
             .preformer(Functions.<IoPair<Double, Double>>identity().andThen(Printables.function("output", IoPair::output)))
             .proposition("{0}={1}", (Dataset<Double> ds) -> Objects.equals(ds.get(0), ds.get(1)))
-            .build().toMetamorphicTestPredicate());
+            .toMetamorphicTestPredicate());
   }
 
   @Test
@@ -190,7 +190,6 @@ public class MetamorSandbox {
             .addInputResolver((x) -> String.format("πー%s", x), x -> Math.PI - x)
             .outputOnly()
             .proposition("{0}={1}", (Dataset<Double> ds) -> Objects.equals(ds.get(0), ds.get(1)))
-            .build()
             .toMetamorphicTestPredicate());
   }
 
@@ -204,7 +203,6 @@ public class MetamorSandbox {
             .addInputResolver((x) -> String.format("πー%s", x), x -> Math.PI - x)
             .outputOnly()
             .proposition("{0}={1}", (Dataset<Double> ds) -> Objects.equals(ds.get(0), ds.get(1)))
-            .build()
             .toMetamorphicTestPredicate());
   }
 

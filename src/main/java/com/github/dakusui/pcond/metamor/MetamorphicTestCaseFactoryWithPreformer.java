@@ -156,16 +156,17 @@ public interface MetamorphicTestCaseFactoryWithPreformer<X, I, O, P, R> extends 
           .checker(PropositionPredicate.INSTANCE);
     }
 
-    public Builder<X, I, O, P, Proposition> proposition(Function<Object[], String> propositionFormatter, Predicate<Dataset<P>> p) {
+    public MetamorphicTestCaseFactory<X, I, O, Proposition> proposition(Function<Object[], String> propositionFormatter, Predicate<Dataset<P>> p) {
       return this.propositionFactory(
           Proposition.Factory.create(
               p,
               propositionFormatter,
               i -> this.outputVariableName + "[" + i + "]",
-              this.inputResolverSequenceFactoryProvider.count()));
+              this.inputResolverSequenceFactoryProvider.count()))
+          .build();
     }
 
-    public Builder<X, I, O, P, Proposition> proposition(String propositionName, Predicate<Dataset<P>> p) {
+    public MetamorphicTestCaseFactory<X, I, O, Proposition> proposition(String propositionName, Predicate<Dataset<P>> p) {
       return this.proposition(args -> MessageFormat.format(propositionName, args), p);
     }
 
