@@ -23,10 +23,11 @@ With these knowledge, we can verify the correctness of the implementation of a s
 
 == Design
 
+.Metamorphic Testing Support Package's Pipeline Design
 [ditaa]
 ----
                     +------------+
-                    |source value|
+                    |SOURCE VALUE|
                     +------------+
                           ^
                           |
@@ -40,10 +41,67 @@ With these knowledge, we can verify the correctness of the implementation of a s
                           |
                           V
     +---------------------+---------------------+
+    |Dataset                                    |
     | +-----------+ +-----------+ +-----------+ |
-    | |input value| |input value| |input value| |
-    | +-----------+ +-----------+ +-----------+ |
-    +-------------------------------------------+
+    | |input value| |input value| |input value|<--------------------------+
+    | +-----------+ +-----------+ +-----------+ |                         |
+    +---------------------^---------------------+                         |
+                          |               ^                               |
+                          |               |                               |
+                          |               |                               |
+              /-----------+---------------+-----------\     +-------------|------------------------+
+              | /---------+---------\                 |     |        +----*--+ +-------+ +-------+ |
+              | |function under test|   FUT controller|     |Dataset |IO pair| |IO pair| |IO pair| |
+              | \---------+---------/                 |     |        +----*--+ +-------+ +-------+ |
+              \-----------|---------------------------/     +-------------|------------------------+
+                          :               :                      ^        |      ^
+                          |               |                      |        |      |
+                          |               +----------------------+        |      |
+   +----------------------|-----------------------+                       |      |
+   |Dataset               V                       |                       |      |
+   | +------------+ +------------+ +------------+ |                       |      |
+   | |output value| |output value| |output value|<------------------------+      |
+   | +------------+ +------------+ +------------+ |                              |
+   +----------------------------------------------+                              |
+                                                                                 |
+                                                                                 |
+                                                                                 |
+                                                            /-----------+--------+-+----+-----------\
+                                                            | /---------\                           |
+                                                            | |preformer| preformer controller      |
+                                                            | \----+----/                           |
+                                                            \------|--------------------------------/
+                                                                   :               :
+                                                                   |               |
+                                                                   |               V
+                                             +---------------------|---------------------------------+
+                                             |Dataset              V                                 |
+                                             | +---------------+ +---------------+ +---------------+ |
+                                             | |preformed value| |preformed value| |preformed value| |
+                                             | +---------------+ +---------------+ +---------------+ |
+                                             +-------------------------------------------------------+
+                                                                    ^
+                                                                    |
+                                                             /------+------\
+                                                             |   reducer   |
+                                                             \------+------/
+                                                                    :
+                                                                    |
+                                                                    V
+                                                             +------+------+
+                                                             |reduced value|
+                                                             +------+------+
+                                                                    ^
+                                                                    |
+                                                             /------+------\
+                                                             |   checker   |
+                                                             \------+------/
+                                                                    :
+                                                                    |
+                                                                    V
+                                                             +------+------+
+                                                             | TEST RESULT |
+                                                             +------+------+
 ----
 
 == Example
@@ -53,19 +111,20 @@ It has several static method which return an instance of `MetamorphicTestCaseFac
 
 Following is an example that illustrates the usage through `thincrest` library.
 
-[%nowrap,java]
+[%nowrap, java]
 ----
 public class MetamorphicExample {
-  @BeforeClass
+  {@code @}BeforeClass
   public static void beforeAll() {
     Validator.reconfigure(Validator.Configuration.Builder::enableMetamorphicTesting);
   }
 
-  @Test
+  {@code @}Test
   public void testMetamorphicTest2a() {
     TestAssertions.assertThat(
         1.23,
-        MetamorphicTestCaseFactory.forFunctionUnderTest("Math::sin", (Double x) -> Math.sin(x + 0.0001 /* error */))
+        // Intentionally add 0.0001 to make the implementation incomplete and make the test fail.
+        MetamorphicTestCaseFactory.forFunctionUnderTest("Math::sin", (Double x) -> Math.sin(x + 0.0001))
             .makeInputResolversEndomorphic()
             .addInputResolver((x) -> String.format("πー%s", x), x -> Math.PI - x)
             .outputOnly()
