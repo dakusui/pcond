@@ -2,7 +2,6 @@ package com.github.dakusui.pcond.validator;
 
 import com.github.dakusui.pcond.core.*;
 import com.github.dakusui.pcond.forms.Predicates;
-import com.github.dakusui.pcond.metamor.MetamorphicReportComposer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -621,12 +620,6 @@ public interface Validator {
 
       public Builder reportComposer(ReportComposer reportComposer) {
         this.reportComposer = reportComposer;
-        return this;
-      }
-
-      @SuppressWarnings("UnusedReturnValue")
-      public Builder enableMetamorphicTesting() {
-        this.reportComposer = new MetamorphicReportComposer();
         return this;
       }
 
