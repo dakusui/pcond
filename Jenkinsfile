@@ -5,8 +5,8 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
-                sh "mvn clean"
-                sh "mvn compile"
+                sh "mvn -B clean"
+                sh "mvn -B compile"
             }
         }
         stage('Test') {
