@@ -5,6 +5,8 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building..'
+                sh "mvne clean"
+                sh "mvne compile"
             }
         }
         stage('Test') {
