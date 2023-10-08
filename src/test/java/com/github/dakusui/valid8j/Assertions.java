@@ -40,7 +40,7 @@ import java.util.function.Predicate;
  * // @formatter:on
  *
  * Each method in this class accepts {@link com.github.dakusui.pcond.fluent.Statement} objects.
- * To create a {@code Statement} object, you can call methods in {@link com.github.dakusui.pcond.fluent.Fluents}
+ * To create a {@code Statement} object, you can call methods in {@link com.github.dakusui.pcond.fluent.Statement} interface itself.
  * class such as {@link Statement#booleanValue(Boolean)},
  * {@link Statement#stringValue(String)}, etc.
  */

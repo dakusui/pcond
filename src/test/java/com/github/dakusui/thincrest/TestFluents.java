@@ -1,7 +1,6 @@
 package com.github.dakusui.thincrest;
 
 import com.github.dakusui.pcond.fluent.DummyList;
-import com.github.dakusui.pcond.fluent.Fluents;
 import com.github.dakusui.pcond.fluent.Statement;
 
 import java.util.Arrays;
@@ -12,7 +11,7 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Each method in this class accepts {@link Statement} objects.
- * To create a {@link Statement} object, you can call methods in {@link Fluents}
+ * To create a {@link Statement} object, you can call static methods in {@link Statement} itself.
  * class such as {@link Statement#booleanValue(Boolean)}, {@link Statement#stringValue(String)},
  * etc.
  */
