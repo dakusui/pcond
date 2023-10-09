@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Which Java') {
             steps {
-                sh "java --version"
+                sh "java -version"
             }
         }
         stage('Build') {
