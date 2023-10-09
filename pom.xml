@@ -68,6 +68,7 @@
         <env.GEM_PATH>${project.basedir}/generated/build/gems</env.GEM_PATH>
         <maven-compiler-plugin.source>1.8</maven-compiler-plugin.source>
         <maven-compiler-plugin.target>1.8</maven-compiler-plugin.target>
+        <groovy-all.version>2.4.18</groovy-all.version>
     </properties>
 
     <dependencies>
@@ -98,7 +99,7 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.4.18</version>
+            <version>${groovy-all.version}</version>
         </dependency>
     </dependencies>
 
@@ -214,6 +215,25 @@
                         <arg>-Xlint:all,-options,-path</arg>
                         -->
                     </compilerArgs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>2.1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!-- This is important to make GMavenPlus compile the Java sources first, then the Groovy sources -->
+                    <compileSourcesRoots>
+                        <compileSourceRoot>${project.basedir}/src/main/java</compileSourceRoot>
+                        <compileSourceRoot>${project.basedir}/src/main/groovy</compileSourceRoot>
+                    </compileSourcesRoots>
                 </configuration>
             </plugin>
             <plugin>
