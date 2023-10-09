@@ -1,7 +1,8 @@
 pipeline {
     agent any
-    def jdkTool = tool name: 'My JDK', type: 'hudson.model.JDK'
-    env.JAVA_HOME="${jdkTool}/bin/java"
+    tools {
+        jdk 'OPENJDK-8'
+    }
     stages {
         stage('Which Java') {
             steps {
