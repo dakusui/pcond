@@ -25,7 +25,7 @@ public class EnsuresTest extends TestBase.ForAssertionEnabledVM {
 
   @Test
   public void test() {
-    System.out.println(Validator.INSTANCE);
+    System.out.println(Validator.instance());
   }
 
   @Test

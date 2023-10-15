@@ -106,7 +106,7 @@ public class AssertionsTest {
   public static class MessageTest {
     @Test
     public void composeMessage$thenComposed() {
-      assertEquals("Value:\"hello\" violated: isNull", new Validator.Impl(new Properties()).configuration().messageComposer().composeMessageForAssertion("hello", Predicates.isNull()));
+      assertEquals("Value:\"hello\" violated: isNull", new Validator.Impl(Validator.configurationFromProperties(new Properties())).configuration().messageComposer().composeMessageForAssertion("hello", Predicates.isNull()));
     }
   }
 }
