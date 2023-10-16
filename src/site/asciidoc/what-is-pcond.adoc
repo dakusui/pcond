@@ -34,7 +34,7 @@ When we want to make the `method` accept a string array whose length is larger t
 If we could print the definition of the lambda with the value given to it, our life will become easier.
 
 Actually, for instance, JavaScript, it is possible.
-There is a library called `power-assert`<<power-assert>>.
+There is a library called `power-assert`[<<power-assert>>].
 It allows you to do it.
 
 [source]
@@ -56,27 +56,35 @@ It allows you to do it.
 
 Although this approach may not allow us to define the error message fully human-friendly, but this will be sufficient for developers.
 
-To our knowledge, only one known attempt to achieve it in Java is `java-power-assert`<<java-power-assert>>.
+To our knowledge, only one known attempt to achieve it in Java is `java-power-assert`[<<java-power-assert>>].
 However, the library's binary is not available in public any more as of Oct, 2023 and not developed actively.
+Instead, several other approaches were attempted in Java's ecosystem.
 
 === Existing Approaches Other Than Introspection
 
-To check condition and to produce a reasonably human friendly error message for the condition is a common concern for some areas such as test assertions, assertions in Design by Contract programming style, and value checking.
+To check a condition and to produce a reasonably human friendly error message for the condition is a common concern for some areas such as test assertions, assertions in Design by Contract programming style, and value checking in programming in general.
 Let's now take a look at those existing approaches and their pain points.
-
 
 ==== Test Assertion Libraries
 
-(t.b.d.)
+In automated testing, it is essential to provide a user friendly message when a given condition results in `false`.
+In Java's ecosystem, there are a few well-known test assertion libraries.
+
+**Hamcrest:** Hamcrest[<<hamcrest>>] is the first one among them.
 
 - Designed only for test assertions.
 Cannot be used for other purposes such as value checking or DbC style assertions in general.
 - Expensive to provide a support for a custom type (class), even if possible.
 - Necessary to provide a support for a custom time (class).
+- Steep learning curve.
+
+**AssertJ:** (t.b.d.)
+
+**Google Truth:** (t.b.d.)
 
 ==== `Validate` class of Apache `commons-lang` library
 
-Apache `commons-lang` library provides `Validate` class.
+Apache `commons-lang` library[<<commons-lang>>] provides `Validate` class[<<commons-lang-Validate>>].
 (t.b.d.)
 
 - Not composable.
@@ -105,6 +113,8 @@ public class Example {
 
 == References
 
-- [[[power-assert, 1]]] power-assert https://github.com/power-assert-js/power-assert[power-assert]: 2021
-- [[[java-power-assert, 2]]] java-power-assert https://github.com/jkschneider/java-power-assert[java-power-assert]: 2016
-- [[[commons-lang-Validate, 4]]] https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html[commons-lang-Validate]
+- [[power-assert, 1]] power-assert https://github.com/power-assert-js/power-assert[power-assert]: 2021
+- [[java-power-assert, 2]] java-power-assert https://github.com/jkschneider/java-power-assert[java-power-assert]: 2016
+- [[commons-lang, 3]] commons-lang https://commons.apache.org/proper/commons-lang/[commons-lang]:2023
+- [[commons-lang-Validate, 4]] Validate.class https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html[commons-lang-Validate]:2023
+- [[hamcrest, 5]] Hamcrest https://hamcrest.org/[Hamcrest]:2012-2023
