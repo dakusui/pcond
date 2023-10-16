@@ -1,70 +1,94 @@
 
-== The `pcond` library
+= The `pcond` library
 
-`pcond` is a simple assertion and validation library, but not in the sense assert4j, hamcrest, or thincrest are.
-It is a focusing on product side's code than on unit test codes and it is more like guava's `Preconditions` class, but it is equipped with more features and designed based on the ideas of "Design by Contract."
+`pcond` is a simple library to build "printable" predicates.
+Why is it important and worth providing a library?
+Alright, let me explain it first.
 
-=== Usage
-First, let's import statically entry points of the library in your code.
-
-[source,java]
-----
-
-
-----
-
-Of course, you can rely on your IDE for it, though.
-
-
-=== `assert var != null` vs `Objects.requireNonNull(var)`
-
-What are the differences between them?
-For what a situation do you use `assert` or `requireNonNull`?
-
-`assert` throws `java.lang.AssertionError` and for `requireNonNull`, `java.lang.NullPointerException` is thrown, when the `var` is `null`.
-And, in both cases, we consider that a bug is detected and the exception should not be caught.
-
-Then which should be used when?
-
-[ditaa]
-----
-+------+    +-----------------------+
-|Client|    |Your Library           |
-|      |    |    +----------------+ |
-|      +--->|    |Internal Classes| |
-|      |    |    +----------------+ |
-+------+    +-----------------------+
-----
-
-The policy `pcond` takes is as simple as follows,
-
-- When you are detecting a bug of your own library, use `assert var != null`.
-- When you are detecting a bug of your client's, use `requireNonNull(var)`
-
-The former should be used in `private` or package-private methods in general, and the other, in `public` methods.
+== Background
+A small but everyday programming pain in Java is its lack of "introspection" over Lambdas.
+I mean, we always do something like:
 
 [source,java]
 ----
-public class Example {
-  public void publicMethod(String message) {
-    requireNonNull(message);
-    privateMethod(message);
+import java.util.Arrays;class Example {
+  static void method(String... args) {
+    require(args,
+            v -> v != null && v.lenth > 1,
+            v -> "We expect input should be non-null and its length is " +
+                 "greater than 1 but it was:<" + Arrays.toString(v) + ">");
   }
 
-  private void privateMethod(String message) {
-    assert precondition(message, isNotNull());
-    System.out.println(mesage);
+  static void require(
+          String[] args,
+          Predicate<String[]> requirement,
+          Function<String[], String> messageFormatter) {
+    if (!requirement.test(args))
+      throw new IllegalArgumentException(messageFormatter.apply(args));
   }
 }
 ----
 
-=== Descriptiveness on failure.
+This is obviously error-prone.
+When we want to make the `method` accept a string array whose length is larger than 2, we also need to edit the message string, which you may forget, sometimes.
+If we could print the definition of the lambda with the value given to it, our life will become easier.
+
+Actually, for instance, JavaScript, it is possible.
+There is a library called `power-assert`<<power-assert>>.
+It allows you to do it.
+
+[source]
+----
+  1) Array #indexOf() should return index when the value is present:
+     AssertionError: # path/to/test/mocha_node.js:10
+
+  assert(ary.indexOf(zero) === two)
+         |   |       |     |   |
+         |   |       |     |   2
+         |   -1      0     false
+         [1,2,3]
+
+  [number] two
+  => 2
+  [number] ary.indexOf(zero)
+  => -1
+----
+
+Although this approach may not allow us to define the error message fully human-friendly, but this will be sufficient for developers.
+
+To our knowledge, only one known attempt to achieve it in Java is `java-power-assert`<<java-power-assert>>.
+However, the library's binary is not available in public any more as of Oct, 2023 and not developed actively.
+
+=== Existing Approaches Other Than Introspection
+
+To check condition and to produce a reasonably human friendly error message for the condition is a common concern for some areas such as test assertions, assertions in Design by Contract programming style, and value checking.
+Let's now take a look at those existing approaches and their pain points.
+
+
+==== Test Assertion Libraries
 
 (t.b.d.)
 
-=== Performance
+- Designed only for test assertions.
+Cannot be used for other purposes such as value checking or DbC style assertions in general.
+- Expensive to provide a support for a custom type (class), even if possible.
+- Necessary to provide a support for a custom time (class).
 
-The `precondition` method is defined to return a `boolean` value.
+==== `Validate` class of Apache `commons-lang` library
+
+Apache `commons-lang` library provides `Validate` class.
+(t.b.d.)
+
+- Not composable.
+- Gives information only for failed condition.
+No information about already passing conditions nor not yet exercised conditions.
+
+==== `valid4j`, a DbC library
+
+(t.b.d.)
+
+== The `pcond` 's Approach
+
 
 [source,java]
 ----
@@ -77,3 +101,10 @@ public class Example {
 ----
 <1> This line is not executed at all if you give `-da` option to your JVM.
 
+
+
+== References
+
+- [[[power-assert, 1]]] power-assert https://github.com/power-assert-js/power-assert[power-assert]: 2021
+- [[[java-power-assert, 2]]] java-power-assert https://github.com/jkschneider/java-power-assert[java-power-assert]: 2016
+- [[[commons-lang-Validate, 4]]] https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html[commons-lang-Validate]
