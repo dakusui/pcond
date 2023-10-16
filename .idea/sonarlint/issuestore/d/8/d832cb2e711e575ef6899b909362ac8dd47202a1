@@ -1,0 +1,16 @@
+
+P	java:S125="<This block of commented-out lines of code should be removed.(³¯Ş
+<
+java:S3864D"!Remove this use of "Stream.peek".(İËìßıÿÿÿÿ
+<
+java:S3864W"!Remove this use of "Stream.peek".(²š±Íşÿÿÿÿ
+_
+java:S3358U"DExtract this nested ternary operation into an independent statement.(’áñïüÿÿÿÿ
+W
+java:S3457p"AFormat specifiers should be used instead of string concatenation.(’¡ê
+_
+java:S3358|"DExtract this nested ternary operation into an independent statement.(Ø‚ éıÿÿÿÿ
+W
+java:S3457"AFormat specifiers should be used instead of string concatenation.(ìëÇØ
+s
+java:S1659ˆ"WDeclare "maxIndentAndFormNameLength" and all following declarations on a separate line.(¿™ö»ÿÿÿÿÿ

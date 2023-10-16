@@ -1,0 +1,98 @@
+
+o
+java:S2293N"YReplace the type specification in this constructor call with the diamond operator ("<>").(»ãĞÃ
+t
+java:S2293R"YReplace the type specification in this constructor call with the diamond operator ("<>").(„µÜáÿÿÿÿÿ
+o
+java:S2293V"YReplace the type specification in this constructor call with the diamond operator ("<>").(ï§õ
+n
+java:S2293Z"YReplace the type specification in this constructor call with the diamond operator ("<>").(¿ßÄ$
+o
+java:S2293b"YReplace the type specification in this constructor call with the diamond operator ("<>").(­´Û¶
+t
+java:S2293z"YReplace the type specification in this constructor call with the diamond operator ("<>").(ÎÃœ“øÿÿÿÿ
+l	java:S117Ò"QRename this local variable to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(äà•øÿÿÿÿ
+M
+java:S16116"2Remove the parentheses around the "args" parameter(®Ê’±üÿÿÿÿ
+M
+java:S16117"2Remove the parentheses around the "args" parameter(øùÜŒÿÿÿÿÿ
+h	java:S100a"NRename this method name to match the regular expression '^[a-z][a-zA-Z0-9]*$'.(‰øúÿÿÿÿ
+N
+java:S1611›"2Remove the parentheses around the "args" parameter(æÌüøÿÿÿÿ
+I
+java:S1611œ"2Remove the parentheses around the "args" parameter(…§Õ¾
+I
+java:S1611"2Remove the parentheses around the "args" parameter(Õ¨˜¦
+I
+java:S1611Ÿ"2Remove the parentheses around the "args" parameter(Ö‚÷â
+H
+java:S1611¡"2Remove the parentheses around the "args" parameter(¨´C
+I
+java:S1611¢"2Remove the parentheses around the "args" parameter(¹ë×Ï
+I
+java:S1611¤"2Remove the parentheses around the "args" parameter(¿æ¼’
+N
+java:S1611¥"2Remove the parentheses around the "args" parameter(ÇŒÖóùÿÿÿÿ
+N
+java:S1611§"2Remove the parentheses around the "args" parameter(•‰ïëùÿÿÿÿ
+N
+java:S1611¨"2Remove the parentheses around the "args" parameter(ûÌÏ°üÿÿÿÿ
+N
+java:S1611ª"2Remove the parentheses around the "args" parameter(ãë¥Ûûÿÿÿÿ
+H
+java:S1611«"2Remove the parentheses around the "args" parameter(¶‘î-
+I
+java:S1611­"2Remove the parentheses around the "args" parameter(Å¤…”
+I
+java:S1611®"2Remove the parentheses around the "args" parameter(òÆŠî
+F
+java:S1611®"/Remove the parentheses around the "s" parameter(òÆŠî
+N
+java:S1611°"2Remove the parentheses around the "args" parameter(¥Ø—Ÿşÿÿÿÿ
+I
+java:S1611±"2Remove the parentheses around the "args" parameter(àøÅÛ
+F
+java:S1611±"/Remove the parentheses around the "s" parameter(àøÅÛ
+I
+java:S1611³"2Remove the parentheses around the "args" parameter(¼ˆ´’
+I
+java:S1611´"2Remove the parentheses around the "args" parameter(ú™ÿà
+F
+java:S1611´"/Remove the parentheses around the "s" parameter(ú™ÿà
+N
+java:S1611¶"2Remove the parentheses around the "args" parameter(ö·®õıÿÿÿÿ
+I
+java:S1611·"2Remove the parentheses around the "args" parameter(õñÀ
+F
+java:S1611·"/Remove the parentheses around the "s" parameter(õñÀ
+I
+java:S1611¹"2Remove the parentheses around the "args" parameter(Ì·Ïš
+N
+java:S1611º"2Remove the parentheses around the "args" parameter(ƒ¼ø‰üÿÿÿÿ
+K
+java:S1611º"/Remove the parentheses around the "s" parameter(ƒ¼ø‰üÿÿÿÿ
+H
+java:S1611Â"2Remove the parentheses around the "args" parameter(Ğ·Û	
+I
+java:S1611Ã"2Remove the parentheses around the "args" parameter(¬İîâ
+F
+java:S1611Ã"/Remove the parentheses around the "c" parameter(¬İîâ
+B
+java:S2160ì"+Override the "equals" method in this class.(š÷Ô
+F
+java:S1611õ"/Remove the parentheses around the "t" parameter(ÓÅ«
+B
+java:S2160Š"+Override the "equals" method in this class.(ŒĞéˆ
+K
+java:S1611“"/Remove the parentheses around the "t" parameter(Á×Öıùÿÿÿÿ
+R	java:S125”"<This block of commented-out lines of code should be removed.(Æß¬¸
+A
+java:S2160®"+Override the "equals" method in this class.(ù¡èv
+a
+java:S1124°"EReorder the modifiers to comply with the Java Language Specification.(—Ç‚ºùÿÿÿÿ
+B
+java:S2160à"+Override the "equals" method in this class.(Â®×¤
+B
+java:S2160ª"+Override the "equals" method in this class.(ÜÅÜŠ
+B
+java:S2160‹"+Override the "equals" method in this class.(ãîÛ
