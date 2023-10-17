@@ -9,6 +9,7 @@ import com.github.dakusui.shared.ApplicationException;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -16,8 +17,27 @@ import static com.github.dakusui.pcond.forms.Functions.*;
 import static com.github.dakusui.shared.TestUtils.validate;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasToString;
 
 public class CallTest extends TestBase {
+  
+  @Test
+  public void givenBean_whenToStringReturnsRequiredString_thenCorrect(){
+    class Person {
+      private final String[] names;
+  
+      Person(String... names) {
+        this.names = names;
+      }
+      public String toString() {
+        return Arrays.toString(names);
+      }
+    }
+    Person person=new Person("Barrack", "Washington");
+    String str=person.toString() + "Biden";
+    assertThat(person, hasToString("[Biden]"));
+  }
+
   @Test
   public void classMethodCaBeCalled() {
     Function<Double, Double> cos = call(classMethod(Math.class, "cos", 0));

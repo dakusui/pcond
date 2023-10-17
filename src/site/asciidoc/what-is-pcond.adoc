@@ -54,7 +54,7 @@ It allows you to do it.
   => -1
 ----
 
-Although this approach may not allow us to define the error message fully human-friendly, but this will be sufficient for developers.
+Although this approach may not allow us to define the error message fully human-friendly, but this will be usually sufficient for developers.
 
 To our knowledge, only one known attempt to achieve it in Java is `java-power-assert`[<<java-power-assert>>].
 However, the library's binary is not available in public any more as of Oct, 2023 and not developed actively.
@@ -62,15 +62,39 @@ Instead, several other approaches were attempted in Java's ecosystem.
 
 === Existing Approaches Other Than Introspection
 
-To check a condition and to produce a reasonably human friendly error message for the condition is a common concern for some areas such as test assertions, assertions in Design by Contract programming style, and value checking in programming in general.
+To check a condition and to produce a reasonably human-friendly error message for the condition is a common concern for some areas such as test assertions, assertions in Design by Contract programming style, and value checking in programming in general.
 Let's now take a look at those existing approaches and their pain points.
 
 ==== Test Assertion Libraries
 
-In automated testing, it is essential to provide a user friendly message when a given condition results in `false`.
-In Java's ecosystem, there are a few well-known test assertion libraries.
+In automated testing, it is essential to provide a user friendly message when a given condition is broken (resulting in `false` or failed to evaluate by an exception).
+In Java's ecosystem, there are a few well-known test assertion libraries such as Hamcrest[<<hamcrest>>], AssertJ[<<assertj>>], or Google Truth[<<google-truth>>].
 
-**Hamcrest:** Hamcrest[<<hamcrest>>] is the first one among them.
+**Hamcrest:** Hamcrest[<<hamcrest>>] is the first one among them and all the assertion libraries in Java.
+Following is an example picked up from Baelung's blog post[<<baeldung-hamcrest>>].
+
+[source, java]
+----
+public class Example {
+    @Test
+    public void givenBean_whenToStringReturnsRequiredString_thenCorrect(){
+        Person person=new Person("Barrack", "Washington");
+        String str=person.toString();
+        assertThat(person, hasToString(str));
+    }
+}
+----
+The static method `hasToString(String)` is defined in `org.hamcrest.Matchers` class and it returns a `Matcher` object.
+If this example fails an error message will be printed as follows:
+
+----
+java.lang.AssertionError:
+Expected: with toString() "[Biden]"
+     but: toString() was "[Barrack, Washington]"
+
+	at org.hamcrest.MatcherAssert.assertThat(MatcherAssert.java:20)
+	at org.hamcrest.MatcherAssert.assertThat(MatcherAssert.java:8)
+----
 
 - Designed only for test assertions.
 Cannot be used for other purposes such as value checking or DbC style assertions in general.
@@ -118,3 +142,6 @@ public class Example {
 - [[commons-lang, 3]] commons-lang https://commons.apache.org/proper/commons-lang/[commons-lang]:2023
 - [[commons-lang-Validate, 4]] Validate.class https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html[commons-lang-Validate]:2023
 - [[hamcrest, 5]] Hamcrest https://hamcrest.org/[Hamcrest]:2012-2023
+- [[assertj, 6]] AssertJ
+- [[google-truth, 7]] Google Truth
+- [[baeldung-hamcrest, 8]] baeldung.com/java-junit-hamcrest-guide https://baeldung.com/java-junit-hamcrest-guide[baeldung.com/java-junit-hamcrest-guide]
