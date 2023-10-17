@@ -74,18 +74,18 @@ In Java's ecosystem, there are a few well-known test assertion libraries such as
 Following is an example picked up from Baelung's blog post[<<baeldung-hamcrest>>].
 
 [source, java]
+.An example from [<<baeldung-hamcrest>>], modified to make it fail.
 ----
 public class Example {
     @Test
     public void givenBean_whenToStringReturnsRequiredString_thenCorrect(){
         Person person=new Person("Barrack", "Washington");
-        String str=person.toString();
-        assertThat(person, hasToString(str));
+        assertThat(person, hasToString("[Biden]"));
     }
 }
 ----
 The static method `hasToString(String)` is defined in `org.hamcrest.Matchers` class and it returns a `Matcher` object.
-If this example fails an error message will be printed as follows:
+If this example fails with a human-friendly error message as follows:
 
 ----
 java.lang.AssertionError:
@@ -96,13 +96,42 @@ Expected: with toString() "[Biden]"
 	at org.hamcrest.MatcherAssert.assertThat(MatcherAssert.java:8)
 ----
 
+Nevertheless, Hamcrest has the following challenges.
+
 - Designed only for test assertions.
 Cannot be used for other purposes such as value checking or DbC style assertions in general.
-- Expensive to provide a support for a custom type (class), even if possible.
-- Necessary to provide a support for a custom time (class).
 - Steep learning curve.
+Factory methods to create matchers are provided as static methods or plain Java class.
+Users need to memory which classes or static methods are useful for what use cases.
+- Expensive to provide a support for a custom type (class), even if possible.
 
-**AssertJ:** (t.b.d.)
+**AssertJ:** AssertJ is another assertion library.
+It has a "fluent" style API and it reduces the pain to learn its programming model.
+
+[source, java]
+.AssertJ example
+----
+import static org.assertj.core.api.Assertions.*;
+
+public class PersonTest {
+
+    @Test
+    public void testNameAndAge() {
+        Person person = new Person("Alice", 30);
+
+        assertThat(person.getName())
+            .isNotNull()
+            .isEqualTo("Alice")
+            .startsWith("Al")
+            .endsWith("ce")
+            .contains("lic");
+
+        assertThat(person.getAge())
+            .isGreaterThan(20)
+            .isLessThanOrEqualTo(30);
+    }
+}
+----
 
 **Google Truth:** (t.b.d.)
 
