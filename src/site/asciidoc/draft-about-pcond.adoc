@@ -1,0 +1,350 @@
+= `pcond`: Printable Conditions
+
+Let's make your test codes as cool as your product codes.
+The `pcond` library provides a basis of it.
+
+== Background and Introduction: Checking Values
+
+Checking values is an everyday task of a programmer.
+It is an easy task but, doing it well is a different challenge.
+When the check fails, we want to see a message useful to diagnose what is going on.
+We want to write such checks in a uniformed way.
+We want to do it with as less effort as possible.
+We are going to walk through the challenges we face to do so.
+Since the testing is the situation, where we become most conscious of it, we first focus on it, but it is not limited to it, as we see later.
+
+*Message Crafting:* How to define a message printed on a failure?
+A good error message should describe what made the check fail with sufficient but not too much context.
+Otherwise a developer will need to go back and forth between the log file that contains the message and the source code that generated it.
+
+Following is such a naive example in Java.
+
+The `require` method takes a value and perform a check over it.
+If the check fails, it constructs a message using a function given to it.
+
+[source,java]
+----
+import java.util.Arrays;
+
+class Example {
+  static void method(String... args) {
+    require(args,
+            v -> v != null && v.lenth > 1,
+            v -> "We expect input should be non-null and its length is " +
+                 "greater than 1 but it was:<" + Arrays.toString(v) + ">");
+  }
+
+  static <T> void require(
+          T args,
+          Predicate<T> requirement,
+          Function<T, String> messageFormatter) {
+    if (!requirement.test(args))
+      throw new IllegalArgumentException(messageFormatter.apply(args));
+  }
+}
+----
+
+This is obviously error-prone.
+Along with the development of a product, specification changes.
+We may want to make the `method` accept arrays whose length is greater than `2`, not `1`.
+In such a case, it is easy to imagine a mistake, where we only update it in the comparison condition code but forgot doing so in the message.
+
+*Custom Type Support:* We always work on a lot of types.
+Some times they are coming from Java's core library, from some well known library, or from not so known, but most of the cases, you are not testing well known libraries, but your own classes.
+So, it is essential how to handle custom types and having rich error messages for custom types.
+
+Thus, being able to handle custom classes is essential for assertion libraries.
+
+*Multiple Violations:* We sometimes need to build a complex check which consists of multiple smaller conditions.
+If one of them fails, the entire check should also fail.
+But in the error message, if no ingenuity is employed, only the first failing condition will be printed.
+
+If we do not consider other conditions, we will break them in order to fix a condition reported broken.
+So we will not only need to go back and forth between source code and failure report, but also repeat try and error to fix the entire condition in the method.
+
+=== Existing Approaches
+
+*JUnit5:* It is a JUnit's design principle to isolate the concerns of test execution and assertions.
+The approach JUnit has out-of-box has relatively naive.
+It only has a set of static methods which start with `assert`.
+Each of them has a variation to accept a message to be printed on a failure.
+
+[source, java]
+.junit test example
+----
+public class ExampleTest {
+	@Test
+	public void failingTest() {
+	    String expectedString = "Hello";
+	    assertEquals(expectedString, "Hi");
+	}
+}
+----
+
+This will print the following output.:
+
+[source]
+.junit output example
+----
+org.junit.ComparisonFailure:
+Expected :Hello
+Actual   :HI
+----
+
+Basically, in JUnit's default programming model, it is not considered a problem to address the Message Crafting problem by itself, but it should be addressed by external assertion libraries such as Hamcrest[<<hamcrest>>], AssertJ[<<assertj>>], Google Truth[<<google-truth>>], and others.
+The same can be said about the custom type support.
+In the programming model, users can just give any type of boolean expressions to the `assertXyz` methods, but without considering the concerns we are discussing here.
+
+As you see, expectation and actual value are displayed, but for what it is expected and of what the actual value is not shown in the message.
+If the test method has more than one value to examine, which is a quite common situation, the test programmer will need to go back and forth between test code and test output.
+
+For "Multiple Violations" problem, JUnit5 has a feature called `assertAll` out-of-box, where assertions are passed as a functional interface object.
+With that, you can get a comprehensive message on a failure caused by one assertion among many.
+
+[source, java]
+----
+class Example {
+    @Test
+    public void groupedAssertions() {
+        Person person = new Person("Alicia", 35);
+
+        assertAll("person",
+            () -> assertEquals("Alice", person.getName(), "Name mismatch!"),
+            () -> assertTrue(person.getAge() <= 30, "Age is greater than expected!")
+        );
+    }
+}
+----
+
+==== AssertJ
+
+AssertJ[<<assertj>>] is a relatively new generation assertion library after Hamcrest[<<hamcrest>>].
+It has a "fluent" programming style, where modern IDEs can help programmers to suggest available methods.
+Its code and message on a failure are both quite readable.
+
+[source, java]
+.AssertJ example
+----
+import static org.assertj.core.api.Assertions.*;
+
+public class PersonTest {
+
+    @Test
+    public void testNameAndAge() {
+        Person person = new Person("Alice", 30);
+
+        assertThat(person.getName())
+            .isNotNull()
+            .isEqualTo("Alice")
+            .startsWith("Al")
+            .endsWith("ce")
+            .contains("lic");
+
+        assertThat(person.getAge())
+            .isGreaterThan(20)
+            .isLessThanOrEqualTo(30);
+    }
+}
+----
+
+This gives a following output on a failure:
+
+----
+[ERROR] Failures:
+[ERROR]   PersonTest.testNameAndAge:
+Expecting:
+ <"Alicia">
+to be equal to:
+ <"Alice">
+----
+
+In Hamcrest[<<hamcrest>>], an assertion library of an older generation, it was very painful to support a custom type.
+In AssertJ, it is much simpler and easier to use.
+
+[source, java]
+.AssertJ's custom type support example, generated by ChatGPT.
+----
+public class PersonAssert extends AbstractAssert<PersonAssert, Person> {
+
+    public PersonAssert(Person actual) {
+        super(actual, PersonAssert.class);
+    }
+
+    // Static entry point
+    public static PersonAssert assertThat(Person actual) {
+        return new PersonAssert(actual);
+    }
+
+    // Leverage existing String assertions for the name property
+    public PersonAssert hasName(String expectedName) {
+        Assertions.assertThat(actual.getName()).isEqualTo(expectedName);
+        return this;
+    }
+}
+----
+
+This actually gives a poor error message as follows.:
+
+----
+org.opentest4j.AssertionFailedError:
+expected: "Gaspard"
+but was: "Lisa"
+Expected :"Gaspard"
+Actual   :"Lisa"
+----
+
+We can tell that `Gaspard` was expected but actually it was `Lisa`.
+However, for what it was expected? Given name,H? family name? or a boyfriend's given name?
+This is because information about which part of the original actual value was compared with the expected is lost.
+
+In this case, in the `hasName(String)` method, `Person#getName()` is called, but the fact that the value came from the method disappears in the check and the returned value is directly compared with `expectedName`.
+
+To address this, we can define a more descriptive message by hand in the `hasName(String)` method.
+However, this means we still have the "Message Crafting" problem to support a custom type.
+
+
+[source, java]
+.AssertJ's soft assertion source example
+----
+class Example {
+    @Test
+    public void testWithSoftAssertions() {
+        Person person = new Person("Alicia", 35);
+
+        SoftAssertions softly = new SoftAssertions();
+
+        softly.assertThat(person.getName()).isEqualTo("Alice");
+        softly.assertThat(person.getAge()).isLessThanOrEqualTo(30);
+
+        // It's crucial to call assertAll at the end to trigger the actual assertions!
+        softly.assertAll();
+    }
+}
+----
+
+[source]
+.AssertJ's soft assertion output example
+----
+[SoftAssertionError:
+1) [Check name] expected:<"[Alice]"> but was:<"[Alicia]">
+2) [Check age]
+Expecting:
+ <35>
+to be less than or equal to:
+ <30> ]
+----
+
+==== Power Assert
+
+power-assert[<<power-assert>>] is an assertion library, which is popular in JavaScript and Groovy.
+It shows the definition of the violated condition as a code.
+Not only that, it displays an actual value of each fragment in the condition.
+
+[source]
+----
+  1) Array #indexOf() should return index when the value is present:
+     AssertionError: # path/to/test/mocha_node.js:10
+
+  assert(ary.indexOf(zero) === two)
+         |   |       |     |   |
+         |   |       |     |   2
+         |   -1      0     false
+         [1,2,3]
+
+  [number] two
+  => 2
+  [number] ary.indexOf(zero)
+  => -1
+----
+
+In Java, there is an implementation called "java-power-assert"[<<java-power-assert>>].
+However, the development of it is not active as of October in 2023, and its binary is not publicly available to the best of the author's knowledge.
+Also, it relies on the technology called "BCI" (Byte Code Instrumentation), which is extensively used in the industry.
+This requires runtime configuration and it introduces compatibility problems with other tools, such as AspectJ, Javassist, JBOSS, coverage tools, etc.
+
+*Summary:* Following is a matrix that summarizes the existing solutions.
+
+|===
+| |Message Crafting |Custom Type|Multiple Violations|BCI needed|Note
+
+|JUnit5
+|No support
+|No support
+|`assertAll` mechanism
+|No
+|
+
+|AssertJ
+|Good support for supported types.
+|Straight-forward to support a custom type.
+|"Soft Assertion" mechanism.
+|No
+|
+
+|Power Assert
+|Not needed
+|No need to support work
+|User's matter
+|Yes
+|In Java, no available implementation.
+|===
+
+As seen above, every existing solution has some drawback in practical usage.
+
+
+== Technique
+
+=== Printable Predicates
+
+The pain in Java comes from its lack of its challenge in printing predicates.
+Without employing any technique, Java just prints a human unfriendly string for a predicate.
+(t.b.d.)
+
+=== "Transform" and "Check" programming model
+
+Do we really need a "custom type support" feature?
+Let's think it again.
+In the end, we human are only comfortable with checking values in only a handful of types.
+As a string, a number, a boolean, a pair of string and them, and an array of those.
+Especially so, we do such checks in a log file or a console output.
+Examine yourself do we really want to (are not able to) check values of custom types (such as `Person`, `Automotive`, `SkuItem`, etc.) as they are?
+Instead we in the end want to check the values as a structure of simpler values such as numbers, strings, booleans, pairs, or their arrays?
+
+If so, we can think of another approach, where we first transform a given value into one of such simpler forms, and then conduct a check with a limited number of preset conditions for which rich and proper human readable messages are pre-defined.
+
+=== "Evaluator" mechanism
+
+* `allOf` and `and`, `anyOf` and `or`
+
+(t.b.d.)
+
+=== Fluent Interface Support
+
+(t.b.d.)
+
+== How to Use It
+
+Check `thincrest`[<<thincrest-pcond>>] for the usage as an assertion library.
+For usage as a DbC (Dsign by Contract) programming library, check `valid8j`[<<valid8j-pcond>>].
+Those libraries can be used at the same time and you can use the independent versions of theirs safely.
+Since the `pcond` itself a software product still actively developed, the libraries above import `pcond` as source code and move all the classes under `com.github.dakusui.pcond` to `com.github.dakusuite.pcond_thincrest` (or `com.github.dakusui.pcond_valid8j`, respectively) in order not to create a issue because of a compatibility of `pcond` versions.
+
+(t.b.d.)
+
+== Conclusion
+
+(t.b.d.)
+
+== References
+
+
+- [[power-assert, 1]] power-assert https://github.com/power-assert-js/power-assert[power-assert]: 2021
+- [[java-power-assert, 2]] java-power-assert https://github.com/jkschneider/java-power-assert[java-power-assert]: 2016
+- [[commons-lang, 3]] commons-lang https://commons.apache.org/proper/commons-lang/[commons-lang]:2023
+- [[commons-lang-Validate, 4]] Validate.class https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html[commons-lang-Validate]:2023
+- [[hamcrest, 5]] Hamcrest https://hamcrest.org/[Hamcrest]:2012-2023
+- [[assertj, 6]] AssertJ
+- [[google-truth, 7]] Google Truth
+- [[baeldung-hamcrest, 8]] baeldung.com/java-junit-hamcrest-guide https://baeldung.com/java-junit-hamcrest-guide[baeldung.com/java-junit-hamcrest-guide]
+- [[thincrest-pcond, 9]] The "thincrest" assertion library https://dakusui.github.io/thincrest/[thincrest-pcond]
+- [[valid8j-pcond, 10]] The "valid8j" assertion library https://dakusui.github.io/valid8j/[valid8j-pcond]

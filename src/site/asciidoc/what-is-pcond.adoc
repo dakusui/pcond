@@ -6,12 +6,28 @@ Why is it important and worth providing a library?
 Alright, let me explain it first.
 
 == Background
-A small but everyday programming pain in Java is its lack of "introspection" over Lambdas.
-I mean, we always do something like:
+
+=== Checking a Value: A Programming Pain Everyday
+
+At the beginning of a method, we check argument values to check if they conform the requirements of the function.
+At the end of a test method, we check a value returned by a function to check if they satisfy the specification of the function.
+
+This is an easy task for us any programmer, however, to do it well isn't so much straightforward.
+
+If it fails, an appropriate message should be printed.
+Such a message should be helpful to understand which conditions are violated and how.
+
+
+=== Crafting Error Messages
+
+its lack of "introspection" over Lambdas. I mean, we always do something like:
+
 
 [source,java]
 ----
-import java.util.Arrays;class Example {
+import java.util.Arrays;
+
+class Example {
   static void method(String... args) {
     require(args,
             v -> v != null && v.lenth > 1,
@@ -60,6 +76,14 @@ To our knowledge, only one known attempt to achieve it in Java is `java-power-as
 However, the library's binary is not available in public any more as of Oct, 2023 and not developed actively.
 Instead, several other approaches were attempted in Java's ecosystem.
 
+=== Multiple Violations
+
+(t.b.d.)
+
+=== Custom Type Support
+
+(t.b.d.)
+
 === Existing Approaches Other Than Introspection
 
 To check a condition and to produce a reasonably human-friendly error message for the condition is a common concern for some areas such as test assertions, assertions in Design by Contract programming style, and value checking in programming in general.
@@ -71,6 +95,7 @@ In automated testing, it is essential to provide a user friendly message when a 
 In Java's ecosystem, there are a few well-known test assertion libraries such as Hamcrest[<<hamcrest>>], AssertJ[<<assertj>>], or Google Truth[<<google-truth>>].
 
 **Hamcrest:** Hamcrest[<<hamcrest>>] is the first one among them and all the assertion libraries in Java.
+
 Following is an example picked up from Baelung's blog post[<<baeldung-hamcrest>>].
 
 [source, java]
@@ -132,6 +157,31 @@ public class PersonTest {
     }
 }
 ----
+
+This gives a following output on a failure:
+
+----
+[ERROR] Failures:
+[ERROR]   PersonTest.testNameAndAge:
+Expecting:
+ <"Alicia">
+to be equal to:
+ <"Alice">
+----
+
+The main goals of AssertJ are following:
+
+- Rich and easy to use
+- Extensible
+- Community driven
+
+
+There are still two challenges, when we practically use it.
+
+1. Multiple violations
+2. Custom type support
+
+
 
 **Google Truth:** (t.b.d.)
 
