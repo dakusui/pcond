@@ -12,6 +12,11 @@
       <option name="url" value="http://gsp-master-nexus1.gsp.prod.rsc.local:8081/repository/public" />
     </remote-repository>
     <remote-repository>
+      <option name="id" value="bintray-jkschneider-maven" />
+      <option name="name" value="bintray-jkschneider-maven" />
+      <option name="url" value="https://dl.bintray.com/jkschneider/maven" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://gsp-artifacts.intra.rakuten-it.com/repository/public" />

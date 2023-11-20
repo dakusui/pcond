@@ -60,7 +60,7 @@ public class PrintableFunction<T, R> extends
 
   @Override
   public Function<? super T, Object> head() {
-    return (Function<? super T, Object>) this.head;
+    return this.head;
   }
 
   @Override
@@ -91,7 +91,7 @@ public class PrintableFunction<T, R> extends
 
   @Override
   public Object explainOutputExpectation() {
-    return this.formatter.get();
+    return this.head();
   }
 
   @Override

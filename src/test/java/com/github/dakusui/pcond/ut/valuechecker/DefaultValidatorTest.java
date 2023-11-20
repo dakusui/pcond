@@ -315,7 +315,7 @@ public class DefaultValidatorTest extends TestBase {
   }
 
   public Validator.Impl createAssertionProvider(Properties properties) {
-    return new Validator.Impl(properties);
+    return new Validator.Impl(Validator.configurationFromProperties(properties));
   }
 
   public static Properties useEvaluator(Properties properties, boolean useEvaluator) {

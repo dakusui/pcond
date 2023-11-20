@@ -23,7 +23,7 @@ com.github.dakusui.pcond.core.printable.ExplainablePredicate$$Lambda$1/102389292
 With lambdas, we can make our code readable, but when a lambda is printed, it is not so much readable.
 Somehow, we want to make it more human-readable so that we can more easily debug and analyze log files or test failure reports.
 
-You may think that, we can override the `toString` method of a lambda, however, it is not straight forward in Java language <<LamdaToString>>.
+You may think that, we can override the `toString` method of a lambda, however, it is not straight forward in Java language &lt;&lt;LambdaToString&gt;&gt;.
 Functionality-wise, the best way is to resort to "dynamic-proxy" mentioned as an answer to the question in 2020.
 The presented snippet has a few limitations.footnote:[Those are addressable problems.
 So, in the future version of `pcond`, the dynamic-proxy approach may be chosen using another library<<osynth>>.]
@@ -58,5 +58,5 @@ hello[name]->niceToMeetYou
 
 == References
 
-- [[LamdaToString]] https://stackoverflow.com/questions/23628631/how-to-make-a-lambda-expression-define-tostring-in-java-8[How to make a lambda expression define toString in Java 8?]
+- [[LambdaToString]] https://stackoverflow.com/questions/23628631/how-to-make-a-lambda-expression-define-tostring-in-java-8[How to make a lambda expression define toString in Java 8?]
 - [[osynth]] https://github.com/dakusui/osynth[Osynth: An object synthesizer library]

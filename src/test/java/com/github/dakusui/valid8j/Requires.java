@@ -23,22 +23,22 @@ public enum Requires {
   ;
 
   public static <T> T requireNonNull(T value) {
-    return Validator.INSTANCE.requireNonNull(value);
+    return Validator.instance().requireNonNull(value);
   }
 
   public static <T> T requireArgument(T value, Predicate<? super T> cond) {
-    return Validator.INSTANCE.requireArgument(value, cond);
+    return Validator.instance().requireArgument(value, cond);
   }
 
   public static <T> T requireState(T value, Predicate<? super T> cond) {
-    return Validator.INSTANCE.requireState(value, cond);
+    return Validator.instance().requireState(value, cond);
   }
 
   @SuppressWarnings("RedundantThrows")
   public static <T, E extends Throwable> T require(
       T value,
       Predicate<? super T> cond) throws E {
-    return Validator.INSTANCE.require(value, cond);
+    return Validator.instance().require(value, cond);
   }
 
 }

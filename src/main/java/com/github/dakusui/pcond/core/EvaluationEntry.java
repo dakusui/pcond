@@ -81,22 +81,22 @@ public abstract class EvaluationEntry {
    */
   private final String formName;
   int level;
-
+  
   Object inputExpectation;
   Object detailInputExpectation;
-
+  
   Object inputActualValue;
   Object detailInputActualValue;
-
+  
   Object outputExpectation;
   Object detailOutputExpectation;
-
-
+  
+  
   /**
    * A flag to let the framework know this entry should be printed in a less outstanding form.
    */
   final boolean squashable;
-
+  
   EvaluationEntry(String formName, Type type, int level, Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object detailOutputExpectation, Object inputActualValue, Object detailInputActualValue, boolean squashable) {
     this.type = type;
     this.level = level;
@@ -109,66 +109,64 @@ public abstract class EvaluationEntry {
     this.detailInputActualValue = detailInputActualValue;
     this.squashable = squashable;
   }
-
+  
   public String formName() {
     return formName;
   }
-
+  
   public Type type() {
     return this.type;
   }
-
+  
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public boolean isSquashable(EvaluationEntry nextEntry) {
     return this.squashable;
   }
-
+  
   public abstract boolean requiresExplanation();
-
+  
   public int level() {
     return level;
   }
-
-
+  
   public Object inputExpectation() {
     return this.inputExpectation;
   }
-
+  
   public Object detailInputExpectation() {
     return this.detailInputExpectation;
   }
-
+  
   public Object outputExpectation() {
     return this.outputExpectation;
   }
-
+  
   public Object detailOutputExpectation() {
     return this.detailOutputExpectation;
   }
-
+  
   public Object inputActualValue() {
     return this.inputActualValue;
   }
-
-
+  
   public abstract Object outputActualValue();
-
+  
   public abstract Object detailOutputActualValue();
-
+  
   public abstract boolean ignored();
-
+  
   @Override
   public String toString() {
     return String.format("%s(%s)", formName(), inputActualValue());
   }
-
+  
   static String composeDetailOutputActualValueFromInputAndThrowable(Object input, Throwable throwable) {
     StringBuilder b = new StringBuilder();
     b.append("Input: '").append(input).append("'").append(format("%n"));
     b.append("Input Type: ").append(input == null ? "(null)" : input.getClass().getName()).append(format("%n"));
     b.append("Thrown Exception: '").append(throwable.getClass().getName()).append("'").append(format("%n"));
     b.append("Exception Message: ").append(sanitizeExceptionMessage(throwable)).append(format("%n"));
-
+    
     for (StackTraceElement each : foldInternalPackageElements(throwable)) {
       b.append("\t");
       b.append(each);
@@ -176,7 +174,7 @@ public abstract class EvaluationEntry {
     }
     return b.toString();
   }
-
+  
   private static String sanitizeExceptionMessage(Throwable throwable) {
     if (throwable.getMessage() == null)
       return null;
@@ -184,11 +182,11 @@ public abstract class EvaluationEntry {
         .map(s -> "> " + s)
         .collect(joining(String.format("%n")));
   }
-
+  
   static <T, E extends Evaluable<T>> Object computeInputActualValue(EvaluableIo<T, E, ?> evaluableIo) {
     return evaluableIo.input().value();
   }
-
+  
   static <T, E extends Evaluable<T>> Object computeOutputExpectation(EvaluableIo<T, E, ?> evaluableIo, boolean expectationFlipped) {
     final State state = evaluableIo.output().state();
     if (state == VALUE_RETURNED) {
@@ -200,7 +198,7 @@ public abstract class EvaluationEntry {
     else
       throw new AssertionError("output state=<" + state + ">");
   }
-
+  
   static <T, E extends Evaluable<T>> Object computeOutputActualValue(EvaluableIo<T, E, ?> evaluableIo) {
     if (evaluableIo.output().state() == State.VALUE_RETURNED)
       return toSnapshotIfPossible(evaluableIo.output().returnedValue());
@@ -209,13 +207,13 @@ public abstract class EvaluationEntry {
     else
       return EVALUATION_SKIPPED;
   }
-
+  
   static <T, E extends Evaluable<T>> boolean isExplanationRequired(EvaluableIo<T, E, ?> evaluableIo, boolean expectationFlipped) {
     return asList(FUNCTION, LEAF).contains(evaluableIo.evaluableType()) && (
         evaluableIo.output().state() == State.EXCEPTION_THROWN || (
             evaluableIo.evaluable() instanceof Evaluable.LeafPred && returnedValueOrVoidIfSkipped(expectationFlipped, evaluableIo)));
   }
-
+  
   private static List<StackTraceElement> foldInternalPackageElements(Throwable throwable) {
     AtomicReference<StackTraceElement> firstInternalStackElement = new AtomicReference<>();
     String lastPackageNameElementPattern = "\\.[a-zA-Z0-9_.]+$";
@@ -242,13 +240,13 @@ public abstract class EvaluationEntry {
         })
         .collect(toList());
   }
-
+  
   private static boolean returnedValueOrVoidIfSkipped(boolean expectationFlipped, EvaluableIo<?, ?, ?> io) {
     if (io.output().state() == State.EVALUATION_SKIPPED)
       return false;
     return expectationFlipped ^ !(Boolean) io.output().returnedValue();
   }
-
+  
   public enum Type {
     TRANSFORM_AND_CHECK {
       @Override
@@ -261,7 +259,7 @@ public abstract class EvaluationEntry {
       String formName(Evaluable<?> evaluable) {
         return "transform";
       }
-
+      
       @Override
       boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
         if (Objects.equals(FUNCTION, nextEntry.evaluableIo().evaluableType()))
@@ -274,7 +272,7 @@ public abstract class EvaluationEntry {
       String formName(Evaluable<?> evaluable) {
         return resolveEvaluationEntryType(evaluable).formName(evaluable);
       }
-
+      
       @Override
       boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
         return asList(LEAF, NOT, AND, OR, TRANSFORM).contains(nextEntry.evaluableIo().evaluableType());
@@ -297,7 +295,7 @@ public abstract class EvaluationEntry {
       String formName(Evaluable<?> evaluable) {
         return "not";
       }
-
+      
       @Override
       boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
         return Objects.equals(LEAF, nextEntry.evaluableIo().evaluableType());
@@ -320,20 +318,20 @@ public abstract class EvaluationEntry {
         return ((Evaluable.Func<?>) evaluable).head().toString();
       }
     };
-
+    
     abstract String formName(Evaluable<?> evaluable);
-
+    
     boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
       return false;
     }
   }
-
+  
   static class Finalized extends EvaluationEntry {
     final         Object  outputActualValue;
     final         Object  detailOutputActualValue;
     private final boolean requiresExplanation;
     private final boolean ignored;
-
+    
     Finalized(
         String formName,
         Type type,
@@ -353,28 +351,28 @@ public abstract class EvaluationEntry {
       this.requiresExplanation = requiresExplanation;
       this.ignored = ignored;
     }
-
+    
     @Override
     public Object outputActualValue() {
       return outputActualValue;
     }
-
+    
     @Override
     public Object detailOutputActualValue() {
       return this.detailOutputActualValue;
     }
-
+    
     @Override
     public boolean ignored() {
       return this.ignored;
     }
-
+    
     @Override
     public boolean requiresExplanation() {
       return this.requiresExplanation;
     }
   }
-
+  
   public static EvaluationEntry create(
       String formName, Type type,
       int level,
@@ -393,17 +391,17 @@ public abstract class EvaluationEntry {
         trivial, requiresExplanation, ignored
     );
   }
-
+  
   public static class Impl extends EvaluationEntry {
-
+    
     private final EvaluableIo<?, ?, ?> evaluableIo;
     private final boolean              expectationFlipped;
     private       boolean              ignored;
-
+    
     private boolean finalized = false;
     private Object  outputActualValue;
     private Object  detailOutputActualValue;
-
+    
     <T, E extends Evaluable<T>> Impl(
         EvaluationContext<T> evaluationContext,
         EvaluableIo<T, E, ?> evaluableIo) {
@@ -422,53 +420,53 @@ public abstract class EvaluationEntry {
       this.expectationFlipped = evaluationContext.isExpectationFlipped();
       this.ignored = false;
     }
-
+    
     private static <E extends Evaluable<T>, T> Object explainInputExpectation(EvaluableIo<T, E, ?> evaluableIo) {
       return explainInputActualValue(evaluableIo, computeInputExpectation(evaluableIo));
     }
-
+    
     private static <E extends Evaluable<T>, T> Object computeInputExpectation(EvaluableIo<T, E, ?> evaluableIo) {
       return computeInputActualValue(evaluableIo);
     }
-
+    
     @Override
     public boolean requiresExplanation() {
       return isExplanationRequired(evaluableIo(), this.expectationFlipped);
     }
-
+    
     @SuppressWarnings("unchecked")
     public <I, O> EvaluableIo<I, Evaluable<I>, O> evaluableIo() {
       return (EvaluableIo<I, Evaluable<I>, O>) this.evaluableIo;
     }
-
+    
     public Object outputExpectation() {
       assert finalized;
       return outputExpectation;
     }
-
+    
     @Override
     public Object outputActualValue() {
       assert finalized;
       return outputActualValue;
     }
-
+    
     @Override
     public Object detailOutputActualValue() {
       assert finalized;
       return detailOutputActualValue;
     }
-
+    
     public boolean ignored() {
       assert finalized;
       return this.ignored;
     }
-
+    
     public boolean isSquashable(EvaluationEntry nextEntry) {
       if (nextEntry instanceof EvaluationEntry.Impl)
         return this.type().isSquashableWith((Impl) nextEntry);
       return false;
     }
-
+    
     public String formName() {
       if (DebuggingUtils.showEvaluableDetail())
         return evaluableIo.formName() + "(" +
@@ -478,7 +476,7 @@ public abstract class EvaluationEntry {
             (finalized && this.ignored() ? ":ignored" : "") + ")";
       return this.evaluableIo.formName();
     }
-
+    
     public void finalizeValues() {
       this.outputExpectation = computeOutputExpectation(evaluableIo(), expectationFlipped);
       this.outputActualValue = computeOutputActualValue(evaluableIo());
@@ -488,7 +486,7 @@ public abstract class EvaluationEntry {
               (this.evaluableIo.evaluableType() == FUNCTION && this.evaluableIo.output().creatorFormType() == FUNC_TAIL);
       this.finalized = true;
     }
-
+    
     @Override
     public String toString() {
       return String.format("%s(%s)=%s (expected:=%s):%s", formName(), inputActualValue(), finalized ? outputActualValue() : "(n/a)", finalized ? outputExpectation() : "(n/a)", this.level());

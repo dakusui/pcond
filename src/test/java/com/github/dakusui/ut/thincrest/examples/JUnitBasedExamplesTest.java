@@ -1,4 +1,4 @@
-package com.github.dakusui.ut.thincrest.ut.examples;
+package com.github.dakusui.ut.thincrest.examples;
 
 import com.github.dakusui.ut.thincrest.examples.UTExample;
 import com.github.dakusui.shared.utils.Metatest;

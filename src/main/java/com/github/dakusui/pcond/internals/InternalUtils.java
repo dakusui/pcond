@@ -130,7 +130,7 @@ public enum InternalUtils {
   }
 
   public static int summarizedStringLength() {
-    return Validator.INSTANCE.configuration().summarizedStringLength();
+    return Validator.instance().configuration().summarizedStringLength();
   }
 
   private static boolean isToStringOverridden(Object object) {
