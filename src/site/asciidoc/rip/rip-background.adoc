@@ -1,0 +1,42 @@
+
+One of Java's weak points is its lack of capability to introspect lambdas.
+If you print out lambda, what you will see is something like:
+[[PrintedLambda]]
+.Printed Lambda
+----
+com.github.your.package.YourClass$$Lambda$1/1867083167@b4c966a
+----
+This makes it not possible to implement an assertion library like power-assert<<power-assert>>, which prints an error message as follows:footnote:[There is an attempt called "power-assert-java"<<power-asset-java>> to implement it using instrumentation mechanism of Java. However the project is not actively developed and the binary is not distributed in publicly available nexus repository as of writing].
+
+[[PowerAssertExample]]
+.power-assert example
+----
+  1) Array #indexOf() should return index when the value is present:
+     AssertionError: # path/to/test/mocha_node.js:10
+
+  assert(ary.indexOf(zero) === two)
+         |   |       |     |   |
+         |   |       |     |   2
+         |   -1      0     false
+         [1,2,3]
+
+  [number] two
+  => 2
+  [number] ary.indexOf(zero)
+  => -1
+----
+Instead, several assertion libraries have been developed and published in Java, such as Hamcrest<<hamcrest>>, AssertJ<<assertj>>, and Google Truth<<google-truth>>.
+Although an assertion is in the end an expression, which results in a boolean value, existing assertion libraries do not rely on `java.util.Predicate`.
+This is because:
+
+- Historically, Java SE8 was not available or not popular at the point of time those assertion libraries were initially developed.
+- It is difficult (or almost not possible) for Java programs to access internal processes of an evaluation of a `Predicate`. Therefore
+
+For product side's development, there is a methodology called Design by Contract<<DbCbyExample>>.
+In DbC, the relationship between software components (such as classes, modules, or functions) are treated as formal agreements, just like legal contracts between parties.
+Such agreements are represented as preconditions, post-conditions, or invariants.
+When such an agreement is broken, in what way it is broken needs to be examined closely in order to figure out how it should be fixed.
+If the agreement is only printed shown as <<PrintedLambda>>, you will need to first find a line of the code and then look into what value is given to which term in the agreement, and in what boolean value the term resulted.
+If the issue is hard to reproduce it or you cannot use a debugger, this will be an error prone manual process.
+Valid4J<<valid4j>> is a library created for addressing this painfootnote:[Note that at the time valid4j was developed, Java 8, where lambdas became available, was not popular].
+It utilizes matchers of Hamcrest to allow users to define agreements.

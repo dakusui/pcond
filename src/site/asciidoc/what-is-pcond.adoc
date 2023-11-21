@@ -2,32 +2,17 @@
 
 `pcond` is a library to build "printable" predicates.
 
-== Background
+== Background: Writing Assertions isn't Fun
 
-One of Java's weak point is its lack of capability to introspect lambdas.
-If you print out lambda, what you will see is something like:
-[[PrintedLambda]]
-.Printed Lambda
-----
-com.github.your.package.YourClass$$Lambda$1/1867083167@b4c966a
-----
-You may think it is not an important thing.
-Correct, usually, when you are only writing code for your product's main logic only, it doesn't matter.
-However, when it comes to validation and verification of your project, it will be a different story.
+Any existing way to write assertions in Java isn't fun.
 
-In the context of unit testing, if a developer can see only the string like <<PrintedLambda>> when a test breaks, it will be very time-consuming to identify the cause of the failure.
-For this, several assertion libraries have been developed and published, such as Hamcrest<<hamcrest>>, AssertJ<<assertj>>, and Google Truth<<google-truth>>.
-Although an assertion is in the end an expression, which results in a boolean value, existing assertion libraries do not rely on `java.util.Predicate`.
-This is because of at least partially historical reason, where Java8 was not available or not popular at the point of time they were initially developed.
+Why do I need to memorize appropriate static methods scattered in various matcher classes?
+Why do I need to write custom support for my own class every time?
+How should I write multiple conditions to be checked in one test method?
 
-For product side's development, there is a methodology called Design by Contract<<DbCbyExample>>.
-In DbC, the relationship between software components (such as classes, modules, or functions) are treated as formal agreements, just like legal contracts between parties.
-Such agreements are represented as preconditions, post-conditions, or invariants.
-When such an agreement is broken, in what way it is broken needs to be examined closely in order to figure out how it should be fixed.
-If the agreement is only printed shown as <<PrintedLambda>>, you will need to first find a line of the code and then look into what value is given to which term in the agreement, and in what boolean value the term resulted.
-If the issue is hard to reproduce it or you cannot use a debugger, this will be an error prone manual process.
-Valid4J<<valid4j>> is a library created for addressing this painfootnote:[Note that at the time valid4j was developed, Java 8, where lambdas became available, was not popular].
-It utilizes matchers of Hamcrest to allow users to define agreements.
+In short, why can't we make our test codes as cool as product's code?
+
+To track the root cause, it will in the end
 
 == Key Concepts
 
@@ -79,4 +64,6 @@ It utilizes matchers of Hamcrest to allow users to define agreements.
 - [[[google-truth, 3]]] Truth - Fluent assertions for Java and Android, https://truth.dev/
 - [[[valid8j, 4]]] valid8j
 - [[[valid4j, 5]]] valid4j https://www.valid4j.org/
-- [[[DbCbyExample, 4]]] "Design by Contract, by Example" by Richard Mitchell and Jim McKim, 2002, Jim McKim, Richard Mitchell
+- [[[DbCbyExample, 6]]] "Design by Contract, by Example" by Richard Mitchell and Jim McKim, 2002, Jim McKim, Richard Mitchell
+- [[[power-assert, 8 ]]] power-assert https://github.com/power-assert-js/power-assert
+- [[[java-power-assert, 9]]] https://github.com/jkschneider/java-power-assert
