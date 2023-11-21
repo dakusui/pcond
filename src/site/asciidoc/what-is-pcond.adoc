@@ -1,16 +1,82 @@
-== The `pcond` library
+= The `pcond` library
 
 `pcond` is a library to build "printable" predicates.
 
+== Background
 
-=== Key Concepts
+One of Java's weak point is its lack of capability to introspect lambdas.
+If you print out lambda, what you will see is something like:
+[[PrintedLambda]]
+.Printed Lambda
+----
+com.github.your.package.YourClass$$Lambda$1/1867083167@b4c966a
+----
+You may think it is not an important thing.
+Correct, usually, when you are only writing code for your product's main logic only, it doesn't matter.
+However, when it comes to validation and verification of your project, it will be a different story.
 
-* Transform and Check style
-* Fluent API to build printable predicates
-* Multi-parameter Functions
+In the context of unit testing, if a developer can see only the string like <<PrintedLambda>> when a test breaks, it will be very time-consuming to identify the cause of the failure.
+For this, several assertion libraries have been developed and published, such as Hamcrest<<hamcrest>>, AssertJ<<assertj>>, and Google Truth<<google-truth>>.
+Although an assertion is in the end an expression, which results in a boolean value, existing assertion libraries do not rely on `java.util.Predicate`.
+This is because of at least partially historical reason, where Java8 was not available or not popular at the point of time they were initially developed.
+
+For product side's development, there is a methodology called Design by Contract<<DbCbyExample>>.
+In DbC, the relationship between software components (such as classes, modules, or functions) are treated as formal agreements, just like legal contracts between parties.
+Such agreements are represented as preconditions, post-conditions, or invariants.
+When such an agreement is broken, in what way it is broken needs to be examined closely in order to figure out how it should be fixed.
+If the agreement is only printed shown as <<PrintedLambda>>, you will need to first find a line of the code and then look into what value is given to which term in the agreement, and in what boolean value the term resulted.
+If the issue is hard to reproduce it or you cannot use a debugger, this will be an error prone manual process.
+Valid4J<<valid4j>> is a library created for addressing this painfootnote:[Note that at the time valid4j was developed, Java 8, where lambdas became available, was not popular].
+It utilizes matchers of Hamcrest to allow users to define agreements.
+
+== Key Concepts
+
+* Transform-and-Check Programming Model
+* Printable Predicates
 * Entry-points: `Predicates`, `Functions`, and `Printables`
   ** `isEqualTo` (`Predicates`)
   ** `call` (`Functions`)
-* Experimental Entry-points: `Experimentals`
+* Fluent API to build printable predicates
+
+=== Transform-and-Check Programming Model
+
+(t.b.d.)
+
+=== Printable Predicates
+
+(t.b.d.)
+
+=== Entry-points
+
+==== Predicates
+
+(t.b.d.)
+
+==== Functions
+
+(t.b.d.)
+
+=== Fluent API to build printable predicates
+
+== Experimental Features: `Experimentals`
+
+* `Experimentals`
   ** `nest`
   ** Currying mechanism and a context.
+  ** Multi-parameter Functions
+
+== Design Detail
+
+* Evaluator mechanism
+* Configuration mechanism
+
+[bibliography]
+== References
+
+- [[[thincrest-pcond, 1]]] thincrest-pcond
+- [[[hamcrest, 2]]] Hamcrest, Matchers that can be combined to create flexible expressions of intent, https://hamcrest.org/
+- [[[assertj, 3]]] AssertJ, Fluent assertions for java, https://joel-costigliola.github.io/assertj/
+- [[[google-truth, 3]]] Truth - Fluent assertions for Java and Android, https://truth.dev/
+- [[[valid8j, 4]]] valid8j
+- [[[valid4j, 5]]] valid4j https://www.valid4j.org/
+- [[[DbCbyExample, 4]]] "Design by Contract, by Example" by Richard Mitchell and Jim McKim, 2002, Jim McKim, Richard Mitchell
