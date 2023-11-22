@@ -4,15 +4,21 @@
 
 == Background: Writing Assertions isn't Fun
 
-Any existing way to write assertions in Java isn't fun.
+In programmings, checking a value if it satisfies a given condition is a common and wide-spread concern.
+Is a value is `null` or not.
+Is a given number positive or zero?
+Isn't a string empty?
+Does it have a length longer than a certain value?
+Does a given object has a name which doesn't contain any value?
+And more.
+For each of them, we may want a proper message.
+All of these can happen in a context of input value checking of a library function, validations in API entry point, assertions in unit testing, {pre,post}condition checks in Design by Contract style programming.
 
-Why do I need to memorize appropriate static methods scattered in various matcher classes?
-Why do I need to write custom support for my own class every time?
-How should I write multiple conditions to be checked in one test method?
+However, especially in Java, there is no good uniformed solution to them.
+For value checking in a normal product code, we may use `Validate` class (Apache Commons), `Preconditions` class (Google Guava), or just create our own class check and compose error messages on check failures.
+For Unit Testing, classes called in many ways are used for defining conditions to check the validity of values such as `Matcher`<<hamcrest>>, `Assert`<<assertj>> or `Subject`<<google-truth>>.
+For Design by Contract, some relies on annotations to define contracts<<java-dbc>>, some other re-uses a test assertion library for it<<valid4j>>.
 
-In short, why can't we make our test codes as cool as product's code?
-
-To track the root cause, it will in the end
 
 == Key Concepts
 
@@ -66,4 +72,5 @@ To track the root cause, it will in the end
 - [[[valid4j, 5]]] valid4j https://www.valid4j.org/
 - [[[DbCbyExample, 6]]] "Design by Contract, by Example" by Richard Mitchell and Jim McKim, 2002, Jim McKim, Richard Mitchell
 - [[[power-assert, 8 ]]] power-assert https://github.com/power-assert-js/power-assert
-- [[[java-power-assert, 9]]] https://github.com/jkschneider/java-power-assert
+- [[[java-power-assert, 9]]] java-power-assert https://github.com/jkschneider/java-power-assert
+- [[[java-dbc, 10]]] Java DbC https://github.com/neopragma/java-dbc
