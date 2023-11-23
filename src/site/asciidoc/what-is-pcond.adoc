@@ -1,8 +1,8 @@
 = The `pcond` library
 
-`pcond` is a library to build "printable" predicates.
+`pcond` is a library to build "printable" predicates to build conditions that generate informative messages on failures.
 
-== Background: Writing Assertions isn't Fun
+== Background
 
 In programmings, checking a value if it satisfies a given condition is a common and wide-spread concern.
 Is a value is `null` or not.
@@ -12,16 +12,24 @@ Does it have a length longer than a certain value?
 Does a given object has a name which doesn't contain any value?
 And more.
 For each of them, we may want a proper message.
-All of these can happen in a context of input value checking of a library function, validations in API entry point, assertions in unit testing, {pre,post}condition checks in Design by Contract style programming.
+All of these can happen in a context of input value checking of a library function, validations in API entry point, assertions in unit testing, {pre,post}-condition checks in Design by Contract style programming.
 
 However, especially in Java, there is no good uniformed solution to them.
 For value checking in a normal product code, we may use `Validate` class (Apache Commons), `Preconditions` class (Google Guava), or just create our own class check and compose error messages on check failures.
 For Unit Testing, classes called in many ways are used for defining conditions to check the validity of values such as `Matcher`<<hamcrest>>, `Assert`<<assertj>> or `Subject`<<google-truth>>.
 For Design by Contract, some relies on annotations to define contracts<<java-dbc>>, some other re-uses a test assertion library for it<<valid4j>>.
 
+Every solution in every context above provides a user with a way to override messages that it generates because a library cannot always compose a sufficiently informative and helpful message automatically.
+But such hand-crafted messages tend to be stale easily over time.
+
+Thus, in spite that the same concern is shared among wide areas, no good solution has been provided and the concern is addressed in quite ad hoc manners depending on the contexts.
+
+`pcond` is a library that provides a uniformed solution to all the use-cases above.
 
 == Key Concepts
 
+* Printable Predicates
+* Composable Predicates
 * Transform-and-Check Programming Model
 * Printable Predicates
 * Entry-points: `Predicates`, `Functions`, and `Printables`
