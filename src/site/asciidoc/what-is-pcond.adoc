@@ -1,4 +1,7 @@
+:toc:
+
 = The `pcond` library
+
 
 `pcond` is a library to build "printable" predicates to build conditions that generate informative messages on failures.
 
@@ -15,70 +18,237 @@ For each of them, we may want a proper message.
 All of these can happen in a context of input value checking of a library function, validations in API entry point, assertions in unit testing, {pre,post}-condition checks in Design by Contract style programming.
 
 However, especially in Java, there is no good uniformed solution to them.
-For value checking in a normal product code, we may use `Validate` class (Apache Commons), `Preconditions` class (Google Guava), or just create our own class check and compose error messages on check failures.
-For Unit Testing, classes called in many ways are used for defining conditions to check the validity of values such as `Matcher`<<hamcrest>>, `Assert`<<assertj>> or `Subject`<<google-truth>>.
+For value checking in a normal product code, we may use `Validate` class<<Validates-apache-commons>> (Apache Commons), `Preconditions` class<<Preconditions-guava>> (Google Guava), or just create our own class to check and compose error messages on failures.
+For Unit Testing, classes are used for defining conditions to check the validity of values such as `Matcher`<<hamcrest>>, `Assert`<<assertj>> or `Subject`<<google-truth>>.
 For Design by Contract, some relies on annotations to define contracts<<java-dbc>>, some other re-uses a test assertion library for it<<valid4j>>.
 
-Every solution in every context above provides a user with a way to override messages that it generates because a library cannot always compose a sufficiently informative and helpful message automatically.
+Every solution in every context above provides a user with a way to override messages that it generates by default because a library cannot always compose a sufficiently informative and helpful message automatically.
 But such hand-crafted messages tend to be stale easily over time.
 
-Thus, in spite that the same concern is shared among wide areas, no good solution has been provided and the concern is addressed in quite ad hoc manners depending on the contexts.
+Thus, in spite that the same concern is observed among wide areas, no good uniformed solution has been provided and the concern is addressed in quite ad hoc manners depending on the contexts.
 
 `pcond` is a library that provides a uniformed solution to all the use-cases above.
 
 == Key Concepts
 
-* Printable Predicates
-* Composable Predicates
-* Transform-and-Check Programming Model
-* Printable Predicates
+Existing assertion libraries require users to define a message for a type to be checked.
+Following is an example presented in baeldung.com<<baeldung-hamcrest-custom>>.
+
+[source,java]
+----
+public class IsOnlyDigits extends TypeSafeMatcher<String> {
+    @Override
+    protected boolean matchesSafely(String s) {
+        try {
+            Integer.parseInt(s);
+            return true;
+        } catch (NumberFormatException nfe){
+            return false;
+        }
+    }
+
+    @Override
+    public void describeTo(Description description) {
+        description.appendText("only digits");
+    }
+}
+----
+
+If the type is a user custom class, which has multiple fields to be examined, the implementation will be complicated.footnote:[Inside `matchesSafely` method, you will need to examine all the conditions are satisfied and define appropriate message in the `describeTo` method.
+You will need to define your `Matcher` class for every condition you want to examine in your test methods.
+Another approach is to define a matcher for every field to be examined.
+Either way it is not only costly but also error-prone.]
+
+This is the point, where we should stop and take a think.
+Isn't there any better approach?
+The general pattern we can see in custom defined matchers is that: It first transforms a given value into a type for which a check can be conducted and a message can be composed.
+We don't need to support hundreds of such checkable and message composable types.
+Only `String`, `Number`, boolean, arrays, and map will be enough at most.
+
+The approach `pcond` proposes is to compose a predicate to check any non-primitive/non-`String` types from relatively small number of functions and predicates, which can give human-readable and meaningful message.
+
+* Printable & Composable Predicates
 * Entry-points: `Predicates`, `Functions`, and `Printables`
-  ** `isEqualTo` (`Predicates`)
-  ** `call` (`Functions`)
+* Transform-and-Check Programming Model
 * Fluent API to build printable predicates
 
+=== Printable & Composable Predicates
+
+====
+To the view of the author of `pcond`, the pain comes from the lack of introspection capability of Java.
+If Java had the capability as other languages (e.g. JavaScript), you could implement a library like `power-assert`<<power-assert>>.
+With that, just construct a predicate whatever you want and let it be evaluated.
+It will print an error message like below:
+
+[[PowerAssertExample]]
+.power-assert example
+----
+  1) Array #indexOf() should return index when the value is present:
+     AssertionError: # path/to/test/mocha_node.js:10
+
+  assert(ary.indexOf(zero) === two)
+         |   |       |     |   |
+         |   |       |     |   2
+         |   -1      0     false
+         [1,2,3]
+
+  [number] two
+  => 2
+  [number] ary.indexOf(zero)
+  => -1
+----
+
+If you try to build such a library in Java, you will need to resort to instrumentation, which delivers an intrusive usage manner.
+In fact, there exists a github repository that provides "power-assert" for Java; "power-assert-java".
+However, the library seems not to be maintained and the recent binaries aren't available in public nexus repositories anymore.
+====
+
+If we desire to provide something more or less similar to `power-assert` in Java, we need a mechanism to make predicate and its runtime evaluation result programmatically accessible.
+
+The approach `pcond` takes is:
+
+The ideas behind the approach are:
+
+1. Any check can be modeled as a composition of simpler conditions.
+In other words, if we have a few operators, such as `not`, `allOf`, and `anyOf`, a user can build any condition from simpler ones using the operators.
+
+(t.b.d.)
+
+[[transformAndCheckProgrammingModel]]
 === Transform-and-Check Programming Model
 
-(t.b.d.)
+Whatever an object is, it can be serialized into JSON.
+JSON only has following types: object, array, text, number, and boolean.
+With only them any types of JVM can use can be represented. footnote:[
+In Java, there are different types of numbers such as `int`, `short`, `long`, `float`, and `double`.
+However supporting them is rather a sake of usefulness (syntax sugar), not an essential concern.
+]
+For those types, do we really need to prepare hundreds of different predicates?
+Of course, there is always an exception, it's a good idea to prepare a way to define a user-custom predicate.
+However, in most cases, predicates that we want to use daily-basis may not be so much diversified.
 
-=== Printable Predicates
+The other part is how to "transform" a given value to such supported types.
+Since methods are access points of a class to be tested.
+A function that allows you to call a method of a class under test will be necessary.
+A returned value of the function may be not the supported aforementioned supported types.
+In this case, you will need to chain method calls until the returned value becomes a supported one.
+Also for supported types, you may want to transform into another supported one.
+E.g., in case you want to check a length of a `String`, you want to call `length` method of it and then check if the returned `int` is greater than a certain value.
+`pcond` has such functions in `Functions` class for usability's sake (`Functions.length`).
+They are basically "syntax sugar", rather than a part of the programming model.
 
-(t.b.d.)
+Now, by applying this approach, we can write a test for a custom class in a following manner.
+
+[source, java]
+----
+public class PcondExample {
+    class ExampleClass {
+        public String salute() {
+            return "Hello, I am " + this;
+        }
+    }
+
+    @Test
+    public void exampleTestMethod() {
+        assertThat(
+                new ExampleClass(),
+                Predicates.<ExampleClass, String>transform(call("salute", "Hello"))
+                        .check(allOf(
+                                containsString("Hello"),
+                                containsString("ExampleType")))); // <1>
+    }
+}
+----
+<1> This check will make the test fail because the name of class under test is `ExampleClass`, not `ExampleType`.
+
+The library composes a following message on the failure.
+
+[%nowrap]
+----
+    ExampleClass@12345           ->transform:<>.salute()          ->"Hello, I am ExampleClass@12345"
+    "Hello, I am ExampleClass..."->check:allOf                    ->false
+                                 ->    containsString[Hello]      ->true
+[0]                              ->    containsString[ExampleType]->false
+
+.Detail of failure [0]
+---
+Hello, I am ExampleClass@1234
+---
+----
 
 === Entry-points
 
+As already discussed, an assertion is composed by connecting functions and predicates in the model.
+Such functions and predicates should be relatively small number and reused across assertions.
+`pcond` has built-in functions and predicates for users to save their time.
+
 ==== Predicates
 
-(t.b.d.)
+`Predicates` is an entry-point class that holds methods to create re-usable predicates to examine a given value.
+For instance, `isEqualTo`, `greaterThan`, `greaterThanOrEqualTo`, `littleThan`,, etc.
+
+Note that this entry-point class also has methods to create a new predicate from given ones, such as `allOf`, `anyOf`, `and`, `or`, and `not`.
+`allOf` and `and` creates a new predicate of a conjunction of given ones (child predicates).
+Similarly, `anyOf` and `or` creates a new predicate of a disjunction of them.
+`allOf` and `anyOf` continue the evaluation of child predicates even if one of them results in `false` or throws an exception.
 
 ==== Functions
 
+To support custom types, it needs to provide a way to invoke a method whose name and arguments are given through parameters.
+`Functions.call(String, Object... args)` is the method for this.
+There is a few variants of this method such as `Functions.call(MethodQuery) in `Functions` entry point class.
+Also it has several methods that convert a supported class into another.
+For instance, `length` transforms a `String` to `int` by calling `String#length` method.
+
+Functions returned by methods defined in this class can be connected by `Function.andThen(Function)` method.
+
+==== Printables
+
+Still sometimes you may want to define your own functions and predicates.
 (t.b.d.)
 
 === Fluent API to build printable predicates
 
+(t.b.d.)
+
 == Experimental Features: `Experimentals`
 
 * `Experimentals`
-  ** `nest`
-  ** Currying mechanism and a context.
-  ** Multi-parameter Functions
+** `nest`
+** Currying mechanism and a context.
+** Multi-parameter Functions
 
 == Design Detail
 
 * Evaluator mechanism
 * Configuration mechanism
 
+== Test
+
+`pcond` itself only has a capability to build predicates.
+To use it as a DbC, value checking, or test assertion library, you need a wrapper class.
+
+thincrest-pcond<<thincrest-pcond>>::
+(t.b.d)
+valid8j-pcond<<valid8j>>::
+(t.b.d.)
+
+`pcond`, `thincrest-pcond`, `valid8j-pcond` themselves are software products, which may evolve over time.
+The programming interface of `pcond` can be different over-time.
+
 [bibliography]
 == References
 
 - [[[thincrest-pcond, 1]]] thincrest-pcond
-- [[[hamcrest, 2]]] Hamcrest, Matchers that can be combined to create flexible expressions of intent, https://hamcrest.org/
-- [[[assertj, 3]]] AssertJ, Fluent assertions for java, https://joel-costigliola.github.io/assertj/
-- [[[google-truth, 3]]] Truth - Fluent assertions for Java and Android, https://truth.dev/
-- [[[valid8j, 4]]] valid8j
-- [[[valid4j, 5]]] valid4j https://www.valid4j.org/
+- [[[hamcrest, 2]]] Hamcrest, Matchers that can be combined to create flexible expressions of intent, https://hamcrest.org/[Hamcrest]
+- [[[assertj, 3]]] AssertJ, Fluent assertions for java, https://joel-costigliola.github.io/assertj/[AssertJ]
+- [[[google-truth, 3]]] Truth - Fluent assertions for Java and Android, https://truth.dev/[Google Truth]
+- [[[java-dbc, 4]]] Java DbC https://github.com/neopragma/java-dbc[Java-DbC]
+- [[[valid4j, 5]]] valid4j https://www.valid4j.org/[valid4j]
 - [[[DbCbyExample, 6]]] "Design by Contract, by Example" by Richard Mitchell and Jim McKim, 2002, Jim McKim, Richard Mitchell
 - [[[power-assert, 8 ]]] power-assert https://github.com/power-assert-js/power-assert
 - [[[java-power-assert, 9]]] java-power-assert https://github.com/jkschneider/java-power-assert
-- [[[java-dbc, 10]]] Java DbC https://github.com/neopragma/java-dbc
+- [[[Preconditions-guava, 10]]] Preconditions, Google Guava https://guava.dev/releases/19.0/api/docs/com/google/common/base/Preconditions.html[Preconditions class]
+- [[[Validates-apache-commons, 11]]] Validates, Apache Commons https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html[Validate class]
+- [[[valid8j, 12]]] valid8j
+- [[[baeldung-hamcrest-custom, 13]]]https://www.baeldung.com/hamcrest-custom-matchers[hamcrest-custom-matchers, baeldung.com]

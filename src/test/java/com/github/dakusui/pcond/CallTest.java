@@ -13,7 +13,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static com.github.dakusui.pcond.forms.Functions.*;
-import static com.github.dakusui.shared.TestUtils.validate;
+import static com.github.dakusui.pcond.forms.Predicates.transform;import static com.github.dakusui.shared.TestUtils.validate;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
