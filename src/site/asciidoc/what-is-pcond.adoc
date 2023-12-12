@@ -159,19 +159,22 @@ Hello, I am ExampleClass@12345
 ----
 
 Thus, you can see that both the test code and the message will be readable, informative, and structured without writing any redundant and error prone hand crafted message.
+In this example, we used a predicate `allOf`, which will be discussed in <<printableAndComposablePredicates>>.
 
+[[printableAndComposablePredicates]]
 === Printable & Composable Predicates
 
 If we desire to provide something more or less similar to `power-assert` in Java, we need a mechanism to make predicate and its runtime evaluation result programmatically accessible.
+There is an existing attempt to implement `power-assert` in Java, however, the project hasn't been updated for years and its most recent binary isn't found in public repositories anymore.<<java-power-assert>>
 
-The approach `pcond` takes is:
+`pcond` takes a differnt approach:
 
 The ideas behind the approach are:
 
 1. Any check can be modeled as a composition of simpler conditions.
-In other words, if we have a few operators, such as `not`, `allOf`, and `anyOf`, a user can build any condition from simpler ones using the operators.
-
-(t.b.d.)
+As discussed in the <<transformAndCheckProgrammingModel>>.
+2. On top of that, it provides predicates composed from others, such as `not`, `allOf`, and `anyOf`, so that a user can build any condition from simpler ones using the operators.
+3. It also has a mechanism to compose a human-readable message to describe what happened when a check fails.
 
 ====
 To the view of the author of `pcond`, the pain comes from the lack of introspection capability of Java.
