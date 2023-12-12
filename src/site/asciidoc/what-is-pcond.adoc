@@ -2,7 +2,6 @@
 
 = The `pcond` library
 
-
 `pcond` is a library to build "printable" predicates to build conditions that generate informative messages on failures.
 
 == Background
@@ -56,23 +55,123 @@ public class IsOnlyDigits extends TypeSafeMatcher<String> {
 
 If the type is a user custom class, which has multiple fields to be examined, the implementation will be complicated.footnote:[Inside `matchesSafely` method, you will need to examine all the conditions are satisfied and define appropriate message in the `describeTo` method.
 You will need to define your `Matcher` class for every condition you want to examine in your test methods.
-Another approach is to define a matcher for every field to be examined.
+Another approach is to define matchers for every combination of fields and conditions to be examined.
 Either way it is not only costly but also error-prone.]
 
 This is the point, where we should stop and take a think.
 Isn't there any better approach?
 The general pattern we can see in custom defined matchers is that: It first transforms a given value into a type for which a check can be conducted and a message can be composed.
-We don't need to support hundreds of such checkable and message composable types.
-Only `String`, `Number`, boolean, arrays, and map will be enough at most.
+This happens at once inside a matcher.
+So, users need to create an unmanageable number of matchers in the end.
+Or they extract values for which preset assertions can be used from a given value and do assertion.
+From author's experience, in most cases, the latter practice is taken and the error message doesn't make sense alone on a failure.
+This leads to a situation, where we need to go back and forth between the error message and the source code.
 
-The approach `pcond` proposes is to compose a predicate to check any non-primitive/non-`String` types from relatively small number of functions and predicates, which can give human-readable and meaningful message.
+Instead, why don't we create a set of reusable transformers and checkers so that users can define their own matchers by combining them?
 
+The approach `pcond` proposes is to let users compose a predicate to check all types from relatively small number of functions and predicates, which can give human-readable and meaningful message.
+It doesn't define its own "Matcher"(Hamcrest), "Assert"(AssertJ), or "Subject"(Google Truth).
+Instead, it directly uses Java's standard `Function` and `Predicate`.
+
+In this section, following topics will be covered.
+
+* Transform-and-Check Programming Model
 * Printable & Composable Predicates
 * Entry-points: `Predicates`, `Functions`, and `Printables`
-* Transform-and-Check Programming Model
 * Fluent API to build printable predicates
 
+Hereafter, we just call "matcher"-like concepts in various assertion libraries just "matcher" in the rest of this document.
+
+[[transformAndCheckProgrammingModel]]
+=== Transform-and-Check Programming Model
+
+Among key concepts of `pcond`, the most important one is its "Transform-and-Check Programming Model".
+Instead of having users define a custom "Matcher" for every condition that they can think of, it provides a mechinsm that makes it possible to compose a transforming predicate from a function and a predicate.
+
+The Figure <<transformAndCheckPipeline>> illustrates the concept of this model.
+
+[ditaa]
+[[transformAndCheckPipeline]]
+.Transform and Check model's pipeline: Transforming Predicate
+----
+    /-------\     +---------+     /-------------------\     +-----+       /------\
+    |T:value|<----+trandform+--=->|R:transformed value|<----+check+-=---->|result|
+    \-------/     +---------+     \-------------------/     +-----+       \------/
+                     ^                                         ^
+                     |                                         |
+                     |                                         +--- A checker predicate
+                     +--- A transformer function
+----
+
+A transformer function transforms a given value of type `T` into a value of `R`.
+This entire pipeline can be considered one predicate for value type `T`.
+Thus, it can be used as a part of another transforming predicate.
+
+If both a transformer function and a checker function can generate a human-readable message, we would be able to compose a sufficiently informative message.
+
+That is,
+"Given `value`, When __transformed__ is applied, it returns `transformed value`, then the __check__ is passed/failed"
+
+With this model, "a string 'hello' is longer than 10" can be expressed as follows:
+
+"Given `value`:"hello", When `length` is applied, it returns `5`, then the `greaterThan` is failed"
+
+This is still informative and understandable.
+
+Following is an actual example to test if `ExampleClass` gives a proper message as a return value of `salute` method.
+
+[%nowrap, java]
+----
+public class PcondExample {
+  class ExampleClass {
+    public String salute() {
+      return "Hello, I am " + this;
+    }
+  }
+
+  @Test
+  public void exampleTestMethod() {
+    assertThat(
+      new ExampleClass(),
+      Predicates.<ExampleClass, String>transform(call("salute", "Hello")) // <1>
+        .check(allOf(containsString("Hello"),
+                     containsString("ExampleType")))); // <2>
+  }
+}
+----
+<1> It is suggested to explicitly specify type parameters, which are type before transformation and type after transformation.
+In this case `ExampleClass` is an input to the transforming function and `String` is its output.
+<2> This check will make the test fail because the name of class under test is `ExampleClass`, not `ExampleType`.
+
+The library composes a following message on the failure for "actual" value part.
+
+[%nowrap]
+----
+    ExampleClass@12345           ->transform:<>.salute()          ->"Hello, I am ExampleClass@12345"
+    "Hello, I am ExampleClass..."->check:allOf                    ->false
+                                 ->    containsString[Hello]      ->true
+[0]                              ->    containsString[ExampleType]->false
+
+.Detail of failure [0]
+---
+Hello, I am ExampleClass@12345
+---
+----
+
+Thus, you can see that both the test code and the message will be readable, informative, and structured without writing any redundant and error prone hand crafted message.
+
 === Printable & Composable Predicates
+
+If we desire to provide something more or less similar to `power-assert` in Java, we need a mechanism to make predicate and its runtime evaluation result programmatically accessible.
+
+The approach `pcond` takes is:
+
+The ideas behind the approach are:
+
+1. Any check can be modeled as a composition of simpler conditions.
+In other words, if we have a few operators, such as `not`, `allOf`, and `anyOf`, a user can build any condition from simpler ones using the operators.
+
+(t.b.d.)
 
 ====
 To the view of the author of `pcond`, the pain comes from the lack of introspection capability of Java.
@@ -103,78 +202,8 @@ In fact, there exists a github repository that provides "power-assert" for Java;
 However, the library seems not to be maintained and the recent binaries aren't available in public nexus repositories anymore.
 ====
 
-If we desire to provide something more or less similar to `power-assert` in Java, we need a mechanism to make predicate and its runtime evaluation result programmatically accessible.
 
-The approach `pcond` takes is:
 
-The ideas behind the approach are:
-
-1. Any check can be modeled as a composition of simpler conditions.
-In other words, if we have a few operators, such as `not`, `allOf`, and `anyOf`, a user can build any condition from simpler ones using the operators.
-
-(t.b.d.)
-
-[[transformAndCheckProgrammingModel]]
-=== Transform-and-Check Programming Model
-
-Whatever an object is, it can be serialized into JSON.
-JSON only has following types: object, array, text, number, and boolean.
-With only them any types of JVM can use can be represented. footnote:[
-In Java, there are different types of numbers such as `int`, `short`, `long`, `float`, and `double`.
-However supporting them is rather a sake of usefulness (syntax sugar), not an essential concern.
-]
-For those types, do we really need to prepare hundreds of different predicates?
-Of course, there is always an exception, it's a good idea to prepare a way to define a user-custom predicate.
-However, in most cases, predicates that we want to use daily-basis may not be so much diversified.
-
-The other part is how to "transform" a given value to such supported types.
-Since methods are access points of a class to be tested.
-A function that allows you to call a method of a class under test will be necessary.
-A returned value of the function may be not the supported aforementioned supported types.
-In this case, you will need to chain method calls until the returned value becomes a supported one.
-Also for supported types, you may want to transform into another supported one.
-E.g., in case you want to check a length of a `String`, you want to call `length` method of it and then check if the returned `int` is greater than a certain value.
-`pcond` has such functions in `Functions` class for usability's sake (`Functions.length`).
-They are basically "syntax sugar", rather than a part of the programming model.
-
-Now, by applying this approach, we can write a test for a custom class in a following manner.
-
-[source, java]
-----
-public class PcondExample {
-    class ExampleClass {
-        public String salute() {
-            return "Hello, I am " + this;
-        }
-    }
-
-    @Test
-    public void exampleTestMethod() {
-        assertThat(
-                new ExampleClass(),
-                Predicates.<ExampleClass, String>transform(call("salute", "Hello"))
-                        .check(allOf(
-                                containsString("Hello"),
-                                containsString("ExampleType")))); // <1>
-    }
-}
-----
-<1> This check will make the test fail because the name of class under test is `ExampleClass`, not `ExampleType`.
-
-The library composes a following message on the failure.
-
-[%nowrap]
-----
-    ExampleClass@12345           ->transform:<>.salute()          ->"Hello, I am ExampleClass@12345"
-    "Hello, I am ExampleClass..."->check:allOf                    ->false
-                                 ->    containsString[Hello]      ->true
-[0]                              ->    containsString[ExampleType]->false
-
-.Detail of failure [0]
----
-Hello, I am ExampleClass@1234
----
-----
 
 === Entry-points
 
@@ -205,11 +234,34 @@ Functions returned by methods defined in this class can be connected by `Functio
 ==== Printables
 
 Still sometimes you may want to define your own functions and predicates.
+`Printables.function(String, Function)`
+`Printables.Predicate(String, Predicate)`
 (t.b.d.)
 
 === Fluent API to build printable predicates
 
-(t.b.d.)
+Nowadays, modern assertion libraries such as AssertJ<<assertj>> or Google Truth<<google-truth>> has so called "Fluent" programming API, where method calls can be chained and your IDE can suggest next possible method call.
+
+`pcond` also has similar API.
+You can use it by starting `xyzValue` methods in `Statement` interface, where `xyz` will be one of `string`, `double`, `float`, `long`, `integer`, `short`, `boolean`, `object`, `list`, and `stream`.
+Each of them returns a `Transformer` such as `StringTransformer`, which has appropriate methods to transform the value into the same or other supported value type.
+Once transformation is done and to check if the transformed value is expected, you can call `then` method, which returns a `Checker`, which has available ways to check the value.
+
+[source, java]
+----
+import Statement.stringValue;
+
+public class FluentExample {
+  @Test
+  public void string_assertThatTest_failed() {
+    String givenValue = "helloWorld";
+    assertStatement(stringValue(givenValue)
+        .toLowerCase()
+        .then()
+        .isEqualTo("HELLOWORLD"));
+  }
+}
+----
 
 == Experimental Features: `Experimentals`
 
@@ -251,4 +303,6 @@ The programming interface of `pcond` can be different over-time.
 - [[[Preconditions-guava, 10]]] Preconditions, Google Guava https://guava.dev/releases/19.0/api/docs/com/google/common/base/Preconditions.html[Preconditions class]
 - [[[Validates-apache-commons, 11]]] Validates, Apache Commons https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html[Validate class]
 - [[[valid8j, 12]]] valid8j
-- [[[baeldung-hamcrest-custom, 13]]]https://www.baeldung.com/hamcrest-custom-matchers[hamcrest-custom-matchers, baeldung.com]
+- [[[baeldung-hamcrest-custom, 13]]] https://www.baeldung.com/hamcrest-custom-matchers[hamcrest-custom-matchers, baeldung.com]
+- [[[java-json-serialization, 14]]] Efficient JSON serialization with Jackson and Java
+ https://blogs.oracle.com/javamagazine/post/java-json-serialization-jackson[blogs.oracle.com]
