@@ -1,8 +1,8 @@
 package com.github.dakusui.ut.valid8j.forms;
 
-import com.github.dakusui.pcond.core.context.CurriedContext;
-import com.github.dakusui.pcond.core.currying.CurryingUtils;
-import com.github.dakusui.pcond.core.multi.MultiFunction;
+import com.github.dakusui.pcond.experimentals.currying.context.CurriedContext;
+import com.github.dakusui.pcond.experimentals.currying.CurryingUtils;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunction;
 import com.github.dakusui.pcond.forms.Printables;
 
 import java.io.Serializable;

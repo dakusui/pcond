@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.experimentals;
 
-import com.github.dakusui.pcond.core.context.CurriedContext;
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.forms.Experimentals;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunctions;
+import com.github.dakusui.pcond.experimentals.currying.context.CurriedContext;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunction;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.ut.IntentionalException;
 import com.github.dakusui.shared.ExperimentalsUtils;
@@ -15,7 +15,7 @@ import org.junit.Test;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.forms.Experimentals.*;
+import static com.github.dakusui.pcond.experimentals.currying.CurriedFunctions.*;
 import static com.github.dakusui.pcond.forms.Functions.stream;
 import static com.github.dakusui.pcond.forms.Functions.streamOf;
 import static com.github.dakusui.pcond.forms.Predicates.*;
@@ -26,13 +26,13 @@ import static com.github.dakusui.shared.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-public class DbCExperimentalsTest extends TestBase {
+public class DbCCurriedFunctionsTest extends TestBase {
   /**
    * Building a nested loop with the {@code pcond} library.
    *
    * You can build a check using a multi-parameter static method which returns a boolean value.
    * In this example, {@link TargetMethodHolder#stringEndsWith(String, String)} is the method.
-   * It is turned into a curried function in {@link ExperimentalsUtils#stringEndsWith()} and then passed to {@link Experimentals#toCurriedContextPredicate(CurriedFunction, int...)}.
+   * It is turned into a curried function in {@link ExperimentalsUtils#stringEndsWith()} and then passed to {@link CurriedFunctions#toCurriedContextPredicate(CurriedFunction, int...)}.
    * The method {@code Experimentals#test(CurriedFunction, int...)} converts a curried function whose final returned value is a boolean into a predicate of a {@link CurriedContext}.
    * A {@code Context} may have one or more values at once and those values are indexed.
    */

@@ -1,11 +1,11 @@
-package com.github.dakusui.pcond.forms;
+package com.github.dakusui.pcond.experimentals.currying;
 
-import com.github.dakusui.pcond.core.context.CurriedContext;
-import com.github.dakusui.pcond.core.context.CurriedContextUtils;
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.experimentals.currying.context.CurriedContext;
+import com.github.dakusui.pcond.experimentals.currying.context.CurriedContextUtils;
 import com.github.dakusui.pcond.core.printable.ParameterizedFunctionFactory;
 import com.github.dakusui.pcond.core.printable.ParameterizedPredicateFactory;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
+import com.github.dakusui.pcond.forms.Printables;
 
 import java.util.Collection;
 import java.util.function.Function;
@@ -17,7 +17,7 @@ import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
 /**
  * A class that collects methods to create functions and predicates in experimental stage.
  */
-public enum Experimentals {
+public enum CurriedFunctions {
   ;
 
   /**
@@ -111,7 +111,7 @@ public enum Experimentals {
    * @param <T>  The expected type of the input value to the final function.
    * @param <R>  The expected type of the output value of the final function.
    * @return A builder to create a function factory.
-   * @see Experimentals#parameterizedPredicate(String)
+   * @see CurriedFunctions#parameterizedPredicate(String)
    */
   public static <T, R> ParameterizedFunctionFactory.Builder<T, R> parameterizedFunction(String name) {
     return new ParameterizedFunctionFactory.Builder<T, R>().name(name);

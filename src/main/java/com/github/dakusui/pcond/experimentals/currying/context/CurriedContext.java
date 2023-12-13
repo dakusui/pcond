@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.core.context;
+package com.github.dakusui.pcond.experimentals.currying.context;
 
 import com.github.dakusui.pcond.internals.InternalUtils;
 
@@ -6,7 +6,7 @@ import java.util.Formattable;
 import java.util.Formatter;
 import java.util.List;
 
-import static com.github.dakusui.pcond.core.context.CurriedContext.PrivateUtils.variableBundleToString;
+import static com.github.dakusui.pcond.experimentals.currying.context.CurriedContext.PrivateUtils.variableBundleToString;
 import static java.util.Collections.singletonList;
 
 /**

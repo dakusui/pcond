@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.core.context.CurriedContext;
+import com.github.dakusui.pcond.experimentals.currying.context.CurriedContext;
 
 import java.util.function.Function;
 import java.util.function.Predicate;

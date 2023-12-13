@@ -1,8 +1,8 @@
 package com.github.dakusui.pcond.experimentals;
 
-import com.github.dakusui.pcond.core.context.CurriedContext;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunctions;
+import com.github.dakusui.pcond.experimentals.currying.context.CurriedContext;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
-import com.github.dakusui.pcond.forms.Experimentals;
 import com.github.dakusui.shared.IllegalValueException;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-import static com.github.dakusui.pcond.forms.Experimentals.nest;
+import static com.github.dakusui.pcond.experimentals.currying.CurriedFunctions.nest;
 import static com.github.dakusui.pcond.forms.Functions.stream;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.pcond.forms.Printables.predicate;
@@ -21,25 +21,25 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.*;
 
-public class TestAssertionsExperimentalsTest extends TestBase {
+public class TestAssertionsCurriedFunctionsTest extends TestBase {
 
   @Test(expected = IllegalValueException.class)
   public void helloError() {
     validate(
         singletonList("hello"),
         transform(stream().andThen(nest(singletonList("o"))))
-            .check(noneMatch(Experimentals.toCurriedContextPredicate(stringEndsWith()))));
+            .check(noneMatch(CurriedFunctions.toCurriedContextPredicate(stringEndsWith()))));
   }
 
   @Test
   public void toContextPredicateTest() {
-    assertFalse(Experimentals.toCurriedContextPredicate(isNotNull()).test(CurriedContext.from(null)));
-    assertTrue(Experimentals.toCurriedContextPredicate(isNotNull()).test(CurriedContext.from(new Object())));
+    assertFalse(CurriedFunctions.toCurriedContextPredicate(isNotNull()).test(CurriedContext.from(null)));
+    assertTrue(CurriedFunctions.toCurriedContextPredicate(isNotNull()).test(CurriedContext.from(new Object())));
   }
 
   @Test
   public void parameterizedPredicateTest() {
-    Predicate<String> p = Experimentals.<String>parameterizedPredicate("containsStringIgnoreCase")
+    Predicate<String> p = CurriedFunctions.<String>parameterizedPredicate("containsStringIgnoreCase")
         .factory(args -> v -> v.toUpperCase().contains(args.get(0).toString().toUpperCase()))
         .create("hello");
     assertTrue(p.test("hello!"));
@@ -51,7 +51,7 @@ public class TestAssertionsExperimentalsTest extends TestBase {
   @Test
   public void parameterizedPredicate_() {
 
-    Predicate<String> p = Experimentals.<String>parameterizedPredicate("containsStringIgnoreCase")
+    Predicate<String> p = CurriedFunctions.<String>parameterizedPredicate("containsStringIgnoreCase")
         .factory((args) -> predicate(() -> "toUpperCase().contains(" + args.get(0) + ")", (String v) -> v.toUpperCase().contains(args.get(0).toString().toUpperCase())))
         .create("hello");
     System.out.println("p:<" + p + ">");
@@ -64,7 +64,7 @@ public class TestAssertionsExperimentalsTest extends TestBase {
 
   @Test
   public void parameterizedFunctionTest() {
-    Function<Object[], Object> f = Experimentals.<Object[], Object>parameterizedFunction("arrayElementAt")
+    Function<Object[], Object> f = CurriedFunctions.<Object[], Object>parameterizedFunction("arrayElementAt")
         .factory(args -> v -> v[(int) args.get(0)])
         .create(1);
     assertEquals("HELLO1", f.apply(new Object[] { 0, "HELLO1" }));
@@ -96,7 +96,7 @@ public class TestAssertionsExperimentalsTest extends TestBase {
   private static Function<List<Object>, Function<String, String>>
   pathToUriFunctionFactory() {
     return v -> PrintableFunctionFactory.create(
-        (List<Object> args) -> () -> "buildUri" + args, (List<Object> args) -> (String path) -> String.format("%s://%s:%s/%s", args.get(0), args.get(1), args.get(2), path), v, TestAssertionsExperimentalsTest.class
+        (List<Object> args) -> () -> "buildUri" + args, (List<Object> args) -> (String path) -> String.format("%s://%s:%s/%s", args.get(0), args.get(1), args.get(2), path), v, TestAssertionsCurriedFunctionsTest.class
     );
   }
 

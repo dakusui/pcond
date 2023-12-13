@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
-import com.github.dakusui.pcond.core.context.CurriedContext;
+import com.github.dakusui.pcond.experimentals.currying.context.CurriedContext;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 import com.github.dakusui.pcond.internals.InternalUtils;
 

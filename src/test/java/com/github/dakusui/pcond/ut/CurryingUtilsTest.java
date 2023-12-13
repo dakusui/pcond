@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunction;
 import com.github.dakusui.pcond.internals.InternalUtils;
 import org.junit.Test;
 

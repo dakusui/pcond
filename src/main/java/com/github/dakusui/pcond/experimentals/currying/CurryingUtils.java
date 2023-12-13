@@ -1,7 +1,7 @@
-package com.github.dakusui.pcond.core.currying;
+package com.github.dakusui.pcond.experimentals.currying;
 
-import com.github.dakusui.pcond.core.context.CurriedContext;
-import com.github.dakusui.pcond.core.multi.MultiFunction;
+import com.github.dakusui.pcond.experimentals.currying.context.CurriedContext;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunction;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 
 import java.util.List;

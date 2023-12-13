@@ -25,7 +25,7 @@ import static com.github.dakusui.thincrest.TestFluents.assumeAll;
 import static java.util.Arrays.asList;
 
 public class SmokeTest extends TestBase {
-  @Test(expected = ComparisonFailure.class)
+  @Test//(expected = ComparisonFailure.class)
   public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength_2() throws Throwable {
     smoke();
   }
@@ -100,6 +100,8 @@ public class SmokeTest extends TestBase {
       assertSmoke(book);
     } catch (ComparisonFailure e) {
       e.printStackTrace();
+      if (true)
+        throw e;
       ReportParser reportParserForActualValue = new ReportParser(e.getActual());
       ReportParser reportParserForExpectation = new ReportParser(e.getExpected());
       assertAllRunnables(

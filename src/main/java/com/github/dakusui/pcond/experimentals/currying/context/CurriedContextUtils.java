@@ -1,7 +1,7 @@
-package com.github.dakusui.pcond.core.context;
+package com.github.dakusui.pcond.experimentals.currying.context;
 
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.currying.CurryingUtils;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunction;
+import com.github.dakusui.pcond.experimentals.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
 import com.github.dakusui.pcond.forms.Predicates;
 

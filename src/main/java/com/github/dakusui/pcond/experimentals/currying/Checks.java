@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.core.currying;
+package com.github.dakusui.pcond.experimentals.currying;
 
 import com.github.dakusui.pcond.internals.InternalChecks;
 

@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 
 import java.util.List;

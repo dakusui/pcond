@@ -1,4 +1,4 @@
-package com.github.dakusui.pcond.core.multi;
+package com.github.dakusui.pcond.experimentals.currying.multi;
 
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.internals.InternalUtils;

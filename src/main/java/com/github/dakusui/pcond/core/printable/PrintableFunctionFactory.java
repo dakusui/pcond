@@ -1,9 +1,9 @@
 package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
-import com.github.dakusui.pcond.core.currying.CurryingUtils;
+import com.github.dakusui.pcond.experimentals.currying.CurryingUtils;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
-import com.github.dakusui.pcond.core.multi.MultiFunction;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunction;
 
 import java.lang.reflect.Method;
 import java.util.*;

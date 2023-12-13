@@ -1,4 +1,6 @@
-package com.github.dakusui.pcond.fluent;
+package com.github.dakusui.thincrest;
+
+import com.github.dakusui.pcond.fluent.DummyValue;
 
 import java.util.ArrayList;
 import java.util.Collection;

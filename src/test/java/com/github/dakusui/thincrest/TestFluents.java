@@ -1,6 +1,5 @@
 package com.github.dakusui.thincrest;
 
-import com.github.dakusui.pcond.fluent.DummyList;
 import com.github.dakusui.pcond.fluent.Statement;
 
 import java.util.Arrays;

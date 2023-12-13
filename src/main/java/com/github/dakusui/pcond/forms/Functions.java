@@ -1,9 +1,9 @@
 package com.github.dakusui.pcond.forms;
 
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.currying.CurryingUtils;
-import com.github.dakusui.pcond.core.multi.MultiFunction;
-import com.github.dakusui.pcond.core.multi.MultiFunctionUtils;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunction;
+import com.github.dakusui.pcond.experimentals.currying.CurryingUtils;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunction;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunctionUtils;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;

@@ -1,5 +1,6 @@
 package com.github.dakusui.ut.thincrest.ut;
 
+import com.github.dakusui.pcond.experimentals.cursor.Cursors;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.IllegalValueException;
@@ -168,7 +169,7 @@ public class ReportDetailTest extends TestBase {
       assertThat(actualValue,
           allOf(
               isEqualTo(expectedValue),
-              findSubstrings("VALUE", "Value")));
+              Cursors.findSubstrings("VALUE", "Value")));
     } catch (IllegalValueException e) {
       System.err.println("================================================");
       e.printStackTrace();

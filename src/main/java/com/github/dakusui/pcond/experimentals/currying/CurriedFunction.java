@@ -1,14 +1,14 @@
-package com.github.dakusui.pcond.core.currying;
+package com.github.dakusui.pcond.experimentals.currying;
 
-import com.github.dakusui.pcond.core.multi.MultiFunction;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunction;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Function;
 
-import static com.github.dakusui.pcond.core.currying.Checks.isValidValueForType;
-import static com.github.dakusui.pcond.core.currying.Checks.validateArgumentType;
+import static com.github.dakusui.pcond.experimentals.currying.Checks.isValidValueForType;
+import static com.github.dakusui.pcond.experimentals.currying.Checks.validateArgumentType;
 
 public interface CurriedFunction<T, R> extends Function<T, R> {
   R applyFunction(T value);
