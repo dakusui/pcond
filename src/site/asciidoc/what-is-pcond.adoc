@@ -11,9 +11,9 @@ Is a value is `null` or not.
 Is a given number positive or zero?
 Isn't a string empty?
 Does it have a length longer than a certain value?
-Does a given object has a name which doesn't contain any value?
+Does a given object has an array which doesn't contain any value?
 And more.
-For each of them, we may want a proper message.
+For each of them, we want a proper message.
 All of these can happen in a context of input value checking of a library function, validations in API entry point, assertions in unit testing, {pre,post}-condition checks in Design by Contract style programming.
 
 However, especially in Java, there is no good uniformed solution to them.
@@ -118,6 +118,26 @@ With this model, "a string 'hello' is longer than 10" can be expressed as follow
 
 This is still informative and understandable.
 
+The remaining part is how to make transforming predicates render human-readable messages.
+For instance, messages that Hamcrest renders becomes hard to understand when a failed condition is complex.
+For the approach `pcond` takes to make it informative yet understandable, please check <<printableAndComposablePredicates>>.
+
+[[printableAndComposablePredicates]]
+=== Printable & Composable Predicates
+
+If we desire to provide something more or less similar to `power-assert` in Java, we need a mechanism to make predicate and its runtime evaluation result programmatically accessible.
+There is an existing attempt to implement `power-assert` in Java, however, the project hasn't been updated for years and its most recent binary isn't found in public repositories anymore.<<java-power-assert>>
+
+`pcond` takes a differnt approach:
+
+The ideas behind the approach are:
+
+1. Any check can be modeled as a composition of simpler conditions.
+As discussed in the <<transformAndCheckProgrammingModel>>.
+2. On top of that, it provides predicates composed from others, such as `not`, `allOf`, and `anyOf`, so that a user can build any condition from simpler ones using the operators.
+3. It also has a mechanism to compose a human-readable message to describe what happened when a check fails.
+
+
 Following is an actual example to test if `ExampleClass` gives a proper message as a return value of `salute` method.
 
 [%nowrap, java]
@@ -159,22 +179,9 @@ Hello, I am ExampleClass@12345
 ----
 
 Thus, you can see that both the test code and the message will be readable, informative, and structured without writing any redundant and error prone hand crafted message.
-In this example, we used a predicate `allOf`, which will be discussed in <<printableAndComposablePredicates>>.
 
-[[printableAndComposablePredicates]]
-=== Printable & Composable Predicates
-
-If we desire to provide something more or less similar to `power-assert` in Java, we need a mechanism to make predicate and its runtime evaluation result programmatically accessible.
-There is an existing attempt to implement `power-assert` in Java, however, the project hasn't been updated for years and its most recent binary isn't found in public repositories anymore.<<java-power-assert>>
-
-`pcond` takes a differnt approach:
-
-The ideas behind the approach are:
-
-1. Any check can be modeled as a composition of simpler conditions.
-As discussed in the <<transformAndCheckProgrammingModel>>.
-2. On top of that, it provides predicates composed from others, such as `not`, `allOf`, and `anyOf`, so that a user can build any condition from simpler ones using the operators.
-3. It also has a mechanism to compose a human-readable message to describe what happened when a check fails.
+// suppress inspection "AsciiDocLinkResolve"
+For the mechanism `pcond` implemented this, check link:apidocs/com/github/dakusui/pcond/core/package-summary.html[Package com.github.dakusui.pcond.core]
 
 ====
 To the view of the author of `pcond`, the pain comes from the lack of introspection capability of Java.
@@ -205,9 +212,6 @@ In fact, there exists a github repository that provides "power-assert" for Java;
 However, the library seems not to be maintained and the recent binaries aren't available in public nexus repositories anymore.
 ====
 
-
-
-
 === Entry-points
 
 As already discussed, an assertion is composed by connecting functions and predicates in the model.
@@ -237,8 +241,11 @@ Functions returned by methods defined in this class can be connected by `Functio
 ==== Printables
 
 Still sometimes you may want to define your own functions and predicates.
-`Printables.function(String, Function)`
-`Printables.Predicate(String, Predicate)`
+
+- `Printables.function(String, Function)`
+- `Printables.function(Supplier<String>, Function)`
+- `Printables.predicate(String, Predicate)`
+- `Printables.predicate(Supplier<String>, Predicate)`
 (t.b.d.)
 
 === Fluent API to build printable predicates
@@ -269,8 +276,21 @@ public class FluentExample {
 == Experimental Features: `Experimentals`
 
 * `Experimentals`
-** `nest`
-** Currying mechanism and a context.
+** `nest`, Currying mechanism, and a context.
+
+[source, java]
+----
+public class NestCurryingAndContextExample {
+    public void example() {
+        assertThat(
+            Stream.of("Hi", "hello", "world"),
+            transform(nest(asList("1", "2", "o")))
+                              // Experimentals.toCurriedContext
+                .check(noneMatch(toCurriedContextPredicate(stringEndsWith(), 0, 1))));
+    }
+}
+----
+
 ** Multi-parameter Functions
 
 == Design Detail
@@ -278,14 +298,14 @@ public class FluentExample {
 * Evaluator mechanism
 * Configuration mechanism
 
-== Test
+== Applications
 
 `pcond` itself only has a capability to build predicates.
 To use it as a DbC, value checking, or test assertion library, you need a wrapper class.
 
 thincrest-pcond<<thincrest-pcond>>::
 (t.b.d)
-valid8j-pcond<<valid8j>>::
+valid8j-pcond<<valid8j-pcond>>::
 (t.b.d.)
 
 `pcond`, `thincrest-pcond`, `valid8j-pcond` themselves are software products, which may evolve over time.
@@ -294,18 +314,18 @@ The programming interface of `pcond` can be different over-time.
 [bibliography]
 == References
 
-- [[[thincrest-pcond, 1]]] thincrest-pcond
-- [[[hamcrest, 2]]] Hamcrest, Matchers that can be combined to create flexible expressions of intent, https://hamcrest.org/[Hamcrest]
-- [[[assertj, 3]]] AssertJ, Fluent assertions for java, https://joel-costigliola.github.io/assertj/[AssertJ]
-- [[[google-truth, 3]]] Truth - Fluent assertions for Java and Android, https://truth.dev/[Google Truth]
-- [[[java-dbc, 4]]] Java DbC https://github.com/neopragma/java-dbc[Java-DbC]
-- [[[valid4j, 5]]] valid4j https://www.valid4j.org/[valid4j]
-- [[[DbCbyExample, 6]]] "Design by Contract, by Example" by Richard Mitchell and Jim McKim, 2002, Jim McKim, Richard Mitchell
-- [[[power-assert, 8 ]]] power-assert https://github.com/power-assert-js/power-assert
-- [[[java-power-assert, 9]]] java-power-assert https://github.com/jkschneider/java-power-assert
-- [[[Preconditions-guava, 10]]] Preconditions, Google Guava https://guava.dev/releases/19.0/api/docs/com/google/common/base/Preconditions.html[Preconditions class]
-- [[[Validates-apache-commons, 11]]] Validates, Apache Commons https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html[Validate class]
-- [[[valid8j, 12]]] valid8j
+- [[[Validates-apache-commons, 1]]] Validates, Apache Commons https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/Validate.html[Validate class]
+- [[[Preconditions-guava, 2]]] Preconditions, Google Guava https://guava.dev/releases/19.0/api/docs/com/google/common/base/Preconditions.html[Preconditions class]
+- [[[hamcrest, 3]]] Hamcrest, Matchers that can be combined to create flexible expressions of intent, https://hamcrest.org/[Hamcrest]
+- [[[assertj, 4]]] AssertJ, Fluent assertions for java, https://joel-costigliola.github.io/assertj/[AssertJ]
+- [[[google-truth, 5]]] Truth - Fluent assertions for Java and Android, https://truth.dev/[Google Truth]
+- [[[java-dbc, 6]]] Java DbC https://github.com/neopragma/java-dbc[Java-DbC]
+- [[[valid4j, 7]]] valid4j https://www.valid4j.org/[valid4j]
+- [[[java-power-assert, 8]]] java-power-assert https://github.com/jkschneider/java-power-assert
+- [[[thincrest-pcond, 9]]] thincrest-pcond
+- [[[valid8j-pcond, 10]]] valid8j
+- [[[DbCbyExample, 11]]] "Design by Contract, by Example" by Richard Mitchell and Jim McKim, 2002, Jim McKim, Richard Mitchell
+- [[[power-assert, 12]]] power-assert https://github.com/power-assert-js/power-assert
 - [[[baeldung-hamcrest-custom, 13]]] https://www.baeldung.com/hamcrest-custom-matchers[hamcrest-custom-matchers, baeldung.com]
 - [[[java-json-serialization, 14]]] Efficient JSON serialization with Jackson and Java
  https://blogs.oracle.com/javamagazine/post/java-json-serialization-jackson[blogs.oracle.com]
