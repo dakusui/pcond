@@ -1,6 +1,7 @@
 package com.github.dakusui.ut.thincrest.ut;
 
 import com.github.dakusui.pcond.experimentals.cursor.Cursors;
+import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.IllegalValueException;
@@ -11,9 +12,9 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.core.refl.MethodQuery.instanceMethod;
-import static com.github.dakusui.pcond.fluent.Statement.statement;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static com.github.dakusui.pcond.forms.Predicates.*;
 import static com.github.dakusui.shared.TestUtils.validate;
@@ -22,7 +23,11 @@ import static com.github.dakusui.thincrest.TestAssertions.assertThat;
 import static com.github.dakusui.thincrest.TestFluents.assertAll;
 
 public class ReportDetailTest extends TestBase {
-  @Test
+    public static <T> Statement<T> statement(T value, Predicate<T> predicate) {
+      return Statement.objectValue(value).then().checkWithPredicate(predicate);
+    }
+
+    @Test
   public void givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted$assertThat() {
     String actual = "helloHELLOhelloHELLOhelloXYZHELLOhelloHELLOhelloHELLO";
     String expected = "helloHELLOhelloHELLOhelloHELLOhelloHELLOhelloHELLO";

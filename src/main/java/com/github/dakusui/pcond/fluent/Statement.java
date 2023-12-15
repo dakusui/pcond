@@ -151,8 +151,4 @@ public interface Statement<T> {
         .toArray(Predicate[]::new);
     return makeSquashable(allOf(predicates));
   }
-
-  static <T> Statement<T> statement(T value, Predicate<T> predicate) {
-    return objectValue(value).then().checkWithPredicate(predicate);
-  }
 }

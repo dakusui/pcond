@@ -25,7 +25,7 @@ import static com.github.dakusui.thincrest.TestFluents.assumeAll;
 import static java.util.Arrays.asList;
 
 public class SmokeTest extends TestBase {
-  @Test//(expected = ComparisonFailure.class)
+  @Test(expected = ExpectedException.class)
   public void givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength_2() throws Throwable {
     smoke();
   }
@@ -61,6 +61,7 @@ public class SmokeTest extends TestBase {
    * 145
    * ----
    */
+  @SuppressWarnings("CallToPrintStackTrace")
   @Ignore
   @Test
   public void smoke() {
@@ -100,8 +101,6 @@ public class SmokeTest extends TestBase {
       assertSmoke(book);
     } catch (ComparisonFailure e) {
       e.printStackTrace();
-      if (true)
-        throw e;
       ReportParser reportParserForActualValue = new ReportParser(e.getActual());
       ReportParser reportParserForExpectation = new ReportParser(e.getExpected());
       assertAllRunnables(
@@ -170,7 +169,12 @@ public class SmokeTest extends TestBase {
                   CoreMatchers.equalTo(extractedOpNameList)
               ))
       );
-      throw e;
+      throw new ExpectedException(e);
+    }
+  }
+  public static class ExpectedException extends RuntimeException {
+    public ExpectedException(Throwable t) {
+      super(t);
     }
   }
 
@@ -213,7 +217,7 @@ public class SmokeTest extends TestBase {
     return new BookTransformer(book)
         .transform((BookTransformer b) -> b.title()
             .transform((StringTransformer<String> ty) -> ty.then().isNotNull().done())
-            .transform((StringTransformer<String> ty) -> ty.parseInt().then()
+            .transform((StringTransformer<String> ty) -> ty.parseInt().then() // This is intended to produce a NumberFormatException
                 .greaterThanOrEqualTo(10)
                 .lessThan(40)
                 .done()).done())

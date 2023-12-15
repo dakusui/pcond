@@ -30,7 +30,7 @@ Thus, in spite that the same concern is observed among wide areas, no good unifo
 
 == Key Concepts
 
-Existing assertion libraries require users to define a message for a type to be checked.
+Existing assertion libraries require users to define a message for a class under test.
 Following is an example presented in baeldung.com<<baeldung-hamcrest-custom>>.
 
 [source,java]
@@ -86,7 +86,7 @@ Hereafter, we just call "matcher"-like concepts in various assertion libraries j
 === Transform-and-Check Programming Model
 
 Among key concepts of `pcond`, the most important one is its "Transform-and-Check Programming Model".
-Instead of having users define a custom "Matcher" for every condition that they can think of, it provides a mechinsm that makes it possible to compose a transforming predicate from a function and a predicate.
+Instead of having users define a custom "Matcher" for every condition that they can think of, it provides a mechanism to compose a transforming predicate from simpler functions and predicates.
 
 The Figure <<transformAndCheckPipeline>> illustrates the concept of this model.
 
@@ -105,16 +105,22 @@ The Figure <<transformAndCheckPipeline>> illustrates the concept of this model.
 
 A transformer function transforms a given value of type `T` into a value of `R`.
 This entire pipeline can be considered one predicate for value type `T`.
-Thus, it can be used as a part of another transforming predicate.
+Thus, it can be used as a part of another transforming predicate, or vice versa.
+Also, note that a function can be chained by `Function#andThen` method,
 
 If both a transformer function and a checker function can generate a human-readable message, we would be able to compose a sufficiently informative message.
 
-That is,
-"Given `value`, When __transformed__ is applied, it returns `transformed value`, then the __check__ is passed/failed"
+For instance:
+
+- Given `value`,
+- When __transform__ is applied, it returns `transformed value`,
+- Then the __check__ is passed/failed"
 
 With this model, "a string 'hello' is longer than 10" can be expressed as follows:
 
-"Given `value`:"hello", When `length` is applied, it returns `5`, then the `greaterThan` is failed"
+- Given `value`:"hello",
+- When `length` is applied, it returns `5`,
+- Then the `greaterThan[10]` is failed"
 
 This is still informative and understandable.
 
@@ -125,18 +131,14 @@ For the approach `pcond` takes to make it informative yet understandable, please
 [[printableAndComposablePredicates]]
 === Printable & Composable Predicates
 
-If we desire to provide something more or less similar to `power-assert` in Java, we need a mechanism to make predicate and its runtime evaluation result programmatically accessible.
-There is an existing attempt to implement `power-assert` in Java, however, the project hasn't been updated for years and its most recent binary isn't found in public repositories anymore.<<java-power-assert>>
+If we desire to provide something more or less similar to `power-assert` in Java, we need a mechanism to make predicate and its runtime evaluation result programmatically accessible.footnote:[There is an existing attempt to implement `power-assert` in Java, however, the project hasn't been updated for years and its most recent binary isn't found in public repositories anymore.<<java-power-assert>>]
 
-`pcond` takes a differnt approach:
+The ideas behind `pcond` 's approach are:
 
-The ideas behind the approach are:
-
-1. Any check can be modeled as a composition of simpler conditions.
+1. Checks programmers want to conduct can be modeled as a composition of simpler conditions.
 As discussed in the <<transformAndCheckProgrammingModel>>.
-2. On top of that, it provides predicates composed from others, such as `not`, `allOf`, and `anyOf`, so that a user can build any condition from simpler ones using the operators.
-3. It also has a mechanism to compose a human-readable message to describe what happened when a check fails.
-
+2. It provides predicates composed from others, such as `not`, `allOf`, and `anyOf`, so that a user can build any condition from simpler ones using the operators.
+3. A mechanism to compose a human-readable message to describe what happened when a check fails.
 
 Following is an actual example to test if `ExampleClass` gives a proper message as a return value of `salute` method.
 
@@ -273,6 +275,13 @@ public class FluentExample {
 }
 ----
 
+=== Configuration
+
+`pcond` has a capability to configure some of its behaviors at runtime.
+Such as choosing exceptions to be thrown on an assertion failure, number of characters for input value, action, and output value columns, etc.
+// suppress inspection "AsciiDocLinkResolve"
+For the further details, check link:apidocs/com/github/dakusui/pcond/validator/Validator.Configuration.html[Class com.github.dakusui.pcond.validator.Validator.Configuration].
+
 == Experimental Features: `Experimentals`
 
 * `Experimentals`
@@ -293,23 +302,42 @@ public class NestCurryingAndContextExample {
 
 ** Multi-parameter Functions
 
-== Design Detail
-
-* Evaluator mechanism
-* Configuration mechanism
-
 == Applications
 
 `pcond` itself only has a capability to build predicates.
-To use it as a DbC, value checking, or test assertion library, you need a wrapper class.
+To use it as a DbC, value checking, or test assertion library, you need wrapper libraries.
 
 thincrest-pcond<<thincrest-pcond>>::
-(t.b.d)
+A wrapper library for test assertions.
+It comes with metamorphic testing support.
+
 valid8j-pcond<<valid8j-pcond>>::
-(t.b.d.)
+A wrapper library for DbC-based programming and value checking.
 
 `pcond`, `thincrest-pcond`, `valid8j-pcond` themselves are software products, which may evolve over time.
-The programming interface of `pcond` can be different over-time.
+The programming interface of `pcond` can be modified over-time and it may introduce incompatibility between versions.
+
+Here is a problem.
+If `thincres-pcond` and `valid8j-pcond` were depending directly on `pcond`, what will happen?
+Even if you only want to upgrade `thincrest-pcond`, which is used for test-side code, to a newer version, you may also need to upgrade `valid8j-pcond`, which is used for product-side code.
+Because the new `thincrest-pcond` may depend on a newer version of `pcond`, which is not compatible with the `pcond` used by `valid8j-pcond` in the product side.
+This is usually not acceptable.
+
+So, those libraries take the following approach in Maven's `generate-source`.:
+
+1. Copy the source code of `pcond` at the beginning of a build procedure.
+2. Move all the source file to a dedicated package.
+For `thincrest`, all the source files under `com.github.dakusui.pcond` will be moved to `com.github.dakusui.thincrest_pcond`.
+For `valid8j`, it will be `com.github.dakusui.valid8j_pcond`.
+
+Thus, you can use different versions of `pcond` for `thincrest` and `pcond` for `valid8j`, independently.
+
+Note that you need to be careful of the classes, which appear in both packages such as `Predicates`, `Functions`, or `Printables`, especially when you are working with `thincrest-pcond` in test-side code.
+If you write test assertions using `valid8j` 's entry points, the error messages on a failure will become poor.
+Because the message composing mechanism of `thincrest-pcond` can work with the `pcond` 's classes under the package for it (i.e. `com.github.dakusui.thincrest_pcond`).
+For product-side codes, `thincrest-pcond` is not visible, but this is not vice-versa and `valid8j-pcond` is visible for `thincrest-pcond`.
+This is why we human need to be careful of it.
+
 
 [bibliography]
 == References

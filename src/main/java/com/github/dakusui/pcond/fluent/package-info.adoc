@@ -39,6 +39,7 @@ public class FluentStyleExample {
 
 May result in the following output:
 
+[%nowrap]
 .Output Example
 ----
  "Doe"               ->WHEN:treatAsIs      ->"Doe"                | "Doe"               ->WHEN:treatAsIs      ->"Doe"
