@@ -2,7 +2,7 @@ package com.github.dakusui.pcond.core.printable;
 
 import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunction;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
 
 import java.util.List;
@@ -60,7 +60,7 @@ public class PrintableFunction<T, R> extends
 
   @Override
   public Function<? super T, Object> head() {
-    return (Function<? super T, Object>) this.head;
+    return this.head;
   }
 
   @Override
@@ -91,7 +91,7 @@ public class PrintableFunction<T, R> extends
 
   @Override
   public Object explainOutputExpectation() {
-    return this.formatter.get();
+    return this.head();
   }
 
   @Override

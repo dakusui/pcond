@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.fluent.builtins;
 
 import com.github.dakusui.pcond.core.fluent.AbstractObjectChecker;
+import com.github.dakusui.pcond.experimentals.cursor.Cursors;
 import com.github.dakusui.pcond.forms.Predicates;
 
 import java.util.function.Function;
@@ -49,15 +50,15 @@ public interface StringChecker<T> extends
   }
 
   default StringChecker<T> findRegexes(String... regexes) {
-    return this.checkWithPredicate(Predicates.findRegexes(regexes));
+    return this.checkWithPredicate(Cursors.findRegexes(regexes));
   }
 
   default StringChecker<T> findRegexPatterns(Pattern... patterns) {
-    return this.checkWithPredicate(Predicates.findRegexPatterns(patterns));
+    return this.checkWithPredicate(Cursors.findRegexPatterns(patterns));
   }
 
   default StringChecker<T> findSubstrings(String... tokens) {
-    return this.checkWithPredicate(Predicates.findSubstrings(tokens));
+    return this.checkWithPredicate(Cursors.findSubstrings(tokens));
   }
 
   @SuppressWarnings("unchecked")

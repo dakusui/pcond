@@ -1,7 +1,6 @@
 package com.github.dakusui.shared;
 
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.shared.TargetMethodHolder;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunction;
 
 import static com.github.dakusui.pcond.forms.Functions.curry;
 

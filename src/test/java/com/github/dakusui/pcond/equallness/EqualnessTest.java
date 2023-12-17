@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.equallness;
 
-import com.github.dakusui.pcond.forms.Experimentals;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunctions;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
@@ -292,11 +292,11 @@ public class EqualnessTest extends TestBase {
             .nonEqualObjectFactory(args -> Predicates.not(Predicates.not(Predicates.isNotNull())))
             .cached(false)
             .$(),
-        define(args -> Experimentals.toCurriedContextPredicate(Predicates.isNotNull()))
+        define(args -> CurriedFunctions.toCurriedContextPredicate(Predicates.isNotNull()))
             .nonEqualObjectFactory(args -> Predicates.isNull())
-            .nonEqualObjectFactory(args -> Experimentals.toCurriedContextPredicate(Predicates.isNull()))
-            .nonEqualObjectFactory(args -> Experimentals.toCurriedContextPredicate(Predicates.isNotNull(), 1))
-            .equalObjectFactory(args -> Experimentals.toCurriedContextPredicate(Predicates.isNotNull()))
+            .nonEqualObjectFactory(args -> CurriedFunctions.toCurriedContextPredicate(Predicates.isNull()))
+            .nonEqualObjectFactory(args -> CurriedFunctions.toCurriedContextPredicate(Predicates.isNotNull(), 1))
+            .equalObjectFactory(args -> CurriedFunctions.toCurriedContextPredicate(Predicates.isNotNull()))
             .cached(false)
             .$()
     };

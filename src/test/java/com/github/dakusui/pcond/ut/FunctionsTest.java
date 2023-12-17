@@ -1,9 +1,9 @@
 package com.github.dakusui.pcond.ut;
 
-import com.github.dakusui.pcond.core.multi.MultiFunctionUtils;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunctionUtils;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.forms.Functions;
-import com.github.dakusui.pcond.core.multi.MultiFunction;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunction;
 import com.github.dakusui.shared.utils.ut.TestBase;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;

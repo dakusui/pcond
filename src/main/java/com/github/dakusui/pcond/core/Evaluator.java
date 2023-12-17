@@ -1,6 +1,6 @@
 package com.github.dakusui.pcond.core;
 
-import com.github.dakusui.pcond.core.context.CurriedContext;
+import com.github.dakusui.pcond.experimentals.currying.context.CurriedContext;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -386,6 +386,8 @@ public interface Evaluator {
    * If an input or an output value object of a form implements this interface,
    * The value returned by `snapshot` method is stored in a {@link EvaluationEntry}
    * record, instead of the value itself.
+   *
+   * An implementation of this interface should override `toString()` method to return a string form of the original state of this object.
    */
   interface Snapshottable {
 

@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 public enum TestUtils {
   ;
-  static final Validator validator = Validator.INSTANCE;
+  static final Validator validator = Validator.instance();
 
   public static <T> T validate(T value, Predicate<? super T> predicate) {
     return validate(value, predicate, IllegalValueException::new);

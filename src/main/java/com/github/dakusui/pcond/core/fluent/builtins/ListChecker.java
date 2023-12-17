@@ -1,6 +1,7 @@
 package com.github.dakusui.pcond.core.fluent.builtins;
 
 import com.github.dakusui.pcond.core.fluent.AbstractObjectChecker;
+import com.github.dakusui.pcond.experimentals.cursor.Cursors;
 import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 
@@ -36,7 +37,7 @@ public interface ListChecker<
 
   @SuppressWarnings("unchecked")
   default ListChecker<T, E> findElementsInOrderBy(List<Predicate<E>> predicates) {
-    return checkWithPredicate(Predicates.findElements(predicates.toArray(new Predicate[0])));
+    return checkWithPredicate(Cursors.findElements(predicates.toArray(new Predicate[0])));
   }
 
   @SuppressWarnings("unchecked")

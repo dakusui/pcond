@@ -1,9 +1,9 @@
 package com.github.dakusui.pcond.forms;
 
-import com.github.dakusui.pcond.core.currying.CurriedFunction;
-import com.github.dakusui.pcond.core.currying.CurryingUtils;
-import com.github.dakusui.pcond.core.multi.MultiFunction;
-import com.github.dakusui.pcond.core.multi.MultiFunctionUtils;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunction;
+import com.github.dakusui.pcond.experimentals.currying.CurryingUtils;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunction;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunctionUtils;
 import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
 import com.github.dakusui.pcond.core.refl.MethodQuery;
 import com.github.dakusui.pcond.core.refl.Parameter;
@@ -406,10 +406,10 @@ public class Functions {
           try {
             out = func.apply(in);
           } catch (Throwable e) {
-            Validator.INSTANCE.assertThat(e, isInstanceOf(exceptionClass));
+            Validator.instance().assertThat(e, isInstanceOf(exceptionClass));
             return (E) e;
           }
-          Validator.INSTANCE.assertThat(
+          Validator.instance().assertThat(
               String.format("%s(%s)->%s", func, formatObject(in, 12), formatObject(out, 12)),
               allOf(exceptionThrown(), exceptionClassWas(exceptionClass)));
           throw new AssertionError("A line that shouldn't be reached. File a ticket.");

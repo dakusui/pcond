@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
-import static com.github.dakusui.valid8j.Requires.requireNonNull;
+import static java.util.Objects.requireNonNull;
 
 public interface BooleanTransformer<T> extends
     AbstractObjectTransformer<

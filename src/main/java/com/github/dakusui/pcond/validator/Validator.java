@@ -10,10 +10,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
+import static com.github.dakusui.pcond.validator.Validator.Configuration.Utils.*;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
@@ -24,7 +26,7 @@ public interface Validator {
   /**
    * A constant field that holds the default provider instance.
    */
-  Validator INSTANCE = create(Configuration.Utils.loadPcondProperties());
+  ThreadLocal<Validator> INSTANCE = ThreadLocal.withInitial(() -> create(loadPcondProperties()));
 
 
   /**
@@ -43,7 +45,7 @@ public interface Validator {
    * @return Created provider instance.
    */
   static Validator create(Properties properties) {
-    return new Impl(properties);
+    return new Impl(configurationFromProperties(properties));
   }
 
   /**
@@ -422,6 +424,34 @@ public interface Validator {
     }
   }
 
+  static Validator instance() {
+    return INSTANCE.get();
+  }
+
+  static void reconfigure(Consumer<Configuration.Builder> configurator) {
+    Configuration.Builder b = instance().configuration().parentBuilder();
+    reconfigure(configurator, b);
+  }
+
+  static void reconfigure(Consumer<Configuration.Builder> configurator, Properties properties) {
+    Configuration.Builder b = Configuration.Builder.fromProperties(properties);
+    reconfigure(configurator, b);
+  }
+
+  static void reconfigure(Consumer<Configuration.Builder> configurator, Configuration.Builder b) {
+    Objects.requireNonNull(configurator).accept(b);
+    INSTANCE.set(new Impl(b.build()));
+  }
+
+  static void resetToDefault() {
+    reconfigure(b -> {
+    });
+  }
+
+  static Configuration configurationFromProperties(Properties properties) {
+    return Configuration.Builder.fromProperties(properties).build();
+  }
+
   interface ExceptionFactory<E extends Throwable> extends Function<Explanation, E> {
     default RuntimeException create(Explanation explanation) {
       return createException(this, explanation);
@@ -493,22 +523,10 @@ public interface Validator {
 
     Optional<Debugging> debugging();
 
+    Configuration.Builder parentBuilder();
+
     enum Utils {
       ;
-
-      static Configuration configure(Properties properties) {
-        return new Builder()
-            .useEvaluator(Boolean.parseBoolean(properties.getProperty("useEvaluator", "true")))
-            .summarizedStringLength(Integer.parseInt(properties.getProperty("summarizedStringLength", "40")))
-            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForRequire.class, properties.getProperty("exceptionComposerForRequire", "com.github.dakusui.pcond.validator.ExceptionComposer$ForRequire$Default")))
-            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForEnsure.class, properties.getProperty("exceptionComposerForEnsure", "com.github.dakusui.pcond.validator.ExceptionComposer$ForEnsure$Default")))
-            .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty("defaultExceptionComposerForValidate", "com.github.dakusui.pcond.validator.ExceptionComposer$ForValidate$Default")))
-            .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty("exceptionComposerForAssert", "com.github.dakusui.pcond.validator.ExceptionComposer$ForAssertion$Default")))
-            .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty("exceptionComposerForAssertThat", "com.github.dakusui.pcond.validator.ExceptionComposer$ForTestAssertion$JUnit4")))
-            .messageComposer(instantiate(MessageComposer.class, properties.getProperty("reportComposer", "com.github.dakusui.pcond.validator.MessageComposer$Default")))
-            .reportComposer(instantiate(ReportComposer.class, properties.getProperty("messageComposer", "com.github.dakusui.pcond.validator.ReportComposer$Default")))
-            .build();
-      }
 
       @SuppressWarnings("unchecked")
       static <E> E instantiate(@SuppressWarnings("unused") Class<E> baseClass, String className) {
@@ -543,7 +561,7 @@ public interface Validator {
       }
     }
 
-    class Builder {
+    class Builder implements Cloneable {
       boolean useEvaluator;
       int     summarizedStringLength;
 
@@ -554,7 +572,7 @@ public interface Validator {
       private ExceptionComposer.ForEnsure        exceptionComposerForEnsure;
       private ExceptionComposer.ForValidate      defaultExceptionComposerForValidate;
       private ExceptionComposer.ForAssertion     exceptionComposerForAssert;
-      private ExceptionComposer.ForTestAssertion exceptionComposerForAssertThat;
+      private ExceptionComposer.ForTestAssertion exceptionComposerForTestFailures;
 
       public Builder() {
       }
@@ -591,7 +609,7 @@ public interface Validator {
       }
 
       public Builder exceptionComposerForAssertThat(ExceptionComposer.ForTestAssertion exceptionComposerForAssertThat) {
-        this.exceptionComposerForAssertThat = exceptionComposerForAssertThat;
+        this.exceptionComposerForTestFailures = exceptionComposerForAssertThat;
         return this;
       }
 
@@ -605,6 +623,11 @@ public interface Validator {
         return this;
       }
 
+      public Builder useOpentest4J() {
+        this.exceptionComposerForTestFailures = new ExceptionComposer.ForTestAssertion.Opentest4J();
+        return this;
+      }
+
       public Configuration build() {
         return new Configuration() {
           private final Debugging debugging = new Debugging() {
@@ -615,7 +638,7 @@ public interface Validator {
               exceptionComposerForEnsure,
               defaultExceptionComposerForValidate,
               exceptionComposerForAssert,
-              exceptionComposerForAssertThat
+              exceptionComposerForTestFailures
           );
 
           @Override
@@ -646,7 +669,6 @@ public interface Validator {
             return Optional.empty();
           }
 
-
           @Override
           public MessageComposer messageComposer() {
             return Builder.this.messageComposer;
@@ -656,7 +678,34 @@ public interface Validator {
           public ReportComposer reportComposer() {
             return Builder.this.reportComposer;
           }
+
+          @Override
+          public Builder parentBuilder() {
+            return Builder.this.clone();
+          }
         };
+      }
+
+      @Override
+      public Builder clone() {
+        try {
+          return (Builder) super.clone();
+        } catch (CloneNotSupportedException e) {
+          throw new AssertionError();
+        }
+      }
+
+      static Builder fromProperties(Properties properties) {
+        return new Builder()
+            .useEvaluator(Boolean.parseBoolean(properties.getProperty("useEvaluator", "true")))
+            .summarizedStringLength(Integer.parseInt(properties.getProperty("summarizedStringLength", "40")))
+            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForRequire.class, properties.getProperty("exceptionComposerForRequire", "com.github.dakusui.pcond.validator.ExceptionComposer$ForRequire$Default")))
+            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForEnsure.class, properties.getProperty("exceptionComposerForEnsure", "com.github.dakusui.pcond.validator.ExceptionComposer$ForEnsure$Default")))
+            .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty("defaultExceptionComposerForValidate", "com.github.dakusui.pcond.validator.ExceptionComposer$ForValidate$Default")))
+            .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty("exceptionComposerForAssert", "com.github.dakusui.pcond.validator.ExceptionComposer$ForAssertion$Default")))
+            .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty("exceptionComposerForTestFailures", "com.github.dakusui.pcond.validator.ExceptionComposer$ForTestAssertion$JUnit4")))
+            .messageComposer(instantiate(MessageComposer.class, properties.getProperty("messageComposer", "com.github.dakusui.pcond.validator.MessageComposer$Default")))
+            .reportComposer(instantiate(ReportComposer.class, properties.getProperty("reportComposer", "com.github.dakusui.pcond.validator.ReportComposer$Default")));
       }
     }
   }
@@ -665,8 +714,8 @@ public interface Validator {
 
     private final Configuration configuration;
 
-    public Impl(Properties properties) {
-      this.configuration = Configuration.Utils.configure(properties);
+    public Impl(Configuration configuration) {
+      this.configuration = Objects.requireNonNull(configuration);
     }
 
     @Override
