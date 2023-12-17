@@ -1,0 +1,3 @@
+= A Library for Uniformed Value Checking: `pcond`
+
+Check https://dakusui.github.io/pcond/[pcond documentation].
