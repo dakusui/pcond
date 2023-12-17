@@ -7,9 +7,7 @@ import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
@@ -79,13 +77,14 @@ public enum Cursors {
         b.append(">");
       }
 
-      public String toString() {
-        return "CursoredString[" + originalString + "]";
-      }
-
       @Override
       public Object snapshot() {
         return originalString.substring(position);
+      }
+
+      @Override
+      public String toString() {
+        return "CursoredString:[" + originalString + "]";
       }
     }
     CursoredString cursoredStringForSnapshotting = new CursoredString(null);
@@ -329,7 +328,7 @@ public enum Cursors {
     }
   }
   
-  static class CursoredList<EE> implements Evaluator.Snapshottable {
+  static class CursoredList<EE> extends AbstractList<EE> implements Evaluator.Snapshottable, Collection<EE> {
     int position;
     final List<EE> originalList;
 
@@ -343,7 +342,22 @@ public enum Cursors {
 
     @Override
     public Object snapshot() {
-      return this.currentList();
+      return originalList.subList(position, originalList.size());
+    }
+
+    @Override
+    public int size() {
+      return originalList.size() - position;
+    }
+
+    @Override
+    public EE get(int index) {
+      return originalList.get(position + index);
+    }
+
+    @Override
+    public String toString() {
+      return "CursoredList:" + originalList;
     }
   }
   

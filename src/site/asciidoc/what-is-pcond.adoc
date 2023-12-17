@@ -2,19 +2,20 @@
 
 = The `pcond` library
 
-`pcond` is a library to build "printable" predicates to build conditions that generate informative messages on failures.
+`pcond` is a library to build "printable" predicates to build conditions that generate informative messages on failures of value checks.
 
 == Background
 
 In programmings, checking a value if it satisfies a given condition is a common and wide-spread concern.
-Is a value is `null` or not.
+
+Is a value `null` or not?
 Is a given number positive or zero?
 Isn't a string empty?
 Does it have a length longer than a certain value?
-Does a given object has an array which doesn't contain any value?
 And more.
-For each of them, we want a proper message.
-All of these can happen in a context of input value checking of a library function, validations in API entry point, assertions in unit testing, {pre,post}-condition checks in Design by Contract style programming.
+
+For each of them, we want a proper error message on a failure.
+All of these can happen in a context of input value checking, a validation in API entry point, an assertion in unit testing, {pre,post}-condition checks in Design by Contract style programming.
 
 However, especially in Java, there is no good uniformed solution to them.
 For value checking in a normal product code, we may use `Validate` class<<Validates-apache-commons>> (Apache Commons), `Preconditions` class<<Preconditions-guava>> (Google Guava), or just create our own class to check and compose error messages on failures.
@@ -22,7 +23,7 @@ For Unit Testing, classes are used for defining conditions to check the validity
 For Design by Contract, some relies on annotations to define contracts<<java-dbc>>, some other re-uses a test assertion library for it<<valid4j>>.
 
 Every solution in every context above provides a user with a way to override messages that it generates by default because a library cannot always compose a sufficiently informative and helpful message automatically.
-But such hand-crafted messages tend to be stale easily over time.
+But such hand-crafted messages tend to be stale easily over time and error-prone.
 
 Thus, in spite that the same concern is observed among wide areas, no good uniformed solution has been provided and the concern is addressed in quite ad hoc manners depending on the contexts.
 
@@ -60,14 +61,44 @@ Either way it is not only costly but also error-prone.]
 
 This is the point, where we should stop and take a think.
 Isn't there any better approach?
+
 The general pattern we can see in custom defined matchers is that: It first transforms a given value into a type for which a check can be conducted and a message can be composed.
 This happens at once inside a matcher.
 So, users need to create an unmanageable number of matchers in the end.
-Or they extract values for which preset assertions can be used from a given value and do assertion.
-From author's experience, in most cases, the latter practice is taken and the error message doesn't make sense alone on a failure.
-This leads to a situation, where we need to go back and forth between the error message and the source code.
 
-Instead, why don't we create a set of reusable transformers and checkers so that users can define their own matchers by combining them?
+Rather than creating a large number of matchers, what people tend to do is to write test code sacrificing readability of error messages.
+Following is a test picked up from a project called "ditaa"<<ditaaTest>>.
+
+[source%nowrap, java, %linenums]
+----
+class TextGridTest {
+  @Test
+  public void testFillContinuousAreaSquareInside() throws FileNotFoundException, IOException {
+    TextGrid squareGrid;
+    squareGrid = new TextGrid();
+    squareGrid.loadFrom("tests/text/simple_square01.txt");
+
+    CellSet filledArea = squareGrid.fillContinuousArea(3, 3, '*');
+    int size = filledArea.size();
+    assertEquals(15, size);
+
+    // skipped...
+  }
+}
+----
+
+In this example, a value on which SUT operation should be performed is given at first (line 4-6).
+When a functionality to be tested is performed (line 7), a value which we can do some check is extracted from it by calleing `size()` method (line 9).
+Then, the value is checked if it satisfies a certain condition, in this case it euqals to `15`.
+
+When this test fails, we will need to go back and forth between the error message and the source code just to understand what is going on.
+Because the error message will show only a certain integer is different from 15, which will not be helpful.
+
+Instead, why don't we try to include the given value and how it was transformed into the value we do the assertion check.
+In this example, the initial given value is `squareGrid` takes after line 6.
+the transformation step is the procedure describle in line 8 and 9.
+The value we do the assertionc heck is the value of `size`.
+The combined step of this transformation and checking can be considered a predicate for the given value.
 
 The approach `pcond` proposes is to let users compose a predicate to check all types from relatively small number of functions and predicates, which can give human-readable and meaningful message.
 It doesn't define its own "Matcher"(Hamcrest), "Assert"(AssertJ), or "Subject"(Google Truth).
@@ -80,7 +111,7 @@ In this section, following topics will be covered.
 * Entry-points: `Predicates`, `Functions`, and `Printables`
 * Fluent API to build printable predicates
 
-Hereafter, we just call "matcher"-like concepts in various assertion libraries just "matcher" in the rest of this document.
+Hereafter, we just call "matcher"-like concepts in various assertion libraries just "matcher".
 
 [[transformAndCheckProgrammingModel]]
 === Transform-and-Check Programming Model
@@ -219,16 +250,38 @@ However, the library seems not to be maintained and the recent binaries aren't a
 As already discussed, an assertion is composed by connecting functions and predicates in the model.
 Such functions and predicates should be relatively small number and reused across assertions.
 `pcond` has built-in functions and predicates for users to save their time.
+They are created by static factory methods defined in the entry point classes presented in this section.
+
+It is recommended to static import those methods when possible for the sake of readability.
 
 ==== Predicates
 
 `Predicates` is an entry-point class that holds methods to create re-usable predicates to examine a given value.
-For instance, `isEqualTo`, `greaterThan`, `greaterThanOrEqualTo`, `littleThan`,, etc.
+For instance, `isEqualTo`, `greaterThan`, `greaterThanOrEqualTo`, `littleThan`, etc.
 
 Note that this entry-point class also has methods to create a new predicate from given ones, such as `allOf`, `anyOf`, `and`, `or`, and `not`.
 `allOf` and `and` creates a new predicate of a conjunction of given ones (child predicates).
 Similarly, `anyOf` and `or` creates a new predicate of a disjunction of them.
 `allOf` and `anyOf` continue the evaluation of child predicates even if one of them results in `false` or throws an exception.
+
+One important static factory method in this entry-point class is `transform(String, Function<O, P>)`.
+This returns a factory object to create a transforming predicate and `check(String, Predicate<? super P>)` is the method to create it.
+Following is an example to use it.
+
+[%nowrap,java]
+----
+import com.github.dakusui.pcond.forms.Predicates;
+public class TransformingPredicateExample {
+    public void example() {
+        Predicate<String> p = Predicates.<String, Integer>transform("length", String::length).check("isGreaterThan[10]", i -> i > 10);
+        System.out.println(p);
+    }
+}
+----
+
+Note that sometimes Java compiler cannot infer appropriate types from the context around `transform` method.
+It is a good idea to explicitly specify them when you see compilation errors around it.
+
 
 ==== Functions
 
@@ -248,7 +301,9 @@ Still sometimes you may want to define your own functions and predicates.
 - `Printables.function(Supplier<String>, Function)`
 - `Printables.predicate(String, Predicate)`
 - `Printables.predicate(Supplier<String>, Predicate)`
-(t.b.d.)
+
+// suppress inspection "AsciiDocLinkResolve"
+link:apidocs/com/github/dakusui/pcond/forms/Printables.html[Class com.github.dakusui.pcond.forms.Printables].
 
 === Fluent API to build printable predicates
 
@@ -282,12 +337,17 @@ Such as choosing exceptions to be thrown on an assertion failure, number of char
 // suppress inspection "AsciiDocLinkResolve"
 For the further details, check link:apidocs/com/github/dakusui/pcond/validator/Validator.Configuration.html[Class com.github.dakusui.pcond.validator.Validator.Configuration].
 
-== Experimental Features: `Experimentals`
+== Experimental Features
 
-* `Experimentals`
-** `nest`, Currying mechanism, and a context.
+=== Currying
 
-[source, java]
+Currying is the technique of translating a function with multiple parameters into a sequence of functions, each taking a single parameter<<currying>>.
+
+`pcond` employs this technique to construct an assertion that examines if a relationship between two or more collections.
+
+With this feature, you can write a test like this:
+
+[%nowrap, java]
 ----
 public class NestCurryingAndContextExample {
     public void example() {
@@ -300,7 +360,60 @@ public class NestCurryingAndContextExample {
 }
 ----
 
-** Multi-parameter Functions
+This test is checking if no element in the first given list (`"Hi"`, `"hello`, "world") starts with an element in the second list (`"1"`, `"2"`, `"o"`).
+
+// suppress inspection "AsciiDocLinkResolve"
+For more details, check link:apidocs/com/github/dakusui/pcond/experimentals/currying/package-summary.html[Package com.github.dakusui.pcond.core].
+
+=== Cursor
+
+It is a common situation, where you have a list of string tokens and you want to examine if they appear in another string in the order.
+
+That is, you have a list ("hello", "world", "all") and they are found in a string such as `"hello, Lisa, god's in his heaven all's right with the world."`, which should fail because after `world`, `all` is not found.
+We can think of a regular expression to check it, but on a failure, does it give us sufficiently informative message that indicates to which element the check has succeeded, etc.?
+
+We can think of a similar check for a list, not a string, where ("hello", "world", "all") can be found in this order in a given list: ("hello", "all", "world", "network", "news")
+
+With the `cursor` package's functionality, you can build a test like following.
+
+[%nowrap, java]
+----
+    @Test(expected = ComparisonFailure.class)
+    public void givenSomeToBeFoundSomeNotToBe$whenFindElements$thenFailed() {
+      List<String> list = asList("Hello", "world", "", "everyone", "quick", "brown", "fox", "runs", "forever");
+      list.forEach(System.out::println);
+      TestAssertions.assertThat(list,
+          Cursors.findElements(
+              Predicates.isEqualTo("world"),
+              Predicates.isEqualTo("cat"), Predicates.isEqualTo("organization"), Predicates.isNotNull(), Predicates.isEqualTo("fox"), Predicates.isEqualTo("world")));
+    }
+----
+
+This will print an error message as follows:
+
+[%nowrap]
+----
+    ["Hello","world",""...;9]   ->transform:toCursoredList                ->["Hello","world",""...;9]
+    Cursors$CursoredList@f5f2bb7->check:allOf                             ->false
+                                ->    findElementBy[isEqualTo[world]]     ->true
+[0]                             ->    findElementBy[isEqualTo[cat]]       ->false
+[1]                             ->    findElementBy[isEq...[organization]]->false
+                                ->    findElementBy[isNotNull]            ->true
+                                ->    findElementBy[isEqualTo[fox]]       ->true
+[2]                             ->    findElementBy[isEqualTo[world]]     ->false
+[3]                             ->    (end)                               ->false
+
+.Detail of failure [0]
+---
+CursoredList:[Hello, world, , everyone, quick, brown, fox, runs, forever]
+---
+
+.Detail of failure [1]
+---
+CursoredList:[Hello, world, , everyone, quick, brown, fox, runs, forever]
+---
+...
+----
 
 == Applications
 
@@ -309,7 +422,7 @@ To use it as a DbC, value checking, or test assertion library, you need wrapper 
 
 thincrest-pcond<<thincrest-pcond>>::
 A wrapper library for test assertions.
-It comes with metamorphic testing support.
+It comes with metamorphic testing<<metamorphic-testing>> support.
 
 valid8j-pcond<<valid8j-pcond>>::
 A wrapper library for DbC-based programming and value checking.
@@ -357,3 +470,6 @@ This is why we human need to be careful of it.
 - [[[baeldung-hamcrest-custom, 13]]] https://www.baeldung.com/hamcrest-custom-matchers[hamcrest-custom-matchers, baeldung.com]
 - [[[java-json-serialization, 14]]] Efficient JSON serialization with Jackson and Java
  https://blogs.oracle.com/javamagazine/post/java-json-serialization-jackson[blogs.oracle.com]
+- [[[currying, 15]]] Currying - Wikipedia https://en.wikipedia.org/wiki/Currying[Currying]
+- [[[metamorphic-testing, 16]]] Design by Contract - Wikipedia https://en.wikipedia.org/wiki/Metamorphic_testing[Metamorphic testing]
+- [[[ditaaTest, 17]]] TextGridTest in ditaa project https://github.com/dakusui/ditaa/blob/master/test/java/org/stathissideris/ascii2image/test/TextGridTest.java[TextGridTest]
