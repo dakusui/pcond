@@ -1,3 +1,24 @@
 = A Library for Uniformed Value Checking: `pcond`
 
 Check https://dakusui.github.io/pcond/[pcond documentation].
+
+
+== Build
+
+=== Build steps
+
+To build and install the jar in local maven repository.
+This also builds the documentation.
+
+----
+mvn clean compile test install site
+----
+
+
+=== Build-time dependencies
+
+----
+sudo apt install openjdk-8-jdk
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH
+sudo apt install -y ruby
+----
