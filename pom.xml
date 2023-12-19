@@ -189,6 +189,7 @@
                             --attribute "name=${project.name}"
                             --attribute "version=${project.version}"
                             --attribute "imagesoutdir=.asciidoctor/diagram"
+                            --attribute "imagesdir=.asciidoctor/diagram"
                             --require asciidoctor-diagram
                             --gem-path ${env.GEM_PATH}
                             --attribute data-uri
