@@ -1,4 +1,0 @@
-= valid8j
-
-`valid8j` is a DbC library powered by `pcond`.
-It is named after `valid4j`.

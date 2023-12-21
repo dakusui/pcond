@@ -1,6 +1,8 @@
 = A Library for Uniformed Value Checking: `pcond`
 
-Check https://dakusui.github.io/pcond/[pcond documentation].
+`pcond` is a library to build "printable" predicates to build conditions that generate informative messages on failures of value checks.
+
+Check https://dakusui.github.io/pcond/[pcond documentation] for more detail.
 
 
 == Build
@@ -19,6 +21,7 @@ mvn clean compile test install site
 
 ----
 sudo apt install openjdk-8-jdk
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH
+sudo apt install maven
 sudo apt install -y ruby
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH
 ----
