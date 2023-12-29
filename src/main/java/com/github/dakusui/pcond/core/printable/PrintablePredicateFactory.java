@@ -4,6 +4,7 @@ import com.github.dakusui.pcond.core.Evaluable;
 import com.github.dakusui.pcond.core.Evaluator;
 import com.github.dakusui.pcond.experimentals.currying.context.CurriedContext;
 import com.github.dakusui.pcond.core.identifieable.Identifiable;
+import com.github.dakusui.pcond.forms.Predicates;
 import com.github.dakusui.pcond.internals.InternalUtils;
 
 import java.util.*;
@@ -402,21 +403,30 @@ public enum PrintablePredicateFactory {
      * @param <P> Intermediate parameter type tested by a predicated.
      * @param <O> Input parameter type.
      */
-    public interface Factory<P, O> {
-      Predicate<O> check(String condName, Predicate<? super P> cond);
+    public static abstract class Factory<P, O> {
+      public abstract Predicate<O> check(String condName, Predicate<? super P> cond);
 
       @SuppressWarnings("unchecked")
-      default <OO> Factory<P, OO> castTo(@SuppressWarnings("unused") Class<OO> ooClass) {
+      public <OO> Factory<P, OO> castTo(@SuppressWarnings("unused") Class<OO> ooClass) {
         return (Factory<P, OO>) this;
       }
+      
+      public abstract Predicate<O> check(Predicate<? super P> cond);
+      
+      @SafeVarargs
+      public final Predicate<O> checkAllOf(Predicate<? super P>... conds) {
+        return check(Predicates.allOf(conds));
+      }
+      @SafeVarargs
+      public final Predicate<O> allOf(Predicate<? super P>... conds) {
+        return checkAllOf(conds);
+      }
 
-      Predicate<O> check(Predicate<? super P> cond);
-
-      static <P, O> Factory<P, O> create(Function<O, P> function) {
+      public static <P, O> Factory<P, O> create(Function<O, P> function) {
         return create(null, null, function);
       }
 
-      static <P, O> Factory<P, O> create(String mapperName, String checkerName, Function<O, P> function) {
+      public static <P, O> Factory<P, O> create(String mapperName, String checkerName, Function<O, P> function) {
         return new Factory<P, O>() {
           @Override
           public Predicate<O> check(String condName, Predicate<? super P> cond) {
