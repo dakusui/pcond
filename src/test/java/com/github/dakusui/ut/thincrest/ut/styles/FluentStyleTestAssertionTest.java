@@ -1,9 +1,11 @@
 package com.github.dakusui.ut.thincrest.ut.styles;
 
+import com.github.dakusui.pcond.fluent.ListHolder;
 import com.github.dakusui.pcond.fluent.Statement;
 import com.github.dakusui.pcond.forms.Functions;
 import com.github.dakusui.pcond.forms.Printables;
 import com.github.dakusui.shared.utils.ut.TestBase;
+import com.github.dakusui.thincrest.TestAssertions;
 import com.github.dakusui.thincrest.TestFluents;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
@@ -16,6 +18,7 @@ import org.junit.runner.RunWith;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.fluent.Statement.booleanValue;
 import static com.github.dakusui.pcond.fluent.Statement.stringValue;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -117,7 +120,7 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void boolean_assertThatTest_passed() {
       boolean givenValue = true;
-      TestFluents.assertStatement(Statement.booleanValue(givenValue)
+      TestFluents.assertStatement(booleanValue(givenValue)
           .then()
           .isEqualTo(true));
     }
@@ -177,6 +180,26 @@ public class FluentStyleTestAssertionTest {
           stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
           stringValue("world").toLowerCase().then().contains("world"));
     }
+
+    @Test
+    public void assertAllDifferentTypes_passed() {
+      boolean b = TestFluents_assertAll(
+          stringValue("hello").toUpperCase().then().isEqualTo("HELLO").$(),
+          booleanValue(false).then().isFalse().$());
+      MatcherAssert.assertThat(b, CoreMatchers.is(true));
+    }
+
+    /*
+     * <T> boolean ValidationFluents.all(Statement<T>... statements) cannot use "?" instead of T.
+     * Because there will be no way to suppress a compiler warning.
+     */
+    @SafeVarargs
+    private static <T> boolean TestFluents_assertAll(Statement<T>... statements) {
+      List<?> values = java.util.Arrays.stream(statements).map(Statement::statementValue).collect(toList());
+      TestAssertions.assertThat(ListHolder.fromList(values), Statement.createPredicateForAllOf(statements));
+      return true;
+    }
+
 
     @Test(expected = AssumptionViolatedException.class)
     public void assumeThatTest_failed() {
