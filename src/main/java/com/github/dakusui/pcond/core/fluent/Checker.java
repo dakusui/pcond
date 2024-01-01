@@ -21,8 +21,36 @@ public interface Checker<
     requireNonNull(predicate);
     return addCheckPhrase(w -> (Predicate<R>) predicate);
   }
+
   default Predicate<T> done() {
     return statementPredicate();
+  }
+
+  /**
+   * // @formatter:off
+   * When you use an assertion method that accepts multiple statements (`Statement`), it requires all the elements in the array (`varargs`) should have the same generic parameter type.
+   * However, you sometimes want to check multiple types at once.
+   * By calling this method for every statement building method calling chain, you can address the compilation error.
+   *
+   * [source, java]
+   * ```
+   * class Example {
+   *   public static void main(String... args) {
+   *     assert all(
+   *        objectValue(arg[0]).isNotNull().$(),
+   *        objectValue(new Example()).isNotNull().$(),
+   *        ...
+   *   }
+   * }
+   * ```
+   *
+   * // @formatter.off
+   *
+   * @return A statement for `java.lang.Object` type.
+   */
+  @SuppressWarnings("unchecked")
+  default Statement<Object> $() {
+    return (Statement<Object>) this;
   }
 
   abstract class Base<
