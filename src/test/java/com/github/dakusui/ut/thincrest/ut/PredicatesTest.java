@@ -10,10 +10,12 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
+import static com.github.dakusui.pcond.forms.Predicates.isInstanceOf;
 import static com.github.dakusui.shared.utils.TestUtils.lineAt;
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.*;
@@ -26,7 +28,7 @@ public class PredicatesTest {
     @Test
     public void testFormat() {
       try {
-        TestAssertions.assertThat(100, Predicates.and(Predicates.isNotNull(), Predicates.isInstanceOf(String.class)));
+        TestAssertions.assertThat(100, Predicates.and(Predicates.isNotNull(), isInstanceOf(String.class)));
         throw new Error(); // Make it fail if PC reaches here.
       } catch (ComparisonFailure e) {
         e.printStackTrace();
@@ -49,7 +51,7 @@ public class PredicatesTest {
     @Test
     public void test() {
       try {
-        TestAssertions.assertThat(100, Predicates.isInstanceOf(String.class));
+        TestAssertions.assertThat(100, isInstanceOf(String.class));
         throw new Error(); // Make it fail if PC reaches here.
       } catch (ComparisonFailure e) {
         e.printStackTrace();
@@ -61,8 +63,13 @@ public class PredicatesTest {
                 Predicates.containsString("false")));
       }
     }
-  }
 
+    @Test
+    public void whenIsInstanceOfUsedInComposite_thenNoExplicitTypeParameterIsNeeded() {
+      Object value = new LinkedList<>();
+      TestAssertions.assertThat(value, Predicates.or(Predicates.isInstanceOf(String.class), Predicates.isInstanceOf(List.class)));
+    }
+  }
   public static class IsNullTest extends TestBase.ForAssertionEnabledVM {
     @Test
     public void whenMet$thenTrue() {

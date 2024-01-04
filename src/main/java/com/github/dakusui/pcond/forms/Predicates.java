@@ -62,7 +62,7 @@ public class Predicates {
         return Function.class.cast(Def.IS_INSTANCE_OF$2);
     }
 
-    public static <T> Predicate<? super T> isInstanceOf(Class<?> value) {
+    public static Predicate<Object> isInstanceOf(Class<?> value) {
         return applyOnceExpectingPredicate(requireNonNull(value), isInstanceOf());
     }
 
