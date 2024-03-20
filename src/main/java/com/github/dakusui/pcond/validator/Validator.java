@@ -629,6 +629,8 @@ public interface Validator {
       }
 
       public Configuration build() {
+        if (!isClassPresent("org.junit.ComparisonFailure"))
+          this.useOpentest4J();
         return new Configuration() {
           private final Debugging debugging = new Debugging() {
           };
@@ -684,6 +686,15 @@ public interface Validator {
             return Builder.this.clone();
           }
         };
+      }
+
+      private static boolean isClassPresent(String s) {
+        try {
+          Class.forName(s);
+          return true;
+        } catch (ClassNotFoundException e) {
+          return false;
+        }
       }
 
       @Override
