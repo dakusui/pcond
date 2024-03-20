@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DoubleTransformer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.fluent.builtins</a> &gt; <span class="el_source">DoubleTransformer.java</span></div><h1>DoubleTransformer.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.fluent.builtins;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
+public interface DoubleTransformer&lt;
+    T
+    &gt; extends
+    ComparableNumberTransformer&lt;
+        DoubleTransformer&lt;T&gt;,
+        DoubleChecker&lt;T&gt;,
+        T,
+        Double&gt; {
+  static DoubleTransformer&lt;Double&gt; create(Supplier&lt;Double&gt; value) {
+<span class="fc" id="L18">    return new Impl&lt;&gt;(value, trivialIdentityFunction());</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  default DoubleTransformer&lt;T&gt; transform(Function&lt;DoubleTransformer&lt;Double&gt;, Predicate&lt;Double&gt;&gt; clause) {
+<span class="nc" id="L23">    return this.addTransformAndCheckClause(tx -&gt; clause.apply((DoubleTransformer&lt;Double&gt;) tx));</span>
+  }
+
+  class Impl&lt;
+      OIN
+      &gt; extends
+      Base&lt;
+          DoubleTransformer&lt;OIN&gt;,
+          DoubleChecker&lt;OIN&gt;,
+          OIN,
+          Double&gt; implements
+      DoubleTransformer&lt;OIN&gt; {
+    public Impl(Supplier&lt;OIN&gt; baseValue, Function&lt;OIN, Double&gt; transformFunction) {
+<span class="fc" id="L36">      super(baseValue, transformFunction);</span>
+<span class="fc" id="L37">    }</span>
+
+    @Override
+    protected DoubleChecker&lt;OIN&gt; toChecker(Function&lt;OIN, Double&gt; transformFunction) {
+<span class="fc" id="L41">      return new DoubleChecker.Impl&lt;&gt;(this::baseValue, transformFunction);</span>
+    }
+
+    @Override
+    protected DoubleTransformer&lt;Double&gt; rebase() {
+<span class="nc" id="L46">      return new DoubleTransformer.Impl&lt;&gt;(this::value, trivialIdentityFunction());</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

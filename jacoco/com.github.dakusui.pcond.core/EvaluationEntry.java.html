@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EvaluationEntry.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core</a> &gt; <span class="el_source">EvaluationEntry.java</span></div><h1>EvaluationEntry.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core;
+
+import com.github.dakusui.pcond.core.ValueHolder.State;
+import com.github.dakusui.pcond.validator.Validator;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
+import static com.github.dakusui.pcond.core.Evaluator.Explainable.*;
+import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
+import static com.github.dakusui.pcond.core.Evaluator.Snapshottable.toSnapshotIfPossible;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_TAIL;
+import static com.github.dakusui.pcond.core.ValueHolder.State.VALUE_RETURNED;
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
+/**
+ *
+ * // @formatter:off
+ * A class to hold an entry of execution history of the {@link Evaluator}.
+ * When an evaluator enters into one {@link Evaluable} (actually a predicate or a function),
+ * an {@code OnGoing} entry is created and held by the evaluator as a current
+ * one.
+ * Since one evaluate can have its children and only one child can be evaluated at once,
+ * on-going entries are held as a list (stack).
+ *
+ * When the evaluator leaves the evaluable, the entry is &quot;finalized&quot;.
+ * From the data held by an entry, &quot;expectation&quot; and &quot;actual behavior&quot; reports are generated.
+ *
+ * .Evaluation Summary Format
+ * ----
+ * +----------------------------------------------------------------------------- Failure Detail Index
+ * |  +-------------------------------------------------------------------------- Input
+ * |  |                                            +----------------------------- Form (Function/Predicate)
+ * |  |                                            |                           +- Output
+ * |  |                                            |                           |
+ * V  V                                            V                           V
+ *     Book:[title:&lt;De Bello G...i appellantur.&gt;]-&gt;check:allOf               -&gt;false
+ *                                                    transform:title       -&gt;&quot;De Bello Gallico&quot;
+ *                       &quot;De Bello Gallico&quot;     -&gt;    check:allOf           -&gt;false
+ *                                                        isNotNull         -&gt;true
+ * [0]                                                    transform:parseInt-&gt;NumberFormatException:&quot;For input s...ico&quot;&quot;
+ *                          null                -&gt;        check:allOf       -&gt;false
+ *                                                            &gt;=[10]        -&gt;true
+ *                                                            &lt;[40]         -&gt;true
+ *    Book:[title:&lt;De Bello G...i appellantur.&gt;]-&gt;    transform:title       -&gt;&quot;Gallia est omnis divis...li appellantur.&quot;
+ *    &quot;Gallia est omnis divis...li appellantur.&quot;-&gt;    check:allOf           -&gt;false
+ *                                                        isNotNull         -&gt;true
+ *                                                        transform:length  -&gt;145
+ *    145                                       -&gt;        check:allOf       -&gt;false
+ * [1]                                                         &gt;=[200]       -&gt;true
+ * &lt;[400]        -&gt;true
+ * ----
+ *
+ * Failure Detail Index::
+ * In the full format of a failure report, detailed descriptions of mismatching forms are provided if the form is {@link Evaluator.Explainable}.
+ * This index points an item in the detail part of the full report.
+ * Input::
+ * Values given to forms are printed here.
+ * If the previous line uses the same value, the value will not be printed.
+ * Form (Function/Predicate)::
+ * This part displays names of forms (predicates and functions).
+ * If a form is marked trivial, the framework may merge the form with the next line.
+ * Output::
+ * For predicates, expected boolean value is printed.
+ * For functions, if a function does not throw an exception during its evaluation, the result will be printed here both for expectation and actual behavior summary.
+ * If it throws an exception, the exception will be printed here in actual behavior summary.
+ *
+ * // @formatter:on
+ */
+public abstract class EvaluationEntry {
+  private final Type   type;
+  /**
+   * A name of a form (evaluable; function, predicate)
+   */
+  private final String formName;
+  int level;
+  
+  Object inputExpectation;
+  Object detailInputExpectation;
+  
+  Object inputActualValue;
+  Object detailInputActualValue;
+  
+  Object outputExpectation;
+  Object detailOutputExpectation;
+  
+  
+  /**
+   * A flag to let the framework know this entry should be printed in a less outstanding form.
+   */
+  final boolean squashable;
+  
+<span class="fc" id="L100">  EvaluationEntry(String formName, Type type, int level, Object inputExpectation_, Object detailInputExpectation_, Object outputExpectation, Object detailOutputExpectation, Object inputActualValue, Object detailInputActualValue, boolean squashable) {</span>
+<span class="fc" id="L101">    this.type = type;</span>
+<span class="fc" id="L102">    this.level = level;</span>
+<span class="fc" id="L103">    this.formName = formName;</span>
+<span class="fc" id="L104">    this.inputExpectation = inputExpectation_;</span>
+<span class="fc" id="L105">    this.detailInputExpectation = detailInputExpectation_;</span>
+<span class="fc" id="L106">    this.outputExpectation = outputExpectation;</span>
+<span class="fc" id="L107">    this.detailOutputExpectation = detailOutputExpectation;</span>
+<span class="fc" id="L108">    this.inputActualValue = inputActualValue;</span>
+<span class="fc" id="L109">    this.detailInputActualValue = detailInputActualValue;</span>
+<span class="fc" id="L110">    this.squashable = squashable;</span>
+<span class="fc" id="L111">  }</span>
+  
+  public String formName() {
+<span class="fc" id="L114">    return formName;</span>
+  }
+  
+  public Type type() {
+<span class="fc" id="L118">    return this.type;</span>
+  }
+  
+  @SuppressWarnings(&quot;BooleanMethodIsAlwaysInverted&quot;)
+  public boolean isSquashable(EvaluationEntry nextEntry) {
+<span class="nc" id="L123">    return this.squashable;</span>
+  }
+  
+  public abstract boolean requiresExplanation();
+  
+  public int level() {
+<span class="fc" id="L129">    return level;</span>
+  }
+  
+  public Object inputExpectation() {
+<span class="fc" id="L133">    return this.inputExpectation;</span>
+  }
+  
+  public Object detailInputExpectation() {
+<span class="fc" id="L137">    return this.detailInputExpectation;</span>
+  }
+  
+  public Object outputExpectation() {
+<span class="fc" id="L141">    return this.outputExpectation;</span>
+  }
+  
+  public Object detailOutputExpectation() {
+<span class="fc" id="L145">    return this.detailOutputExpectation;</span>
+  }
+  
+  public Object inputActualValue() {
+<span class="fc" id="L149">    return this.inputActualValue;</span>
+  }
+  
+  public abstract Object outputActualValue();
+  
+  public abstract Object detailOutputActualValue();
+  
+  public abstract boolean ignored();
+  
+  @Override
+  public String toString() {
+<span class="nc" id="L160">    return String.format(&quot;%s(%s)&quot;, formName(), inputActualValue());</span>
+  }
+  
+  static String composeDetailOutputActualValueFromInputAndThrowable(Object input, Throwable throwable) {
+<span class="fc" id="L164">    StringBuilder b = new StringBuilder();</span>
+<span class="fc" id="L165">    b.append(&quot;Input: '&quot;).append(input).append(&quot;'&quot;).append(format(&quot;%n&quot;));</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">    b.append(&quot;Input Type: &quot;).append(input == null ? &quot;(null)&quot; : input.getClass().getName()).append(format(&quot;%n&quot;));</span>
+<span class="fc" id="L167">    b.append(&quot;Thrown Exception: '&quot;).append(throwable.getClass().getName()).append(&quot;'&quot;).append(format(&quot;%n&quot;));</span>
+<span class="fc" id="L168">    b.append(&quot;Exception Message: &quot;).append(sanitizeExceptionMessage(throwable)).append(format(&quot;%n&quot;));</span>
+    
+<span class="fc bfc" id="L170" title="All 2 branches covered.">    for (StackTraceElement each : foldInternalPackageElements(throwable)) {</span>
+<span class="fc" id="L171">      b.append(&quot;\t&quot;);</span>
+<span class="fc" id="L172">      b.append(each);</span>
+<span class="fc" id="L173">      b.append(format(&quot;%n&quot;));</span>
+<span class="fc" id="L174">    }</span>
+<span class="fc" id="L175">    return b.toString();</span>
+  }
+  
+  private static String sanitizeExceptionMessage(Throwable throwable) {
+<span class="fc bfc" id="L179" title="All 2 branches covered.">    if (throwable.getMessage() == null)</span>
+<span class="fc" id="L180">      return null;</span>
+<span class="fc" id="L181">    return Arrays.stream(throwable.getMessage().split(&quot;\n&quot;))</span>
+<span class="fc" id="L182">        .map(s -&gt; &quot;&gt; &quot; + s)</span>
+<span class="fc" id="L183">        .collect(joining(String.format(&quot;%n&quot;)));</span>
+  }
+  
+  static &lt;T, E extends Evaluable&lt;T&gt;&gt; Object computeInputActualValue(EvaluableIo&lt;T, E, ?&gt; evaluableIo) {
+<span class="fc" id="L187">    return evaluableIo.input().value();</span>
+  }
+  
+  static &lt;T, E extends Evaluable&lt;T&gt;&gt; Object computeOutputExpectation(EvaluableIo&lt;T, E, ?&gt; evaluableIo, boolean expectationFlipped) {
+<span class="fc" id="L191">    final State state = evaluableIo.output().state();</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">    if (state == VALUE_RETURNED) {</span>
+<span class="fc bfc" id="L193" title="All 4 branches covered.">      if (evaluableIo.evaluableType() == FUNCTION || evaluableIo.evaluableType() == TRANSFORM)</span>
+<span class="fc" id="L194">        return toSnapshotIfPossible(evaluableIo.output().returnedValue());</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">      return !expectationFlipped;</span>
+<span class="pc bpc" id="L196" title="1 of 4 branches missed.">    } else if (state == State.EXCEPTION_THROWN || state == State.EVALUATION_SKIPPED)</span>
+<span class="fc" id="L197">      return EVALUATION_SKIPPED;</span>
+    else
+<span class="nc" id="L199">      throw new AssertionError(&quot;output state=&lt;&quot; + state + &quot;&gt;&quot;);</span>
+  }
+  
+  static &lt;T, E extends Evaluable&lt;T&gt;&gt; Object computeOutputActualValue(EvaluableIo&lt;T, E, ?&gt; evaluableIo) {
+<span class="fc bfc" id="L203" title="All 2 branches covered.">    if (evaluableIo.output().state() == State.VALUE_RETURNED)</span>
+<span class="fc" id="L204">      return toSnapshotIfPossible(evaluableIo.output().returnedValue());</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">    if (evaluableIo.output().state() == State.EXCEPTION_THROWN)</span>
+<span class="fc" id="L206">      return evaluableIo.output().thrownException();</span>
+    else
+<span class="fc" id="L208">      return EVALUATION_SKIPPED;</span>
+  }
+  
+  static &lt;T, E extends Evaluable&lt;T&gt;&gt; boolean isExplanationRequired(EvaluableIo&lt;T, E, ?&gt; evaluableIo, boolean expectationFlipped) {
+<span class="fc bfc" id="L212" title="All 2 branches covered.">    return asList(FUNCTION, LEAF).contains(evaluableIo.evaluableType()) &amp;&amp; (</span>
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        evaluableIo.output().state() == State.EXCEPTION_THROWN || (</span>
+<span class="fc bfc" id="L214" title="All 4 branches covered.">            evaluableIo.evaluable() instanceof Evaluable.LeafPred &amp;&amp; returnedValueOrVoidIfSkipped(expectationFlipped, evaluableIo)));</span>
+  }
+  
+  private static List&lt;StackTraceElement&gt; foldInternalPackageElements(Throwable throwable) {
+<span class="fc" id="L218">    AtomicReference&lt;StackTraceElement&gt; firstInternalStackElement = new AtomicReference&lt;&gt;();</span>
+<span class="fc" id="L219">    String lastPackageNameElementPattern = &quot;\\.[a-zA-Z0-9_.]+$&quot;;</span>
+<span class="fc" id="L220">    String internalPackageName = Validator.class.getPackage().getName()</span>
+<span class="fc" id="L221">        .replaceFirst(lastPackageNameElementPattern, &quot;&quot;)</span>
+<span class="fc" id="L222">        .replaceFirst(lastPackageNameElementPattern, &quot;&quot;);</span>
+<span class="fc" id="L223">    return Arrays.stream(throwable.getStackTrace())</span>
+<span class="fc" id="L224">        .filter(e -&gt; {</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">          if (e.getClassName().startsWith(internalPackageName)) {</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">            if (firstInternalStackElement.get() == null) {</span>
+<span class="fc" id="L227">              firstInternalStackElement.set(e);</span>
+<span class="fc" id="L228">              return true;</span>
+            }
+<span class="fc" id="L230">            return false;</span>
+          }
+<span class="fc" id="L232">          firstInternalStackElement.set(null);</span>
+<span class="fc" id="L233">          return true;</span>
+        })
+<span class="fc" id="L235">        .map(e -&gt; {</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">          if (e.getClassName().startsWith(internalPackageName)) {</span>
+<span class="fc" id="L237">            return new StackTraceElement(&quot;...internal.package.InternalClass&quot;, &quot;internalMethod&quot;, &quot;InternalClass.java&quot;, 0);</span>
+          }
+<span class="fc" id="L239">          return e;</span>
+        })
+<span class="fc" id="L241">        .collect(toList());</span>
+  }
+  
+  private static boolean returnedValueOrVoidIfSkipped(boolean expectationFlipped, EvaluableIo&lt;?, ?, ?&gt; io) {
+<span class="fc bfc" id="L245" title="All 2 branches covered.">    if (io.output().state() == State.EVALUATION_SKIPPED)</span>
+<span class="fc" id="L246">      return false;</span>
+<span class="fc bfc" id="L247" title="All 2 branches covered.">    return expectationFlipped ^ !(Boolean) io.output().returnedValue();</span>
+  }
+  
+<span class="fc" id="L250">  public enum Type {</span>
+<span class="fc" id="L251">    TRANSFORM_AND_CHECK {</span>
+      @Override
+      String formName(Evaluable&lt;?&gt; evaluable) {
+<span class="fc" id="L254">        return &quot;transformAndCheck&quot;;</span>
+      }
+    },
+<span class="fc" id="L257">    TRANSFORM {</span>
+      @Override
+      String formName(Evaluable&lt;?&gt; evaluable) {
+<span class="fc" id="L260">        return &quot;transform&quot;;</span>
+      }
+      
+      @Override
+      boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">        if (Objects.equals(FUNCTION, nextEntry.evaluableIo().evaluableType()))</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">          return !((Evaluable.Func&lt;?&gt;) nextEntry.evaluableIo().evaluable()).tail().isPresent();</span>
+<span class="nc" id="L267">        return false;</span>
+      }
+    },
+<span class="fc" id="L270">    CHECK {</span>
+      @Override
+      String formName(Evaluable&lt;?&gt; evaluable) {
+<span class="fc" id="L273">        return resolveEvaluationEntryType(evaluable).formName(evaluable);</span>
+      }
+      
+      @Override
+      boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
+<span class="fc" id="L278">        return asList(LEAF, NOT, AND, OR, TRANSFORM).contains(nextEntry.evaluableIo().evaluableType());</span>
+      }
+    },
+<span class="fc" id="L281">    AND {</span>
+      @Override
+      String formName(Evaluable&lt;?&gt; evaluable) {
+<span class="fc bfc" id="L284" title="All 2 branches covered.">        return ((Evaluable.Conjunction&lt;?&gt;) evaluable).shortcut() ? &quot;and&quot; : &quot;allOf&quot;;</span>
+      }
+    },
+<span class="fc" id="L287">    OR {</span>
+      @Override
+      String formName(Evaluable&lt;?&gt; evaluable) {
+<span class="fc bfc" id="L290" title="All 2 branches covered.">        return ((Evaluable.Disjunction&lt;?&gt;) evaluable).shortcut() ? &quot;or&quot; : &quot;anyOf&quot;;</span>
+      }
+    },
+<span class="fc" id="L293">    NOT {</span>
+      @Override
+      String formName(Evaluable&lt;?&gt; evaluable) {
+<span class="fc" id="L296">        return &quot;not&quot;;</span>
+      }
+      
+      @Override
+      boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
+<span class="fc" id="L301">        return Objects.equals(LEAF, nextEntry.evaluableIo().evaluableType());</span>
+      }
+    },
+<span class="fc" id="L304">    LEAF {</span>
+      @Override
+      String formName(Evaluable&lt;?&gt; evaluable) {
+<span class="fc" id="L307">        return evaluable.toString();</span>
+      }
+    },
+<span class="fc" id="L310">    FUNCTION {</span>
+      @Override
+      String formName(Evaluable&lt;?&gt; evaluable) {
+<span class="pc bpc" id="L313" title="1 of 2 branches missed.">        if (DebuggingUtils.showEvaluableDetail()) {</span>
+<span class="nc bnc" id="L314" title="All 2 branches missed.">          if (!((Evaluable.Func&lt;?&gt;) evaluable).tail().isPresent())</span>
+<span class="nc" id="L315">            return ((Evaluable.Func&lt;?&gt;) evaluable).head().toString();</span>
+<span class="nc" id="L316">          return ((Evaluable.Func&lt;?&gt;) evaluable).head().toString() + &quot;(&quot; + ((Evaluable.Func&lt;?&gt;) evaluable).tail().get() + &quot;)&quot;;</span>
+        }
+<span class="fc" id="L318">        return ((Evaluable.Func&lt;?&gt;) evaluable).head().toString();</span>
+      }
+    };
+    
+    abstract String formName(Evaluable&lt;?&gt; evaluable);
+    
+    boolean isSquashableWith(EvaluationEntry.Impl nextEntry) {
+<span class="fc" id="L325">      return false;</span>
+    }
+  }
+  
+  static class Finalized extends EvaluationEntry {
+    final         Object  outputActualValue;
+    final         Object  detailOutputActualValue;
+    private final boolean requiresExplanation;
+    private final boolean ignored;
+    
+    Finalized(
+        String formName,
+        Type type,
+        int level,
+        Object inputExpectation_, Object detailInputExpectation_,
+        Object outputExpectation, Object detailOutputExpectation,
+        Object inputActualValue, Object detailInputActualValue,
+        Object outputActualValue, Object detailOutputActualValue,
+        boolean squashable, boolean requiresExplanation, boolean ignored) {
+<span class="fc" id="L344">      super(</span>
+          formName, type, level,
+          inputExpectation_, detailInputExpectation_,
+          outputExpectation, detailOutputExpectation,
+          inputActualValue, detailInputActualValue, squashable);
+<span class="fc" id="L349">      this.outputActualValue = outputActualValue;</span>
+<span class="fc" id="L350">      this.detailOutputActualValue = detailOutputActualValue;</span>
+<span class="fc" id="L351">      this.requiresExplanation = requiresExplanation;</span>
+<span class="fc" id="L352">      this.ignored = ignored;</span>
+<span class="fc" id="L353">    }</span>
+    
+    @Override
+    public Object outputActualValue() {
+<span class="fc" id="L357">      return outputActualValue;</span>
+    }
+    
+    @Override
+    public Object detailOutputActualValue() {
+<span class="fc" id="L362">      return this.detailOutputActualValue;</span>
+    }
+    
+    @Override
+    public boolean ignored() {
+<span class="nc" id="L367">      return this.ignored;</span>
+    }
+    
+    @Override
+    public boolean requiresExplanation() {
+<span class="fc" id="L372">      return this.requiresExplanation;</span>
+    }
+  }
+  
+  public static EvaluationEntry create(
+      String formName, Type type,
+      int level,
+      Object inputExpectation_, Object detailInputExpectation_,
+      Object outputExpectation, Object detailOutputExpectation,
+      Object inputActualValue, Object detailInputActualValue,
+      Object outputActualValue, Object detailOutputActualValue,
+      boolean trivial, boolean requiresExplanation, boolean ignored) {
+<span class="fc" id="L384">    return new Finalized(</span>
+        formName, type,
+        level,
+        inputExpectation_, detailInputExpectation_,
+        outputExpectation, detailOutputExpectation,
+        inputActualValue, detailInputActualValue,
+        outputActualValue, detailOutputActualValue,
+        trivial, requiresExplanation, ignored
+    );
+  }
+  
+<span class="pc bpc" id="L395" title="1 of 2 branches missed.">  public static class Impl extends EvaluationEntry {</span>
+    
+    private final EvaluableIo&lt;?, ?, ?&gt; evaluableIo;
+    private final boolean              expectationFlipped;
+    private       boolean              ignored;
+    
+<span class="fc" id="L401">    private boolean finalized = false;</span>
+    private Object  outputActualValue;
+    private Object  detailOutputActualValue;
+    
+    &lt;T, E extends Evaluable&lt;T&gt;&gt; Impl(
+        EvaluationContext&lt;T&gt; evaluationContext,
+        EvaluableIo&lt;T, E, ?&gt; evaluableIo) {
+<span class="fc" id="L408">      super(</span>
+<span class="fc" id="L409">          EvaluationContext.formNameOf(evaluableIo),</span>
+<span class="fc" id="L410">          evaluableIo.evaluableType(),</span>
+<span class="fc" id="L411">          evaluationContext.visitorLineage.size(),</span>
+<span class="fc" id="L412">          computeInputExpectation(evaluableIo),                   // inputExpectation        == inputActualValue</span>
+<span class="fc" id="L413">          explainInputExpectation(evaluableIo),                   // detailInputExpectation  == detailInputActualValue</span>
+          null, // not necessary                                  // outputExpectation
+<span class="fc" id="L415">          explainOutputExpectation(evaluableIo.evaluable(), evaluableIo),      // detailOutputExpectation</span>
+<span class="fc" id="L416">          computeInputActualValue(evaluableIo),                   // inputActualValue</span>
+<span class="fc" id="L417">          explainInputActualValue(evaluableIo.evaluable(), computeInputActualValue(evaluableIo)), // detailInputActualValue</span>
+<span class="fc" id="L418">          evaluableIo.evaluable().isSquashable());</span>
+<span class="fc" id="L419">      this.evaluableIo = evaluableIo;</span>
+<span class="fc" id="L420">      this.expectationFlipped = evaluationContext.isExpectationFlipped();</span>
+<span class="fc" id="L421">      this.ignored = false;</span>
+<span class="fc" id="L422">    }</span>
+    
+    private static &lt;E extends Evaluable&lt;T&gt;, T&gt; Object explainInputExpectation(EvaluableIo&lt;T, E, ?&gt; evaluableIo) {
+<span class="fc" id="L425">      return explainInputActualValue(evaluableIo, computeInputExpectation(evaluableIo));</span>
+    }
+    
+    private static &lt;E extends Evaluable&lt;T&gt;, T&gt; Object computeInputExpectation(EvaluableIo&lt;T, E, ?&gt; evaluableIo) {
+<span class="fc" id="L429">      return computeInputActualValue(evaluableIo);</span>
+    }
+    
+    @Override
+    public boolean requiresExplanation() {
+<span class="fc" id="L434">      return isExplanationRequired(evaluableIo(), this.expectationFlipped);</span>
+    }
+    
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public &lt;I, O&gt; EvaluableIo&lt;I, Evaluable&lt;I&gt;, O&gt; evaluableIo() {
+<span class="fc" id="L439">      return (EvaluableIo&lt;I, Evaluable&lt;I&gt;, O&gt;) this.evaluableIo;</span>
+    }
+    
+    public Object outputExpectation() {
+<span class="pc bpc" id="L443" title="2 of 4 branches missed.">      assert finalized;</span>
+<span class="fc" id="L444">      return outputExpectation;</span>
+    }
+    
+    @Override
+    public Object outputActualValue() {
+<span class="pc bpc" id="L449" title="2 of 4 branches missed.">      assert finalized;</span>
+<span class="fc" id="L450">      return outputActualValue;</span>
+    }
+    
+    @Override
+    public Object detailOutputActualValue() {
+<span class="pc bpc" id="L455" title="2 of 4 branches missed.">      assert finalized;</span>
+<span class="fc" id="L456">      return detailOutputActualValue;</span>
+    }
+    
+    public boolean ignored() {
+<span class="pc bpc" id="L460" title="2 of 4 branches missed.">      assert finalized;</span>
+<span class="fc" id="L461">      return this.ignored;</span>
+    }
+    
+    public boolean isSquashable(EvaluationEntry nextEntry) {
+<span class="pc bpc" id="L465" title="1 of 2 branches missed.">      if (nextEntry instanceof EvaluationEntry.Impl)</span>
+<span class="fc" id="L466">        return this.type().isSquashableWith((Impl) nextEntry);</span>
+<span class="nc" id="L467">      return false;</span>
+    }
+    
+    public String formName() {
+<span class="pc bpc" id="L471" title="1 of 2 branches missed.">      if (DebuggingUtils.showEvaluableDetail())</span>
+<span class="nc" id="L472">        return evaluableIo.formName() + &quot;(&quot; +</span>
+<span class="nc" id="L473">            evaluableIo.evaluableType() + &quot;:&quot; +</span>
+<span class="nc" id="L474">            evaluableIo.input().creatorFormType() + &quot;:&quot; +</span>
+<span class="nc bnc" id="L475" title="All 2 branches missed.">            evaluableIo.output().creatorFormType() +</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">            (finalized &amp;&amp; this.ignored() ? &quot;:ignored&quot; : &quot;&quot;) + &quot;)&quot;;</span>
+<span class="fc" id="L477">      return this.evaluableIo.formName();</span>
+    }
+    
+    public void finalizeValues() {
+<span class="fc" id="L481">      this.outputExpectation = computeOutputExpectation(evaluableIo(), expectationFlipped);</span>
+<span class="fc" id="L482">      this.outputActualValue = computeOutputActualValue(evaluableIo());</span>
+<span class="fc" id="L483">      this.detailOutputActualValue = explainActual(evaluableIo());</span>
+<span class="fc" id="L484">      this.ignored =</span>
+<span class="pc bpc" id="L485" title="1 of 4 branches missed.">          (this.evaluableIo.evaluableType() == TRANSFORM_AND_CHECK &amp;&amp; this.evaluableIo.formName().equals(&quot;transformAndCheck&quot;)) ||</span>
+<span class="fc bfc" id="L486" title="All 4 branches covered.">              (this.evaluableIo.evaluableType() == FUNCTION &amp;&amp; this.evaluableIo.output().creatorFormType() == FUNC_TAIL);</span>
+<span class="fc" id="L487">      this.finalized = true;</span>
+<span class="fc" id="L488">    }</span>
+    
+    @Override
+    public String toString() {
+<span class="nc bnc" id="L492" title="All 4 branches missed.">      return String.format(&quot;%s(%s)=%s (expected:=%s):%s&quot;, formName(), inputActualValue(), finalized ? outputActualValue() : &quot;(n/a)&quot;, finalized ? outputExpectation() : &quot;(n/a)&quot;, this.level());</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Checker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.fluent</a> &gt; <span class="el_source">Checker.java</span></div><h1>Checker.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.fluent;
+
+import com.github.dakusui.pcond.fluent.Statement;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static java.util.Objects.requireNonNull;
+
+public interface Checker&lt;
+    V extends Checker&lt;V, T, R&gt;,
+    T,
+    R&gt; extends
+    Matcher&lt;V, T, R&gt;,
+    Statement&lt;T&gt; {
+  V addCheckPhrase(Function&lt;Checker&lt;?, R, R&gt;, Predicate&lt;R&gt;&gt; clause);
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  default V checkWithPredicate(Predicate&lt;? super R&gt; predicate) {
+<span class="fc" id="L21">    requireNonNull(predicate);</span>
+<span class="fc" id="L22">    return addCheckPhrase(w -&gt; (Predicate&lt;R&gt;) predicate);</span>
+  }
+
+  default Predicate&lt;T&gt; done() {
+<span class="fc" id="L26">    return statementPredicate();</span>
+  }
+
+  /**
+   * // @formatter:off
+   * When you use an assertion method that accepts multiple statements (`Statement`), it requires all the elements in the array (`varargs`) should have the same generic parameter type.
+   * However, you sometimes want to check multiple types at once.
+   * By calling this method for every statement building method calling chain, you can address the compilation error.
+   *
+   * [source, java]
+   * ```
+   * class Example {
+   *   public static void main(String... args) {
+   *     assert all(
+   *        objectValue(arg[0]).isNotNull().$(),
+   *        objectValue(new Example()).isNotNull().$(),
+   *        ...
+   *   }
+   * }
+   * ```
+   *
+   * // @formatter.off
+   *
+   * @return A statement for `java.lang.Object` type.
+   */
+  @SuppressWarnings(&quot;unchecked&quot;)
+  default Statement&lt;Object&gt; $() {
+<span class="fc" id="L53">    return (Statement&lt;Object&gt;) this;</span>
+  }
+
+  abstract class Base&lt;
+      V extends Checker&lt;V, T, R&gt;,
+      T,
+      R&gt; extends
+      Matcher.Base&lt;
+          V,
+          T,
+          R
+          &gt; implements
+      Checker&lt;
+          V,
+          T,
+          R&gt; {
+    public Base(Supplier&lt;T&gt; baseValue, Function&lt;T, R&gt; transformFunction) {
+<span class="fc" id="L70">      super(baseValue, transformFunction);</span>
+<span class="fc" id="L71">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public V addCheckPhrase(Function&lt;Checker&lt;?, R, R&gt;, Predicate&lt;R&gt;&gt; clause) {
+<span class="fc" id="L76">      return this.addPredicate((Matcher&lt;?, R, R&gt; v) -&gt; clause.apply((Checker&lt;?, R, R&gt;) v));</span>
+    }
+
+    @Override
+    public T statementValue() {
+<span class="fc" id="L81">      return this.baseValue();</span>
+    }
+
+    @Override
+    public Predicate&lt;T&gt; statementPredicate() {
+<span class="fc" id="L86">      return toPredicate();</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

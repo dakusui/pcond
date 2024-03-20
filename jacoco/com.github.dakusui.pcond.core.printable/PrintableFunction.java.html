@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrintableFunction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.printable</a> &gt; <span class="el_source">PrintableFunction.java</span></div><h1>PrintableFunction.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.printable;
+
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.Evaluator;
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunction;
+import com.github.dakusui.pcond.core.identifieable.Identifiable;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">public class PrintableFunction&lt;T, R&gt; extends</span>
+    Identifiable.Base implements
+    Evaluable.Func&lt;T&gt;,
+    CurriedFunction&lt;T, R&gt;,
+    Evaluator.Explainable,
+    Cloneable {
+  final         Function&lt;? super T, ? extends R&gt; function;
+  private final Function&lt;? super T, Object&gt;           head;
+  private final Evaluable&lt;Object&gt;                tail;
+  private final Supplier&lt;String&gt;                 formatter;
+  private final Function&lt;?, R&gt;                   tailAsFunction;
+
+<span class="fc" id="L26">  boolean trivial = false;</span>
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  protected PrintableFunction(Object creator, List&lt;Object&gt; args, Supplier&lt;String&gt; s, Function&lt;? super T, ? extends R&gt; function, Function&lt;? super T, ?&gt; head, Evaluable&lt;?&gt; tail) {
+<span class="fc" id="L30">    super(creator, args);</span>
+<span class="fc" id="L31">    this.formatter = Objects.requireNonNull(s);</span>
+<span class="fc" id="L32">    this.function = requireNonPrintableFunction(unwrap(Objects.requireNonNull(function)));</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">    this.head = head != null ? (Function&lt;? super T, Object&gt;) head : (Function&lt;? super T, Object&gt;) this;</span>
+<span class="fc" id="L34">    this.tail = (Evaluable&lt;Object&gt;) tail;</span>
+<span class="fc" id="L35">    this.tailAsFunction = (Function&lt;?, R&gt;) tail;</span>
+<span class="fc" id="L36">  }</span>
+
+  protected PrintableFunction(Object creator, List&lt;Object&gt; args, Supplier&lt;String&gt; s, Function&lt;? super T, ? extends R&gt; function) {
+<span class="fc" id="L39">    this(creator, args, s, function, null, null);</span>
+<span class="fc" id="L40">  }</span>
+
+  @Override
+  public String toString() {
+<span class="fc" id="L44">    return this.formatter.get();</span>
+  }
+
+  @Override
+  public &lt;V&gt; Function&lt;V, R&gt; compose(Function&lt;? super V, ? extends T&gt; before) {
+<span class="fc" id="L49">    Objects.requireNonNull(before);</span>
+<span class="fc" id="L50">    return PrintableFunctionFactory.&lt;V, T, R&gt;compose(before, this);</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  @Override
+  public &lt;V&gt; Function&lt;T, V&gt; andThen(Function&lt;? super R, ? extends V&gt; after) {
+<span class="fc" id="L56">    Objects.requireNonNull(after);</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">    @SuppressWarnings(&quot;rawtypes&quot;) Function f = this.tailAsFunction == null ? after : PrintableFunctionFactory.compose((Function) this.tailAsFunction, after);</span>
+<span class="fc" id="L58">    return PrintableFunctionFactory.compose(this.head, f);</span>
+  }
+
+  @Override
+  public Function&lt;? super T, Object&gt; head() {
+<span class="fc" id="L63">    return this.head;</span>
+  }
+
+  @Override
+  public Optional&lt;Evaluable&lt;Object&gt;&gt; tail() {
+<span class="fc" id="L68">    return Optional.ofNullable(this.tail);</span>
+  }
+
+  @Override
+  public R applyFunction(T value) {
+<span class="fc" id="L73">    return this.function.apply(value);</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  @Override
+  public Class&lt;?&gt; parameterType() {
+<span class="fc bfc" id="L79" title="All 2 branches covered.">    return function instanceof CurriedFunction ?</span>
+<span class="fc" id="L80">        ((CurriedFunction&lt;? super T, ? extends R&gt;) function).parameterType() :</span>
+        Object.class;
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  @Override
+  public Class&lt;? extends R&gt; returnType() {
+<span class="fc bfc" id="L87" title="All 2 branches covered.">    return function instanceof CurriedFunction ?</span>
+<span class="fc" id="L88">        (Class&lt;? extends R&gt;) ((CurriedFunction&lt;? super T, ? extends R&gt;) function).returnType() :</span>
+        (Class&lt;? extends R&gt;) Object.class;
+  }
+
+  @Override
+  public Object explainOutputExpectation() {
+<span class="fc" id="L94">    return this.head();</span>
+  }
+
+  @Override
+  public Object explainActual(Object actualValue) {
+<span class="fc" id="L99">    return actualValue;</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;T, R&gt; Function&lt;T, R&gt; unwrap(Function&lt;T, R&gt; function) {
+<span class="fc" id="L104">    Function&lt;T, R&gt; ret = function;</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">    if (function instanceof PrintableFunction) {</span>
+<span class="fc" id="L106">      ret = (Function&lt;T, R&gt;) ((PrintableFunction&lt;T, R&gt;) function).function;</span>
+<span class="pc bpc" id="L107" title="2 of 4 branches missed.">      assert !(ret instanceof PrintableFunction);</span>
+    }
+<span class="fc" id="L109">    return ret;</span>
+  }
+
+
+  @SuppressWarnings({ &quot;CloneDoesntDeclareCloneNotSupportedException&quot;, &quot;unchecked&quot; })
+  @Override
+  protected PrintableFunction&lt;T, R&gt; clone() {
+    try {
+<span class="nc" id="L117">      return (PrintableFunction&lt;T, R&gt;) super.clone();</span>
+<span class="nc" id="L118">    } catch (CloneNotSupportedException e) {</span>
+<span class="nc" id="L119">      throw new AssertionError();</span>
+    }
+  }
+
+
+  public boolean isSquashable() {
+<span class="fc" id="L125">    return this.trivial;</span>
+  }
+
+  @Override
+  public PrintableFunction&lt;T, R&gt; makeTrivial() {
+<span class="nc" id="L130">    PrintableFunction&lt;T, R&gt; ret = this.clone();</span>
+<span class="nc" id="L131">    ret.trivial = true;</span>
+<span class="nc" id="L132">    return ret;</span>
+  }
+
+  private static &lt;T, R&gt; Function&lt;T, R&gt; requireNonPrintableFunction(Function&lt;T, R&gt; function) {
+<span class="pc bpc" id="L136" title="2 of 4 branches missed.">    assert !(function instanceof PrintableFunction);</span>
+<span class="fc" id="L137">    return function;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

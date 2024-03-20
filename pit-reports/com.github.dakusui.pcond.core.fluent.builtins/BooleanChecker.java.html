@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>BooleanChecker.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.github.dakusui.pcond.core.fluent.builtins;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.github.dakusui.pcond.core.fluent.AbstractObjectChecker;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.github.dakusui.pcond.forms.Predicates;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.function.Function;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.function.Predicate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.function.Supplier;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static java.util.Objects.requireNonNull;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public interface BooleanChecker&#60;T&#62; extends</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    AbstractObjectChecker&#60;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        BooleanChecker&#60;T&#62;,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        T,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>        Boolean&#62; {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  default BooleanChecker&#60;T&#62; isTrue() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_20'/>
+20
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_20'>1</a>
+<span>
+1. isTrue : replaced return value with null for com/github/dakusui/pcond/core/fluent/builtins/BooleanChecker::isTrue &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return this.checkWithPredicate(Predicates.isTrue());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  default BooleanChecker&#60;T&#62; isFalse() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_24'/>
+24
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_24'>1</a>
+<span>
+1. isFalse : replaced return value with null for com/github/dakusui/pcond/core/fluent/builtins/BooleanChecker::isFalse &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return this.checkWithPredicate(Predicates.isFalse());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @SuppressWarnings(&#34;unchecked&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  default BooleanChecker&#60;T&#62; check(Function&#60;BooleanChecker&#60;Boolean&#62;, Predicate&#60;Boolean&#62;&#62; phrase) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    requireNonNull(phrase);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_30'/>
+30
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_30'>2</a>
+<span>
+1. check : replaced return value with null for com/github/dakusui/pcond/core/fluent/builtins/BooleanChecker::check &rarr; KILLED<br/>
+2. lambda$check$0 : replaced return value with null for com/github/dakusui/pcond/core/fluent/builtins/BooleanChecker::lambda$check$0 &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return this.addCheckPhrase(v -&#62; phrase.apply((BooleanChecker&#60;Boolean&#62;) v));</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  class Impl&#60;T&#62; extends</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      Base&#60;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>          BooleanChecker&#60;T&#62;,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_35'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>          T,</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>          Boolean&#62; implements</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      BooleanChecker&#60;T&#62; {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public Impl(Supplier&#60;T&#62; baseValue, Function&#60;T, Boolean&#62; transformingFunction) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      super(baseValue, transformingFunction);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Override</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    protected BooleanChecker&#60;Boolean&#62; rebase() {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_44'/>
+44
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_44'>1</a>
+<span>
+1. rebase : replaced return value with null for com/github/dakusui/pcond/core/fluent/builtins/BooleanChecker$Impl::rebase &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return new BooleanChecker.Impl&#60;&#62;(this::value, trivialIdentityFunction());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@9340b37_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@9340b37_20'>20</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_20'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isTrue<br/><b>Killed by : </b>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenTrue_whenIsTrue_thenPass(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/fluent/builtins/BooleanChecker::isTrue &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@9340b37_24'>24</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_24'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isFalse<br/><b>Killed by : </b>com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest.test_isEmpty(com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/fluent/builtins/BooleanChecker::isFalse &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@9340b37_30'>30</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_30'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>check<br/><b>Killed by : </b>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenCheckIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/fluent/builtins/BooleanChecker::check &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>lambda$check$0<br/><b>Killed by : </b>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenCheckIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/fluent/builtins/BooleanChecker::lambda$check$0 &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@9340b37_44'>44</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@9340b37_44'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>rebase<br/><b>Killed by : </b>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenCheckIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest)</span></span> replaced return value with null for com/github/dakusui/pcond/core/fluent/builtins/BooleanChecker$Impl::rebase &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[50: Given:<null>:When:<split[:] THEN:toCursoredList (findElementBy[[A]]&&findElementBy[[B]]&&findElementBy[[C]]&&(end))>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[80: Given:<"Hello">:When:<expectingException(Exception,throwRuntimeException) THEN:isInstanceOf[class com....tionalException]>:Then:<valueReturned:[identity=>identicalWith(value:Hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[61: Given:<"hello">:When:<<>.equals(<hello>)>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[15: Given:<[]>:When:<castTo[List<Object>] THEN:isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenCheckIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[59: Given:<"hello">:When:<<>.equals(<hello>)->castTo[Boolean] THEN:isTrue>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[4: Given:<null>:When:<isTrue>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[20: Given:<"123">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[123])>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[81: Given:<"Bye">:When:<expectingException(Exception,throwRuntimeException) THEN:isInstanceOf[class com....tionalException]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[44: Given:<"A:B:C">:When:<split[:] THEN:toCursoredList (findElementBy[[A]]&&findElementBy[[B]]&&findElementBy[[C]]&&(end))>:Then:<valueReturned:[identity=>identicalWith(value:A:B:C)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[47: Given:<"A:B">:When:<split[:] THEN:toCursoredList (findElementBy[[A]]&&findElementBy[[B]]&&findElementBy[[C]]&&(end))>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[58: Given:<"hello">:When:<java.util.Objects.equals(<hello>,<>)->castTo[Boolean] THEN:isTrue>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[45: Given:<"A:B:C">:When:<split[:] THEN:toCursoredList (findElementBy[isEqualTo[A]]&&findElementBy[isEqualTo[B]]&&findElementBy[isEqualTo[C]]&&(end))>:Then:<valueReturned:[identity=>identicalWith(value:A:B:C)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[43: Given:<"A:B:C">:When:<split[:] THEN:(!isEmpty&&contains[A]&&contains[B]&&contains[C])>:Then:<valueReturned:[identity=>identicalWith(value:A:B:C)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[26: Given:<"456">:When:<parseLong THEN:(isInstanceOf[class java.lang.Long]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[33: Given:<"A">:When:<parseDouble THEN:(isInstanceOf[class java.lang.Double]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[62: Given:<"hello">:When:<java.util.Objects.equals(<hello>,<>)->castTo[Boolean] THEN:isTrue>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[22: Given:<"123">:When:<parseFloat THEN:(isInstanceOf[class java.lang.Float]&&isEqualTo[123.0])>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.assertAllDifferentTypes_passed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[74: Given:<"124">:When:<parseInt->identity->castTo[Integer] THEN:=[123]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[7: Given:<["A","B"]>:When:<subList[1] THEN:!isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[A, B])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[57: Given:<"hello">:When:<<>.equals(<hello>)>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[75: Given:<"124">:When:<parseBoolean->identity->castTo[Short] THEN:=[123]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[73: Given:<"124">:When:<parseLong->identity->castTo[Long] THEN:=[123]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest.test_isEmpty(com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[46: Given:<"A:B">:When:<split[:] THEN:(!isEmpty&&contains[A]&&contains[B]&&contains[C])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[12: Given:<[]>:When:<subList[1,0] THEN:!isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[39: Given:<"true">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Boolean]&&isTrue)>:Then:<valueReturned:[identity=>identicalWith(value:true)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.CallTest.cannotCallPrimitiveParameterMethodWithNull(com.github.dakusui.pcond.CallTest) (9 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenTrue_whenIsTrue_thenPass(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[68: Given:<null>:When:<isNull>:Then:<valueReturned:[identity=>identicalWith(value:null)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[60: Given:<"hello">:When:<java.util.Objects.equals(<hello>,<>)>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[34: Given:<null>:When:<substring[1]->parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[23])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[10: Given:<["X"]>:When:<subList[1,1] THEN:!isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (7 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[21: Given:<"123">:When:<parseLong THEN:(isInstanceOf[class java.lang.Long]&&isEqualTo[123])>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[14: Given:<["X"]>:When:<isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[51: Given:<null>:When:<split[:] THEN:toCursoredList (findElementBy[isEqualTo[A]]&&findElementBy[isEqualTo[B]]&&findElementBy[isEqualTo[C]]&&(end))>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[41: Given:<"XYZ">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Boolean]&&isTrue)>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[23: Given:<"123">:When:<parseDouble THEN:(isInstanceOf[class java.lang.Double]&&isEqualTo[123.0])>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[79: Given:<"123.5">:When:<parseDouble->identity->castTo[Double] THEN:=[123.4]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[11: Given:<[]>:When:<subList[1] THEN:!isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[71: Given:<"123">:When:<parseInt->identity->castTo[Integer] THEN:=[123]>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[5: Given:<["A","B","C"]>:When:<subList[1] THEN:!isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[A, B, C])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[72: Given:<"123">:When:<parseBoolean->identity->castTo[Short] THEN:=[123]>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[56: Given:<"hello">:When:<java.util.Objects.equals(<hello>,<>)>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[63: Given:<"hello">:When:<<>.equals(<hello>)->castTo[Boolean] THEN:isTrue>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenToBooleanIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[6: Given:<["A","B","C"]>:When:<subList[1,3] THEN:!isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[A, B, C])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[8: Given:<["A","B"]>:When:<subList[1,2] THEN:!isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[A, B])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenTransformIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[3: Given:<false>:When:<isTrue>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[55: Given:<"hello">:When:<stringify THEN:==[hello]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[42: Given:<null>:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Boolean]&&isTrue)>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[32: Given:<"A">:When:<parseFloat THEN:(isInstanceOf[class java.lang.Float]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[16: Given:<["X"]>:When:<castTo[List<Object>] THEN:isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[53: Given:<"hello">:When:<stringify THEN:==[hello]>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[30: Given:<"A">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[31: Given:<"A">:When:<parseLong THEN:(isInstanceOf[class java.lang.Long]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[78: Given:<"123.5">:When:<parseFloat->identity->castTo[Float] THEN:=[123.4]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[38: Given:<null>:When:<parseDouble THEN:(isInstanceOf[class java.lang.Double]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[18: Given:<["X"]>:When:<castTo[List<String>] THEN:isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[52: Given:<"hello">:When:<==[hello]>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[25: Given:<"456">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[9: Given:<["X"]>:When:<subList[1] THEN:!isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[17: Given:<[]>:When:<castTo[List<String>] THEN:isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[2: Given:<false>:When:<isTrue>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[28: Given:<"456">:When:<parseDouble THEN:(isInstanceOf[class java.lang.Double]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[76: Given:<"123.4">:When:<parseFloat->identity->castTo[Float] THEN:=[123.4]>:Then:<valueReturned:[identity=>identicalWith(value:123.4)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[69: Given:<"HELLO">:When:<isNull>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[49: Given:<null>:When:<split[:] THEN:(!isEmpty&&contains[A]&&contains[B]&&contains[C])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[67: Given:<"HELLO">:When:<<>.equals(<hello>)->castTo[Boolean] THEN:isTrue>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.boolean_assertThatTest_passed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[40: Given:<"false">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Boolean]&&isTrue)>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[27: Given:<"456">:When:<parseFloat THEN:(isInstanceOf[class java.lang.Float]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[0: Given:<true>:When:<isTrue>:Then:<valueReturned:[identity=>identicalWith(value:true)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (8 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[54: Given:<"hello">:When:<==[hello]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[70: Given:<"123">:When:<parseLong->identity->castTo[Long] THEN:=[123]>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[36: Given:<null>:When:<parseLong THEN:(isInstanceOf[class java.lang.Long]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[24: Given:<"456">:When:<substring[1]->parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[23])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[19: Given:<"123">:When:<substring[1]->parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[23])>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[48: Given:<"A:B">:When:<split[:] THEN:toCursoredList (findElementBy[isEqualTo[A]]&&findElementBy[isEqualTo[B]]&&findElementBy[isEqualTo[C]]&&(end))>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[64: Given:<"HELLO">:When:<java.util.Objects.equals(<hello>,<>)>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[29: Given:<"A">:When:<substring[1]->parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[23])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[77: Given:<"123.4">:When:<parseDouble->identity->castTo[Double] THEN:=[123.4]>:Then:<valueReturned:[identity=>identicalWith(value:123.4)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[1: Given:<true>:When:<isTrue>:Then:<valueReturned:[identity=>identicalWith(value:true)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[65: Given:<"HELLO">:When:<<>.equals(<hello>)>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[37: Given:<null>:When:<parseFloat THEN:(isInstanceOf[class java.lang.Float]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[35: Given:<null>:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[66: Given:<"HELLO">:When:<java.util.Objects.equals(<hello>,<>)->castTo[Boolean] THEN:isTrue>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenIsTrueAndIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[13: Given:<[]>:When:<isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='http://pitest.org'>PIT</a> 1.7.3
+
+</body>
+</html>

@@ -1,0 +1,738 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Validator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.validator</a> &gt; <span class="el_source">Validator.java</span></div><h1>Validator.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.validator;
+
+import com.github.dakusui.pcond.core.*;
+import com.github.dakusui.pcond.forms.Predicates;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.toEvaluableIfNecessary;
+import static com.github.dakusui.pcond.validator.Validator.Configuration.Utils.*;
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+
+/**
+ * An interface of a policy for behaviours on 'contract violations'.
+ */
+public interface Validator {
+  /**
+   * A constant field that holds the default provider instance.
+   */
+<span class="fc" id="L29">  ThreadLocal&lt;Validator&gt; INSTANCE = ThreadLocal.withInitial(() -&gt; create(loadPcondProperties()));</span>
+
+
+  /**
+   * Returns a configuration object that determines behaviors of this object.
+   *
+   * @return A configuration object.
+   */
+  Configuration configuration();
+
+  /**
+   * Returns a provider instance created from a given `Properties` object.
+   * This method reads the value for the FQCN of this class (`com.github.dakusui.pcond.provider.AssertionProvider`) and creates an instance of a class specified by the value.
+   * If the value is not set, this value instantiates an object of `DefaultAssertionProvider` and returns it.
+   *
+   * @param properties A {@code Properties} object from which an {@code AssertionProvider} is created
+   * @return Created provider instance.
+   */
+  static Validator create(Properties properties) {
+<span class="fc" id="L48">    return new Impl(configurationFromProperties(properties));</span>
+  }
+
+  /**
+   * Checks a value if it is {@code null} or not.
+   * If it is not a {@code null}, this method returns the given value itself.
+   *
+   * @param value The given value.
+   * @param &lt;T&gt;   The type of the value.
+   * @return The {@code value}.
+   */
+  default &lt;T&gt; T requireNonNull(T value) {
+<span class="fc" id="L60">    return require(value, Predicates.isNotNull(), configuration().exceptionComposer().forRequire()::exceptionForNonNullViolation);</span>
+  }
+
+  /**
+   * Checks a value if it meets a requirement specified by {@code cond}.
+   * If it does, the value itself will be returned.
+   *
+   * @param value The value to be checked.
+   * @param cond  The requirement to check the {@code value}.
+   * @param &lt;T&gt;   The type of the value.
+   * @return The value.
+   */
+  default &lt;T&gt; T requireArgument(T value, Predicate&lt;? super T&gt; cond) {
+<span class="fc" id="L73">    return require(value, cond, configuration().exceptionComposer().forRequire()::exceptionForIllegalArgument);</span>
+  }
+
+  /**
+   * Checks a value if it meets a requirement specified by {@code cond}.
+   * If it does, the value itself will be returned.
+   *
+   * @param value The value to be checked.
+   * @param cond  The requirement to check the {@code value}.
+   * @param &lt;T&gt;   The type of the value.
+   * @return The value.
+   */
+  default &lt;T&gt; T requireState(T value, Predicate&lt;? super T&gt; cond) {
+<span class="fc" id="L86">    return require(value, cond, configuration().exceptionComposer().forRequire()::exceptionForIllegalState);</span>
+  }
+
+  /**
+   * A method to check if a given `value` satisfies a precondition given as `cond`.
+   * If the `cond` is satisfied, the `value` itself will be returned.
+   * Otherwise, an exception returned by `configuration().exceptionComposer().forRequire().exceptionForGeneralViolation(String)`
+   * will be thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A condition to check if `value` satisfies.
+   * @param &lt;T&gt;   The of the `value`.
+   * @return The `value`, if `cond` is satisfied.
+   */
+  default &lt;T&gt; T require(T value, Predicate&lt;? super T&gt; cond) {
+<span class="fc" id="L101">    return require(value, cond, msg -&gt; configuration().exceptionComposer().forRequire().exceptionForGeneralViolation(msg));</span>
+  }
+
+  /**
+   * A method to check if a given `value` satisfies a precondition given as `cond`.
+   * If the `cond` is satisfied, the `value` itself will be returned.
+   * Otherwise, an exception created by `exceptionFactory` is thrown.
+   *
+   * @param value            A value to be checked.
+   * @param cond             A condition to check if `value` satisfies.
+   * @param exceptionFactory A function to create an exception thrown when `cond`
+   *                         is not satisfied by `value`.
+   * @param &lt;T&gt;              The of the `value`.
+   * @return The `value`, if `cond` is satisfied.
+   */
+  default &lt;T&gt; T require(T value, Predicate&lt;? super T&gt; cond, Function&lt;String, Throwable&gt; exceptionFactory) {
+<span class="fc" id="L117">    return checkValueAndThrowIfFails(</span>
+        value,
+        cond,
+<span class="fc" id="L120">        this.configuration().messageComposer()::composeMessageForPrecondition,</span>
+<span class="fc" id="L121">        explanation -&gt; exceptionFactory.apply(explanation.toString()));</span>
+  }
+
+  /**
+   * Validates the given `value`.
+   * If the value satisfies a condition `cond`, the value itself will be returned.
+   * Otherwise, an exception created by `forValidate.exceptionForGeneralViolation()`
+   * will be thrown.
+   * This method is intended to be used by {@code Validates#validate(Object, Predicate, Function)}
+   * method in `valid8j` library.
+   *
+   * @param value       The value to be checked.
+   * @param cond        A condition to validate the `value`.
+   * @param forValidate An exception composer for &quot;validate&quot; methods.
+   * @param &lt;T&gt;         The type of the value.
+   * @return The value itself.
+   */
+  default &lt;T&gt; T validate(T value, Predicate&lt;? super T&gt; cond, ExceptionComposer.ForValidate forValidate) {
+<span class="fc" id="L139">    return validate(value, cond, forValidate::exceptionForGeneralViolation);</span>
+  }
+
+  /**
+   * Validates the given `value`.
+   * If the value is not `null`, the value itself will be returned.
+   * Otherwise, an exception created by `forValidate.exceptionForGeneralViolation()`
+   * will be thrown.
+   * This method is intended to be used by {@code Validates#validateNonNull(Object)}
+   * method in valid8j library.
+   *
+   * @param value       The value to be checked.
+   * @param forValidate An exception composer for &quot;validate&quot; methods.
+   * @param &lt;T&gt;         The type of the value.
+   * @return The value itself.
+   */
+  default &lt;T&gt; T validateNonNull(T value, ExceptionComposer.ForValidate forValidate) {
+<span class="fc" id="L156">    return validate(value, Predicates.isNotNull(), forValidate::exceptionForNonNullViolation);</span>
+  }
+
+  /**
+   * Validates the given argument variable `value`.
+   * If the value satisfies a condition `cond` for checking an argument variable, the value itself will be returned.
+   * Otherwise, an exception created by `forValidate.exceptionForIllegalArgument()`
+   * will be thrown.
+   * This method is intended to be used by {@code Validates#validateArgument(Object, Predicate)}
+   * method in `valid8j` library.
+   *
+   * @param value       The value to be checked.
+   * @param cond        A condition to validate the `value`.
+   * @param forValidate An exception composer for &quot;validate&quot; methods.
+   * @param &lt;T&gt;         The type of the value.
+   * @return The value itself.
+   */
+  default &lt;T&gt; T validateArgument(T value, Predicate&lt;? super T&gt; cond, ExceptionComposer.ForValidate forValidate) {
+<span class="fc" id="L174">    return validate(value, cond, forValidate::exceptionForIllegalArgument);</span>
+  }
+
+  /**
+   * Validates the given state variable `value`.
+   * If the value satisfies a condition `cond` for checking a state, the value itself will be returned.
+   * Otherwise, an exception created by `forValidate.exceptionForIllegalState()`
+   * will be thrown.
+   * This method is intended to be used by {@code Validates#validateState(Object, Predicate)}
+   * method in valid8j library.
+   *
+   * @param value       The value to be checked.
+   * @param cond        A condition to validate the `value`.
+   * @param forValidate An exception composer for &quot;validate&quot; methods.
+   * @param &lt;T&gt;         The type of the value.
+   * @return The value itself.
+   */
+  default &lt;T&gt; T validateState(T value, Predicate&lt;? super T&gt; cond, ExceptionComposer.ForValidate forValidate) {
+<span class="fc" id="L192">    return validate(value, cond, forValidate::exceptionForIllegalState);</span>
+  }
+
+  /**
+   * Validates the given variable `value`.
+   * If the value satisfies a condition `cond`, the value itself will be returned.
+   * Otherwise, an exception created by `exceptionFactory` will be thrown.
+   * This method is intended to be used by {@code Validates#validate(Object, Predicate, Function)}
+   * method in valid8j library.
+   *
+   * @param value            The value to be checked.
+   * @param cond             A condition to validate the `value`.
+   * @param exceptionFactory A function to create an exception when the `cond` is not satisfied.
+   * @param &lt;T&gt;              The type of the value.
+   * @return The value itself.
+   */
+  default &lt;T&gt; T validate(T value, Predicate&lt;? super T&gt; cond, Function&lt;String, Throwable&gt; exceptionFactory) {
+<span class="fc" id="L209">    return validate_2(value, cond, explanation -&gt; exceptionFactory.apply(explanation.toString()));</span>
+  }
+
+  default &lt;T&gt; T validate_2(T value, Predicate&lt;? super T&gt; cond, ExceptionFactory&lt;Throwable&gt; exceptionFactory) {
+<span class="fc" id="L213">    return checkValueAndThrowIfFails(</span>
+        value,
+        cond,
+<span class="fc" id="L216">        configuration().messageComposer()::composeMessageForValidation,</span>
+        exceptionFactory);
+  }
+
+  /**
+   * Checks a value if it is not `null`.
+   * If it is not `null`, the value itself will be returned.
+   * If it is, an exception created by `configuration().exceptionComposer().forEnsure().exceptionForNonNullViolation()` will be thrown.
+   * This method is intended for ensuring a &quot;post-condition&quot;.
+   *
+   * @param value The value to be checked.
+   * @param &lt;T&gt;   The type of the value.
+   * @return The value.
+   */
+  default &lt;T&gt; T ensureNonNull(T value) {
+<span class="fc" id="L231">    return ensure(value, Predicates.isNotNull(), configuration().exceptionComposer().forEnsure()::exceptionForNonNullViolation);</span>
+  }
+
+  /**
+   * Checks a value if it meets a requirement specified by {@code cond}.
+   * If it does, the value itself will be returned.
+   * If it does not, an exception created by `configuration().exceptionComposer().forEnsure().exceptionForIllegalState()` will be thrown.
+   * This method is intended for ensuring a &quot;post-condition&quot; of a state.
+   *
+   * @param value The value to be checked.
+   * @param cond  The requirement to check the {@code value}.
+   * @param &lt;T&gt;   The type of the value.
+   * @return The value.
+   */
+  default &lt;T&gt; T ensureState(T value, Predicate&lt;? super T&gt; cond) {
+<span class="fc" id="L246">    return ensure(value, cond, configuration().exceptionComposer().forEnsure()::exceptionForIllegalState);</span>
+  }
+
+  /**
+   * Checks a value if it meets a requirement specified by {@code cond}.
+   * If it does, the value itself will be returned.
+   * If it does not, an exception created by `configuration().exceptionComposer().forEnsure().exceptionForGeneralViolation()` will be thrown.
+   * This method is intended for ensuring a &quot;post-condition&quot;.
+   *
+   * @param value The value to be checked.
+   * @param cond  The requirement to check the {@code value}.
+   * @param &lt;T&gt;   The type of the value.
+   * @return The value.
+   */
+  default &lt;T&gt; T ensure(T value, Predicate&lt;? super T&gt; cond) {
+<span class="fc" id="L261">    return ensure(value, cond, msg -&gt; configuration().exceptionComposer().forEnsure().exceptionForGeneralViolation(msg));</span>
+  }
+
+  /**
+   * Checks a value if it meets a requirement specified by {@code cond}.
+   * If it does, the value itself will be returned.
+   * If it does not, an exception created by `exceptionComposer` will be thrown.
+   * This method is intended for ensuring a &quot;post-condition&quot;.
+   *
+   * @param value             The value to be checked.
+   * @param cond              The requirement to check the {@code value}.
+   * @param exceptionComposer A function to create an exception to be thrown when
+   *                          `cond` is not met.
+   * @param &lt;T&gt;               The type of the value.
+   * @return The value.
+   */
+  default &lt;T&gt; T ensure(T value, Predicate&lt;? super T&gt; cond, Function&lt;String, Throwable&gt; exceptionComposer) {
+<span class="fc" id="L278">    return checkValueAndThrowIfFails(</span>
+        value,
+        cond,
+<span class="fc" id="L281">        configuration().messageComposer()::composeMessageForPostcondition,</span>
+<span class="fc" id="L282">        explanation -&gt; exceptionComposer.apply(explanation.toString()));</span>
+  }
+
+  /**
+   * A method to check if a `value` satisfies a predicate `cond`.
+   *
+   * This method is intended to be used by {@code Assertions#that(Object, Predicate)} in valid8j library.
+   * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionInvariantConditionViolation()`
+   * method will be thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A condition to check the `value`.
+   * @param &lt;T&gt;   The type of `value`.
+   */
+  default &lt;T&gt; void checkInvariant(T value, Predicate&lt;? super T&gt; cond) {
+<span class="fc" id="L297">    checkValueAndThrowIfFails(</span>
+        value,
+        cond,
+<span class="fc" id="L300">        configuration().messageComposer()::composeMessageForAssertion,</span>
+<span class="fc" id="L301">        explanation -&gt; configuration().exceptionComposer().forAssert().exceptionInvariantConditionViolation(explanation.toString()));</span>
+<span class="fc" id="L302">  }</span>
+
+  /**
+   * A method to check if a `value` satisfies a predicate `cond`.
+   *
+   * This method is intended to be used by {@code Assertions#precondition(Object, Predicate)} in valid8j library.
+   * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionPreconditionViolation()`
+   * method will be thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A condition to check the `value`.
+   * @param &lt;T&gt;   The type of `value`.
+   */
+  default &lt;T&gt; void checkPrecondition(T value, Predicate&lt;? super T&gt; cond) {
+<span class="fc" id="L316">    checkValueAndThrowIfFails(</span>
+        value,
+        cond,
+<span class="fc" id="L319">        configuration().messageComposer()::composeMessageForPrecondition,</span>
+<span class="fc" id="L320">        explanation -&gt; configuration().exceptionComposer().forAssert().exceptionPreconditionViolation(explanation.toString()));</span>
+<span class="fc" id="L321">  }</span>
+
+  /**
+   * A method to check if a `value` satisfies a predicate `cond`.
+   *
+   * This method is intended to be used by {@code Assertions#postcondition(Object, Predicate)} in valid8j library.
+   * If the condition is not satisfied, an exception created by `this.exceptionComposer().forAssert().exceptionPostconditionViolation()`
+   * method will be thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A condition to check the `value`.
+   * @param &lt;T&gt;   The type of `value`.
+   */
+  default &lt;T&gt; void checkPostcondition(T value, Predicate&lt;? super T&gt; cond) {
+<span class="fc" id="L335">    checkValueAndThrowIfFails(</span>
+        value,
+        cond,
+<span class="fc" id="L338">        configuration().messageComposer()::composeMessageForPostcondition,</span>
+<span class="fc" id="L339">        explanation -&gt; configuration().exceptionComposer().forAssert().exceptionPostconditionViolation(explanation.toString()));</span>
+<span class="fc" id="L340">  }</span>
+
+  /**
+   * Executes a test assertion for a given `value` using a predicate `cond`.
+   * If the `cond` is not satisfied by the `value`, an exception created by `configuration().messageComposer().composeMessageForAssertion()`
+   * will be thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A predicate to check a given `value`.
+   * @param &lt;T&gt;   The type of the `value`.
+   */
+  default &lt;T&gt; void assertThat(T value, Predicate&lt;? super T&gt; cond) {
+<span class="fc" id="L352">    checkValueAndThrowIfFails(</span>
+        value,
+        cond,
+<span class="fc" id="L355">        configuration().messageComposer()::composeMessageForAssertion,</span>
+<span class="nc" id="L356">        explanation -&gt; configuration().exceptionComposer().forAssertThat().testFailedException(explanation, configuration().reportComposer()));</span>
+<span class="fc" id="L357">  }</span>
+
+  /**
+   * Executes a test assumption check for a given `value` using a predicate `cond`.
+   * If the `cond` is not satisfied by the `value`, an exception created by `configuration().messageComposer().composeMessageForAssertion()`
+   * will be thrown.
+   *
+   * @param value A value to be checked.
+   * @param cond  A predicate to check a given `value`.
+   * @param &lt;T&gt;   The type of the `value`.
+   */
+  default &lt;T&gt; void assumeThat(T value, Predicate&lt;? super T&gt; cond) {
+<span class="fc" id="L369">    checkValueAndThrowIfFails(</span>
+        value,
+        cond,
+<span class="fc" id="L372">        configuration().messageComposer()::composeMessageForAssertion,</span>
+<span class="nc" id="L373">        explanation -&gt; configuration().exceptionComposer().forAssertThat().testSkippedException(explanation, configuration().reportComposer()));</span>
+<span class="fc" id="L374">  }</span>
+
+  /**
+   * The core method of the `ValueChecker`.
+   * This method checks if the given `evaluationContext` satisfies a condition, passed as `cond`.
+   * If it does, the `evaluationContext` itself will be returned.
+   * If not, an appropriate message will be composed based on the `evaluationContext` and `cond` by the `messageComposerFunction`.
+   * Internally in this method, an `Explanation` of the failure is created by a {@link ReportComposer}
+   * object returned by `configuration().reportComposer()` method.
+   * The `Explanation` is passed to the `exceptionComposerFunction` and the exception
+   * created by the function will be thrown.
+   *
+   * @param &lt;T&gt;                       The type of the `evaluationContext`.
+   * @param value                     A value to be checked.
+   * @param cond                      A predicate that checks the `evaluationContext`.
+   * @param messageComposerFunction   A function that composes an error message from the `evaluationContext` and the predicate `cond`.
+   * @param exceptionComposerFunction A function that creates an exception from a failure report created inside this method.
+   * @return The `evaluationContext` itself.
+   */
+  @SuppressWarnings(&quot;unchecked&quot;)
+  default &lt;T&gt; T checkValueAndThrowIfFails(
+      T value,
+      Predicate&lt;? super T&gt; cond,
+      BiFunction&lt;T, Predicate&lt;? super T&gt;, String&gt; messageComposerFunction,
+      ExceptionFactory&lt;Throwable&gt; exceptionComposerFunction) {
+<span class="fc" id="L399">    ValueHolder&lt;T&gt; valueHolder = ValueHolder.forValue(value);</span>
+<span class="fc" id="L400">    Evaluable&lt;T&gt; evaluable = toEvaluableIfNecessary(cond);</span>
+<span class="fc" id="L401">    EvaluableIo&lt;T, Evaluable&lt;T&gt;, Boolean&gt; evaluableIo = new EvaluableIo&lt;&gt;(valueHolder, EvaluationContext.resolveEvaluationEntryType(evaluable), evaluable);</span>
+<span class="fc" id="L402">    EvaluationContext&lt;T&gt; evaluationContext = new EvaluationContext&lt;&gt;();</span>
+<span class="fc bfc" id="L403" title="All 4 branches covered.">    if (this.configuration().useEvaluator() &amp;&amp; cond instanceof Evaluable) {</span>
+<span class="fc" id="L404">      Evaluator evaluator = Evaluator.create();</span>
+<span class="fc" id="L405">      ((Evaluable&lt;T&gt;) cond).accept(evaluableIo, evaluationContext, evaluator);</span>
+<span class="fc bfc" id="L406" title="All 4 branches covered.">      if (evaluableIo.output().isValueReturned() &amp;&amp; Objects.equals(true, evaluableIo.output().value()))</span>
+<span class="fc" id="L407">        return value;</span>
+<span class="fc" id="L408">      List&lt;EvaluationEntry&gt; entries = evaluationContext.resultEntries();</span>
+<span class="pc" id="L409">      throw exceptionComposerFunction.create(configuration()</span>
+<span class="fc" id="L410">          .reportComposer()</span>
+<span class="fc" id="L411">          .composeExplanation(</span>
+<span class="fc" id="L412">              messageComposerFunction.apply(value, cond),</span>
+              entries
+          ));
+    } else {
+<span class="fc bfc" id="L416" title="All 2 branches covered.">      if (!cond.test(valueHolder.returnedValue()))</span>
+<span class="pc" id="L417">        throw exceptionComposerFunction.create(configuration()</span>
+<span class="fc" id="L418">            .reportComposer()</span>
+<span class="fc" id="L419">            .composeExplanation(</span>
+<span class="fc" id="L420">                messageComposerFunction.apply(value, cond),</span>
+<span class="fc" id="L421">                emptyList()</span>
+            ));
+<span class="fc" id="L423">      return value;</span>
+    }
+  }
+
+  static Validator instance() {
+<span class="fc" id="L428">    return INSTANCE.get();</span>
+  }
+
+  static void reconfigure(Consumer&lt;Configuration.Builder&gt; configurator) {
+<span class="nc" id="L432">    Configuration.Builder b = instance().configuration().parentBuilder();</span>
+<span class="nc" id="L433">    reconfigure(configurator, b);</span>
+<span class="nc" id="L434">  }</span>
+
+  static void reconfigure(Consumer&lt;Configuration.Builder&gt; configurator, Properties properties) {
+<span class="nc" id="L437">    Configuration.Builder b = Configuration.Builder.fromProperties(properties);</span>
+<span class="nc" id="L438">    reconfigure(configurator, b);</span>
+<span class="nc" id="L439">  }</span>
+
+  static void reconfigure(Consumer&lt;Configuration.Builder&gt; configurator, Configuration.Builder b) {
+<span class="nc" id="L442">    Objects.requireNonNull(configurator).accept(b);</span>
+<span class="nc" id="L443">    INSTANCE.set(new Impl(b.build()));</span>
+<span class="nc" id="L444">  }</span>
+
+  static void resetToDefault() {
+<span class="nc" id="L447">    reconfigure(b -&gt; {</span>
+<span class="nc" id="L448">    });</span>
+<span class="nc" id="L449">  }</span>
+
+  static Configuration configurationFromProperties(Properties properties) {
+<span class="fc" id="L452">    return Configuration.Builder.fromProperties(properties).build();</span>
+  }
+
+  interface ExceptionFactory&lt;E extends Throwable&gt; extends Function&lt;Explanation, E&gt; {
+    default RuntimeException create(Explanation explanation) {
+<span class="nc" id="L457">      return createException(this, explanation);</span>
+    }
+
+    static RuntimeException createException(ExceptionFactory&lt;?&gt; exceptionFactory, Explanation explanation) {
+<span class="fc" id="L461">      Throwable t = exceptionFactory.apply(explanation);</span>
+<span class="fc bfc" id="L462" title="All 2 branches covered.">      if (t instanceof Error)</span>
+<span class="fc" id="L463">        throw (Error) t;</span>
+<span class="pc bpc" id="L464" title="1 of 2 branches missed.">      if (t instanceof RuntimeException)</span>
+<span class="fc" id="L465">        throw (RuntimeException) t;</span>
+<span class="nc" id="L466">      throw new AssertionError(format(&quot;Checked exception(%s) cannot be used for validation.&quot;, t.getClass()), t);</span>
+    }
+  }
+
+  interface Configuration {
+    /**
+     * When `com.github.dakusui.pcond.debug` is not `true`, it is assumed that those methods in this interface return `false`.
+     */
+    interface Debugging {
+      default boolean suppressSquashing() {
+<span class="nc" id="L476">        return true;</span>
+      }
+
+      default boolean enableDebugLog() {
+<span class="nc" id="L480">        return true;</span>
+      }
+
+      default boolean showEvaluableDetail() {
+<span class="nc" id="L484">        return true;</span>
+      }
+
+      default boolean reportIgnoredEntries() {
+<span class="nc" id="L488">        return true;</span>
+      }
+
+      default boolean passThroughComparisonFailure() {
+<span class="nc" id="L492">        return true;</span>
+      }
+    }
+
+    int summarizedStringLength();
+
+    boolean useEvaluator();
+
+    /**
+     * Returns a message composer, which is responsible for composing an appropriate message for
+     * a context.
+     *
+     * @return A message composer.
+     */
+    MessageComposer messageComposer();
+
+    /**
+     * Returns a report composer, which is responsible for composing an appropriate &quot;report&quot; for
+     * a context.
+     *
+     * @return A report composer
+     */
+    ReportComposer reportComposer();
+
+    /**
+     * Returns an exception composer, which is responsible for creating an exception
+     * object of an appropriate type for a context.
+     *
+     * @return An exception composer.
+     */
+    ExceptionComposer exceptionComposer();
+
+    Optional&lt;Debugging&gt; debugging();
+
+    Configuration.Builder parentBuilder();
+
+<span class="fc" id="L528">    enum Utils {</span>
+      ;
+
+      @SuppressWarnings(&quot;unchecked&quot;)
+      static &lt;E&gt; E instantiate(@SuppressWarnings(&quot;unused&quot;) Class&lt;E&gt; baseClass, String className) {
+        try {
+<span class="fc" id="L534">          return (E) Class.forName(className).newInstance();</span>
+<span class="nc" id="L535">        } catch (InstantiationException | IllegalAccessException |</span>
+                 ClassNotFoundException e) {
+<span class="nc" id="L537">          throw new RuntimeException(e);</span>
+        }
+      }
+
+      public static Properties loadPcondProperties() {
+        try {
+<span class="fc" id="L543">          Properties ret = new Properties();</span>
+<span class="fc" id="L544">          System.getProperties().forEach((k, v) -&gt; {</span>
+<span class="fc" id="L545">            String key = Objects.toString(k);</span>
+<span class="fc" id="L546">            String value = Objects.toString(v);</span>
+<span class="fc" id="L547">            String prefix = &quot;com.github.dakusui.pcond.&quot;;</span>
+<span class="fc bfc" id="L548" title="All 2 branches covered.">            if (key.startsWith(prefix)) {</span>
+<span class="fc" id="L549">              ret.put(key.replace(prefix, &quot;&quot;), value);</span>
+            }
+<span class="fc" id="L551">          });</span>
+<span class="fc" id="L552">          try (InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(&quot;pcond.properties&quot;)) {</span>
+<span class="pc bpc" id="L553" title="1 of 2 branches missed.">            if (inputStream == null)</span>
+<span class="fc" id="L554">              return ret;</span>
+<span class="nc" id="L555">            ret.load(inputStream);</span>
+<span class="nc" id="L556">            return ret;</span>
+          }
+<span class="nc" id="L558">        } catch (IOException e) {</span>
+<span class="nc" id="L559">          throw new RuntimeException(e);</span>
+        }
+      }
+    }
+
+    class Builder implements Cloneable {
+      boolean useEvaluator;
+      int     summarizedStringLength;
+
+
+      MessageComposer messageComposer;
+      ReportComposer  reportComposer;
+      private ExceptionComposer.ForRequire       exceptionComposerForRequire;
+      private ExceptionComposer.ForEnsure        exceptionComposerForEnsure;
+      private ExceptionComposer.ForValidate      defaultExceptionComposerForValidate;
+      private ExceptionComposer.ForAssertion     exceptionComposerForAssert;
+      private ExceptionComposer.ForTestAssertion exceptionComposerForTestFailures;
+
+<span class="fc" id="L577">      public Builder() {</span>
+<span class="fc" id="L578">      }</span>
+
+
+      public Builder useEvaluator(boolean useEvaluator) {
+<span class="fc" id="L582">        this.useEvaluator = useEvaluator;</span>
+<span class="fc" id="L583">        return this;</span>
+      }
+
+      public Builder summarizedStringLength(int summarizedStringLength) {
+<span class="fc" id="L587">        this.summarizedStringLength = summarizedStringLength;</span>
+<span class="fc" id="L588">        return this;</span>
+      }
+
+      public Builder exceptionComposerForRequire(ExceptionComposer.ForRequire exceptionComposerForRequire) {
+<span class="fc" id="L592">        this.exceptionComposerForRequire = exceptionComposerForRequire;</span>
+<span class="fc" id="L593">        return this;</span>
+      }
+
+      public Builder exceptionComposerForEnsure(ExceptionComposer.ForEnsure exceptionComposerForEnsure) {
+<span class="fc" id="L597">        this.exceptionComposerForEnsure = exceptionComposerForEnsure;</span>
+<span class="fc" id="L598">        return this;</span>
+      }
+
+      public Builder defaultExceptionComposerForValidate(ExceptionComposer.ForValidate exceptionComposerForValidate) {
+<span class="fc" id="L602">        this.defaultExceptionComposerForValidate = exceptionComposerForValidate;</span>
+<span class="fc" id="L603">        return this;</span>
+      }
+
+      public Builder exceptionComposerForAssert(ExceptionComposer.ForAssertion exceptionComposerForAssert) {
+<span class="fc" id="L607">        this.exceptionComposerForAssert = exceptionComposerForAssert;</span>
+<span class="fc" id="L608">        return this;</span>
+      }
+
+      public Builder exceptionComposerForAssertThat(ExceptionComposer.ForTestAssertion exceptionComposerForAssertThat) {
+<span class="fc" id="L612">        this.exceptionComposerForTestFailures = exceptionComposerForAssertThat;</span>
+<span class="fc" id="L613">        return this;</span>
+      }
+
+      public Builder messageComposer(MessageComposer messageComposer) {
+<span class="fc" id="L617">        this.messageComposer = messageComposer;</span>
+<span class="fc" id="L618">        return this;</span>
+      }
+
+      public Builder reportComposer(ReportComposer reportComposer) {
+<span class="fc" id="L622">        this.reportComposer = reportComposer;</span>
+<span class="fc" id="L623">        return this;</span>
+      }
+
+      public Builder useOpentest4J() {
+<span class="nc" id="L627">        this.exceptionComposerForTestFailures = new ExceptionComposer.ForTestAssertion.Opentest4J();</span>
+<span class="nc" id="L628">        return this;</span>
+      }
+
+      public Configuration build() {
+<span class="pc bpc" id="L632" title="1 of 2 branches missed.">        if (!isClassPresent(&quot;org.junit.ComparisonFailure&quot;))</span>
+<span class="nc" id="L633">          this.useOpentest4J();</span>
+<span class="fc" id="L634">        return new Configuration() {</span>
+<span class="fc" id="L635">          private final Debugging debugging = new Debugging() {</span>
+          };
+
+<span class="fc" id="L638">          private final ExceptionComposer exceptionComposer = new ExceptionComposer.Impl(</span>
+<span class="fc" id="L639">              exceptionComposerForRequire,</span>
+<span class="fc" id="L640">              exceptionComposerForEnsure,</span>
+<span class="fc" id="L641">              defaultExceptionComposerForValidate,</span>
+<span class="fc" id="L642">              exceptionComposerForAssert,</span>
+<span class="fc" id="L643">              exceptionComposerForTestFailures</span>
+          );
+
+          @Override
+          public int summarizedStringLength() {
+<span class="fc" id="L648">            return Builder.this.summarizedStringLength;</span>
+          }
+
+          @Override
+          public boolean useEvaluator() {
+<span class="fc" id="L653">            return Builder.this.useEvaluator;</span>
+          }
+
+          /**
+           * Returns an exception composer, which is responsible for creating an exception
+           * object of an appropriate type for a context.
+           *
+           * @return An exception composer.
+           */
+          public ExceptionComposer exceptionComposer() {
+<span class="fc" id="L663">            return this.exceptionComposer;</span>
+          }
+
+          @Override
+          public Optional&lt;Debugging&gt; debugging() {
+<span class="pc bpc" id="L668" title="1 of 2 branches missed.">            if (Boolean.parseBoolean(System.getProperty(&quot;com.github.dakusui.pcond.debug&quot;))) {</span>
+<span class="nc" id="L669">              return Optional.of(this.debugging);</span>
+            }
+<span class="fc" id="L671">            return Optional.empty();</span>
+          }
+
+          @Override
+          public MessageComposer messageComposer() {
+<span class="fc" id="L676">            return Builder.this.messageComposer;</span>
+          }
+
+          @Override
+          public ReportComposer reportComposer() {
+<span class="fc" id="L681">            return Builder.this.reportComposer;</span>
+          }
+
+          @Override
+          public Builder parentBuilder() {
+<span class="nc" id="L686">            return Builder.this.clone();</span>
+          }
+        };
+      }
+
+      private static boolean isClassPresent(String s) {
+        try {
+<span class="fc" id="L693">          Class.forName(s);</span>
+<span class="fc" id="L694">          return true;</span>
+<span class="nc" id="L695">        } catch (ClassNotFoundException e) {</span>
+<span class="nc" id="L696">          return false;</span>
+        }
+      }
+
+      @Override
+      public Builder clone() {
+        try {
+<span class="nc" id="L703">          return (Builder) super.clone();</span>
+<span class="nc" id="L704">        } catch (CloneNotSupportedException e) {</span>
+<span class="nc" id="L705">          throw new AssertionError();</span>
+        }
+      }
+
+      static Builder fromProperties(Properties properties) {
+<span class="fc" id="L710">        return new Builder()</span>
+<span class="fc" id="L711">            .useEvaluator(Boolean.parseBoolean(properties.getProperty(&quot;useEvaluator&quot;, &quot;true&quot;)))</span>
+<span class="fc" id="L712">            .summarizedStringLength(Integer.parseInt(properties.getProperty(&quot;summarizedStringLength&quot;, &quot;40&quot;)))</span>
+<span class="fc" id="L713">            .exceptionComposerForRequire(instantiate(ExceptionComposer.ForRequire.class, properties.getProperty(&quot;exceptionComposerForRequire&quot;, &quot;com.github.dakusui.pcond.validator.ExceptionComposer$ForRequire$Default&quot;)))</span>
+<span class="fc" id="L714">            .exceptionComposerForEnsure(instantiate(ExceptionComposer.ForEnsure.class, properties.getProperty(&quot;exceptionComposerForEnsure&quot;, &quot;com.github.dakusui.pcond.validator.ExceptionComposer$ForEnsure$Default&quot;)))</span>
+<span class="fc" id="L715">            .defaultExceptionComposerForValidate(instantiate(ExceptionComposer.ForValidate.class, properties.getProperty(&quot;defaultExceptionComposerForValidate&quot;, &quot;com.github.dakusui.pcond.validator.ExceptionComposer$ForValidate$Default&quot;)))</span>
+<span class="fc" id="L716">            .exceptionComposerForAssert(instantiate(ExceptionComposer.ForAssertion.class, properties.getProperty(&quot;exceptionComposerForAssert&quot;, &quot;com.github.dakusui.pcond.validator.ExceptionComposer$ForAssertion$Default&quot;)))</span>
+<span class="fc" id="L717">            .exceptionComposerForAssertThat(instantiate(ExceptionComposer.ForTestAssertion.class, properties.getProperty(&quot;exceptionComposerForTestFailures&quot;, &quot;com.github.dakusui.pcond.validator.ExceptionComposer$ForTestAssertion$JUnit4&quot;)))</span>
+<span class="fc" id="L718">            .messageComposer(instantiate(MessageComposer.class, properties.getProperty(&quot;messageComposer&quot;, &quot;com.github.dakusui.pcond.validator.MessageComposer$Default&quot;)))</span>
+<span class="fc" id="L719">            .reportComposer(instantiate(ReportComposer.class, properties.getProperty(&quot;reportComposer&quot;, &quot;com.github.dakusui.pcond.validator.ReportComposer$Default&quot;)));</span>
+      }
+    }
+  }
+
+  class Impl implements Validator {
+
+    private final Configuration configuration;
+
+<span class="fc" id="L728">    public Impl(Configuration configuration) {</span>
+<span class="fc" id="L729">      this.configuration = Objects.requireNonNull(configuration);</span>
+<span class="fc" id="L730">    }</span>
+
+    @Override
+    public Configuration configuration() {
+<span class="fc" id="L734">      return this.configuration;</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

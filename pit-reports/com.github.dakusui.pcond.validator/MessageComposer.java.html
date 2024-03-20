@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>MessageComposer.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.github.dakusui.pcond.validator;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.function.Predicate;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static java.lang.String.format;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * An interface that defines methods to compose a message when a value violates</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * a given condition based on a context.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>public interface MessageComposer {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  /**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * Compose a message string for a `value`, which violates a precondition given as `predicate`.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param value     A value for which a message is created.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param predicate A condition that a given `value` violated.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param &#60;T&#62;       The type of the `value`.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_19'/>
+19
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_19'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @return A composed message string.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_21'/>
+21
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_21'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  &#60;T&#62; String composeMessageForPrecondition(T value, Predicate&#60;? super T&#62; predicate);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  /**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * Compose a message string for a `value`, which violates a postcondition given as `predicate`.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param value     A value for which a message is created.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param predicate A condition that a given `value` violated.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param &#60;T&#62;       The type of the `value`.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @return A composed message string.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  &#60;T&#62; String composeMessageForPostcondition(T value, Predicate&#60;? super T&#62; predicate);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  /**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_34'/>
+34
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_34'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * Compose a message string for a `value`, which violates a general condition given as `predicate`.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_35'/>
+35
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_35'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * Used for invariant conditions, test assertion (`assertThat`), and test prerequisition</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * checking (`assumeThat`).</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param value     A value for which a message is created.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_39'/>
+39
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_39'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param predicate A condition that a given `value` violated.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_40'/>
+40
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_40'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param &#60;T&#62;       The type of the `value`.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_41'/>
+41
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_41'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @return A composed message string.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_42'/>
+42
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_42'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  &#60;T&#62; String composeMessageForAssertion(T value, Predicate&#60;? super T&#62; predicate);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_44'/>
+44
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_44'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_45'/>
+45
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_45'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  /**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_46'/>
+46
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_46'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * Compose a message string for a `value`, which violates a user input checking</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * condition given as `predicate`.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_48'/>
+48
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_48'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_49'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param value     A value for which a message is created.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_50'/>
+50
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_50'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param predicate A condition that a given `value` violated.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_51'/>
+51
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_51'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param &#60;T&#62;       The type of the `value`.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_52'/>
+52
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_52'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @return A composed message string.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_53'/>
+53
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_53'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  &#60;T&#62; String composeMessageForValidation(T value, Predicate&#60;? super T&#62; predicate);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_56'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  /**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_57'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * A default implementation of `MessageComposer`.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_58'/>
+58
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_58'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   */</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_59'/>
+59
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_59'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>  class Default implements MessageComposer {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_60'/>
+60
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_60'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Override</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_61'/>
+61
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_61'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public &#60;T&#62; String composeMessageForPrecondition(T value, Predicate&#60;? super T&#62; predicate) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_62'/>
+62
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_62'>1</a>
+<span>
+1. composeMessageForPrecondition : replaced return value with &#34;&#34; for com/github/dakusui/pcond/validator/MessageComposer$Default::composeMessageForPrecondition &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return format(&#34;value:&#60;%s&#62; violated precondition:value %s&#34;, formatObject(value), predicate);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_63'/>
+63
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_63'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_64'/>
+64
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_64'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_65'/>
+65
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_65'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Override</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_66'/>
+66
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_66'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public &#60;T&#62; String composeMessageForPostcondition(T value, Predicate&#60;? super T&#62; predicate) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_67'/>
+67
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_67'>1</a>
+<span>
+1. composeMessageForPostcondition : replaced return value with &#34;&#34; for com/github/dakusui/pcond/validator/MessageComposer$Default::composeMessageForPostcondition &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return format(&#34;value:&#60;%s&#62; violated postcondition:value %s&#34;, formatObject(value), predicate);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_68'/>
+68
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_68'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_69'/>
+69
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_69'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_70'/>
+70
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_70'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Override</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_71'/>
+71
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_71'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public &#60;T&#62; String composeMessageForAssertion(T value, Predicate&#60;? super T&#62; predicate) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_72'/>
+72
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_72'>1</a>
+<span>
+1. composeMessageForAssertion : replaced return value with &#34;&#34; for com/github/dakusui/pcond/validator/MessageComposer$Default::composeMessageForAssertion &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return &#34;Value:&#34; + formatObject(value) + &#34; violated: &#34; + predicate.toString();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_73'/>
+73
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_73'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_74'/>
+74
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_74'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_75'/>
+75
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_75'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    @Override</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_76'/>
+76
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_76'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    public &#60;T&#62; String composeMessageForValidation(T value, Predicate&#60;? super T&#62; predicate) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_77'/>
+77
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_77'>1</a>
+<span>
+1. composeMessageForValidation : replaced return value with &#34;&#34; for com/github/dakusui/pcond/validator/MessageComposer$Default::composeMessageForValidation &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return &#34;Value:&#34; + formatObject(value) + &#34; violated: &#34; + predicate.toString();</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_78'/>
+78
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_78'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_79'/>
+79
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_79'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_80'/>
+80
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_80'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_62'>62</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_62'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>composeMessageForPrecondition<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withoutEvaluator_conj_thenFail(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest)</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/validator/MessageComposer$Default::composeMessageForPrecondition &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_67'>67</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_67'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>composeMessageForPostcondition<br/><b>Killed by : </b>com.github.dakusui.ut.valid8j.ut.EnsuresTest</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/validator/MessageComposer$Default::composeMessageForPostcondition &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_72'>72</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_72'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>composeMessageForAssertion<br/><b>Killed by : </b>com.github.dakusui.ut.valid8j.ut.AssertionsTest$MessageTest.composeMessage$thenComposed(com.github.dakusui.ut.valid8j.ut.AssertionsTest$MessageTest)</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/validator/MessageComposer$Default::composeMessageForAssertion &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@4ed0aa33_77'>77</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@4ed0aa33_77'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>composeMessageForValidation<br/><b>Killed by : </b>com.github.dakusui.ut.valid8j.ut.ValidatesTest.testValidateMethod$failing(com.github.dakusui.ut.valid8j.ut.ValidatesTest)</span></span> replaced return value with &#34;&#34; for com/github/dakusui/pcond/validator/MessageComposer$Default::composeMessageForValidation &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.expectingExceptionButNotThrown_testFailing(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (2 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest.exerciseTestCase[3: givenStreamPredicate$hello_b_e_4$_whenUnexpectedValue_thenComparisonFailure2](com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest) (7 ms)</li><li>com.github.dakusui.pcond.CallTest.methodAmbiguous_primitiveBoxed(com.github.dakusui.pcond.CallTest) (25 ms)</li><li>com.github.dakusui.pcond.bugfixes.Issue11Test.whenReproduceIssue(com.github.dakusui.pcond.bugfixes.Issue11Test) (3 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenLongString_whenCheckEqualnessUsingCustomPredicateWithSlightlyDifferentString_thenExpectationSpecificFragmentsContainedOnlyByExplanationForExpectationAndActualValuesAreAlsoSo(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (3 ms)</li><li>com.github.dakusui.pcond.types.FloatTest.floatTransformerTestFail(com.github.dakusui.pcond.types.FloatTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest.requireValuesTest_failing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest) (2 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.givenString$hello$_whenTransformToContextAndCheckContextValueIsNull_thenPreconditionViolationWithCorrectMessageThrown(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withEvaluator_columns100_conj(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.ListTest.testAllMatch(com.github.dakusui.ut.valid8j.compatibility.ListTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.ListTest.testCollectionContains(com.github.dakusui.ut.valid8j.compatibility.ListTest) (0 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenString_whenFails_then(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.BooleanTest.testIsFalse(com.github.dakusui.ut.valid8j.compatibility.BooleanTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.fluent4.SmokeTest.givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength_2(com.github.dakusui.pcond.ut.fluent4.SmokeTest) (21 ms)</li><li>com.github.dakusui.pcond.CallTest.methodAmbiguous_primitiveBoxed_negated(com.github.dakusui.pcond.CallTest) (7 ms)</li><li>com.github.dakusui.ut.valid8j.ut.ValidatesTest.testValidateMethod$failing(com.github.dakusui.ut.valid8j.ut.ValidatesTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.multiAssumeAll_failed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (1 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest.exerciseTestCase[1: givenStreamPredicate$hello_b_e$_whenUnexpectedValue_thenComparisonFailure2](com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest) (4 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$MessageTest.testFormat(com.github.dakusui.ut.thincrest.ut.PredicatesTest$MessageTest) (1 ms)</li><li>com.github.dakusui.pcond.types.StreamTest.streamTransformerTestFailure(com.github.dakusui.pcond.types.StreamTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.StringTest.testStartsWith(com.github.dakusui.ut.valid8j.compatibility.StringTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.StringTest.testEqualsIgnoreCase(com.github.dakusui.ut.valid8j.compatibility.StringTest) (0 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenString_whenFails_then_2(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (0 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest.givenSomeFoundSomeNot$whenFindString$thenFailed(com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenToBooleanIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest) (0 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello5(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.ValidatesTest.test_validateArgument_fail(com.github.dakusui.ut.valid8j.ut.ValidatesTest) (1 ms)</li><li>com.github.dakusui.pcond.CallTest.nullReturningFunctionAsPredicate(com.github.dakusui.pcond.CallTest) (3 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenTransformIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withEvaluator_columns100$whenNull(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.RequiresTest (3 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withEvaluator_transforming_thenFail(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (1 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.StreamAllMatchPredicateTest.exerciseTestCase[2: givenStreamPredicate_whenUnexpectedValue_thenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.StreamAllMatchPredicateTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withEvaluator_disj$or$_thenFail(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (2 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.nestedLoop_fail(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.TestAssertionsTest.testAnyOf(com.github.dakusui.ut.thincrest.ut.TestAssertionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.ListTest.testNoneMatch(com.github.dakusui.ut.valid8j.compatibility.ListTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.ValidatesTest.testY(com.github.dakusui.ut.valid8j.ut.ValidatesTest) (2 ms)</li><li>com.github.dakusui.pcond.NegateTest.whenInvertedTrasformingPredicateFails_thenPrintDesignedMessage$mergedWhenNotMismatch(com.github.dakusui.pcond.NegateTest) (3 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.BooleanTest.testWrapperIsTrue(com.github.dakusui.ut.valid8j.compatibility.BooleanTest) (1 ms)</li><li>com.github.dakusui.pcond.types.StreamTest.streamTestFailure(com.github.dakusui.pcond.types.StreamTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.StringTest.testIsEmptyOrNullString(com.github.dakusui.ut.valid8j.compatibility.StringTest) (0 ms)</li><li>com.github.dakusui.pcond.types.FloatTest.toFloatTest(com.github.dakusui.pcond.types.FloatTest) (1 ms)</li><li>com.github.dakusui.pcond.NegateTest.whenInvertedTrasformingPredicateFails_thenPrintDesignedMessage$notMergedWhenMismatch(com.github.dakusui.pcond.NegateTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.TestAssertionsTest.testAssumeThat(com.github.dakusui.ut.thincrest.ut.TestAssertionsTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.string_assertThatTest_failed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.EnsuresTest (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.expectingDifferentException_testFailing(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted$assertThat_usingFluentStyle(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.StringTest.testIsEmptyString(com.github.dakusui.ut.valid8j.compatibility.StringTest) (0 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$IsInstanceOfTest.test(com.github.dakusui.ut.thincrest.ut.PredicatesTest$IsInstanceOfTest) (1 ms)</li><li>com.github.dakusui.pcond.PrintablesFunctionTest$Composed.testFailureFromAndThenStructureInTransformer(com.github.dakusui.pcond.PrintablesFunctionTest$Composed) (4 ms)</li><li>com.github.dakusui.pcond.PrintablesFunctionTest$Composed.testFailureFromComposeStructureInTransformer(com.github.dakusui.pcond.PrintablesFunctionTest$Composed) (6 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest.ensureValuesTest_failing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest) (3 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenIsTrueAndIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest) (1 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.NegatedPredicateTest.exerciseTestCase[1: givenNegatedSimplePredicateReturningTrue_whenUnexpectedValue_thenComparisonFailureThrown](com.github.dakusui.pcond.propertybased.tests.NegatedPredicateTest) (1 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest.exerciseTestCase[3: givenTransformingPredicate_whenNonExpectedValue_thenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest.requireArgumentsTest_failing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.TestAssertionsTest.testAllOf(com.github.dakusui.ut.thincrest.ut.TestAssertionsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.StringTest.testContainsString(com.github.dakusui.ut.valid8j.compatibility.StringTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest.givenFalse_whenCheckIsTrue_thenComparisonFailure(com.github.dakusui.ut.valid8j.ut.styles.fluent.FluentBooleanTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest.givenSomeFoundSomeNotFound$whenFindRegexes$thenFailed(com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindElementsTest.givenSomeToBeFoundSomeNotToBe$whenFindElements$thenFailed(com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindElementsTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenLongString_whenCheckEqualnessUsingCustomPredicateWithSlightlyDifferentString_thenFailWithDetailsArePrinted(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.StringTest.testMatchesRegex(com.github.dakusui.ut.valid8j.compatibility.StringTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.BooleanTest.testWrapperIsFalse(com.github.dakusui.ut.valid8j.compatibility.BooleanTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.ListTest.testListContains(com.github.dakusui.ut.valid8j.compatibility.ListTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.ValidatesTest.test_validate_fail(com.github.dakusui.ut.valid8j.ut.ValidatesTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.multiAssertAll_failed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (2 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest.exerciseTestCase[2: givenStreamPredicate$hello_b_e_2$_whenUnexpectedValue_thenComparisonFailure2](com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest) (7 ms)</li><li>com.github.dakusui.pcond.experimentals.TestAssertionsCurriedFunctionsTest.helloError(com.github.dakusui.pcond.experimentals.TestAssertionsCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.FluentUtilsTest.example2(com.github.dakusui.ut.thincrest.ut.FluentUtilsTest) (3 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted$assertThat(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (1 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.SimplePredicateTest.exerciseTestCase[1: givenSimplePredicate_whenUnexpectedValue_thenComparisonFailureThrown](com.github.dakusui.pcond.propertybased.tests.SimplePredicateTest) (1 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.AllOfPredicateTest.exerciseTestCase[0: whenOnePredicateReturningFalseUnderAllOf_whenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.AllOfPredicateTest) (6 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.AllOfPredicateTest.exerciseTestCase[2: whenPredicatesFirstReturningFalseRestReturningTrueUnderAllOf_whenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.AllOfPredicateTest) (2 ms)</li><li>com.github.dakusui.pcond.CallTest.methodNotFound(com.github.dakusui.pcond.CallTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withoutEvaluator_conj_thenFail(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (1 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.given$hello$_$world$_whenRequireNestedStreamImpossibleConditions_thenPreconditionViolationExceptionWithCorrectMessage(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (8 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest.exerciseTestCase[4: givenTwoChainedTransformingPredicates_whenNonExpectedValue_thenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest) (7 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.StringTest.testSameAs(com.github.dakusui.ut.valid8j.compatibility.StringTest) (0 ms)</li><li>com.github.dakusui.pcond.types.FloatTest.floatTestFail(com.github.dakusui.pcond.types.FloatTest) (0 ms)</li><li>com.github.dakusui.ut.thincrest.ut.FluentUtilsTest.test4(com.github.dakusui.ut.thincrest.ut.FluentUtilsTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withEvaluator_disj$anyOf$_thenFail(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.ListTest.testAnyMatch(com.github.dakusui.ut.valid8j.compatibility.ListTest) (1 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest.exerciseTestCase[1: givenDoubleChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.ValidatesTest.testX(com.github.dakusui.ut.valid8j.ut.ValidatesTest) (2 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest.exerciseTestCase[0: givenStreamPredicate$RequireConditionResultingInNPE$_whenUnexpectedValue_thenComparisonFailure2](com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest) (4 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.givenStreamOfSingleString$hello$_whenRequireNullIsFound_thenPreconditionViolationWithCorrectMessageIsThrown(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.ListTest.testEmpty(com.github.dakusui.ut.valid8j.compatibility.ListTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.StringTest.testEqualTo(com.github.dakusui.ut.valid8j.compatibility.StringTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.AssertionsTest$Failing (2 ms)</li><li>com.github.dakusui.ut.thincrest.examples.JUnitBasedExamplesTest.testExampleUT(com.github.dakusui.ut.thincrest.examples.JUnitBasedExamplesTest) (26 ms)</li><li>com.github.dakusui.pcond.PrintablesFunctionTest$Simple.testHandleNull(com.github.dakusui.pcond.PrintablesFunctionTest$Simple) (1 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.StringTest.testComparison(com.github.dakusui.ut.valid8j.compatibility.StringTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest.ensureStatesTest_failing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest) (3 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest.exerciseTestCase[0: givenChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.AssertionsTest$MessageTest.composeMessage$thenComposed(com.github.dakusui.ut.valid8j.ut.AssertionsTest$MessageTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.StringTest.testEndsWith(com.github.dakusui.ut.valid8j.compatibility.StringTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.ValidatesTest.test(com.github.dakusui.ut.valid8j.ut.ValidatesTest) (3 ms)</li><li>com.github.dakusui.pcond.NegateTest.whenInvertedTransformingPredicateFails_thenPrintDesignedMessage$transformIsntLeafAndNotMerged(com.github.dakusui.pcond.NegateTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withEvaluator_columns100$whenShorterThan10(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (3 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello_b_e5(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (3 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.StreamAllMatchPredicateTest.exerciseTestCase[1: givenStreamPredicate_whenUnexpectedNullValue_thenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.StreamAllMatchPredicateTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (1 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.AnyOfPredicateTest.exerciseTestCase[0: whenOnePredicateReturningFalseUnderAnyOf_whenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.AnyOfPredicateTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.assumeThatTest_failed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.BooleanTest.testIsTrue(com.github.dakusui.ut.valid8j.compatibility.BooleanTest) (0 ms)</li><li>com.github.dakusui.ut.thincrest.ut.FluentUtilsTest.expectationFlipping(com.github.dakusui.ut.thincrest.ut.FluentUtilsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest.requireStatesTest_failing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest) (3 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='http://pitest.org'>PIT</a> 1.7.3
+
+</body>
+</html>

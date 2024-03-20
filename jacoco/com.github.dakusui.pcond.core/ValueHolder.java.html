@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ValueHolder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core</a> &gt; <span class="el_source">ValueHolder.java</span></div><h1>ValueHolder.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core;
+
+import static com.github.dakusui.pcond.core.Evaluator.Impl.EVALUATION_SKIPPED;
+import static java.util.Objects.requireNonNull;
+
+public class ValueHolder&lt;V&gt; implements Cloneable {
+
+  private final State state;
+  private final CreatorFormType creatorFormType;
+  V         value;
+  Throwable exception;
+
+<span class="fc" id="L13">  private ValueHolder(State state, V value, Throwable exception, CreatorFormType creatorFormType) {</span>
+<span class="fc" id="L14">    this.state = state;</span>
+<span class="fc" id="L15">    this.value = value;</span>
+<span class="fc" id="L16">    this.exception = exception;</span>
+<span class="fc" id="L17">    this.creatorFormType = creatorFormType;</span>
+<span class="fc" id="L18">  }</span>
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public ValueHolder&lt;V&gt; clone() {
+    try {
+<span class="fc" id="L23">      return (ValueHolder&lt;V&gt;) super.clone();</span>
+<span class="nc" id="L24">    } catch (CloneNotSupportedException e) {</span>
+<span class="nc" id="L25">      throw new RuntimeException(e);</span>
+    }
+  }
+
+  public State state() {
+<span class="fc" id="L30">    return this.state;</span>
+  }
+
+  public V returnedValue() {
+<span class="fc" id="L34">    return this.state.value(this);</span>
+  }
+
+  public Throwable thrownException() {
+<span class="fc" id="L38">    return this.state.exception(this);</span>
+  }
+
+  public Object value() {
+<span class="fc bfc" id="L42" title="All 2 branches covered.">    if (isValueReturned())</span>
+<span class="fc" id="L43">      return this.returnedValue();</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">    if (isEvaluationSkipped())</span>
+<span class="fc" id="L45">      return EVALUATION_SKIPPED;</span>
+<span class="pc bpc" id="L46" title="1 of 2 branches missed.">    if (isExceptionThrown())</span>
+<span class="fc" id="L47">      return this.thrownException();</span>
+<span class="nc" id="L48">    throw new IllegalStateException();</span>
+  }
+
+  public static &lt;V&gt; ValueHolder&lt;V&gt; forValue(V value) {
+<span class="fc" id="L52">    return new ValueHolder&lt;&gt;(State.VALUE_RETURNED, value, null, CreatorFormType.UNKNOWN);</span>
+  }
+
+  @Override
+  public String toString() {
+<span class="nc bnc" id="L57" title="All 2 branches missed.">    if (isValueReturned())</span>
+<span class="nc" id="L58">      return String.format(&quot;state:%s, value:%s, creator:%s&quot;, state, value, creatorFormType);</span>
+<span class="nc bnc" id="L59" title="All 2 branches missed.">    if (isEvaluationSkipped())</span>
+<span class="nc" id="L60">      return String.format(&quot;state:%s, exception:%s, creator:%s&quot;, state, exception, creatorFormType);</span>
+<span class="nc" id="L61">    return String.format(&quot;state:%s, creator:%s&quot;, state, creatorFormType);</span>
+  }
+
+  public boolean isValueReturned() {
+<span class="fc bfc" id="L65" title="All 2 branches covered.">    return this.state() == State.VALUE_RETURNED;</span>
+  }
+
+  public boolean isExceptionThrown() {
+<span class="fc bfc" id="L69" title="All 2 branches covered.">    return this.state() == State.EXCEPTION_THROWN;</span>
+  }
+
+  public boolean isEvaluationSkipped() {
+<span class="fc bfc" id="L73" title="All 2 branches covered.">    return this.state() == State.EVALUATION_SKIPPED;</span>
+  }
+
+  public CreatorFormType creatorFormType() {
+<span class="fc" id="L77">    return this.creatorFormType;</span>
+  }
+
+  public ValueHolder&lt;V&gt; valueReturned(V value) {
+    //    requireState(this.state, v -&gt; v.equals(State.NOT_YET_EVALUATED), v -&gt; messageNotYetEvaluatedStateIsRequired(v, this));
+<span class="fc" id="L82">    return new ValueHolder&lt;&gt;(State.VALUE_RETURNED, value, null, this.creatorFormType);</span>
+  }
+
+  public ValueHolder&lt;V&gt; exceptionThrown(Throwable throwable) {
+    //    requireState(this.state, v -&gt; v.equals(State.NOT_YET_EVALUATED), v -&gt; messageNotYetEvaluatedStateIsRequired(v, this));
+<span class="fc" id="L87">    return new ValueHolder&lt;&gt;(State.EXCEPTION_THROWN, null, requireNonNull(throwable), this.creatorFormType);</span>
+  }
+
+  public ValueHolder&lt;V&gt; evaluationSkipped() {
+    //    requireState(this.state, v -&gt; v.equals(State.NOT_YET_EVALUATED), v -&gt; messageNotYetEvaluatedStateIsRequired(v, this));
+<span class="fc" id="L92">    return new ValueHolder&lt;&gt;(State.EVALUATION_SKIPPED, null, null, this.creatorFormType);</span>
+  }
+
+  public ValueHolder&lt;V&gt; creatorFormType(CreatorFormType creatorFormType) {
+<span class="fc" id="L96">    return new ValueHolder&lt;&gt;(this.state, this.value, this.exception, creatorFormType);</span>
+  }
+
+  static &lt;E&gt; ValueHolder&lt;E&gt; create() {
+<span class="fc" id="L100">    return create(CreatorFormType.UNKNOWN);</span>
+  }
+
+  public static &lt;E&gt; ValueHolder&lt;E&gt; create(CreatorFormType creatorFormType) {
+<span class="fc" id="L104">    return new ValueHolder&lt;&gt;(State.NOT_YET_EVALUATED, null, null, creatorFormType);</span>
+  }
+
+<span class="fc" id="L107">  public enum State {</span>
+<span class="fc" id="L108">    NOT_YET_EVALUATED {</span>
+    },
+<span class="fc" id="L110">    VALUE_RETURNED {</span>
+      &lt;V&gt; V value(ValueHolder&lt;V&gt; valueHolder) {
+<span class="fc" id="L112">        return valueHolder.value;</span>
+      }
+    },
+<span class="fc" id="L115">    EXCEPTION_THROWN {</span>
+      &lt;V&gt; Throwable exception(ValueHolder&lt;V&gt; vContextVariable) {
+<span class="fc" id="L117">        return vContextVariable.exception;</span>
+      }
+    },
+<span class="fc" id="L120">    EVALUATION_SKIPPED {</span>
+    };
+
+    &lt;V&gt; V value(ValueHolder&lt;V&gt; valueHolder) {
+<span class="nc" id="L124">      throw new IllegalStateException(&quot;current state=&quot; + valueHolder.state);</span>
+    }
+
+    &lt;V&gt; Throwable exception(ValueHolder&lt;V&gt; vContextVariable) {
+<span class="nc" id="L128">      throw new IllegalStateException();</span>
+    }
+  }
+
+<span class="fc" id="L132">  enum CreatorFormType {</span>
+<span class="fc" id="L133">    FUNC_HEAD,</span>
+<span class="fc" id="L134">    FUNC_TAIL,</span>
+<span class="fc" id="L135">    TRANSFORM,</span>
+<span class="fc" id="L136">    UNKNOWN</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

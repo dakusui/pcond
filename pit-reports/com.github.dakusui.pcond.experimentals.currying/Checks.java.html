@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+</head>
+<body>
+
+
+<h1>Checks.java</h1>
+
+<table class="src">
+
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_1'/>
+1
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_1'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>package com.github.dakusui.pcond.experimentals.currying;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_2'/>
+2
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_2'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_3'/>
+3
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_3'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import com.github.dakusui.pcond.internals.InternalChecks;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_4'/>
+4
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_4'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_5'/>
+5
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_5'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import java.util.function.Supplier;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_6'/>
+6
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_6'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_7'/>
+7
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_7'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_8'/>
+8
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_8'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_9'/>
+9
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_9'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>import static java.lang.String.format;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_10'/>
+10
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_10'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_11'/>
+11
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_11'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>/**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_12'/>
+12
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_12'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * A utility class for checking values that the &#34;currying&#34; mechanism of the `pcond`</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_13'/>
+13
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_13'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> * library processes.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_14'/>
+14
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_14'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''> */</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_15'/>
+15
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_15'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>public enum Checks {</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_16'/>
+16
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_16'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  ;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_17'/>
+17
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_17'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_18'/>
+18
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_18'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  static &#60;T extends CurriedFunction&#60;?, ?&#62;&#62; T requireLast(T value) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_19'/>
+19
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_19'>1</a>
+<span>
+1. requireLast : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    if (value.hasNext())</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_20'/>
+20
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_20'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      throw new IllegalStateException();</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_21'/>
+21
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_21'>1</a>
+<span>
+1. requireLast : replaced return value with null for com/github/dakusui/pcond/experimentals/currying/Checks::requireLast &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return value;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_22'/>
+22
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_22'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_23'/>
+23
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_23'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_24'/>
+24
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_24'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  /**</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_25'/>
+25
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_25'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * Validates if a given argument value is appropriate for a parameter type (`paramType`).</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_26'/>
+26
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_26'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   *</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_27'/>
+27
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_27'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param arg              An argument value is to check with `paramType`.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_28'/>
+28
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_28'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param paramType        An expected type for `arg`.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_29'/>
+29
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_29'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param messageFormatter A message formatter which generates a message on a failure.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_30'/>
+30
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_30'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @param &#60;T&#62;              The type of the argument value.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_31'/>
+31
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_31'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   * @return The `arg` value itself.</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_32'/>
+32
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_32'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>   */</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_33'/>
+33
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_33'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  static &#60;T&#62; T validateArgumentType(T arg, Class&#60;?&#62; paramType, Supplier&#60;String&#62; messageFormatter) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_34'/>
+34
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_34'>1</a>
+<span>
+1. validateArgumentType : removed call to com/github/dakusui/pcond/internals/InternalChecks::checkArgument &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    InternalChecks.checkArgument(isValidValueForType(arg, paramType), messageFormatter);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_35'/>
+35
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_35'>1</a>
+<span>
+1. validateArgumentType : replaced return value with null for com/github/dakusui/pcond/experimentals/currying/Checks::validateArgumentType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    return arg;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_36'/>
+36
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_36'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_37'/>
+37
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_37'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_38'/>
+38
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_38'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  static boolean isValidValueForType(Object arg, Class&#60;?&#62; paramType) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_39'/>
+39
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_39'>1</a>
+<span>
+1. isValidValueForType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    if (paramType.isPrimitive()) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_40'/>
+40
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_40'>1</a>
+<span>
+1. isValidValueForType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      if (arg == null)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_41'/>
+41
+</td>
+<td class='survived'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_41'>2</a>
+<span>
+1. isValidValueForType : replaced boolean return with false for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; SURVIVED<br/>
+2. isValidValueForType : replaced boolean return with true for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='survived'>        return paramType.equals(void.class);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_42'/>
+42
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_42'>1</a>
+<span>
+1. isValidValueForType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      if (InternalChecks.isPrimitiveWrapperClassOrPrimitive(arg.getClass())) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_43'/>
+43
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_43'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>        Class&#60;?&#62; wrapperClassForParamType = wrapperClassOf(paramType);</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_44'/>
+44
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_44'>1</a>
+<span>
+1. isValidValueForType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        if (wrapperClassForParamType.equals(arg.getClass()))</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_45'/>
+45
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_45'>1</a>
+<span>
+1. isValidValueForType : replaced boolean return with false for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>          return true;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_46'/>
+46
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_46'>2</a>
+<span>
+1. isValidValueForType : replaced boolean return with false for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+2. isValidValueForType : replaced boolean return with true for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return InternalChecks.isWiderThan(wrapperClassForParamType, arg.getClass());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_47'/>
+47
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_47'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>      }</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_48'/>
+48
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_48'>1</a>
+<span>
+1. isValidValueForType : replaced boolean return with true for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return false;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_49'/>
+49
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_49'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    } else {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_50'/>
+50
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_50'>1</a>
+<span>
+1. isValidValueForType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      if (arg == null)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_51'/>
+51
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_51'>1</a>
+<span>
+1. isValidValueForType : replaced boolean return with false for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>        return true;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_52'/>
+52
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_52'>2</a>
+<span>
+1. isValidValueForType : replaced boolean return with false for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+2. isValidValueForType : replaced boolean return with true for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return paramType.isAssignableFrom(arg.getClass());</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_53'/>
+53
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_53'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_54'/>
+54
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_54'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_55'/>
+55
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_55'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''></span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_56'/>
+56
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_56'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  @SuppressWarnings(&#34;unchecked&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_57'/>
+57
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_57'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  static &#60;T&#62; T ensureReturnedValueType(Object value, Class&#60;?&#62; returnType) {</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_58'/>
+58
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_58'>1</a>
+<span>
+1. ensureReturnedValueType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>    if (isValidValueForType(value, returnType))</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_59'/>
+59
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_59'>1</a>
+<span>
+1. ensureReturnedValueType : replaced return value with null for com/github/dakusui/pcond/experimentals/currying/Checks::ensureReturnedValueType &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>      return (T) value;</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_60'/>
+60
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_60'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>    else</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_61'/>
+61
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_61'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>      throw new IllegalStateException(&#34;Returned value:&#34;</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_62'/>
+62
+</td>
+<td class='killed'>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_62'>1</a>
+<span>
+1. ensureReturnedValueType : negated conditional &rarr; KILLED<br/>
+
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class='killed'>          + formatObject(value)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_63'/>
+63
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_63'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>          + (value != null ? &#34;(&#34; + value.getClass().getName() + &#34;)&#34; : &#34;&#34;)</span></pre></td></tr>
+
+
+<tr>
+<td class='covered'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_64'/>
+64
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_64'></a>
+<span>
+</span>
+</span>
+</td>
+<td class='covered'><pre><span  class=''>          + &#34; is neither null nor an instance of &#34; + returnType.getName() + &#34;. &#34;);</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_65'/>
+65
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_65'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>  }</span></pre></td></tr>
+
+
+<tr>
+<td class='na'>
+<a name='org.pitest.mutationtest.report.html.SourceFile@73b4606_66'/>
+66
+</td>
+<td class=''>
+<span class='pop'>
+<a href='#grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_66'></a>
+<span>
+</span>
+</span>
+</td>
+<td class=''><pre><span  class=''>}</span></pre></td></tr>
+
+
+
+<tr><td></td><td></td><td><h2>Mutations</h2></td></tr>
+
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_19'>19</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_19'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>requireLast<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyLastBeforeLast$thenIllegalStateIsThrown(com.github.dakusui.pcond.ut.CurryingTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_21'>21</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_21'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>requireLast<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.test3(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced return value with null for com/github/dakusui/pcond/experimentals/currying/Checks::requireLast &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_34'>34</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_34'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateArgumentType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyWithInvalidArg$thenThrown(com.github.dakusui.pcond.ut.CurryingTest)</span></span> removed call to com/github/dakusui/pcond/internals/InternalChecks::checkArgument &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_35'>35</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_35'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>validateArgumentType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> replaced return value with null for com/github/dakusui/pcond/experimentals/currying/Checks::validateArgumentType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_39'>39</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_39'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_40'>40</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_40'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_41'>41</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_41'/> 
+
+<p class='SURVIVED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>none</span></span> replaced boolean return with false for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; SURVIVED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with true for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_42'>42</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_42'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.givenStringToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_44'>44</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_44'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_intToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_45'>45</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_45'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_intToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with false for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_46'>46</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_46'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_byteToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with false for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.given_longToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with true for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_48'>48</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_48'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingTest.givenStringToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest)</span></span> replaced boolean return with true for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_50'>50</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_50'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.InternalUtilsTest$DummyFormTest.testDummyFunction(com.github.dakusui.pcond.ut.InternalUtilsTest$DummyFormTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_51'>51</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_51'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.InternalUtilsTest$DummyFormTest.testDummyFunction(com.github.dakusui.pcond.ut.InternalUtilsTest$DummyFormTest)</span></span> replaced boolean return with false for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_52'>52</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_52'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> replaced boolean return with false for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED</p> <p class='KILLED'><span class='pop'>2.<span><b>2</b><br/><b>Location : </b>isValidValueForType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingUtilsTest.returnedValueIsInvalid(com.github.dakusui.pcond.ut.CurryingUtilsTest)</span></span> replaced boolean return with true for com/github/dakusui/pcond/experimentals/currying/Checks::isValidValueForType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_58'>58</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_58'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>ensureReturnedValueType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_59'>59</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_59'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>ensureReturnedValueType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest)</span></span> replaced return value with null for com/github/dakusui/pcond/experimentals/currying/Checks::ensureReturnedValueType &rarr; KILLED</p> 
+</td>
+</tr>
+<tr>
+<td><a href='#org.pitest.mutationtest.report.html.SourceFile@73b4606_62'>62</a></td> 
+<td></td>
+<td>
+
+<a name='grouporg.pitest.mutationtest.report.html.SourceFile@73b4606_62'/> 
+
+<p class='KILLED'><span class='pop'>1.<span><b>1</b><br/><b>Location : </b>ensureReturnedValueType<br/><b>Killed by : </b>com.github.dakusui.pcond.ut.CurryingUtilsTest.returnedValueIsInvalid(com.github.dakusui.pcond.ut.CurryingUtilsTest)</span></span> negated conditional &rarr; KILLED</p> 
+</td>
+</tr>
+
+</table>
+
+
+<h2>Active mutators</h2>
+<ul>
+<li class='mutator'>CONDITIONALS_BOUNDARY</li>
+<li class='mutator'>EMPTY_RETURNS</li>
+<li class='mutator'>FALSE_RETURNS</li>
+<li class='mutator'>INCREMENTS</li>
+<li class='mutator'>INVERT_NEGS</li>
+<li class='mutator'>MATH</li>
+<li class='mutator'>NEGATE_CONDITIONALS</li>
+<li class='mutator'>NULL_RETURNS</li>
+<li class='mutator'>PRIMITIVE_RETURNS</li>
+<li class='mutator'>TRUE_RETURNS</li>
+<li class='mutator'>VOID_METHOD_CALLS</li>
+
+</ul>
+
+<h2>Tests examined</h2>
+<ul>
+<li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.expectingExceptionButNotThrown_testFailing(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[80: Given:<"Hello">:When:<expectingException(Exception,throwRuntimeException) THEN:isInstanceOf[class com....tionalException]>:Then:<valueReturned:[identity=>identicalWith(value:Hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.MoreFluentStringTest.test_findRegexes(com.github.dakusui.ut.thincrest.ut.styles.MoreFluentStringTest) (0 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello_b(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[61: Given:<"hello">:When:<<>.equals(<hello>)>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.stream_assertThatTest_passed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[81: Given:<"Bye">:When:<expectingException(Exception,throwRuntimeException) THEN:isInstanceOf[class com....tionalException]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello_d_1(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingUtilsTest.returnedValueIsInvalid(com.github.dakusui.pcond.ut.CurryingUtilsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[3](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withEvaluator_columns100_conj(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (2 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello_c(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.ListTest.testAllMatch(com.github.dakusui.ut.valid8j.compatibility.ListTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[5](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello2(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[0](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.fluent4.SmokeTest.givenBook_whenCheckTitleAndAbstract_thenTheyAreNotNullAndAppropriateLength_2(com.github.dakusui.pcond.ut.fluent4.SmokeTest) (21 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest.ensureValue_passing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[9](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[22: Given:<"123">:When:<parseFloat THEN:(isInstanceOf[class java.lang.Float]&&isEqualTo[123.0])>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[57: Given:<"hello">:When:<<>.equals(<hello>)>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.multiAssumeAll_failed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (1 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello3(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (0 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindElementsTest.givenAllFound$whenFindElements$thenPassed(com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindElementsTest) (3 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[75: Given:<"124">:When:<parseBoolean->identity->castTo[Short] THEN:=[123]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[2](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest.test_postconditions(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest) (1 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello_a(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[6](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[51: Given:<null>:When:<split[:] THEN:toCursoredList (findElementBy[isEqualTo[A]]&&findElementBy[isEqualTo[B]]&&findElementBy[isEqualTo[C]]&&(end))>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenString_whenFails_then_2(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.test3(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[12](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest.givenSomeFoundSomeNot$whenFindString$thenFailed(com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[63: Given:<"hello">:When:<<>.equals(<hello>)->castTo[Boolean] THEN:isTrue>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello5(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[6: Given:<["A","B","C"]>:When:<subList[1,3] THEN:!isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[A, B, C])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringTest.example(com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[30: Given:<"A">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withoutEvaluator_conj_thenPass(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (1 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello6(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByAndThen$whenApply$thenWorksRight(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.CurriedContextPredicateTest.exerciseTestCase[0: givenVariableBundlePredicate_whenExpectedValue_thenValueReturned](com.github.dakusui.pcond.propertybased.tests.CurriedContextPredicateTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.ListTest.testNoneMatch(com.github.dakusui.ut.valid8j.compatibility.ListTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyNextMoreThanExpected$thenNoSuchElementIsThrown(com.github.dakusui.pcond.ut.CurryingTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[52: Given:<"hello">:When:<==[hello]>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.ValidatesTest.testY(com.github.dakusui.ut.valid8j.ut.ValidatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[12](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[69: Given:<"HELLO">:When:<isNull>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.pcond.types.FloatTest.toFloatTest(com.github.dakusui.pcond.types.FloatTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$ElementAtTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[15](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[0: Given:<true>:When:<isTrue>:Then:<valueReturned:[identity=>identicalWith(value:true)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (8 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.string_assertThatTest_failed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[70: Given:<"123">:When:<parseLong->identity->castTo[Long] THEN:=[123]>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.string_assertThat_useValue_passed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[19: Given:<"123">:When:<substring[1]->parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[23])>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted$assertThat_usingFluentStyle(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.expectingDifferentException_testFailing(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.runVoidReturningMultiParameterFunction$thenNullReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[29: Given:<"A">:When:<substring[1]->parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[23])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[15](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest.requireArgumentsTest_failing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest) (2 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest.exerciseTestCase[3: givenTransformingPredicate_whenNonExpectedValue_thenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest) (4 ms)</li><li>com.github.dakusui.pcond.CallTest.functionCanBeCreatedFromInstanceMethod(com.github.dakusui.pcond.CallTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[1](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest.test_all(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[14](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[59: Given:<"hello">:When:<<>.equals(<hello>)->castTo[Boolean] THEN:isTrue>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.MoreFluentStringTest.test_contains(com.github.dakusui.ut.thincrest.ut.styles.MoreFluentStringTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[17](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (0 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.string_assertThatTest_passed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (0 ms)</li><li>com.github.dakusui.pcond.PrintablesFunctionTest$Composed.testCompose$toString(com.github.dakusui.pcond.PrintablesFunctionTest$Composed) (0 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyExpectedTimes$thenExpectedResultReturned(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[45: Given:<"A:B:C">:When:<split[:] THEN:toCursoredList (findElementBy[isEqualTo[A]]&&findElementBy[isEqualTo[B]]&&findElementBy[isEqualTo[C]]&&(end))>:Then:<valueReturned:[identity=>identicalWith(value:A:B:C)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest.test_elementAt(com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[43: Given:<"A:B:C">:When:<split[:] THEN:(!isEmpty&&contains[A]&&contains[B]&&contains[C])>:Then:<valueReturned:[identity=>identicalWith(value:A:B:C)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.testMultiParameterFunction$withReversedOrder$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[11](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.multiAssertAll_failed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[2](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[7](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[74: Given:<"124">:When:<parseInt->identity->castTo[Integer] THEN:=[123]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[7: Given:<["A","B"]>:When:<subList[1] THEN:!isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[A, B])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.assertAll_passed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[73: Given:<"124">:When:<parseLong->identity->castTo[Long] THEN:=[123]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[12: Given:<[]>:When:<subList[1,0] THEN:!isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.expectedExceptionThrown_testPassing(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[39: Given:<"true">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Boolean]&&isTrue)>:Then:<valueReturned:[identity=>identicalWith(value:true)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[68: Given:<null>:When:<isNull>:Then:<valueReturned:[identity=>identicalWith(value:null)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[60: Given:<"hello">:When:<java.util.Objects.equals(<hello>,<>)>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[34: Given:<null>:When:<substring[1]->parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[23])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[21: Given:<"123">:When:<parseLong THEN:(isInstanceOf[class java.lang.Long]&&isEqualTo[123])>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[23: Given:<"123">:When:<parseDouble THEN:(isInstanceOf[class java.lang.Double]&&isEqualTo[123.0])>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[11: Given:<[]>:When:<subList[1] THEN:!isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[56: Given:<"hello">:When:<java.util.Objects.equals(<hello>,<>)>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withoutEvaluator_conj_thenFail(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.runMultiParameterFunction$thenExpectedValueReturned(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[55: Given:<"hello">:When:<stringify THEN:==[hello]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest.requireArgument_passing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_shortToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$StringifyTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$StringifyTest) (0 ms)</li><li>com.github.dakusui.pcond.bugfixes.Issue42Test.givenPrivateClassOverridingPublicMethod$whenPublicMethodIsCalled$thenCallSucceeds(com.github.dakusui.pcond.bugfixes.Issue42Test) (3 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[32: Given:<"A">:When:<parseFloat THEN:(isInstanceOf[class java.lang.Float]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.ListTest.testAnyMatch(com.github.dakusui.ut.valid8j.compatibility.ListTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest.givenFunctionReturnedByCompose$whenApply$thenWorksRight(com.github.dakusui.pcond.ut.PrintablesTest$FunctionTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.multiAssumeAll_passed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[31: Given:<"A">:When:<parseLong THEN:(isInstanceOf[class java.lang.Long]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyLastBeforeLast$thenIllegalStateIsThrown(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[18: Given:<["X"]>:When:<castTo[List<String>] THEN:isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithStringParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[2: Given:<false>:When:<isTrue>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.StringTest.testIsInstanceOf(com.github.dakusui.ut.valid8j.compatibility.StringTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.InternalUtilsTest$DummyFormTest.testDummyFunction(com.github.dakusui.pcond.ut.InternalUtilsTest$DummyFormTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[40: Given:<"false">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Boolean]&&isTrue)>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.CallTest.instanceMethodCanBeCreatedOnSpecifiedObject(com.github.dakusui.pcond.CallTest) (1 ms)</li><li>com.github.dakusui.pcond.NegateTest.whenInvertedTransformingPredicateFails_thenPrintDesignedMessage$transformIsntLeafAndNotMerged(com.github.dakusui.pcond.NegateTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[24: Given:<"456">:When:<substring[1]->parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[23])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello4(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.MoreFluentStringTest.test_findSubstrings(com.github.dakusui.ut.thincrest.ut.styles.MoreFluentStringTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[35: Given:<null>:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_IntegerToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.assumeThatTest_failed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[8](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello_b2(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest.requireStatesTest_failing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest) (3 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[50: Given:<null>:When:<split[:] THEN:toCursoredList (findElementBy[[A]]&&findElementBy[[B]]&&findElementBy[[C]]&&(end))>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello_b3(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (0 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest.exerciseTestCase[3: givenStreamPredicate$hello_b_e_4$_whenUnexpectedValue_thenComparisonFailure2](com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest) (7 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[15: Given:<[]>:When:<castTo[List<Object>] THEN:isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_intToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (0 ms)</li><li>com.github.dakusui.pcond.CallTest.classMethodCaBeCalled(com.github.dakusui.pcond.CallTest) (3 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[4: Given:<null>:When:<isTrue>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.MoreFluentStringTest.test_findRegexPatterns(com.github.dakusui.ut.thincrest.ut.styles.MoreFluentStringTest) (0 ms)</li><li>com.github.dakusui.pcond.bugfixes.Issue11Test.whenReproduceIssue(com.github.dakusui.pcond.bugfixes.Issue11Test) (3 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenLongString_whenCheckEqualnessUsingCustomPredicateWithSlightlyDifferentString_thenExpectationSpecificFragmentsContainedOnlyByExplanationForExpectationAndActualValuesAreAlsoSo(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (3 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest.requireValuesTest_failing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest) (2 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.givenString$hello$_whenTransformToContextAndCheckContextValueIsNull_thenPreconditionViolationWithCorrectMessageThrown(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenExceptionThrowingFunction$whenApplythenThrown(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[0](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[10](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[47: Given:<"A:B">:When:<split[:] THEN:toCursoredList (findElementBy[[A]]&&findElementBy[[B]]&&findElementBy[[C]]&&(end))>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[16](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (0 ms)</li><li>com.github.dakusui.pcond.experimentals.TestAssertionsCurriedFunctionsTest.usageExample(com.github.dakusui.pcond.experimentals.TestAssertionsCurriedFunctionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[58: Given:<"hello">:When:<java.util.Objects.equals(<hello>,<>)->castTo[Boolean] THEN:isTrue>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.givenStreamOfSingleString$hello$_whenRequireNonNullIsFound_thenPassing(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.MoreFluentStringTest.test_startsWith(com.github.dakusui.ut.thincrest.ut.styles.MoreFluentStringTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[1](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[26: Given:<"456">:When:<parseLong THEN:(isInstanceOf[class java.lang.Long]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[13](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (0 ms)</li><li>com.github.dakusui.pcond.CallTest.instanceMethodCanBeCalled(com.github.dakusui.pcond.CallTest) (0 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest.exerciseTestCase[1: givenStreamPredicate$hello_b_e$_whenUnexpectedValue_thenComparisonFailure2](com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest) (4 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest.test_isEmpty(com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest.requireValue_passing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[2](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$MessageTest.testFormat(com.github.dakusui.ut.thincrest.ut.PredicatesTest$MessageTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[3](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest.ensureState_passing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[16](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[79: Given:<"123.5">:When:<parseDouble->identity->castTo[Double] THEN:=[123.4]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[71: Given:<"123">:When:<parseInt->identity->castTo[Integer] THEN:=[123]>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[5: Given:<["A","B","C"]>:When:<subList[1] THEN:!isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[A, B, C])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[13](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[72: Given:<"123">:When:<parseBoolean->identity->castTo[Short] THEN:=[123]>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[4](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[8](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[42: Given:<null>:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Boolean]&&isTrue)>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.RequiresTest (3 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withEvaluator_transforming_thenFail(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenToStringOnOngoing$thenExpectedResultReturned(com.github.dakusui.pcond.ut.CurryingTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[16: Given:<["X"]>:When:<castTo[List<Object>] THEN:isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.nestedLoop_fail(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[5](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[38: Given:<null>:When:<parseDouble THEN:(isInstanceOf[class java.lang.Double]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[9](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[28: Given:<"456">:When:<parseDouble THEN:(isInstanceOf[class java.lang.Double]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest.test_stream(com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest) (6 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[76: Given:<"123.4">:When:<parseFloat->identity->castTo[Float] THEN:=[123.4]>:Then:<valueReturned:[identity=>identicalWith(value:123.4)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[7](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[49: Given:<null>:When:<split[:] THEN:(!isEmpty&&contains[A]&&contains[B]&&contains[C])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[67: Given:<"HELLO">:When:<<>.equals(<hello>)->castTo[Boolean] THEN:isTrue>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[54: Given:<"hello">:When:<==[hello]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[36: Given:<null>:When:<parseLong THEN:(isInstanceOf[class java.lang.Long]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.PrintablesFunctionTest$Composed.testAndThen$toString(com.github.dakusui.pcond.PrintablesFunctionTest$Composed) (1 ms)</li><li>com.github.dakusui.pcond.CallTest.covariantOverridingMethodCanBeInvokedCorrectly(com.github.dakusui.pcond.CallTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$IsInstanceOfTest.whenIsInstanceOfUsedInComposite_thenNoExplicitTypeParameterIsNeeded(com.github.dakusui.ut.thincrest.ut.PredicatesTest$IsInstanceOfTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[64: Given:<"HELLO">:When:<java.util.Objects.equals(<hello>,<>)>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[10](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[4](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello4_a(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$IsInstanceOfTest.test(com.github.dakusui.ut.thincrest.ut.PredicatesTest$IsInstanceOfTest) (1 ms)</li><li>com.github.dakusui.pcond.PrintablesFunctionTest$Composed.testFailureFromAndThenStructureInTransformer(com.github.dakusui.pcond.PrintablesFunctionTest$Composed) (4 ms)</li><li>com.github.dakusui.pcond.PrintablesFunctionTest$Composed.testFailureFromComposeStructureInTransformer(com.github.dakusui.pcond.PrintablesFunctionTest$Composed) (6 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[37: Given:<null>:When:<parseFloat THEN:(isInstanceOf[class java.lang.Float]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest.ensureValuesTest_failing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest) (3 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_nullToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest.reqireState_passing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForRequiresTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[20: Given:<"123">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[123])>:Then:<valueReturned:[identity=>identicalWith(value:123)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_byteToCurriedFuncWithIntParam$whenIsValidArg$thenTrue(com.github.dakusui.pcond.ut.CurryingTest) (0 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest.givenSomeFoundSomeNotFound$whenFindRegexes$thenFailed(com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.assumeThatTest_passed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindElementsTest.givenSomeToBeFoundSomeNotToBe$whenFindElements$thenFailed(com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindElementsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenCurriedFunction$whenApplyWithInvalidArg$thenThrown(com.github.dakusui.pcond.ut.CurryingTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[44: Given:<"A:B:C">:When:<split[:] THEN:toCursoredList (findElementBy[[A]]&&findElementBy[[B]]&&findElementBy[[C]]&&(end))>:Then:<valueReturned:[identity=>identicalWith(value:A:B:C)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[7](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest.whenWrongNumberArgumentsThenFails(com.github.dakusui.pcond.ut.FunctionsTest$MultiFunctionTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[33: Given:<"A">:When:<parseDouble THEN:(isInstanceOf[class java.lang.Double]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest.exerciseTestCase[2: givenStreamPredicate$hello_b_e_2$_whenUnexpectedValue_thenComparisonFailure2](com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest) (7 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[62: Given:<"hello">:When:<java.util.Objects.equals(<hello>,<>)->castTo[Boolean] THEN:isTrue>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.assertAllDifferentTypes_passed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[14](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (0 ms)</li><li>com.github.dakusui.pcond.experimentals.TestAssertionsCurriedFunctionsTest.helloError(com.github.dakusui.pcond.experimentals.TestAssertionsCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello3_a(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest.test_size(com.github.dakusui.ut.thincrest.ut.styles.MoreFluentListTest) (0 ms)</li><li>com.github.dakusui.pcond.CallTest.parameterUnmatchedWhileNameMatching(com.github.dakusui.pcond.CallTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[46: Given:<"A:B">:When:<split[:] THEN:(!isEmpty&&contains[A]&&contains[B]&&contains[C])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.ReportDetailTest.givenLongString_whenCheckEqualnessWithSlightlyDifferentString_thenFailWithDetailsArePrinted$assertThat(com.github.dakusui.ut.thincrest.ut.ReportDetailTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[6](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (0 ms)</li><li>com.github.dakusui.pcond.CallTest.cannotCallPrimitiveParameterMethodWithNull(com.github.dakusui.pcond.CallTest) (9 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[17](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[10: Given:<["X"]>:When:<subList[1,1] THEN:!isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (7 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest.test_preconditions(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[14: Given:<["X"]>:When:<isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[41: Given:<"XYZ">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Boolean]&&isTrue)>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[6](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (0 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest.givenAllFound$whenFindString$thenPassed(com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest) (0 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.given$hello$_$world$_whenRequireNestedStreamImpossibleConditions_thenPreconditionViolationExceptionWithCorrectMessage(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (8 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest.exerciseTestCase[4: givenTwoChainedTransformingPredicates_whenNonExpectedValue_thenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest) (7 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[8: Given:<["A","B"]>:When:<subList[1,2] THEN:!isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[A, B])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[3: Given:<false>:When:<isTrue>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[1](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedFunctionsTest.exercisePredicate[5](com.github.dakusui.pcond.ut.ParameterizedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$StreamTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$StreamTest) (0 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.givenStream_whenRequireConditionResultingInNPE_thenInternalExceptionWithCorrectMessageAndNpeAsNestedException(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[3](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[53: Given:<"hello">:When:<stringify THEN:==[hello]>:Then:<valueReturned:[identity=>identicalWith(value:hello)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest.givenAllFound$whenFindRegexes$thenPassed(com.github.dakusui.ut.thincrest.ut.PredicatesTest$FindStringsTest) (4 ms)</li><li>com.github.dakusui.pcond.ut.FunctionsTest$SizeTest.whenApplied$thenLooksGood(com.github.dakusui.pcond.ut.FunctionsTest$SizeTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[78: Given:<"123.5">:When:<parseFloat->identity->castTo[Float] THEN:=[123.4]>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest.exerciseTestCase[1: givenDoubleChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest) (5 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.givenStringToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest) (0 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.nestedLoop_success(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[25: Given:<"456">:When:<parseBoolean THEN:(isInstanceOf[class java.lang.Short]&&isEqualTo[123])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[9: Given:<["X"]>:When:<subList[1] THEN:!isEmpty>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[17: Given:<[]>:When:<castTo[List<String>] THEN:isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (5 ms)</li><li>com.github.dakusui.ut.valid8j.ut.ValidatesTest.testX(com.github.dakusui.ut.valid8j.ut.ValidatesTest) (2 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest.exerciseTestCase[0: givenStreamPredicate$RequireConditionResultingInNPE$_whenUnexpectedValue_thenComparisonFailure2](com.github.dakusui.pcond.propertybased.tests.StreamNoneMatchPredicateTest) (4 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.givenStreamOfSingleString$hello$_whenRequireNullIsFound_thenPreconditionViolationWithCorrectMessageIsThrown(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest.exerciseTestCase[2: givenTransformingPredicate_whenExpectedValue_thenValueReturned](com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest) (1 ms)</li><li>com.github.dakusui.pcond.PrintablesFunctionTest$Simple.testHandleNull(com.github.dakusui.pcond.PrintablesFunctionTest$Simple) (1 ms)</li><li>com.github.dakusui.ut.thincrest.examples.JUnitBasedExamplesTest.testExampleUT(com.github.dakusui.ut.thincrest.examples.JUnitBasedExamplesTest) (26 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exerciseToString[0](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.CurryingTest.given_longToCurriedFuncWithIntParam$whenIsValidArg$thenFalse(com.github.dakusui.pcond.ut.CurryingTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.compatibility.ObjectTest.givenNull(com.github.dakusui.ut.valid8j.compatibility.ObjectTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest.ensureStatesTest_failing(com.github.dakusui.ut.valid8j.ut.styles.FluentStyleDbCTest$ForEnsuresTest) (3 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[27: Given:<"456">:When:<parseFloat THEN:(isInstanceOf[class java.lang.Float]&&isEqualTo[123.0])>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest.exerciseTestCase[0: givenChainedTransformingPredicate_whenNonExpectedValue_thenComparisonFailure](com.github.dakusui.pcond.propertybased.tests.TransformAndCheckPredicateTest) (4 ms)</li><li>com.github.dakusui.pcond.experimentals.TestAssertionsCurriedFunctionsTest.parameterizedFunctionTest(com.github.dakusui.pcond.experimentals.TestAssertionsCurriedFunctionsTest) (2 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[4](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest.object_assertThatTest_passed(com.github.dakusui.ut.thincrest.ut.styles.FluentStyleTestAssertionTest$ForTestAssertionsTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[48: Given:<"A:B">:When:<split[:] THEN:toCursoredList (findElementBy[isEqualTo[A]]&&findElementBy[isEqualTo[B]]&&findElementBy[isEqualTo[C]]&&(end))>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (1 ms)</li><li>com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest.withEvaluator_columns100$whenShorterThan10(com.github.dakusui.pcond.ut.valuechecker.DefaultValidatorTest) (3 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello3_b(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (0 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[77: Given:<"123.4">:When:<parseDouble->identity->castTo[Double] THEN:=[123.4]>:Then:<valueReturned:[identity=>identicalWith(value:123.4)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest.hello_b_e5(com.github.dakusui.pcond.experimentals.DbCCurriedFunctionsTest) (3 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[1: Given:<true>:When:<isTrue>:Then:<valueReturned:[identity=>identicalWith(value:true)]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (4 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[65: Given:<"HELLO">:When:<<>.equals(<hello>)>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.pcond.CallTest.functionsCanBeChained(com.github.dakusui.pcond.CallTest) (0 ms)</li><li>com.github.dakusui.pcond.ut.ParameterizedPredicatesTest.exercisePredicate[11](com.github.dakusui.pcond.ut.ParameterizedPredicatesTest) (1 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[66: Given:<"HELLO">:When:<java.util.Objects.equals(<hello>,<>)->castTo[Boolean] THEN:isTrue>:Then:<exceptionThrown:ComparisonFailure:[numberOfActualSummaries=>greaterThan(1), numbersOfExpectAndActualSummaries=>areEqual, numbersOfExpectAndActualSummariesWithDetails=>areEqual, numberOfExpectDetails=>greaterThan(1), numbersOfExpectAndActualDetails=>areEqual]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (2 ms)</li><li>com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest.exerciseTestCase[13: Given:<[]>:When:<isEmpty>:Then:<valueReturned:[identity=>identicalWith(value:[])]>](com.github.dakusui.ut.valid8j.ut.styles.fluent.GeneralFluentTest) (6 ms)</li>
+</ul>
+
+<br/>
+
+Report generated by <a href='http://pitest.org'>PIT</a> 1.7.3
+
+</body>
+</html>

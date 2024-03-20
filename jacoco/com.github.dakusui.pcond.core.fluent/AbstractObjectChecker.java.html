@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractObjectChecker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.fluent</a> &gt; <span class="el_source">AbstractObjectChecker.java</span></div><h1>AbstractObjectChecker.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.fluent;
+
+import com.github.dakusui.pcond.core.refl.MethodQuery;
+import com.github.dakusui.pcond.forms.Predicates;
+
+import static com.github.dakusui.pcond.forms.Functions.parameter;
+
+public interface AbstractObjectChecker&lt;
+    V extends Checker&lt;V, T, R&gt;,
+    T,
+    R&gt; extends
+    Checker&lt;V, T, R&gt; {
+  default V isNotNull() {
+<span class="fc" id="L14">    return this.checkWithPredicate(Predicates.isNotNull());</span>
+  }
+
+  default V isNull() {
+<span class="fc" id="L18">    return this.checkWithPredicate(Predicates.isNull());</span>
+  }
+
+  /**
+   * Checks the object with an argument if they are &quot;equal&quot;, using `equalTo` method.
+   *
+   * @return the updated object.
+   */
+  default V isEqualTo(Object anotherObject) {
+<span class="fc" id="L27">    return this.checkWithPredicate(Predicates.isEqualTo(anotherObject));</span>
+  }
+
+  default V isSameReferenceAs(Object anotherObject) {
+<span class="fc" id="L31">    return this.checkWithPredicate(Predicates.isSameReferenceAs(anotherObject));</span>
+  }
+
+  default V isInstanceOf(Class&lt;?&gt; klass) {
+<span class="fc" id="L35">    return this.checkWithPredicate(Predicates.isInstanceOf(klass));</span>
+  }
+
+  default V invoke(String methodName, Object... args) {
+<span class="fc" id="L39">    return this.checkWithPredicate(Predicates.callp(MethodQuery.instanceMethod(parameter(), methodName, args)));</span>
+  }
+
+  default V invokeStatic(Class&lt;?&gt; klass, String methodName, Object... args) {
+<span class="fc" id="L43">    return this.checkWithPredicate(Predicates.callp(MethodQuery.classMethod(klass, methodName, args)));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

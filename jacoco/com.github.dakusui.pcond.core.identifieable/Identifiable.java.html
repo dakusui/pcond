@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Identifiable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.identifieable</a> &gt; <span class="el_source">Identifiable.java</span></div><h1>Identifiable.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.identifieable;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+
+/**
+ * An interface that represents an object which can be identified based on objects
+ * used on instantiation without overriding the {@link Object#hashCode} and {@link Object#equals(Object)}.
+ * In order to minimize effort to implement this interface, you can extend
+ * {@link Identifiable.Base} class.
+ */
+public interface Identifiable {
+  static Optional&lt;Object&gt; creatorOf(Object object) {
+<span class="fc" id="L19">    Optional&lt;Object&gt; ret = Optional.empty();</span>
+<span class="fc bfc" id="L20" title="All 2 branches covered.">    if (object instanceof Identifiable)</span>
+<span class="fc" id="L21">      ret = Optional.of(((Identifiable) object).creator());</span>
+<span class="fc" id="L22">    return ret;</span>
+  }
+
+  static List&lt;Object&gt; argsOf(Object object) {
+<span class="fc" id="L26">    List&lt;Object&gt; ret = singletonList(object);</span>
+<span class="pc bpc" id="L27" title="1 of 2 branches missed.">    if (object instanceof Identifiable)</span>
+<span class="fc" id="L28">      ret = ((Identifiable) object).args();</span>
+<span class="fc" id="L29">    return ret;</span>
+  }
+
+  static &lt;T&gt; String formatObjectName(Object object) {
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">    return &quot;noname:&quot; + (object == null ? &quot;null&quot; : object.toString());</span>
+  }
+
+  Object creator();
+
+  /**
+   * This method is designed to be called from the {@code hashCode()} method of a class
+   * which implements {@link Identifiable} identity interface.
+   *
+   * @return A proper value to be returned from the {@link Object#hashCode()} method.
+   */
+  default int defaultHashCode() {
+<span class="fc" id="L45">    return identityObject().hashCode();</span>
+  }
+
+  /**
+   * This method is designed to be called from the {@code defaultEquals()} method of a class
+   * which implements {@link Identifiable} identity interface.
+   *
+   * @return A proper value to be returned from the {@link Object#equals(Object)} method.
+   */
+  default boolean defaultEquals(Object anotherObject) {
+<span class="fc bfc" id="L55" title="All 2 branches covered.">    if (this == anotherObject)</span>
+<span class="fc" id="L56">      return true;</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">    if (!this.getClass().isInstance(anotherObject))</span>
+<span class="fc" id="L58">      return false;</span>
+<span class="fc" id="L59">    return Objects.equals(this.identityObject(), ((Identifiable) anotherObject).identityObject());</span>
+  }
+
+  default Object createIdentity() {
+<span class="fc" id="L63">    return Stream.concat(</span>
+<span class="fc" id="L64">        Stream.of(creator()),</span>
+<span class="fc" id="L65">        args().stream()).collect(toList());</span>
+  }
+
+  /**
+   * Typically, implementation of this method should return a final field value to which the
+   * value returned by {@link Identifiable#createIdentity()} method is assigned in the constructor.
+   *
+   * @return The identity object.
+   */
+  Object identityObject();
+
+  List&lt;Object&gt; args();
+
+  class Base implements Identifiable {
+    private final Object       creator;
+    private final List&lt;Object&gt; args;
+    private final Object       identity;
+
+<span class="fc" id="L83">    protected Base(Object creator, List&lt;Object&gt; args) {</span>
+<span class="fc" id="L84">      this.creator = Objects.requireNonNull(creator);</span>
+<span class="fc" id="L85">      this.args = Objects.requireNonNull(args);</span>
+<span class="fc" id="L86">      this.identity = createIdentity();</span>
+<span class="fc" id="L87">    }</span>
+
+    @Override
+    public Object identityObject() {
+<span class="fc" id="L91">      return this.identity;</span>
+    }
+
+    @Override
+    public Object creator() {
+<span class="fc" id="L96">      return this.creator;</span>
+    }
+
+    @Override
+    public List&lt;Object&gt; args() {
+<span class="fc" id="L101">      return args;</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L106">      return defaultHashCode();</span>
+    }
+
+    // Done in a method to which the operation is delegated.
+    @SuppressWarnings(&quot;EqualsWhichDoesntCheckParameterClass&quot;)
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc" id="L113">      return defaultEquals(obj);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

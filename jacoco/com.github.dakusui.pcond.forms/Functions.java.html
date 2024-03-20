@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Functions.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.forms</a> &gt; <span class="el_source">Functions.java</span></div><h1>Functions.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.forms;
+
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunction;
+import com.github.dakusui.pcond.experimentals.currying.CurryingUtils;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunction;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunctionUtils;
+import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
+import com.github.dakusui.pcond.core.refl.MethodQuery;
+import com.github.dakusui.pcond.core.refl.Parameter;
+import com.github.dakusui.pcond.validator.Validator;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
+import static com.github.dakusui.pcond.forms.Predicates.allOf;
+import static com.github.dakusui.pcond.forms.Predicates.isInstanceOf;
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
+
+/**
+ * An entry point for acquiring function objects.
+ * Functions retrieved by methods in this class are all &quot;printable&quot;.
+ */
+public class Functions {
+  private Functions() {
+  
+  }
+  
+  /**
+   * Returns a printable function that returns a given object itself.
+   *
+   * @param &lt;E&gt; The type of the object.
+   * @return The function.
+   */
+  public static &lt;E&gt; Function&lt;E, E&gt; identity() {
+<span class="fc" id="L44">    return PrintableFunctionFactory.Simple.IDENTITY.instance();</span>
+  }
+  
+  /**
+   * Returns a function that gives a string representation of a object given to it.
+   * Internally, the returned function calls `toString` method on a given object.
+   *
+   * @param &lt;E&gt; The type of the object
+   * @return The function.
+   */
+  public static &lt;E&gt; Function&lt;E, String&gt; stringify() {
+<span class="fc" id="L55">    return PrintableFunctionFactory.Simple.STRINGIFY.instance();</span>
+  }
+  
+  /**
+   * Returns a function that gives a length of a string passed as an argument.
+   *
+   * @return The function.
+   */
+  public static Function&lt;? super String, Integer&gt; length() {
+<span class="fc" id="L64">    return PrintableFunctionFactory.Simple.LENGTH.instance();</span>
+  }
+  
+  
+  @SuppressWarnings({ &quot;unchecked&quot;, &quot;RedundantClassCall&quot; })
+  public static &lt;E&gt; Function&lt;List&lt;E&gt;, E&gt; elementAt(int i) {
+<span class="fc" id="L70">    return Function.class.cast(PrintableFunctionFactory.Parameterized.ELEMENT_AT.create(singletonList(i)));</span>
+  }
+  
+  /**
+   * Returns a function that that returns a size of a given list.
+   *
+   * @return The function.
+   */
+  public static &lt;E&gt; Function&lt;Collection&lt;E&gt;, Integer&gt; size() {
+<span class="fc" id="L79">    return PrintableFunctionFactory.Simple.SIZE.instance();</span>
+  }
+  
+  /**
+   * Returns a function that returns a stream for a given collection.
+   *
+   * @param &lt;E&gt; Type of elements in the given collection.
+   * @return The function.
+   */
+  public static &lt;E&gt; Function&lt;Collection&lt;? extends E&gt;, Stream&lt;E&gt;&gt; stream() {
+<span class="fc" id="L89">    return PrintableFunctionFactory.Simple.STREAM.instance();</span>
+  }
+  
+  /**
+   * Returns a function that returns a stream for a given collection.
+   *
+   * @param elementClass A parameter to let compiler know the type of the element in a collection.
+   * @param &lt;E&gt;          A type of elements in a collection.
+   * @return The function.
+   */
+  public static &lt;E&gt; Function&lt;Collection&lt;? extends E&gt;, Stream&lt;E&gt;&gt; stream(@SuppressWarnings(&quot;unused&quot;) Class&lt;E&gt; elementClass) {
+<span class="fc" id="L100">    return stream();</span>
+  }
+  
+  /**
+   * Returns a function that returns a stream for a given object.
+   * This method corresponds to {@link Stream#of(Object)} method.
+   *
+   * @param &lt;E&gt; Type of object.
+   * @return The function.
+   */
+  public static &lt;E&gt; Function&lt;E, Stream&lt;E&gt;&gt; streamOf() {
+<span class="fc" id="L111">    return PrintableFunctionFactory.Simple.STREAM_OF.instance();</span>
+  }
+  
+  /**
+   * Returns a function that casts an object into a given class.
+   *
+   * @param type The type to which the given object is cast
+   * @param &lt;E&gt;  The type to which the object is case.
+   * @return The function.
+   */
+  public static &lt;E&gt; Function&lt;? super Object, E&gt; cast(Class&lt;E&gt; type) {
+<span class="fc" id="L122">    return PrintableFunctionFactory.Parameterized.CAST.create(singletonList(type));</span>
+  }
+  
+  /**
+   * Returns a function that casts an object into a given class.
+   * ```java
+   *     assertThat(
+   *         asList(lastName, fullName),
+   *         allOf(
+   *             transform(elementAt(0).andThen(cast(String.class))).check(allOf(isNotNull(), not(isEmptyString()))),
+   *             transform(elementAt(1).andThen(castTo((List&lt;String&gt;)value()))).check(Predicates.contains(lastName))));
+   *  ```
+   *
+   * @param value A type place-holder.
+   *              Always use a value returned from {@link Functions#value()} method.
+   * @param &lt;E&gt;   The type to which the object is case.
+   * @return The function.
+   */
+  public static &lt;E&gt; Function&lt;? super Object, E&gt; castTo(@SuppressWarnings(&quot;unused&quot;) E value) {
+<span class="nc" id="L141">    return PrintableFunctionFactory.Simple.CAST_TO.instance();</span>
+  }
+
+  /**
+   * Returns a function that creates and returns a list that contains all the elements in the given list.
+   *
+   * @param &lt;I&gt; The type of the input collection.
+   * @param &lt;E&gt; Type of the elements in the collection
+   * @return The function.
+   */
+  public static &lt;I extends Collection&lt;E&gt;, E&gt; Function&lt;I, List&lt;E&gt;&gt; collectionToList() {
+<span class="fc" id="L152">    return PrintableFunctionFactory.Simple.COLLECTION_TO_LIST.instance();</span>
+  }
+  
+  /**
+   * Returns a function that converts a given array into a list.
+   *
+   * @param &lt;E&gt; Type of elements in a given array.
+   * @return The function.
+   */
+  public static &lt;E&gt; Function&lt;E[], List&lt;E&gt;&gt; arrayToList() {
+<span class="fc" id="L162">    return PrintableFunctionFactory.Simple.ARRAY_TO_LIST.instance();</span>
+  }
+  
+  /**
+   * Returns a function the counts lines in a given string.
+   *
+   * @return The function.
+   */
+  public static Function&lt;String, Integer&gt; countLines() {
+<span class="fc" id="L171">    return PrintableFunctionFactory.Simple.COUNT_LINES.instance();</span>
+  }
+  
+  /**
+   * //@formatter:off
+   * The returned function tries to find a {@code substring} after a given string.
+   * If found, it returns the result of the following statement.
+   *
+   * [source,java]
+   * ----
+   * s.substring(s.indexOf(substring) + substring.length())
+   * ----
+   *
+   * If not found, a {@link StringIndexOutOfBoundsException} will be thrown.
+   * //@formatter:on
+   *
+   * @param substring A substring to find in a given string.
+   * @return The string after the {@code substring}.
+   */
+  public static Function&lt;String, String&gt; findString(String substring) {
+<span class="fc" id="L191">    requireNonNull(substring);</span>
+<span class="fc" id="L192">    return PrintableFunctionFactory.function(</span>
+<span class="nc" id="L193">        () -&gt; format(&quot;findString[%s]&quot;, substring),</span>
+        s -&gt; {
+<span class="fc" id="L195">          int index = s.indexOf(substring);</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">          if (index &gt;= 0)</span>
+<span class="fc" id="L197">            return s.substring(s.indexOf(substring) + substring.length());</span>
+<span class="fc" id="L198">          throw new NoSuchElementException(format(&quot;'%s' was not found in '%s'&quot;, substring, s));</span>
+        });
+  }
+  
+  /**
+   * https://en.wikipedia.org/wiki/Currying[Curries] a static method specified by the given arguments.
+   *
+   * @param aClass         A class to which the method to be curried belongs to.
+   * @param methodName     A name of the method to be curried.
+   * @param parameterTypes Parameters types of the method.
+   * @return A printable and curried function of the target method.
+   */
+  @SuppressWarnings(&quot;JavadocLinkAsPlainText&quot;)
+  public static CurriedFunction&lt;Object, Object&gt; curry(Class&lt;?&gt; aClass, String methodName, Class&lt;?&gt;... parameterTypes) {
+<span class="fc" id="L212">    return curry(multifunction(aClass, methodName, parameterTypes));</span>
+  }
+  
+  /**
+   * Curries a given multi-function.
+   *
+   * @param function A multi-function to be curried
+   * @return A curried function
+   * @see Functions#curry(Class, String, Class[])
+   */
+  public static CurriedFunction&lt;Object, Object&gt; curry(MultiFunction&lt;Object&gt; function) {
+<span class="fc" id="L223">    return CurryingUtils.curry(function);</span>
+  }
+  
+  public static &lt;R&gt; MultiFunction&lt;R&gt; multifunction(Class&lt;?&gt; aClass, String methodName, Class&lt;?&gt;... parameterTypes) {
+<span class="fc" id="L227">    return MultiFunctionUtils.multifunction(IntStream.range(0, parameterTypes.length).toArray(), aClass, methodName, parameterTypes);</span>
+  }
+  
+  /**
+   * Returns a {@link Function} created from a method specified by a {@code methodQuery}.
+   * If the {@code methodQuery} matches none or more than one methods, a {@code RuntimeException} will be thrown.
+   *
+   * To pass an input value given to an entry point method, such as `TestAssertions.assertThat`, to the method, use a place-holder value returned by {@link Functions#parameter()}.
+   *
+   * @param methodQuery A query object that specifies a method to be invoked by the returned function.
+   * @param &lt;T&gt;         the type of the input to the returned function
+   * @return Created function.
+   * @see Functions#classMethod(Class, String, Object[])
+   * @see Functions#instanceMethod(Object, String, Object[])
+   * @see Functions#parameter()
+   */
+  public static &lt;T, R&gt; Function&lt;T, R&gt; call(MethodQuery methodQuery) {
+<span class="fc" id="L244">    return Printables.function(methodQuery.describe(), t -&gt; invokeMethod(methodQuery.bindActualArguments((o) -&gt; o instanceof Parameter, o -&gt; t)));</span>
+  }
+  
+  
+  /**
+   * // @formatter:off
+   * Creates a {@link MethodQuery} object from given arguments to search for {@code static} methods.
+   * Note that {@code arguments} are actual argument values, not the formal parameter types.
+   * The pcond library searches for the &quot;best&quot; matching method for you.
+   * In case no matching method is found or more than one methods are found, a {@link RuntimeException}
+   * will be thrown.
+   *
+   * In order to specify a parameter which should be passed to the returned function at applying,
+   * you can use an object returned by {@link Functions#parameter} method.
+   * This is useful to construct a function from an existing method.
+   *
+   * To pass an input value given to an entry point method, such as `TestAssertions.assertThat`, to the method, use a place-holder value returned by {@link Functions#parameter()}.
+   *
+   * That is, in order to create a function which computes sin using query a method {@link Math#sin(double)},
+   * you can do following
+   *
+   * [source, java]
+   * ----
+   * public class Example
+   *   public void buildSinFunction() {
+   *     MethodQuery mq = classMethod(Math.class, &quot;sin&quot;, parameter());
+   *     Function&lt;Double, Double&gt; sin = call(mq);
+   *     System.out.println(sin(Math.PI/2));
+   *   }
+   * }
+   * ----
+   * This prints {@code 1.0}.
+   *
+   * In case your arguments do not contain any {@link Parameter} object, the input
+   * argument passed to the built function will be simply ignored.
+   *
+   * // @formatter:on
+   *
+   * @param targetClass A class
+   * @param methodName  A method name
+   * @param arguments   Arguments
+   * @return A method query for static methods specified by arguments.
+   * @see com.github.dakusui.pcond.core.refl.ReflUtils#findMethod(Class, String, Object[])
+   * @see Functions#parameter()
+   */
+  public static MethodQuery classMethod(Class&lt;?&gt; targetClass, String methodName, Object... arguments) {
+<span class="fc" id="L290">    return MethodQuery.classMethod(targetClass, methodName, arguments);</span>
+  }
+  
+  /**
+   * // @formatter:off
+   * Creates a {@link MethodQuery} object from given arguments to search for {@code static} methods.
+   * Excepting that this method returns a query for instance methods, it is quite
+   * similar to {@link Functions#classMethod(Class, String, Object[])}.
+   *
+   * This method is useful to build a function from an instance method.
+   * That is, you can create a function which returns the length of a given string
+   * from a method {@link String#length()} with a following code snippet.
+   *
+   * [source, java]
+   * ----
+   * public void buildLengthFunction() {
+   *   Function&lt;String, Integer&gt; length = call(instanceMethod(parameter(), &quot;length&quot;));
+   * }
+   * ----
+   *
+   * In case the {@code targetObject} is not an instance of {@link Parameter} and {@code arguments}
+   * contain no {@code Parameter} object, the function will simply ignore the input passed to it.
+   *
+   * To pass an input value given to an entry point method, such as `TestAssertions.assertThat`, to the method, use a place-holder value returned by {@link Functions#parameter()}.
+   *
+   * // @formatter:on
+   *
+   * @param targetObject An object on which methods matching returned query should be invoked.
+   * @param methodName   A name of method.
+   * @param arguments    Arguments passed to the method.
+   * @return A method query for instance methods specified by arguments.
+   * @see Functions#classMethod(Class, String, Object[])
+   * @see Functions#parameter()
+   */
+  public static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
+<span class="fc" id="L325">    return MethodQuery.instanceMethod(targetObject, methodName, arguments);</span>
+  }
+  
+  /**
+   * // @formatter:off
+   * A short hand method to call
+   *
+   * [source, java]
+   * ---
+   * call(instanceMethod(object, methodName, args))
+   * ---
+   * // @formatter:on
+   *
+   * To pass an input value given to an entry point method, such as `TestAssertions.assertThat`, to the method, use a place-holder value returned by {@link Functions#parameter()}.
+   *
+   * @param targetObject An object on which methods matching returned query should be invoked.
+   * @param methodName   A name of method.
+   * @param arguments    Arguments passed to the method.
+   * @param &lt;T&gt;          The type of the input to the returned function.
+   * @param &lt;R&gt;          The type of the output from the returned function.
+   * @return The function that calls a method matching a query built from the given arguments.
+   * @see Functions#call(MethodQuery)
+   * @see Functions#instanceMethod(Object, String, Object[])
+   * @see Functions#parameter()
+   */
+  private static &lt;T, R&gt; Function&lt;T, R&gt; callInstanceMethod(Object targetObject, String methodName, Object... arguments) {
+<span class="fc" id="L351">    return call(instanceMethod(targetObject, methodName, arguments));</span>
+  }
+  
+  /**
+   * Returns a function that calls a method which matches the given {@code methodName}
+   * and {@code args} on the object given as input to it.
+   *
+   * Note that method look up is done when the predicate is applied.
+   * This means this method does not throw any exception by itself and in case
+   * you give wrong {@code methodName} or {@code arguments}, an exception will be
+   * thrown when the returned function is applied.
+   *
+   * // @formatter:off
+   * [source, java]
+   * ----
+   * public class Example {
+   *   public void method() {
+   *     assertThat(value, transform(call(&quot;toString&quot;)).check(isNotNull()));
+   *   }
+   * }
+   * ----
+   *
+   * To pass an input value given to an entry point method, such as `TestAssertions.assertThat`, to the method, use a place-holder value returned by {@link Functions#parameter()}.
+   *
+   * // @formatter:on
+   *
+   * @param methodName The method name
+   * @param arguments  Arguments passed to the method.
+   * @param &lt;T&gt;        The type of input to the returned function
+   * @param &lt;R&gt;        The type of output from the returned function
+   * @return A function that invokes the method matching the {@code methodName} and {@code args}
+   * @see Functions#parameter()
+   */
+  public static &lt;T, R&gt; Function&lt;T, R&gt; call(String methodName, Object... arguments) {
+<span class="fc" id="L385">    return callInstanceMethod(parameter(), methodName, arguments);</span>
+  }
+  
+  /**
+   * Returns a function that converts an input value to an exception object, which is thrown by `func`, when it is applied.
+   * If it does not throw an exception, or even if thrown, it is not an instance of {@code exceptionClass}, an assertion executed inside this method will fail and an exception
+   * to indicate it will be thrown.
+   * The exception will be typically an {@link AssertionError}.
+   *
+   * @param exceptionClass An exception class to be thrown.
+   * @param func           A function to be exercised
+   * @param &lt;T&gt;            A type of exception value to be thrown by {@code func}.
+   * @param &lt;E&gt;            An input value type of {@code func}.
+   * @return A function that maps an input value to an exception.
+   */
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;T, E extends Throwable&gt; Function&lt;T, E&gt; expectingException(Class&lt;E&gt; exceptionClass, Function&lt;? super T, ?&gt; func) {
+<span class="fc" id="L402">    return Printables.function(</span>
+<span class="fc" id="L403">        () -&gt; String.format(&quot;expectingException(%s,%s)&quot;, exceptionClass.getSimpleName(), func),</span>
+        in -&gt; {
+          Object out;
+          try {
+<span class="fc" id="L407">            out = func.apply(in);</span>
+<span class="fc" id="L408">          } catch (Throwable e) {</span>
+<span class="fc" id="L409">            Validator.instance().assertThat(e, isInstanceOf(exceptionClass));</span>
+<span class="fc" id="L410">            return (E) e;</span>
+<span class="fc" id="L411">          }</span>
+<span class="pc" id="L412">          Validator.instance().assertThat(</span>
+<span class="fc" id="L413">              String.format(&quot;%s(%s)-&gt;%s&quot;, func, formatObject(in, 12), formatObject(out, 12)),</span>
+<span class="fc" id="L414">              allOf(exceptionThrown(), exceptionClassWas(exceptionClass)));</span>
+<span class="nc" id="L415">          throw new AssertionError(&quot;A line that shouldn't be reached. File a ticket.&quot;);</span>
+        });
+  }
+  
+  /**
+   * Returns a {@link Parameter} object, which is used in combination with {@link Functions#instanceMethod(Object, String, Object[])},
+   * {@link Functions#classMethod(Class, String, Object[])}, or their shorthand methods.
+   * The object returned by this method is replaced with the actual input value passed to a function built
+   * through {@link Functions#call(MethodQuery)} or {@link Predicates#callp(MethodQuery)}
+   * when it is applied.
+   *
+   * @return a {@code Parameter} object
+   * @see Functions#classMethod(Class, String, Object[])
+   * @see Functions#instanceMethod(Object, String, Object[])
+   * @see Functions#call(MethodQuery)
+   * @see Functions#call(String, Object[])
+   * @see Predicates#callp(MethodQuery)
+   * @see Predicates#callp(String, Object[])
+   */
+  public static Parameter parameter() {
+<span class="fc" id="L435">    return Parameter.INSTANCE;</span>
+  }
+  
+  private static Predicate&lt;Object&gt; exceptionThrown() {
+<span class="fc" id="L439">    return Printables.predicate(&quot;exceptionThrown&quot;, v -&gt; false);</span>
+  }
+  
+  private static Predicate&lt;Object&gt; exceptionClassWas(Class&lt;? extends Throwable&gt; exceptionClass) {
+<span class="fc" id="L443">    return Printables.predicate(() -&gt; &quot;exceptionClass:&quot; + requireNonNull(exceptionClass).getSimpleName(), v -&gt; false);</span>
+  }
+
+  /**
+   * A method to return a value for a &quot;casting placeholder value&quot;.
+   *
+   * @param &lt;E&gt; Type to cast to.
+   * @return Casting placeholder value
+   */
+  public static &lt;E&gt; E value() {
+<span class="fc" id="L453">    return null;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

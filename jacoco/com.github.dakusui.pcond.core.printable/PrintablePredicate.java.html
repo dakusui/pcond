@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrintablePredicate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.printable</a> &gt; <span class="el_source">PrintablePredicate.java</span></div><h1>PrintablePredicate.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.printable;
+
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.identifieable.Identifiable;
+import com.github.dakusui.pcond.forms.Predicates;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+<span class="pc bpc" id="L12" title="1 of 2 branches missed.">public abstract class PrintablePredicate&lt;T&gt; extends Identifiable.Base implements Predicate&lt;T&gt;, Evaluable&lt;T&gt;, Cloneable {</span>
+  protected final Predicate&lt;? super T&gt; predicate;
+  final           Supplier&lt;String&gt;     formatter;
+<span class="fc" id="L15">  boolean squashable = false;</span>
+
+  protected PrintablePredicate(Object creator, List&lt;Object&gt; args, Supplier&lt;String&gt; formatter, Predicate&lt;? super T&gt; predicate) {
+<span class="fc" id="L18">    super(creator, args);</span>
+<span class="fc" id="L19">    this.formatter = Objects.requireNonNull(formatter);</span>
+<span class="fc" id="L20">    this.predicate = requireNonPrintablePredicate(unwrap(Objects.requireNonNull(predicate)));</span>
+<span class="fc" id="L21">  }</span>
+
+  @Override
+  public boolean test(T t) {
+<span class="fc" id="L25">    return this.predicate.test(t);</span>
+  }
+
+  @Override
+  public String toString() {
+<span class="fc" id="L30">    return formatter.get();</span>
+  }
+
+  @Override
+  public Predicate&lt;T&gt; and(Predicate&lt;? super T&gt; other) {
+<span class="fc" id="L35">    return Predicates.and(this, other);</span>
+  }
+
+  @Override
+  public Predicate&lt;T&gt; or(Predicate&lt;? super T&gt; other) {
+<span class="fc" id="L40">    return Predicates.or(this, other);</span>
+  }
+
+  @Override
+  public Predicate&lt;T&gt; negate() {
+<span class="fc" id="L45">    return PrintablePredicateFactory.not(this);</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  static &lt;T&gt; Predicate&lt;? super T&gt; unwrap(Predicate&lt;? super T&gt; predicate) {
+<span class="fc" id="L50">    Predicate&lt;? super T&gt; ret = predicate;</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    if (predicate instanceof PrintablePredicate) {</span>
+<span class="fc" id="L52">      ret = ((PrintablePredicate&lt;? super T&gt;) predicate).predicate;</span>
+<span class="pc bpc" id="L53" title="2 of 4 branches missed.">      assert !(ret instanceof PrintablePredicate);</span>
+    }
+<span class="fc" id="L55">    return ret;</span>
+  }
+
+  @SuppressWarnings({ &quot;CloneDoesntDeclareCloneNotSupportedException&quot;, &quot;unchecked&quot; })
+  @Override
+  protected PrintablePredicate&lt;T&gt; clone() {
+    try {
+<span class="fc" id="L62">      return (PrintablePredicate&lt;T&gt;) super.clone();</span>
+<span class="nc" id="L63">    } catch (CloneNotSupportedException e) {</span>
+<span class="nc" id="L64">      throw new AssertionError();</span>
+    }
+  }
+
+
+  public boolean isSquashable() {
+<span class="fc" id="L70">    return this.squashable;</span>
+  }
+
+  @Override
+  public PrintablePredicate&lt;T&gt; makeTrivial() {
+<span class="fc" id="L75">    PrintablePredicate&lt;T&gt; ret = this.clone();</span>
+<span class="fc" id="L76">    ret.squashable = true;</span>
+<span class="fc" id="L77">    return ret;</span>
+  }
+
+  private static &lt;T&gt; Predicate&lt;T&gt; requireNonPrintablePredicate(Predicate&lt;T&gt; predicate) {
+<span class="pc bpc" id="L81" title="2 of 4 branches missed.">    assert !(predicate instanceof PrintablePredicate);</span>
+<span class="fc" id="L82">    return predicate;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

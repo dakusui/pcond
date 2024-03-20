@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EvaluationContext.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core</a> &gt; <span class="el_source">EvaluationContext.java</span></div><h1>EvaluationContext.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
+import static java.util.Objects.requireNonNull;
+
+/**
+ * The new design:
+ *
+ * Evaluator: Concentrates on &quot;evaluate&quot; an individual evaluable (form). No aware of how to compose evaluation entries.
+ */
+
+public class EvaluationContext&lt;T&gt; {
+<span class="fc" id="L19">  final List&lt;EvaluationEntry&gt; evaluationEntries = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L20">  final List&lt;EvaluationEntry&gt; visitorLineage    = new LinkedList&lt;&gt;();</span>
+
+<span class="fc" id="L22">  boolean expectationFlipped = false;</span>
+
+<span class="fc" id="L24">  public EvaluationContext() {</span>
+<span class="fc" id="L25">  }</span>
+
+<span class="fc" id="L27">  public EvaluationContext(EvaluationContext&lt;?&gt; parent) {</span>
+<span class="fc" id="L28">    this.expectationFlipped = parent.isExpectationFlipped();</span>
+<span class="fc" id="L29">  }</span>
+
+  /**
+   * @param evaluableIo       An object to hold a form and its I/O.
+   * @param evaluatorCallback A callback that executes a logic specific to the {@code evaluable}.
+   */
+  public &lt;E extends Evaluable&lt;T&gt;, O&gt; void evaluate(EvaluableIo&lt;T, E, O&gt; evaluableIo, BiFunction&lt;E, ValueHolder&lt;T&gt;, ValueHolder&lt;O&gt;&gt; evaluatorCallback) {
+<span class="fc" id="L36">    evaluate(resolveEvaluationEntryType(evaluableIo.evaluable()), evaluableIo, evaluatorCallback);</span>
+<span class="fc" id="L37">  }</span>
+
+  public &lt;E extends Evaluable&lt;T&gt;, O&gt; void evaluate(EvaluationEntry.Type type, EvaluableIo&lt;T, E, O&gt; evaluableIo, BiFunction&lt;E, ValueHolder&lt;T&gt;, ValueHolder&lt;O&gt;&gt; evaluatorCallback) {
+<span class="fc" id="L40">    evaluate(type, evaluableIo, io -&gt; evaluatorCallback.apply(io.evaluable(), io.input()));</span>
+<span class="fc" id="L41">  }</span>
+
+  public &lt;E extends Evaluable&lt;T&gt;, O&gt; void evaluate(EvaluationEntry.Type type, EvaluableIo&lt;T, E, O&gt; evaluableIo, Function&lt;EvaluableIo&lt;T, E, O&gt;, ValueHolder&lt;O&gt;&gt; function) {
+<span class="fc" id="L44">    evaluate(type, formNameOf(evaluableIo), evaluableIo, function);</span>
+<span class="fc" id="L45">  }</span>
+
+  public &lt;E extends Evaluable&lt;T&gt;, O&gt; void evaluate(EvaluationEntry.Type type, String formName, EvaluableIo&lt;T, E, O&gt; evaluableIo, Function&lt;EvaluableIo&lt;T, E, O&gt;, ValueHolder&lt;O&gt;&gt; function) {
+<span class="fc" id="L48">    requireNonNull(evaluableIo);</span>
+<span class="fc" id="L49">    EvaluableIo&lt;T, E, O&gt; evaluableIoWork = this.enter(evaluableIo.input(), type, formName, evaluableIo.evaluable());</span>
+<span class="fc" id="L50">    this.leave(evaluableIoWork, function.apply(evaluableIoWork));</span>
+<span class="fc" id="L51">    DebuggingUtils.printTo(this, System.err, 1);</span>
+<span class="fc" id="L52">    updateEvaluableIo(evaluableIo, evaluableIoWork);</span>
+<span class="fc" id="L53">  }</span>
+
+  public static String formNameOf(EvaluableIo&lt;?, ?, ?&gt; evaluableIo) {
+<span class="fc" id="L56">    return formNameOf(evaluableIo.evaluableType(), evaluableIo.evaluable());</span>
+  }
+
+  public static String formNameOf(EvaluationEntry.Type type, Evaluable&lt;?&gt; e) {
+<span class="fc" id="L60">    return type.formName(e);</span>
+  }
+
+  public boolean isExpectationFlipped() {
+<span class="fc" id="L64">    return this.expectationFlipped;</span>
+  }
+
+  public void flipExpectation() {
+<span class="fc bfc" id="L68" title="All 2 branches covered.">    this.expectationFlipped = !expectationFlipped;</span>
+<span class="fc" id="L69">  }</span>
+
+  private static &lt;T, E extends Evaluable&lt;T&gt;, O&gt; void updateEvaluableIo(EvaluableIo&lt;T, E, O&gt; evaluableIo, EvaluableIo&lt;T, E, O&gt; evaluableIoWork) {
+<span class="fc" id="L72">    evaluableIo.output(evaluableIoWork.output());</span>
+<span class="fc" id="L73">  }</span>
+
+  public static &lt;T&gt; EvaluationEntry.Type resolveEvaluationEntryType(Evaluable&lt;T&gt; evaluable) {
+<span class="fc bfc" id="L76" title="All 6 branches covered.">    if (evaluable instanceof Evaluable.LeafPred || evaluable instanceof Evaluable.CurriedContextPred || evaluable instanceof Evaluable.StreamPred)</span>
+<span class="fc" id="L77">      return LEAF;</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">    if (evaluable instanceof Evaluable.Func)</span>
+<span class="fc" id="L79">      return FUNCTION;</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">    if (evaluable instanceof Evaluable.Conjunction)</span>
+<span class="fc" id="L81">      return AND;</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">    if (evaluable instanceof Evaluable.Disjunction)</span>
+<span class="fc" id="L83">      return OR;</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">    if (evaluable instanceof Evaluable.Negation)</span>
+<span class="fc" id="L85">      return NOT;</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">    if (evaluable instanceof Evaluable.Transformation)</span>
+<span class="fc" id="L87">      return TRANSFORM_AND_CHECK;</span>
+<span class="nc" id="L88">    throw new IllegalArgumentException();</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private &lt;E extends Evaluable&lt;T&gt;, O&gt; EvaluableIo&lt;T, E, O&gt; enter(ValueHolder&lt;T&gt; input, EvaluationEntry.Type type, String formName, E evaluable) {
+<span class="fc" id="L93">    EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; ret = createEvaluableIo(input, type, formName, evaluable);</span>
+<span class="fc" id="L94">    this.evaluationEntries.add(createEvaluationEntry(this, ret));</span>
+<span class="fc" id="L95">    this.visitorLineage.add(evaluationEntries.get(evaluationEntries.size() - 1));</span>
+<span class="fc" id="L96">    return (EvaluableIo&lt;T, E, O&gt;) ret;</span>
+  }
+
+  private &lt;E extends Evaluable&lt;T&gt;, O&gt; void leave(EvaluableIo&lt;T, E, O&gt; evaluableIo, ValueHolder&lt;O&gt; output) {
+<span class="fc" id="L100">    EvaluationEntry.Impl currentEvaluationEntry = (EvaluationEntry.Impl) this.visitorLineage.remove(this.visitorLineage.size() - 1);</span>
+<span class="fc" id="L101">    evaluableIo.output(output);</span>
+<span class="fc" id="L102">    currentEvaluationEntry.finalizeValues();</span>
+<span class="fc" id="L103">  }</span>
+
+  private static &lt;T, O&gt; EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; createEvaluableIo(ValueHolder&lt;T&gt; input, EvaluationEntry.Type type, String formName, Evaluable&lt;T&gt; evaluable) {
+<span class="fc" id="L106">    return new EvaluableIo&lt;&gt;(input, type, formName, evaluable);</span>
+  }
+
+  private static &lt;T, E extends Evaluable&lt;T&gt;&gt; EvaluationEntry createEvaluationEntry(
+      EvaluationContext&lt;T&gt; evaluationContext,
+      EvaluableIo&lt;T, E, ?&gt; evaluableIo) {
+<span class="fc" id="L112">    return new EvaluationEntry.Impl(evaluationContext, evaluableIo);</span>
+  }
+
+  public List&lt;EvaluationEntry&gt; resultEntries() {
+<span class="fc" id="L116">    return new ArrayList&lt;&gt;(this.evaluationEntries);</span>
+  }
+
+  public &lt;R&gt; void importEntries(EvaluationContext&lt;R&gt; childContext) {
+<span class="fc" id="L120">    importEntries(childContext, currentIndentLevel());</span>
+<span class="fc" id="L121">  }</span>
+
+  public &lt;R&gt; void importEntries(EvaluationContext&lt;R&gt; childContext, int indentLevelGap) {
+<span class="fc" id="L124">    childContext.evaluationEntries.forEach(each -&gt; each.level += indentLevelGap);</span>
+<span class="fc" id="L125">    this.evaluationEntries.addAll(childContext.resultEntries());</span>
+<span class="fc" id="L126">  }</span>
+
+  public int currentIndentLevel() {
+<span class="fc" id="L129">    return this.visitorLineage.size();</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

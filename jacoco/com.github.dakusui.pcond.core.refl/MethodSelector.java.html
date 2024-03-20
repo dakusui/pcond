@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MethodSelector.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.refl</a> &gt; <span class="el_source">MethodSelector.java</span></div><h1>MethodSelector.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.refl;
+
+import com.github.dakusui.pcond.internals.InternalChecks;
+import com.github.dakusui.pcond.internals.InternalUtils;
+
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.stream.IntStream;
+
+import static com.github.dakusui.pcond.core.refl.MethodSelector.Utils.isAssignableWithBoxingFrom;
+import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+
+/**
+ * //@formater:off
+ * An interface representing an object that selects {@link Method}s from given ones.
+ *
+ * This interface is used to choose methods that are appropriate to invoke with
+ * given arguments.
+ * //@formater:on
+ */
+public interface MethodSelector extends Formattable {
+  /**
+   * Selects methods that can be invoked with given {@code args}.
+   *
+   * @param methods Methods from which returned methods are selected.
+   * @param args    Arguments to be passed to selected methods.
+   * @return Selected methods.
+   */
+  List&lt;Method&gt; select(List&lt;Method&gt; methods, Object[] args);
+
+  /**
+   * Returns a string that describes this object.
+   *
+   * @return A description of this object
+   */
+  String describe();
+
+  /**
+   * Returns a composed {@link MethodSelector} that first applies this and
+   * then applies {@code another}.
+   *
+   * @param another The method selector to apply after this.
+   * @return The composed method selector
+   */
+  default MethodSelector andThen(MethodSelector another) {
+<span class="fc" id="L49">    return new MethodSelector() {</span>
+      @Override
+      public List&lt;Method&gt; select(List&lt;Method&gt; methods, Object[] args) {
+<span class="fc" id="L52">        return another.select(MethodSelector.this.select(methods, args), args);</span>
+      }
+
+      @Override
+      public String describe() {
+<span class="fc" id="L57">        return format(&quot;%s&amp;&amp;%s&quot;, MethodSelector.this.describe(), another.describe());</span>
+      }
+    };
+  }
+
+  /**
+   * Formats this object using the {@link MethodSelector#describe()} method.
+   */
+  @Override
+  default void formatTo(Formatter formatter, int flags, int width, int precision) {
+<span class="fc" id="L67">    formatter.format(&quot;%s&quot;, this.describe());</span>
+<span class="fc" id="L68">  }</span>
+
+<span class="fc" id="L70">  class Default implements MethodSelector {</span>
+    @Override
+    public List&lt;Method&gt; select(List&lt;Method&gt; methods, Object[] args) {
+<span class="fc" id="L73">      return methods</span>
+<span class="fc" id="L74">          .stream()</span>
+<span class="fc" id="L75">          .filter(m -&gt; areArgsCompatible(m.getParameterTypes(), args))</span>
+<span class="fc" id="L76">          .collect(toList());</span>
+    }
+
+    @Override
+    public String describe() {
+<span class="fc" id="L81">      return &quot;default&quot;;</span>
+    }
+
+    private static boolean areArgsCompatible(Class&lt;?&gt;[] formalParameters, Object[] args) {
+<span class="fc bfc" id="L85" title="All 2 branches covered.">      if (formalParameters.length != args.length)</span>
+<span class="fc" id="L86">        return false;</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">      for (int i = 0; i &lt; args.length; i++) {</span>
+<span class="fc bfc" id="L88" title="All 2 branches covered.">        if (args[i] == null)</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">          if (formalParameters[i].isPrimitive())</span>
+<span class="fc" id="L90">            return false;</span>
+          else
+            continue;
+<span class="fc bfc" id="L93" title="All 2 branches covered.">        if (!isAssignableWithBoxingFrom(formalParameters[i], Utils.toClass(args[i])))</span>
+<span class="fc" id="L94">          return false;</span>
+      }
+<span class="fc" id="L96">      return true;</span>
+    }
+  }
+
+  /**
+   * A method selector that selects &quot;narrower&quot; methods over &quot;wider&quot; ones.
+   */
+<span class="fc" id="L103">  class PreferNarrower implements MethodSelector {</span>
+    @Override
+    public List&lt;Method&gt; select(List&lt;Method&gt; methods, Object[] args) {
+<span class="fc bfc" id="L106" title="All 2 branches covered.">      if (methods.size() &lt; 2)</span>
+<span class="fc" id="L107">        return methods;</span>
+<span class="fc" id="L108">      List&lt;Method&gt; ret = new LinkedList&lt;&gt;();</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">      for (Method i : methods) {</span>
+<span class="fc bfc" id="L110" title="All 6 branches covered.">        if (methods.stream().filter(j -&gt; j != i).noneMatch(j -&gt; compareNarrowness(j, i) &gt; 0))</span>
+<span class="fc" id="L111">          ret.add(i);</span>
+<span class="fc" id="L112">      }</span>
+<span class="fc" id="L113">      return ret;</span>
+    }
+
+    @Override
+    public String describe() {
+<span class="fc" id="L118">      return &quot;preferNarrower&quot;;</span>
+    }
+
+    /**
+     * If {@code a} is 'narrower' than {@code b}, positive integer will be returned.
+     * If {@code b} is 'narrower' than {@code a}, negative integer will be returned.
+     * Otherwise {@code zero}.
+     *
+     * 'Narrower' means that every parameter of {@code a} is assignable to corresponding
+     * one of {@code b}, but any of {@code b} cannot be assigned to {@code a}'s
+     * corresponding parameter.
+     *
+     * @param a A method.
+     * @param b A method to be compared with {@code a}.
+     * @return a negative integer, zero, or a positive integer as method {@code a}
+     * is less compatible than, as compatible as, or more compatible than
+     * the method {@code b} object.
+     */
+    private static int compareNarrowness(Method a, Method b) {
+<span class="fc bfc" id="L137" title="All 4 branches covered.">      if (isCompatibleWith(a, b) &amp;&amp; isCompatibleWith(b, a))</span>
+<span class="fc" id="L138">        return 0;</span>
+<span class="fc bfc" id="L139" title="All 4 branches covered.">      if (!isCompatibleWith(a, b) &amp;&amp; !isCompatibleWith(b, a))</span>
+<span class="fc" id="L140">        return 0;</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">      return isCompatibleWith(a, b)</span>
+          ? -1
+          : 1;
+    }
+
+    private static boolean isCompatibleWith(Method a, Method b) {
+<span class="fc" id="L147">      requireSameParameterCounts(a, b);</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">      if (Objects.equals(a, b))</span>
+<span class="fc" id="L149">        return true;</span>
+<span class="fc" id="L150">      return IntStream</span>
+<span class="fc" id="L151">          .range(0, a.getParameterCount())</span>
+<span class="fc" id="L152">          .allMatch(i -&gt; isAssignableWithBoxingFrom(a.getParameterTypes()[i], b.getParameterTypes()[i]));</span>
+    }
+
+    private static void requireSameParameterCounts(Method a, Method b) {
+<span class="fc" id="L156">      requireArgument(</span>
+<span class="fc" id="L157">          requireNonNull(a),</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">          (Method v) -&gt; v.getParameterCount() == requireNonNull(b).getParameterCount(),</span>
+<span class="fc" id="L159">          () -&gt; format(&quot;Parameter counts are different: a: %s, b: %s&quot;, a, b));</span>
+<span class="fc" id="L160">    }</span>
+  }
+
+<span class="fc" id="L163">  class PreferExact implements MethodSelector {</span>
+    @Override
+    public List&lt;Method&gt; select(List&lt;Method&gt; methods, Object[] args) {
+<span class="fc bfc" id="L166" title="All 2 branches covered.">      if (methods.size() &lt; 2)</span>
+<span class="fc" id="L167">        return methods;</span>
+<span class="fc" id="L168">      List&lt;Method&gt; work = methods;</span>
+<span class="pc bpc" id="L169" title="1 of 2 branches missed.">      for (Object ignored : args) {</span>
+<span class="fc" id="L170">        List&lt;Method&gt; tmp = new ArrayList&lt;&gt;(work);</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">        if (!tmp.isEmpty()) {</span>
+<span class="fc" id="L172">          work = tmp;</span>
+<span class="fc" id="L173">          break;</span>
+        }
+      }
+<span class="fc" id="L176">      return work;</span>
+    }
+
+    @Override
+    public String describe() {
+<span class="fc" id="L181">      return &quot;preferExact&quot;;</span>
+    }
+  }
+
+<span class="fc" id="L185">  enum Utils {</span>
+    ;
+
+    static boolean isAssignableWithBoxingFrom(Class&lt;?&gt; a, Class&lt;?&gt; b) {
+<span class="fc bfc" id="L189" title="All 2 branches covered.">      if (a.isAssignableFrom(b))</span>
+<span class="fc" id="L190">        return true;</span>
+<span class="pc bpc" id="L191" title="1 of 4 branches missed.">      if (InternalChecks.isPrimitiveWrapperClassOrPrimitive(a) &amp;&amp; InternalChecks.isPrimitiveWrapperClassOrPrimitive(b))</span>
+<span class="fc" id="L192">        return InternalChecks.isWiderThanOrEqualTo(toWrapperIfPrimitive(a), toWrapperIfPrimitive(b));</span>
+<span class="fc" id="L193">      return false;</span>
+    }
+
+    private static Class&lt;?&gt; toWrapperIfPrimitive(Class&lt;?&gt; in) {
+<span class="fc bfc" id="L197" title="All 2 branches covered.">      if (in.isPrimitive())</span>
+<span class="fc" id="L198">        return InternalUtils.wrapperClassOf(in);</span>
+<span class="fc" id="L199">      return in;</span>
+    }
+
+    private static Class&lt;?&gt; toClass(Object value) {
+<span class="fc" id="L203">      return value.getClass();</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

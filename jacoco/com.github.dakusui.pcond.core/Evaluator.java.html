@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Evaluator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core</a> &gt; <span class="el_source">Evaluator.java</span></div><h1>Evaluator.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core;
+
+import com.github.dakusui.pcond.experimentals.currying.context.CurriedContext;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
+import static com.github.dakusui.pcond.core.EvaluationContext.resolveEvaluationEntryType;
+import static com.github.dakusui.pcond.core.EvaluationEntry.Type.*;
+import static com.github.dakusui.pcond.core.EvaluationEntry.composeDetailOutputActualValueFromInputAndThrowable;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_HEAD;
+import static com.github.dakusui.pcond.core.ValueHolder.CreatorFormType.FUNC_TAIL;
+import static com.github.dakusui.pcond.core.ValueHolder.State.*;
+import static com.github.dakusui.pcond.internals.InternalUtils.explainValue;
+import static com.github.dakusui.pcond.internals.InternalUtils.isDummyFunction;
+import static java.util.Objects.requireNonNull;
+
+/**
+ * A visitor interface that defines a mechanism to &quot;evaluate&quot; printable predicates.
+ */
+public interface Evaluator {
+  /**
+   * Evaluates `value` with `conjunction` predicate (&quot;and&quot;).
+   *
+   * @param &lt;T&gt;               The type of the `value`.
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
+   * @see com.github.dakusui.pcond.core.Evaluable.Conjunction
+   */
+  &lt;T&gt; void evaluateConjunction(EvaluableIo&lt;T, Evaluable.Conjunction&lt;T&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext);
+
+  /**
+   * Evaluates `value` with a `disjunction` predicate (&quot;or&quot;).
+   *
+   * @param &lt;T&gt;               The type of the `value`.
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
+   * @see com.github.dakusui.pcond.core.Evaluable.Disjunction
+   */
+  &lt;T&gt; void evaluateDisjunction(EvaluableIo&lt;T, Evaluable.Disjunction&lt;T&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext);
+
+  /**
+   * Evaluates `value` with a `negation` predicate (&quot;not&quot;).
+   *
+   * @param &lt;T&gt;               The type of the `value`.
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
+   * @see com.github.dakusui.pcond.core.Evaluable.Negation
+   */
+  &lt;T&gt; void evaluateNegation(EvaluableIo&lt;T, Evaluable.Negation&lt;T&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext);
+
+  /**
+   * Evaluates `value` with a leaf predicate.
+   *
+   * @param &lt;T&gt;               The type of the `value`.
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
+   * @see com.github.dakusui.pcond.core.Evaluable.LeafPred
+   */
+  &lt;T&gt; void evaluateLeaf(EvaluableIo&lt;T, Evaluable.LeafPred&lt;T&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext);
+
+  /**
+   * Evaluates `value` with a &quot;function&quot; predicate.
+   *
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
+   * @see com.github.dakusui.pcond.core.Evaluable.Func
+   */
+  &lt;T, R&gt; void evaluateFunction(EvaluableIo&lt;T, Evaluable.Func&lt;T&gt;, R&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext);
+
+  /**
+   * Evaluates `value` with a context predicate.
+   *
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
+   * @see Evaluable.CurriedContextPred
+   */
+  void evaluateCurriedContextPredicate(EvaluableIo&lt;CurriedContext, Evaluable.CurriedContextPred, Boolean&gt; evaluableIo, EvaluationContext&lt;CurriedContext&gt; evaluationContext);
+
+  /**
+   * Evaluates `value` with a &quot;transformation&quot; predicate.
+   *
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
+   * @see com.github.dakusui.pcond.core.Evaluable.Transformation
+   */
+  &lt;T, R&gt; void evaluateTransformation(EvaluableIo&lt;T, Evaluable.Transformation&lt;T, R&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext);
+
+  /**
+   * Evaluates `value` with a predicate for a stream.
+   *
+   * @param evaluableIo       An object to hold an evaluable and its input and output.
+   * @param evaluationContext An evaluation context.
+   * @see com.github.dakusui.pcond.core.Evaluable.StreamPred
+   */
+  &lt;E&gt; void evaluateStreamPredicate(EvaluableIo&lt;Stream&lt;E&gt;, Evaluable.StreamPred&lt;E&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;Stream&lt;E&gt;&gt; evaluationContext);
+
+  /**
+   * Returns a new instance of this interface.
+   *
+   * @return a new instance of this interface.
+   */
+  static Evaluator create() {
+<span class="fc" id="L106">    return new Impl();</span>
+  }
+
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">  class Impl implements Evaluator {</span>
+<span class="fc" id="L110">    public static final Object EVALUATION_SKIPPED = new Object() {</span>
+      @Override
+      public String toString() {
+<span class="fc" id="L113">        return &quot;(not evaluated)&quot;;</span>
+      }
+    };
+
+<span class="fc" id="L117">    private static final Object NULL_VALUE = new Object() {</span>
+      public String toString() {
+<span class="fc" id="L119">        return &quot;null&quot;;</span>
+      }
+    };
+
+<span class="fc" id="L123">    public Impl() {</span>
+<span class="fc" id="L124">    }</span>
+
+    @Override
+    public &lt;T&gt; void evaluateConjunction(EvaluableIo&lt;T, Evaluable.Conjunction&lt;T&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext) {
+<span class="fc" id="L128">      evaluationContext.evaluate(</span>
+          evaluableIo,
+          (Evaluable.Conjunction&lt;T&gt; evaluable, ValueHolder&lt;T&gt; input) -&gt; {
+<span class="fc" id="L131">            ValueHolder&lt;Boolean&gt; ret = ValueHolder.create();</span>
+<span class="fc" id="L132">            boolean result = true;</span>
+<span class="fc" id="L133">            ValueHolder&lt;Boolean&gt; retSkipped = null;</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">            for (Evaluable&lt;T&gt; each : evaluable.children()) {</span>
+<span class="fc" id="L135">              EvaluableIo&lt;T, Evaluable&lt;T&gt;, Boolean&gt; child = createChildEvaluableIoOf(each, input);</span>
+<span class="fc" id="L136">              each.accept(child, evaluationContext, this);</span>
+<span class="fc" id="L137">              ValueHolder&lt;Boolean&gt; outputFromEach = child.output();</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">              if (outputFromEach.isValueReturned()) {</span>
+<span class="fc" id="L139">                result &amp;= outputFromEach.returnedValue();</span>
+<span class="fc" id="L140">                ret = ValueHolder.forValue(result);</span>
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">              } else if (child.output().isExceptionThrown()) {</span>
+<span class="nc" id="L142">                ret = ValueHolder.&lt;Boolean&gt;create().evaluationSkipped();</span>
+<span class="nc bnc" id="L143" title="All 2 branches missed.">                retSkipped = retSkipped != null ? retSkipped : ret;</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">              } else if (child.output().isEvaluationSkipped()) {</span>
+<span class="fc" id="L145">                ret = ValueHolder.&lt;Boolean&gt;create().evaluationSkipped();</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">                retSkipped = retSkipped != null ? retSkipped : ret;</span>
+              } else
+<span class="nc bnc" id="L148" title="All 2 branches missed.">                assert false;</span>
+<span class="pc bpc" id="L149" title="1 of 6 branches missed.">              if (evaluable.shortcut() &amp;&amp; (ret.isEvaluationSkipped() || !result))</span>
+<span class="fc" id="L150">                break;</span>
+<span class="fc" id="L151">            }</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">            return retSkipped != null ? retSkipped : ret;</span>
+          });
+<span class="fc" id="L154">    }</span>
+
+    @Override
+    public &lt;T&gt; void evaluateDisjunction(EvaluableIo&lt;T, Evaluable.Disjunction&lt;T&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext) {
+<span class="fc" id="L158">      evaluationContext.evaluate(</span>
+          evaluableIo,
+          (Evaluable.Disjunction&lt;T&gt; evaluable, ValueHolder&lt;T&gt; input) -&gt; {
+<span class="fc" id="L161">            ValueHolder&lt;Boolean&gt; ret = ValueHolder.create();</span>
+<span class="fc" id="L162">            boolean result = false;</span>
+<span class="fc" id="L163">            ValueHolder&lt;Boolean&gt; retSkipped = null;</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">            for (Evaluable&lt;T&gt; each : evaluable.children()) {</span>
+<span class="fc" id="L165">              EvaluableIo&lt;T, Evaluable&lt;T&gt;, Boolean&gt; child = createChildEvaluableIoOf(each, input);</span>
+<span class="fc" id="L166">              each.accept(child, evaluationContext, this);</span>
+<span class="fc" id="L167">              ValueHolder&lt;Boolean&gt; outputFromEach = child.output();</span>
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">              if (outputFromEach.isValueReturned()) {</span>
+<span class="fc" id="L169">                result |= outputFromEach.returnedValue();</span>
+<span class="fc" id="L170">                ret = ValueHolder.forValue(result);</span>
+<span class="nc bnc" id="L171" title="All 2 branches missed.">              } else if (outputFromEach.isExceptionThrown()) {</span>
+<span class="nc" id="L172">                ret = ValueHolder.&lt;Boolean&gt;create().evaluationSkipped();</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">                retSkipped = retSkipped != null ? retSkipped : ret;</span>
+<span class="nc bnc" id="L174" title="All 2 branches missed.">              } else if (outputFromEach.isEvaluationSkipped()) {</span>
+<span class="nc" id="L175">                ret = ValueHolder.&lt;Boolean&gt;create().evaluationSkipped();</span>
+<span class="nc bnc" id="L176" title="All 2 branches missed.">                retSkipped = retSkipped != null ? retSkipped : ret;</span>
+              } else
+<span class="nc bnc" id="L178" title="All 2 branches missed.">                assert false;</span>
+<span class="pc bpc" id="L179" title="1 of 6 branches missed.">              if (evaluable.shortcut() &amp;&amp; (ret.isEvaluationSkipped() || result))</span>
+<span class="fc" id="L180">                break;</span>
+<span class="fc" id="L181">            }</span>
+<span class="pc bpc" id="L182" title="1 of 2 branches missed.">            return retSkipped != null ? retSkipped : ret;</span>
+          });
+<span class="fc" id="L184">    }</span>
+
+    @Override
+    public &lt;T&gt; void evaluateNegation(EvaluableIo&lt;T, Evaluable.Negation&lt;T&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext) {
+<span class="fc" id="L188">      evaluationContext.evaluate(</span>
+          evaluableIo,
+          (Evaluable.Negation&lt;T&gt; evaluable, ValueHolder&lt;T&gt; input) -&gt; {
+<span class="fc" id="L191">            evaluationContext.flipExpectation();</span>
+            try {
+<span class="fc" id="L193">              EvaluableIo&lt;T, Evaluable&lt;T&gt;, Boolean&gt; childIo = createChildEvaluableIoOf(evaluable.target(), input);</span>
+<span class="fc" id="L194">              evaluable.target().accept(childIo, evaluationContext, this);</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">              return childIo.output().isValueReturned() ?</span>
+<span class="fc" id="L196">                  ValueHolder.forValue(evaluationContext.isExpectationFlipped() ^ childIo.output().returnedValue()) :</span>
+<span class="fc" id="L197">                  childIo.output();</span>
+            } finally {
+<span class="fc" id="L199">              evaluationContext.flipExpectation();</span>
+            }
+          }
+      );
+<span class="fc" id="L203">    }</span>
+
+    @Override
+    public &lt;T&gt; void evaluateLeaf(EvaluableIo&lt;T, Evaluable.LeafPred&lt;T&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext) {
+<span class="fc" id="L207">      evaluationContext.evaluate(</span>
+          LEAF,
+          evaluableIo,
+          (evaluable, input) -&gt; {
+<span class="fc" id="L211">            ValueHolder&lt;Boolean&gt; ret = ValueHolder.create();</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">            if (input.isValueReturned()) {</span>
+<span class="fc" id="L213">              T value = input.returnedValue();</span>
+<span class="fc" id="L214">              Predicate&lt;? super T&gt; predicate = requireNonNull(evaluable.predicate());</span>
+              try {
+<span class="fc" id="L216">                return ret.valueReturned(predicate.test(value));</span>
+<span class="fc" id="L217">              } catch (Throwable t) {</span>
+<span class="fc" id="L218">                return ret.exceptionThrown(t);</span>
+              }
+            } else
+<span class="fc" id="L221">              return ret.evaluationSkipped();</span>
+          });
+<span class="fc" id="L223">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public &lt;T, R&gt; void evaluateFunction(EvaluableIo&lt;T, Evaluable.Func&lt;T&gt;, R&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext) {
+<span class="fc" id="L228">      evaluationContext.evaluate( //#2</span>
+          FUNCTION,
+          evaluableIo,
+          (Evaluable.Func&lt;T&gt; evaluable, ValueHolder&lt;T&gt; input) -&gt; {
+            ValueHolder&lt;R&gt; ret;
+            {
+<span class="fc" id="L234">              EvaluableIo&lt;T, Evaluable&lt;T&gt;, Object&gt; ioForHead = createChildEvaluableIoOf(evaluable, input);</span>
+<span class="fc" id="L235">              EvaluationContext&lt;T&gt; childContext = new EvaluationContext&lt;&gt;(evaluationContext);</span>
+<span class="fc" id="L236">              childContext.evaluate(FUNCTION, ioForHead, io -&gt; {</span>
+<span class="fc" id="L237">                ValueHolder&lt;Object&gt; tmp = ValueHolder.create();</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">                if (io.input().isValueReturned())</span>
+<span class="fc" id="L239">                  tmp = applyFunction(tmp, io.input().returnedValue(), ((Evaluable.Func&lt;T&gt;) io.evaluable()).head());</span>
+                else
+<span class="fc" id="L241">                  tmp = tmp.evaluationSkipped();</span>
+<span class="fc" id="L242">                return tmp.creatorFormType(FUNC_HEAD);</span>
+              });
+<span class="fc" id="L244">              evaluationContext.importEntries(childContext, 1);</span>
+<span class="fc" id="L245">              ret = (ValueHolder&lt;R&gt;) ioForHead.output().creatorFormType(FUNC_TAIL);</span>
+            }
+<span class="fc" id="L247">            ValueHolder&lt;Object&gt; finalRet = (ValueHolder&lt;Object&gt;) ret;</span>
+<span class="fc" id="L248">            return evaluable.tail().map((Evaluable&lt;Object&gt; e) -&gt; {</span>
+<span class="fc" id="L249">                  EvaluableIo&lt;Object, Evaluable&lt;Object&gt;, R&gt; ioForTail = createChildEvaluableIoOf(e, finalRet);</span>
+<span class="fc" id="L250">                  DebuggingUtils.printIo(&quot;FUNC_TAIL:BEFORE&quot;, ioForTail);</span>
+<span class="fc" id="L251">                  e.accept(ioForTail, (EvaluationContext&lt;Object&gt;) evaluationContext, this);</span>
+<span class="fc" id="L252">                  DebuggingUtils.printIo(&quot;FUNC_TAIL:AFTER&quot;, ioForTail);</span>
+<span class="fc" id="L253">                  return ioForTail.output().creatorFormType(FUNC_TAIL);</span>
+                })
+<span class="fc" id="L255">                .orElse(ret);</span>
+          });
+<span class="fc" id="L257">    }</span>
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private static &lt;T, R&gt; ValueHolder&lt;R&gt; applyFunction(ValueHolder&lt;R&gt; ret, T in, Function&lt;? super T, Object&gt; function) {
+      try {
+        R returnedValue;
+<span class="fc" id="L263">        returnedValue = (R) function.apply(in);</span>
+<span class="fc" id="L264">        return ret.valueReturned(returnedValue);</span>
+<span class="fc" id="L265">      } catch (Throwable t) {</span>
+<span class="fc" id="L266">        return ret.exceptionThrown(t);</span>
+      }
+    }
+
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+    @Override
+    public &lt;T, R&gt; void evaluateTransformation(EvaluableIo&lt;T, Evaluable.Transformation&lt;T, R&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext) {
+<span class="pc bpc" id="L273" title="1 of 2 branches missed.">      if (isDummyFunction((Function&lt;?, ?&gt;) evaluableIo.evaluable().mapper())) {</span>
+<span class="nc" id="L274">        evaluableIo.evaluable().checker().accept((EvaluableIo&lt;R, Evaluable&lt;R&gt;, Boolean&gt;) (Evaluable) evaluableIo, (EvaluationContext&lt;R&gt;) evaluationContext, this);</span>
+<span class="nc" id="L275">        return;</span>
+      }
+<span class="fc" id="L277">      EvaluationContext&lt;T&gt; childContext = new EvaluationContext&lt;&gt;(evaluationContext);</span>
+<span class="fc" id="L278">      childContext.evaluate(</span>
+          evaluableIo,
+          (Evaluable.Transformation&lt;T, R&gt; evaluable, ValueHolder&lt;T&gt; input) -&gt; {
+<span class="fc" id="L281">            DebuggingUtils.printInput(&quot;TRANSFORMATION:BEFORE&quot;, evaluable, input);</span>
+<span class="fc" id="L282">            EvaluableIo&lt;T, Evaluable&lt;T&gt;, R&gt; mapperIo = evaluateMapper(evaluable.mapperName().orElse(&quot;transform&quot;), evaluable.mapper(), input, childContext);</span>
+<span class="fc" id="L283">            EvaluableIo&lt;R, Evaluable&lt;R&gt;, Boolean&gt; checkerIo = evaluateChecker(evaluable.checkerName().orElse(&quot;check&quot;), evaluable.checker(), mapperIo.output(), childContext);</span>
+<span class="fc" id="L284">            DebuggingUtils.printInputAndOutput(evaluable, input, checkerIo.output());</span>
+<span class="fc" id="L285">            return checkerIo.output();</span>
+          }
+      );
+<span class="fc" id="L288">      evaluationContext.importEntries(childContext, 1);</span>
+<span class="fc" id="L289">    }</span>
+
+    private &lt;T, R&gt; EvaluableIo&lt;T, Evaluable&lt;T&gt;, R&gt; evaluateMapper(String mapperName, Evaluable&lt;T&gt; mapper, ValueHolder&lt;T&gt; input, EvaluationContext&lt;T&gt; evaluationContext) {
+<span class="fc" id="L292">      EvaluableIo&lt;T, Evaluable&lt;T&gt;, R&gt; ioForMapper = createChildEvaluableIoOf(mapper, input.creatorFormType(ValueHolder.CreatorFormType.TRANSFORM));</span>
+      {
+<span class="fc" id="L294">        EvaluationContext&lt;T&gt; childContext = new EvaluationContext&lt;&gt;(evaluationContext);</span>
+
+        // #1
+<span class="fc" id="L297">        childContext.evaluate(TRANSFORM, mapperName, ioForMapper, io -&gt; {</span>
+<span class="fc" id="L298">          DebuggingUtils.printIo(&quot;TRANSFORM:BEFORE&quot;, io);</span>
+<span class="fc" id="L299">          io.evaluable().accept(io, childContext, this);</span>
+<span class="fc" id="L300">          DebuggingUtils.printIo(&quot;TRANSFORM:AFTER&quot;, io);</span>
+<span class="fc" id="L301">          return io.output();</span>
+        });
+
+<span class="fc" id="L304">        evaluationContext.importEntries(childContext, 0);</span>
+      }
+<span class="fc" id="L306">      return ioForMapper;</span>
+    }
+
+    private &lt;T, R&gt; EvaluableIo&lt;R, Evaluable&lt;R&gt;, Boolean&gt; evaluateChecker(String checkerName, Evaluable&lt;R&gt; checker, ValueHolder&lt;R&gt; input, EvaluationContext&lt;T&gt; evaluationContext) {
+<span class="fc" id="L310">      EvaluableIo&lt;R, Evaluable&lt;R&gt;, Boolean&gt; ioForChecker = createChildEvaluableIoOf(checker, input);</span>
+      {
+<span class="fc" id="L312">        EvaluationContext&lt;R&gt; childContext = new EvaluationContext&lt;&gt;(evaluationContext);</span>
+
+<span class="fc" id="L314">        childContext.evaluate(CHECK, checkerName, ioForChecker, io -&gt; {</span>
+<span class="fc" id="L315">          DebuggingUtils.printIo(&quot;CHECK:BEFORE&quot;, io);</span>
+<span class="fc" id="L316">          io.evaluable().accept(io, childContext, this);</span>
+<span class="fc" id="L317">          DebuggingUtils.printIo(&quot;CHECK:AFTER&quot;, io);</span>
+<span class="fc" id="L318">          return io.output();</span>
+        });
+
+<span class="fc" id="L321">        evaluationContext.importEntries(childContext, 0);</span>
+      }
+<span class="fc" id="L323">      return ioForChecker;</span>
+    }
+
+    //             ValueToCut  ValueOnCut ValueForNone(=default)
+    // NoneMatch         true       false                   true
+    // AnyMatch          true        true                  false
+    // AllMatch         false       false                   true
+
+    @Override
+    public &lt;E&gt; void evaluateStreamPredicate(EvaluableIo&lt;Stream&lt;E&gt;, Evaluable.StreamPred&lt;E&gt;, Boolean&gt; evaluableIo, EvaluationContext&lt;Stream&lt;E&gt;&gt; evaluationContext) {
+<span class="fc" id="L333">      evaluationContext.evaluate(</span>
+          evaluableIo,
+<span class="fc" id="L335">          (Evaluable.StreamPred&lt;E&gt; evaluable, ValueHolder&lt;Stream&lt;E&gt;&gt; input) -&gt; input.returnedValue()</span>
+<span class="fc" id="L336">              .map((E e) -&gt; {</span>
+<span class="fc bfc" id="L337" title="All 2 branches covered.">                if (evaluable.requestExpectationFlip())</span>
+<span class="fc" id="L338">                  evaluationContext.flipExpectation();</span>
+                try {
+<span class="fc" id="L340">                  EvaluationContext&lt;E&gt; childContext = new EvaluationContext&lt;&gt;(evaluationContext);</span>
+<span class="fc" id="L341">                  EvaluableIo&lt;E, Evaluable&lt;E&gt;, Boolean&gt; ioForCutPredicate = createChildEvaluableIoOf(evaluable.cut(), ValueHolder.forValue(e));</span>
+<span class="fc" id="L342">                  evaluable.cut().accept(ioForCutPredicate, childContext, this);</span>
+<span class="fc" id="L343">                  evaluationContext.importEntries(childContext);</span>
+<span class="fc" id="L344">                  return ioForCutPredicate.output();</span>
+                } finally {
+<span class="fc bfc" id="L346" title="All 2 branches covered.">                  if (evaluable.requestExpectationFlip())</span>
+<span class="fc" id="L347">                    evaluationContext.flipExpectation();</span>
+                }
+              })
+<span class="fc" id="L350">              .filter(eachResult -&gt; {</span>
+<span class="fc bfc" id="L351" title="All 2 branches covered.">                if (!eachResult.isValueReturned())</span>
+<span class="fc" id="L352">                  return true;</span>
+<span class="fc bfc" id="L353" title="All 2 branches covered.">                return eachResult.returnedValue() == evaluable.valueToCut();</span>
+              })
+<span class="fc bfc" id="L355" title="All 2 branches covered.">              .map(eachResult -&gt; eachResult.valueReturned(!evaluable.defaultValue())) // compute Value on cut</span>
+<span class="fc" id="L356">              .findFirst()</span>
+<span class="fc" id="L357">              .orElseGet(() -&gt; ValueHolder.forValue(evaluable.defaultValue())));      // compute Value for none</span>
+<span class="fc" id="L358">    }</span>
+
+    @Override
+    public void evaluateCurriedContextPredicate(EvaluableIo&lt;CurriedContext, Evaluable.CurriedContextPred, Boolean&gt; evaluableIo, EvaluationContext&lt;CurriedContext&gt; evaluationContext) {
+<span class="fc" id="L362">      evaluationContext.evaluate(evaluableIo, (Evaluable.CurriedContextPred evaluable, ValueHolder&lt;CurriedContext&gt; input) -&gt; {</span>
+<span class="fc" id="L363">        EvaluableIo&lt;Object, Evaluable&lt;Object&gt;, Boolean&gt; io = createChildEvaluableIoOf(evaluable.enclosed(), ValueHolder.forValue(input.returnedValue().valueAt(evaluable.argIndex())));</span>
+<span class="fc" id="L364">        EvaluationContext&lt;Object&gt; childContext = new EvaluationContext&lt;&gt;(evaluationContext);</span>
+<span class="fc" id="L365">        evaluable.enclosed().accept(io, childContext, this);</span>
+<span class="fc" id="L366">        evaluationContext.importEntries(childContext);</span>
+<span class="fc" id="L367">        return io.output();</span>
+      });
+<span class="fc" id="L369">    }</span>
+
+    private static &lt;T, E extends Evaluable&lt;T&gt;, O&gt; EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; createChildEvaluableIoOf(E evaluable, ValueHolder&lt;T&gt; input) {
+<span class="fc" id="L372">      return createChildEvaluableIoOf(resolveEvaluationEntryType(evaluable).formName(evaluable), evaluable, input);</span>
+    }
+
+    private static &lt;T, E extends Evaluable&lt;T&gt;, O&gt; EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; createChildEvaluableIoOf(String formName, E evaluable, ValueHolder&lt;T&gt; input) {
+<span class="fc" id="L376">      EvaluationEntry.Type evaluableType = resolveEvaluationEntryType(evaluable);</span>
+<span class="fc" id="L377">      return createChildEvaluableIoOf(evaluableType, formName, evaluable, input);</span>
+    }
+
+    private static &lt;T, E extends Evaluable&lt;T&gt;, O&gt; EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; createChildEvaluableIoOf(EvaluationEntry.Type evaluableType, String formName, E evaluable, ValueHolder&lt;T&gt; input) {
+<span class="fc" id="L381">      return new EvaluableIo&lt;&gt;(input, evaluableType, formName, evaluable);</span>
+    }
+  }
+
+  /**
+   * If an input or an output value object of a form implements this interface,
+   * The value returned by `snapshot` method is stored in a {@link EvaluationEntry}
+   * record, instead of the value itself.
+   *
+   * An implementation of this interface should override `toString()` method to return a string form of the original state of this object.
+   */
+  interface Snapshottable {
+
+<span class="fc" id="L394">    Object NULL = new Object() {</span>
+      @Override
+      public String toString() {
+<span class="fc" id="L397">        return &quot;null&quot;;</span>
+      }
+    };
+
+    Object snapshot();
+
+    static Object toSnapshotIfPossible(Object value) {
+<span class="fc bfc" id="L404" title="All 2 branches covered.">      if (value instanceof Snapshottable)</span>
+<span class="fc" id="L405">        return ((Snapshottable) value).snapshot();</span>
+<span class="fc bfc" id="L406" title="All 2 branches covered.">      if (value == null)</span>
+<span class="fc" id="L407">        return NULL;</span>
+      else
+<span class="fc" id="L409">        return value;</span>
+    }
+  }
+
+  /**
+   * An interface to define methods that make a predicate &quot;explainable&quot; to humans.
+   */
+  interface Explainable {
+    Object explainOutputExpectation();
+
+    Object explainActual(Object actualValue);
+
+    static Object explainOutputExpectation(Object evaluable, EvaluableIo&lt;?, ?, ?&gt; evaluableIo) {
+<span class="fc bfc" id="L422" title="All 2 branches covered.">      if (evaluable instanceof Explainable)</span>
+<span class="fc" id="L423">        return explainValue(((Explainable) evaluable).explainOutputExpectation());</span>
+<span class="pc bpc" id="L424" title="1 of 2 branches missed.">      if (evaluable instanceof Evaluable)</span>
+<span class="fc" id="L425">        return formNameOf(evaluableIo);</span>
+<span class="nc" id="L426">      return null;</span>
+    }
+
+    static Object explainInputActualValue(Object evaluable, Object actualValue) {
+<span class="fc bfc" id="L430" title="All 2 branches covered.">      if (evaluable instanceof Explainable)</span>
+<span class="fc" id="L431">        return explainValue(((Explainable) evaluable).explainActual(actualValue));</span>
+<span class="fc" id="L432">      return null;</span>
+    }
+
+    static &lt;T, E extends Evaluable&lt;T&gt;&gt; Object explainActual(EvaluableIo&lt;T, E, ?&gt; evaluableIo) {
+<span class="fc bfc" id="L436" title="All 2 branches covered.">      if (evaluableIo.output().state() == VALUE_RETURNED) {</span>
+<span class="fc" id="L437">        T ret = evaluableIo.input().returnedValue();</span>
+<span class="fc bfc" id="L438" title="All 2 branches covered.">        return ret != null ? ret : Impl.NULL_VALUE;</span>
+<span class="fc bfc" id="L439" title="All 2 branches covered.">      } else if (evaluableIo.output().state() == EXCEPTION_THROWN)</span>
+<span class="fc" id="L440">        return composeDetailOutputActualValueFromInputAndThrowable(evaluableIo.input().value(), evaluableIo.output().thrownException());</span>
+<span class="pc bpc" id="L441" title="1 of 2 branches missed.">      else if (evaluableIo.output().state() == EVALUATION_SKIPPED) {</span>
+<span class="fc" id="L442">        return EVALUATION_SKIPPED;</span>
+      } else
+<span class="nc" id="L444">        throw new AssertionError(&quot;evaluableIo:&quot; + evaluableIo);</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReportComposer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.validator</a> &gt; <span class="el_source">ReportComposer.java</span></div><h1>ReportComposer.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.validator;
+
+import com.github.dakusui.pcond.core.DebuggingUtils;
+import com.github.dakusui.pcond.core.EvaluationEntry;
+import com.github.dakusui.pcond.fluent.ValueHolder;
+import com.github.dakusui.pcond.internals.InternalUtils;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.*;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
+public interface ReportComposer {
+  default Explanation explanationFromMessage(String msg) {
+<span class="fc" id="L25">    return Explanation.fromMessage(msg);</span>
+  }
+  
+  default Explanation composeExplanation(String message, List&lt;EvaluationEntry&gt; evaluationEntries) {
+<span class="fc" id="L29">    return Utils.composeExplanation(this, message, evaluationEntries);</span>
+  }
+  
+  default FormattedEntry createFormattedEntryForExpectation(EvaluationEntry evaluationEntry) {
+<span class="fc" id="L33">    return Utils.createFormattedEntryForExpectation(this, evaluationEntry);</span>
+  }
+  
+  default FormattedEntry createFormattedEntryForActualValue(EvaluationEntry evaluationEntry) {
+<span class="fc" id="L37">    return Utils.createFormattedEntryForActualValue(this, evaluationEntry);</span>
+  }
+  
+  default boolean requiresExplanation(EvaluationEntry evaluationEntry) {
+<span class="fc" id="L41">    return evaluationEntry.requiresExplanation();</span>
+  }
+  
+  /**
+   * A default implementation of `ReportComposer`.
+   */
+<span class="fc" id="L47">  class Default implements ReportComposer {</span>
+  }
+  
+  interface Report {
+    String summary();
+    
+    List&lt;String&gt; details();
+    
+    static Report create(String summary, List&lt;String&gt; details) {
+<span class="fc" id="L56">      List&lt;String&gt; detailsCopy = unmodifiableList(new ArrayList&lt;&gt;(details));</span>
+<span class="fc" id="L57">      return new Report() {</span>
+        @Override
+        public String summary() {
+<span class="fc" id="L60">          return summary;</span>
+        }
+        
+        @Override
+        public List&lt;String&gt; details() {
+<span class="fc" id="L65">          return detailsCopy;</span>
+        }
+      };
+    }
+  }
+  
+  class FormattedEntry {
+    private final String  input;
+    private final String  formName;
+    private final String  indent;
+    private final String  output;
+    private final boolean requiresExplanation;
+    
+<span class="fc" id="L78">    public FormattedEntry(String input, String formName, String indent, String output, boolean requiresExplanation) {</span>
+<span class="fc" id="L79">      this.input = input;</span>
+<span class="fc" id="L80">      this.formName = formName;</span>
+<span class="fc" id="L81">      this.indent = indent;</span>
+<span class="fc" id="L82">      this.output = output;</span>
+<span class="fc" id="L83">      this.requiresExplanation = requiresExplanation;</span>
+<span class="fc" id="L84">    }</span>
+    
+    Optional&lt;String&gt; input() {
+<span class="fc" id="L87">      return Optional.ofNullable(this.input);</span>
+    }
+    
+    String indent() {
+<span class="fc" id="L91">      return this.indent;</span>
+    }
+    
+    String formName() {
+<span class="fc" id="L95">      return this.formName;</span>
+    }
+    
+    Optional&lt;String&gt; output() {
+<span class="fc" id="L99">      return Optional.ofNullable(this.output);</span>
+    }
+    
+    public boolean requiresExplanation() {
+<span class="fc" id="L103">      return this.requiresExplanation;</span>
+    }
+  }
+  
+<span class="fc" id="L107">  enum Utils {</span>
+    ;
+    
+    /**
+     * Note that an exception thrown during an evaluation is normally caught by the framework.
+     *
+     * @param message           A message to be prepended to a summary.
+     * @param evaluationHistory An &quot;evaluation history&quot; object represented as a list of evaluation entries.
+     * @return An explanation object.
+     */
+    public static Explanation composeExplanation(ReportComposer reportComposer, String message, List&lt;EvaluationEntry&gt; evaluationHistory) {
+<span class="fc" id="L118">      List&lt;Object&gt; detailsForExpectation = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L119">      List&lt;ReportComposer.FormattedEntry&gt; summaryDataForExpectations = squashTrivialEntries(reportComposer, evaluationHistory)</span>
+<span class="fc" id="L120">          .stream()</span>
+<span class="fc" id="L121">          .peek((EvaluationEntry each) -&gt; addToDetailsListIfExplanationIsRequired(reportComposer, detailsForExpectation, each, each::detailOutputExpectation))</span>
+<span class="fc" id="L122">          .map(reportComposer::createFormattedEntryForExpectation)</span>
+<span class="fc" id="L123">          .collect(toList());</span>
+<span class="fc" id="L124">      String textSummaryForExpectations = composeSummaryForExpectations(minimizeIndentation(summaryDataForExpectations));</span>
+<span class="fc" id="L125">      List&lt;Object&gt; detailsForActual = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L126">      List&lt;ReportComposer.FormattedEntry&gt; summaryForActual = squashTrivialEntries(reportComposer, evaluationHistory)</span>
+<span class="fc" id="L127">          .stream()</span>
+<span class="fc" id="L128">          .peek((EvaluationEntry each) -&gt; addToDetailsListIfExplanationIsRequired(reportComposer, detailsForActual, each, each::detailOutputActualValue))</span>
+<span class="fc" id="L129">          .map(reportComposer::createFormattedEntryForActualValue)</span>
+<span class="fc" id="L130">          .collect(toList());</span>
+<span class="fc" id="L131">      String textSummaryForActualResult = composeSummaryForActualResults(minimizeIndentation(summaryForActual));</span>
+<span class="fc" id="L132">      return new Explanation(message,</span>
+<span class="fc" id="L133">          composeReport(textSummaryForExpectations, detailsForExpectation),</span>
+<span class="fc" id="L134">          composeReport(textSummaryForActualResult, detailsForActual));</span>
+    }
+    
+    public static ReportComposer.FormattedEntry createFormattedEntryForExpectation(ReportComposer reportComposer, EvaluationEntry entry) {
+<span class="fc" id="L138">      return new ReportComposer.FormattedEntry(</span>
+<span class="fc" id="L139">          formatObject(entry.inputExpectation()),</span>
+<span class="fc" id="L140">          entry.formName(),</span>
+<span class="fc" id="L141">          indent(entry.level()),</span>
+<span class="fc" id="L142">          formatObject(entry.outputExpectation()),</span>
+<span class="fc" id="L143">          reportComposer.requiresExplanation(entry));</span>
+    }
+    
+    public static ReportComposer.FormattedEntry createFormattedEntryForActualValue(ReportComposer reportComposer, EvaluationEntry entry) {
+<span class="fc" id="L147">      return new ReportComposer.FormattedEntry(</span>
+<span class="fc" id="L148">          formatObject(entry.inputActualValue()),</span>
+<span class="fc" id="L149">          entry.formName(),</span>
+<span class="fc" id="L150">          indent(entry.level()),</span>
+<span class="fc" id="L151">          formatObject(entry.outputActualValue()),</span>
+<span class="fc" id="L152">          reportComposer.requiresExplanation(entry));</span>
+    }
+    
+    private static List&lt;FormattedEntry&gt; minimizeIndentation(List&lt;FormattedEntry&gt; summaryForActual) {
+<span class="fc" id="L156">      String minIndent = summaryForActual.stream()</span>
+<span class="fc" id="L157">          .map(e -&gt; e.indent)</span>
+<span class="fc" id="L158">          .min(Comparator.comparingInt(String::length))</span>
+<span class="fc" id="L159">          .orElse(&quot;&quot;);</span>
+<span class="fc" id="L160">      return summaryForActual.stream()</span>
+<span class="fc" id="L161">          .map(e -&gt; new ReportComposer.FormattedEntry(e.input, e.formName(), e.indent().replaceFirst(minIndent, &quot;&quot;), e.output, e.requiresExplanation()))</span>
+<span class="fc" id="L162">          .collect(toList());</span>
+    }
+    
+    private static List&lt;EvaluationEntry&gt; squashTrivialEntries(ReportComposer reportComposer, List&lt;EvaluationEntry&gt; evaluationHistory) {
+<span class="fc bfc" id="L166" title="All 2 branches covered.">      if (evaluationHistory.size() &gt; 1) {</span>
+<span class="fc" id="L167">        List&lt;EvaluationEntry&gt; ret = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L168">        List&lt;EvaluationEntry&gt; entriesToSquash = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L169">        AtomicReference&lt;EvaluationEntry&gt; cur = new AtomicReference&lt;&gt;();</span>
+<span class="fc" id="L170">        evaluationHistory.stream()</span>
+<span class="pc bpc" id="L171" title="1 of 4 branches missed.">            .filter(each -&gt; !each.ignored() || DebuggingUtils.reportIgnoredEntries())</span>
+<span class="fc" id="L172">            .filter(each -&gt; {</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">              if (cur.get() != null)</span>
+<span class="fc" id="L174">                return true;</span>
+              else {
+<span class="fc" id="L176">                cur.set(each);</span>
+<span class="fc" id="L177">                return false;</span>
+              }
+            })
+<span class="fc" id="L180">            .forEach(each -&gt; {</span>
+<span class="fc bfc" id="L181" title="All 2 branches covered.">              if (entriesToSquash.isEmpty()) {</span>
+<span class="pc bpc" id="L182" title="1 of 4 branches missed.">                if (cur.get().isSquashable(each) &amp;&amp; !suppressSquashing()) {</span>
+<span class="fc" id="L183">                  entriesToSquash.add(cur.get());</span>
+                } else {
+<span class="fc" id="L185">                  ret.add(cur.get());</span>
+                }
+              } else {
+<span class="fc" id="L188">                entriesToSquash.add(cur.get());</span>
+<span class="fc" id="L189">                ret.add(squashEntries(reportComposer, entriesToSquash));</span>
+<span class="fc" id="L190">                entriesToSquash.clear();</span>
+              }
+<span class="fc" id="L192">              cur.set(each);</span>
+<span class="fc" id="L193">            });</span>
+<span class="fc" id="L194">        finishLeftOverEntries(reportComposer, ret, entriesToSquash, cur);</span>
+<span class="fc" id="L195">        return ret.stream()</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">            .filter(e -&gt; !(e.inputActualValue() instanceof ValueHolder))</span>
+<span class="fc" id="L197">            .collect(toList());</span>
+      } else {
+<span class="fc" id="L199">        return new ArrayList&lt;&gt;(evaluationHistory);</span>
+      }
+    }
+    
+    private static void finishLeftOverEntries(ReportComposer reportComposer, List&lt;EvaluationEntry&gt; out, List&lt;EvaluationEntry&gt; leftOverEntriesToSquash, AtomicReference&lt;EvaluationEntry&gt; leftOver) {
+<span class="pc bpc" id="L204" title="2 of 6 branches missed.">      if (!leftOverEntriesToSquash.isEmpty() &amp;&amp; leftOverEntriesToSquash.get(leftOverEntriesToSquash.size() - 1).isSquashable(leftOver.get()) &amp;&amp; !suppressSquashing()) {</span>
+<span class="fc" id="L205">        leftOverEntriesToSquash.add(leftOver.get());</span>
+<span class="fc" id="L206">        out.add(squashEntries(reportComposer, leftOverEntriesToSquash));</span>
+      } else {
+<span class="pc bpc" id="L208" title="1 of 2 branches missed.">        if (!leftOverEntriesToSquash.isEmpty())</span>
+<span class="nc" id="L209">          out.add(squashEntries(reportComposer, leftOverEntriesToSquash));</span>
+<span class="fc" id="L210">        out.add(leftOver.get());</span>
+      }
+<span class="fc" id="L212">    }</span>
+    
+    private static EvaluationEntry squashEntries(ReportComposer reportComposer, List&lt;EvaluationEntry&gt; squashedItems) {
+<span class="fc" id="L215">      EvaluationEntry first = squashedItems.get(0);</span>
+<span class="fc" id="L216">      return EvaluationEntry.create(</span>
+<span class="fc" id="L217">          squashedItems.stream()</span>
+<span class="fc" id="L218">              .map(e -&gt; (EvaluationEntry.Impl) e)</span>
+<span class="fc" id="L219">              .map(EvaluationEntry::formName)</span>
+<span class="fc" id="L220">              .collect(joining(&quot;:&quot;)),</span>
+<span class="fc" id="L221">          first.type(),</span>
+<span class="fc" id="L222">          first.level(),</span>
+<span class="fc" id="L223">          first.inputExpectation(), first.detailInputExpectation(),</span>
+<span class="fc" id="L224">          first.outputExpectation(), computeDetailOutputExpectationFromSquashedItems(squashedItems),</span>
+<span class="fc" id="L225">          first.inputActualValue(), null,</span>
+<span class="fc" id="L226">          first.outputActualValue(), squashedItems.get(squashedItems.size() - 1).detailOutputActualValue(),</span>
+          false,
+<span class="fc" id="L228">          squashedItems.stream().anyMatch(reportComposer::requiresExplanation), false);</span>
+    }
+    
+    @SuppressWarnings(&quot;BooleanMethodIsAlwaysInverted&quot;)
+    private static boolean suppressSquashing() {
+<span class="fc" id="L233">      return DebuggingUtils.suppressSquashing();</span>
+    }
+    
+    private static String computeDetailOutputExpectationFromSquashedItems(List&lt;EvaluationEntry&gt; squashedItems) {
+<span class="fc" id="L237">      return squashedItems.stream()</span>
+<span class="fc bfc" id="L238" title="All 4 branches covered.">          .filter(e -&gt; e.type() != EvaluationEntry.Type.TRANSFORM &amp;&amp; e.type() != EvaluationEntry.Type.CHECK)</span>
+<span class="fc" id="L239">          .map(EvaluationEntry::detailOutputExpectation)</span>
+<span class="fc" id="L240">          .map(Objects::toString)</span>
+<span class="fc" id="L241">          .collect(joining(&quot;:&quot;));</span>
+    }
+    
+    private static void addToDetailsListIfExplanationIsRequired(ReportComposer reportComposer, List&lt;Object&gt; detailsForExpectation, EvaluationEntry evaluationEntry, Supplier&lt;Object&gt; detailOutput) {
+<span class="fc bfc" id="L245" title="All 2 branches covered.">      if (reportComposer.requiresExplanation(evaluationEntry))</span>
+<span class="fc" id="L246">        detailsForExpectation.add(detailOutput.get());</span>
+<span class="fc" id="L247">    }</span>
+    
+    static Report composeReport(String summary, List&lt;Object&gt; details) {
+<span class="fc bfc" id="L250" title="All 2 branches covered.">      List&lt;String&gt; stringFormDetails = details != null ?</span>
+<span class="fc" id="L251">          details.stream()</span>
+<span class="fc" id="L252">              .filter(Objects::nonNull)</span>
+<span class="fc" id="L253">              .map(Objects::toString)</span>
+<span class="fc" id="L254">              .collect(toList()) :</span>
+<span class="fc" id="L255">          emptyList();</span>
+<span class="fc" id="L256">      return ReportComposer.Report.create(summary, stringFormDetails);</span>
+    }
+    
+    private static String composeSummaryForActualResults(List&lt;ReportComposer.FormattedEntry&gt; formattedEntries) {
+<span class="fc" id="L260">      return composeSummary(formattedEntries);</span>
+    }
+    
+    private static String composeSummaryForExpectations(List&lt;ReportComposer.FormattedEntry&gt; formattedEntries) {
+<span class="fc" id="L264">      return composeSummaryForActualResults(formattedEntries);</span>
+    }
+    
+    private static String composeSummary(List&lt;ReportComposer.FormattedEntry&gt; formattedEntries) {
+<span class="fc" id="L268">      AtomicInteger mismatchExplanationCount = new AtomicInteger(0);</span>
+<span class="fc" id="L269">      boolean mismatchExplanationFound = formattedEntries</span>
+<span class="fc" id="L270">          .stream()</span>
+<span class="fc" id="L271">          .anyMatch(ReportComposer.FormattedEntry::requiresExplanation);</span>
+<span class="fc" id="L272">      return evaluatorEntriesToString(</span>
+<span class="fc" id="L273">          hideInputValuesWhenRepeated(formattedEntries),</span>
+<span class="fc" id="L274">          columnLengths -&gt; formattedEntryToString(</span>
+              columnLengths[0],
+              columnLengths[1],
+              columnLengths[2],
+              mismatchExplanationCount,
+              mismatchExplanationFound));
+    }
+    
+    private static Function&lt;ReportComposer.FormattedEntry, String&gt; formattedEntryToString(
+        int inputColumnWidth,
+        int formNameColumnLength,
+        int outputColumnLength,
+        AtomicInteger i,
+        boolean mismatchExplanationFound) {
+<span class="fc" id="L288">      return (ReportComposer.FormattedEntry formattedEntry) -&gt;</span>
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">          (mismatchExplanationFound ?</span>
+<span class="pc bfc" id="L290" title="All 2 branches covered.">              format(&quot;%-4s&quot;, formattedEntry.requiresExplanation ?</span>
+<span class="fc" id="L291">                  &quot;[&quot; + i.getAndIncrement() + &quot;]&quot; : &quot;&quot;) :</span>
+              &quot;&quot;) +
+<span class="fc" id="L293">              format(&quot;%-&quot; + max(2, inputColumnWidth) + &quot;s&quot; +</span>
+                      &quot;%-&quot; + (formNameColumnLength + 2) + &quot;s&quot; +
+<span class="fc" id="L295">                      &quot;%-&quot; + max(2, outputColumnLength) + &quot;s&quot;,</span>
+<span class="fc" id="L296">                  formattedEntry.input().orElse(&quot;&quot;),</span>
+<span class="fc" id="L297">                  formattedEntry.input()</span>
+<span class="fc" id="L298">                      .map(v -&gt; &quot;-&gt;&quot;)</span>
+<span class="fc" id="L299">                      .orElse(&quot;  &quot;) + formatObject(InternalUtils.toNonStringObject(formattedEntry.indent() + formattedEntry.formName()), formNameColumnLength - 2),</span>
+                  formattedEntry
+<span class="fc" id="L301">                      .output()</span>
+<span class="fc" id="L302">                      .map(v -&gt; &quot;-&gt;&quot; + v).orElse(&quot;&quot;));</span>
+    }
+    
+    private static String evaluatorEntriesToString(List&lt;ReportComposer.FormattedEntry&gt; formattedEntries, Function&lt;int[], Function&lt;ReportComposer.FormattedEntry, String&gt;&gt; formatterFactory) {
+<span class="fc" id="L306">      int maxInputLength = 0, maxIndentAndFormNameLength = 0, maxOutputLength = 0;</span>
+<span class="fc bfc" id="L307" title="All 2 branches covered.">      for (ReportComposer.FormattedEntry eachEntry : formattedEntries) {</span>
+<span class="fc" id="L308">        int inputLength = eachEntry.input().map(String::length).orElse(0);</span>
+<span class="fc bfc" id="L309" title="All 2 branches covered.">        if (inputLength &gt; maxInputLength)</span>
+<span class="fc" id="L310">          maxInputLength = inputLength;</span>
+<span class="fc" id="L311">        int inputAndFormNameLength = eachEntry.indent().length() + eachEntry.formName().length();</span>
+<span class="fc bfc" id="L312" title="All 2 branches covered.">        if (inputAndFormNameLength &gt; maxIndentAndFormNameLength)</span>
+<span class="fc" id="L313">          maxIndentAndFormNameLength = inputAndFormNameLength;</span>
+<span class="fc" id="L314">        int outputLength = eachEntry.output().map(String::length).orElse(0);</span>
+<span class="fc bfc" id="L315" title="All 2 branches covered.">        if (outputLength &gt; maxOutputLength)</span>
+<span class="fc" id="L316">          maxOutputLength = outputLength;</span>
+<span class="fc" id="L317">      }</span>
+<span class="fc" id="L318">      int formNameColumnLength = (formNameColumnLength = max(</span>
+<span class="pc bpc" id="L319" title="1 of 2 branches missed.">          DebuggingUtils.showEvaluableDetail() ? 80 : 12,</span>
+<span class="fc" id="L320">          min(summarizedStringLength(), maxIndentAndFormNameLength))) + formNameColumnLength % 2;</span>
+<span class="fc" id="L321">      Function&lt;ReportComposer.FormattedEntry, String&gt; formatter = formatterFactory.apply(</span>
+          new int[] { maxInputLength, formNameColumnLength, maxOutputLength });
+<span class="fc" id="L323">      return formattedEntries</span>
+<span class="fc" id="L324">          .stream()</span>
+<span class="fc" id="L325">          .map(formatter)</span>
+<span class="fc" id="L326">          .map(s -&gt; (&quot;+&quot; + s).trim().substring(1))</span>
+<span class="fc" id="L327">          .collect(joining(format(&quot;%n&quot;)));</span>
+    }
+    
+    private static List&lt;ReportComposer.FormattedEntry&gt; hideInputValuesWhenRepeated(List&lt;ReportComposer.FormattedEntry&gt; formattedEntries) {
+<span class="fc" id="L331">      AtomicReference&lt;Object&gt; previousInput = new AtomicReference&lt;&gt;();</span>
+<span class="fc" id="L332">      return formattedEntries.stream()</span>
+<span class="fc" id="L333">          .map(each -&gt; {</span>
+<span class="fc bfc" id="L334" title="All 2 branches covered.">            if (!Objects.equals(previousInput.get(), each.input())) {</span>
+<span class="fc" id="L335">              previousInput.set(each.input());</span>
+<span class="fc" id="L336">              return each;</span>
+            } else {
+<span class="fc" id="L338">              return new ReportComposer.FormattedEntry(&quot;&quot;, each.formName(), each.indent(), each.output().orElse(null), each.requiresExplanation());</span>
+            }
+          })
+<span class="fc" id="L341">          .collect(toList());</span>
+    }
+    
+    
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

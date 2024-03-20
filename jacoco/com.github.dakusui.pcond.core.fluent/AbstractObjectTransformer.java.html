@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AbstractObjectTransformer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.fluent</a> &gt; <span class="el_source">AbstractObjectTransformer.java</span></div><h1>AbstractObjectTransformer.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.fluent;
+
+import com.github.dakusui.pcond.core.fluent.builtins.*;
+import com.github.dakusui.pcond.forms.Functions;
+
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.core.refl.MethodQuery.classMethod;
+import static com.github.dakusui.pcond.core.refl.MethodQuery.instanceMethod;
+import static com.github.dakusui.pcond.forms.Functions.call;
+import static com.github.dakusui.pcond.forms.Functions.parameter;
+import static java.util.Objects.requireNonNull;
+
+public interface AbstractObjectTransformer&lt;
+    TX extends AbstractObjectTransformer&lt;TX, V, T, R&gt;,
+    V extends AbstractObjectChecker&lt;V, T, R&gt;,
+    T,
+    R
+    &gt; extends
+    Transformer&lt;TX, V, T, R&gt; {
+
+  /**
+   * Corresponds to {@code toString()} method.
+   *
+   * @return this object the method appended.
+   */
+  @SuppressWarnings(&quot;unchecked&quot;)
+  default StringTransformer&lt;String&gt; stringify() {
+<span class="fc" id="L31">    return (StringTransformer&lt;String&gt;) this.toString(Functions.stringify());</span>
+  }
+
+  default &lt;E&gt; ObjectTransformer&lt;T, E&gt; invoke(String methodName, Object... args) {
+<span class="fc" id="L35">    return this.toObject(call(instanceMethod(parameter(), methodName, args)));</span>
+  }
+
+  default &lt;E&gt; ObjectTransformer&lt;T, E&gt; invokeStatic(Class&lt;?&gt; klass, String methodName, Object... args) {
+<span class="fc" id="L39">    return this.toObject(call(classMethod(klass, methodName, args)));</span>
+  }
+
+  default &lt;O extends Throwable&gt; ThrowableTransformer&lt;T, O&gt; expectException(Class&lt;O&gt; exceptionClass, Function&lt;? super R, ?&gt; f) {
+<span class="fc" id="L43">    requireNonNull(exceptionClass);</span>
+<span class="fc" id="L44">    return this.toThrowable(Functions.expectingException(exceptionClass, f));</span>
+  }
+
+  default &lt;E&gt; ObjectTransformer&lt;T, E&gt; toObject(Function&lt;R, E&gt; function) {
+<span class="fc" id="L48">    return this.transformValueWith(function, ObjectTransformer.Impl::new);</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  default &lt;E&gt; ObjectTransformer&lt;T, E&gt; asObject() {
+<span class="fc" id="L53">    return (ObjectTransformer&lt;T, E&gt;)this.toObject(Functions.identity());</span>
+  }
+
+
+  default BooleanTransformer&lt;T&gt; toBoolean(Function&lt;? super R, Boolean&gt; function) {
+<span class="fc" id="L58">    return this.transformValueWith(function, BooleanTransformer.Impl::new);</span>
+  }
+
+  default IntegerTransformer&lt;T&gt; toInteger(Function&lt;? super R, Integer&gt; function) {
+<span class="fc" id="L62">    return this.transformValueWith(function, IntegerTransformer.Impl::new);</span>
+  }
+
+  default LongTransformer&lt;T&gt; toLong(Function&lt;? super R, Long&gt; function) {
+<span class="fc" id="L66">    return this.transformValueWith(function, LongTransformer.Impl::new);</span>
+  }
+
+  default ShortTransformer&lt;T&gt; toShort(Function&lt;? super R, Short&gt; function) {
+<span class="fc" id="L70">    return this.transformValueWith(function, ShortTransformer.Impl::new);</span>
+  }
+
+  default DoubleTransformer&lt;T&gt; toDouble(Function&lt;? super R, Double&gt; function) {
+<span class="fc" id="L74">    return this.transformValueWith(function, DoubleTransformer.Impl::new);</span>
+  }
+
+  default FloatTransformer&lt;T&gt; toFloat(Function&lt;? super R, Float&gt; function) {
+<span class="fc" id="L78">    return this.transformValueWith(function, FloatTransformer.Impl::new);</span>
+  }
+
+  default StringTransformer&lt;T&gt; toString(Function&lt;? super R, String&gt; function) {
+<span class="fc" id="L82">    return this.transformValueWith(function, StringTransformer.Impl::new);</span>
+  }
+
+
+  default &lt;E&gt; ListTransformer&lt;T, E&gt; toList(Function&lt;? super R, List&lt;E&gt;&gt; function) {
+<span class="fc" id="L87">    return this.transformValueWith(function, ListTransformer.Impl::new);</span>
+  }
+
+  default &lt;E&gt; StreamTransformer&lt;T, E&gt; toStream(Function&lt;? super R, Stream&lt;E&gt;&gt; function) {
+<span class="fc" id="L91">    return this.transformValueWith(function, StreamTransformer.Impl::new);</span>
+  }
+
+  default &lt;E extends Throwable&gt; ThrowableTransformer&lt;T, E&gt; toThrowable(Function&lt;? super R, E&gt; function) {
+<span class="fc" id="L95">    return this.transformValueWith(function, ThrowableTransformer.Impl::new);</span>
+
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DebuggingUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core</a> &gt; <span class="el_source">DebuggingUtils.java</span></div><h1>DebuggingUtils.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core;
+
+import com.github.dakusui.pcond.validator.Validator;
+
+import java.io.PrintStream;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.indent;
+
+<span class="fc" id="L9">public enum DebuggingUtils {</span>
+  ;
+
+  static &lt;T, R&gt; void printIo(String x, EvaluableIo&lt;T, ? extends Evaluable&lt;T&gt;, R&gt; io) {
+<span class="pc bpc" id="L13" title="1 of 2 branches missed.">    if (isDebugLogEnabled())</span>
+<span class="nc" id="L14">      System.err.println(x + &quot;:&quot; + io.evaluableType() + &quot;:&quot; + io.evaluable() + &quot;(&quot; + io.input() + &quot;)=&quot; + io.output());</span>
+<span class="fc" id="L15">  }</span>
+
+  static &lt;T&gt; void printInput(String x, Evaluable&lt;T&gt; evaluable, ValueHolder&lt;T&gt; input) {
+<span class="pc bpc" id="L18" title="1 of 2 branches missed.">    if (isDebugLogEnabled())</span>
+<span class="nc" id="L19">      System.err.println(x + &quot;:&quot; + evaluable + &quot;(&quot; + input + &quot;)&quot;);</span>
+<span class="fc" id="L20">  }</span>
+
+  static &lt;T, R&gt; void printInputAndOutput(Evaluable&lt;T&gt; evaluable, ValueHolder&lt;T&gt; input, ValueHolder&lt;R&gt; output) {
+<span class="pc bpc" id="L23" title="1 of 2 branches missed.">    if (isDebugLogEnabled())</span>
+<span class="nc" id="L24">      System.err.println(&quot;TRANSFORMATION:AFTER&quot; + &quot;:&quot; + evaluable + &quot;(&quot; + input + &quot;)=&quot; + output);</span>
+<span class="fc" id="L25">  }</span>
+
+  static &lt;T&gt; void printTo(EvaluationContext&lt;T&gt; evaluationContext, PrintStream ps, int indent) {
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">    if (isDebugLogEnabled()) {</span>
+<span class="nc" id="L29">      ps.println(indent(indent) + &quot;context=&lt;&quot; + evaluationContext + &quot;&gt;&quot;);</span>
+<span class="nc bnc" id="L30" title="All 2 branches missed.">      for (Object each : evaluationContext.resultEntries()) {</span>
+<span class="nc" id="L31">        ps.println(indent(indent + 1) + each);</span>
+<span class="nc" id="L32">      }</span>
+    }
+<span class="fc" id="L34">  }</span>
+
+  public static boolean showEvaluableDetail() {
+<span class="fc" id="L37">    return Validator.instance().configuration().debugging().map(Validator.Configuration.Debugging::showEvaluableDetail).orElse(false);</span>
+  }
+
+  public static boolean suppressSquashing() {
+<span class="fc" id="L41">    return Validator.instance().configuration().debugging().map(Validator.Configuration.Debugging::suppressSquashing).orElse(false);</span>
+  }
+  public static boolean isDebugLogEnabled() {
+<span class="fc" id="L44">    return Validator.instance().configuration().debugging().map(Validator.Configuration.Debugging::enableDebugLog).orElse(false);</span>
+  }
+
+  public static boolean reportIgnoredEntries() {
+<span class="fc" id="L48">    return Validator.instance().configuration().debugging().map(Validator.Configuration.Debugging::reportIgnoredEntries).orElse(false);</span>
+  }
+
+  public static boolean passThroughComparisonFailure() {
+<span class="fc" id="L52">    return Validator.instance().configuration().debugging().map(Validator.Configuration.Debugging::passThroughComparisonFailure).orElse(false);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

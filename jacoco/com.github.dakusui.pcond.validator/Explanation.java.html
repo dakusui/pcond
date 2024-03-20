@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Explanation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.validator</a> &gt; <span class="el_source">Explanation.java</span></div><h1>Explanation.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.validator;
+
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.IntStream;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.newLine;
+import static com.github.dakusui.pcond.validator.ReportComposer.Utils.composeReport;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
+
+<span class="pc bpc" id="L14" title="1 of 2 branches missed.">public class Explanation {</span>
+  private final String                message;
+  private final ReportComposer.Report expected;
+  private final ReportComposer.Report actual;
+
+  public Explanation(String message) {
+<span class="fc" id="L20">    this(message, composeReport(&quot;&quot;, null), composeReport(&quot;&quot;, null));</span>
+<span class="fc" id="L21">  }</span>
+
+<span class="fc" id="L23">  public Explanation(String message, ReportComposer.Report expected, ReportComposer.Report actual) {</span>
+<span class="fc" id="L24">    this.message = message;</span>
+<span class="fc" id="L25">    this.expected = requireNonNull(expected);</span>
+<span class="fc" id="L26">    this.actual = requireNonNull(actual);</span>
+<span class="fc" id="L27">  }</span>
+
+  public String message() {
+<span class="fc" id="L30">    return this.message;</span>
+  }
+
+  public ReportComposer.Report expected() {
+<span class="fc" id="L34">    return this.expected;</span>
+  }
+
+  public ReportComposer.Report actual() {
+<span class="fc" id="L38">    return this.actual;</span>
+  }
+
+  public String toString() {
+<span class="pc bpc" id="L42" title="1 of 2 branches missed.">    return actual != null ?</span>
+<span class="pc" id="L43">        format(&quot;%s%n%s&quot;, message, composeDiff(expected, actual)) :</span>
+        message;
+  }
+
+  private static String composeDiff(ReportComposer.Report expected, ReportComposer.Report actual) {
+<span class="fc" id="L48">    String[] e = splitAndTrim(expected.summary());</span>
+<span class="fc" id="L49">    String[] a = splitAndTrim(actual.summary());</span>
+<span class="fc" id="L50">    List&lt;String&gt; b = new LinkedList&lt;&gt;();</span>
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    for (int i = 0; i &lt; Math.max(a.length, e.length); i++) {</span>
+<span class="pc bpc" id="L52" title="1 of 4 branches missed.">      if (i &lt; Math.min(e.length, a.length) &amp;&amp; Objects.equals(e[i], a[i])) {</span>
+<span class="fc" id="L53">        b.add(format(&quot;          %s&quot;, a[i]));</span>
+      } else {
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        b.add(format(&quot;Mismatch&lt;:%s&quot;, i &lt; e.length ? e[i] : &quot;&quot;));</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">        b.add(format(&quot;Mismatch&gt;:%s&quot;, i &lt; a.length ? a[i] : &quot;&quot;));</span>
+      }
+    }
+<span class="fc" id="L59">    b.add(newLine());</span>
+<span class="pc bpc" id="L60" title="2 of 4 branches missed.">    assert expected.details().size() == actual.details().size();</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">    return !expected.details().isEmpty() ?</span>
+<span class="fc" id="L62">        b.stream().collect(joining(newLine()))</span>
+<span class="fc" id="L63">            + IntStream.range(0, expected.details().size())</span>
+<span class="fc" id="L64">            .mapToObj(i -&gt; formatDetailItemPair(i, expected.details().get(i), actual.details().get(i)))</span>
+<span class="fc" id="L65">            .collect(joining(newLine())) :</span>
+        &quot;&quot;;
+  }
+
+  private static String formatDetailItemPair(int i, String detailItemForExpectation, String detailItemForActual) {
+<span class="fc" id="L70">    return format(&quot;.Detail of failure [%s] (expectation)%n&quot;, i)</span>
+<span class="fc" id="L71">        + format(&quot;----%n&quot;)</span>
+        + detailItemForExpectation
+<span class="fc" id="L73">        + newLine()</span>
+<span class="fc" id="L74">        + format(&quot;----%n&quot;)</span>
+<span class="fc" id="L75">        + newLine()</span>
+<span class="fc" id="L76">        + format(&quot;.Detail of failure [%s] (actual value)%n&quot;, i)</span>
+<span class="fc" id="L77">        + format(&quot;----%n&quot;)</span>
+        + detailItemForActual
+<span class="fc" id="L79">        + newLine()</span>
+        + &quot;----&quot;;
+  }
+
+  public static String reportToString(ReportComposer.Report report) {
+<span class="fc" id="L84">    String ret = report.summary();</span>
+<span class="fc" id="L85">    ret += newLine();</span>
+<span class="fc" id="L86">    ret += newLine();</span>
+<span class="fc" id="L87">    ret += IntStream.range(0, report.details().size())</span>
+<span class="fc" id="L88">        .mapToObj(i -&gt; formatDetailItem(i, report.details().get(i)))</span>
+<span class="fc" id="L89">        .collect(joining(newLine()));</span>
+<span class="fc" id="L90">    return ret;</span>
+  }
+
+  private static String formatDetailItem(int i, String detailItem) {
+<span class="fc" id="L94">    return format(&quot;.Detail of failure [%s]%n&quot;, i)</span>
+<span class="fc" id="L95">        + format(&quot;----%n&quot;)</span>
+        + detailItem
+<span class="fc" id="L97">        + newLine()</span>
+<span class="fc" id="L98">        + format(&quot;----%n&quot;);</span>
+  }
+
+  public static Explanation fromMessage(String msg) {
+<span class="fc" id="L102">    return new Explanation(msg);</span>
+  }
+
+  private static String[] splitAndTrim(String expected) {
+<span class="fc" id="L106">    String[] in = expected.split(newLine());</span>
+<span class="fc" id="L107">    List&lt;String&gt; out = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L108">    boolean nonEmptyFound = false;</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">    for (int i = in.length - 1; i &gt;= 0; i--) {</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">      if (!&quot;&quot;.equals(in[i]))</span>
+<span class="fc" id="L111">        nonEmptyFound = true;</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">      if (nonEmptyFound)</span>
+<span class="fc" id="L113">        out.add(0, in[i]);</span>
+    }
+<span class="fc" id="L115">    return out.toArray(new String[0]);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

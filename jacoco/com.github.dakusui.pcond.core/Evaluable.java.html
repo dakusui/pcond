@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Evaluable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core</a> &gt; <span class="el_source">Evaluable.java</span></div><h1>Evaluable.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core;
+
+import com.github.dakusui.pcond.experimentals.currying.context.CurriedContext;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+/**
+ * An interface that models &quot;forms&quot;.
+ * A form is a general idea that covers predicates, functions, and &quot;special-forms&quot;.
+ *
+ * A simple form (such as one returned by {@link Predicate#isEqual(Object)}) is
+ * modeled as and held by {@link Evaluable.LeafPred}.
+ * The framework just delegates the evaluation to the object.
+ *
+ * However, for a form which has an internal structure, such as one returned by
+ * {@link Predicate#and(Predicate)}, this approach doesn't work.
+ * Because, in order to make the evaluation process visible and readable for human,
+ * we need intermediate evaluation results.
+ *
+ * That is, when we evaluate a form `v != null &amp;&amp; v.startsWith(&quot;hello&quot;)`, we want
+ * information about which predicate was violated.
+ * Just showing the actual value of `v` is not sufficient, because the `v` and the
+ * predicates in the evaluation might have internal structures or logics that make
+ * it difficult/impossible to infer which predicate is violated.
+ *
+ * @param &lt;T&gt; The type of the value evaluated by this object.
+ */
+public interface Evaluable&lt;T&gt; {
+  /**
+   * Performs an evaluation of the `evaluationContext` with a given `evaluator`.
+   *
+   * @param evaluableIo       An execution occurrence of an evaluable.
+   * @param evaluationContext An evaluation context.
+   * @param evaluator         An evaluator with which the `evaluationContext` is evaluated.
+   */
+  &lt;O&gt; void accept(EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext, Evaluator evaluator);
+
+  default boolean isSquashable() {
+<span class="nc" id="L43">    return false;</span>
+  }
+
+  default Evaluable&lt;T&gt; makeTrivial() {
+<span class="nc" id="L47">    throw new UnsupportedOperationException();</span>
+  }
+
+  /**
+   * A base interface to model all the predicates in the model of the evaluation
+   * framework.
+   *
+   * @param &lt;T&gt; The type of the value to be tested.
+   */
+  interface Pred&lt;T&gt; extends Evaluable&lt;T&gt; {
+  }
+
+  /**
+   * A base interface for conjunction (and) and disjunction (or) of predicates.
+   *
+   * @param &lt;T&gt; The type of the value to be evaluated.
+   */
+  interface Composite&lt;T&gt; extends Pred&lt;T&gt; {
+    /**
+     * Returns the predicates with which the target value is evaluated.
+     *
+     * @return The list of the child predicates.
+     */
+    List&lt;Evaluable&lt;T&gt;&gt; children();
+
+    /**
+     * Returns `true` if the &quot;shortcut&quot; evaluation is enabled.
+     *
+     * Suppose you have a following predicate.
+     *
+     * ----
+     * a &amp;&amp; b &amp;&amp; c
+     * ----
+     *
+     * If the `a` results in `false`, the `b` and `c` doesn't need to be evaluated.
+     * The optimization, where the evaluations for the `b` and `c` are skipped,
+     * is called &quot;shortcut&quot;.
+     *
+     * However, in the context of testing, sometimes we want to know the evaluation
+     * results for the `b` and `c`.
+     * Otherwise, we cannot avoid getting into a fail-&gt;fix-&gt;run-&gt;fail... loop,
+     * sometimes.
+     *
+     * @return `true` if the &quot;shortcut&quot; evaluation is enabled.
+     */
+    boolean shortcut();
+
+    @Override
+    default boolean isSquashable() {
+<span class="nc bnc" id="L96" title="All 2 branches missed.">      return children().size() &lt;= 1;</span>
+    }
+  }
+
+  /**
+   * An interface to model a conjunction (`and`, `&amp;&amp;`) predicate.
+   *
+   * @param &lt;T&gt; The type of the value to be evaluated.
+   */
+  interface Conjunction&lt;T&gt; extends Composite&lt;T&gt; {
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+    @Override
+    default &lt;O&gt; void accept(EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext, Evaluator evaluator) {
+<span class="fc" id="L109">      evaluator.evaluateConjunction((EvaluableIo&lt;T, Conjunction&lt;T&gt;, Boolean&gt;) (EvaluableIo) evaluableIo, evaluationContext);</span>
+<span class="fc" id="L110">    }</span>
+  }
+
+  /**
+   * An interface to model a disjunction (`or`, `||`) predicate.
+   *
+   * @param &lt;T&gt; The type of the value to be evaluated.
+   */
+  interface Disjunction&lt;T&gt; extends Composite&lt;T&gt; {
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+    @Override
+    default &lt;O&gt; void accept(EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext, Evaluator evaluator) {
+<span class="fc" id="L122">      evaluator.evaluateDisjunction((EvaluableIo&lt;T, Disjunction&lt;T&gt;, Boolean&gt;) (EvaluableIo) evaluableIo, evaluationContext);</span>
+<span class="fc" id="L123">    }</span>
+  }
+
+  /**
+   * An interface to model a negation (`not`, `negate`, `!`) of a predicate.
+   *
+   * @param &lt;T&gt; The type of the value to be evaluated.
+   */
+  interface Negation&lt;T&gt; extends Pred&lt;T&gt; {
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+    @Override
+    default &lt;O&gt; void accept(EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext, Evaluator evaluator) {
+<span class="fc" id="L135">      evaluator.evaluateNegation((EvaluableIo&lt;T, Negation&lt;T&gt;, Boolean&gt;) (EvaluableIo) evaluableIo, evaluationContext);</span>
+<span class="fc" id="L136">    }</span>
+
+    /**
+     * The predicate the negation is applied.
+     *
+     * @return A target predicate.
+     */
+    Evaluable&lt;T&gt; target();
+
+    @Override
+    default boolean isSquashable() {
+<span class="nc" id="L147">      return true;</span>
+    }
+  }
+
+  /**
+   * An interface to model a simple predicate in the evaluation framework.
+   *
+   * @param &lt;T&gt; The type of the value to be evaluated.
+   */
+  interface LeafPred&lt;T&gt; extends Pred&lt;T&gt; {
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+    @Override
+    default &lt;O&gt; void accept(EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext, Evaluator evaluator) {
+<span class="fc" id="L160">      evaluator.evaluateLeaf((EvaluableIo&lt;T, LeafPred&lt;T&gt;, Boolean&gt;) (EvaluableIo) evaluableIo, evaluationContext);</span>
+<span class="fc" id="L161">    }</span>
+
+    /**
+     * Returns an actual predicate modeled by this interface.
+     *
+     * @return The predicate modeled by this interface.
+     */
+    Predicate&lt;? super T&gt; predicate();
+  }
+
+  /**
+   * An interface to model a predicate for {@link CurriedContext}.
+   *
+   * @see CurriedContext
+   */
+  interface CurriedContextPred extends Pred&lt;CurriedContext&gt; {
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+    @Override
+    default &lt;O&gt; void accept(EvaluableIo&lt;CurriedContext, Evaluable&lt;CurriedContext&gt;, O&gt; evaluableIo, EvaluationContext&lt;CurriedContext&gt; evaluationContext, Evaluator evaluator) {
+<span class="fc" id="L180">      evaluator.evaluateCurriedContextPredicate((EvaluableIo&lt;CurriedContext, CurriedContextPred, Boolean&gt;) (EvaluableIo) evaluableIo, evaluationContext);</span>
+<span class="fc" id="L181">    }</span>
+
+    &lt;T&gt; Evaluable&lt;T&gt; enclosed();
+
+    int argIndex();
+  }
+
+  /**
+   * An interface to model a predicate for {@link Stream}.
+   *
+   * @param &lt;E&gt; The type of elements in the stream to be evaluated.
+   */
+  interface StreamPred&lt;E&gt; extends Pred&lt;Stream&lt;E&gt;&gt; {
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+    @Override
+    default &lt;O&gt; void accept(EvaluableIo&lt;Stream&lt;E&gt;, Evaluable&lt;Stream&lt;E&gt;&gt;, O&gt; evaluableIo, EvaluationContext&lt;Stream&lt;E&gt;&gt; evaluationContext, Evaluator evaluator) {
+<span class="fc" id="L197">      evaluator.evaluateStreamPredicate((EvaluableIo&lt;Stream&lt;E&gt;, StreamPred&lt;E&gt;, Boolean&gt;) (EvaluableIo) evaluableIo, evaluationContext);</span>
+<span class="fc" id="L198">    }</span>
+
+    /**
+     * Returns a default value returned as the entire result of this predicate.
+     * The `value` is used when a &quot;cut&quot; happens.
+     *
+     * @return a default value to fallback of this object.
+     */
+    boolean defaultValue();
+
+    /**
+     * Returns an evaluable object which makes &quot;cut&quot; happen.
+     * If the result of the evaluation of the returned object becomes equal to the
+     * returned value of the {@link StreamPred#valueToCut()}, a &quot;cut&quot; will actually happen.
+     *
+     * @return An evaluable which triggers a &quot;cut&quot;.
+     */
+    Evaluable&lt;E&gt; cut();
+
+    /**
+     * Returns a value to make a &quot;cut&quot; happen.
+     *
+     * A &quot;cut&quot; is a situation, where an evaluation process for the elements in the
+     * stream is ended without reaching the last one.
+     * This is necessary to model a functionalities of `Stream`, such as
+     * `allMatch`, `noneMatch`, and `anyMatch`.
+     *
+     * @return value ( `true` / `false` ) to make a &quot;cut&quot; happen.
+     */
+    boolean valueToCut();
+
+    /**
+     * In order to generate an informative report, the framework needs information
+     * about the expected value for each predicate.
+     *
+     * The &quot;expected&quot; value of a predicate can be different inside the tree of the `Evaluables`,
+     * when a negation is used.
+     *
+     * If this `Evaluable` node requests to flip the expectation value under the node,
+     * this method should return `true`.
+     *
+     * @return `true`, if the expectation flip is requested.
+     */
+    default boolean requestExpectationFlip() {
+<span class="fc" id="L242">      return false;</span>
+    }  }
+
+  /**
+   * An interface to model a &quot;transforming predicate&quot;, which models the &quot;transform and check&quot; style of value validation.
+   * The idea of the style is to first  transform a value into a type, which is easy to read for human and to check for machine, such as list, integer, string, etc., in order to validate a value.
+   *
+   * @param &lt;T&gt; The type of the value to be evaluated.
+   * @param &lt;R&gt; The type to which the value (`T`) is transformed and then tested.
+   */
+  interface Transformation&lt;T, R&gt; extends Pred&lt;T&gt; {
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+    @Override
+    default &lt;O&gt; void accept(EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext, Evaluator evaluator) {
+<span class="fc" id="L256">      evaluator.evaluateTransformation((EvaluableIo&lt;T, Transformation&lt;T, R&gt;, Boolean&gt;) (EvaluableIo) evaluableIo, evaluationContext);</span>
+<span class="fc" id="L257">    }</span>
+
+    /**
+     * Returns a transformer of this object.
+     *
+     * @return A transformer function.
+     */
+    Evaluable&lt;T&gt; mapper();
+
+    Evaluable&lt;R&gt; checker();
+
+    /**
+     * Returns a name of a transformer, if any.
+     *
+     * @return An optional to store a name of the transformer.
+     */
+    Optional&lt;String&gt; mapperName();
+
+    /**
+     * Returns a name of a checker, if any.
+     *
+     * @return An optional to store a name of the checker.
+     */
+    Optional&lt;String&gt; checkerName();
+  }
+
+  /**
+   * An interface to model a function ({@link Function}) in the evaluation framework
+   * of the `pcond`.
+   *
+   * @param &lt;T&gt; The type of the value to be evaluated.
+   */
+  interface Func&lt;T&gt; extends Evaluable&lt;T&gt; {
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+    @Override
+    default &lt;O&gt; void accept(EvaluableIo&lt;T, Evaluable&lt;T&gt;, O&gt; evaluableIo, EvaluationContext&lt;T&gt; evaluationContext, Evaluator evaluator) {
+<span class="fc" id="L293">      evaluator.evaluateFunction((EvaluableIo&lt;T, Func&lt;T&gt;, O&gt;) (EvaluableIo) evaluableIo, evaluationContext);</span>
+<span class="fc" id="L294">    }</span>
+
+    Function&lt;? super T, Object&gt; head();
+
+    Optional&lt;Evaluable&lt;Object&gt;&gt; tail();
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

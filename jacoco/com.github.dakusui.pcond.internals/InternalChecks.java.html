@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InternalChecks.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.internals</a> &gt; <span class="el_source">InternalChecks.java</span></div><h1>InternalChecks.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.internals;
+
+import com.github.dakusui.pcond.core.refl.ReflUtils;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static java.lang.String.format;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.toList;
+
+<span class="fc" id="L19">public enum InternalChecks {</span>
+  ;
+
+<span class="fc" id="L22">  private static final Set&lt;Class&lt;?&gt;&gt; PRIMITIVE_WRAPPERS = new HashSet&lt;Class&lt;?&gt;&gt;() {{</span>
+<span class="fc" id="L23">    add(Integer.class);</span>
+<span class="fc" id="L24">    add(Long.class);</span>
+<span class="fc" id="L25">    add(Boolean.class);</span>
+<span class="fc" id="L26">    add(Byte.class);</span>
+<span class="fc" id="L27">    add(Character.class);</span>
+<span class="fc" id="L28">    add(Float.class);</span>
+<span class="fc" id="L29">    add(Double.class);</span>
+<span class="fc" id="L30">    add(Short.class);</span>
+<span class="fc" id="L31">    add(Void.class);</span>
+<span class="fc" id="L32">  }};</span>
+
+  public static void checkArgument(boolean b, Supplier&lt;String&gt; messageFormatter) {
+<span class="fc bfc" id="L35" title="All 2 branches covered.">    if (!b)</span>
+<span class="fc" id="L36">      throw new IllegalArgumentException(messageFormatter.get());</span>
+<span class="fc" id="L37">  }</span>
+
+  public static &lt;V&gt; V requireArgument(V arg, Predicate&lt;? super V&gt; predicate, Supplier&lt;String&gt; messageFormatter) {
+<span class="fc bfc" id="L40" title="All 2 branches covered.">    if (!predicate.test(arg))</span>
+<span class="fc" id="L41">      throw new IllegalArgumentException(messageFormatter.get());</span>
+<span class="fc" id="L42">    return arg;</span>
+  }
+
+  public static &lt;V&gt; V ensureValue(V value, Predicate&lt;? super V&gt; predicate, Function&lt;V, String&gt; messageFormatter) {
+<span class="fc bfc" id="L46" title="All 2 branches covered.">    if (!predicate.test(value))</span>
+<span class="fc" id="L47">      throw new IllegalStateException(messageFormatter.apply(value));</span>
+<span class="fc" id="L48">    return value;</span>
+  }
+
+  public static &lt;V&gt; V requireState(V arg, Predicate&lt;? super V&gt; predicate, Function&lt;V, String&gt; messageFormatter) {
+<span class="fc bfc" id="L52" title="All 2 branches covered.">    if (!predicate.test(arg))</span>
+<span class="fc" id="L53">      throw new IllegalStateException(messageFormatter.apply(arg));</span>
+<span class="fc" id="L54">    return arg;</span>
+  }
+
+  public static Method requireStaticMethod(Method method) {
+<span class="fc bfc" id="L58" title="All 2 branches covered.">    if (!Modifier.isStatic(method.getModifiers()))</span>
+<span class="fc" id="L59">      throw new IllegalArgumentException(String.format(&quot;The specified method '%s' is not static&quot;, method));</span>
+<span class="fc" id="L60">    return method;</span>
+  }
+
+  public static List&lt;Object&gt; requireArgumentListSize(List&lt;Object&gt; args, int requiredSize) {
+<span class="fc bfc" id="L64" title="All 2 branches covered.">    if (requiredSize != args.size())</span>
+<span class="fc" id="L65">      throw new IllegalArgumentException(String.format(&quot;Wrong number of arguments are given: required: %s, actual: %s&quot;, requiredSize, args.size()));</span>
+<span class="fc" id="L66">    return args;</span>
+  }
+
+  public static boolean isWiderThanOrEqualTo(Class&lt;?&gt; classA, Class&lt;?&gt; classB) {
+<span class="fc" id="L70">    requireArgument(classA, InternalChecks::isPrimitiveWrapperClass, () -&gt; format(&quot;'%s' is not a primitive wrapper class&quot;, classA));</span>
+<span class="fc" id="L71">    requireArgument(classB, InternalChecks::isPrimitiveWrapperClass, () -&gt; format(&quot;'%s' is not a primitive wrapper class&quot;, classB));</span>
+<span class="fc bfc" id="L72" title="All 4 branches covered.">    return classA.equals(classB) || isWiderThan(classA, classB);</span>
+  }
+
+  public static boolean isPrimitiveWrapperClass(Class&lt;?&gt; aClass) {
+<span class="fc" id="L76">    return PRIMITIVE_WRAPPERS.contains(aClass);</span>
+  }
+
+  public static boolean isPrimitiveWrapperClassOrPrimitive(Class&lt;?&gt; aClass) {
+<span class="fc bfc" id="L80" title="All 4 branches covered.">    return aClass.isPrimitive() || isPrimitiveWrapperClass(aClass);</span>
+  }
+
+  /**
+   * @param classA A non-primitive type class.
+   * @param classB Another non-primitive type class.
+   * @return {@code true} iff {@code classA} is a &quot;wider&quot; wrapper class than {@code classB}.
+   */
+  public static boolean isWiderThan(Class&lt;?&gt; classA, Class&lt;?&gt; classB) {
+<span class="fc" id="L89">    requireArgument(classA, InternalChecks::isPrimitiveWrapperClass, () -&gt; format(&quot;'%s' is not a primitive wrapper class&quot;, classA));</span>
+<span class="fc" id="L90">    requireArgument(classB, InternalChecks::isPrimitiveWrapperClass, () -&gt; format(&quot;'%s' is not a primitive wrapper class&quot;, classB));</span>
+<span class="fc" id="L91">    Set&lt;Class&lt;?&gt;&gt; widerBoxedClassesForClassA = widerTypesThan(classB);</span>
+<span class="fc" id="L92">    return widerBoxedClassesForClassA.contains(classA);</span>
+  }
+
+  private static Set&lt;Class&lt;?&gt;&gt; widerTypesThan(Class&lt;?&gt; classB) {
+<span class="fc" id="L96">    return ReflUtils.WIDER_TYPES.getOrDefault(classB, emptySet());</span>
+  }
+
+  public static List&lt;Integer&gt; validateParamOrderList(List&lt;Integer&gt; order, int numParameters) {
+<span class="fc" id="L100">    final List&lt;Integer&gt; paramOrder = unmodifiableList(order.stream().distinct().collect(toList()));</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">    requireArgument(order, o -&gt; o.size() == paramOrder.size(), () -&gt; &quot;Duplicated elements are found in the 'order' argument:&quot; + order.toString() + &quot; &quot; + paramOrder);</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">    requireArgument(order, o -&gt; o.size() == numParameters, () -&gt; &quot;Inconsistent number of parameters are supplied by 'order'. Expected:&quot; + numParameters + &quot;, Actual: &quot; + order.size());</span>
+<span class="fc" id="L103">    return paramOrder;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

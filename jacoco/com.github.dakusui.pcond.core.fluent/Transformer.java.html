@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Transformer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.fluent</a> &gt; <span class="el_source">Transformer.java</span></div><h1>Transformer.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.fluent;
+
+import com.github.dakusui.pcond.fluent.Statement;
+import com.github.dakusui.pcond.forms.Functions;
+
+import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static com.github.dakusui.pcond.internals.InternalChecks.requireState;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+
+public interface Transformer&lt;
+    TX extends Transformer&lt;TX, V, T, R&gt;,  // SELF
+    V extends Checker&lt;V, T, R&gt;,
+    T,
+    R&gt; extends
+    Matcher&lt;TX, T, R&gt;,
+    Statement&lt;T&gt; {
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  default TX checkWithPredicate(Predicate&lt;? super R&gt; predicate) {
+<span class="nc" id="L26">    requireNonNull(predicate);</span>
+<span class="nc" id="L27">    return addTransformAndCheckClause(tx -&gt; (Predicate&lt;R&gt;) predicate);</span>
+  }
+
+  TX addTransformAndCheckClause(Function&lt;Transformer&lt;?, ?, R, R&gt;, Predicate&lt;R&gt;&gt; clause);
+
+  V then();
+
+  default Predicate&lt;T&gt; done() {
+<span class="fc" id="L35">    return this.statementPredicate();</span>
+  }
+
+  &lt;TY extends Transformer&lt;TY, W, T, RR&gt;,
+      W extends Checker&lt;W, T, RR&gt;,
+      RR&gt;
+  TY transformValueWith(Function&lt;? super R, RR&gt; func, BiFunction&lt;Supplier&lt;T&gt;, Function&lt;T, RR&gt;, TY&gt; transformerFactory);
+
+  abstract class Base&lt;
+      TX extends Transformer&lt;TX, V, T, R&gt;,  // SELF
+      V extends Checker&lt;V, T, R&gt;,
+      T,
+      R&gt; extends
+      Matcher.Base&lt;
+          TX,
+          T,
+          R&gt; implements
+      Transformer&lt;
+          TX,
+          V,
+          T,
+          R&gt; {
+
+    protected Base(Supplier&lt;T&gt; baseValue, Function&lt;T, R&gt; transformFunction) {
+<span class="fc" id="L59">      super(baseValue, transformFunction);</span>
+<span class="fc" id="L60">    }</span>
+
+    public V then() {
+<span class="pc" id="L63">      requireState(this, Matcher.Base::hasNoChild, v -&gt; format(&quot;Predicate is already added. %s&quot;, v.childPredicates()));</span>
+<span class="fc" id="L64">      return toChecker(this.transformFunction());</span>
+    }
+
+    public &lt;
+        TY extends Transformer&lt;TY, W, T, RR&gt;,
+        W extends Checker&lt;W, T, RR&gt;,
+        RR&gt;
+    TY transformValueWith(Function&lt;? super R, RR&gt; func, BiFunction&lt;Supplier&lt;T&gt;, Function&lt;T, RR&gt;, TY&gt; transformerFactory) {
+<span class="fc" id="L72">      Function&lt;T, R&gt; tf = transformFunction();</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">      @SuppressWarnings(&quot;unchecked&quot;) Function&lt;T, RR&gt; transformFunction = Objects.equals(tf, Functions.identity()) ?</span>
+          (Function&lt;T, RR&gt;) func :
+<span class="fc" id="L75">          tf.andThen(func);</span>
+<span class="fc" id="L76">      return transformerFactory.apply(this::baseValue, transformFunction);</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public TX checkWithPredicate(Predicate&lt;? super R&gt; predicate) {
+<span class="nc" id="L82">      return this.addTransformAndCheckClause(tx -&gt; (Predicate&lt;R&gt;) predicate);</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Override
+    public TX addTransformAndCheckClause(Function&lt;Transformer&lt;?, ?, R, R&gt;, Predicate&lt;R&gt;&gt; clause) {
+<span class="fc" id="L88">      return this.addPredicate(tx -&gt; clause.apply((Transformer&lt;?, ?, R, R&gt;) tx));</span>
+    }
+
+    @Override
+    public T statementValue() {
+<span class="fc" id="L93">      return baseValue();</span>
+    }
+
+    @Override
+    public Predicate&lt;T&gt; statementPredicate() {
+<span class="fc" id="L98">      return toPredicate();</span>
+    }
+
+    protected abstract V toChecker(Function&lt;T, R&gt; transformFunction);
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

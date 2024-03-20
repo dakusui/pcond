@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MethodQuery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.refl</a> &gt; <span class="el_source">MethodQuery.java</span></div><h1>MethodQuery.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.refl;
+
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Predicate;
+
+import static com.github.dakusui.pcond.core.refl.ReflUtils.replacePlaceHolderWithActualArgument;
+import static com.github.dakusui.pcond.internals.InternalChecks.requireArgument;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
+
+/**
+ * An interface that models a query to specify a method.
+ */
+public interface MethodQuery {
+  boolean isStatic();
+
+  Object targetObject();
+
+  Class&lt;?&gt; targetClass();
+
+  String methodName();
+
+  Object[] arguments();
+
+  /**
+   * Returns a string that describes this object.
+   *
+   * @return A description of this object.
+   */
+  String describe();
+
+  default MethodQuery bindActualArguments(Predicate&lt;Object&gt; isPlaceHolder, Function&lt;Object, Object&gt; replace) {
+<span class="fc" id="L36">    Function&lt;Object, Object&gt; argReplacer = object -&gt; replacePlaceHolderWithActualArgument(object, isPlaceHolder, replace);</span>
+<span class="fc" id="L37">    Object targetObject = argReplacer.apply(this.targetObject());</span>
+<span class="fc" id="L38">    return create(</span>
+<span class="fc" id="L39">        this.isStatic(),</span>
+        targetObject,
+<span class="fc bfc" id="L41" title="All 2 branches covered.">        this.isStatic() ? this.targetClass() : targetObject.getClass(),</span>
+<span class="fc" id="L42">        this.methodName(),</span>
+<span class="fc" id="L43">        Arrays.stream(this.arguments()).map(argReplacer).toArray());</span>
+  }
+
+  static MethodQuery instanceMethod(Object targetObject, String methodName, Object... arguments) {
+<span class="fc" id="L47">    return create(false, requireNonNull(targetObject), ReflUtils.targetTypeOf(targetObject), methodName, arguments);</span>
+  }
+
+  /**
+   * Create a `MethodQuery` object to search matching static methods.
+   *
+   * @param targetClass A class from which a method is searched.
+   * @param methodName  A name of a method to be searched.
+   * @param arguments   Argument values;
+   * @return A `MethodQuery` object.
+   */
+  static MethodQuery classMethod(Class&lt;?&gt; targetClass, String methodName, Object... arguments) {
+<span class="fc" id="L59">    return create(true, null, targetClass, methodName, arguments);</span>
+  }
+
+  static MethodQuery create(boolean isStatic, Object targetObject, Class&lt;?&gt; targetClass, String methodName, Object[] arguments) {
+<span class="fc" id="L63">    requireNonNull(targetClass);</span>
+<span class="fc" id="L64">    requireNonNull(arguments);</span>
+<span class="fc" id="L65">    requireNonNull(methodName);</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">    if (isStatic)</span>
+<span class="pc" id="L67">      requireArgument(targetObject, Objects::isNull, () -&gt; &quot;targetObject must be null when isStatic is true.&quot;);</span>
+    else {
+<span class="fc" id="L69">      requireNonNull(targetObject);</span>
+<span class="pc" id="L70">      requireArgument(targetObject, v -&gt; targetClass.isAssignableFrom(v.getClass()), () -&gt; format(&quot;Incompatible object '%s' was given it needs to be assignable to '%s'.&quot;, targetObject, targetClass.getName()));</span>
+    }
+
+<span class="fc" id="L73">    return new MethodQuery() {</span>
+      @Override
+      public boolean isStatic() {
+<span class="fc" id="L76">        return isStatic;</span>
+      }
+
+      @Override
+      public Object targetObject() {
+<span class="fc" id="L81">        return targetObject;</span>
+      }
+
+      @Override
+      public String methodName() {
+<span class="fc" id="L86">        return methodName;</span>
+      }
+
+      @Override
+      public Class&lt;?&gt; targetClass() {
+<span class="fc" id="L91">        return targetClass;</span>
+      }
+
+      @Override
+      public Object[] arguments() {
+<span class="fc" id="L96">        return arguments;</span>
+      }
+
+      @Override
+      public String describe() {
+<span class="fc" id="L101">        Function&lt;Object, String&gt; parameterFormatter = s -&gt; &quot;&lt;&quot; + s + &quot;&gt;&quot;;</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        return format(&quot;%s.%s(%s)&quot;,</span>
+            isStatic ?
+<span class="fc" id="L104">                targetClass.getName() :</span>
+<span class="fc" id="L105">                parameterFormatter.apply(targetObject),</span>
+            methodName,
+<span class="fc" id="L107">            Arrays.stream(arguments)</span>
+<span class="fc" id="L108">                .map(parameterFormatter)</span>
+<span class="fc" id="L109">                .collect(joining(&quot;,&quot;)));</span>
+      }
+    };
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
