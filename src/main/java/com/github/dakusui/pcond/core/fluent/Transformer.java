@@ -31,6 +31,10 @@ public interface Transformer<
 
   V then();
 
+  default V satisfies() {
+    return then();
+  }
+
   default Predicate<T> done() {
     return this.statementPredicate();
   }

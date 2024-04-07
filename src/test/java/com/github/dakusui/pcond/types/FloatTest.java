@@ -13,12 +13,19 @@ public class FloatTest {
     validateStatement(Statement.floatValue(v).then().lessThan(1.24f));
   }
 
+  @Test
+  public void floatSatisfiesTest() {
+    float v = 1.23f;
+    validateStatement(Statement.floatValue(v).satisfies().lessThan(1.24f));
+  }
+
   @Test(expected = IllegalValueException.class)
   public void floatTestFail() {
     float v = 1.23f;
     validateStatement(
         Statement.floatValue(v).then().lessThan(1.22f));
   }
+
 
   @Test
   public void floatTransformerTest() {
