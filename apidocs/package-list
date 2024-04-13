@@ -1,0 +1,15 @@
+com.github.dakusui.pcond.core
+com.github.dakusui.pcond.core.fluent
+com.github.dakusui.pcond.core.fluent.builtins
+com.github.dakusui.pcond.core.identifieable
+com.github.dakusui.pcond.core.printable
+com.github.dakusui.pcond.core.refl
+com.github.dakusui.pcond.experimentals.currying
+com.github.dakusui.pcond.experimentals.currying.context
+com.github.dakusui.pcond.experimentals.currying.multi
+com.github.dakusui.pcond.experimentals.cursor
+com.github.dakusui.pcond.fluent
+com.github.dakusui.pcond.forms
+com.github.dakusui.pcond.internals
+com.github.dakusui.pcond.validator
+com.github.dakusui.pcond.validator.exceptions

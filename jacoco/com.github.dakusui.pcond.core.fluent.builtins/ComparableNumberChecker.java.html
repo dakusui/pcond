@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ComparableNumberChecker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.fluent.builtins</a> &gt; <span class="el_source">ComparableNumberChecker.java</span></div><h1>ComparableNumberChecker.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.fluent.builtins;
+
+
+import com.github.dakusui.pcond.core.fluent.AbstractObjectChecker;
+import com.github.dakusui.pcond.forms.Predicates;
+
+public interface ComparableNumberChecker&lt;
+    V extends ComparableNumberChecker&lt;V, T, N&gt;,
+    T,
+    N extends Number &amp; Comparable&lt;N&gt;
+    &gt; extends AbstractObjectChecker&lt;V, T, N&gt; {
+  default V equalTo(N v) {
+<span class="fc" id="L13">    return checkWithPredicate(Predicates.equalTo(v));</span>
+  }
+
+  default V lessThan(N v) {
+<span class="fc" id="L17">    return checkWithPredicate(Predicates.lessThan(v));</span>
+  }
+
+  default V lessThanOrEqualTo(N v) {
+<span class="fc" id="L21">    return checkWithPredicate(Predicates.lessThanOrEqualTo(v));</span>
+  }
+
+  default V greaterThan(N v) {
+<span class="fc" id="L25">    return checkWithPredicate(Predicates.greaterThan(v));</span>
+  }
+
+  default V greaterThanOrEqualTo(N v) {
+<span class="fc" id="L29">    return checkWithPredicate(Predicates.greaterThanOrEqualTo(v));</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

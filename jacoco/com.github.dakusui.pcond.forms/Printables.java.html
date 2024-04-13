@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Printables.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.forms</a> &gt; <span class="el_source">Printables.java</span></div><h1>Printables.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.forms;
+
+
+import com.github.dakusui.pcond.core.printable.PrintableFunctionFactory;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+/**
+ * An entry point class that provides methods to create a new &quot;printable&quot; function from a given conventional function.
+ */
+<span class="fc" id="L14">public enum Printables {</span>
+  ;
+  
+  /**
+   * Returns a printable predicate for a given one.
+   * This is a short hand of `Printables.predicate(() -&gt; name, predicate)`.
+   *
+   * @param name      A name of the returned predicate.
+   * @param predicate A predicate from which a printable predicate is created.
+   * @param &lt;T&gt;       The type that the returned predicate can test.
+   * @return A printable predicate.
+   */
+  public static &lt;T&gt; Predicate&lt;T&gt; predicate(String name, Predicate&lt;T&gt; predicate) {
+<span class="fc" id="L27">    return PrintablePredicateFactory.leaf(name, predicate);</span>
+  }
+  
+  /**
+   * Returns a printable predicate for a given one.
+   *
+   * @param formatter A supplier that gives a string printed on `toString()`.
+   * @param predicate A predicate from which a printable predicate is created.
+   * @param &lt;T&gt;       The type that the returned predicate can test.
+   * @return A printable predicate.
+   */
+  public static &lt;T&gt; Predicate&lt;T&gt; predicate(Supplier&lt;String&gt; formatter, Predicate&lt;T&gt; predicate) {
+<span class="fc" id="L39">    return PrintablePredicateFactory.leaf(formatter, predicate);</span>
+  }
+  
+  /**
+   * Returns a printable function for a given one.
+   * This is a short-hand method for `Printables.function(() -&gt; name, function)`.
+   *
+   * @param name     A name of the function.
+   * @param function A function from which a printable function is created.
+   * @param &lt;T&gt;      A type of the function's parameter.
+   * @param &lt;R&gt;      A type of the function's returned value.
+   * @return A printable function.
+   */
+  public static &lt;T, R&gt; Function&lt;T, R&gt; function(String name, Function&lt;T, R&gt; function) {
+<span class="fc" id="L53">    return PrintableFunctionFactory.function(name, function);</span>
+  }
+  
+  /**
+   * Returns a printable function for a given one.
+   *
+   * @param formatter A supplier that gives a string printed on `toString()`.
+   * @param function A function from which a printable function is created.
+   * @param &lt;T&gt;      A type of the function's parameter.
+   * @param &lt;R&gt;      A type of the function's returned value.
+   * @return A printable function.
+   */
+  public static &lt;T, R&gt; Function&lt;T, R&gt; function(Supplier&lt;String&gt; formatter, Function&lt;T, R&gt; function) {
+<span class="fc" id="L66">    return PrintableFunctionFactory.function(formatter, function);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

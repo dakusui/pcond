@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Cursors.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.experimentals.cursor</a> &gt; <span class="el_source">Cursors.java</span></div><h1>Cursors.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.experimentals.cursor;
+
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.core.Evaluator;
+import com.github.dakusui.pcond.core.printable.PrintablePredicate;
+import com.github.dakusui.pcond.forms.Predicates;
+import com.github.dakusui.pcond.forms.Printables;
+import com.github.dakusui.pcond.internals.InternalUtils;
+
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.forms.Printables.function;
+import static com.github.dakusui.pcond.forms.Printables.predicate;
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
+
+<span class="fc" id="L28">public enum Cursors {</span>
+  ;
+  
+  /**
+   * Note that a predicate returned by this method is stateful and not to be re-used.
+   *
+   * @param locatorFactory A function to return a cursor which points the location where a given token appears in an original string.
+   * @param tokens         Tokens to be found in a given string passed to the returned predicate.
+   * @param &lt;T&gt;            The type of token to be searched for.
+   * @return A predicate that checks if `tokens` are all contained in a given string
+   * in the order, where they appear in the argument.
+   */
+  @SuppressWarnings(&quot;unchecked&quot;)
+  static &lt;T&gt; Predicate&lt;String&gt; findTokens(Function&lt;T, Function&lt;String, Cursor&gt;&gt; locatorFactory, T... tokens) {
+<span class="fc" id="L42">    AtomicBoolean result = new AtomicBoolean(true);</span>
+<span class="fc" id="L43">    AtomicInteger lastTestedPosition = new AtomicInteger(0);</span>
+<span class="fc" id="L44">    StringBuilder bExpectation = new StringBuilder();</span>
+<span class="fc" id="L45">    StringBuilder bActual = new StringBuilder();</span>
+    class CursoredString implements Evaluator.Snapshottable {
+      public int previousFailingPosition;
+      String originalString;
+      int    position;
+
+<span class="fc" id="L51">      CursoredString(String originalString) {</span>
+<span class="fc" id="L52">        this.originalString = originalString;</span>
+<span class="fc" id="L53">        this.position = 0;</span>
+<span class="fc" id="L54">      }</span>
+
+      CursoredString findNext(T token) {
+<span class="fc" id="L57">        Function&lt;String, Cursor&gt; locator = locatorFactory.apply(token);</span>
+<span class="fc" id="L58">        Cursor cursor = locator.apply(originalString.substring(this.position));</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (cursor.position &gt;= 0) {</span>
+<span class="fc" id="L60">          updateOngoingExplanation(bExpectation, token, cursor, (lf, t) -&gt; &quot;found for:&quot; + locatorFactory + &quot;[&quot; + t + &quot;]&quot;);</span>
+<span class="fc" id="L61">          updateOngoingExplanation(bActual, token, cursor, (lf, t) -&gt; &quot;found for:&quot; + locatorFactory + &quot;[&quot; + t + &quot;]&quot;);</span>
+
+<span class="fc" id="L63">          this.position += cursor.position + cursor.length;</span>
+        } else {
+<span class="fc" id="L65">          this.previousFailingPosition = this.position;</span>
+        }
+<span class="fc" id="L67">        lastTestedPosition.set(this.position);</span>
+<span class="fc" id="L68">        return this;</span>
+      }
+
+      private void updateOngoingExplanation(StringBuilder b, T token, Cursor cursor, BiFunction&lt;Object, T, String&gt; locatorFactoryFormatter) {
+<span class="fc" id="L72">        b.append(this.originalString, this.position, this.position + cursor.position);</span>
+<span class="fc" id="L73">        b.append(&quot;&lt;&quot;);</span>
+<span class="fc" id="L74">        b.append(formatObject(this.originalString.substring(this.position + cursor.position, this.position + cursor.position + cursor.length)));</span>
+<span class="fc" id="L75">        b.append(&quot;:&quot;);</span>
+<span class="fc" id="L76">        b.append(locatorFactoryFormatter.apply(locatorFactory, token));</span>
+<span class="fc" id="L77">        b.append(&quot;&gt;&quot;);</span>
+<span class="fc" id="L78">      }</span>
+
+      @Override
+      public Object snapshot() {
+<span class="fc" id="L82">        return originalString.substring(position);</span>
+      }
+
+      @Override
+      public String toString() {
+<span class="fc" id="L87">        return &quot;CursoredString:[&quot; + originalString + &quot;]&quot;;</span>
+      }
+    }
+<span class="fc" id="L90">    CursoredString cursoredStringForSnapshotting = new CursoredString(null);</span>
+    class CursoredStringPredicate extends PrintablePredicate&lt;CursoredString&gt; implements
+        Predicate&lt;CursoredString&gt;,
+        Evaluable.LeafPred&lt;CursoredString&gt;,
+        Evaluator.Explainable {
+      final T each;
+
+<span class="fc" id="L97">      CursoredStringPredicate(T each) {</span>
+<span class="pc" id="L98">        super(new Object(), emptyList(), () -&gt; &quot;findTokenBy[&quot; + locatorFactory + &quot;[&quot; + each + &quot;]]&quot;, cursoredString -&gt; {</span>
+<span class="fc" id="L99">          cursoredStringForSnapshotting.previousFailingPosition = cursoredString.previousFailingPosition;</span>
+<span class="fc" id="L100">          cursoredStringForSnapshotting.position = cursoredString.position;</span>
+<span class="fc" id="L101">          cursoredStringForSnapshotting.originalString = cursoredString.originalString;</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">          return cursoredString.position != cursoredString.findNext(each).position;</span>
+        });
+<span class="fc" id="L104">        this.each = each;</span>
+<span class="fc" id="L105">      }</span>
+
+      @Override
+      public boolean test(CursoredString v) {
+<span class="fc" id="L109">        boolean ret = super.test(v);</span>
+<span class="fc bfc" id="L110" title="All 4 branches covered.">        result.set(ret &amp;&amp; result.get());</span>
+<span class="fc" id="L111">        return ret;</span>
+      }
+
+      @Override
+      public String toString() {
+<span class="fc" id="L116">        return &quot;findTokenBy[&quot; + locatorFactoryName() + &quot;]&quot;;</span>
+      }
+
+      private String locatorFactoryName() {
+<span class="fc" id="L120">        return locatorFactory + &quot;[&quot; + each + &quot;]&quot;;</span>
+      }
+
+      @Override
+      public Predicate&lt;? super CursoredString&gt; predicate() {
+<span class="fc" id="L125">        return this;</span>
+      }
+
+
+      @Override
+      public Object explainOutputExpectation() {
+<span class="fc" id="L131">        return formatExplanation(bExpectation, &quot;SHOULD BE FOUND AFTER THIS POSITION&quot;);</span>
+      }
+
+      @Override
+      public Object explainActual(Object actualValue) {
+<span class="fc" id="L136">        return formatExplanation(bActual, &quot;BUT NOT FOUND&quot;);</span>
+      }
+
+      private String formatExplanation(StringBuilder b, String keyword) {
+<span class="fc" id="L140">        String ret = b.toString() + format(&quot;%n&quot;) + &quot;&lt;&quot; + this.locatorFactoryName() + &quot;:&quot; + keyword + &quot;&gt;&quot;;</span>
+<span class="fc" id="L141">        b.delete(0, b.length());</span>
+<span class="fc" id="L142">        return ret;</span>
+      }
+    }
+<span class="fc" id="L145">    return Predicates.transform(function(&quot;findTokens&quot; + formatObject(tokens), CursoredString::new))</span>
+<span class="fc" id="L146">        .check(Predicates.allOf(</span>
+<span class="fc" id="L147">            Stream.concat(</span>
+<span class="fc" id="L148">                    Arrays.stream(tokens).map(CursoredStringPredicate::new),</span>
+<span class="fc" id="L149">                    Stream.of(endMarkPredicateForString(lastTestedPosition, bExpectation, bActual, result, () -&gt; cursoredStringForSnapshotting.originalString)))</span>
+<span class="fc" id="L150">                .toArray(Predicate[]::new)));</span>
+
+  }
+  
+  private static Predicate&lt;Object&gt; endMarkPredicateForString(AtomicInteger lastTestedPosition, StringBuilder ongoingExpectationExplanation, StringBuilder ongoingActualExplanation, AtomicBoolean result, Supplier&lt;String&gt; originalStringSupplier) {
+<span class="fc" id="L155">    return makeExplainable((PrintablePredicate&lt;? super Object&gt;) predicate(&quot;(end)&quot;, v -&gt; result.get()), new Evaluator.Explainable() {</span>
+
+      @Override
+      public Object explainOutputExpectation() {
+<span class="fc" id="L159">        return ongoingExpectationExplanation.toString() + originalStringSupplier.get().substring(lastTestedPosition.get());</span>
+      }
+
+      @Override
+      public Object explainActual(Object actualValue) {
+<span class="fc" id="L164">        return ongoingActualExplanation.toString() + originalStringSupplier.get().substring(lastTestedPosition.get());</span>
+      }
+    });
+  }
+  
+  private static &lt;T&gt; Predicate&lt;T&gt; makeExplainable(PrintablePredicate&lt;? super T&gt; p, Evaluator.Explainable explainable) {
+    class ExplainablePredicate extends PrintablePredicate&lt;T&gt; implements
+        Predicate&lt;T&gt;,
+        Evaluable.LeafPred&lt;T&gt;,
+        Evaluator.Explainable {
+
+<span class="fc" id="L175">      protected ExplainablePredicate() {</span>
+<span class="fc" id="L176">        super(new Object(), emptyList(), p::toString, p);</span>
+<span class="fc" id="L177">      }</span>
+
+      @Override
+      public Predicate&lt;? super T&gt; predicate() {
+<span class="fc" id="L181">        return predicate;</span>
+      }
+
+      @Override
+      public Object explainOutputExpectation() {
+<span class="fc" id="L186">        return explainable.explainOutputExpectation();</span>
+      }
+
+      @Override
+      public Object explainActual(Object actualValue) {
+<span class="fc" id="L191">        return explainable.explainActual(actualValue);</span>
+      }
+    }
+
+<span class="fc" id="L195">    return new ExplainablePredicate();</span>
+  }
+  
+  public static Predicate&lt;String&gt; findSubstrings(String... tokens) {
+<span class="fc" id="L199">    return findTokens(Printables.function(&quot;substring&quot;, token -&gt; string -&gt; new Cursor(string.indexOf(token), token.length())), tokens);</span>
+  }
+  
+  public static Predicate&lt;String&gt; findRegexPatterns(Pattern... patterns) {
+<span class="fc" id="L203">    return findTokens(function(&quot;matchesRegex&quot;, token -&gt; string -&gt; {</span>
+<span class="fc" id="L204">      java.util.regex.Matcher m = token.matcher(string);</span>
+<span class="fc bfc" id="L205" title="All 2 branches covered.">      if (m.find()) {</span>
+<span class="fc" id="L206">        return new Cursor(m.start(), m.end() - m.start());</span>
+      } else
+<span class="fc" id="L208">        return new Cursor(-1, 0);</span>
+
+    }), patterns);
+  }
+  
+  public static Predicate&lt;String&gt; findRegexes(String... regexes) {
+<span class="fc" id="L214">    return findRegexPatterns(Arrays.stream(regexes).map(Pattern::compile).toArray(Pattern[]::new));</span>
+  }
+  
+  @SuppressWarnings(&quot;unchecked&quot;)
+  @SafeVarargs
+  public static &lt;E&gt; Predicate&lt;List&lt;E&gt;&gt; findElements(Predicate&lt;? super E&gt;... predicates) {
+<span class="fc" id="L220">    AtomicBoolean result = new AtomicBoolean(true);</span>
+<span class="fc" id="L221">    List&lt;Object&gt; expectationExplanationList = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L222">    List&lt;Object&gt; actualExplanationList = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L223">    List&lt;Object&gt; rest = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L224">    AtomicInteger previousPosition = new AtomicInteger(0);</span>
+<span class="fc" id="L225">    Function&lt;Predicate&lt;? super E&gt;, Predicate&lt;CursoredList&lt;E&gt;&gt;&gt; predicatePredicateFunction = (Predicate&lt;? super E&gt; p) -&gt; (Predicate&lt;CursoredList&lt;E&gt;&gt;) cursoredList -&gt; {</span>
+<span class="fc" id="L226">      AtomicInteger j = new AtomicInteger(0);</span>
+<span class="fc" id="L227">      boolean isFound = cursoredList.currentList().stream()</span>
+<span class="fc" id="L228">          .peek((E each) -&gt; j.getAndIncrement())</span>
+<span class="fc" id="L229">          .anyMatch(p);</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">      if (isFound) {</span>
+<span class="fc" id="L231">        updateExplanationsForFoundElement(</span>
+            expectationExplanationList, actualExplanationList,
+<span class="fc" id="L233">            cursoredList.currentList().get(j.get() - 1),</span>
+<span class="fc" id="L234">            p, (List&lt;Object&gt;) cursoredList.currentList().subList(0, j.get() - 1));</span>
+<span class="fc" id="L235">        rest.clear();</span>
+<span class="fc" id="L236">        rest.add(cursoredList.currentList().subList(j.get(), cursoredList.currentList().size()));</span>
+<span class="fc" id="L237">        cursoredList.position += j.get();</span>
+<span class="fc" id="L238">        previousPosition.set(cursoredList.position);</span>
+<span class="fc" id="L239">        return true;</span>
+      }
+<span class="fc" id="L241">      updateExplanationsForMissedPredicateIfCursorMoved(</span>
+          expectationExplanationList, actualExplanationList,
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">          cursoredList.position &gt; previousPosition.get(),</span>
+<span class="fc" id="L244">          p, cursoredList.currentList().subList(0, j.get()));</span>
+<span class="fc" id="L245">      result.set(false);</span>
+<span class="fc" id="L246">      previousPosition.set(cursoredList.position);</span>
+<span class="fc" id="L247">      return false;</span>
+    };
+<span class="fc" id="L249">    return Predicates.transform(function(&quot;toCursoredList&quot;, (List&lt;E&gt; v)-&gt; new CursoredList&lt;&gt;(v)))</span>
+<span class="fc" id="L250">        .check(Predicates.allOf(Stream.concat(</span>
+<span class="fc" id="L251">                Arrays.stream(predicates)</span>
+<span class="fc" id="L252">                    .map((Predicate&lt;? super E&gt; each) -&gt; predicate(&quot;findElementBy[&quot; + each + &quot;]&quot;, predicatePredicateFunction.apply(each))),</span>
+<span class="fc" id="L253">                Stream.of(endMarkPredicateForList(result, expectationExplanationList, actualExplanationList, rest)))</span>
+<span class="fc" id="L254">            .toArray(Predicate[]::new)));</span>
+  }
+  
+  private static &lt;E&gt; void updateExplanationsForFoundElement(List&lt;Object&gt; expectationExplanationList, List&lt;Object&gt; actualExplanationList, E foundElement, Predicate&lt;? super E&gt; matchedPredicate, List&lt;Object&gt; skippedElements) {
+<span class="fc bfc" id="L258" title="All 2 branches covered.">    if (!skippedElements.isEmpty()) {</span>
+      //      expectationExplanationList.add(skippedElements);
+<span class="fc" id="L260">      actualExplanationList.add(skippedElements);</span>
+    }
+<span class="fc" id="L262">    actualExplanationList.add(new Explanation(foundElement, &quot;&lt;%s:found for:&quot; + matchedPredicate + &quot;&gt;&quot;));</span>
+<span class="fc" id="L263">    expectationExplanationList.add(new Explanation(matchedPredicate, &quot;&lt;matching element for:%s&gt;&quot;));</span>
+<span class="fc" id="L264">  }</span>
+  
+  private static &lt;E&gt; void updateExplanationsForMissedPredicateIfCursorMoved(List&lt;Object&gt; expectationExplanationList, List&lt;Object&gt; actualExplanationList, boolean isCursorMoved, Predicate&lt;? super E&gt; missedPredicate, List&lt;E&gt; scannedElements) {
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">    if (isCursorMoved) {</span>
+      //expectationExplanationList.add(scannedElements);
+<span class="nc" id="L269">      actualExplanationList.add(scannedElements);</span>
+    }
+<span class="fc" id="L271">    Explanation missedInExpectation = new Explanation(missedPredicate, &quot;&lt;matching element for:%s&gt;&quot;);</span>
+<span class="fc" id="L272">    expectationExplanationList.add(missedInExpectation);</span>
+
+<span class="fc" id="L274">    Explanation missedInActual = new Explanation(missedPredicate, &quot;&lt;NOT FOUND:matching element for:%s&gt;&quot;);</span>
+<span class="fc" id="L275">    actualExplanationList.add(missedInActual);</span>
+<span class="fc" id="L276">  }</span>
+  
+  private static Predicate&lt;Object&gt; endMarkPredicateForList(AtomicBoolean result, List&lt;Object&gt; expectationExplanationList, List&lt;Object&gt; actualExplanationList, List&lt;?&gt; rest) {
+<span class="fc" id="L279">    return makeExplainable((PrintablePredicate&lt;? super Object&gt;) predicate(&quot;(end)&quot;, v -&gt; result.get()), new Evaluator.Explainable() {</span>
+
+      @Override
+      public Object explainOutputExpectation() {
+<span class="fc" id="L283">        return renderExplanationString(expectationExplanationList);</span>
+      }
+
+      @Override
+      public Object explainActual(Object actualValue) {
+<span class="fc" id="L288">        return renderExplanationString(createFullExplanationList(actualExplanationList, rest));</span>
+      }
+
+      private List&lt;Object&gt; createFullExplanationList(List&lt;Object&gt; explanationList, List&lt;?&gt; rest) {
+<span class="fc" id="L292">        return Stream.concat(explanationList.stream(), rest.stream()).collect(toList());</span>
+      }
+
+      private String renderExplanationString(List&lt;Object&gt; fullExplanationList) {
+<span class="fc" id="L296">        return fullExplanationList</span>
+<span class="fc" id="L297">            .stream()</span>
+<span class="fc" id="L298">            .map(e -&gt; {</span>
+<span class="fc bfc" id="L299" title="All 2 branches covered.">              if (e instanceof List) {</span>
+<span class="fc" id="L300">                return String.format(&quot;&lt;%s:skipped&gt;&quot;,</span>
+<span class="fc" id="L301">                    ((List&lt;?&gt;) e).stream()</span>
+<span class="fc" id="L302">                        .map(InternalUtils::formatObject)</span>
+<span class="fc" id="L303">                        .collect(joining(&quot;,&quot;)));</span>
+              }
+<span class="fc" id="L305">              return e;</span>
+            })
+<span class="fc" id="L307">            .map(Object::toString)</span>
+<span class="fc" id="L308">            .collect(joining(String.format(&quot;%n&quot;)));</span>
+      }
+    });
+  }
+  
+  static class Cursor {
+    /**
+     * The &quot;relative&quot; position, where the token was found, from the beginning of the string passed to a locator.
+     * By convention, it is designed to pass a substring of the original string, which starts from the position,
+     * where a token (element) searching attempt was made.
+     */
+    final int position;
+    /**
+     * A length of a token to be searched.
+     */
+    final int length;
+
+<span class="fc" id="L325">    Cursor(int position, int length) {</span>
+<span class="fc" id="L326">      this.position = position;</span>
+<span class="fc" id="L327">      this.length = length;</span>
+<span class="fc" id="L328">    }</span>
+  }
+  
+  static class CursoredList&lt;EE&gt; extends AbstractList&lt;EE&gt; implements Evaluator.Snapshottable, Collection&lt;EE&gt; {
+    int position;
+    final List&lt;EE&gt; originalList;
+
+<span class="fc" id="L335">    CursoredList(List&lt;EE&gt; originalList) {</span>
+<span class="fc" id="L336">      this.originalList = originalList;</span>
+<span class="fc" id="L337">    }</span>
+
+    List&lt;EE&gt; currentList() {
+<span class="fc" id="L340">      return this.originalList.subList(position, this.originalList.size());</span>
+    }
+
+    @Override
+    public Object snapshot() {
+<span class="fc" id="L345">      return originalList.subList(position, originalList.size());</span>
+    }
+
+    @Override
+    public int size() {
+<span class="fc" id="L350">      return originalList.size() - position;</span>
+    }
+
+    @Override
+    public EE get(int index) {
+<span class="fc" id="L355">      return originalList.get(position + index);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L360">      return &quot;CursoredList:&quot; + originalList;</span>
+    }
+  }
+  
+  private static class Explanation {
+    final         Object value;
+    private final String formatString;
+
+<span class="fc" id="L368">    private Explanation(Object value, String formatString) {</span>
+<span class="fc" id="L369">      this.value = value;</span>
+<span class="fc" id="L370">      this.formatString = formatString;</span>
+<span class="fc" id="L371">    }</span>
+
+    @Override
+    public String toString() {
+<span class="fc" id="L375">      return format(formatString, formatObject(this.value));</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

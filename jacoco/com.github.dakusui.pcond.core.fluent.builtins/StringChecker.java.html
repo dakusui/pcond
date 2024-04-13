@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StringChecker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.fluent.builtins</a> &gt; <span class="el_source">StringChecker.java</span></div><h1>StringChecker.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.fluent.builtins;
+
+import com.github.dakusui.pcond.core.fluent.AbstractObjectChecker;
+import com.github.dakusui.pcond.experimentals.cursor.Cursors;
+import com.github.dakusui.pcond.forms.Predicates;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+
+import static com.github.dakusui.pcond.core.printable.ExplainablePredicate.explainableStringIsEqualTo;
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
+public interface StringChecker&lt;T&gt; extends
+    AbstractObjectChecker&lt;
+        StringChecker&lt;T&gt;,
+        T,
+        String&gt; {
+  default StringChecker&lt;T&gt; containing(String token) {
+<span class="nc" id="L21">    return this.checkWithPredicate(Predicates.containsString(token));</span>
+  }
+
+  default StringChecker&lt;T&gt; containingRegexes(String... regexes) {
+<span class="nc" id="L25">    return this.checkWithPredicate(Cursors.findRegexes(regexes));</span>
+  }
+
+  /**
+   * Checks if given tokens are contained by the target value in the given order.
+   * @param patterns Regular expression patterns to be contained by the target value.
+   * @return This object.
+   */
+  default StringChecker&lt;T&gt; containingRegexes(Pattern... patterns) {
+<span class="nc" id="L34">    return this.checkWithPredicate(Cursors.findRegexPatterns(patterns));</span>
+  }
+
+  /**
+   * Checks if given tokens are contained by the target value in the given order.
+   * @param tokens Tokens to be contained by the target value.
+   * @return This object.
+   */
+  default StringChecker&lt;T&gt; containingSubstrings(String... tokens) {
+<span class="nc" id="L43">    return this.checkWithPredicate(Cursors.findSubstrings(tokens));</span>
+  }
+
+  default StringChecker&lt;T&gt; startingWith(String prefix) {
+<span class="nc" id="L47">    return this.checkWithPredicate(Predicates.startsWith(prefix));</span>
+  }
+
+  default StringChecker&lt;T&gt; endingWith(String prefix) {
+<span class="nc" id="L51">    return this.checkWithPredicate(Predicates.endsWith(prefix));</span>
+  }
+
+  default StringChecker&lt;T&gt; empty() {
+<span class="nc" id="L55">    return this.checkWithPredicate(Predicates.isEmptyString());</span>
+  }
+
+  default StringChecker&lt;T&gt; notEmpty() {
+<span class="nc" id="L59">    return this.checkWithPredicate(Predicates.isEmptyString().negate());</span>
+  }
+
+  default StringChecker&lt;T&gt; equalTo(String string) {
+<span class="nc" id="L63">    return this.checkWithPredicate(explainableStringIsEqualTo(string));</span>
+  }
+
+  default StringChecker&lt;T&gt; nullOrEmpty() {
+<span class="nc" id="L67">    return this.checkWithPredicate(Predicates.isNullOrEmptyString());</span>
+  }
+
+  default StringChecker&lt;T&gt; matchingRegex(String regex) {
+<span class="nc" id="L71">    return this.checkWithPredicate(Predicates.matchesRegex(regex));</span>
+  }
+
+  default StringChecker&lt;T&gt; equalToIgnoringCase(String s) {
+<span class="nc" id="L75">    return this.checkWithPredicate(Predicates.equalsIgnoreCase(s));</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  default StringChecker&lt;T&gt; check(Function&lt;StringChecker&lt;String&gt;, Predicate&lt;String&gt;&gt; phrase) {
+<span class="nc" id="L80">    return this.addCheckPhrase(v -&gt; phrase.apply((StringChecker&lt;String&gt;) v));</span>
+  }
+
+  class Impl&lt;T&gt;
+      extends
+      Base&lt;StringChecker&lt;T&gt;, T, String&gt;
+      implements
+      StringChecker&lt;T&gt; {
+    protected Impl(Supplier&lt;T&gt; rootValue, Function&lt;T, String&gt; transformFunction) {
+<span class="nc" id="L89">      super(rootValue, transformFunction);</span>
+<span class="nc" id="L90">    }</span>
+
+    @Override
+    public StringChecker&lt;String&gt; rebase() {
+<span class="nc" id="L94">      return new StringChecker.Impl&lt;&gt;(this::value, trivialIdentityFunction());</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

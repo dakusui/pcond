@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Checks.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.experimentals.currying</a> &gt; <span class="el_source">Checks.java</span></div><h1>Checks.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.experimentals.currying;
+
+import com.github.dakusui.pcond.internals.InternalChecks;
+
+import java.util.function.Supplier;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static com.github.dakusui.pcond.internals.InternalUtils.wrapperClassOf;
+import static java.lang.String.format;
+
+/**
+ * A utility class for checking values that the &quot;currying&quot; mechanism of the `pcond`
+ * library processes.
+ */
+<span class="fc" id="L15">public enum Checks {</span>
+  ;
+
+  static &lt;T extends CurriedFunction&lt;?, ?&gt;&gt; T requireLast(T value) {
+<span class="fc bfc" id="L19" title="All 2 branches covered.">    if (value.hasNext())</span>
+<span class="fc" id="L20">      throw new IllegalStateException();</span>
+<span class="fc" id="L21">    return value;</span>
+  }
+
+  /**
+   * Validates if a given argument value is appropriate for a parameter type (`paramType`).
+   *
+   * @param arg              An argument value is to check with `paramType`.
+   * @param paramType        An expected type for `arg`.
+   * @param messageFormatter A message formatter which generates a message on a failure.
+   * @param &lt;T&gt;              The type of the argument value.
+   * @return The `arg` value itself.
+   */
+  static &lt;T&gt; T validateArgumentType(T arg, Class&lt;?&gt; paramType, Supplier&lt;String&gt; messageFormatter) {
+<span class="fc" id="L34">    InternalChecks.checkArgument(isValidValueForType(arg, paramType), messageFormatter);</span>
+<span class="fc" id="L35">    return arg;</span>
+  }
+
+  static boolean isValidValueForType(Object arg, Class&lt;?&gt; paramType) {
+<span class="fc bfc" id="L39" title="All 2 branches covered.">    if (paramType.isPrimitive()) {</span>
+<span class="fc bfc" id="L40" title="All 2 branches covered.">      if (arg == null)</span>
+<span class="fc" id="L41">        return paramType.equals(void.class);</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">      if (InternalChecks.isPrimitiveWrapperClassOrPrimitive(arg.getClass())) {</span>
+<span class="fc" id="L43">        Class&lt;?&gt; wrapperClassForParamType = wrapperClassOf(paramType);</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">        if (wrapperClassForParamType.equals(arg.getClass()))</span>
+<span class="fc" id="L45">          return true;</span>
+<span class="fc" id="L46">        return InternalChecks.isWiderThan(wrapperClassForParamType, arg.getClass());</span>
+      }
+<span class="fc" id="L48">      return false;</span>
+    } else {
+<span class="fc bfc" id="L50" title="All 2 branches covered.">      if (arg == null)</span>
+<span class="fc" id="L51">        return true;</span>
+<span class="fc" id="L52">      return paramType.isAssignableFrom(arg.getClass());</span>
+    }
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  static &lt;T&gt; T ensureReturnedValueType(Object value, Class&lt;?&gt; returnType) {
+<span class="fc bfc" id="L58" title="All 2 branches covered.">    if (isValidValueForType(value, returnType))</span>
+<span class="fc" id="L59">      return (T) value;</span>
+    else
+<span class="fc" id="L61">      throw new IllegalStateException(&quot;Returned value:&quot;</span>
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">          + formatObject(value)</span>
+<span class="pc" id="L63">          + (value != null ? &quot;(&quot; + value.getClass().getName() + &quot;)&quot; : &quot;&quot;)</span>
+<span class="fc" id="L64">          + &quot; is neither null nor an instance of &quot; + returnType.getName() + &quot;. &quot;);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

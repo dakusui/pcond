@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MultiFunction.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.experimentals.currying.multi</a> &gt; <span class="el_source">MultiFunction.java</span></div><h1>MultiFunction.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.experimentals.currying.multi;
+
+import com.github.dakusui.pcond.core.printable.PrintableFunction;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static com.github.dakusui.pcond.internals.InternalChecks.requireArgumentListSize;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
+
+/**
+ * An interface that represents a function that can have more than one parameters.
+ * This interface is often used in combination with {@link com.github.dakusui.pcond.forms.Functions#curry(MultiFunction)} method.
+ *
+ * @param &lt;R&gt; The type of the returned value.
+ */
+public interface MultiFunction&lt;R&gt; extends Function&lt;List&lt;? super Object&gt;, R&gt; {
+  /**
+   * Returns a name of this function.
+   *
+   * @return The name of this function.
+   */
+  String name();
+
+  /**
+   * Returns the number of parameters that this function can take.
+   *
+   * @return the number of parameters
+   */
+  int arity();
+
+  /**
+   * The expected type of the {@code i}th parameter.
+   *
+   * @param i The parameter index.
+   * @return The type of {@code i}th parameter.
+   */
+  Class&lt;?&gt; parameterType(int i);
+
+  /**
+   * The type of the value returned by this function.
+   *
+   * @return The type of the returned value.
+   */
+  Class&lt;? extends R&gt; returnType();
+
+  class Impl&lt;R&gt; extends PrintableFunction&lt;List&lt;? super Object&gt;, R&gt; implements MultiFunction&lt;R&gt; {
+    private final String         name;
+    private final List&lt;Class&lt;?&gt;&gt; parameterTypes;
+
+    protected Impl(
+        Object creator,
+        List&lt;Object&gt; args,
+        Supplier&lt;String&gt; formatter,
+        String name,
+        Function&lt;? super List&lt;? super Object&gt;, ? extends R&gt; function,
+        List&lt;Class&lt;?&gt;&gt; parameterTypes) {
+<span class="fc" id="L63">      super(</span>
+          creator,
+          args,
+          formatter,
+          function);
+<span class="fc" id="L68">      this.name = name;</span>
+<span class="fc" id="L69">      this.parameterTypes = new ArrayList&lt;&gt;(parameterTypes);</span>
+<span class="fc" id="L70">    }</span>
+
+    @Override
+    public String name() {
+<span class="fc" id="L74">      return name;</span>
+    }
+
+    @Override
+    public int arity() {
+<span class="fc" id="L79">      return parameterTypes.size();</span>
+    }
+
+    @Override
+    public Class&lt;?&gt; parameterType(int i) {
+<span class="fc" id="L84">      return parameterTypes.get(i);</span>
+    }
+
+  }
+
+  /**
+   * A builder for a {@link MultiFunction} instance.
+   *
+   * @param &lt;R&gt; The type of value returned by the multi-function built by this object.
+   */
+  class Builder&lt;R&gt; {
+<span class="fc" id="L95">    private final Object                                              creator        = Builder.class;</span>
+    private       List&lt;Object&gt;                                        identityArgs;
+<span class="fc" id="L97">    private       String                                              name           = &quot;(anonymous)&quot;;</span>
+    private final Function&lt;? super List&lt;? super Object&gt;, ? extends R&gt; body;
+<span class="fc" id="L99">    private final List&lt;Class&lt;?&gt;&gt;                                      parameterTypes = new LinkedList&lt;&gt;();</span>
+<span class="pc" id="L100">    private       Supplier&lt;String&gt;                                    formatter      = () -&gt; name + &quot;(&quot; + parameterTypes.stream().map(Class::getSimpleName).collect(joining(&quot;,&quot;)) + &quot;)&quot;;</span>
+
+<span class="fc" id="L102">    public Builder(Function&lt;List&lt;Object&gt;, R&gt; body) {</span>
+<span class="fc" id="L103">      requireNonNull(body);</span>
+<span class="fc" id="L104">      this.body = args -&gt; body.apply(requireArgumentListSize(requireNonNull(args), parameterTypes.size()));</span>
+<span class="fc" id="L105">    }</span>
+
+    public Builder&lt;R&gt; addParameters(List&lt;Class&lt;?&gt;&gt; parameterTypes) {
+<span class="fc" id="L108">      requireNonNull(parameterTypes).stream().map(this::addParameter).forEach(Objects::requireNonNull);</span>
+<span class="fc" id="L109">      return this;</span>
+    }
+
+    public Builder&lt;R&gt; identityArgs(List&lt;Object&gt; identity) {
+<span class="fc" id="L113">      this.identityArgs = requireNonNull(identity);</span>
+<span class="fc" id="L114">      return this;</span>
+    }
+
+    public Builder&lt;R&gt; name(String name) {
+<span class="fc" id="L118">      this.name = name;</span>
+<span class="fc" id="L119">      return this;</span>
+    }
+
+    public Builder&lt;R&gt; addParameter(Class&lt;?&gt; parameterType) {
+<span class="fc" id="L123">      this.parameterTypes.add(requireNonNull(parameterType));</span>
+<span class="fc" id="L124">      return this;</span>
+    }
+
+    public Builder&lt;R&gt; formatter(Supplier&lt;String&gt; formatter) {
+<span class="fc" id="L128">      this.formatter = requireNonNull(formatter);</span>
+<span class="fc" id="L129">      return this;</span>
+    }
+
+    public MultiFunction&lt;R&gt; $() {
+<span class="fc" id="L133">      return new Impl&lt;R&gt;(</span>
+          this.creator,
+          this.identityArgs,
+          this.formatter,
+          this.name,
+          this.body,
+          this.parameterTypes
+      );
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

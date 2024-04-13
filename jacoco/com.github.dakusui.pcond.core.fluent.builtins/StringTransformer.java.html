@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StringTransformer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.fluent.builtins</a> &gt; <span class="el_source">StringTransformer.java</span></div><h1>StringTransformer.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.fluent.builtins;
+
+import com.github.dakusui.pcond.core.fluent.AbstractObjectTransformer;
+import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Printables;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
+
+public interface StringTransformer&lt;T&gt; extends
+    AbstractObjectTransformer&lt;
+        StringTransformer&lt;T&gt;,
+        StringChecker&lt;T&gt;,
+        T,
+        String&gt; {
+  static StringTransformer&lt;String&gt; create(Supplier&lt;String&gt; value) {
+<span class="fc" id="L22">    return new Impl&lt;&gt;(value, trivialIdentityFunction());</span>
+  }
+
+  default StringTransformer&lt;T&gt; substring(int begin) {
+<span class="fc" id="L26">    return this.toString(Printables.function(() -&gt; &quot;substring[&quot; + begin + &quot;]&quot;, (String s) -&gt; s.substring(begin)));</span>
+  }
+
+  default StringTransformer&lt;T&gt; toUpperCase() {
+<span class="fc" id="L30">    return this.toString(Printables.function(&quot;toUpperCase&quot;, String::toUpperCase));</span>
+  }
+
+  default StringTransformer&lt;T&gt; toLowerCase() {
+<span class="fc" id="L34">    return this.toString(Printables.function(&quot;toLowerCase&quot;, String::toLowerCase));</span>
+  }
+
+  default ListTransformer&lt;T, String&gt; split(String regex) {
+<span class="fc" id="L38">    return this.toList(Printables.function(&quot;split[&quot; + regex + &quot;]&quot;, (String s) -&gt; asList((s.split(regex)))));</span>
+  }
+
+  default IntegerTransformer&lt;T&gt; length() {
+<span class="fc" id="L42">    return toInteger(Functions.length());</span>
+  }
+
+  default BooleanTransformer&lt;T&gt; parseBoolean() {
+<span class="fc" id="L46">    return toBoolean(Printables.function(&quot;parseBoolean&quot;, Boolean::parseBoolean));</span>
+  }
+
+  default IntegerTransformer&lt;T&gt; parseInt() {
+<span class="fc" id="L50">    return toInteger(Printables.function(&quot;parseInt&quot;, Integer::parseInt));</span>
+  }
+
+  default LongTransformer&lt;T&gt; parseLong() {
+<span class="fc" id="L54">    return toLong(Printables.function(&quot;parseLong&quot;, Long::parseLong));</span>
+  }
+
+  default ShortTransformer&lt;T&gt; parseShort() {
+<span class="fc" id="L58">    return toShort(Printables.function(&quot;parseBoolean&quot;, Short::parseShort));</span>
+  }
+
+  default DoubleTransformer&lt;T&gt; parseDouble() {
+<span class="fc" id="L62">    return toDouble(Printables.function(&quot;parseDouble&quot;, Double::parseDouble));</span>
+  }
+
+  default FloatTransformer&lt;T&gt; parseFloat() {
+<span class="fc" id="L66">    return toFloat(Printables.function(&quot;parseFloat&quot;, Float::parseFloat));</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  default StringTransformer&lt;T&gt; transform(Function&lt;StringTransformer&lt;String&gt;, Predicate&lt;String&gt;&gt; clause) {
+<span class="fc" id="L71">    requireNonNull(clause);</span>
+<span class="fc" id="L72">    return this.addTransformAndCheckClause(tx -&gt; clause.apply((StringTransformer&lt;String&gt;) tx));</span>
+  }
+
+  class Impl&lt;T&gt; extends
+      Base&lt;
+          StringTransformer&lt;T&gt;,
+          StringChecker&lt;T&gt;,
+          T,
+          String&gt; implements
+      StringTransformer&lt;T&gt; {
+
+    public Impl(Supplier&lt;T&gt; rootValue, Function&lt;T, String&gt; transformFunction) {
+<span class="fc" id="L84">      super(rootValue, transformFunction);</span>
+<span class="fc" id="L85">    }</span>
+
+    @Override
+    public StringChecker&lt;T&gt; toChecker(Function&lt;T, String&gt; transformFunction) {
+<span class="fc" id="L89">      return new StringChecker.Impl&lt;&gt;(this::baseValue, requireNonNull(transformFunction));</span>
+    }
+
+    @Override
+    public StringTransformer&lt;String&gt; rebase() {
+<span class="fc" id="L94">      return new StringTransformer.Impl&lt;&gt;(this::value, trivialIdentityFunction());</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

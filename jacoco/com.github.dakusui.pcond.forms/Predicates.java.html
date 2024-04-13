@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Predicates.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.forms</a> &gt; <span class="el_source">Predicates.java</span></div><h1>Predicates.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.forms;
+
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.Leaf;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory.ParameterizedLeafFactory;
+import com.github.dakusui.pcond.core.refl.MethodQuery;
+import com.github.dakusui.pcond.core.refl.Parameter;
+import com.github.dakusui.pcond.internals.InternalChecks;
+
+import java.util.Collection;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeMethod;
+import static com.github.dakusui.pcond.forms.Printables.function;
+import static com.github.dakusui.pcond.forms.Printables.predicate;
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
+
+/**
+ * An entry point for acquiring predicate objects.
+ * Predicates retrieved by methods in this class are all &quot;printable&quot;.
+ */
+public class Predicates {
+    private Predicates() {
+    }
+
+    public static &lt;T&gt; Predicate&lt;T&gt; alwaysTrue() {
+<span class="fc" id="L33">        return Leaf.ALWAYS_TRUE.instance();</span>
+    }
+
+    public static Predicate&lt;Boolean&gt; isTrue() {
+<span class="fc" id="L37">        return Leaf.IS_TRUE.instance();</span>
+    }
+
+    public static Predicate&lt;Boolean&gt; isFalse() {
+<span class="fc" id="L41">        return Leaf.IS_FALSE.instance();</span>
+    }
+
+    public static &lt;T&gt; Predicate&lt;T&gt; isNull() {
+<span class="fc" id="L45">        return Leaf.IS_NULL.instance();</span>
+    }
+
+    public static &lt;T&gt; Predicate&lt;T&gt; isNotNull() {
+<span class="fc" id="L49">        return Leaf.IS_NOT_NULL.instance();</span>
+    }
+
+    public static &lt;T&gt; Predicate&lt;T&gt; isEqualTo(T value) {
+<span class="fc" id="L53">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.IS_EQUAL_TO, singletonList(value));</span>
+    }
+
+    public static &lt;T&gt; Predicate&lt;T&gt; isSameReferenceAs(T value) {
+<span class="fc" id="L57">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.OBJECT_IS_SAME_AS, singletonList(value));</span>
+    }
+
+    @SuppressWarnings({&quot;unchecked&quot;, &quot;RedundantClassCall&quot;})
+    public static &lt;T&gt; Function&lt;Class&lt;?&gt;, Predicate&lt;T&gt;&gt; isInstanceOf() {
+<span class="fc" id="L62">        return Function.class.cast(Def.IS_INSTANCE_OF$2);</span>
+    }
+
+    public static Predicate&lt;Object&gt; isInstanceOf(Class&lt;?&gt; value) {
+<span class="fc" id="L66">        return applyOnceExpectingPredicate(requireNonNull(value), isInstanceOf());</span>
+    }
+
+    private static &lt;T, R&gt; Predicate&lt;R&gt; applyOnceExpectingPredicate(T value, Function&lt;T, Predicate&lt;R&gt;&gt; p) {
+<span class="fc" id="L70">        return predicate(() -&gt; format(&quot;%s[%s]&quot;, p, formatObject(value)), p.apply(value));</span>
+    }
+
+    public static &lt;T extends Comparable&lt;? super T&gt;&gt; Predicate&lt;T&gt; gt(T value) {
+<span class="fc" id="L74">        return greaterThan(value);</span>
+    }
+
+    public static &lt;T extends Comparable&lt;? super T&gt;&gt; Predicate&lt;T&gt; greaterThan(T value) {
+<span class="fc" id="L78">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.GREATER_THAN, singletonList(value));</span>
+    }
+
+    public static &lt;T extends Comparable&lt;? super T&gt;&gt; Predicate&lt;T&gt; ge(T value) {
+<span class="fc" id="L82">        return greaterThanOrEqualTo(value);</span>
+    }
+
+    public static &lt;T extends Comparable&lt;? super T&gt;&gt; Predicate&lt;T&gt; greaterThanOrEqualTo(T value) {
+<span class="fc" id="L86">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.GREATER_THAN_OR_EQUAL_TO, singletonList(value));</span>
+    }
+
+    public static &lt;T extends Comparable&lt;? super T&gt;&gt; Predicate&lt;T&gt; lt(T value) {
+<span class="fc" id="L90">        return lessThan(value);</span>
+    }
+
+    public static &lt;T extends Comparable&lt;? super T&gt;&gt; Predicate&lt;T&gt; lessThan(T value) {
+<span class="fc" id="L94">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.LESS_THAN, singletonList(value));</span>
+    }
+
+    public static &lt;T extends Comparable&lt;? super T&gt;&gt; Predicate&lt;T&gt; le(T value) {
+<span class="fc" id="L98">        return lessThanOrEqualTo(value);</span>
+    }
+
+    public static &lt;T extends Comparable&lt;? super T&gt;&gt; Predicate&lt;T&gt; lessThanOrEqualTo(T value) {
+<span class="fc" id="L102">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.LESS_THAN_OR_EQUAL_TO, singletonList(value));</span>
+    }
+
+    public static &lt;T extends Comparable&lt;T&gt;&gt; Predicate&lt;T&gt; eq(T value) {
+<span class="fc" id="L106">        return equalTo(value);</span>
+    }
+
+    public static &lt;T extends Comparable&lt;T&gt;&gt; Predicate&lt;T&gt; equalTo(T value) {
+<span class="fc" id="L110">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.EQUAL_TO, singletonList(value));</span>
+    }
+
+    public static Predicate&lt;String&gt; matchesRegex(String regex) {
+<span class="fc" id="L114">        requireNonNull(regex);</span>
+<span class="fc" id="L115">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.MATCHES_REGEX, singletonList(regex));</span>
+    }
+
+    public static Predicate&lt;String&gt; containsString(String string) {
+<span class="fc" id="L119">        requireNonNull(string);</span>
+<span class="fc" id="L120">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.CONTAINS_STRING, singletonList(string));</span>
+    }
+
+    public static Predicate&lt;String&gt; startsWith(String string) {
+<span class="fc" id="L124">        requireNonNull(string);</span>
+<span class="fc" id="L125">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.STARTS_WITH, singletonList(string));</span>
+    }
+
+    public static Predicate&lt;String&gt; endsWith(String string) {
+<span class="fc" id="L129">        requireNonNull(string);</span>
+<span class="fc" id="L130">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.ENDS_WITH, singletonList(string));</span>
+    }
+
+    public static Predicate&lt;String&gt; equalsIgnoreCase(String string) {
+<span class="fc" id="L134">        requireNonNull(string);</span>
+<span class="fc" id="L135">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.EQUALS_IGNORE_CASE, singletonList(string));</span>
+    }
+
+    public static Predicate&lt;String&gt; isEmptyString() {
+<span class="fc" id="L139">        return Leaf.IS_EMPTY_STRING.instance();</span>
+    }
+
+    public static Predicate&lt;String&gt; isNullOrEmptyString() {
+<span class="fc" id="L143">        return Leaf.IS_NULL_OR_EMPTY_STRING.instance();</span>
+    }
+
+    public static &lt;E&gt; Predicate&lt;Collection&lt;E&gt;&gt; contains(Object entry) {
+<span class="fc" id="L147">        return ParameterizedLeafFactory.create(ParameterizedLeafFactory.CONTAINS, singletonList(entry));</span>
+    }
+
+    public static Predicate&lt;Object[]&gt; isEmptyArray() {
+<span class="fc" id="L151">        return Leaf.IS_EMPTY_ARRAY.instance();</span>
+    }
+
+    public static Predicate&lt;? super Collection&lt;?&gt;&gt; isEmpty() {
+<span class="fc" id="L155">        return Leaf.IS_EMPTY_COLLECTION.instance();</span>
+    }
+
+    public static &lt;E&gt; Predicate&lt;Stream&lt;E&gt;&gt; allMatch(Predicate&lt;E&gt; predicate) {
+<span class="fc" id="L159">        requireNonNull(predicate);</span>
+<span class="fc" id="L160">        return PrintablePredicateFactory.allMatch(predicate);</span>
+    }
+
+    public static &lt;E&gt; Predicate&lt;Stream&lt;E&gt;&gt; noneMatch(Predicate&lt;E&gt; predicate) {
+<span class="fc" id="L164">        requireNonNull(predicate);</span>
+<span class="fc" id="L165">        return PrintablePredicateFactory.noneMatch(predicate);</span>
+    }
+
+    public static &lt;E&gt; Predicate&lt;Stream&lt;E&gt;&gt; anyMatch(Predicate&lt;E&gt; predicate) {
+<span class="fc" id="L169">        requireNonNull(predicate);</span>
+<span class="fc" id="L170">        return PrintablePredicateFactory.anyMatch(predicate);</span>
+    }
+
+    @SafeVarargs
+    public static &lt;T&gt; Predicate&lt;T&gt; and(Predicate&lt;? super T&gt;... predicates) {
+<span class="fc" id="L175">        return PrintablePredicateFactory.and(asList(predicates));</span>
+    }
+
+    @SafeVarargs
+    public static &lt;T&gt; Predicate&lt;T&gt; or(Predicate&lt;? super T&gt;... predicates) {
+<span class="fc" id="L180">        return PrintablePredicateFactory.or(asList(predicates));</span>
+    }
+
+    @SafeVarargs
+    public static &lt;T&gt; Predicate&lt;T&gt; allOf(Predicate&lt;? super T&gt;... predicates) {
+<span class="fc" id="L185">        return PrintablePredicateFactory.allOf(asList(predicates));</span>
+    }
+
+    @SafeVarargs
+    public static &lt;T&gt; Predicate&lt;T&gt; anyOf(Predicate&lt;? super T&gt;... predicates) {
+<span class="fc" id="L190">        return PrintablePredicateFactory.anyOf(asList(predicates));</span>
+    }
+
+    public static &lt;T&gt; Predicate&lt;T&gt; not(Predicate&lt;T&gt; cond) {
+<span class="fc" id="L194">        return PrintablePredicateFactory.not(cond);</span>
+    }
+
+    public static &lt;O, P&gt; PrintablePredicateFactory.TransformingPredicate.Factory&lt;P, O&gt; transform(String funcName, Function&lt;O, P&gt; func) {
+<span class="fc" id="L198">        return transform(function(funcName, func));</span>
+    }
+
+    public static &lt;O, P&gt; PrintablePredicateFactory.TransformingPredicate.Factory&lt;P, O&gt; transform(Function&lt;O, P&gt; function) {
+<span class="fc" id="L202">        return PrintablePredicateFactory.transform(function);</span>
+    }
+
+    /**
+     * // @formatter:off
+   * Returns a {@link Predicate} created from a method specified by a {@code methodQuery}.
+   * If the {@code methodQuery} matches none or more than one methods, a {@code RuntimeException} will be thrown.
+   *
+   * The suffix {@code p} stands for &quot;predicate&quot; following the custom in LISP culture
+   * and it is necessary to avoid collision with {@link Functions#call(MethodQuery)} method.
+   *
+   * // @formatter:on
+     *
+     * @param methodQuery A query object that specifies a method to be invoked by the returned predicate.
+     * @param &lt;T&gt;         the type of the input to the returned predicate
+     * @return Created predicate.
+     * @see Functions#classMethod(Class, String, Object[])
+     * @see Functions#instanceMethod(Object, String, Object[])
+     * @see Functions#parameter()
+     */
+    @SuppressWarnings(&quot;ConstantConditions&quot;)
+    public static &lt;T&gt; Predicate&lt;T&gt; callp(MethodQuery methodQuery) {
+<span class="fc" id="L224">        return predicate(</span>
+<span class="fc" id="L225">                methodQuery.describe(),</span>
+<span class="fc" id="L226">                t -&gt; InternalChecks.ensureValue(</span>
+<span class="fc" id="L227">                        invokeMethod(methodQuery.bindActualArguments((o) -&gt; o instanceof Parameter, o -&gt; t)),</span>
+<span class="fc" id="L228">                        v -&gt; v instanceof Boolean,</span>
+<span class="fc" id="L229">                        v -&gt; format(&quot;Method matched with '%s' must return a boolean value but it gave: '%s'.&quot;, methodQuery.describe(), v)));</span>
+    }
+
+    /**
+     * // @formatter:off
+   * Returns a predicate that calls a method which matches the given {@code methodName}
+   * and {@code args} on the object given as input to it.
+   *
+   * Note that method look up is done when the predicate is applied.
+   * This means this method does not throw any exception by itself and in case
+   * you give wrong {@code methodName} or {@code arguments}, an exception will be
+   * thrown when the returned function is applied.
+   * // @formatter:on
+     *
+     * @param methodName The method name
+     * @param arguments  Arguments passed to the method.
+     * @param &lt;T&gt;        The type of input to the returned predicate
+     * @return A predicate that invokes the method matching the {@code methodName} and {@code args}
+     * @see Functions#parameter()
+     */
+    public static &lt;T&gt; Predicate&lt;T&gt; callp(String methodName, Object... arguments) {
+<span class="fc" id="L250">        return callp(Functions.instanceMethod(Functions.parameter(), methodName, arguments));</span>
+    }
+
+<span class="fc" id="L253">    enum Def {</span>
+        ;
+
+<span class="fc" id="L256">        public static final Function&lt;Class&lt;?&gt;, Predicate&lt;?&gt;&gt; IS_INSTANCE_OF$2 = function(() -&gt; &quot;isInstanceOf&quot;, (Class&lt;?&gt; c) -&gt; c::isInstance);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

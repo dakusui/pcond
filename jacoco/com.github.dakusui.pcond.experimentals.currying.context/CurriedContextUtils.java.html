@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CurriedContextUtils.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.experimentals.currying.context</a> &gt; <span class="el_source">CurriedContextUtils.java</span></div><h1>CurriedContextUtils.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.experimentals.currying.context;
+
+import com.github.dakusui.pcond.experimentals.currying.CurriedFunction;
+import com.github.dakusui.pcond.experimentals.currying.CurryingUtils;
+import com.github.dakusui.pcond.core.printable.PrintablePredicateFactory;
+import com.github.dakusui.pcond.forms.Predicates;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
+
+/**
+ * A utility class that collects helper methods for the &quot;Context&quot; mechanism.
+ */
+<span class="fc" id="L21">public enum CurriedContextUtils {</span>
+  ;
+
+  public static Stream&lt;CurriedContext&gt; nest(Stream&lt;?&gt; stream, Collection&lt;?&gt; inner) {
+<span class="fc" id="L25">    return toCurriedContextStream(stream)</span>
+<span class="fc" id="L26">        .flatMap((CurriedContext curriedContext) -&gt; inner</span>
+<span class="fc" id="L27">            .stream()</span>
+<span class="fc" id="L28">            .map((Function&lt;Object, CurriedContext&gt;) curriedContext::append));</span>
+  }
+
+  public static Stream&lt;CurriedContext&gt; toCurriedContextStream(Stream&lt;?&gt; stream) {
+<span class="fc" id="L32">    return stream.map(CurriedContextUtils::toCurriedContext);</span>
+  }
+
+  public static &lt;T&gt; CurriedContext toCurriedContext(T t) {
+<span class="fc bfc" id="L36" title="All 2 branches covered.">    return t instanceof CurriedContext ? (CurriedContext) t : CurriedContext.from(t);</span>
+  }
+
+  public static &lt;R&gt; Predicate&lt;CurriedContext&gt; applyAndTest(CurriedFunction&lt;Object, Object&gt; curriedFunction, Predicate&lt;? super R&gt; pred, @SuppressWarnings(&quot;SameParameterValue&quot;) Class&lt;? extends R&gt; type, int... orderArgs) {
+<span class="fc" id="L40">    List&lt;Object&gt; spec = asList(curriedFunction, pred, asList(Arrays.stream(orderArgs).boxed().toArray()));</span>
+<span class="fc" id="L41">    return PrintablePredicateFactory.parameterizedLeaf(</span>
+<span class="fc" id="L42">        args -&gt; () -&gt; String.format(&quot;%s(%s%s)&quot;, args.get(1), args.get(0), args.get(2)), args -&gt; (CurriedContext curriedContext) -&gt; (pred).test(type.cast(CurryingUtils.applyCurriedFunction(curriedFunction, orderArgs).apply(curriedContext))), spec, CurriedContextUtils.class</span>
+    );
+  }
+
+  public static Predicate&lt;CurriedContext&gt; toContextPredicate(CurriedFunction&lt;Object, Object&gt; curriedFunction, int... orderArgs) {
+<span class="fc" id="L47">    return CurriedContextUtils.applyAndTest(curriedFunction, createPredicate(&quot;curry&quot;, Predicates.isTrue()), Boolean.class, orderArgs);</span>
+  }
+
+  public static &lt;T&gt; Predicate&lt;T&gt; createPredicate(String s, Predicate&lt;T&gt; predicate) {
+<span class="fc" id="L51">    requireNonNull(s);</span>
+<span class="fc" id="L52">    return PrintablePredicateFactory.leaf(() -&gt; s, predicate, CurriedContextUtils.class);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

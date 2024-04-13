@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessageComposer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.validator</a> &gt; <span class="el_source">MessageComposer.java</span></div><h1>MessageComposer.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.validator;
+
+import java.util.function.Predicate;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.formatObject;
+import static java.lang.String.format;
+
+/**
+ * An interface that defines methods to compose a message when a value violates
+ * a given condition based on a context.
+ */
+public interface MessageComposer {
+  /**
+   * Compose a message string for a `value`, which violates a precondition given as `predicate`.
+   *
+   * @param value     A value for which a message is created.
+   * @param predicate A condition that a given `value` violated.
+   * @param &lt;T&gt;       The type of the `value`.
+   * @return A composed message string.
+   */
+  &lt;T&gt; String composeMessageForPrecondition(T value, Predicate&lt;? super T&gt; predicate);
+
+  /**
+   * Compose a message string for a `value`, which violates a postcondition given as `predicate`.
+   *
+   * @param value     A value for which a message is created.
+   * @param predicate A condition that a given `value` violated.
+   * @param &lt;T&gt;       The type of the `value`.
+   * @return A composed message string.
+   */
+  &lt;T&gt; String composeMessageForPostcondition(T value, Predicate&lt;? super T&gt; predicate);
+
+  /**
+   * Compose a message string for a `value`, which violates a general condition given as `predicate`.
+   * Used for invariant conditions, test assertion (`assertThat`), and test prerequisition
+   * checking (`assumeThat`).
+   *
+   * @param value     A value for which a message is created.
+   * @param predicate A condition that a given `value` violated.
+   * @param &lt;T&gt;       The type of the `value`.
+   * @return A composed message string.
+   */
+  &lt;T&gt; String composeMessageForAssertion(T value, Predicate&lt;? super T&gt; predicate);
+
+  /**
+   * Compose a message string for a `value`, which violates a user input checking
+   * condition given as `predicate`.
+   *
+   * @param value     A value for which a message is created.
+   * @param predicate A condition that a given `value` violated.
+   * @param &lt;T&gt;       The type of the `value`.
+   * @return A composed message string.
+   */
+  &lt;T&gt; String composeMessageForValidation(T value, Predicate&lt;? super T&gt; predicate);
+
+  /**
+   * A default implementation of `MessageComposer`.
+   */
+<span class="fc" id="L59">  class Default implements MessageComposer {</span>
+    @Override
+    public &lt;T&gt; String composeMessageForPrecondition(T value, Predicate&lt;? super T&gt; predicate) {
+<span class="fc" id="L62">      return format(&quot;value:&lt;%s&gt; violated precondition:value %s&quot;, formatObject(value), predicate);</span>
+    }
+
+    @Override
+    public &lt;T&gt; String composeMessageForPostcondition(T value, Predicate&lt;? super T&gt; predicate) {
+<span class="fc" id="L67">      return format(&quot;value:&lt;%s&gt; violated postcondition:value %s&quot;, formatObject(value), predicate);</span>
+    }
+
+    @Override
+    public &lt;T&gt; String composeMessageForAssertion(T value, Predicate&lt;? super T&gt; predicate) {
+<span class="fc" id="L72">      return &quot;Value:&quot; + formatObject(value) + &quot; violated: &quot; + predicate.toString();</span>
+    }
+
+    @Override
+    public &lt;T&gt; String composeMessageForValidation(T value, Predicate&lt;? super T&gt; predicate) {
+<span class="fc" id="L77">      return &quot;Value:&quot; + formatObject(value) + &quot; violated: &quot; + predicate.toString();</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

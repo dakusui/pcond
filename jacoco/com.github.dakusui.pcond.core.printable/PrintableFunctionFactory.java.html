@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PrintableFunctionFactory.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.printable</a> &gt; <span class="el_source">PrintableFunctionFactory.java</span></div><h1>PrintableFunctionFactory.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.printable;
+
+import com.github.dakusui.pcond.core.Evaluable;
+import com.github.dakusui.pcond.experimentals.currying.CurryingUtils;
+import com.github.dakusui.pcond.core.identifieable.Identifiable;
+import com.github.dakusui.pcond.experimentals.currying.multi.MultiFunction;
+
+import java.lang.reflect.Method;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import static com.github.dakusui.pcond.core.refl.ReflUtils.formatMethodName;
+import static com.github.dakusui.pcond.core.refl.ReflUtils.invokeStaticMethod;
+import static com.github.dakusui.pcond.internals.InternalChecks.requireStaticMethod;
+import static com.github.dakusui.pcond.internals.InternalChecks.validateParamOrderList;
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+
+<span class="fc" id="L24">public enum PrintableFunctionFactory {</span>
+<span class="fc" id="L25">  COMPOSE,</span>
+  ;
+  
+<span class="fc" id="L28">  public enum Simple {</span>
+<span class="fc" id="L29">    IDENTITY(&quot;identity&quot;, Function.identity()),</span>
+<span class="fc" id="L30">    STRINGIFY(&quot;stringify&quot;, Object::toString),</span>
+<span class="fc" id="L31">    LENGTH(&quot;length&quot;, (Function&lt;String, Integer&gt;) String::length),</span>
+<span class="fc" id="L32">    SIZE(&quot;size&quot;, (Function&lt;Collection&lt;?&gt;, Integer&gt;) Collection::size),</span>
+<span class="fc" id="L33">    STREAM(&quot;stream&quot;, (Function&lt;Collection&lt;?&gt;, Stream&lt;?&gt;&gt;) Collection::stream),</span>
+<span class="fc" id="L34">    STREAM_OF(&quot;streamOf&quot;, Stream::of),</span>
+<span class="fc" id="L35">    ARRAY_TO_LIST(&quot;arrayToList&quot;, (Function&lt;Object[], List&lt;Object&gt;&gt;) Arrays::asList),</span>
+<span class="fc" id="L36">    COUNT_LINES(&quot;countLines&quot;, (String v) -&gt; v.split(String.format(&quot;%n&quot;)).length),</span>
+<span class="fc" id="L37">    COLLECTION_TO_LIST(&quot;collectionToList&quot;, (Collection&lt;?&gt; c) -&gt; new ArrayList&lt;Object&gt;() {</span>
+      {
+<span class="fc" id="L39">        addAll(c);</span>
+<span class="fc" id="L40">      }</span>
+    }),
+<span class="pc" id="L42">    CAST_TO(&quot;cast@compileTime&quot;, (v) -&gt; v),</span>
+    ;
+    private final Function&lt;?, ?&gt; instance;
+    
+<span class="fc" id="L46">    Simple(String name, Function&lt;?, ?&gt; function) {</span>
+<span class="fc" id="L47">      instance = PrintableFunctionFactory.function(() -&gt; name, function, this);</span>
+<span class="fc" id="L48">    }</span>
+    
+    @SuppressWarnings(&quot;unchecked&quot;)
+    public &lt;T, R&gt; Function&lt;T, R&gt; instance() {
+<span class="fc" id="L52">      return (Function&lt;T, R&gt;) this.instance;</span>
+    }
+  }
+  
+<span class="fc" id="L56">  public enum Parameterized {</span>
+<span class="fc" id="L57">    ELEMENT_AT((args) -&gt; () -&gt; format(&quot;at[%s]&quot;, args.get(0)), (args) -&gt; (List&lt;?&gt; v) -&gt; v.get((int) args.get(0))),</span>
+<span class="fc" id="L58">    CAST((args) -&gt; () -&gt; format(&quot;castTo[%s]&quot;, requireNonNull((Class&lt;?&gt;) args.get(0)).getSimpleName()), (args) -&gt; (Object v) -&gt; ((Class&lt;?&gt;) args.get(0)).cast(v)),</span>
+    ;
+    final Function&lt;List&lt;Object&gt;, Supplier&lt;String&gt;&gt; formatterFactory;
+    final Function&lt;List&lt;Object&gt;, Function&lt;?, ?&gt;&gt;   functionFactory;
+    
+<span class="fc" id="L63">    Parameterized(Function&lt;List&lt;Object&gt;, Supplier&lt;String&gt;&gt; formatterFactory, Function&lt;List&lt;Object&gt;, Function&lt;?, ?&gt;&gt; functionFactory) {</span>
+<span class="fc" id="L64">      this.formatterFactory = formatterFactory;</span>
+<span class="fc" id="L65">      this.functionFactory = functionFactory;</span>
+<span class="fc" id="L66">    }</span>
+    
+    @SuppressWarnings({ &quot;unchecked&quot;, &quot;rawtypes&quot; })
+    public &lt;T, R&gt; Function&lt;T, R&gt; create(List&lt;Object&gt; args) {
+<span class="fc" id="L70">      return PrintableFunctionFactory.create(this.formatterFactory, (Function) this.functionFactory, args, this);</span>
+    }
+  }
+  
+  @SuppressWarnings(&quot;unchecked&quot;)
+  public static &lt;T, R, S&gt; PrintableFunction&lt;T, S&gt; compose(Function&lt;? super T, ? extends R&gt; before, Function&lt;? super R, ? extends S&gt; after) {
+<span class="fc" id="L76">    PrintableFunction&lt;? super T, ? extends R&gt; before_ = toPrintableFunction(before);</span>
+<span class="fc" id="L77">    PrintableFunction&lt;? super R, ? extends S&gt; after_ = toPrintableFunction(after);</span>
+<span class="fc" id="L78">    PrintableFunction&lt;Object, S&gt; other = (PrintableFunction&lt;Object, S&gt;) after_;</span>
+<span class="fc" id="L79">    return new PrintableFunction&lt;&gt;(</span>
+        COMPOSE,
+<span class="fc" id="L81">        asList(before_, after_),</span>
+<span class="fc" id="L82">        () -&gt; format(&quot;%s-&gt;%s&quot;, before, after),</span>
+<span class="fc" id="L83">        (T v) -&gt; PrintableFunction.unwrap(after).apply(PrintableFunction.unwrap(before).apply(v)),</span>
+<span class="fc" id="L84">        PrintableFunctionFactory.&lt;T&gt;extractHeadOf(before_),</span>
+<span class="fc" id="L85">        (Evaluable&lt;?&gt;) PrintableFunctionFactory.&lt;T, R&gt;extractTailOf(before)</span>
+<span class="fc" id="L86">            .map((Function&lt;?, R&gt; t) -&gt; PrintableFunctionFactory.&lt;Object, R, S&gt;compose((Function&lt;Object, R&gt;) t, after))</span>
+<span class="fc" id="L87">            .orElse(other));</span>
+  }
+  
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private static &lt;T&gt; Function&lt;? super T, Object&gt; extractHeadOf(Function&lt;? super T, ?&gt; f) {
+<span class="fc" id="L92">    Function&lt;? super T, Object&gt; func = (Function&lt;? super T, Object&gt;) f;</span>
+    Function&lt;? super T, Object&gt; ret;
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">    if (func instanceof PrintableFunction) {</span>
+<span class="fc" id="L95">      ret = ((PrintableFunction&lt;? super T, Object&gt;) func).head();</span>
+    } else {
+<span class="nc" id="L97">      ret = func;</span>
+    }
+<span class="fc" id="L99">    return requireNonNull(ret);</span>
+  }
+  
+  @SuppressWarnings(&quot;unchecked&quot;)
+  private static &lt;T, R&gt; Optional&lt;Function&lt;?, R&gt;&gt; extractTailOf(Function&lt;? super T, ? extends R&gt; f) {
+<span class="fc" id="L104">    Function&lt;? super T, Object&gt; func = (Function&lt;? super T, Object&gt;) f;</span>
+    Optional&lt;Function&lt;?, R&gt;&gt; ret;
+<span class="fc bfc" id="L106" title="All 2 branches covered.">    if (func instanceof PrintableFunction) {</span>
+<span class="fc" id="L107">      ret = ((PrintableFunction&lt;?, ?&gt;) func).tail().map(e -&gt; (Function&lt;?, R&gt;) e);</span>
+    } else {
+<span class="fc" id="L109">      ret = Optional.empty();</span>
+    }
+<span class="fc" id="L111">    return ret;</span>
+  }
+  
+  public static &lt;R&gt; MultiFunction&lt;R&gt; multifunction(Method method, List&lt;Integer&gt; paramOrder) {
+<span class="fc" id="L115">    validateParamOrderList(paramOrder, method.getParameterCount());</span>
+<span class="fc" id="L116">    requireStaticMethod(method);</span>
+<span class="fc" id="L117">    return new MultiFunction.Builder&lt;R&gt;(args -&gt; invokeStaticMethod(method, (paramOrder).stream().map(args::get).toArray()))</span>
+<span class="fc" id="L118">        .name(method.getName())</span>
+<span class="fc" id="L119">        .formatter(() -&gt; formatMethodName(method) + CurryingUtils.formatParameterOrder(paramOrder))</span>
+<span class="fc" id="L120">        .addParameters(paramOrder.stream().map(i -&gt; method.getParameterTypes()[i]).collect(toList()))</span>
+<span class="fc" id="L121">        .identityArgs(asList(method, validateParamOrderList(paramOrder, method.getParameterCount())))</span>
+<span class="fc" id="L122">        .$();</span>
+  }
+  
+  public static &lt;T, R&gt; Function&lt;T, R&gt; function(Function&lt;T, R&gt; function) {
+<span class="fc bfc" id="L126" title="All 2 branches covered.">    if (function instanceof PrintableFunction)</span>
+<span class="fc" id="L127">      return function;</span>
+<span class="fc" id="L128">    return function(&quot;noname:&quot; + function.toString(), function);</span>
+  }
+  
+  public static &lt;
+      T, R&gt; Function&lt;T, R&gt; function(String name, Function&lt;T, R&gt; function) {
+<span class="fc" id="L133">    return function(() -&gt; name, function);</span>
+  }
+  
+  public static &lt;
+      T, R&gt; Function&lt;T, R&gt; function(Supplier&lt;String&gt; formatter, Function&lt;T, R&gt; function) {
+<span class="fc" id="L138">    return function(formatter, function, PrintableFunctionFactory.class);</span>
+  }
+  
+  public static &lt;
+      T, R&gt; Function&lt;T, R&gt; function(Supplier&lt;String&gt; formatter, Function&lt;T, R&gt; function, Object fallbackCreator) {
+<span class="fc" id="L143">    return create(</span>
+<span class="fc" id="L144">        (args) -&gt; formatter,</span>
+<span class="fc" id="L145">        (args) -&gt; function,</span>
+<span class="fc" id="L146">        emptyList(),</span>
+        fallbackCreator);
+  }
+  
+  public static &lt;T, R&gt; PrintableFunction&lt;T, R&gt; create(
+      Function&lt;List&lt;Object&gt;, Supplier&lt;String&gt;&gt; formatterFactory, Function&lt;List&lt;Object&gt;, Function&lt;T, R&gt;&gt; functionFactory, List&lt;Object&gt; args,
+      Object fallbackCreator) {
+<span class="fc" id="L153">    Supplier&lt;String&gt; formatter = formatterFactory.apply(args);</span>
+<span class="fc" id="L154">    Function&lt;T, R&gt; function = functionFactory.apply(args);</span>
+<span class="fc" id="L155">    return Identifiable.creatorOf(function)</span>
+<span class="fc" id="L156">        .map(c -&gt; new PrintableFunction&lt;&gt;(c, Identifiable.argsOf(function), formatter, function))</span>
+<span class="fc" id="L157">        .orElse(new PrintableFunction&lt;&gt;(fallbackCreator, args, formatter, function));</span>
+  }
+  
+  private static &lt;
+      T, R&gt; PrintableFunction&lt;T, R&gt; toPrintableFunction(Function&lt;T, R&gt; function) {
+<span class="fc" id="L162">    return (PrintableFunction&lt;T, R&gt;) function(function);</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

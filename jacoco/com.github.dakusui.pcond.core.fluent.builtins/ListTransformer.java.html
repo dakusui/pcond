@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ListTransformer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core.fluent.builtins</a> &gt; <span class="el_source">ListTransformer.java</span></div><h1>ListTransformer.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core.fluent.builtins;
+
+import com.github.dakusui.pcond.core.fluent.AbstractObjectTransformer;
+import com.github.dakusui.pcond.core.fluent.Matcher;
+import com.github.dakusui.pcond.forms.Functions;
+import com.github.dakusui.pcond.forms.Printables;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import static com.github.dakusui.pcond.internals.InternalUtils.trivialIdentityFunction;
+
+public interface ListTransformer&lt;
+    T,
+    E
+    &gt; extends
+    AbstractObjectTransformer&lt;
+        ListTransformer&lt;T, E&gt;,
+        ListChecker&lt;T, E&gt;,
+        T,
+        List&lt;E&gt;&gt; {
+  static &lt;E&gt; ListTransformer&lt;List&lt;E&gt;, E&gt; create(Supplier&lt;List&lt;E&gt;&gt; value) {
+<span class="fc" id="L26">    return new Impl&lt;&gt;(value, trivialIdentityFunction());</span>
+  }
+
+  @SuppressWarnings(&quot;unchecked&quot;)
+  default ListTransformer&lt;T, E&gt; transform(Function&lt;ListTransformer&lt;T, E&gt;, Predicate&lt;List&lt;E&gt;&gt;&gt; clause) {
+<span class="nc" id="L31">    return this.addTransformAndCheckClause(tx -&gt; clause.apply((ListTransformer&lt;T, E&gt;) tx));</span>
+  }
+
+  default ObjectTransformer&lt;T, E&gt; elementAt(int i) {
+<span class="fc" id="L35">    return this.toObject(Functions.elementAt(i));</span>
+  }
+
+  default IntegerTransformer&lt;T&gt; size() {
+<span class="fc" id="L39">    return this.toInteger(Functions.size());</span>
+  }
+
+  default ListTransformer&lt;T, E&gt; subList(int begin, int end) {
+<span class="fc" id="L43">    return this.toList(Printables.function(&quot;subList[&quot; + begin + &quot;,&quot; + end + &quot;]&quot;, v -&gt; v.subList(begin, end)));</span>
+  }
+
+  default ListTransformer&lt;T, E&gt; subList(int begin) {
+<span class="fc" id="L47">    return this.toList(Printables.function(&quot;subList[&quot; + begin + &quot;]&quot;, v -&gt; v.subList(begin, v.size())));</span>
+  }
+
+  default StreamTransformer&lt;T, E&gt; stream() {
+<span class="fc" id="L51">    return this.toStream(Printables.function(&quot;listStream&quot;, Collection::stream));</span>
+  }
+
+  default BooleanTransformer&lt;T&gt; isEmpty() {
+<span class="fc" id="L55">    return this.toBoolean(Printables.function(&quot;listIsEmpty&quot;, List::isEmpty));</span>
+  }
+
+  class Impl&lt;T, E&gt; extends
+      Base&lt;
+          ListTransformer&lt;T, E&gt;,
+          ListChecker&lt;T, E&gt;,
+          T,
+          List&lt;E&gt;&gt; implements
+      ListTransformer&lt;T, E&gt; {
+    public Impl(Supplier&lt;T&gt; value, Function&lt;T, List&lt;E&gt;&gt; transformFunction) {
+<span class="fc" id="L66">      super(value, transformFunction);</span>
+<span class="fc" id="L67">    }</span>
+
+    @Override
+    protected ListChecker&lt;T, E&gt; toChecker(Function&lt;T, List&lt;E&gt;&gt; transformFunction) {
+<span class="fc" id="L71">      return new ListChecker.Impl&lt;&gt;(this::baseValue, transformFunction);</span>
+    }
+
+    @Override
+    protected Matcher&lt;?, List&lt;E&gt;, List&lt;E&gt;&gt; rebase() {
+<span class="nc" id="L76">      return new Impl&lt;&gt;(this::value, trivialIdentityFunction());</span>
+    }
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>

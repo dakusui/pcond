@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EvaluableIo.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">pcond</a> &gt; <a href="index.source.html" class="el_package">com.github.dakusui.pcond.core</a> &gt; <span class="el_source">EvaluableIo.java</span></div><h1>EvaluableIo.java</h1><pre class="source lang-java linenums">package com.github.dakusui.pcond.core;
+
+import static com.github.dakusui.pcond.core.EvaluationContext.formNameOf;
+import static java.util.Objects.requireNonNull;
+
+public class EvaluableIo&lt;I, E extends Evaluable&lt;I&gt;, O&gt; {
+  private final ValueHolder&lt;I&gt;       input;
+  private final E                    evaluable;
+  private final EvaluationEntry.Type evaluableType;
+  private final String               formName;
+  private       ValueHolder&lt;O&gt;       output;
+
+  public EvaluableIo(ValueHolder&lt;I&gt; input, EvaluationEntry.Type evaluableType, E evaluable) {
+<span class="fc" id="L14">    this(input, evaluableType, formNameOf(evaluableType, evaluable), evaluable);</span>
+<span class="fc" id="L15">  }</span>
+
+<span class="fc" id="L17">  public EvaluableIo(ValueHolder&lt;I&gt; input, EvaluationEntry.Type evaluableType, String formName, E evaluable) {</span>
+<span class="fc" id="L18">    this.input = requireNonNull(input);</span>
+<span class="fc" id="L19">    this.evaluableType = requireNonNull(evaluableType);</span>
+<span class="fc" id="L20">    this.formName = formName;</span>
+<span class="fc" id="L21">    this.evaluable = requireNonNull(evaluable);</span>
+<span class="fc" id="L22">    this.output = ValueHolder.create();</span>
+<span class="fc" id="L23">  }</span>
+
+  public void output(ValueHolder&lt;O&gt; output) {
+<span class="fc" id="L26">    this.output = requireNonNull(output).clone();</span>
+<span class="fc" id="L27">  }</span>
+
+  public ValueHolder&lt;I&gt; input() {
+<span class="fc" id="L30">    return this.input;</span>
+  }
+
+  public EvaluationEntry.Type evaluableType() {
+<span class="fc" id="L34">    return this.evaluableType;</span>
+  }
+
+  public String formName() {
+<span class="fc" id="L38">    return this.formName;</span>
+  }
+
+  public E evaluable() {
+<span class="fc" id="L42">    return this.evaluable;</span>
+  }
+
+  public ValueHolder&lt;O&gt; output() {
+<span class="fc" id="L46">    return this.output;</span>
+  }
+
+  @Override
+  public String toString() {
+<span class="nc" id="L51">    return &quot;evaluable:&lt;&quot; + evaluableType + &quot;:&quot; + evaluable + &quot;&gt; in:&quot; + input + &quot; out:&quot; + output;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.5.201910111838</span></div></body></html>
