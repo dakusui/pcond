@@ -83,8 +83,8 @@ public class Fluent4Example {
       assertStatement(stringTransformer("INPUT_VALUE")
           .toLowerCase()
           .then()
-          .check(v -> v.contains("XYZ1").toPredicate())
-          .check(v -> v.contains("ABC1").toPredicate()));
+          .check(v -> v.containing("XYZ1").toPredicate())
+          .check(v -> v.containing("ABC1").toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -202,7 +202,7 @@ public class Fluent4Example {
                 .transform(tx -> tx.abstractText()
                     .transform(ty -> ty
                         .then()
-                        .isNotNull().done())
+                        .notNull().done())
                     .transform(ty -> ty
                         .length()
                         .then()

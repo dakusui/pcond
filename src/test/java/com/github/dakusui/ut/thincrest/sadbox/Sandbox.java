@@ -29,6 +29,6 @@ public class Sandbox {
 
   @Test
   public void hello3() {
-    assertStatement(Statement.stringValue("hello").substring(2).then().isEqualTo("world"));
+    assertStatement(Statement.stringValue("hello").substring(2).then().equalTo("world"));
   }
 }

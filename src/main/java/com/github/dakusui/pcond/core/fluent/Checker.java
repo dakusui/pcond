@@ -22,6 +22,10 @@ public interface Checker<
     return addCheckPhrase(w -> (Predicate<R>) predicate);
   }
 
+  default V predicate(Predicate<? super R> predicate) {
+    return checkWithPredicate(predicate);
+  }
+
   default Predicate<T> done() {
     return statementPredicate();
   }

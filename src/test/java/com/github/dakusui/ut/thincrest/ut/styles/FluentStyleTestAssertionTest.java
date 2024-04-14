@@ -38,7 +38,7 @@ public class FluentStyleTestAssertionTest {
             .expectException(ArrayIndexOutOfBoundsException.class, Printables.function("substring100", (String s) -> s.substring(100)))
             .getMessage()
             .then()
-            .isEqualTo("HELLOWORLD"));
+            .equalTo("HELLOWORLD"));
       } catch (ComparisonFailure e) {
         e.printStackTrace();
         MatcherAssert.assertThat(e.getMessage(), CoreMatchers.allOf(
@@ -57,7 +57,7 @@ public class FluentStyleTestAssertionTest {
             .expectException(StringIndexOutOfBoundsException.class, Printables.function("substring0", (String s) -> s.substring(0)))
             .getMessage()
             .then()
-            .isEqualTo("HELLOWORLD"));
+            .equalTo("HELLOWORLD"));
       } catch (ComparisonFailure e) {
         e.printStackTrace();
         MatcherAssert.assertThat(e.getMessage(), CoreMatchers.allOf(
@@ -74,7 +74,7 @@ public class FluentStyleTestAssertionTest {
           .expectException(StringIndexOutOfBoundsException.class, Printables.function("substring100", (String s) -> s.substring(100)))
           .getMessage()
           .then()
-          .isEqualTo("String index out of range: -90"));
+          .equalTo("String index out of range: -90"));
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -84,7 +84,7 @@ public class FluentStyleTestAssertionTest {
         TestFluents.assertStatement(Statement.stringValue(givenValue)
             .toLowerCase()
             .then()
-            .isEqualTo("HELLOWORLD"));
+            .equalTo("HELLOWORLD"));
       } catch (ComparisonFailure e) {
         MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("Value:\"helloWorld\" violated: toLowerCase THEN:stringIsEqualTo[HELLOWORLD]"));
         throw e;
@@ -97,7 +97,7 @@ public class FluentStyleTestAssertionTest {
       TestFluents.assertStatement(stringValue(givenValue)
           .toLowerCase()
           .then()
-          .isEqualTo("helloworld"));
+          .equalTo("helloworld"));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class FluentStyleTestAssertionTest {
       TestFluents.assertStatement(stringValue(givenValue)
           .toLowerCase()
           .then()
-          .isEqualTo("helloworld"));
+          .equalTo("helloworld"));
     }
 
     @Test
@@ -114,7 +114,7 @@ public class FluentStyleTestAssertionTest {
       int givenValue = 1234;
       TestFluents.assertStatement(Statement.integerValue(givenValue)
           .then()
-          .isEqualTo(1234));
+          .equalTo(1234));
     }
 
     @Test
@@ -122,7 +122,7 @@ public class FluentStyleTestAssertionTest {
       boolean givenValue = true;
       TestFluents.assertStatement(booleanValue(givenValue)
           .then()
-          .isEqualTo(true));
+          .equalTo(true));
     }
 
     @Test
@@ -136,7 +136,7 @@ public class FluentStyleTestAssertionTest {
       TestFluents.assertStatement(Statement.objectValue(givenValue)
           .toString(Object::toString)
           .then()
-          .isEqualTo("OBJECT"));
+          .equalTo("OBJECT"));
     }
 
     @Test
@@ -144,7 +144,7 @@ public class FluentStyleTestAssertionTest {
       List<String> givenValue = asList("hello", "world");
       TestFluents.assertStatement(Statement.listValue(givenValue)
           .then()
-          .isEqualTo(asList("hello", "world")));
+          .equalTo(asList("hello", "world")));
     }
 
     @Test
@@ -153,15 +153,15 @@ public class FluentStyleTestAssertionTest {
       TestFluents.assertStatement(Statement.streamValue(givenValue)
           .toList(v -> v.collect(toList()))
           .then()
-          .isEqualTo(asList("hello", "world")));
+          .equalTo(asList("hello", "world")));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void multiAssertAll_failed() {
       try {
         TestFluents.assertAll(
-            stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
-            stringValue("world").toLowerCase().then().contains("WORLD"));
+            stringValue("hello").toUpperCase().then().equalTo("HELLO"),
+            stringValue("world").toLowerCase().then().containing("WORLD"));
       } catch (ComparisonFailure e) {
         e.printStackTrace();
         System.err.println("actual:" + e.getActual());
@@ -177,14 +177,14 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void assertAll_passed() {
       TestFluents.assertAll(
-          stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
-          stringValue("world").toLowerCase().then().contains("world"));
+          stringValue("hello").toUpperCase().then().equalTo("HELLO"),
+          stringValue("world").toLowerCase().then().containing("world"));
     }
 
     @Test
     public void assertAllDifferentTypes_passed() {
       boolean b = TestFluents_assertAll(
-          stringValue("hello").toUpperCase().then().isEqualTo("HELLO").$(),
+          stringValue("hello").toUpperCase().then().equalTo("HELLO").$(),
           booleanValue(false).then().isFalse().$());
       MatcherAssert.assertThat(b, CoreMatchers.is(true));
     }
@@ -208,7 +208,7 @@ public class FluentStyleTestAssertionTest {
         TestFluents.assumeStatement(stringValue(givenValue)
             .toLowerCase()
             .then()
-            .isEqualTo("HELLOWORLD"));
+            .equalTo("HELLOWORLD"));
       } catch (AssumptionViolatedException e) {
         e.printStackTrace();
         MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("Value:\"helloWorld\" violated: toLowerCase THEN"));
@@ -222,15 +222,15 @@ public class FluentStyleTestAssertionTest {
       TestFluents.assumeStatement(stringValue(givenValue)
           .toLowerCase()
           .then()
-          .isEqualTo("helloworld"));
+          .equalTo("helloworld"));
     }
 
     @Test(expected = AssumptionViolatedException.class)
     public void multiAssumeAll_failed() {
       try {
         TestFluents.assumeAll(
-            stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
-            stringValue("world").toLowerCase().then().contains("WORLD"));
+            stringValue("hello").toUpperCase().then().equalTo("HELLO"),
+            stringValue("world").toLowerCase().then().containing("WORLD"));
       } catch (AssumptionViolatedException e) {
         e.printStackTrace();
         MatcherAssert.assertThat(e.getMessage().replaceAll(" +", ""), CoreMatchers.containsString("stringIsEqualTo[HELLO]->true"));
@@ -242,8 +242,8 @@ public class FluentStyleTestAssertionTest {
     @Test
     public void multiAssumeAll_passed() {
       TestFluents.assumeAll(
-          stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
-          stringValue("world").toLowerCase().then().contains("world"));
+          stringValue("hello").toUpperCase().then().equalTo("HELLO"),
+          stringValue("world").toLowerCase().then().containing("world"));
     }
 
     @Test

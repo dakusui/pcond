@@ -216,7 +216,7 @@ public class SmokeTest extends TestBase {
   private static BookTransformer getTransform(Fluent4Example.OnGoing.Book book) {
     return new BookTransformer(book)
         .transform((BookTransformer b) -> b.title()
-            .transform((StringTransformer<String> ty) -> ty.then().isNotNull().done())
+            .transform((StringTransformer<String> ty) -> ty.then().notNull().done())
             .transform((StringTransformer<String> ty) -> ty.parseInt().then() // This is intended to produce a NumberFormatException
                 .greaterThanOrEqualTo(10)
                 .lessThan(40)

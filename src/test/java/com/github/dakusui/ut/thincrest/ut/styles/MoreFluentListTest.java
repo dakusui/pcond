@@ -16,7 +16,7 @@ public class MoreFluentListTest {
   @Test
   public void test_elementAt() {
     List<String> var = asList("hello", "world");
-    assertStatement(Statement.listValue(var).elementAt(0).then().isEqualTo("hello"));
+    assertStatement(Statement.listValue(var).elementAt(0).then().equalTo("hello"));
   }
 
   @Test

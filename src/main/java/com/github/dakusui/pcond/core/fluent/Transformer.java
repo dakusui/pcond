@@ -29,9 +29,25 @@ public interface Transformer<
 
   TX addTransformAndCheckClause(Function<Transformer<?, ?, R, R>, Predicate<R>> clause);
 
+  /**
+   * Returns a checker object for this object.
+   * @return A checker object for this object.
+   */
   V then();
 
+  /**
+   * A synonym of {@link Transformer#then()} method.
+   * @return A checker object for this object.
+   */
   default V satisfies() {
+    return then();
+  }
+
+  /**
+   * A synonym of {@link Transformer#then()} method.
+   * @return A checker object for this object.
+   */
+  default V toBe() {
     return then();
   }
 

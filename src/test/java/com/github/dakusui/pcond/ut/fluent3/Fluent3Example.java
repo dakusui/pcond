@@ -28,7 +28,7 @@ public class Fluent3Example {
       assertAll(
           stringValue("Hello")
               .then()
-              .isNull());
+              .nullValue());
     }
 
     @Test//(expected = ComparisonFailure.class)
@@ -37,8 +37,8 @@ public class Fluent3Example {
           stringValue("Hello")
               .allOf()
               .then()
-              .isNotNull()
-              .isNull());
+              .notNull()
+              .nullValue());
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -47,8 +47,8 @@ public class Fluent3Example {
           stringValue("Hello")
               .allOf()
               .then()
-              .isNotNull()
-              .isNull());
+              .notNull()
+              .nullValue());
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -68,7 +68,7 @@ public class Fluent3Example {
       assertAll(
           stringValue("Hello5")
               .then()
-              .check(v -> v.isNull().toPredicate())
+              .check(v -> v.nullValue().toPredicate())
       );
     }
 
@@ -76,15 +76,15 @@ public class Fluent3Example {
     public void test7() {
       assertAll(
           stringValue("Hello5")
-              .transform(tx -> tx.then().isNotNull().toPredicate())
-              .transform(tx -> tx.then().isNull().toPredicate()));
+              .transform(tx -> tx.then().notNull().toPredicate())
+              .transform(tx -> tx.then().nullValue().toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test6b() {
       assertAll(
           stringValue("Hello5")
-              .transform(tx -> tx.then().isNull().toPredicate()));
+              .transform(tx -> tx.then().nullValue().toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -92,7 +92,7 @@ public class Fluent3Example {
       assertAll(
           stringValue("Hello5")
               .anyOf()
-              .transform(tx -> tx.then().isNull().toPredicate()));
+              .transform(tx -> tx.then().nullValue().toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -111,8 +111,8 @@ public class Fluent3Example {
     public void test7_a() {
       assertAll(
           stringValue("Hello5")
-              .transform(tx -> tx.then().isNotNull().toPredicate())
-              .transform(tx -> tx.then().isNull().toPredicate()));
+              .transform(tx -> tx.then().notNull().toPredicate())
+              .transform(tx -> tx.then().nullValue().toPredicate()));
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -121,7 +121,6 @@ public class Fluent3Example {
           stringValue("Hello5")
               .transform(tx -> tx.length().then().greaterThan(10).done()));
     }
-
   }
 
 
@@ -131,9 +130,9 @@ public class Fluent3Example {
     public void test8() {
       assertAll(
           stringValue("Hello5")
-              .then()
-              .check(v -> v.isNull().done())
-              .check(v -> v.isNotNull().done()));
+              .satisfies()
+              .check(v -> v.nullValue().done())
+              .check(v -> v.notNull().done()));
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -154,19 +153,19 @@ public class Fluent3Example {
           stringValue("Hello5")
               .transform(tx -> tx
                   .transform(ty -> ty.length()
-                      .then()
+                      .toBe()
                       .greaterThanOrEqualTo(800)
                       .lessThan(1000)
                       .done())
-                  .transform(ty -> ty.then().isNotNull().done()).done())
-              .transform(tx -> tx.then().isNull().done()));
+                  .transform(ty -> ty.toBe().notNull().done()).done())
+              .transform(tx -> tx.toBe().nullValue().done()));
     }
 
     @Test
     public void givenBookTitle_whenLength_thenNotNullAndAppropriateLength() {
       assertAll(
           stringValue("De Bello Gallico")
-              .transform(ty -> ty.then().isNotNull().done())
+              .transform(ty -> ty.then().notNull().done())
               .transform(ty -> ty.length().then()
                   .greaterThanOrEqualTo(10)
                   .lessThan(40)
@@ -179,13 +178,13 @@ public class Fluent3Example {
       String bookAbstract = "Gallia est omnis divisa in partes tres, quarum unam incolunt Belgae, aliam Aquitani, tertiam qui ipsorum lingua Celtae, nostra Galli appellantur.";
       assertAll(
           stringValue(bookTitle)
-              .transform(ty -> ty.then().isNotNull().done())
+              .transform(ty -> ty.then().notNull().done())
               .transform(ty -> ty.length().then()
                   .greaterThanOrEqualTo(10)
                   .lessThan(40)
                   .done()),
           stringValue(bookAbstract)
-              .transform(ty -> ty.then().isNotNull().done())
+              .transform(ty -> ty.then().notNull().done())
               .transform(ty -> ty.length().then()
                   .greaterThanOrEqualTo(200)
                   .lessThan(400)
@@ -198,9 +197,9 @@ public class Fluent3Example {
       assertAll(
           new Fluent4Example.OnGoing.BookTransformer(book)
               .transform(b -> b.title()
-                  .transform(ty -> ty.then().isNotNull().toPredicate()).done())
+                  .transform(ty -> ty.then().notNull().toPredicate()).done())
               .transform(b -> b.abstractText()
-                  .transform(ty -> ty.then().isNotNull().toPredicate()).done()));
+                  .transform(ty -> ty.then().notNull().toPredicate()).done()));
     }
 
     @Test(expected = ComparisonFailure.class)
@@ -227,16 +226,16 @@ public class Fluent3Example {
               .length()
               .then()
               .allOf()
-              .isNotNull()
-              .isNull());
+              .notNull()
+              .nullValue());
     }
 
     @Test(expected = ComparisonFailure.class)
     public void test7() {
       assertAll(
           stringValue("Hello5")
-              .transform(tx -> tx.then().isNotNull().done())
-              .transform(tx -> tx.then().isNull().done()));
+              .transform(tx -> tx.then().notNull().done())
+              .transform(tx -> tx.then().nullValue().done()));
     }
 
     @Test//(expected = ComparisonFailure.class)
@@ -247,7 +246,7 @@ public class Fluent3Example {
             stringValue("hello").length().then().greaterThan(1),
             new Fluent4Example.OnGoing.BookTransformer(book)
                 .transform(b -> b.title()
-                    .transform(ty -> ty.then().isNotNull().done())
+                    .transform(ty -> ty.then().notNull().done())
                     .transform(ty -> ty.parseInt().then()
                         .greaterThanOrEqualTo(10)
                         .lessThan(40)
@@ -278,13 +277,13 @@ public class Fluent3Example {
         assertAll(
             new Fluent4Example.OnGoing.BookTransformer(book)
                 .transform(b -> b.title()
-                    .transform(ty -> ty.then().isNotNull().done())
+                    .transform(ty -> ty.then().notNull().done())
                     .transform(ty -> ty.length().then()
                         .greaterThanOrEqualTo(10)
                         .checkWithPredicate(errorThrowingPredicate())
                         .done()).done())
                 .transform(b -> b.abstractText()
-                    .transform(ty -> ty.then().isNotNull().done())
+                    .transform(ty -> ty.then().notNull().done())
                     .transform(ty -> ty.length().then()
                         .greaterThanOrEqualTo(200)
                         .lessThan(400)

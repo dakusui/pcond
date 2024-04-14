@@ -12,12 +12,41 @@ import static com.github.dakusui.pcond.forms.Predicates.allOf;
 import static com.github.dakusui.pcond.forms.Predicates.transform;
 import static com.github.dakusui.pcond.internals.InternalUtils.makeSquashable;
 
+/**
+ * An interface to model a "statement", which .
+ *
+ * @param <T> A type of a value held by an instance of this interface.
+ */
 @FunctionalInterface
 public interface Statement<T> {
+  /**
+   * Creates a predicate which conjunctions all the given statements.
+   *
+   * @param statements statements to be conjunctioned.
+   * @return A created predicate.
+   */
+  static Predicate<? super List<?>> createPredicateForAllOf(Statement<?>[] statements) {
+    AtomicInteger i = new AtomicInteger(0);
+    @SuppressWarnings("unchecked") Predicate<? super List<?>>[] predicates = Arrays.stream(statements)
+        .map(e -> makeSquashable(transform(elementAt(i.getAndIncrement())).check("WHEN", (Predicate<? super Object>) e.statementPredicate())))
+        .toArray(Predicate[]::new);
+    return makeSquashable(allOf(predicates));
+  }
+
+  /**
+   * Returns a value to be evaluated, "target value", by an instance of this interface.
+   *
+   * @return the value to be evaluated.
+   */
   default T statementValue() {
     throw new NoSuchElementException();
   }
 
+  /**
+   * Returns a predicate to evaluate the target value.
+   *
+   * @return A predicate to evaluate the target value.
+   */
   Predicate<T> statementPredicate();
 
   /**
@@ -144,11 +173,15 @@ public interface Statement<T> {
     return StreamTransformer.create(() -> value);
   }
 
-  static Predicate<? super List<?>> createPredicateForAllOf(Statement<?>[] statements) {
-    AtomicInteger i = new AtomicInteger(0);
-    @SuppressWarnings("unchecked") Predicate<? super List<?>>[] predicates = Arrays.stream(statements)
-        .map(e -> makeSquashable(transform(elementAt(i.getAndIncrement())).check("WHEN", (Predicate<? super Object>) e.statementPredicate())))
-        .toArray(Predicate[]::new);
-    return makeSquashable(allOf(predicates));
+  /**
+   * Returns a transformer for a {@link Throwable} value.
+   *
+   * @param value A value for which a transformer is created.
+   * @return A transformer for a {@code value}.
+   * @see ThrowableTransformer
+   */
+  static <E extends Throwable> ThrowableTransformer<E, E>
+  throwableValue(E value) {
+    return ThrowableTransformer.create(() -> value);
   }
 }

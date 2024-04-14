@@ -10,6 +10,33 @@ import java.util.function.Predicate;
 
 import static java.util.Objects.requireNonNull;
 
+/**
+ * A base class for a custom transformer.
+ *
+ * [source,java]
+ * .Example Transformer
+ * ----
+ * public static class BookTransformer extends CustomTransformer<BookTransformer, Book> {
+ *   public BookTransformer(Book rootValue) {
+ *     super(rootValue);
+ *   }
+ *
+ *   public StringTransformer<Book> title() {
+ *     return toString(Printables.function("title", Book::title));
+ *   }
+ *
+ *   public StringTransformer<Book> abstractText() {
+ *     return toString(Printables.function("abstractText", Book::abstractText));
+ *   }
+ * }
+ * ----
+ *
+ * In the example above, the custom transformer class `BookTransformer`, which targets `Book` type value is specified for `TX`,
+ * while the `Book` is specified for `T`.
+ *
+ * @param <TX> This class
+ * @param <T> Type of the class that is targeted by the transformer.
+ */
 public abstract class CustomTransformer<
     TX extends AbstractObjectTransformer<
         TX,
@@ -27,10 +54,20 @@ public abstract class CustomTransformer<
         ObjectChecker<T, T>,
         T,
         T> {
+  /**
+   * Creates an instance of this class.
+   *
+   * @param baseValue The target value of this transformer.
+   */
   public CustomTransformer(T baseValue) {
     super(() -> baseValue, Functions.identity());
   }
 
+  /**
+   * A method to be used for internal purposes.
+   *
+   * @return this object.
+   */
   @Override
   protected TX rebase() {
     return create(this.value());

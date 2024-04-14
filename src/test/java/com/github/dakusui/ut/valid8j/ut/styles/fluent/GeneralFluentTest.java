@@ -129,11 +129,11 @@ public class GeneralFluentTest extends TestBase {
   private static TestSuite<String> stringTestSuite_1() {
     return new TestSuite<>(
         asList(
-            (String v) -> Statement.stringValue(v).substring(1).parseShort().then().isInstanceOf(Short.class).isEqualTo((short) 23).done(),
-            (String v) -> Statement.stringValue(v).parseShort().then().isInstanceOf(Short.class).isEqualTo((short) 123).done(),
-            (String v) -> Statement.stringValue(v).parseLong().then().isInstanceOf(Long.class).isEqualTo((long) 123).done(),
-            (String v) -> Statement.stringValue(v).parseFloat().then().isInstanceOf(Float.class).isEqualTo((float) 123).done(),
-            (String v) -> Statement.stringValue(v).parseDouble().then().isInstanceOf(Double.class).isEqualTo((double) 123).done()),
+            (String v) -> Statement.stringValue(v).substring(1).parseShort().then().instanceOf(Short.class).equalTo((short) 23).done(),
+            (String v) -> Statement.stringValue(v).parseShort().then().instanceOf(Short.class).equalTo((short) 123).done(),
+            (String v) -> Statement.stringValue(v).parseLong().then().instanceOf(Long.class).equalTo((long) 123).done(),
+            (String v) -> Statement.stringValue(v).parseFloat().then().instanceOf(Float.class).equalTo((float) 123).done(),
+            (String v) -> Statement.stringValue(v).parseDouble().then().instanceOf(Double.class).equalTo((double) 123).done()),
         singletonList("123"),
         asList("456", "A", null));
   }
@@ -141,7 +141,7 @@ public class GeneralFluentTest extends TestBase {
   private static TestSuite<String> stringTestSuite_2() {
     return new TestSuite<>(
         singletonList(
-            (String v) -> Statement.stringValue(v).parseBoolean().then().isInstanceOf(Boolean.class).isTrue().done()),
+            (String v) -> Statement.stringValue(v).parseBoolean().then().instanceOf(Boolean.class).isTrue().done()),
         singletonList("true"),
         asList("false", "XYZ", null));
   }
@@ -161,9 +161,9 @@ public class GeneralFluentTest extends TestBase {
     String s = "hello";
     return new TestSuite<>(
         asList(
-            (String v) -> Statement.stringValue(v).then().isSameReferenceAs(s).done(),
+            (String v) -> Statement.stringValue(v).then().sameReferenceAs(s).done(),
             /*String#toString() method returns the object itself by specification. Check JavaDoc*/
-            (String v) -> Statement.stringValue(v).stringify().then().isSameReferenceAs(s).done()),
+            (String v) -> Statement.stringValue(v).stringify().then().sameReferenceAs(s).done()),
         singletonList(s),
         singletonList(new String(s)));
   }
@@ -185,7 +185,7 @@ public class GeneralFluentTest extends TestBase {
     String s = "hello";
     return new TestSuite<>(
         singletonList(
-            (String v) -> Statement.stringValue(v).then().isNull().done()),
+            (String v) -> Statement.stringValue(v).then().nullValue().done()),
         singletonList(null),
         singletonList("HELLO"));
   }
@@ -224,7 +224,7 @@ public class GeneralFluentTest extends TestBase {
         singletonList(
             (String v) -> Statement.stringValue(v).expectException(Exception.class, throwRuntimeException)
                 .then()
-                .isInstanceOf(IntentionalException.class)
+                .instanceOf(IntentionalException.class)
                 .done()),
         singletonList("Hello"),
         singletonList("Bye"));

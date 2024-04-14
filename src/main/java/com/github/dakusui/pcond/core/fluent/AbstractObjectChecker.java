@@ -10,11 +10,11 @@ public interface AbstractObjectChecker<
     T,
     R> extends
     Checker<V, T, R> {
-  default V isNotNull() {
+  default V notNull() {
     return this.checkWithPredicate(Predicates.isNotNull());
   }
 
-  default V isNull() {
+  default V nullValue() {
     return this.checkWithPredicate(Predicates.isNull());
   }
 
@@ -23,15 +23,15 @@ public interface AbstractObjectChecker<
    *
    * @return the updated object.
    */
-  default V isEqualTo(Object anotherObject) {
+  default V equalTo(Object anotherObject) {
     return this.checkWithPredicate(Predicates.isEqualTo(anotherObject));
   }
 
-  default V isSameReferenceAs(Object anotherObject) {
+  default V sameReferenceAs(Object anotherObject) {
     return this.checkWithPredicate(Predicates.isSameReferenceAs(anotherObject));
   }
 
-  default V isInstanceOf(Class<?> klass) {
+  default V instanceOf(Class<?> klass) {
     return this.checkWithPredicate(Predicates.isInstanceOf(klass));
   }
 

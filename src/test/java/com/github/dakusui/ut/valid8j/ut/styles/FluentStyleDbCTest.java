@@ -16,9 +16,6 @@ import static com.github.dakusui.pcond.forms.Predicates.not;
 import static com.github.dakusui.shared.utils.TestUtils.stringToLowerCase;
 import static org.hamcrest.MatcherAssert.assertThat;
 
-/**
- * Temporarily commented out for improving new fluent model.
- */
 @RunWith(Enclosed.class)
 public class FluentStyleDbCTest {
   public static class ForRequiresTest extends TestBase {
@@ -26,8 +23,8 @@ public class FluentStyleDbCTest {
     public void requireArgumentsTest_failing() {
       try {
         ValidationFluents.requireArguments(
-            stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
-            stringValue("world").toLowerCase().then().contains("WORLD").checkWithPredicate(not(containsString("w"))));
+            stringValue("hello").toUpperCase().satisfies().equalTo("HELLO"),
+            stringValue("world").toLowerCase().satisfies().containing("WORLD").predicate(not(containsString("w"))));
       } catch (IllegalArgumentException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -41,8 +38,8 @@ public class FluentStyleDbCTest {
     public void requireStatesTest_failing() {
       try {
         ValidationFluents.requireStates(
-            stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
-            stringValue("world").toLowerCase().then().contains("WORLD").checkWithPredicate(not(containsString("w"))));
+            stringValue("hello").toUpperCase().then().equalTo("HELLO"),
+            stringValue("world").toLowerCase().then().containing("WORLD").checkWithPredicate(not(containsString("w"))));
       } catch (IllegalStateException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -57,8 +54,8 @@ public class FluentStyleDbCTest {
     public void requireValuesTest_failing() {
       try {
         ValidationFluents.requireAll(
-            stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
-            stringValue("world").toLowerCase().then().contains("WORLD").checkWithPredicate(not(containsString("w"))));
+            stringValue("hello").toUpperCase().then().equalTo("HELLO"),
+            stringValue("world").toLowerCase().then().containing("WORLD").checkWithPredicate(not(containsString("w"))));
       } catch (PreconditionViolationException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -74,7 +71,7 @@ public class FluentStyleDbCTest {
       ValidationFluents.requireArgument(stringValue(givenValue)
           .toString(stringToLowerCase())
           .then()
-          .isEqualTo("helloworld"));
+          .equalTo("helloworld"));
     }
 
 
@@ -86,7 +83,7 @@ public class FluentStyleDbCTest {
               .toObject(stringToLowerCase())
               .asString()
               .then()
-              .isEqualTo("helloworld")),
+              .equalTo("helloworld")),
           Matchers.equalTo(givenValue));
     }
 
@@ -97,7 +94,7 @@ public class FluentStyleDbCTest {
           ValidationFluents.requireState(stringValue(givenValue)
               .toString(stringToLowerCase())
               .then()
-              .isEqualTo("helloworld")),
+              .equalTo("helloworld")),
           Matchers.equalTo(givenValue));
     }
   }
@@ -107,8 +104,8 @@ public class FluentStyleDbCTest {
     public void ensureValuesTest_failing() {
       try {
         ValidationFluents.ensureAll(
-            stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
-            stringValue("world").toLowerCase().then().contains("WORLD").checkWithPredicate(not(containsString("w"))));
+            stringValue("hello").toUpperCase().then().equalTo("HELLO"),
+            stringValue("world").toLowerCase().then().containing("WORLD").checkWithPredicate(not(containsString("w"))));
       } catch (PostconditionViolationException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -122,8 +119,8 @@ public class FluentStyleDbCTest {
     public void ensureStatesTest_failing() {
       try {
         ValidationFluents.ensureStates(
-            stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
-            stringValue("world").toLowerCase().then().contains("WORLD").checkWithPredicate(not(containsString("w"))));
+            stringValue("hello").toUpperCase().then().equalTo("HELLO"),
+            stringValue("world").toLowerCase().then().containing("WORLD").checkWithPredicate(not(containsString("w"))));
       } catch (IllegalStateException e) {
         e.printStackTrace();
         String message = e.getMessage().replaceAll(" +", "");
@@ -140,10 +137,9 @@ public class FluentStyleDbCTest {
           ValidationFluents.ensureStatement(stringValue(givenValue)
               .toString(stringToLowerCase())
               .then()
-              .isEqualTo("helloworld")),
+              .equalTo("helloworld")),
           CoreMatchers.equalTo(givenValue));
     }
-
 
     @Test
     public void ensureState_passing() {
@@ -152,44 +148,44 @@ public class FluentStyleDbCTest {
           ValidationFluents.ensureState(stringValue(givenValue)
               .toString(stringToLowerCase())
               .then()
-              .isEqualTo("helloworld")),
+              .equalTo("helloworld")),
           CoreMatchers.equalTo(givenValue));
     }
 
 
     @Test
     public void test_that() {
-      assertThat(ValidationFluents.that(stringValue("").then().isNotNull()), CoreMatchers.is(true));
+      assertThat(ValidationFluents.that(stringValue("").then().notNull()), CoreMatchers.is(true));
     }
 
     @Test
     public void test_all() {
       assertThat(
-          ValidationFluents.all(stringValue("").then().isNotNull(), stringValue("").then().isNotNull()),
+          ValidationFluents.all(stringValue("").then().notNull(), stringValue("").then().notNull()),
           CoreMatchers.is(true));
     }
 
     @Test
     public void test_precondition() {
-      assertThat(ValidationFluents.precondition(stringValue("").then().isNotNull()), CoreMatchers.is(true));
+      assertThat(ValidationFluents.precondition(stringValue("").then().notNull()), CoreMatchers.is(true));
     }
 
     @Test
     public void test_preconditions() {
       assertThat(
-          ValidationFluents.preconditions(stringValue("").then().isNotNull(), stringValue("").then().isNotNull()),
+          ValidationFluents.preconditions(stringValue("").then().notNull(), stringValue("").then().notNull()),
           CoreMatchers.is(true));
     }
 
     @Test
     public void test_postcondition() {
-      assertThat(ValidationFluents.postcondition(stringValue("").then().isNotNull()), CoreMatchers.is(true));
+      assertThat(ValidationFluents.postcondition(stringValue("").then().notNull()), CoreMatchers.is(true));
     }
 
     @Test
     public void test_postconditions() {
       assertThat(
-          ValidationFluents.postconditions(stringValue("").then().isNotNull(), stringValue("").then().isNotNull()),
+          ValidationFluents.postconditions(stringValue("").then().notNull(), stringValue("").then().notNull()),
           CoreMatchers.is(true));
     }
   }

@@ -13,6 +13,13 @@ import static com.github.dakusui.pcond.forms.Functions.call;
 import static com.github.dakusui.pcond.forms.Functions.parameter;
 import static java.util.Objects.requireNonNull;
 
+/**
+ *
+ * @param <TX> The type of the extending class itself.
+ * @param <V> A type of a checker produced by this transformer.
+ * @param <T> The type of the target value of the instance of this interface.
+ * @param <R> The type of the target value of the checker instance `V`
+ */
 public interface AbstractObjectTransformer<
     TX extends AbstractObjectTransformer<TX, V, T, R>,
     V extends AbstractObjectChecker<V, T, R>,
@@ -39,20 +46,42 @@ public interface AbstractObjectTransformer<
     return this.toObject(call(classMethod(klass, methodName, args)));
   }
 
+  /**
+   * Applies `f`, which is expected to throw an exception of class `exceptionClass`, to the target value of this transformer object.
+   * In case no exception is thrown, or a different type of exception is thrown, an exception will be thrown.
+   * But its type is not specified.
+   *
+   * @param exceptionClass A class of exception of the exception to be thrown by `f`.
+   * @param f A function that is expected to throw an exception of `exceptionClass`.
+   * @return A {@link ThrowableTransformer} instance constructed for the thrown exception by `f`.
+   * @param <O> An exception class to be thrown by `f`.
+   * @see Functions#expectingException(Class, Function)
+   */
   default <O extends Throwable> ThrowableTransformer<T, O> expectException(Class<O> exceptionClass, Function<? super R, ?> f) {
     requireNonNull(exceptionClass);
     return this.toThrowable(Functions.expectingException(exceptionClass, f));
   }
 
-  default <E> ObjectTransformer<T, E> toObject(Function<R, E> function) {
-    return this.transformValueWith(function, ObjectTransformer.Impl::new);
-  }
-
+  /**
+   * Mainly used for internal purposes
+   * @return Another transformer objecct.
+   * @param <E>
+   */
   @SuppressWarnings("unchecked")
   default <E> ObjectTransformer<T, E> asObject() {
     return (ObjectTransformer<T, E>)this.toObject(Functions.identity());
   }
 
+  /**
+   * Applies a given `function` to the currently targeted value and returns a new `ObjectTransformer` whose target value is the returned value from the `function`.
+   *
+   * @param function A function to be applied to the target value.
+   * @return A new {@link ObjectTransformer} which targets the result of the `function`.
+   * @param <E> The type of the returned value of the `function`.
+   */
+  default <E> ObjectTransformer<T, E> toObject(Function<R, E> function) {
+    return this.transformValueWith(function, ObjectTransformer.Impl::new);
+  }
 
   default BooleanTransformer<T> toBoolean(Function<? super R, Boolean> function) {
     return this.transformValueWith(function, BooleanTransformer.Impl::new);
@@ -95,5 +124,4 @@ public interface AbstractObjectTransformer<
     return this.transformValueWith(function, ThrowableTransformer.Impl::new);
 
   }
-
 }

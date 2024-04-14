@@ -24,7 +24,7 @@ public class MoreFluentStyleExample {
     TestFluents.assertStatement(Statement.stringValue(givenValue)
         .toString(TestUtils.stringToLowerCase())
         .then()
-        .isEqualTo("HELLOWORLD"));
+        .equalTo("HELLOWORLD"));
   }
 
 
@@ -34,7 +34,7 @@ public class MoreFluentStyleExample {
     TestFluents.assertStatement(Statement.stringValue(givenValue)
         .expectException(Exception.class, TestUtils.stringToLowerCase())
         .then()
-        .isEqualTo("HELLOWORLD"));
+        .equalTo("HELLOWORLD"));
   }
 
   @Test
@@ -44,7 +44,13 @@ public class MoreFluentStyleExample {
         .expectException(Exception.class, throwRuntimeException())
         .getCause()
         .then()
-        .isNotNull());
+        .notNull());
+  }
+
+  @Test
+  public void testThrowableTransformer() {
+    String givenValue = "helloWorld";
+    TestFluents.assertStatement(Statement.throwableValue(new Throwable(givenValue)).getMessage().then().equalTo("helloWorld!"));
   }
 
   private static Function<String, Object> throwRuntimeException() {
@@ -60,7 +66,7 @@ public class MoreFluentStyleExample {
     TestFluents.assertStatement(Statement.listValue(givenValues).elementAt(0)
         .toString(TestUtils.stringToLowerCase())
         .then()
-        .isEqualTo("HELLO"));
+        .equalTo("HELLO"));
   }
 
   @Test
@@ -69,15 +75,15 @@ public class MoreFluentStyleExample {
     TestFluents.assertStatement(Statement.listValue(givenValues).elementAt(0)
         .toString(TestUtils.stringToLowerCase())
         .then()
-        .isEqualTo("HELLO"));
+        .equalTo("HELLO"));
   }
 
   @Test(expected = ComparisonFailure.class)
   public void test4() {
     try {
       TestFluents.assertAll(
-          Statement.stringValue("hello").toUpperCase().then().isEqualTo("HELLO"),
-          Statement.stringValue("world").toLowerCase().then().contains("WORLD"));
+          Statement.stringValue("hello").toUpperCase().then().equalTo("HELLO"),
+          Statement.stringValue("world").toLowerCase().then().containing("WORLD"));
     } catch (ComparisonFailure e) {
       e.printStackTrace();
       throw e;
@@ -99,9 +105,9 @@ public class MoreFluentStyleExample {
         .toObject(lookUpMemberWith.apply(identifier))
         .toString(memberLastName)
         .then()
-        .isNotNull()
-        .isNotEmpty()
-        .isEqualTo("Do"));
+        .notNull()
+        .notEmpty()
+        .equalTo("Do"));
   }
 
   /**
@@ -118,7 +124,7 @@ public class MoreFluentStyleExample {
         Statement.stringValue(lastName)
             .then()
             .allOf()
-            .isNotNull()
+            .notNull()
             .checkWithPredicate(not(isEmptyString())),
         Statement.listValue(fullName)
             .then()
@@ -139,11 +145,11 @@ public class MoreFluentStyleExample {
         Statement.stringValue(lastName)
             .then()
             .allOf()
-            .isNotNull()
+            .notNull()
             .check(v -> v.anyOf()
-                .check(w -> w.isNotNull().toPredicate())
-                .check(w -> w.isEmpty().toPredicate()).toPredicate())
-            .check(v -> v.isNotEmpty().toPredicate()),
+                .check(w -> w.notNull().toPredicate())
+                .check(w -> w.empty().toPredicate()).toPredicate())
+            .check(v -> v.notEmpty().toPredicate()),
         Statement.listValue(fullName)
             .then()
             .contains("DOE"));
@@ -201,7 +207,7 @@ public class MoreFluentStyleExample {
         Statement.stringValue(s)
             .toString(TestUtils.stringToLowerCase())
             .then()
-            .isEqualTo("HI"),
+            .equalTo("HI"),
         Statement.listValue(strings)
             .then()
             .findElementsInOrder("HELLO", "WORLD"));
@@ -213,7 +219,7 @@ public class MoreFluentStyleExample {
     TestFluents.assertAll(
         Statement.stringValue(s)
             .then()
-            .isNotNull(),
+            .notNull(),
         Statement.stringValue(s).length()
             .then()
             .greaterThan(100));
@@ -228,7 +234,7 @@ public class MoreFluentStyleExample {
             .greaterThan(3),
         Statement.listValue(list).elementAt(0).toString(v -> v)
             .then()
-            .isNotNull(),
+            .notNull(),
         Statement.listValue(list).elementAt(0).toString(v -> v).length()
             .then()
             .greaterThan(100));

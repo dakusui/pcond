@@ -17,48 +17,75 @@ public interface StringChecker<T> extends
         StringChecker<T>,
         T,
         String> {
-  default StringChecker<T> contains(String token) {
+  /**
+   * Checks if the given token is contained by the target value.
+   * @param token A token to be contained by the target value.
+   * @return This object.
+   */
+  default StringChecker<T> containing(String token) {
     return this.checkWithPredicate(Predicates.containsString(token));
   }
 
-  default StringChecker<T> startsWith(String prefix) {
-    return this.checkWithPredicate(Predicates.startsWith(prefix));
-  }
-
-  default StringChecker<T> isEmpty() {
-    return this.checkWithPredicate(Predicates.isEmptyString());
-  }
-
-  default StringChecker<T> isNotEmpty() {
-    return this.checkWithPredicate(Predicates.isEmptyString().negate());
-  }
-
-  default StringChecker<T> isEqualTo(String string) {
-    return this.checkWithPredicate(explainableStringIsEqualTo(string));
-  }
-
-  default StringChecker<T> isNullOrEmpty() {
-    return this.checkWithPredicate(Predicates.isNullOrEmptyString());
-  }
-
-  default StringChecker<T> matchesRegex(String regex) {
-    return this.checkWithPredicate(Predicates.matchesRegex(regex));
-  }
-
-  default StringChecker<T> equalsIgnoreCase(String s) {
-    return this.checkWithPredicate(Predicates.equalsIgnoreCase(s));
-  }
-
-  default StringChecker<T> findRegexes(String... regexes) {
+  /**
+   * Checks if given regular expressions are contained by the target value in the given order.
+   *
+   * @param regexes Regular expression patterns to be contained by the target value.
+   * @return This object.
+   */
+  default StringChecker<T> containingRegexes(String... regexes) {
     return this.checkWithPredicate(Cursors.findRegexes(regexes));
   }
 
-  default StringChecker<T> findRegexPatterns(Pattern... patterns) {
+  /**
+   * Checks if given tokens are contained by the target value in the given order.
+   *
+   * @param patterns Regular expression patterns to be contained by the target value.
+   * @return This object.
+   */
+  default StringChecker<T> containingRegexes(Pattern... patterns) {
     return this.checkWithPredicate(Cursors.findRegexPatterns(patterns));
   }
 
-  default StringChecker<T> findSubstrings(String... tokens) {
+  /**
+   * Checks if given tokens are contained by the target value in the given order.
+   *
+   * @param tokens Tokens to be contained by the target value.
+   * @return This object.
+   */
+  default StringChecker<T> containingSubstrings(String... tokens) {
     return this.checkWithPredicate(Cursors.findSubstrings(tokens));
+  }
+
+  default StringChecker<T> startingWith(String prefix) {
+    return this.checkWithPredicate(Predicates.startsWith(prefix));
+  }
+
+  default StringChecker<T> endingWith(String prefix) {
+    return this.checkWithPredicate(Predicates.endsWith(prefix));
+  }
+
+  default StringChecker<T> empty() {
+    return this.checkWithPredicate(Predicates.isEmptyString());
+  }
+
+  default StringChecker<T> notEmpty() {
+    return this.checkWithPredicate(Predicates.isEmptyString().negate());
+  }
+
+  default StringChecker<T> equalTo(String string) {
+    return this.checkWithPredicate(explainableStringIsEqualTo(string));
+  }
+
+  default StringChecker<T> nullOrEmpty() {
+    return this.checkWithPredicate(Predicates.isNullOrEmptyString());
+  }
+
+  default StringChecker<T> matchingRegex(String regex) {
+    return this.checkWithPredicate(Predicates.matchesRegex(regex));
+  }
+
+  default StringChecker<T> equalToIgnoringCase(String s) {
+    return this.checkWithPredicate(Predicates.equalsIgnoreCase(s));
   }
 
   @SuppressWarnings("unchecked")

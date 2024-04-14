@@ -12,61 +12,67 @@ public class MoreFluentStringTest extends TestBase {
   @Test
   public void test_contains() {
     String var = "world";
-    assertStatement(Statement.stringValue(var).toUpperCase().then().contains("W"));
+    assertStatement(Statement.stringValue(var).toUpperCase().then().containing("W"));
   }
 
   @Test
-  public void test_startsWith() {
+  public void test_startingWith() {
     String var = "Hello, world";
-    assertStatement(Statement.stringValue(var).toUpperCase().then().startsWith("H"));
+    assertStatement(Statement.stringValue(var).toUpperCase().satisfies().startingWith("H"));
+  }
+
+  @Test
+  public void test_endingWith() {
+    String var = "Hello, world";
+    assertStatement(Statement.stringValue(var).toUpperCase().toBe().endingWith("D"));
   }
 
   @Test
   public void test_isEmpty() {
     String var = "";
-    assertStatement(Statement.stringValue(var).then().isEmpty());
+    assertStatement(Statement.stringValue(var).then().empty());
   }
 
   @Test
   public void test_isEqualTo() {
     String var = "hello";
-    assertStatement(Statement.stringValue(var).then().isEqualTo("hello"));
+    assertStatement(Statement.stringValue(var).then().equalTo("hello"));
   }
 
   @Test
   public void test_isNullOrEmpty() {
     String var = "";
-    assertStatement(Statement.stringValue(var).then().isNullOrEmpty());
+    assertStatement(Statement.stringValue(var).then().nullOrEmpty());
   }
 
   @Test
   public void test_matchesRegex() {
     String var = "hello";
-    assertStatement(Statement.stringValue(var).then().matchesRegex("he.+"));
+    assertStatement(Statement.stringValue(var).then().matchingRegex("he.+"));
   }
 
   @Test
   public void test_equalsIgnoreCase() {
     String var = "hello";
-    assertStatement(Statement.stringValue(var).then().equalsIgnoreCase("HELLO"));
+    assertStatement(Statement.stringValue(var).then().equalToIgnoringCase("HELLO"));
   }
 
   @Test
   public void test_findRegexes() {
     String var = "hello";
-    assertStatement(Statement.stringValue(var).then().findRegexes("he.", "lo"));
+    assertStatement(Statement.stringValue(var).then().containingRegexes("he.", "lo"));
   }
 
   @Test
   public void test_findRegexPatterns() {
     String var = "hello";
-    assertStatement(Statement.stringValue(var).then().findRegexPatterns(Pattern.compile("he."), Pattern.compile("lo")));
+    assertStatement(Statement.stringValue(var).then().containingRegexes(Pattern.compile("he."), Pattern.compile("lo")));
   }
 
 
   @Test
   public void test_findSubstrings() {
     String var = "hello";
-    assertStatement(Statement.stringValue(var).then().findSubstrings("hel", "lo"));
+    assertStatement(Statement.stringValue(var).then().containingSubstrings("hel", "lo"));
   }
 }
